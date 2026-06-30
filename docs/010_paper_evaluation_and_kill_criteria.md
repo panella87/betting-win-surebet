@@ -1,0 +1,9 @@
+# 010 — Paper evaluation and kill criteria
+
+The repo produces private paper reports only.
+
+A candidate must be killed or blocked when any required evidence is missing, stale,
+ambiguous, unverifiable, or outside the first lane.
+
+Reports must avoid public signal language, execution-readiness language, and profitability
+claims. They should state blockers and required upstream evidence.

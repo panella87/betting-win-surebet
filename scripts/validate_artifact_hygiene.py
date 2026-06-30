@@ -1,0 +1,128 @@
+from __future__ import annotations
+from pathlib import Path
+import os
+import shutil
+import subprocess
+import sys
+import zipfile
+
+ROOT = Path(__file__).resolve().parents[1]
+FORBIDDEN_ROOTS = {'.git', '.github', '.locks', 'artifacts', 'node_modules', 'dist', 'coverage', 'output', 'tmp', '.tmp'}
+FORBIDDEN_EXACT = {'true', 'artifacts.zip', 'autonomous-codebase.zip'}
+LOCAL_IGNORED_EXACT = {'.env'}
+FORBIDDEN_SUFFIXES = ('.log', '.tmp', '.pyc', '.tap', '.zip', '.tar', '.tgz', '.tar.gz')
+
+
+def fail(message: str) -> None:
+    print(f'ERROR: {message}', file=sys.stderr)
+    raise SystemExit(1)
+
+
+def cleanup_python_cache() -> None:
+    for dirpath, dirnames, filenames in os.walk(ROOT, topdown=True):
+        rel_parts = Path(dirpath).relative_to(ROOT).parts if Path(dirpath) != ROOT else ()
+        if any(part in FORBIDDEN_ROOTS for part in rel_parts):
+            dirnames[:] = []
+            continue
+        for dirname in list(dirnames):
+            if dirname == '__pycache__':
+                shutil.rmtree(Path(dirpath) / dirname)
+                dirnames.remove(dirname)
+            elif dirname in FORBIDDEN_ROOTS:
+                dirnames.remove(dirname)
+        for filename in filenames:
+            if filename.endswith('.pyc'):
+                (Path(dirpath) / filename).unlink()
+
+
+def iter_source_files():
+    for dirpath, dirnames, filenames in os.walk(ROOT, topdown=True):
+        current = Path(dirpath)
+        rel_parts = current.relative_to(ROOT).parts if current != ROOT else ()
+        if any(part in FORBIDDEN_ROOTS for part in rel_parts):
+            dirnames[:] = []
+            continue
+        dirnames[:] = [d for d in dirnames if d not in FORBIDDEN_ROOTS and d != '__pycache__']
+        for filename in filenames:
+            yield current / filename
+
+
+def gitignore_has_exact_env_rule() -> bool:
+    gitignore = ROOT / '.gitignore'
+    if not gitignore.is_file():
+        return False
+    for raw_line in gitignore.read_text(encoding='utf-8').splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith('#'):
+            continue
+        if line in {'.env', '/.env'}:
+            return True
+    return False
+
+
+def git_check_ignore(rel: str) -> bool:
+    if not (ROOT / '.git').exists():
+        return gitignore_has_exact_env_rule()
+    try:
+        result = subprocess.run(
+            ['git', 'check-ignore', '--quiet', rel],
+            cwd=ROOT,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=False,
+        )
+    except FileNotFoundError:
+        return gitignore_has_exact_env_rule()
+    return result.returncode == 0
+
+
+def check_local_ignored_file(rel: str) -> None:
+    if not gitignore_has_exact_env_rule():
+        fail(f'{rel} may exist locally only when .gitignore contains an explicit .env rule')
+    if not git_check_ignore(rel):
+        fail(f'{rel} exists locally but git does not ignore it')
+
+
+def check_source_tree() -> None:
+    cleanup_python_cache()
+    for path in iter_source_files():
+        rel = path.relative_to(ROOT).as_posix()
+        if rel in LOCAL_IGNORED_EXACT:
+            check_local_ignored_file(rel)
+            continue
+        if rel in FORBIDDEN_EXACT:
+            fail(f'forbidden generated/sensitive file in source tree: {rel}')
+        if rel.endswith(FORBIDDEN_SUFFIXES) and rel not in {'package-lock.json'}:
+            fail(f'forbidden generated archive/log/temp file in source tree: {rel}')
+
+
+def check_zip(zip_path: Path) -> None:
+    if not zip_path.is_file():
+        fail(f'archive not found: {zip_path}')
+    with zipfile.ZipFile(zip_path) as zf:
+        for info in zf.infolist():
+            name = info.filename.rstrip('/')
+            if not name:
+                continue
+            parts = Path(name).parts
+            if parts and parts[0] in FORBIDDEN_ROOTS:
+                fail(f'forbidden root in archive: {name}')
+            if name in FORBIDDEN_EXACT or name in LOCAL_IGNORED_EXACT:
+                fail(f'forbidden exact path in archive: {name}')
+            if name.endswith(('.pyc', '.log', '.tap')):
+                fail(f'forbidden generated file in archive: {name}')
+
+
+def main() -> None:
+    args = sys.argv[1:]
+    if args:
+        if len(args) != 2 or args[0] != '--codebase-zip':
+            fail('usage: validate_artifact_hygiene.py [--codebase-zip path]')
+        check_zip(Path(args[1]))
+    else:
+        check_source_tree()
+    print('validate_artifact_hygiene: ok')
+
+
+if __name__ == '__main__':
+    main()

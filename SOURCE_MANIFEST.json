@@ -1,0 +1,466 @@
+{
+  "generated": "2026-06-30T20:19:18Z",
+  "overlay": "betting-win-surebet SURE-001 no-source-NVM launcher fix",
+  "files": [
+    {
+      "path": ".env.example",
+      "sha256": "c4dfaeebffb3c11fc3dd6f60c7c05b5498bd83e1f5f623434cdcaf66928eeb1f",
+      "size": 875
+    },
+    {
+      "path": ".gitattributes",
+      "sha256": "30f89fa2c10642365fc9de80869ee18886c24e754e4be304ccfd5aab3ac2e5d7",
+      "size": 286
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "41c017d737477cf7c95ef83bc4b518ebe8c705bc1eee0e61a35beda2faa95a7a",
+      "size": 755
+    },
+    {
+      "path": ".nvmrc",
+      "sha256": "75053fb82fe4512318dd99556daf58b862fb81c96cf1153249b75f8116edf440",
+      "size": 8
+    },
+    {
+      "path": "AGENTS.md",
+      "sha256": "ad0857a139672f633a8e1615a653140afca015b67079abcc7357bb79b1d45507",
+      "size": 2957
+    },
+    {
+      "path": "CHANGELOG.md",
+      "sha256": "82a475c919b8c6db409ebe07d20c640a8193dca299dac2fedb86e90bfd067fac",
+      "size": 2173
+    },
+    {
+      "path": "PROJECT_STATUS.md",
+      "sha256": "19963fadaa1b1b04526f9b6ebb58c2f74abd027ac7c3e055184c53149dac3c1c",
+      "size": 1623
+    },
+    {
+      "path": "README.md",
+      "sha256": "a19d5430d3619d8bcd8769555f16247528ed6b8cb6ecd0c3dea189345671487d",
+      "size": 1997
+    },
+    {
+      "path": "STARTER_PACK.md",
+      "sha256": "b48f4bace34b7e3921f346a82fb2632a57305320866fe39b948c1773ee2db73f",
+      "size": 743
+    },
+    {
+      "path": "check_progress.sh",
+      "sha256": "0f0a7429b5c4724bce6ff3c2237cba28befdd0c02ef560c1d43c1f8b52db0e06",
+      "size": 824
+    },
+    {
+      "path": "cli.js",
+      "sha256": "b7b9d3a72696c0312eca63f51440df47d8598d07ad718c58b22fd7e52f523429",
+      "size": 835
+    },
+    {
+      "path": "commands/run-sure-001-autonomous.sh",
+      "sha256": "56be1d740de5d561eec4b99251a36ea6d5b0216989163eee9f6697318b051898",
+      "size": 362
+    },
+    {
+      "path": "decisions/ADR-0001-repo-boundary-and-no-provider-connections.md",
+      "sha256": "a45e1006c038b5cb2b12ced79f23d406c0ff134c836f8158ae32280d5c93b734",
+      "size": 447
+    },
+    {
+      "path": "decisions/ADR-0002-first-lane-polymarket-standard-binary-complete-set.md",
+      "sha256": "dc650a1e418c164cfe742025585e58ca1efe12badc7c0d4d0c4ce09de0dd3f18",
+      "size": 441
+    },
+    {
+      "path": "decisions/ADR-0003-paper-only-no-execution.md",
+      "sha256": "5e9abcd46b62cdc4f058e26bcd0ebb3064ea7c99ae33fe87f62121080bc73c0f",
+      "size": 354
+    },
+    {
+      "path": "docs/001_scope_and_boundaries.md",
+      "sha256": "4b8237d7ec96422b08d2201171a6ad636777997ac18645ad4256a975d0c466f5",
+      "size": 941
+    },
+    {
+      "path": "docs/002_dependency_contract_with_betting_win.md",
+      "sha256": "750511843261bb09c9f74c8336c7d3a7fe1bb831e0f9abebaac4914ef82a353b",
+      "size": 900
+    },
+    {
+      "path": "docs/003_surebet_family_decision.md",
+      "sha256": "4d81ee12e112f0f8f5532f17480d6ca4dea71f1309d3b42123483c0a16db2883",
+      "size": 689
+    },
+    {
+      "path": "docs/004_market_identity_and_rule_equivalence.md",
+      "sha256": "5d513d45333831c249d014f249914b26c92c3f412387930004383abd96e46c7b",
+      "size": 635
+    },
+    {
+      "path": "docs/005_terminal_scenario_cashflow_model.md",
+      "sha256": "3c9a71bfe0edafba5d72af2513d54d9101271858f2800272cc980b756435cd3e",
+      "size": 562
+    },
+    {
+      "path": "docs/006_quote_depth_capacity_requirements.md",
+      "sha256": "f8d39039b68a4924766806dc9728be4939977faa43f27fac475404c69f8f5c1a",
+      "size": 443
+    },
+    {
+      "path": "docs/007_stake_vector_solver_contract.md",
+      "sha256": "7e2ecbabb63e1c84402e1630fdf5c2c04fa8d75ccffb680568452511c3ef33a3",
+      "size": 496
+    },
+    {
+      "path": "docs/008_leg_completion_and_residual_exposure.md",
+      "sha256": "ab9878377d9372d8b4654831f34c3991de9a4a012aca432bf99be8bc5189bb00",
+      "size": 395
+    },
+    {
+      "path": "docs/009_settlement_replay_contract.md",
+      "sha256": "5bab22478ea0cafab8644d407698d764fca3f511f8a597eeb09ab44ffe8f315a",
+      "size": 420
+    },
+    {
+      "path": "docs/010_paper_evaluation_and_kill_criteria.md",
+      "sha256": "b8f8dbf7da05963f3c40b6a2e78538e9a1baf4ac13d195f6686b51f5ee11ab4b",
+      "size": 388
+    },
+    {
+      "path": "docs/011_validation_matrix.md",
+      "sha256": "9eb7a845493c64b755892b63140bada9d0b8e136e52e7246601f21dcf465df72",
+      "size": 414
+    },
+    {
+      "path": "docs/012_runbook.md",
+      "sha256": "80e64f5e912906a5eacdbbe8824b12933805f2ef201353eddbf19413ee25f238",
+      "size": 467
+    },
+    {
+      "path": "docs/MASTER_PLAN.md",
+      "sha256": "77c278806d853abd687145b723013aac1fa12ebb4c8fea1b9c63f2ca69c3ee45",
+      "size": 3932
+    },
+    {
+      "path": "docs/autonomous_loop_contract.md",
+      "sha256": "6b48e21d0713a60ccf6ef96b5b417d3ece404a058d99f4b8b944ecdc69daa04a",
+      "size": 1106
+    },
+    {
+      "path": "docs/operations/autonomous_72h_runbook.md",
+      "sha256": "57dc4696b66fdfec22c5deee05b5a2eea91ad5addf96c516de8df919a3ff6d09",
+      "size": 1633
+    },
+    {
+      "path": "docs/operations/service_run.md",
+      "sha256": "f82a8c4d22293814e26dff2e05927e7de35bf5b19dfea7481dd9f63e40a36617",
+      "size": 852
+    },
+    {
+      "path": "docs/repo_status_current.md",
+      "sha256": "10240b18b9c004284235dd7c68900d661795267bc46cc8d3703000ebdca04885",
+      "size": 1479
+    },
+    {
+      "path": "open_log.sh",
+      "sha256": "7e45df2ba4da60b930eaf2d037853c75976c1f564e61e7778a3321ad1d97af52",
+      "size": 1554
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "939ac55eb6414b8c0e613f247ebda51273d0718d680c8545660042ba621504b8",
+      "size": 1603
+    },
+    {
+      "path": "package.json",
+      "sha256": "5d153ad7957f1867f2cebf6f9712062a43ff8ee0cae24cea09c8b7dfaa4e1485",
+      "size": 1795
+    },
+    {
+      "path": "pull_artifacts_and_zip_codebase.sh",
+      "sha256": "cd84ed274441058089976d1ab2f5ad86b8e4e9728064918adfa03050ece7a74b",
+      "size": 5856
+    },
+    {
+      "path": "run-autonomous-implementation.sh",
+      "sha256": "3768af8b16fc61208a8266edd1085b181a172e5bae569d5f30c02f42a714e204",
+      "size": 12474
+    },
+    {
+      "path": "scripts/create-source-handoff-archive.sh",
+      "sha256": "97b04b14ce13c4fd3579ddfd645614a608293ef6fbe98252c4f01cf9122f478c",
+      "size": 1488
+    },
+    {
+      "path": "scripts/load-node-runtime.sh",
+      "sha256": "ea4bb9bef2995130f632d069dc3c3cbb5c6774047f420ab1a58f6335b3f87abe",
+      "size": 4349
+    },
+    {
+      "path": "scripts/restore-required-executable-bits.js",
+      "sha256": "ba678ee0d636ef8adefccdc30e0558fb9f90d82a283d9a5c15b8c36fa77791f5",
+      "size": 1238
+    },
+    {
+      "path": "scripts/validate_artifact_hygiene.py",
+      "sha256": "faf4f175405867a49d24fed997c7032ec679c49501ae5e51f92e961dcb85e4ab",
+      "size": 4494
+    },
+    {
+      "path": "scripts/validate_contract_boundary.py",
+      "sha256": "6dd396af380fed524c938437e00706e2fef97caf7fbff83c93ff0b1ba374e07c",
+      "size": 1464
+    },
+    {
+      "path": "scripts/validate_executable_bits.py",
+      "sha256": "abceeb557a548319a8d7fd9799233b3f492e4e66cfe4443e34e2b1a6b709f7ae",
+      "size": 939
+    },
+    {
+      "path": "scripts/validate_fixture_integrity.py",
+      "sha256": "cbf9c79e843a13346ad01122953d71fe7143e62e1fed683cc38bc60e862c5538",
+      "size": 1504
+    },
+    {
+      "path": "scripts/validate_master_plan.py",
+      "sha256": "011bcea26bb704f4ab5ea5f228a43f9128a5cada7e7724c3a44f4965bebb2b47",
+      "size": 1396
+    },
+    {
+      "path": "scripts/validate_no_execution_paths.py",
+      "sha256": "643e35496ea0a67741e187687e12a1988fda7a96313bd4e83d081fa2b6c70910",
+      "size": 1620
+    },
+    {
+      "path": "scripts/validate_no_provider_connections.py",
+      "sha256": "85aed9d777b85cbfafc31f63cde8da9fca08bbfded55f167874460aae554400e",
+      "size": 2255
+    },
+    {
+      "path": "scripts/validate_node_runtime_loader.py",
+      "sha256": "1b04ac3f98c21066ca96ef42ea3ba4af99fd101246a71bc5fad36ccca2729427",
+      "size": 1996
+    },
+    {
+      "path": "scripts/validate_repo.py",
+      "sha256": "8ef9d20b27b2b5619b82fe3df71c1a7df82eb63b5759de4f37bc1289d403fb25",
+      "size": 3349
+    },
+    {
+      "path": "src/adapters/betting-win-export-reader.ts",
+      "sha256": "141d57a02809b3607c3343b82443e89428ae5f4cb0ae127b6cfa308aac8d0315",
+      "size": 1236
+    },
+    {
+      "path": "src/adapters/betting-win-query-client.ts",
+      "sha256": "4aa2eaa3d28216d210e227be3be6737867774cad22ee915aa8b96689e05fdfb9",
+      "size": 690
+    },
+    {
+      "path": "src/contracts/betting-win-contract-imports.ts",
+      "sha256": "c8d51f9aa245b0806f2cca5adf597da31ac9f884c719a9aea2fb23873d1300e4",
+      "size": 1146
+    },
+    {
+      "path": "src/contracts/local-types.ts",
+      "sha256": "b1c307fcd025e9b92d53a8e83b208b63b38b1a07ca7f8590594945c2e428f81b",
+      "size": 2762
+    },
+    {
+      "path": "src/identity/equivalence-precheck.ts",
+      "sha256": "0b64559851b60f014b10b989c2889531e651f7f1a8086b5b337a89df49b4235c",
+      "size": 1148
+    },
+    {
+      "path": "src/identity/market-group-key.ts",
+      "sha256": "e104d47d68d7c379626d0d5010034ba31a6385f07a8eece385d27e3bd05f2d14",
+      "size": 511
+    },
+    {
+      "path": "src/quotes/fee-cost-model.ts",
+      "sha256": "fc5fb3172dafe21f4eecd7115900ab68e977c5b98ae36435ec88bbab15d00be6",
+      "size": 682
+    },
+    {
+      "path": "src/quotes/quote-capacity.ts",
+      "sha256": "b72b822a2010ad98d97aaddf917c0ee1008a090fcc27006f01b819d8ae5a4f1a",
+      "size": 540
+    },
+    {
+      "path": "src/quotes/quote-freshness.ts",
+      "sha256": "0ffeeb11212fbf31f2f2fb57d9e256341d2f8549ee29e4f7ef7cc37da6e3ade1",
+      "size": 870
+    },
+    {
+      "path": "src/reporting/blocker-report.ts",
+      "sha256": "2f736e9b36fe8106e144bc0ae0d9e09cba8c38d6b6543aad51154ef48ea86e23",
+      "size": 292
+    },
+    {
+      "path": "src/reporting/opportunity-report.ts",
+      "sha256": "99d09f7e494d6aeded5b9ece57a6bad0a95f73c394d9a9d831102ae51af8d6eb",
+      "size": 524
+    },
+    {
+      "path": "src/reporting/private-run-report.ts",
+      "sha256": "77a80ed8d81239f6c87638398e95259090dfd11aec806ed08df0189087b1286b",
+      "size": 349
+    },
+    {
+      "path": "src/scenarios/complete-set.ts",
+      "sha256": "1c7b8cdb8c3537a6c7cc9411d5b13bf2c454f82403842bad35ca2c3a6ff9f179",
+      "size": 927
+    },
+    {
+      "path": "src/scenarios/scenario-cashflow.ts",
+      "sha256": "2e22c4d3c01b470bf9e36b769ccce16c61286baa0952ab4082254f29750d3e28",
+      "size": 839
+    },
+    {
+      "path": "src/scenarios/terminal-scenario.ts",
+      "sha256": "c535c3ae751f23c497a38e93a12ef6d007d3d6f32cbaa6d974e57166c0745daf",
+      "size": 427
+    },
+    {
+      "path": "src/simulation/leg-completion.ts",
+      "sha256": "420ca5ff4723e42e89ede3a9e04a3d7c6c5399a7125437ef88081e6b4c23fe4f",
+      "size": 344
+    },
+    {
+      "path": "src/simulation/partial-fill.ts",
+      "sha256": "c5ecc848b2c3b22e84ca0c4bbd1932edb92d2196ee2971376808cb048115f082",
+      "size": 330
+    },
+    {
+      "path": "src/simulation/residual-exposure.ts",
+      "sha256": "109888f0e036497b2cdb4b3b4801fe3e2cbe50b77f66cd64dc24cb62e45283b5",
+      "size": 346
+    },
+    {
+      "path": "src/simulation/settlement-replay.ts",
+      "sha256": "dfb4def3f16369e0aedfde91ff911e4cc8d22126e8d5e2ff2eae99cbb3858a48",
+      "size": 330
+    },
+    {
+      "path": "src/solver/constraints.ts",
+      "sha256": "e108aadf2f2a16ccd9230eccdc09020dd7876cfbfb0c3b037aa8efa8c2b26c90",
+      "size": 692
+    },
+    {
+      "path": "src/solver/rounding.ts",
+      "sha256": "e43750cb914d455e26c10e85bff1256d4aeade8bea55fe5b472ce82e33473718",
+      "size": 659
+    },
+    {
+      "path": "src/solver/stake-vector.ts",
+      "sha256": "1278f5e28c917584f7ba41706cc77e680fd97e8c5a94fbd5fffd67834893e23d",
+      "size": 515
+    },
+    {
+      "path": "start.sh",
+      "sha256": "b977728167adf49c1fae0a6ecdd80aa27a0e9f6b4a9266f17ef0d60e157e8825",
+      "size": 235
+    },
+    {
+      "path": "stop.sh",
+      "sha256": "d9591d3e7c489f2b590aa90039bc27073edf65c25a08cb6bbf6fbd99585ffbfe",
+      "size": 182
+    },
+    {
+      "path": "tests/blocker-report.test.ts",
+      "sha256": "ccc2522cc54c86e49c3bdbf6b1937f63b42bacbd16e098fd5d46b731b03b592d",
+      "size": 622
+    },
+    {
+      "path": "tests/complete-set.test.ts",
+      "sha256": "72597017320cd25d416a663ee0a2becff9f37c9e1781298fe9b711bea3fc51f4",
+      "size": 452
+    },
+    {
+      "path": "tests/contract-boundary.test.ts",
+      "sha256": "c60d759a656e4bc09039ff2680dbc05c4921293e29b95d421967a77e6ef19916",
+      "size": 840
+    },
+    {
+      "path": "tests/fixtures/betting-win-exports/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "tests/fixtures/complete-set/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "tests/fixtures/settlement/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "tests/helpers.ts",
+      "sha256": "61272ed2401e06e26cfd6bf2e63bba0dd8a4dc787652b8d28febcab3044831c1",
+      "size": 531
+    },
+    {
+      "path": "tests/leg-completion.test.ts",
+      "sha256": "1e219cfba5ff15782089eb1560b208b4750b22ad64fde4116c3ff839bd300e9e",
+      "size": 285
+    },
+    {
+      "path": "tests/market-group-key.test.ts",
+      "sha256": "bf18bc8538713375a331691bdcdb71be259d02da70cfea64c4fbe1764139c21c",
+      "size": 472
+    },
+    {
+      "path": "tests/quote-capacity.test.ts",
+      "sha256": "5c0ba02e5624d62d131b459988721e43d08c6385abce36df48c7a68fd3af9a26",
+      "size": 786
+    },
+    {
+      "path": "tests/residual-exposure.test.ts",
+      "sha256": "a2560a11c68d04884dcc8c0a3176f384c2d3dd97de5428be2a218dcbcdbdd56d",
+      "size": 291
+    },
+    {
+      "path": "tests/rounding.test.ts",
+      "sha256": "25d2d0b6275ebdbd948774a70c748cc9775c3faeddce0311ab2ec407e54b4a87",
+      "size": 445
+    },
+    {
+      "path": "tests/scenario-cashflow.test.ts",
+      "sha256": "5b375ea83239fb0b5f1e9a77b477f5fe0b93ac87968cc8e2ef4105de31fec9cd",
+      "size": 569
+    },
+    {
+      "path": "tests/settlement-replay.test.ts",
+      "sha256": "615ac2aa99e30b2280e40ac704dc0851f141bc5c5d44f2da9e4d963ab7f9390c",
+      "size": 290
+    },
+    {
+      "path": "tests/stake-vector.test.ts",
+      "sha256": "ceb792bcb1a053f54bb2eabf4166b9f6181e1887f2f544d9ab90f357818b90b5",
+      "size": 431
+    },
+    {
+      "path": "tools/required_executable_paths.js",
+      "sha256": "27c0b9711ad5069a31c8e413243a143085cd7168ee3e655b26b57985cc89e551",
+      "size": 381
+    },
+    {
+      "path": "tsconfig.json",
+      "sha256": "dba0b18b2d878dc172ddf0c24e338bc7179f694a27b55399761ffac83874417f",
+      "size": 473
+    },
+    {
+      "path": "update_git.sh",
+      "sha256": "f8cc22dbe7dd18a1308f7722b600f32088658eb3497ad2aace40578445f352d3",
+      "size": 3329
+    },
+    {
+      "path": "watch_progress.sh",
+      "sha256": "9557dd824cef2d8a16f0b0a9680feaf1669e9d9f6369a25bb5c7f5528b406c45",
+      "size": 940
+    }
+  ]
+}

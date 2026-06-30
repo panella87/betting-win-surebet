@@ -1,0 +1,14 @@
+export const REQUIRED_EXECUTABLE_PATHS = Object.freeze([
+  'cli.js',
+  'start.sh',
+  'stop.sh',
+  'check_progress.sh',
+  'watch_progress.sh',
+  'open_log.sh',
+  'update_git.sh',
+  'pull_artifacts_and_zip_codebase.sh',
+  'run-autonomous-implementation.sh',
+  'scripts/create-source-handoff-archive.sh',
+  'scripts/load-node-runtime.sh',
+  'commands/run-sure-001-autonomous.sh',
+]);

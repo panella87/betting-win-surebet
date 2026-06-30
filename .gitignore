@@ -1,78 +1,57 @@
-# Secrets
+# Dependencies and builds
+node_modules/
+dist/
+coverage/
+.nyc_output/
+
+# Local env and secrets
+# .env may exist locally, but must stay ignored and must never be archived.
 .env
-.env.*
+.env.local
+.env.*.local
 !.env.example
 *.pem
 *.key
-*.secret
-secrets.*
+*.crt
+*.p12
 
-# Node / Python
-node_modules/
-dist/
-build/
-coverage/
-.npm/
-.pnpm-store/
-__pycache__/
-*.py[cod]
-.venv/
-venv/
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-
-# OS / editors
-.DS_Store
-Thumbs.db
-.vscode/*
-!.vscode/extensions.json
-.idea/
-
-# Runtime / data
-*.log
-logs/
+# Runtime output and autonomous artifacts
+artifacts/*
+!artifacts/.gitkeep
+!artifacts/**/.gitkeep
+output/
 tmp/
-.cache/
-/data/raw/*
-!/data/raw/.gitkeep
-/data/external/*
-!/data/external/.gitkeep
-/data/processed/*
-!/data/processed/.gitkeep
+.tmp/
+.locks/
+.codex_current_artifact_dir
+autonomous-codebase.zip
+autonomous-handoff.manifest.json
+artifacts.zip
 
-# Generated archives, except curated evidence captures
+# Logs and transient files
+*.log
+*.stdout
+*.stderr
+*.stdout.txt
+*.stderr.txt
+*.stdout.log
+*.stderr.log
+*.tap
+*.tap.log
+*.tmp
+*.swp
+*.swo
+.DS_Store
+
+# Local archives
 *.zip
 *.tar
 *.tar.gz
-!research/captures/**/*.zip
+*.tgz
 
-# Expanded local captures
-research/captures/sx/sx_*/
-research/captures/azuro/*/
-!research/captures/sx/*.zip
-!research/captures/azuro/*.zip
+# Python cache
+__pycache__/
+*.pyc
 
-
-# Historical stage-specific expanded capture patterns retained for validator compatibility
-research/captures/sx/sx_stage13_ws_contract_capture_*/
-research/captures/sx/sx_stage14_ws_retry_*/
-research/captures/sx/sx_stage15_ws_token_shape_comprehensive_*/
-
-# Upstream source archives/workspaces stay outside the repo
-/vendor-upstream/
-/upstream-sources/
-/azuro-source-audit-work/
-/sx-source-audit-work/
-
-# Packaging metadata must not be copied into overlays
-.git/
-.github/
-OVERLAY_MANIFEST.json
-OVERLAY_README.md
-VALIDATION_REPORT*.md
-MANIFEST.json
-# Polymarket source/capture workspaces stay outside tracked source
-/polymarket-source-audit-work/
-research/captures/polymarket/*/
-!research/captures/polymarket/*.zip
+# Historical accidental file from upstream reference repos
+/true
