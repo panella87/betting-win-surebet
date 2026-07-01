@@ -33,7 +33,13 @@ Configure `.env` with `SSH_HOST`, `SSH_USER`, `SSH_PASSWORD`, and `REMOTE_REPO=/
 ./pull_artifacts_and_zip_codebase.sh
 ```
 
-The helper numbers files using the highest existing local suffix to avoid recreating stale lower-numbered archives.
+For a local codebase archive only, without SSH/artifact pull:
+
+```bash
+./zip_codebase.sh
+```
+
+The helpers number files using the highest existing local suffix, including browser duplicate names like `betting-win-surebet1(2).zip`, to avoid recreating stale lower-numbered archives.
 
 
 ## Launcher note

@@ -40,3 +40,7 @@ archive_env_policy=forbidden
 ```
 
 A repo-root `.env` may exist locally for helper configuration if Git ignores it. It must not be included in source handoff archives or codebase zips.
+
+## Packaging helpers
+
+`zip_codebase.sh` is the repo-local clean codebase packager. `pull_artifacts_and_zip_codebase.sh` now uses it instead of maintaining a separate packaging implementation.

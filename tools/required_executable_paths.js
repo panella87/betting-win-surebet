@@ -7,6 +7,7 @@ export const REQUIRED_EXECUTABLE_PATHS = Object.freeze([
   'open_log.sh',
   'update_git.sh',
   'pull_artifacts_and_zip_codebase.sh',
+  'zip_codebase.sh',
   'run-autonomous-implementation.sh',
   'scripts/create-source-handoff-archive.sh',
   'scripts/load-node-runtime.sh',

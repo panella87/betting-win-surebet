@@ -1,6 +1,6 @@
 {
-  "generated": "2026-06-30T20:19:18Z",
-  "overlay": "betting-win-surebet SURE-001 no-source-NVM launcher fix",
+  "generated": "2026-06-30T20:56:00Z",
+  "overlay": "betting-win-surebet SURE-001 autonomous local-assignment, stale-lock, and zip_codebase fix",
   "files": [
     {
       "path": ".env.example",
@@ -29,18 +29,18 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "82a475c919b8c6db409ebe07d20c640a8193dca299dac2fedb86e90bfd067fac",
-      "size": 2173
+      "sha256": "9da8c7db742e0265af9bc7120724ca48c38427208ce2ec59d3221c33b7c1edcb",
+      "size": 3426
     },
     {
       "path": "PROJECT_STATUS.md",
-      "sha256": "19963fadaa1b1b04526f9b6ebb58c2f74abd027ac7c3e055184c53149dac3c1c",
-      "size": 1623
+      "sha256": "b16466dbec23c128f98d82458ef90962f3d8c67d62c14f20f1daf1a4a0913d33",
+      "size": 1929
     },
     {
       "path": "README.md",
-      "sha256": "a19d5430d3619d8bcd8769555f16247528ed6b8cb6ecd0c3dea189345671487d",
-      "size": 1997
+      "sha256": "84dcfda20664a536fab486a7e6e042199870f0db1ed72cb08ad4cf16cf7e52c4",
+      "size": 2015
     },
     {
       "path": "STARTER_PACK.md",
@@ -139,8 +139,8 @@
     },
     {
       "path": "docs/MASTER_PLAN.md",
-      "sha256": "77c278806d853abd687145b723013aac1fa12ebb4c8fea1b9c63f2ca69c3ee45",
-      "size": 3932
+      "sha256": "a5e65080b2b0580a52d4a6a4b61fff608b0f618d0e09f6a352d4e069f145e32f",
+      "size": 3950
     },
     {
       "path": "docs/autonomous_loop_contract.md",
@@ -149,8 +149,8 @@
     },
     {
       "path": "docs/operations/autonomous_72h_runbook.md",
-      "sha256": "57dc4696b66fdfec22c5deee05b5a2eea91ad5addf96c516de8df919a3ff6d09",
-      "size": 1633
+      "sha256": "5e8840277bd13c760b27ad69b811e3b400f71ee8ebdf4fa0df18fd3273050132",
+      "size": 1798
     },
     {
       "path": "docs/operations/service_run.md",
@@ -159,8 +159,8 @@
     },
     {
       "path": "docs/repo_status_current.md",
-      "sha256": "10240b18b9c004284235dd7c68900d661795267bc46cc8d3703000ebdca04885",
-      "size": 1479
+      "sha256": "136e2922672aff7b7fcf93de3bff66c0c35467d890d6c4f7418dd1120bb52d78",
+      "size": 1672
     },
     {
       "path": "open_log.sh",
@@ -174,18 +174,18 @@
     },
     {
       "path": "package.json",
-      "sha256": "5d153ad7957f1867f2cebf6f9712062a43ff8ee0cae24cea09c8b7dfaa4e1485",
-      "size": 1795
+      "sha256": "2b59669c4a5d3963ca5e74206b7efaa17e9463c87695651911be82d67c303981",
+      "size": 1876
     },
     {
       "path": "pull_artifacts_and_zip_codebase.sh",
-      "sha256": "cd84ed274441058089976d1ab2f5ad86b8e4e9728064918adfa03050ece7a74b",
-      "size": 5856
+      "sha256": "e5e6459f88e81c61c4ab7eba76bcfd323557d4c7a946c1451484796cd9b2f23d",
+      "size": 7599
     },
     {
       "path": "run-autonomous-implementation.sh",
-      "sha256": "3768af8b16fc61208a8266edd1085b181a172e5bae569d5f30c02f42a714e204",
-      "size": 12474
+      "sha256": "e782b4921b1e1a140fe3ec878b22148751421d22cf9c1fbecc2c96dcbe7a627c",
+      "size": 14027
     },
     {
       "path": "scripts/create-source-handoff-archive.sh",
@@ -214,8 +214,8 @@
     },
     {
       "path": "scripts/validate_executable_bits.py",
-      "sha256": "abceeb557a548319a8d7fd9799233b3f492e4e66cfe4443e34e2b1a6b709f7ae",
-      "size": 939
+      "sha256": "8326cb7e5ca8af184bf4bf0303e0aa3ed05736343d4e1b71f011abda9f71f60c",
+      "size": 962
     },
     {
       "path": "scripts/validate_fixture_integrity.py",
@@ -244,8 +244,13 @@
     },
     {
       "path": "scripts/validate_repo.py",
-      "sha256": "8ef9d20b27b2b5619b82fe3df71c1a7df82eb63b5759de4f37bc1289d403fb25",
-      "size": 3349
+      "sha256": "2212bb47611eca4005f55ac915b09a89927278097cb06c34097cd6fce068b821",
+      "size": 3413
+    },
+    {
+      "path": "scripts/validate_shell_local_assignments.py",
+      "sha256": "bfa4f7f7d8afbc4e8fe2eeadd59fb254f57ca9e8d03fae59cff3479c2ce04309",
+      "size": 1808
     },
     {
       "path": "src/adapters/betting-win-export-reader.ts",
@@ -444,8 +449,8 @@
     },
     {
       "path": "tools/required_executable_paths.js",
-      "sha256": "27c0b9711ad5069a31c8e413243a143085cd7168ee3e655b26b57985cc89e551",
-      "size": 381
+      "sha256": "565d96d2fd59b03e4afb849f56be80d21be22f700e0883d1cbea8ef0134bb69d",
+      "size": 402
     },
     {
       "path": "tsconfig.json",
@@ -461,6 +466,11 @@
       "path": "watch_progress.sh",
       "sha256": "9557dd824cef2d8a16f0b0a9680feaf1669e9d9f6369a25bb5c7f5528b406c45",
       "size": 940
+    },
+    {
+      "path": "zip_codebase.sh",
+      "sha256": "725ad1e8bb2c42aabe84b1025ba643166fbcddcd70878ac15532606687c5d7ee",
+      "size": 10189
     }
   ]
 }

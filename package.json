@@ -15,7 +15,7 @@
     "restore:executables": "node scripts/restore-required-executable-bits.js",
     "validate:repo": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_repo.py",
     "validate:boundary": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_contract_boundary.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_no_provider_connections.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_no_execution_paths.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_fixture_integrity.py",
-    "validate:ops": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_master_plan.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_executable_bits.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_artifact_hygiene.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_node_runtime_loader.py",
+    "validate:ops": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_master_plan.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_executable_bits.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_artifact_hygiene.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_node_runtime_loader.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_shell_local_assignments.py",
     "validate:starter": "npm run typecheck && npm test && npm run validate:repo && npm run validate:boundary && npm run validate:ops",
     "validate": "npm run validate:starter",
     "archive:source": "bash scripts/create-source-handoff-archive.sh"

@@ -14,7 +14,7 @@ def read(path: Path) -> str:
 
 REQUIRED = [
   'README.md','AGENTS.md','CHANGELOG.md','PROJECT_STATUS.md','package.json','package-lock.json','tsconfig.json','.gitignore','.gitattributes','.env.example','.nvmrc','cli.js',
-  'start.sh','stop.sh','check_progress.sh','watch_progress.sh','open_log.sh','update_git.sh','pull_artifacts_and_zip_codebase.sh','run-autonomous-implementation.sh',
+  'start.sh','stop.sh','check_progress.sh','watch_progress.sh','open_log.sh','update_git.sh','pull_artifacts_and_zip_codebase.sh','zip_codebase.sh','run-autonomous-implementation.sh',
   'docs/MASTER_PLAN.md','docs/repo_status_current.md','docs/autonomous_loop_contract.md','docs/operations/autonomous_72h_runbook.md','docs/operations/service_run.md',
   'docs/001_scope_and_boundaries.md','docs/002_dependency_contract_with_betting_win.md','docs/003_surebet_family_decision.md','docs/004_market_identity_and_rule_equivalence.md',
   'docs/005_terminal_scenario_cashflow_model.md','docs/006_quote_depth_capacity_requirements.md','docs/007_stake_vector_solver_contract.md','docs/008_leg_completion_and_residual_exposure.md',
@@ -22,7 +22,7 @@ REQUIRED = [
   'decisions/ADR-0001-repo-boundary-and-no-provider-connections.md','decisions/ADR-0002-first-lane-polymarket-standard-binary-complete-set.md','decisions/ADR-0003-paper-only-no-execution.md',
   'src/contracts/betting-win-contract-imports.ts','src/contracts/local-types.ts',
   'scripts/validate_contract_boundary.py','scripts/validate_no_provider_connections.py','scripts/validate_no_execution_paths.py','scripts/validate_fixture_integrity.py',
-  'scripts/validate_master_plan.py','scripts/validate_executable_bits.py','scripts/validate_artifact_hygiene.py','scripts/validate_node_runtime_loader.py','scripts/load-node-runtime.sh','scripts/create-source-handoff-archive.sh','scripts/restore-required-executable-bits.js',
+  'scripts/validate_master_plan.py','scripts/validate_executable_bits.py','scripts/validate_artifact_hygiene.py','scripts/validate_node_runtime_loader.py','scripts/validate_shell_local_assignments.py','scripts/load-node-runtime.sh','scripts/create-source-handoff-archive.sh','scripts/restore-required-executable-bits.js',
   'tools/required_executable_paths.js','commands/run-sure-001-autonomous.sh',
 ]
 

@@ -51,6 +51,7 @@ Useful wrappers:
 ./open_log.sh
 ./update_git.sh --help
 ./pull_artifacts_and_zip_codebase.sh --help
+./zip_codebase.sh
 ./run-autonomous-implementation.sh --check-only
 ```
 

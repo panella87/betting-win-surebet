@@ -41,3 +41,7 @@ Local `.env` policy: allowed in the working folder only because `.gitignore` exp
 ## Launcher hardening
 
 The autonomous launcher uses `scripts/load-node-runtime.sh` and logs Node/NPM runtime checks before validation. `.env` may exist locally when ignored by `.gitignore`; it must not be archived or committed.
+
+## Packaging helpers
+
+`zip_codebase.sh` creates a local clean codebase archive. `pull_artifacts_and_zip_codebase.sh` downloads remote `artifacts.zip` when present and delegates codebase packaging to `zip_codebase.sh`. Both helpers exclude `.env`, dependencies, build output, logs, and generated archives.

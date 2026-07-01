@@ -108,5 +108,6 @@ npm install
 npm run validate
 ./run-autonomous-implementation.sh --check-only
 ./pull_artifacts_and_zip_codebase.sh --help
+./zip_codebase.sh
 ./update_git.sh --help
 ```
