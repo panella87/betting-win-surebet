@@ -50,9 +50,11 @@ Reciprocal odds alone are not acceptance evidence.
 
 ## Implementation discipline
 
-- Implement one bounded slice only.
-- Keep SURE-001 as docs, tooling, stubs, and validators only.
-- Do not implement the solver, simulation engine, provider ingestion, or execution paths until Federico explicitly asks.
+- Implement one bounded slice per cycle. Continue with `CONTINUE_REQUIRED=yes` while `docs/014_sure_001_remaining_hardening_backlog.md` or `docs/015_local_engine_implementation_backlog.md` still contains safe unchecked work.
+- SURE-001 docs/tooling/validators are complete.
+- Federico asked for the maximum safe implementation possible; continue through `docs/015_local_engine_implementation_backlog.md`.
+- Local-only deterministic solver math, simulation state machines, settlement replay consumers, and private report assembly are allowed only against fake/local fixtures and must not claim real upstream readiness.
+- Do not implement provider ingestion or execution paths.
 - Do not weaken validators to make a run green.
 - Do not add placeholders that silently pass as evidence.
 - Do not print secrets or mutate `.env`.

@@ -1,5 +1,39 @@
 # Changelog
 
+## 2026-07-02 — SURE-002A local engine implementation backlog overlay
+
+- Documented why the latest autonomous run stopped: SURE-001 hardening backlog was exhausted and the controller correctly wrote `AUTONOMOUS_GOAL_COMPLETE=yes`.
+- Added `docs/015_local_engine_implementation_backlog.md` so the next run can implement the maximum safe local surebet engine work without a real upstream `betting-win` export bundle.
+- Updated autonomous task selection to continue from SURE-001 hardening into SURE-002A local interface/engine implementation while preserving one bounded slice per cycle.
+- Added `commands/run-sure-local-engine-autonomous.sh` as the clearer start wrapper for this phase.
+- Added `scripts/validate_local_engine_backlog_contract.py` and `tests/local-engine-backlog-contract.test.ts` so the local-only/no-provider/no-execution boundary is validated.
+- Updated status/master-plan docs to allow local deterministic contracts, parsers, fixture readers, paper math, state machines, settlement replay consumers, and private reports while keeping real upstream evaluation blocked until Federico provides the pinned interface.
+
+
+## 2026-07-01 — SURE-001 autonomous continuation backlog overlay
+
+- Documented why the latest run stopped quickly: the controller reached `AUTONOMOUS_GOAL_COMPLETE=yes` after one bounded slice because the prompt still told it to stop after one slice.
+- Added `docs/014_sure_001_remaining_hardening_backlog.md` as the active safe SURE-001 backlog for the next autonomous run.
+- Updated the controller prompt so each cycle still performs one bounded safe SURE-001 slice, but the run continues with `CONTINUE_REQUIRED=yes` while safe backlog items remain.
+- Added a continuation-contract validator and test coverage so the one-slice stop behavior does not silently return.
+- Preserved SURE-001 boundaries: no provider connections, execution paths, direct `betting-win` DB access, generated-contract vendoring, solver, simulation, or settlement implementation.
+
+## 2026-07-01 — SURE-001 cycle artifact quality and manifest hardening
+
+- Added fail-closed controller validation for required cycle artifact quality: missing, placeholder, or empty required report artifacts now stop the loop before machine status is accepted.
+- Preserved `git_diff.patch` as the only required artifact that may be empty when a cycle genuinely makes no source diff.
+- Added `scripts/validate_source_manifest.py` and refreshed `SOURCE_MANIFEST.json` so stale source handoff manifests are caught by `npm run validate`.
+- Extended controller contract docs and tests without adding provider connections, execution paths, direct `betting-win` DB access, generated-contract vendoring, or solver implementation.
+
+## 2026-07-01 — SURE-001 autonomous status fail-closed hardening
+
+- Fixed the autonomous controller status parser so malformed, missing, combined, or unknown `continue_status.txt` content fails closed instead of being treated as `CONTINUE_REQUIRED=yes`.
+- The controller now fails closed on nonzero Codex cycle exit before accepting any cycle status.
+- The controller now requires post-cycle `npm run validate` to pass before accepting `AUTONOMOUS_GOAL_COMPLETE=yes` or any other cycle status.
+- Added `scripts/validate_autonomous_controller_contract.py` and wired it into `npm run validate` so future controller/prompt drift is caught.
+- Added `docs/013_autonomous_controller_status_contract.md` and updated the autonomous loop contract/run docs.
+- Preserved SURE-001 boundaries: no provider connections, no execution paths, no direct `betting-win` database access, no vendored generated contracts, and no solver implementation.
+
 ## 2026-06-30 — SURE-001 autonomous controller and codebase packaging fix
 
 - Fixed the autonomous controller `set -u` startup crash by splitting dependent `local` assignments in `run-autonomous-implementation.sh`.

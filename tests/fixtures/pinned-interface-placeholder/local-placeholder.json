@@ -1,0 +1,10 @@
+{
+  "schema": "betting-win-surebet-pinned-interface-placeholder-v1",
+  "generatedBy": "betting-win-surebet",
+  "fixtureKind": "pinned_interface_placeholder",
+  "mode": "paper_only",
+  "providerConnection": "prohibited",
+  "status": "blocked_until_federico_provides_pinned_betting_win_interface",
+  "notes": "Local fake fixture for validator smoke tests only. Not a betting-win export bundle and not SURE-002 readiness evidence.",
+  "records": []
+}

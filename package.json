@@ -1,6 +1,6 @@
 {
   "name": "betting-win-surebet",
-  "version": "0.0.0-private-sure-001-master-plan-ops",
+  "version": "0.0.0-private-sure-002a-local-engine-bootstrap",
   "private": true,
   "type": "module",
   "description": "Private paper-only downstream surebet / complete-set research skeleton consuming betting-win contracts and exports.",
@@ -13,9 +13,10 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "npm run build && node --test dist/tests/*.test.js",
     "restore:executables": "node scripts/restore-required-executable-bits.js",
+    "regen:source-manifest": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/regenerate_source_manifest.py",
     "validate:repo": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_repo.py",
     "validate:boundary": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_contract_boundary.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_no_provider_connections.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_no_execution_paths.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_fixture_integrity.py",
-    "validate:ops": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_master_plan.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_executable_bits.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_artifact_hygiene.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_node_runtime_loader.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_shell_local_assignments.py",
+    "validate:ops": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_master_plan.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_executable_bits.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_artifact_hygiene.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_node_runtime_loader.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_shell_local_assignments.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_autonomous_controller_contract.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_source_manifest.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_autonomous_continuation_contract.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_local_engine_backlog_contract.py",
     "validate:starter": "npm run typecheck && npm test && npm run validate:repo && npm run validate:boundary && npm run validate:ops",
     "validate": "npm run validate:starter",
     "archive:source": "bash scripts/create-source-handoff-archive.sh"

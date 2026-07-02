@@ -1,0 +1,52 @@
+{
+  "schema": "betting-win.export-bundle.v1",
+  "reference": {
+    "source": "betting-win",
+    "contractVersion": "0.0.0-test",
+    "manifestHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "bundleKind": "resource_export",
+  "exportedAt": "2026-07-01T00:00:00.000Z",
+  "records": [
+    {
+      "recordType": "identity",
+      "canonicalEventId": "event-001",
+      "canonicalMarketId": "market-001",
+      "providerMarketId": "provider-market-001",
+      "providerGeneration": "generation-001"
+    },
+    {
+      "recordType": "rules",
+      "canonicalMarketId": "market-001",
+      "ruleProfileId": "rules-001",
+      "resultSourceId": "result-source-001",
+      "finalityPolicyId": "finality-001"
+    },
+    {
+      "recordType": "quotes",
+      "canonicalMarketId": "market-001",
+      "outcome": "yes",
+      "quoteSourceManifestHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "evidenceId": "quote-001",
+      "observedAt": "2026-07-01T00:00:01.000Z",
+      "priceMinor": "510000",
+      "availableSizeMinor": "1200000",
+      "minStakeMinor": "1000",
+      "feeMinor": "25",
+      "costMinor": "0",
+      "currency": "USDC"
+    },
+    {
+      "recordType": "settlement",
+      "canonicalMarketId": "market-001",
+      "ruleProfileId": "rules-001",
+      "resultSourceId": "result-source-001",
+      "finalityPolicyId": "finality-001",
+      "finalityAuthorityId": "authority-001",
+      "replayManifestHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "replayAcceptedAt": "2026-07-01T00:05:00.000Z",
+      "acceptanceStatus": "accepted",
+      "finalOutcome": "yes"
+    }
+  ]
+}

@@ -18,6 +18,7 @@ REQUIRED = [
     'scripts/create-source-handoff-archive.sh',
     'scripts/load-node-runtime.sh',
     'commands/run-sure-001-autonomous.sh',
+    'commands/run-sure-local-engine-autonomous.sh',
 ]
 
 def fail(message: str) -> None:

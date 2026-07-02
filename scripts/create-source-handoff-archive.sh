@@ -50,6 +50,7 @@ tar -czpf "$output_archive" \
   --exclude='*.stdout.log' \
   --exclude='*.stderr.log' \
   --exclude='*.log' \
+  --exclude='*.tmp' \
   .
 
 echo "source_handoff_archive=$output_archive"

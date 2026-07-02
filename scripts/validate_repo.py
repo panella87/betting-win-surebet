@@ -18,12 +18,14 @@ REQUIRED = [
   'docs/MASTER_PLAN.md','docs/repo_status_current.md','docs/autonomous_loop_contract.md','docs/operations/autonomous_72h_runbook.md','docs/operations/service_run.md',
   'docs/001_scope_and_boundaries.md','docs/002_dependency_contract_with_betting_win.md','docs/003_surebet_family_decision.md','docs/004_market_identity_and_rule_equivalence.md',
   'docs/005_terminal_scenario_cashflow_model.md','docs/006_quote_depth_capacity_requirements.md','docs/007_stake_vector_solver_contract.md','docs/008_leg_completion_and_residual_exposure.md',
-  'docs/009_settlement_replay_contract.md','docs/010_paper_evaluation_and_kill_criteria.md','docs/011_validation_matrix.md','docs/012_runbook.md',
+  'docs/009_settlement_replay_contract.md','docs/010_paper_evaluation_and_kill_criteria.md','docs/011_validation_matrix.md','docs/012_runbook.md','docs/013_autonomous_controller_status_contract.md','docs/014_sure_001_remaining_hardening_backlog.md','docs/015_local_engine_implementation_backlog.md',
   'decisions/ADR-0001-repo-boundary-and-no-provider-connections.md','decisions/ADR-0002-first-lane-polymarket-standard-binary-complete-set.md','decisions/ADR-0003-paper-only-no-execution.md',
   'src/contracts/betting-win-contract-imports.ts','src/contracts/local-types.ts',
   'scripts/validate_contract_boundary.py','scripts/validate_no_provider_connections.py','scripts/validate_no_execution_paths.py','scripts/validate_fixture_integrity.py',
-  'scripts/validate_master_plan.py','scripts/validate_executable_bits.py','scripts/validate_artifact_hygiene.py','scripts/validate_node_runtime_loader.py','scripts/validate_shell_local_assignments.py','scripts/load-node-runtime.sh','scripts/create-source-handoff-archive.sh','scripts/restore-required-executable-bits.js',
-  'tools/required_executable_paths.js','commands/run-sure-001-autonomous.sh',
+  'scripts/validate_master_plan.py','scripts/validate_executable_bits.py','scripts/validate_artifact_hygiene.py','scripts/validate_node_runtime_loader.py','scripts/validate_shell_local_assignments.py','scripts/validate_autonomous_controller_contract.py','scripts/validate_source_manifest.py','scripts/regenerate_source_manifest.py','scripts/validate_autonomous_continuation_contract.py','scripts/validate_local_engine_backlog_contract.py','scripts/load-node-runtime.sh','scripts/create-source-handoff-archive.sh','scripts/restore-required-executable-bits.js',
+  'tests/autonomous-controller-contract.test.ts','tests/autonomous-continuation-contract.test.ts','tests/local-engine-backlog-contract.test.ts','tests/validate-artifact-hygiene.test.ts','tests/validate-fixture-integrity.test.ts','tests/validate-shell-local-assignments.test.ts','tests/validate-source-manifest.test.ts','tests/packaging-helpers.test.ts','tests/validate-repo-contract.test.ts','tests/validation-matrix-contract.test.ts',
+  'tests/fixtures/pinned-interface-placeholder/.gitkeep','tests/fixtures/pinned-interface-placeholder/local-placeholder.json',
+  'tools/required_executable_paths.js','commands/run-sure-001-autonomous.sh','commands/run-sure-local-engine-autonomous.sh',
 ]
 
 def main() -> None:
@@ -33,7 +35,7 @@ def main() -> None:
     package = json.loads(read(ROOT / 'package.json'))
     if package.get('private') is not True:
         fail('package.json must set private=true')
-    for script in ['typecheck','test','validate','validate:starter','validate:ops','restore:executables']:
+    for script in ['typecheck','test','validate','validate:starter','validate:ops','restore:executables','regen:source-manifest']:
         if script not in package.get('scripts', {}):
             fail(f'package.json missing script: {script}')
     if package.get('bin', {}).get('betting-win-surebet') != './cli.js':

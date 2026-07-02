@@ -3,7 +3,7 @@
 A paper candidate must not assume every leg completes. Future phases must model partial
 completion and bounded residual exposure.
 
-Required states for future implementation:
+Required states:
 
 ```text
 leg_open
@@ -17,4 +17,4 @@ group_incomplete
 manual_kill
 ```
 
-SURE-001 contains blocked stubs only.
+`src/simulation/leg-completion.ts` now implements the local paper completion state machine from SURE-005. Residual exposure remains a separate follow-up slice.

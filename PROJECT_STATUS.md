@@ -2,13 +2,13 @@
 
 ```text
 repo=betting-win-surebet
-status=SURE-001_SKELETON_AND_BOUNDARY_OVERLAY
+status=SURE-002A_LOCAL_INTERFACE_AND_ENGINE_BOOTSTRAP
 runtime=paper_only
 provider_connections=prohibited
 execution=prohibited
 first_lane=polymarket_standard_binary_complete_set_v0
-current_task=SURE-001
-next_task=SURE-002 only after Federico explicitly asks and betting-win exposes pinned contract/export interface
+current_task=SURE-002A_LOCAL_INTERFACE_AND_ENGINE_BOOTSTRAP
+next_task=local deterministic interface and engine backlog; real upstream evaluation waits for pinned betting-win interface
 ```
 
 Current state:
@@ -45,3 +45,17 @@ The autonomous launcher uses `scripts/load-node-runtime.sh` and logs Node/NPM ru
 ## Packaging helpers
 
 `zip_codebase.sh` creates a local clean codebase archive. `pull_artifacts_and_zip_codebase.sh` downloads remote `artifacts.zip` when present and delegates codebase packaging to `zip_codebase.sh`. Both helpers exclude `.env`, dependencies, build output, logs, and generated archives.
+
+## Controller status contract
+
+The autonomous controller must fail closed on malformed cycle status, nonzero Codex exit, or failed post-cycle validation. It must not treat unknown `continue_status.txt` content as `CONTINUE_REQUIRED=yes`.
+
+## SURE-001 artifact quality hardening
+
+Required autonomous cycle artifacts are audit evidence. Missing, placeholder, or empty required report files fail closed before cycle status is accepted. `SOURCE_MANIFEST.json` is validated against the current source tree during `npm run validate`.
+
+## Local implementation backlog
+
+The repo-local SURE-001 hardening backlog and the safe SURE-002A local implementation backlog are now exhausted. The repo has local-only deterministic interface contracts, fixture readers, scenario math, stake-vector math, completion/residual simulation, settlement replay consumption, private paper reporting, and an offline fixture-to-artifact report path.
+
+Real upstream evaluation remains blocked pending Federico's pinned `betting-win` contract/export interface. Autonomous cycles should now write `AUTONOMOUS_GOAL_COMPLETE=yes` unless a repo-local validation/tooling defect reopens safe local work.

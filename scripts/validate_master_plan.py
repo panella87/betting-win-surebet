@@ -14,28 +14,48 @@ def read(rel: str) -> str:
         fail(f'missing required file: {rel}')
     return path.read_text(encoding='utf-8')
 
+def require(text: str, needle: str, rel: str) -> None:
+    if needle not in text:
+        fail(f'{rel} missing required marker: {needle}')
+
 def main() -> None:
     master = read('docs/MASTER_PLAN.md')
     status = read('docs/repo_status_current.md')
-    required_master = [
+    backlog = read('docs/015_local_engine_implementation_backlog.md')
+
+    for needle in [
         'SURE-001', 'SURE-002', 'SURE-003', 'SURE-004', 'SURE-005', 'SURE-006', 'SURE-007',
+        'SURE-002A_LOCAL_INTERFACE_AND_ENGINE_BOOTSTRAP',
+        'docs/015_local_engine_implementation_backlog.md',
         'polymarket_standard_binary_complete_set_v0',
         'provider_connection=prohibited',
         'execution=prohibited',
         'pinned_betting_win_interface=missing',
-    ]
-    for needle in required_master:
-        if needle not in master:
-            fail(f'docs/MASTER_PLAN.md missing required marker: {needle}')
-    required_status = [
-        'current_task=SURE-001',
+        'local_fixture_only_allowed',
+    ]:
+        require(master, needle, 'docs/MASTER_PLAN.md')
+
+    for needle in [
+        'current_task=SURE-002A_LOCAL_INTERFACE_AND_ENGINE_BOOTSTRAP',
         'provider_connections=prohibited',
         'execution=prohibited',
-        'Wait for Federico to provide the pinned `betting-win` contract/export interface',
-    ]
-    for needle in required_status:
-        if needle not in status:
-            fail(f'docs/repo_status_current.md missing required marker: {needle}')
+        'docs/015_local_engine_implementation_backlog.md',
+        'Real upstream evaluation remains blocked',
+    ]:
+        require(status, needle, 'docs/repo_status_current.md')
+
+    for needle in [
+        'SURE-002A_LOCAL_INTERFACE_AND_ENGINE_BOOTSTRAP',
+        'Local implementation backlog',
+        'CONTINUE_REQUIRED=yes',
+        'AUTONOMOUS_GOAL_COMPLETE=yes',
+        'provider SDK/client imports',
+        'stake-vector math',
+        'settlement replay consumption',
+        'profitability claims',
+    ]:
+        require(backlog, needle, 'docs/015_local_engine_implementation_backlog.md')
+
     print('validate_master_plan: ok')
 
 if __name__ == '__main__':

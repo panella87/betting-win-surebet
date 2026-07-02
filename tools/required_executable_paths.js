@@ -12,4 +12,5 @@ export const REQUIRED_EXECUTABLE_PATHS = Object.freeze([
   'scripts/create-source-handoff-archive.sh',
   'scripts/load-node-runtime.sh',
   'commands/run-sure-001-autonomous.sh',
+  'commands/run-sure-local-engine-autonomous.sh',
 ]);

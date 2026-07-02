@@ -1,15 +1,17 @@
 # 007 — Stake-vector solver contract
 
-The stake-vector solver is intentionally blocked in SURE-001.
+SURE-004 may solve a local paper-only standard-binary stake vector from validated terminal
+scenario cash-flow rows.
 
-Future implementation must use fixed-point integer amounts and must include:
+The local solver contract must:
 
-- Minimum/maximum stake constraints.
-- Capacity constraints.
-- Rounding rules.
-- Outcome-specific fees and costs.
-- Worst-case residual exposure.
-- A no-profitability-claim report format.
+- Use fixed-point integer amounts only.
+- Require exactly two complete-set legs and two terminal scenarios.
+- Enforce one local min/max capacity constraint and one local rounding step per leg.
+- Keep per-leg stake, fee, and cost terms consistent across terminal scenarios.
+- Output blockers instead of acceptance when capacity, rounding, or payoff terms cannot
+  cover both standard-binary terminal scenarios.
+- Avoid profitability or execution-readiness claims.
 
 A solver result is not accepted without quote freshness, capacity evidence, leg completion
 simulation, and settlement replay.

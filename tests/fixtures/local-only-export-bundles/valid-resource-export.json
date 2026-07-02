@@ -1,0 +1,16 @@
+{
+  "schema": "betting-win.export-bundle.v1",
+  "reference": {
+    "source": "betting-win",
+    "contractVersion": "0.0.0-test",
+    "manifestHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "bundleKind": "resource_export",
+  "exportedAt": "2026-07-01T00:00:00.000Z",
+  "records": [
+    {
+      "recordType": "identity",
+      "canonicalMarketId": "market-001"
+    }
+  ]
+}

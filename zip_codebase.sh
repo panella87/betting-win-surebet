@@ -191,7 +191,7 @@ def common_safe(relative: str) -> bool:
         return False
     if source.resolve() == final_zip.resolve():
         return False
-    if lowered.endswith(LOG_SUFFIXES) or lowered.endswith('.pyc'):
+    if lowered.endswith(LOG_SUFFIXES) or lowered.endswith('.tmp') or lowered.endswith('.pyc'):
         return False
     if lowered.endswith(ARCHIVE_SUFFIXES):
         return False

@@ -9,11 +9,11 @@ This repo must never become the provider/evidence platform and must never become
 ## Current stage
 
 ```text
-stage=SURE-001
-status=skeleton and boundary controls only
+stage=SURE-002A_LOCAL_INTERFACE_AND_ENGINE_BOOTSTRAP
+status=local deterministic implementation allowed without real upstream readiness
 provider_connections=prohibited
 execution=prohibited
-solver_implementation=blocked
+solver_implementation=local_fixture_only_allowed
 pinned_betting_win_interface=missing
 ```
 
@@ -44,7 +44,14 @@ Real surebet logic remains blocked until all of the following are available and 
 6. Generic paper ledger/capacity/reservation primitives.
 7. Fixture bundle or read-only query/export interface for tests.
 
-Until then, this repo may only contain docs, validators, stubs, empty fixture folders, and operational wrappers.
+Until then, this repo may implement deterministic local contracts, parsers, fixture readers, paper math, state machines, and private reports. It may not claim real readiness, use real upstream evidence, or connect to providers until Federico provides the pinned interface.
+
+
+## Current local implementation authority
+
+`docs/015_local_engine_implementation_backlog.md` is the retained SURE-002A local implementation ledger after SURE-001. It authorized the maximum safe local implementation possible without a real upstream bundle: interface contracts, local bundle parsing, standard-binary grouping, terminal scenario cash flows, fixed-point stake-vector math, completion and residual exposure simulation, settlement replay consumption, private paper reporting, and an offline local fixture-to-artifact report path.
+
+This authority is local-only and paper-only. It does not authorize provider connections, execution, public signals, profitability claims, direct `betting-win` database reads, `core.*` migrations, or manual vendoring of generated `betting-win` contracts.
 
 ## SURE phases
 
@@ -97,7 +104,7 @@ Produce deterministic private reports for candidates, blockers, residual exposur
 
 ## Autonomous implementation rules
 
-The autonomous controller may work only on the first safe unchecked SURE phase. In SURE-001 it may improve docs/tooling/validators/stubs only.
+The autonomous controller may work only on the first safe unchecked SURE phase or documented local implementation backlog. SURE-001 docs/tooling/validator hardening is complete, and the safe repo-local SURE-002A backlog is now complete as well. Autonomous work should therefore stop with `AUTONOMOUS_GOAL_COMPLETE=yes` unless a repo-local validation/tooling defect reopens safe work; real upstream evaluation remains blocked on the pinned `betting-win` interface.
 
 It must not connect to providers, create execution modules, add wallet/signer/order dependencies, read or mutate `betting-win` databases, copy provider adapters from another repo, claim readiness based on reciprocal odds only, or mark later phases complete without pinned upstream evidence.
 
@@ -107,7 +114,12 @@ It must not connect to providers, create execution modules, add wallet/signer/or
 npm install
 npm run validate
 ./run-autonomous-implementation.sh --check-only
+python3 scripts/validate_autonomous_controller_contract.py
 ./pull_artifacts_and_zip_codebase.sh --help
 ./zip_codebase.sh
 ./update_git.sh --help
 ```
+
+## Active implementation backlog
+
+`docs/014_sure_001_remaining_hardening_backlog.md` is retained as the completed SURE-001 ledger. `docs/015_local_engine_implementation_backlog.md` is retained as the completed safe SURE-002A local implementation ledger. Real upstream work remains blocked on Federico's pinned `betting-win` interface.

@@ -149,7 +149,7 @@ Read first:
 $context_file
 
 Objective:
-Implement exactly one bounded safe SURE-001 hardening slice from the current repository truth. Stop after one slice.
+Implement exactly one bounded safe local implementation slice per cycle from the current repository truth. Continue across cycles while safe documented backlog remains in docs/014_sure_001_remaining_hardening_backlog.md or docs/015_local_engine_implementation_backlog.md.
 
 Source-of-truth order:
 1. current code
@@ -166,18 +166,23 @@ Hard boundaries:
 - No direct betting-win database access.
 - No core.* migrations.
 - No generated betting-win contract vendoring.
-- No solver, stake-vector, leg-completion, residual-exposure, or settlement-replay implementation until Federico explicitly asks and a pinned betting-win interface exists.
+- No provider-backed or live solver, stake-vector, leg-completion, residual-exposure, or settlement-replay claims.
+- Local-only, fixture-driven deterministic engine implementation is now allowed under docs/015_local_engine_implementation_backlog.md, but it must remain blocked from real upstream readiness until Federico provides the pinned betting-win interface.
 - Do not edit .env or print secrets.
 - Do not commit, push, pull, reset, clean, stash, or rewrite branches.
 - Do not weaken validators.
 
 Task selection:
 1. If local validation is broken, repair the smallest confirmed repo-local validation/tooling defect.
-2. Otherwise improve exactly one SURE-001 item: docs, validators, operation wrappers, typed stubs, fixture folders, or tests.
-3. If the next required work is SURE-002 or later, return BLOCKED=yes with the missing pinned betting-win contract/export interface.
+2. Otherwise inspect docs/014_sure_001_remaining_hardening_backlog.md and implement the first safe unchecked SURE-001 hardening item that is still relevant to current code.
+3. If the SURE-001 backlog is exhausted, inspect docs/015_local_engine_implementation_backlog.md and implement the first safe unchecked local implementation item that is still relevant to current code.
+4. If every documented SURE-001 and local-engine backlog item is complete or no longer relevant, write AUTONOMOUS_GOAL_COMPLETE=yes and state that real upstream evaluation remains blocked pending Federico's pinned betting-win contract/export interface.
+5. If a repo-local defect prevents safe progress, write BLOCKED=yes with exact evidence.
+6. Do not stop with AUTONOMOUS_GOAL_COMPLETE=yes after one completed slice when either backlog document still contains safe unchecked work.
 
 Required commands before finishing when relevant:
 - npm run validate
+- python3 scripts/validate_autonomous_continuation_contract.py
 
 Required files inside $cycle_dir:
 - docs_review.md
@@ -195,22 +200,174 @@ Required files inside $cycle_dir:
 - continue_status.txt
 - request_flags.txt
 
-continue_status.txt must contain exactly one line:
-AUTONOMOUS_GOAL_COMPLETE=yes
-CONTINUE_REQUIRED=yes
-BLOCKED=yes
+continue_status.txt must contain exactly one non-empty line, and that line must be exactly one of:
+- AUTONOMOUS_GOAL_COMPLETE=yes
+- CONTINUE_REQUIRED=yes
+- BLOCKED=yes
+
+Do not put more than one status token on the same line. Do not include explanations in continue_status.txt.
 
 request_flags.txt must contain exactly two lines:
 SERVICE_REFRESH_REQUIRED=no
 RUNTIME_EVIDENCE_REQUIRED=no
+
+Continuation contract:
+- Use CONTINUE_REQUIRED=yes when docs/014_sure_001_remaining_hardening_backlog.md still has a safe unchecked SURE-001 item after the current slice.
+- Use CONTINUE_REQUIRED=yes when docs/015_local_engine_implementation_backlog.md still has a safe unchecked local implementation item after the current slice.
+- Use AUTONOMOUS_GOAL_COMPLETE=yes only when both backlogs are exhausted or the only remaining work requires Federico's real pinned betting-win interface.
+- Use BLOCKED=yes only for a concrete unsafe or repo-local blocker, not merely because one bounded slice was completed.
 EOF_PROMPT
 }
 
+REQUIRED_CYCLE_ARTIFACTS=(
+  docs_review.md
+  code_state_review.md
+  task_ledger.md
+  selected_task.md
+  implementation_plan.md
+  commands_run.log
+  validation_results.md
+  changes_made.md
+  remaining_gaps.md
+  next_cycle_recommendation.md
+  final_status.md
+  git_diff.patch
+  continue_status.txt
+  request_flags.txt
+)
+
 ensure_cycle_artifacts() {
-  local cycle_dir="$1" f
-  for f in docs_review.md code_state_review.md task_ledger.md selected_task.md implementation_plan.md commands_run.log validation_results.md changes_made.md remaining_gaps.md next_cycle_recommendation.md final_status.md git_diff.patch continue_status.txt request_flags.txt; do
+  local cycle_dir="$1"
+  local f
+  for f in "${REQUIRED_CYCLE_ARTIFACTS[@]}"; do
     [[ -f "$cycle_dir/$f" ]] || echo "controller_placeholder=missing after Codex; inspect codex.log" > "$cycle_dir/$f"
   done
+}
+
+validate_cycle_artifacts() {
+  local cycle_dir="$1"
+  local invalid_file="$cycle_dir/invalid_cycle_artifacts.txt"
+  local f
+  local rel
+  local invalid=0
+  : > "$invalid_file"
+
+  for f in "${REQUIRED_CYCLE_ARTIFACTS[@]}"; do
+    rel="$cycle_dir/$f"
+    if [[ ! -f "$rel" ]]; then
+      echo "missing_required_cycle_artifact=$f" >> "$invalid_file"
+      invalid=1
+      continue
+    fi
+    if grep -q '^controller_placeholder=missing after Codex; inspect codex.log$' "$rel" 2>/dev/null; then
+      echo "placeholder_cycle_artifact=$f" >> "$invalid_file"
+      invalid=1
+      continue
+    fi
+    if [[ "$f" != "git_diff.patch" ]] && [[ ! -s "$rel" ]]; then
+      echo "empty_required_cycle_artifact=$f" >> "$invalid_file"
+      invalid=1
+    fi
+  done
+
+  if [[ "$invalid" != "0" ]]; then
+    return 1
+  fi
+  rm -f "$invalid_file"
+  return 0
+}
+
+read_continue_status() {
+  local cycle_dir="$1"
+  local status_file="$cycle_dir/continue_status.txt"
+  local invalid_file="$cycle_dir/invalid_continue_status.txt"
+  local status_line=""
+  local non_empty_count=""
+
+  if [[ ! -f "$status_file" ]]; then
+    {
+      echo "reason=missing_continue_status"
+      echo "expected_one_of=AUTONOMOUS_GOAL_COMPLETE=yes|CONTINUE_REQUIRED=yes|BLOCKED=yes"
+    } > "$invalid_file"
+    return 1
+  fi
+
+  non_empty_count="$(awk 'NF { count += 1 } END { print count + 0 }' "$status_file")"
+  status_line="$(awk 'NF { print; exit }' "$status_file" | tr -d '\r')"
+
+  if [[ "$non_empty_count" != "1" ]]; then
+    {
+      echo "reason=continue_status_must_have_exactly_one_non_empty_line"
+      echo "non_empty_line_count=$non_empty_count"
+      echo "expected_one_of=AUTONOMOUS_GOAL_COMPLETE=yes|CONTINUE_REQUIRED=yes|BLOCKED=yes"
+      echo "actual_begin"
+      sed -n '1,20p' "$status_file"
+      echo "actual_end"
+    } > "$invalid_file"
+    return 1
+  fi
+
+  case "$status_line" in
+    AUTONOMOUS_GOAL_COMPLETE=yes|CONTINUE_REQUIRED=yes|BLOCKED=yes)
+      printf '%s\n' "$status_line"
+      return 0
+      ;;
+    *)
+      {
+        echo "reason=unrecognized_continue_status"
+        echo "actual=$status_line"
+        echo "expected_one_of=AUTONOMOUS_GOAL_COMPLETE=yes|CONTINUE_REQUIRED=yes|BLOCKED=yes"
+      } > "$invalid_file"
+      return 1
+      ;;
+  esac
+}
+
+read_request_flags() {
+  local cycle_dir="$1"
+  local flags_file="$cycle_dir/request_flags.txt"
+  local invalid_file="$cycle_dir/invalid_request_flags.txt"
+  local -a lines=()
+  local expected_first="SERVICE_REFRESH_REQUIRED=no"
+  local expected_second="RUNTIME_EVIDENCE_REQUIRED=no"
+
+  if [[ ! -f "$flags_file" ]]; then
+    {
+      echo "reason=missing_request_flags"
+      echo "expected_line_1=$expected_first"
+      echo "expected_line_2=$expected_second"
+    } > "$invalid_file"
+    return 1
+  fi
+
+  mapfile -t lines < "$flags_file"
+  lines=("${lines[@]//$'\r'/}")
+
+  if [[ "${#lines[@]}" -ne 2 ]]; then
+    {
+      echo "reason=request_flags_must_have_exactly_two_lines"
+      echo "line_count=${#lines[@]}"
+      echo "expected_line_1=$expected_first"
+      echo "expected_line_2=$expected_second"
+      echo "actual_begin"
+      sed -n '1,20p' "$flags_file"
+      echo "actual_end"
+    } > "$invalid_file"
+    return 1
+  fi
+
+  if [[ "${lines[0]}" != "$expected_first" || "${lines[1]}" != "$expected_second" ]]; then
+    {
+      echo "reason=unexpected_request_flags"
+      echo "actual_line_1=${lines[0]}"
+      echo "actual_line_2=${lines[1]}"
+      echo "expected_line_1=$expected_first"
+      echo "expected_line_2=$expected_second"
+    } > "$invalid_file"
+    return 1
+  fi
+
+  return 0
 }
 
 run_codex_cycle() {
@@ -367,7 +524,36 @@ main() {
     validation_rc=$?
     echo "validation_exit_code=$validation_rc" >> "$cycle_dir/controller_cycle_status.txt"
 
-    status_line="$(head -n 1 "$cycle_dir/continue_status.txt" | tr -d '\r' || true)"
+    if [[ "$codex_rc" -ne 0 ]]; then
+      STOP_REASON="codex_cycle_failed"
+      FINAL_STATUS="BLOCKED=yes"
+      finish 3
+    fi
+
+    if [[ "$validation_rc" -ne 0 ]]; then
+      STOP_REASON="post_cycle_validation_failed"
+      FINAL_STATUS="BLOCKED=yes"
+      finish 5
+    fi
+
+    if ! validate_cycle_artifacts "$cycle_dir"; then
+      STOP_REASON="invalid_cycle_artifacts"
+      FINAL_STATUS="BLOCKED=yes"
+      finish 8
+    fi
+
+    if ! read_request_flags "$cycle_dir"; then
+      STOP_REASON="invalid_request_flags"
+      FINAL_STATUS="BLOCKED=yes"
+      finish 7
+    fi
+
+    if ! status_line="$(read_continue_status "$cycle_dir")"; then
+      STOP_REASON="invalid_continue_status"
+      FINAL_STATUS="BLOCKED=yes"
+      finish 6
+    fi
+
     case "$status_line" in
       AUTONOMOUS_GOAL_COMPLETE=yes)
         STOP_REASON="autonomous_goal_complete"
@@ -377,12 +563,7 @@ main() {
         STOP_REASON="codex_reported_blocked"
         FINAL_STATUS="BLOCKED=yes"
         finish 2 ;;
-      CONTINUE_REQUIRED=yes|*)
-        if [[ "$validation_rc" -ne 0 ]]; then
-          STOP_REASON="post_cycle_validation_failed"
-          FINAL_STATUS="BLOCKED=yes"
-          finish 5
-        fi
+      CONTINUE_REQUIRED=yes)
         FINAL_STATUS="CONTINUE_REQUIRED=yes"
         cycle=$((cycle + 1)) ;;
     esac

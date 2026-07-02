@@ -2,9 +2,9 @@
 
 ```text
 repo=betting-win-surebet
-current_task=SURE-001
-current_task_status=in_progress
-next_allowed_task=SURE-001 hardening only
+current_task=SURE-002A_LOCAL_INTERFACE_AND_ENGINE_BOOTSTRAP
+current_task_status=complete_local_backlog_blocked_on_pinned_interface
+next_allowed_task=wait for Federico's pinned betting-win contract/export interface before real upstream evaluation
 provider_connections=prohibited
 execution=prohibited
 runtime_service=none
@@ -17,15 +17,18 @@ runtime_service=none
 - [x] Add empty typed stubs and fixture directories.
 - [x] Add master plan and current-status docs.
 - [x] Add adapted Git, artifact, validation, progress, and autonomous shell helpers.
-- [ ] Wait for Federico to provide the pinned `betting-win` contract/export interface before SURE-002.
+- [x] Harden autonomous controller status parsing so malformed cycle status fails closed.
+- [x] Wait for an explicit user request before moving beyond SURE-001.
+- [x] Implement the maximum safe local engine backlog in `docs/015_local_engine_implementation_backlog.md`.
+- [ ] Wait for Federico to provide the pinned `betting-win` contract/export interface before real upstream evaluation.
 
 ## Current safe work
 
-Only SURE-001 hardening is allowed: docs, tooling, validators, typed stubs, fixture directory structure, and private run/report shape stubs.
+SURE-001 hardening is complete. The documented SURE-002A local implementation backlog is also complete: contracts, parsers, local fixture readers, deterministic paper math, state machines, private reports, and CLI/reporting over local fixtures are implemented. Real upstream evaluation remains blocked.
 
 ## Blocked work
 
-The following remain blocked: opportunity solving, stake-vector solving, leg-completion simulation, settlement replay implementation, provider integration, live execution, public reporting, and profitability claims.
+The following remain blocked: provider integration, live execution, public reporting, profitability claims, direct upstream database access, generated-contract vendoring, and real upstream readiness claims. Local deterministic stake-vector, completion, residual exposure, and settlement replay consumption may now be implemented only against fake/local fixtures and must remain blocked from real acceptance.
 
 ## Operational command
 
@@ -44,3 +47,15 @@ A repo-root `.env` may exist locally for helper configuration if Git ignores it.
 ## Packaging helpers
 
 `zip_codebase.sh` is the repo-local clean codebase packager. `pull_artifacts_and_zip_codebase.sh` now uses it instead of maintaining a separate packaging implementation.
+
+## Post-wave controller audit
+
+The latest SURE-001 loop exposed one controller safety gap: malformed `continue_status.txt` content could be treated as continue. The controller now validates the status file strictly and fails closed on malformed, missing, combined, unknown, nonzero-Codex, or post-cycle-validation-failed states.
+
+## SURE-001 artifact quality hardening
+
+Required autonomous cycle artifacts are audit evidence. Missing, placeholder, or empty required report files fail closed before cycle status is accepted. `SOURCE_MANIFEST.json` is validated against the current source tree during `npm run validate`.
+
+## Continuation status
+
+The repo-local SURE-001 hardening backlog and the safe SURE-002A local implementation backlog are exhausted. Autonomous cycles should now write `AUTONOMOUS_GOAL_COMPLETE=yes` unless a repo-local validation/tooling defect reopens safe work. The remaining blocker is Federico's pinned `betting-win` contract/export interface for real upstream evaluation.

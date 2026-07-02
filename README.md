@@ -16,9 +16,10 @@ execution=prohibited
 Current status:
 
 ```text
-SURE-001 only
-skeleton, documentation, operational wrappers, validation gates, and typed stubs
-strategy implementation blocked until betting-win exposes stable read-only exports/query and generic paper infrastructure
+SURE-002A local interface and engine bootstrap
+SURE-001 hardening complete
+local deterministic contracts, fixture readers, paper math, simulation state machines, and private reports may be implemented
+real upstream evaluation remains blocked until betting-win exposes a pinned contract/export interface
 ```
 
 ## Source of truth
@@ -53,12 +54,13 @@ Useful wrappers:
 ./pull_artifacts_and_zip_codebase.sh --help
 ./zip_codebase.sh
 ./run-autonomous-implementation.sh --check-only
+# Active SURE-001 continuation backlog: docs/014_sure_001_remaining_hardening_backlog.md
 ```
 
 `start.sh` is intentionally a validation wrapper, not a daemon launcher. This repo has no long-running service in SURE-001.
 
 ## Hard boundary
 
-The repository must fail closed if it contains provider SDK/client imports, provider URLs, wallet/signer/order/transaction paths, direct `betting-win` database access, `core.*` migrations, or manually vendored generated contracts.
+The repository must fail closed if it contains provider SDK/client imports, provider URLs, wallet/signer/order/transaction paths, direct `betting-win` database access, `core.*` migrations, manually vendored generated contracts, malformed autonomous cycle status, nonzero Codex exit, or failed post-cycle validation.
 
-The first accepted output remains a repo skeleton and boundary-validation pack. Do not implement opportunity solving until Federico explicitly asks and a pinned `betting-win` contract/export interface exists.
+Federico has asked for the maximum safe local implementation possible. Implement local deterministic paper-engine work from `docs/015_local_engine_implementation_backlog.md`, but do not claim real upstream readiness until a pinned `betting-win` contract/export interface exists.

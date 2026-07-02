@@ -3,9 +3,12 @@ import { readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 
 const command = process.argv[2] || 'help';
+const LOCAL_REPORT_DIST_ENTRY = 'dist/src/cli/local-paper-report.js';
 
 function printHelp() {
-  process.stdout.write(`betting-win-surebet CLI\n\nCommands:\n  help       Show this help\n  status     Print current repository status\n  validate   Run npm run validate\n`);
+  process.stdout.write(
+    `betting-win-surebet CLI\n\nCommands:\n  help           Show this help\n  status         Print current repository status\n  validate       Run npm run validate\n  local-report   Validate a repo-local export bundle and write a private report under artifacts/\n`,
+  );
 }
 
 if (command === 'help' || command === '--help' || command === '-h') {
@@ -20,6 +23,16 @@ if (command === 'status') {
 
 if (command === 'validate') {
   const result = spawnSync('npm', ['run', 'validate'], { stdio: 'inherit' });
+  process.exit(result.status === null ? 1 : result.status);
+}
+
+if (command === 'local-report') {
+  const buildResult = spawnSync('npm', ['run', 'build'], { stdio: 'inherit' });
+  if (buildResult.status !== 0) {
+    process.exit(buildResult.status === null ? 1 : buildResult.status);
+  }
+
+  const result = spawnSync('node', [LOCAL_REPORT_DIST_ENTRY, ...process.argv.slice(3)], { stdio: 'inherit' });
   process.exit(result.status === null ? 1 : result.status);
 }
 
