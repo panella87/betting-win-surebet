@@ -9,11 +9,12 @@ This repo must never become the provider/evidence platform and must never become
 ## Current stage
 
 ```text
-stage=SURE-002A_LOCAL_INTERFACE_AND_ENGINE_BOOTSTRAP
-status=local deterministic implementation allowed without real upstream readiness
+stage=SURE-002B_PRIVATE_PAPER_MODE_INTAKE
+status=repo-local private paper-mode backlog complete; real upstream blocked pending pinned betting-win interface
 provider_connections=prohibited
 execution=prohibited
-solver_implementation=local_fixture_only_allowed
+solver_implementation=local_fixture_only_complete
+private_paper_mode=repo_local_complete
 pinned_betting_win_interface=missing
 ```
 
@@ -104,7 +105,7 @@ Produce deterministic private reports for candidates, blockers, residual exposur
 
 ## Autonomous implementation rules
 
-The autonomous controller may work only on the first safe unchecked SURE phase or documented local implementation backlog. SURE-001 docs/tooling/validator hardening is complete, and the safe repo-local SURE-002A backlog is now complete as well. Autonomous work should therefore stop with `AUTONOMOUS_GOAL_COMPLETE=yes` unless a repo-local validation/tooling defect reopens safe work; real upstream evaluation remains blocked on the pinned `betting-win` interface.
+The autonomous controller may work only on the first safe unchecked SURE phase or documented local implementation backlog. SURE-001 docs/tooling/validator hardening is complete, the safe repo-local SURE-002A backlog is complete, and the safe repo-local SURE-002B private paper-mode backlog is complete. Autonomous work should therefore stop with `AUTONOMOUS_GOAL_COMPLETE=yes` unless a repo-local validation/tooling defect reopens safe work; real upstream evaluation remains blocked on the pinned `betting-win` interface.
 
 It must not connect to providers, create execution modules, add wallet/signer/order dependencies, read or mutate `betting-win` databases, copy provider adapters from another repo, claim readiness based on reciprocal odds only, or mark later phases complete without pinned upstream evidence.
 
@@ -122,4 +123,23 @@ python3 scripts/validate_autonomous_controller_contract.py
 
 ## Active implementation backlog
 
-`docs/014_sure_001_remaining_hardening_backlog.md` is retained as the completed SURE-001 ledger. `docs/015_local_engine_implementation_backlog.md` is retained as the completed safe SURE-002A local implementation ledger. Real upstream work remains blocked on Federico's pinned `betting-win` interface.
+`docs/014_sure_001_remaining_hardening_backlog.md`, `docs/015_local_engine_implementation_backlog.md`, and `docs/017_private_paper_mode_implementation_backlog.md` are retained as completed ledgers. `docs/018_private_paper_mode_runbook.md` defines the current freeze gate. `docs/016_pinned_betting_win_interface_readiness.md` is the next required handoff checklist. Real upstream work remains blocked on Federico's pinned `betting-win` interface.
+
+
+### SURE-002B — Private paper-mode intake
+
+Objective: implement every safe repo-local step needed before real private paper evaluation: pinned-interface intake, private paper report artifact contracts, fake/local smoke fixtures, batch summaries, and operator runbooks.
+
+Authority:
+
+```text
+docs/017_private_paper_mode_implementation_backlog.md
+SURE-002B_PRIVATE_PAPER_MODE_INTAKE
+provider_connections=prohibited
+execution=prohibited
+accepted=false
+```
+
+This phase still requires Federico's pinned `betting-win` export/interface before real upstream evaluation. It may not add provider connections, direct database reads, wallet/signer/order code, public signals, profitability claims, or execution readiness.
+
+Current retained state: the repo-local SURE-002B backlog is complete, the freeze gate is documented, and the first remaining non-local step still requires Federico's pinned `betting-win` bundle.

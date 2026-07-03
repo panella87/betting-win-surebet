@@ -1,4 +1,4 @@
-import { readFileSync, statSync } from 'node:fs';
+import { lstatSync, readFileSync, realpathSync, statSync } from 'node:fs';
 import { isAbsolute, relative, resolve } from 'node:path';
 import { blocked, type BoundaryResult } from '../contracts/local-types.js';
 import { parseBettingWinExportBundle, type BettingWinExportBundle } from './betting-win-export-reader.js';
@@ -36,12 +36,31 @@ export function readLocalBettingWinExportBundle(
   }
 
   try {
+    const repoRealPath = realpathSync(resolvedRepoRoot);
+    const linkStats = lstatSync(resolvedBundlePath);
+    if (linkStats.isSymbolicLink()) {
+      return blocked(
+        'LOCAL_EXPORT_SYMLINK_FORBIDDEN',
+        'Export bundle path must be a real repo-local file, not a symbolic link.',
+        'Non-symlink repo-local JSON export bundle file.',
+      );
+    }
+
     const stats = statSync(resolvedBundlePath);
     if (!stats.isFile()) {
       return blocked(
         'LOCAL_EXPORT_PATH_NOT_FILE',
         'Export bundle path must resolve to a JSON file.',
         'Repo-local JSON export bundle file.',
+      );
+    }
+
+    const bundleRealPath = realpathSync(resolvedBundlePath);
+    if (!isPathInsideRoot(repoRealPath, bundleRealPath)) {
+      return blocked(
+        'LOCAL_EXPORT_REALPATH_OUTSIDE_REPO',
+        'Export bundle realpath must stay inside the current repository.',
+        'Repo-local JSON export bundle file with an in-repo realpath.',
       );
     }
   } catch (error: unknown) {

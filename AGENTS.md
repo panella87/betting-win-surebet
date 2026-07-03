@@ -50,10 +50,12 @@ Reciprocal odds alone are not acceptance evidence.
 
 ## Implementation discipline
 
-- Implement one bounded slice per cycle. Continue with `CONTINUE_REQUIRED=yes` while `docs/014_sure_001_remaining_hardening_backlog.md` or `docs/015_local_engine_implementation_backlog.md` still contains safe unchecked work.
+- Implement one bounded slice per cycle. Continue with `CONTINUE_REQUIRED=yes` only while `docs/014_sure_001_remaining_hardening_backlog.md`, `docs/015_local_engine_implementation_backlog.md`, or `docs/017_private_paper_mode_implementation_backlog.md` still contains safe unchecked work.
 - SURE-001 docs/tooling/validators are complete.
-- Federico asked for the maximum safe implementation possible; continue through `docs/015_local_engine_implementation_backlog.md`.
+- The maximum safe local SURE-002A implementation backlog is complete. Current code has local deterministic contracts, fixture readers, paper math, simulation state machines, settlement replay consumption, private report assembly, and offline fixture-to-artifact reporting.
+- Do not invent more local engine work from stale backlog wording. If all retained backlogs are exhausted, write `AUTONOMOUS_GOAL_COMPLETE=yes` unless a concrete repo-local validation/tooling defect is confirmed.
 - Local-only deterministic solver math, simulation state machines, settlement replay consumers, and private report assembly are allowed only against fake/local fixtures and must not claim real upstream readiness.
+- Real upstream evaluation requires Federico's pinned `betting-win` contract/export interface. Use `docs/016_pinned_betting_win_interface_readiness.md` as the handoff checklist.
 - Do not implement provider ingestion or execution paths.
 - Do not weaken validators to make a run green.
 - Do not add placeholders that silently pass as evidence.
@@ -69,3 +71,14 @@ npm run validate
 ```
 
 No task may pass by weakening validators or replacing evidence with mocks.
+
+
+## Private paper-mode continuation
+
+Federico asked for the maximum safe implementation possible up to paper mode. The SURE-002B private paper-mode intake backlog is the next active backlog at `docs/017_private_paper_mode_implementation_backlog.md` under:
+
+```text
+SURE-002B_PRIVATE_PAPER_MODE_INTAKE
+```
+
+As of 2026-07-02, the repo-local private paper-mode backlog is complete and `docs/018_private_paper_mode_runbook.md` defines the freeze gate: `npm run validate` passes, local fixture smoke passes, and real upstream evaluation still requires Federico's pinned bundle. Use `commands/run-sure-paper-mode-autonomous.sh` only if a concrete repo-local defect reopens safe work. Use `commands/run-pinned-interface-smoke.sh` only for a repo-local pinned `betting-win` bundle path supplied by Federico. Do not use remote URLs. Do not connect to providers. Do not claim live readiness or profitability.

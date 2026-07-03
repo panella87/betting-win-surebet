@@ -140,6 +140,22 @@ export function assembleStandardBinaryCompleteSet(
     );
   }
 
+  if (yesQuote.evidence.currency === 'UNKNOWN' || noQuote.evidence.currency === 'UNKNOWN') {
+    return blocked(
+      'COMPLETE_SET_QUOTE_CURRENCY_UNKNOWN',
+      'Standard-binary complete-set assembly requires resolved quote currencies before local paper math.',
+      'Resolved local quote currency for every complete-set leg.',
+    );
+  }
+
+  if (yesQuote.evidence.currency !== noQuote.evidence.currency) {
+    return blocked(
+      'COMPLETE_SET_QUOTE_CURRENCY_MISMATCH',
+      'Standard-binary complete-set assembly requires both quote legs to use the same currency.',
+      'Same-currency local quote records for the YES and NO legs.',
+    );
+  }
+
   const legs: readonly CompleteSetLeg[] = Object.freeze([
     createLeg(identity, primaryRuleRecord, 'yes'),
     createLeg(identity, primaryRuleRecord, 'no'),

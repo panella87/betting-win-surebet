@@ -44,3 +44,12 @@ These tests lock the narrow regressions that previously caused or could cause bo
 | `tests/validate-source-manifest.test.ts` | The manifest regenerator stops matching validator inclusion rules or begins admitting generated junk into `SOURCE_MANIFEST.json`. |
 | `tests/validate-repo-contract.test.ts` | `validate_repo.py` stops requiring critical validator tests as first-class repo assets. |
 | `tests/local-engine-backlog-contract.test.ts` | The autonomous prompt or status docs stop continuing through the maximum safe local implementation backlog. |
+| `tests/betting-win-adapters.test.ts` | Repo-local export bundle and read-only query boundaries stop rejecting symlink/realpath escapes or unsupported runtime resources. |
+| `tests/complete-set.test.ts` | Complete-set assembly starts summing quote legs with mixed or unresolved currencies. |
+| `tests/local-paper-report.test.ts` | Private report generation emits opportunity candidates without settlement replay evidence, fresh quotes, or same-currency quote legs. |
+| `tests/leg-completion.test.ts` | Partial-fill status drifts back to a stale blocked stub instead of pointing to implemented local completion/residual modules. |
+
+| `python3 scripts/validate_local_engine_backlog_contract.py` | The repo claims the SURE-002A local backlog is still active after it is exhausted, or the pinned-interface handoff docs drift away from the blocked-real-upstream truth. |
+
+| `python3 scripts/validate_private_paper_mode_backlog_contract.py` | Private paper-mode intake docs, commands, and autonomous continuation drift into provider/live/execution scope or stop ignoring the active SURE-002B backlog. |
+| `tests/private-paper-mode-backlog-contract.test.ts` | Private paper-mode backlog or smoke command starts accepting remote URLs, provider/database access, execution claims, or non-private artifacts. |

@@ -42,10 +42,10 @@ wallet/signer/order/transaction paths
 direct betting-win DB access
 core.* migrations
 generated-contract vendoring
-solver implementation
-stake-vector implementation
-leg-completion simulation
-residual-exposure engine
-settlement replay implementation
+real provider-backed solver implementation
+real upstream stake-vector acceptance
+real leg-completion simulation against pinned upstream evidence
+real residual-exposure evaluation against pinned upstream evidence
+real settlement replay acceptance
 profitability or execution-readiness claims
 ```

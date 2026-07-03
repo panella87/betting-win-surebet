@@ -1,11 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   BETTING_WIN_EXPORT_BUNDLE_SCHEMA,
   parseBettingWinExportBundle,
 } from '../src/adapters/betting-win-export-reader.js';
 import { readLocalBettingWinExportBundle } from '../src/adapters/betting-win-local-bundle-reader.js';
+import { validatePinnedBettingWinBundleIntake } from '../src/adapters/betting-win-pinned-bundle-intake.js';
 import { buildReadOnlyQueryContractRequest } from '../src/adapters/betting-win-query-client.js';
 
 const REPO_ROOT = process.cwd();
@@ -163,6 +165,22 @@ test('read-only query contract request rejects an unpinned contract version', ()
   ]);
 });
 
+test('read-only query contract request rejects unsupported runtime resources', () => {
+  const result = buildReadOnlyQueryContractRequest({
+    contractVersion: '0.0.0-test',
+    resource: 'markets',
+  } as never);
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'QUERY_RESOURCE_UNSUPPORTED',
+      message: 'Read-only query contract resource must be one of identity, rules, quotes, or settlement.',
+      evidenceRequired: 'Supported pinned betting-win read-only query resource.',
+    },
+  ]);
+});
+
 test('read-only query contract request returns a frozen copy when pinned', () => {
   const request = {
     contractVersion: '0.0.0-test',
@@ -262,4 +280,104 @@ test('local export bundle reader returns bundle contract blockers for invalid me
       evidenceRequired: 'Pinned betting-win export bundle schema string.',
     },
   ]);
+});
+
+
+test('local export bundle reader rejects symlink inputs instead of following them', () => {
+  mkdirSync(join(REPO_ROOT, 'artifacts'), { recursive: true });
+  const tempDir = mkdtempSync(join(REPO_ROOT, 'artifacts', 'local-reader-symlink-'));
+  const symlinkPath = join(tempDir, 'linked-export.json');
+
+  try {
+    symlinkSync(join(REPO_ROOT, 'tests/fixtures/local-only-export-bundles/valid-resource-export.json'), symlinkPath);
+    const result = readLocalBettingWinExportBundle(symlinkPath, REPO_ROOT);
+
+    assert.equal(result.ok, false);
+    assert.deepEqual(result.blockers, [
+      {
+        code: 'LOCAL_EXPORT_SYMLINK_FORBIDDEN',
+        message: 'Export bundle path must be a real repo-local file, not a symbolic link.',
+        evidenceRequired: 'Non-symlink repo-local JSON export bundle file.',
+      },
+    ]);
+  } finally {
+    rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test('pinned bundle intake validator accepts a repo-local bundle with full record coverage', () => {
+  const result = validatePinnedBettingWinBundleIntake(
+    'tests/fixtures/local-only-export-bundles/solver-ready-resource-export.json',
+    REPO_ROOT,
+  );
+
+  assert.equal(result.ok, true);
+  assert.equal(result.value.bundle.reference.source, 'betting-win');
+  assert.equal(result.value.records.length, 5);
+});
+
+test('pinned bundle intake validator rejects missing required record coverage', () => {
+  const tempDir = mkdtempSync(join(REPO_ROOT, 'artifacts', 'pinned-intake-coverage-'));
+  const bundlePath = join(tempDir, 'missing-settlement.json');
+
+  try {
+    const bundle = JSON.parse(
+      readFileSync('tests/fixtures/local-only-export-bundles/solver-ready-resource-export.json', 'utf-8'),
+    ) as { records: Array<{ recordType?: string }> };
+    bundle.records = bundle.records.filter((record) => record.recordType !== 'settlement');
+    writeFileSync(bundlePath, `${JSON.stringify(bundle, null, 2)}\n`, { encoding: 'utf-8' });
+
+    const result = validatePinnedBettingWinBundleIntake(bundlePath, REPO_ROOT);
+
+    assert.equal(result.ok, false);
+    assert.deepEqual(result.blockers, [
+      {
+        code: 'PINNED_BUNDLE_SETTLEMENT_RECORDS_MISSING',
+        message: 'Pinned bundle intake requires at least one settlement record.',
+        evidenceRequired: 'Pinned betting-win export bundle with settlement record coverage.',
+      },
+    ]);
+  } finally {
+    rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test('pinned bundle intake validator rejects forbidden provider, credential, and execution text', () => {
+  const cases = [
+    {
+      fileName: 'provider-url.json',
+      mutate: (bundle: Record<string, unknown>) => ({ ...bundle, notes: 'https://provider.example/private-feed' }),
+      code: 'PINNED_BUNDLE_PROVIDER_URL_FORBIDDEN',
+    },
+    {
+      fileName: 'credential.json',
+      mutate: (bundle: Record<string, unknown>) => ({ ...bundle, apiKey: 'secret-test-value' }),
+      code: 'PINNED_BUNDLE_CREDENTIAL_TEXT_FORBIDDEN',
+    },
+    {
+      fileName: 'execution.json',
+      mutate: (bundle: Record<string, unknown>) => ({ ...bundle, notes: 'execute order after report generation' }),
+      code: 'PINNED_BUNDLE_EXECUTION_TEXT_FORBIDDEN',
+    },
+  ] as const;
+
+  mkdirSync(join(REPO_ROOT, 'artifacts'), { recursive: true });
+  for (const testCase of cases) {
+    const tempDir = mkdtempSync(join(REPO_ROOT, 'artifacts', 'pinned-intake-text-'));
+    const bundlePath = join(tempDir, testCase.fileName);
+
+    try {
+      const bundle = JSON.parse(
+        readFileSync('tests/fixtures/local-only-export-bundles/solver-ready-resource-export.json', 'utf-8'),
+      ) as Record<string, unknown>;
+      writeFileSync(bundlePath, `${JSON.stringify(testCase.mutate(bundle), null, 2)}\n`, { encoding: 'utf-8' });
+
+      const result = validatePinnedBettingWinBundleIntake(bundlePath, REPO_ROOT);
+
+      assert.equal(result.ok, false);
+      assert.equal(result.blockers[0]?.code, testCase.code);
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  }
 });

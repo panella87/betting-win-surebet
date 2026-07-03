@@ -8,6 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 RUNNER = ROOT / 'run-autonomous-implementation.sh'
 BACKLOG = ROOT / 'docs' / '014_sure_001_remaining_hardening_backlog.md'
 LOCAL_BACKLOG = ROOT / 'docs' / '015_local_engine_implementation_backlog.md'
+PAPER_BACKLOG = ROOT / 'docs' / '017_private_paper_mode_implementation_backlog.md'
 AGENTS = ROOT / 'AGENTS.md'
 MASTER_PLAN = ROOT / 'docs' / 'MASTER_PLAN.md'
 PACKAGE = ROOT / 'package.json'
@@ -34,6 +35,7 @@ def main() -> None:
     runner = read(RUNNER)
     backlog = read(BACKLOG)
     local_backlog = read(LOCAL_BACKLOG)
+    paper_backlog = read(PAPER_BACKLOG)
     agents = read(AGENTS)
     master_plan = read(MASTER_PLAN)
     package = json.loads(read(PACKAGE))
@@ -49,11 +51,13 @@ def main() -> None:
 
     for marker in [
         'docs/014_sure_001_remaining_hardening_backlog.md',
-        'Continue across cycles while safe documented backlog remains in docs/014_sure_001_remaining_hardening_backlog.md or docs/015_local_engine_implementation_backlog.md',
+        'docs/017_private_paper_mode_implementation_backlog.md',
+        'Continue across cycles while safe documented backlog remains in docs/014_sure_001_remaining_hardening_backlog.md, docs/015_local_engine_implementation_backlog.md, or docs/017_private_paper_mode_implementation_backlog.md',
         'Do not stop with AUTONOMOUS_GOAL_COMPLETE=yes after one completed slice',
         'Use CONTINUE_REQUIRED=yes when docs/014_sure_001_remaining_hardening_backlog.md still has a safe unchecked SURE-001 item',
         'Use CONTINUE_REQUIRED=yes when docs/015_local_engine_implementation_backlog.md still has a safe unchecked local implementation item',
-        'Use AUTONOMOUS_GOAL_COMPLETE=yes only when both backlogs are exhausted',
+        'Use CONTINUE_REQUIRED=yes when docs/017_private_paper_mode_implementation_backlog.md still has a safe unchecked private paper-mode item',
+        'Use AUTONOMOUS_GOAL_COMPLETE=yes only when all retained backlogs are exhausted',
     ]:
         require(runner, marker, 'run-autonomous-implementation.sh')
 
@@ -71,6 +75,7 @@ def main() -> None:
     require(agents, 'Implement one bounded slice per cycle', 'AGENTS.md')
     require(master_plan, 'docs/014_sure_001_remaining_hardening_backlog.md', 'docs/MASTER_PLAN.md')
     require(master_plan, 'docs/015_local_engine_implementation_backlog.md', 'docs/MASTER_PLAN.md')
+    require(master_plan, 'docs/017_private_paper_mode_implementation_backlog.md', 'docs/MASTER_PLAN.md')
 
     for marker in [
         'SURE-002A_LOCAL_INTERFACE_AND_ENGINE_BOOTSTRAP',
@@ -80,6 +85,15 @@ def main() -> None:
         'profitability claims',
     ]:
         require(local_backlog, marker, 'docs/015_local_engine_implementation_backlog.md')
+
+    for marker in [
+        'SURE-002B_PRIVATE_PAPER_MODE_INTAKE',
+        'private paper-mode',
+        'CONTINUE_REQUIRED=yes',
+        'provider_connection = prohibited',
+        'execution = prohibited',
+    ]:
+        require(paper_backlog, marker, 'docs/017_private_paper_mode_implementation_backlog.md')
 
     validate_ops = package.get('scripts', {}).get('validate:ops', '')
     if 'scripts/validate_autonomous_continuation_contract.py' not in validate_ops:

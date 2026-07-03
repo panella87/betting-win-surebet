@@ -30,7 +30,24 @@ test('local engine backlog authorizes maximum safe implementation without provid
   assert.match(runner, /docs\/015_local_engine_implementation_backlog\.md/);
   assert.match(runner, /first safe unchecked local implementation item/);
   assert.match(runner, /Use CONTINUE_REQUIRED=yes when docs\/015_local_engine_implementation_backlog\.md still has a safe unchecked local implementation item/);
-  assert.match(status, /current_task=SURE-002A_LOCAL_INTERFACE_AND_ENGINE_BOOTSTRAP/);
+  assert.match(status, /safe SURE-002A local implementation backlog/);
+});
+
+test('completed local backlog docs point to the pinned betting-win interface gate', () => {
+  const agents = read('AGENTS.md');
+  const readme = read('README.md');
+  const scope = read('docs/001_scope_and_boundaries.md');
+  const runbook = read('docs/012_runbook.md');
+  const handoff = read('docs/016_pinned_betting_win_interface_readiness.md');
+
+  assert.match(agents, /maximum safe local SURE-002A implementation backlog is complete/);
+  assert.match(agents, /Do not invent more local engine work/);
+  assert.match(readme, /SURE-002A local interface and engine bootstrap = complete for local fixtures/);
+  assert.match(readme, /AUTONOMOUS_GOAL_COMPLETE=yes/);
+  assert.match(scope, /SURE-002A local fixture engine = complete/);
+  assert.match(runbook, /Expected state after SURE-002A local bootstrap/);
+  assert.match(handoff, /Required pinned interface from betting-win/);
+  assert.match(handoff, /reference\.source=betting-win/);
 });
 
 test('local engine command keeps the normal validation-before-autonomous contract', () => {

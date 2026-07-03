@@ -1,6 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { simulatePaperGroupCompletion } from '../src/simulation/leg-completion.js';
+import { partialFillModelStatus } from '../src/simulation/partial-fill.js';
+
+
+test('partial fill status points to the implemented local completion modules', () => {
+  const result = partialFillModelStatus();
+
+  assert.equal(result.ok, true);
+  assert.equal(result.value.implementation, 'local_fixture_completion_state_machine');
+  assert.equal(result.value.realUpstreamAcceptance, 'blocked_until_pinned_betting_win_interface');
+  assert.equal(result.value.implementationModule, 'src/simulation/leg-completion.ts');
+  assert.equal(result.value.residualExposureModule, 'src/simulation/residual-exposure.ts');
+});
 
 test('leg completion simulation derives the expected local paper group states', () => {
   const cases = [

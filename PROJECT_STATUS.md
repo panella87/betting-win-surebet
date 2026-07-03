@@ -2,13 +2,13 @@
 
 ```text
 repo=betting-win-surebet
-status=SURE-002A_LOCAL_INTERFACE_AND_ENGINE_BOOTSTRAP
+status=SURE-002B_PRIVATE_PAPER_MODE_INTAKE
 runtime=paper_only
 provider_connections=prohibited
 execution=prohibited
 first_lane=polymarket_standard_binary_complete_set_v0
-current_task=SURE-002A_LOCAL_INTERFACE_AND_ENGINE_BOOTSTRAP
-next_task=local deterministic interface and engine backlog; real upstream evaluation waits for pinned betting-win interface
+current_task=SURE-002B_PRIVATE_PAPER_MODE_INTAKE
+next_task=wait_for_federico_pinned_betting_win_contract_export_interface_before_real_upstream_evaluation
 ```
 
 Current state:
@@ -59,3 +59,32 @@ Required autonomous cycle artifacts are audit evidence. Missing, placeholder, or
 The repo-local SURE-001 hardening backlog and the safe SURE-002A local implementation backlog are now exhausted. The repo has local-only deterministic interface contracts, fixture readers, scenario math, stake-vector math, completion/residual simulation, settlement replay consumption, private paper reporting, and an offline fixture-to-artifact report path.
 
 Real upstream evaluation remains blocked pending Federico's pinned `betting-win` contract/export interface. Autonomous cycles should now write `AUTONOMOUS_GOAL_COMPLETE=yes` unless a repo-local validation/tooling defect reopens safe local work.
+
+
+## Local safety bugfix hardening
+
+The local fixture pipeline now blocks symlink/realpath export escapes, unsupported runtime query resources, unresolved or mixed quote currencies, missing settlement replay evidence, and stale quote evidence before private opportunity reports are emitted. Partial-fill status now points to the implemented local completion/residual modules while real upstream acceptance remains blocked pending Federico's pinned `betting-win` interface.
+
+
+## Private paper-mode intake backlog
+
+Federico asked for the maximum safe implementation possible up to private paper mode. The repo-local private paper-mode backlog is now complete:
+
+```text
+current_task=SURE-002B_PRIVATE_PAPER_MODE_INTAKE
+mode=private_paper_only
+provider_connections=prohibited
+execution=prohibited
+input=repo-local JSON bundles only
+output=artifacts/private-paper-mode/*.report.json
+```
+
+`docs/017_private_paper_mode_implementation_backlog.md` is now a completed implementation ledger after SURE-001 and SURE-002A completion. `docs/018_private_paper_mode_runbook.md` captures the freeze gate: `npm run validate` passes, local fixture smoke passes, and real upstream evaluation still requires Federico's repo-local pinned `betting-win` bundle.
+
+Use:
+
+```bash
+bash commands/run-sure-paper-mode-autonomous.sh
+```
+
+only if a concrete repo-local validation/tooling defect reopens safe work. Use `commands/run-pinned-interface-smoke.sh` only when Federico provides a repo-local pinned `betting-win` export bundle.

@@ -1,9 +1,14 @@
 {
   "schema": "betting-win.export-bundle.v1",
+  "fixtureKind": "private_paper_mode_smoke",
+  "fixtureScenario": "blocked-mixed-currency",
+  "mode": "paper_only",
+  "providerConnection": "prohibited",
+  "notes": "Local fake fixture for private paper-mode smoke only. Not upstream evidence.",
   "reference": {
     "source": "betting-win",
     "contractVersion": "0.0.0-test",
-    "manifestHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+    "manifestHash": "3333333333333333333333333333333333333333333333333333333333333333"
   },
   "bundleKind": "resource_export",
   "exportedAt": "2026-07-01T00:00:03.000Z",
@@ -48,7 +53,7 @@
       "minStakeMinor": "100",
       "feeMinor": "5",
       "costMinor": "0",
-      "currency": "USDC"
+      "currency": "USD"
     },
     {
       "recordType": "settlement",

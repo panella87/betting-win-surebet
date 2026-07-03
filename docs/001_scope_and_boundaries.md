@@ -25,8 +25,16 @@ it does not become the shared provider platform.
 ## Current status
 
 ```text
-SURE-001 = starter skeleton
-solver = blocked
+SURE-001 = complete
+SURE-002A local fixture engine = complete
+solver = local_fixture_only_implemented
+completion_simulation = local_fixture_only_implemented
+residual_exposure = local_fixture_only_implemented
+settlement_replay_consumption = local_fixture_only_implemented
+private_reporting = local_fixture_only_implemented
 provider connection = prohibited
 real-money path = prohibited
+real upstream evaluation = blocked pending Federico's pinned betting-win interface
 ```
+
+The SURE-002A local implementation is deterministic and fixture-only. It is not evidence that any real provider market is exploitable, executable, or ready for live use.

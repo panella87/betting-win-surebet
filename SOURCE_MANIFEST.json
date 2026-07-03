@@ -1,7 +1,7 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-07-02T01:58:51Z",
-  "overlay": "SURE-001 autonomous continuation backlog overlay",
+  "generated": "2026-07-02T13:58:37Z",
+  "overlay": "SURE-002A local safety bugfix hardening",
   "files": [
     {
       "path": ".env.example",
@@ -25,23 +25,23 @@
     },
     {
       "path": "AGENTS.md",
-      "sha256": "3d5c7c894ab7cd1c44d43b3dce9375fce918cf21199a708a277ae556b0656e7c",
-      "size": 3414
+      "sha256": "86ba3eaa7bee3a17c8e422ff95595fa9be2a510e16133b954f6d3954cb9c7d7c",
+      "size": 4911
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "d0ee2c86f54f847bd177a8f15aa7e541f4ed4244d8c04795a42436dc3bcc5995",
-      "size": 7080
+      "sha256": "08ea3f6528589802dd88f56fbaa1e39ee899ed9acf7d2c1a8ba0d8df13eb5e3e",
+      "size": 9323
     },
     {
       "path": "PROJECT_STATUS.md",
-      "sha256": "9a2f6bfbfef470dae240e297fb8a4c29ce9bea521578323b74a581aab9ba286a",
-      "size": 3155
+      "sha256": "ce40a5db0af0473533fc0fa694de1b9ea502ed9db31a0169a9a26ee2eafd57eb",
+      "size": 4617
     },
     {
       "path": "README.md",
-      "sha256": "49dc02ea934de42c4b45bab49cef97f6d267fe73ab5bc0427d9467947de5e0aa",
-      "size": 2345
+      "sha256": "44ad3729557114b4d7bad1eb2861d6f59c035aa3fbf2c582143bc09f29c519c7",
+      "size": 3860
     },
     {
       "path": "STARTER_PACK.md",
@@ -55,8 +55,13 @@
     },
     {
       "path": "cli.js",
-      "sha256": "306a52939ac574deb01b656cc9a780feceb8034a20fd75edfdd7d26d970d351e",
-      "size": 1423
+      "sha256": "5682e5b17dba65a9b2cff9cf50583bed08236ae491ea8eb4e88f02bee598aeaa",
+      "size": 2511
+    },
+    {
+      "path": "commands/run-pinned-interface-smoke.sh",
+      "sha256": "5e67a42007f41815c68d1cf43136f7ee94dd04325b3566c33189710928471e28",
+      "size": 1139
     },
     {
       "path": "commands/run-sure-001-autonomous.sh",
@@ -65,6 +70,11 @@
     },
     {
       "path": "commands/run-sure-local-engine-autonomous.sh",
+      "sha256": "56be1d740de5d561eec4b99251a36ea6d5b0216989163eee9f6697318b051898",
+      "size": 362
+    },
+    {
+      "path": "commands/run-sure-paper-mode-autonomous.sh",
       "sha256": "56be1d740de5d561eec4b99251a36ea6d5b0216989163eee9f6697318b051898",
       "size": 362
     },
@@ -85,8 +95,8 @@
     },
     {
       "path": "docs/001_scope_and_boundaries.md",
-      "sha256": "4b8237d7ec96422b08d2201171a6ad636777997ac18645ad4256a975d0c466f5",
-      "size": 941
+      "sha256": "5624c9f83d9cfd0055744a415e5c1cc01822d26e41aa9e9a1f20d4b088b0e234",
+      "size": 1472
     },
     {
       "path": "docs/002_dependency_contract_with_betting_win.md",
@@ -135,13 +145,13 @@
     },
     {
       "path": "docs/011_validation_matrix.md",
-      "sha256": "88001a3712444a734e56330c72984299ae149cb1b233a7e4508033f6ea24cf75",
-      "size": 5070
+      "sha256": "cff978cedc09e059ef6af06345e2f1331281604eecdd3b5ce6aa2b0638ab69e3",
+      "size": 6370
     },
     {
       "path": "docs/012_runbook.md",
-      "sha256": "80e64f5e912906a5eacdbbe8824b12933805f2ef201353eddbf19413ee25f238",
-      "size": 467
+      "sha256": "3a18ffc46205173ad08975af7eca7cd7eed180af7bbc827f5fbfc4acef2d073b",
+      "size": 1192
     },
     {
       "path": "docs/013_autonomous_controller_status_contract.md",
@@ -150,8 +160,8 @@
     },
     {
       "path": "docs/014_sure_001_remaining_hardening_backlog.md",
-      "sha256": "142d0d55476653e302417d52f5bddbc1879138f3b6e9d8383b921fbd51fbec28",
-      "size": 3176
+      "sha256": "fd5a1ccd2bf84a7e608429fae80a6395cbea125759990b49763e8cbd5246abf1",
+      "size": 3288
     },
     {
       "path": "docs/015_local_engine_implementation_backlog.md",
@@ -159,9 +169,24 @@
       "size": 6544
     },
     {
+      "path": "docs/016_pinned_betting_win_interface_readiness.md",
+      "sha256": "16b8fc5ad4ebfbc95e8e652392835c837c391962dbc92d95c0c9ec585d3ddbbe",
+      "size": 3089
+    },
+    {
+      "path": "docs/017_private_paper_mode_implementation_backlog.md",
+      "sha256": "54bdbd69385d479d5b0b4e0cb21ea535a509c937f75c38a4db8c6bc5bbbb0bd1",
+      "size": 5621
+    },
+    {
+      "path": "docs/018_private_paper_mode_runbook.md",
+      "sha256": "0ff3ba3e04d6c05b63a1f6d522f87a029dfc983d04d2c47c2d4bb61ce45e83d7",
+      "size": 3534
+    },
+    {
       "path": "docs/MASTER_PLAN.md",
-      "sha256": "7c8c14ec6d509edd797930d49f69d31a881f5eeae113309470aded11f329499f",
-      "size": 5720
+      "sha256": "807eae93ff16c2cd7275c8f7edaea6c1f0591f9f4ed58a44976f512564a8dd4c",
+      "size": 6893
     },
     {
       "path": "docs/autonomous_loop_contract.md",
@@ -180,8 +205,8 @@
     },
     {
       "path": "docs/repo_status_current.md",
-      "sha256": "945690068a4e22d1d882ed2f8477ff894fdddb27a4707ff27ff242bda29ed4a3",
-      "size": 3459
+      "sha256": "b2bbcbe49d1ae6bf32a98b17a5bb5cb3c35044529213bb7c0d62363b6bb9623f",
+      "size": 4940
     },
     {
       "path": "open_log.sh",
@@ -195,8 +220,8 @@
     },
     {
       "path": "package.json",
-      "sha256": "ae2219a6399df22855f1e2549a4aef274c8339bc728c37c0bc97c60449281e98",
-      "size": 2326
+      "sha256": "294630fe3b309b302dc1e39eac624ed8f7c65dc2121fda5ae2839e74ce5ea2fb",
+      "size": 2419
     },
     {
       "path": "pull_artifacts_and_zip_codebase.sh",
@@ -205,8 +230,8 @@
     },
     {
       "path": "run-autonomous-implementation.sh",
-      "sha256": "7612ff54e9f7fdbdc26405fee8adfe22c3252af60748f0ce9ffd7d36c7903756",
-      "size": 19933
+      "sha256": "aa8142d236dce3ed6b121afb994f4dd32ea2cce4a73ba895caed0c983e9b2b2f",
+      "size": 20734
     },
     {
       "path": "scripts/create-source-handoff-archive.sh",
@@ -235,8 +260,8 @@
     },
     {
       "path": "scripts/validate_autonomous_continuation_contract.py",
-      "sha256": "80fc399d88796fcc43adf9fb6de826557f850f45f2f10e6856a8ce8b5ec4d389",
-      "size": 4113
+      "sha256": "1f98020209079e1bb2edd82eed99336e46ae55b47b28d0bbc560066a6dc52c56",
+      "size": 4929
     },
     {
       "path": "scripts/validate_autonomous_controller_contract.py",
@@ -260,13 +285,13 @@
     },
     {
       "path": "scripts/validate_local_engine_backlog_contract.py",
-      "sha256": "900c737ea0be88e5596c6a5686ee22f1f3cc6e1d4a937d02ce316cbd2d3ffdbc",
-      "size": 3096
+      "sha256": "3d8f3c979e3b507fe520c62156cfb3b464f3d18035597695830c9ba02c2ff84e",
+      "size": 4722
     },
     {
       "path": "scripts/validate_master_plan.py",
-      "sha256": "9b3fc2f6da7b7222b389f7ef36b51964987639f540855b0966cbb2567a3cd4c6",
-      "size": 2064
+      "sha256": "57e38255d55006014a3bafa0533aaa253da8914fff9d11d7fb8dc65bd358529c",
+      "size": 3732
     },
     {
       "path": "scripts/validate_no_execution_paths.py",
@@ -284,9 +309,14 @@
       "size": 1996
     },
     {
+      "path": "scripts/validate_private_paper_mode_backlog_contract.py",
+      "sha256": "87404b725374df6e48fee5247748f007edd03a2eb689851b413e8d2d70943104",
+      "size": 5825
+    },
+    {
       "path": "scripts/validate_repo.py",
-      "sha256": "599d9d9773c461f113ba7ba0ade659e36405f7c6f779611912a6c4efbe300b32",
-      "size": 4438
+      "sha256": "1f3e0a61eeecd65f228fc94abef274623516ec8f4ac1f81029eadabf43b34e50",
+      "size": 5159
     },
     {
       "path": "scripts/validate_shell_local_assignments.py",
@@ -305,18 +335,28 @@
     },
     {
       "path": "src/adapters/betting-win-local-bundle-reader.ts",
-      "sha256": "024eed54f62dba92dfe1e9d9fe3a81c75734a46454beccde43cc3791e69ccf1d",
-      "size": 2710
+      "sha256": "c238613d1716137d7efa9c79100459fc66a5b90ea16024bc6b26ffcf87e1f36c",
+      "size": 3456
+    },
+    {
+      "path": "src/adapters/betting-win-pinned-bundle-intake.ts",
+      "sha256": "0838676fc8e59d7f9835813d4dcd8545f4c69fd4385dffceac643a78fdb80dc8",
+      "size": 3844
     },
     {
       "path": "src/adapters/betting-win-query-client.ts",
-      "sha256": "4aa2eaa3d28216d210e227be3be6737867774cad22ee915aa8b96689e05fdfb9",
-      "size": 690
+      "sha256": "a7de7e654ed9eb37023ba8a113f0b7fff8d377a262fca02801b638901ee187cd",
+      "size": 1301
+    },
+    {
+      "path": "src/cli/local-paper-batch-report.ts",
+      "sha256": "7c1e7eef7295810361ad01b06d6726d3885b3d9dd09bf5cae6ee7d8b4639c25e",
+      "size": 26380
     },
     {
       "path": "src/cli/local-paper-report.ts",
-      "sha256": "341412a59c1c1736da051bfe7dec833bd4844e39e371292a78528555cc061140",
-      "size": 15228
+      "sha256": "06a1b9a6c33b19cdfa521a22e08022bf1d777b67567780ff0e5eef9dbf11e1d0",
+      "size": 22318
     },
     {
       "path": "src/contracts/betting-win-contract-imports.ts",
@@ -370,13 +410,13 @@
     },
     {
       "path": "src/reporting/private-run-report.ts",
-      "sha256": "bd7f49b0a5ab3b0c2ddcb4edcc3e5e240c97ed85de1632640636d3156a5d3a54",
-      "size": 4889
+      "sha256": "5438d826b77f23b24addf837601ef8c7e562d801f90059f25dc7e9035ec8b0ea",
+      "size": 10929
     },
     {
       "path": "src/scenarios/complete-set.ts",
-      "sha256": "e7d0914b479875b331c49faef771223ee77ad6e4790095782ee30da89cae2eb5",
-      "size": 8588
+      "sha256": "ac267c3cc9051febf24110b359a597bf557189f6e1ee3f40a0718d7e18689846",
+      "size": 9242
     },
     {
       "path": "src/scenarios/scenario-cashflow.ts",
@@ -395,8 +435,8 @@
     },
     {
       "path": "src/simulation/partial-fill.ts",
-      "sha256": "c5ecc848b2c3b22e84ca0c4bbd1932edb92d2196ee2971376808cb048115f082",
-      "size": 330
+      "sha256": "84ea147e7d449e3ffdfcfcd662f29803dc5905f4d207b556ed04ab6b39071a93",
+      "size": 826
     },
     {
       "path": "src/simulation/residual-exposure.ts",
@@ -435,8 +475,8 @@
     },
     {
       "path": "tests/autonomous-continuation-contract.test.ts",
-      "sha256": "458ebbfaa759ea08d9ab3f078713a26ee6245eb2222fcbfabe1b3da3bf632dde",
-      "size": 1646
+      "sha256": "b3270b5ee27d037fd9bb1c43f87893095fce48b8a482bac82a5c2cc28d042a04",
+      "size": 1877
     },
     {
       "path": "tests/autonomous-controller-contract.test.ts",
@@ -445,8 +485,8 @@
     },
     {
       "path": "tests/betting-win-adapters.test.ts",
-      "sha256": "e3bd8b4c1426528999da74596599ef2b1a23da5a65a859f99a6033857315ee77",
-      "size": 9305
+      "sha256": "1563c84b9e97318505ff41a244925a201751784b3aae222fc9f90afa403596ac",
+      "size": 14082
     },
     {
       "path": "tests/betting-win-resource-records.test.ts",
@@ -455,13 +495,13 @@
     },
     {
       "path": "tests/blocker-report.test.ts",
-      "sha256": "55eff0441b19d4a80af801d4333b6d35904f25f9f901623c99c289ab2ac22d52",
-      "size": 4983
+      "sha256": "5c68332ddcec3b4f51dfc52dc75e87dbcb7d02bcc5f94163912014922f69e92a",
+      "size": 8471
     },
     {
       "path": "tests/complete-set.test.ts",
-      "sha256": "b1e83b8148564f91ebe1ba312578308f05849ac1098543ddec304069761e63fe",
-      "size": 6760
+      "sha256": "78c399607e06cc1e246d521382c909668af4b419d9f68df16ff87d47b6632c14",
+      "size": 8209
     },
     {
       "path": "tests/contract-boundary.test.ts",
@@ -490,7 +530,7 @@
     },
     {
       "path": "tests/fixtures/local-only-export-bundles/solver-ready-resource-export.json",
-      "sha256": "bb2e2f7c23854164685ff17bfd32d86ba2aa9743ec4e4d8c778c2427466731a9",
+      "sha256": "dc9c87538bef4f3bdea902d0a35351894f9a56d6dbf0764e2544efe22fc08cda",
       "size": 2132
     },
     {
@@ -514,6 +554,31 @@
       "size": 448
     },
     {
+      "path": "tests/fixtures/private-paper-mode-smoke/accepted-local-bundle.json",
+      "sha256": "623ccae2fd5ab78124445d1d3eaceddd829c161472bbfd0ab4e8297739941be4",
+      "size": 2369
+    },
+    {
+      "path": "tests/fixtures/private-paper-mode-smoke/blocked-missing-settlement-bundle.json",
+      "sha256": "8c0244387d55e451ab705a42962c6afb34696c837bd9418b7d3344ea1302805b",
+      "size": 1908
+    },
+    {
+      "path": "tests/fixtures/private-paper-mode-smoke/blocked-mixed-currency-bundle.json",
+      "sha256": "168a726c60d44e58756c8f973212cd35cb2e10fbdea5f718410c0a305b8e90d9",
+      "size": 2376
+    },
+    {
+      "path": "tests/fixtures/private-paper-mode-smoke/blocked-stale-quotes-bundle.json",
+      "sha256": "84258f8369c3364ed0b0543a5c91b4515b904fa466f0c57c17e25c54b87a55e7",
+      "size": 2375
+    },
+    {
+      "path": "tests/fixtures/private-paper-mode-smoke/multi-candidate-bundle.json",
+      "sha256": "2b947fd401a9530e97da532ddf9032b103dbeadd5c9fccb426252c5e4aa6b2e0",
+      "size": 4203
+    },
+    {
       "path": "tests/fixtures/settlement/.gitkeep",
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "size": 0
@@ -525,18 +590,23 @@
     },
     {
       "path": "tests/leg-completion.test.ts",
-      "sha256": "26fc2b037ad27a09cdff093e1e19e8babbac1505b4cc9b340b222a42c5881417",
-      "size": 3608
+      "sha256": "0eef63d7a260c693218acbd08c59df2de251915ca894ce14a18885f60ed7d2f4",
+      "size": 4219
     },
     {
       "path": "tests/local-engine-backlog-contract.test.ts",
-      "sha256": "ce0702fa1bcd4643ce2ec928952318847b65c031bb4e89b27ff83ad9bb08e6f8",
-      "size": 1887
+      "sha256": "ea76d0da942a58f01c307ffd71f7a0a3af5d4b8dc8b34428ecad35b715e3f78d",
+      "size": 2811
+    },
+    {
+      "path": "tests/local-paper-batch-report.test.ts",
+      "sha256": "f0c0b790ee56687f569fa66eaef420f2e6d9d764bc5e46e32b7033d544e82397",
+      "size": 11447
     },
     {
       "path": "tests/local-paper-report.test.ts",
-      "sha256": "e1133552c596e13727cb123943bb90278f5e3cb1ea9c7a228e609b426b0cd530",
-      "size": 5350
+      "sha256": "f9efe3cccea50ee5733b4471c06448ac86884d6c985e469da21003df16e9eda0",
+      "size": 15124
     },
     {
       "path": "tests/market-group-key.test.ts",
@@ -545,8 +615,18 @@
     },
     {
       "path": "tests/packaging-helpers.test.ts",
-      "sha256": "3793088062d97566c7bbc246571d28b22e7815c328cf8350c1090823b4aafaf3",
-      "size": 12170
+      "sha256": "713085cf484d517b9b706eec9852fd17ba4d73fba000b5953d4c95d29a387ab8",
+      "size": 12266
+    },
+    {
+      "path": "tests/private-paper-mode-backlog-contract.test.ts",
+      "sha256": "91999c516d4d7a176dad14cf106851ce755b69a9e89f42b5ea685fab06654133",
+      "size": 3175
+    },
+    {
+      "path": "tests/private-paper-report-artifact-contract.test.ts",
+      "sha256": "cf73b403dabac8e6e7d4a6d7fc00d911fb06b1a8dcf7dbc03d85939326822758",
+      "size": 2640
     },
     {
       "path": "tests/quote-capacity.test.ts",
@@ -610,8 +690,8 @@
     },
     {
       "path": "tools/required_executable_paths.js",
-      "sha256": "b9ada1d1695ce26a9d15779ba297b17a73dc9efb72dfe3c1f223bed5050385b3",
-      "size": 452
+      "sha256": "44ca5f5156a0475d1524e5dd59035c9cacaa044195c14d3307c6ec9c4e170d2c",
+      "size": 544
     },
     {
       "path": "tsconfig.json",

@@ -166,3 +166,40 @@ function loadCompleteResourceRecords(): readonly BettingWinResourceRecord[] {
     },
   ];
 }
+
+
+test('standard binary complete-set assembly rejects mixed quote currencies', () => {
+  const records = loadCompleteResourceRecords().map((record) =>
+    record.recordType === 'quotes' && record.outcome === 'no'
+      ? { ...record, evidence: { ...record.evidence, currency: 'USD' as const } }
+      : record,
+  );
+  const result = assembleStandardBinaryCompleteSet(records);
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'COMPLETE_SET_QUOTE_CURRENCY_MISMATCH',
+      message: 'Standard-binary complete-set assembly requires both quote legs to use the same currency.',
+      evidenceRequired: 'Same-currency local quote records for the YES and NO legs.',
+    },
+  ]);
+});
+
+test('standard binary complete-set assembly rejects unknown quote currencies', () => {
+  const records = loadCompleteResourceRecords().map((record) =>
+    record.recordType === 'quotes' && record.outcome === 'yes'
+      ? { ...record, evidence: { ...record.evidence, currency: 'UNKNOWN' as const } }
+      : record,
+  );
+  const result = assembleStandardBinaryCompleteSet(records);
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'COMPLETE_SET_QUOTE_CURRENCY_UNKNOWN',
+      message: 'Standard-binary complete-set assembly requires resolved quote currencies before local paper math.',
+      evidenceRequired: 'Resolved local quote currency for every complete-set leg.',
+    },
+  ]);
+});

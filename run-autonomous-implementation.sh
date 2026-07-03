@@ -149,7 +149,7 @@ Read first:
 $context_file
 
 Objective:
-Implement exactly one bounded safe local implementation slice per cycle from the current repository truth. Continue across cycles while safe documented backlog remains in docs/014_sure_001_remaining_hardening_backlog.md or docs/015_local_engine_implementation_backlog.md.
+Implement exactly one bounded safe private paper-mode slice per cycle from the current repository truth. Continue across cycles while safe documented backlog remains in docs/014_sure_001_remaining_hardening_backlog.md, docs/015_local_engine_implementation_backlog.md, or docs/017_private_paper_mode_implementation_backlog.md.
 
 Source-of-truth order:
 1. current code
@@ -168,6 +168,7 @@ Hard boundaries:
 - No generated betting-win contract vendoring.
 - No provider-backed or live solver, stake-vector, leg-completion, residual-exposure, or settlement-replay claims.
 - Local-only, fixture-driven deterministic engine implementation is now allowed under docs/015_local_engine_implementation_backlog.md, but it must remain blocked from real upstream readiness until Federico provides the pinned betting-win interface.
+- Private paper-mode intake and reporting are allowed under docs/017_private_paper_mode_implementation_backlog.md only for repo-local JSON bundles and private artifacts under artifacts/; remote URLs, provider calls, public reports, profitability claims, and execution readiness remain prohibited.
 - Do not edit .env or print secrets.
 - Do not commit, push, pull, reset, clean, stash, or rewrite branches.
 - Do not weaken validators.
@@ -176,9 +177,10 @@ Task selection:
 1. If local validation is broken, repair the smallest confirmed repo-local validation/tooling defect.
 2. Otherwise inspect docs/014_sure_001_remaining_hardening_backlog.md and implement the first safe unchecked SURE-001 hardening item that is still relevant to current code.
 3. If the SURE-001 backlog is exhausted, inspect docs/015_local_engine_implementation_backlog.md and implement the first safe unchecked local implementation item that is still relevant to current code.
-4. If every documented SURE-001 and local-engine backlog item is complete or no longer relevant, write AUTONOMOUS_GOAL_COMPLETE=yes and state that real upstream evaluation remains blocked pending Federico's pinned betting-win contract/export interface.
-5. If a repo-local defect prevents safe progress, write BLOCKED=yes with exact evidence.
-6. Do not stop with AUTONOMOUS_GOAL_COMPLETE=yes after one completed slice when either backlog document still contains safe unchecked work.
+4. If the SURE-001 and SURE-002A local-engine backlogs are exhausted, inspect docs/017_private_paper_mode_implementation_backlog.md and implement the first safe unchecked private paper-mode intake/reporting item that is still relevant to current code.
+5. If every documented SURE-001, local-engine, and private paper-mode backlog item is complete or no longer relevant, write AUTONOMOUS_GOAL_COMPLETE=yes and state that real upstream evaluation remains blocked pending Federico's pinned betting-win contract/export interface.
+6. If a repo-local defect prevents safe progress, write BLOCKED=yes with exact evidence.
+7. Do not stop with AUTONOMOUS_GOAL_COMPLETE=yes after one completed slice when any retained backlog document still contains safe unchecked work.
 
 Required commands before finishing when relevant:
 - npm run validate
@@ -214,7 +216,8 @@ RUNTIME_EVIDENCE_REQUIRED=no
 Continuation contract:
 - Use CONTINUE_REQUIRED=yes when docs/014_sure_001_remaining_hardening_backlog.md still has a safe unchecked SURE-001 item after the current slice.
 - Use CONTINUE_REQUIRED=yes when docs/015_local_engine_implementation_backlog.md still has a safe unchecked local implementation item after the current slice.
-- Use AUTONOMOUS_GOAL_COMPLETE=yes only when both backlogs are exhausted or the only remaining work requires Federico's real pinned betting-win interface.
+- Use CONTINUE_REQUIRED=yes when docs/017_private_paper_mode_implementation_backlog.md still has a safe unchecked private paper-mode item after the current slice.
+- Use AUTONOMOUS_GOAL_COMPLETE=yes only when all retained backlogs are exhausted or the only remaining work requires Federico's real pinned betting-win interface.
 - Use BLOCKED=yes only for a concrete unsafe or repo-local blocker, not merely because one bounded slice was completed.
 EOF_PROMPT
 }

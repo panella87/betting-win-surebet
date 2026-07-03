@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-07-02 — SURE-002A local safety bugfix hardening
+
+- Hardened the repo-local export bundle reader against symlink and realpath escapes while preserving the no-provider/no-network boundary.
+- Added runtime validation for read-only query resource names so JavaScript callers cannot bypass the TypeScript union.
+- Enforced resolved same-currency quote legs before complete-set paper math; `UNKNOWN` and mixed `USD`/`USDC` quote groups now block.
+- Required accepted local settlement replay evidence before private opportunity reports can be emitted from local fixture bundles.
+- Wired quote freshness into local paper reports using bundle `exportedAt` and a deterministic local freshness window.
+- Replaced the stale partial-fill blocked stub with a local status contract pointing to the implemented completion/residual modules.
+- Added regression tests for symlink rejection, resource validation, quote currency blocking, settlement-required reporting, stale quote blocking, and partial-fill status.
+
+## 2026-07-02 — SURE-002A local backlog completion handoff
+
+- Synced README, AGENTS, scope, runbook, master-plan, and current-status docs after the 12-cycle SURE-002A local engine run exhausted the safe local backlog.
+- Added `docs/016_pinned_betting_win_interface_readiness.md` as the next required handoff checklist before any real upstream evaluation.
+- Strengthened local-engine backlog validation so stale docs cannot continue telling agents to invent more local implementation work after both retained backlogs are exhausted.
+- Preserved hard boundaries: no provider connections, no execution paths, no direct `betting-win` DB access, no vendored contracts, no public signals, and no profitability claims.
+
 ## 2026-07-02 — SURE-002A local engine implementation backlog overlay
 
 - Documented why the latest autonomous run stopped: SURE-001 hardening backlog was exhausted and the controller correctly wrote `AUTONOMOUS_GOAL_COMPLETE=yes`.
@@ -71,3 +88,12 @@
 - Added adapted operational shell helpers from the Hyperliquid reference pattern: validation start wrapper, safe no-service stop wrapper, progress/log watchers, Git helper, artifact/codebase pull helper, source handoff archive helper, and autonomous implementation controller.
 - Added executable-bit restoration and validation.
 - Kept SURE-001 boundaries intact: no provider connections, no execution paths, no direct `betting-win` database access, no vendored generated contracts, and no solver implementation.
+
+
+## SURE-002B private paper-mode intake overlay
+
+- Added the SURE-002B private paper-mode backlog and runbook for safe repo-local pinned-interface intake and artifact/report hardening.
+- Added `commands/run-sure-paper-mode-autonomous.sh` and `commands/run-pinned-interface-smoke.sh`.
+- Hardened local report output containment against realpath/symlink escapes.
+- Added per-candidate settlement summaries for multi-candidate private paper reports.
+- Added validator and tests for the private paper-mode backlog contract.

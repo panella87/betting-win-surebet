@@ -14,9 +14,10 @@ test('autonomous prompt continues while safe SURE-001 backlog remains', () => {
 
   assert.doesNotMatch(script, /Stop after one slice/);
   assert.match(script, /docs\/014_sure_001_remaining_hardening_backlog\.md/);
-  assert.match(script, /Continue across cycles while safe documented backlog remains in docs\/014_sure_001_remaining_hardening_backlog\.md or docs\/015_local_engine_implementation_backlog\.md/);
+  assert.match(script, /Continue across cycles while safe documented backlog remains in docs\/014_sure_001_remaining_hardening_backlog\.md, docs\/015_local_engine_implementation_backlog\.md, or docs\/017_private_paper_mode_implementation_backlog\.md/);
   assert.match(script, /Use CONTINUE_REQUIRED=yes when docs\/014_sure_001_remaining_hardening_backlog\.md still has a safe unchecked SURE-001 item/);
-  assert.match(script, /Use AUTONOMOUS_GOAL_COMPLETE=yes only when both backlogs are exhausted/);
+  assert.match(script, /Use CONTINUE_REQUIRED=yes when docs\/017_private_paper_mode_implementation_backlog\.md still has a safe unchecked private paper-mode item/);
+  assert.match(script, /Use AUTONOMOUS_GOAL_COMPLETE=yes only when all retained backlogs are exhausted/);
   assert.match(script, /Do not stop with AUTONOMOUS_GOAL_COMPLETE=yes after one completed slice/);
 });
 

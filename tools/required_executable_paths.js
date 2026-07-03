@@ -13,4 +13,6 @@ export const REQUIRED_EXECUTABLE_PATHS = Object.freeze([
   'scripts/load-node-runtime.sh',
   'commands/run-sure-001-autonomous.sh',
   'commands/run-sure-local-engine-autonomous.sh',
+  'commands/run-sure-paper-mode-autonomous.sh',
+  'commands/run-pinned-interface-smoke.sh',
 ]);

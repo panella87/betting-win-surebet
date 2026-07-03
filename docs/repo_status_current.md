@@ -2,8 +2,8 @@
 
 ```text
 repo=betting-win-surebet
-current_task=SURE-002A_LOCAL_INTERFACE_AND_ENGINE_BOOTSTRAP
-current_task_status=complete_local_backlog_blocked_on_pinned_interface
+current_task=SURE-002B_PRIVATE_PAPER_MODE_INTAKE
+current_task_status=complete_repo_local_private_paper_mode_backlog_blocked_on_pinned_interface
 next_allowed_task=wait for Federico's pinned betting-win contract/export interface before real upstream evaluation
 provider_connections=prohibited
 execution=prohibited
@@ -20,11 +20,12 @@ runtime_service=none
 - [x] Harden autonomous controller status parsing so malformed cycle status fails closed.
 - [x] Wait for an explicit user request before moving beyond SURE-001.
 - [x] Implement the maximum safe local engine backlog in `docs/015_local_engine_implementation_backlog.md`.
-- [ ] Wait for Federico to provide the pinned `betting-win` contract/export interface before real upstream evaluation.
+- [x] Implement the maximum safe private paper-mode backlog in `docs/017_private_paper_mode_implementation_backlog.md`.
+- [ ] Wait for Federico to provide the pinned `betting-win` contract/export interface before real upstream evaluation. See `docs/016_pinned_betting_win_interface_readiness.md`.
 
 ## Current safe work
 
-SURE-001 hardening is complete. The documented SURE-002A local implementation backlog is also complete: contracts, parsers, local fixture readers, deterministic paper math, state machines, private reports, and CLI/reporting over local fixtures are implemented. Real upstream evaluation remains blocked.
+SURE-001 hardening is complete. The documented SURE-002A local implementation backlog is also complete: contracts, parsers, local fixture readers, deterministic paper math, state machines, private reports, and CLI/reporting over local fixtures are implemented. The documented SURE-002B private paper-mode backlog is also complete: pinned-intake validation, private artifact contracts, batch summaries, smoke fixtures, and the operator freeze gate are implemented. Real upstream evaluation remains blocked.
 
 ## Blocked work
 
@@ -58,4 +59,19 @@ Required autonomous cycle artifacts are audit evidence. Missing, placeholder, or
 
 ## Continuation status
 
-The repo-local SURE-001 hardening backlog and the safe SURE-002A local implementation backlog are exhausted. Autonomous cycles should now write `AUTONOMOUS_GOAL_COMPLETE=yes` unless a repo-local validation/tooling defect reopens safe work. The remaining blocker is Federico's pinned `betting-win` contract/export interface for real upstream evaluation.
+The repo-local SURE-001 hardening backlog, the safe SURE-002A local implementation backlog, and the safe SURE-002B private paper-mode backlog are exhausted. Autonomous cycles should now write `AUTONOMOUS_GOAL_COMPLETE=yes` unless a repo-local validation/tooling defect reopens safe work. The remaining blocker is Federico's pinned `betting-win` contract/export interface for real upstream evaluation.
+
+
+## Private paper-mode intake backlog
+
+```text
+current_task=SURE-002B_PRIVATE_PAPER_MODE_INTAKE
+current_task_status=complete_repo_local_private_paper_mode_backlog_blocked_on_pinned_interface
+provider_connections=prohibited
+execution=prohibited
+real_upstream_evaluation=blocked_until_federico_pinned_betting_win_interface
+```
+
+`docs/017_private_paper_mode_implementation_backlog.md` is now a completed safe backlog. `docs/018_private_paper_mode_runbook.md` is the operator runbook and freeze gate. No unchecked repo-local item remains in `docs/017_private_paper_mode_implementation_backlog.md`.
+
+Private paper-mode work may create repo-local validators, commands, fake fixtures, artifact contracts, and batch summaries. It may not connect to providers, read `betting-win` databases, vendor generated contracts, execute orders, publish reports, or make profitability/live-readiness claims. The freeze gate remains: `npm run validate` passes, local fixture smoke passes, and real upstream evaluation still requires Federico's pinned bundle.

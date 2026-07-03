@@ -1,5 +1,10 @@
 {
   "schema": "betting-win.export-bundle.v1",
+  "fixtureKind": "private_paper_mode_smoke",
+  "fixtureScenario": "accepted-local",
+  "mode": "paper_only",
+  "providerConnection": "prohibited",
+  "notes": "Local fake fixture for private paper-mode smoke only. Not upstream evidence.",
   "reference": {
     "source": "betting-win",
     "contractVersion": "0.0.0-test",
