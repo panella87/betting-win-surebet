@@ -1,0 +1,127 @@
+{
+  "schema": "betting-win-surebet-doc-boundary-overlay-v1",
+  "createdAt": "2026-07-03",
+  "sourceZip": "betting-win-surebet9(3).zip",
+  "repo": "betting-win-surebet",
+  "purpose": "Rebaseline documentation to accepted three-repo surebet strategy boundary while preserving current private paper-only gate.",
+  "deleteOrMoveRequired": false,
+  "files": [
+    {
+      "path": "DOCUMENTATION_CHECK_REPORT.md"
+    },
+    {
+      "path": "OVERLAY_MANIFEST.json"
+    },
+    {
+      "path": "AGENTS.md"
+    },
+    {
+      "path": "CHANGELOG.md"
+    },
+    {
+      "path": "PROJECT_STATUS.md"
+    },
+    {
+      "path": "README.md"
+    },
+    {
+      "path": "STARTER_PACK.md"
+    },
+    {
+      "path": "SOURCE_MANIFEST.json"
+    },
+    {
+      "path": "package.json"
+    },
+    {
+      "path": "package-lock.json"
+    },
+    {
+      "path": "docs/001_scope_and_boundaries.md"
+    },
+    {
+      "path": "docs/002_dependency_contract_with_betting_win.md"
+    },
+    {
+      "path": "docs/003_surebet_family_decision.md"
+    },
+    {
+      "path": "docs/004_market_identity_and_rule_equivalence.md"
+    },
+    {
+      "path": "docs/005_terminal_scenario_cashflow_model.md"
+    },
+    {
+      "path": "docs/006_quote_depth_capacity_requirements.md"
+    },
+    {
+      "path": "docs/010_paper_evaluation_and_kill_criteria.md"
+    },
+    {
+      "path": "docs/011_validation_matrix.md"
+    },
+    {
+      "path": "docs/012_runbook.md"
+    },
+    {
+      "path": "docs/016_pinned_betting_win_interface_readiness.md"
+    },
+    {
+      "path": "docs/018_private_paper_mode_runbook.md"
+    },
+    {
+      "path": "docs/019_three_repo_surebet_strategy_boundary.md"
+    },
+    {
+      "path": "docs/020_strategy_data_and_state_ownership.md"
+    },
+    {
+      "path": "docs/021_backtest_paper_live_mode_roadmap.md"
+    },
+    {
+      "path": "docs/022_separate_account_policy.md"
+    },
+    {
+      "path": "docs/023_legacy_betting_win_surebet_import_manifest.md"
+    },
+    {
+      "path": "docs/MASTER_PLAN.md"
+    },
+    {
+      "path": "docs/autonomous_loop_contract.md"
+    },
+    {
+      "path": "docs/operations/autonomous_72h_runbook.md"
+    },
+    {
+      "path": "docs/operations/service_run.md"
+    },
+    {
+      "path": "docs/repo_status_current.md"
+    },
+    {
+      "path": "decisions/ADR-0001-repo-boundary-and-no-provider-connections.md"
+    },
+    {
+      "path": "decisions/ADR-0003-paper-only-no-execution.md"
+    },
+    {
+      "path": "decisions/ADR-0004-three-repo-surebet-strategy-execution-boundary.md"
+    },
+    {
+      "path": "scripts/validate_repo.py"
+    },
+    {
+      "path": "scripts/validate_three_repo_surebet_boundary.py"
+    },
+    {
+      "path": "tests/three-repo-surebet-boundary.test.ts"
+    },
+    {
+      "path": "tests/validate-repo-contract.test.ts"
+    },
+    {
+      "path": "tests/validation-matrix-contract.test.ts"
+    }
+  ]
+}

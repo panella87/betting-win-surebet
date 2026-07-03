@@ -1,5 +1,7 @@
 # 003 — Surebet family decision
 
+This file is surebet-family authority for `betting-win-surebet`; predictive/value-betting strategy families belong in `betting-win-betting`.
+
 The first lane is:
 
 ```text

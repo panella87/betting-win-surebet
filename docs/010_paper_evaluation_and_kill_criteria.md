@@ -6,4 +6,4 @@ A candidate must be killed or blocked when any required evidence is missing, sta
 ambiguous, unverifiable, or outside the first lane.
 
 Reports must avoid public signal language, execution-readiness language, and profitability
-claims. They should state blockers and required upstream evidence.
+claims. Private paper mode and future surebet backtesting belong in this repo; live execution remains blocked until a separate explicit gate. They should state blockers and required upstream evidence.

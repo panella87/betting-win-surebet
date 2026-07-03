@@ -1,0 +1,11 @@
+risk_id,risk,severity,required_control,effect
+SR-01,market identity/rule mismatch,critical,deterministic event/market/rule-version matching; reject ambiguity,destroys guarantee
+SR-02,quote staleness and leg sequencing,critical,timestamp/freshness checks and paper-only fill simulation,destroys guarantee
+SR-03,insufficient executable depth,critical,"use full book/quote size, never best price alone",destroys guarantee
+SR-04,stake limits and one-leg rejection,critical,preflight size/limit evidence; simulate incomplete portfolios,destroys guarantee
+SR-05,commission/tax/fee miscalculation,critical,outcome-specific cash-flow engine,can reverse margin
+SR-06,void/retirement/postponement asymmetry,critical,versioned venue rule registry,destroys guarantee
+SR-07,rounding/minimum stake constraints,high,MILP/integer-constrained allocation and after-rounding verification,can destroy guarantee
+SR-08,account restriction / venue access,high,research only; never propose evasion or multi-accounting,limits scalability
+SR-09,oracle/resolution divergence on-chain,critical,resolution-source mapping and dispute-window controls,destroys guarantee
+SR-10,capital fragmentation and settlement lock,high,capital-time accounting and venue-balance constraints,reduces or reverses economic return

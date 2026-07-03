@@ -1,0 +1,9 @@
+risk_id,risk,observed_in,consequence,required_paper_model,decision
+EX-01,cross-venue atomicity does not exist,BOT-02 BOT-08,one leg fills while another rejects or reprices,"leg-order simulation, latency distribution, failure correlation, residual exposure and compensation cost",hard gate
+EX-02,"FOK is per order, not cross-order atomicity",BOT-05,first complete-set leg may fill while second FOK is killed,pair completion state and unhedged token inventory scenario,hard gate
+EX-03,requested quantity treated as filled quantity,BOT-05 BOT-08,paper ledger overstates hedge and PnL,accept only provider-reported final filled quantity/status/trade ids,reject shortcut
+EX-04,partial route returned as success,BOT-08,requested exposure silently underfilled,explicit shortfall; surebet opportunity invalid unless every required leg is fully coverable,reject shortcut
+EX-05,synthetic liquidity fallback,BOT-08,non-executable price/size becomes a routeable level,separate price-only and executable-depth evidence; missing depth is rejection,critical rejection
+EX-06,sequential execution without reservation,BOT-02 BOT-08,quote moves or capacity disappears after first leg,"preflight snapshot, conservative reservation model, quote-age budget, leg ordering and failure loss",hard gate
+EX-07,GTC copy at historical price,BOT-06,stale order rests and fills under changed information,not applicable; copy strategy rejected,reject
+EX-08,maker quote state lost or empty-on-error,BOT-01,bot interprets transport failure as empty market/order state,unknown/error distinct from empty; fail closed and reconcile from authoritative source,adopt fail-closed rule

@@ -2,6 +2,11 @@
 
 This runbook is for `betting-win-surebet` only. It never authorizes provider connections, direct `betting-win` database reads, live collectors, wallets, signers, orders, public reports, profitability claims, or execution readiness.
 
+```text
+paper_mode_owner=betting-win-surebet
+account_policy=separate_from_betting-win-betting
+```
+
 ## Current mode
 
 ```text

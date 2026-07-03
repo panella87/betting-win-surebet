@@ -1,0 +1,9 @@
+dimension,required_fields,false_positive_if_missing,fail_closed_rule
+provider_generation,"provider, api_generation, contract_generation, collateral_generation",V1/V2 or USDC.e/pUSD objects treated as fungible,reject if any generation is unknown or mismatched
+event_identity,"sport, competition, participants, participant roles, scheduled_start, provider event ids, game/series number, venue/neutral-site","reschedules, doubleheaders, same-day rematches or similarly named teams merged",require stable IDs or reviewed mapping; fuzzy match may only nominate candidates
+market_family,"moneyline/1x2/spread/total/prop, period, line, side, market type id","full-game, period, alternate line or prop exposures compared",exact canonical market contract required
+time_scope,"regulation, overtime, extra innings, shootout, abandoned-game treatment",two apparently opposite legs can both lose or both void,rule profiles must be scenario-equivalent
+participant_status,"listed pitcher, goalie, lineup, tennis retirement/walkover, substitution rules",settlement differs after player change or retirement,reject unsupported status-dependent equivalence
+settlement_source,"oracle/result source, finality, dispute window, correction policy",venues settle from different facts or at different finality points,record and compare result-source contracts
+outcome_coverage,terminal scenario id and per-leg payoff vector,nominal labels look exhaustive but leave draw/push/void/cancel scenarios uncovered,matrix rank/coverage check across all terminal scenarios
+currency_and_costs,"collateral, decimals, conversion haircut, gas, bridge/withdrawal cost, commission/fee function",gross odds imply profit while net cash flow is negative,cash flows in one accounting currency after conservative costs

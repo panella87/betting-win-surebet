@@ -1,0 +1,9 @@
+formula_id,topic,canonical_formula_or_rule,status,assumptions_and_notes
+MATH-01,N-outcome fixed-odds surebet,S = sum_i(1/o_i); surebet iff S < 1,confirmed,Only when outcomes are mutually exclusive/exhaustive and quoted odds are actually executable.
+MATH-02,Equal-return fixed-odds stakes,stake_i = B*(1/o_i)/S; gross return = B/S; ROI = (1-S)/S,confirmed,"Recompute after exact stake increments, taxes and fees."
+MATH-03,Bookmaker back + exchange lay equalisation,lay_stake L = B*O_back/(O_lay-c),corrected,Assumes exchange commission c is charged on positive lay winnings for this isolated market.
+MATH-04,Back-lay guaranteed profit,profit = B*(O_back*(1-c)/(O_lay-c) - 1),corrected,Positive iff O_back*(1-c) > O_lay-c. The reciprocal-sum test is not valid for a lay quote.
+MATH-05,Effective lay odds shortcut,Do not use 1 + (O_lay-1)*(1-c) as a universal effective lay price,rejected,Commission applies to net market winnings and cash-flow structure; aggregation across exchange positions changes treatment.
+MATH-06,Fee/tax handling,Evaluate outcome-specific after-fee cash flows; min_outcome(net_return_outcome) > total_committed_capital,required,"Generic percentage subtraction can be wrong for turnover taxes, commissions, gas, rebates or withdrawal fees."
+MATH-07,Stake rounding,Solve constrained allocation using exact venue increments; verify every outcome after rounding,required,Rounding can destroy the guarantee even when the continuous solution is positive.
+MATH-08,Partial fill,"Guarantee exists only for the filled vector, not requested stakes",required,Every leg must use executable size and fill state.

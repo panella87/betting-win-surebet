@@ -1,0 +1,7 @@
+reported_rank,market_type,structural_case,evidence_confidence,canonical_treatment
+1,Two-way moneyline,high structural suitability,low-medium direct surebet evidence,keep as first normalization target
+2,Bookmaker-exchange back/lay,highest direct academic support,medium,keep; use corrected commission cash flows
+3,Three-way match result,strongest historical football surebet evidence,medium,keep; exact regulation/overtime rule matching required
+4,Draw-no-bet,clean two-way structure,low direct evidence,hypothesis only
+5,Asian handicap whole/half line,potentially liquid,low direct evidence,exact line and push/quarter-line semantics required
+6,Prediction-market yes/no,conditional MECE,no direct sports surebet evidence,hold pending Polymarket resolution-source audit

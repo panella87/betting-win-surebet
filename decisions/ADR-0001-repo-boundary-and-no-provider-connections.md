@@ -1,5 +1,8 @@
 # ADR-0001 — Repo boundary and no provider connections
 
+Superseding note: ADR-0004 is now the accepted three-repo surebet strategy boundary. This ADR remains the current no-direct-provider safety gate.
+
+
 ## Status
 
 Accepted.

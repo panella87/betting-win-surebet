@@ -2,9 +2,21 @@
 
 ## Goal
 
-Build a private, deterministic, paper-only downstream surebet / complete-set research repo that consumes canonical identity, rules, quote/depth evidence, settlement evidence, and generic paper infrastructure from `betting-win`.
+Build the dedicated surebet / complete-set strategy repository that consumes canonical identity, rules, quote/depth evidence, settlement evidence, and generic paper infrastructure from `betting-win`. Current implementation is private paper-only; future live surebet execution decisions remain disabled until a separate explicit authorization.
 
-This repo must never become the provider/evidence platform and must never become an executor.
+```text
+repo_role=surebet_strategy_execution_repo
+strategy_family=surebet_complete_set_only
+provider_truth_owner=betting-win
+canonical_history_owner=betting-win
+predictive_strategy_owner=betting-win-betting
+backtesting_owner=betting-win-surebet
+paper_mode_owner=betting-win-surebet
+future_live_decision_owner=betting-win-surebet_after_explicit_gate
+account_policy=separate_from_betting-win-betting
+```
+
+This repo must never become the provider/evidence platform and must not duplicate canonical provider history. Under the current gate it must not become a live executor; future live surebet decision loops require a new ADR and explicit approval.
 
 ## Current stage
 
@@ -16,6 +28,9 @@ execution=prohibited
 solver_implementation=local_fixture_only_complete
 private_paper_mode=repo_local_complete
 pinned_betting_win_interface=missing
+backtesting_owner=betting-win-surebet
+paper_mode_owner=betting-win-surebet
+future_live_decision_owner=betting-win-surebet_after_explicit_gate
 ```
 
 ## First lane
@@ -49,6 +64,9 @@ Until then, this repo may implement deterministic local contracts, parsers, fixt
 
 
 ## Current local implementation authority
+
+The controlling three-repo boundary docs are `docs/019_three_repo_surebet_strategy_boundary.md`, `docs/020_strategy_data_and_state_ownership.md`, `docs/021_backtest_paper_live_mode_roadmap.md`, and `docs/022_separate_account_policy.md`. They do not reopen provider integration or live execution. They clarify that surebet-specific backtesting and private paper state belong here, while provider truth remains upstream in `betting-win`.
+
 
 `docs/015_local_engine_implementation_backlog.md` is the retained SURE-002A local implementation ledger after SURE-001. It authorized the maximum safe local implementation possible without a real upstream bundle: interface contracts, local bundle parsing, standard-binary grouping, terminal scenario cash flows, fixed-point stake-vector math, completion and residual exposure simulation, settlement replay consumption, private paper reporting, and an offline local fixture-to-artifact report path.
 
@@ -101,7 +119,7 @@ Replay accepted `betting-win` settlement/finality fixture data through surebet c
 
 ### SURE-007 — Private paper report
 
-Produce deterministic private reports for candidates, blockers, residual exposure, and paper outcomes. Reports must avoid public signal language, profitability claims, and execution readiness claims.
+Produce deterministic private reports for candidates, blockers, residual exposure, and paper outcomes. Reports must avoid public signal language, profitability claims, and execution readiness claims. Surebet-specific backtesting belongs in this repo once it consumes pinned `betting-win` history exports; canonical history remains upstream.
 
 ## Autonomous implementation rules
 
@@ -140,6 +158,6 @@ execution=prohibited
 accepted=false
 ```
 
-This phase still requires Federico's pinned `betting-win` export/interface before real upstream evaluation. It may not add provider connections, direct database reads, wallet/signer/order code, public signals, profitability claims, or execution readiness.
+This phase still requires Federico's pinned `betting-win` export/interface before real upstream evaluation. It may not add provider connections, direct database reads, wallet/signer/order code, public signals, profitability claims, or execution readiness. The live execution prohibition is the current safety gate; future surebet execution decisions require a separate ADR and new validators.
 
 Current retained state: the repo-local SURE-002B backlog is complete, the freeze gate is documented, and the first remaining non-local step still requires Federico's pinned `betting-win` bundle.

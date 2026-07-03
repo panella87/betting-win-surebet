@@ -1,0 +1,11 @@
+pattern_id,pattern,observed_in,value,required_change,decision
+ARCH-01,provider adapter interface,BOT-08,isolates provider payload semantics from canonical model,read-only pure adapters; raw payload hash and generation metadata mandatory,adopt
+ARCH-02,canonical event and outcome keys,BOT-08,enables cross-provider comparison,"include event identity proof, rule profile, result source, protocol/collateral generation and terminal-scenario coverage",adopt_with_stricter_contract
+ARCH-03,live cache plus REST reseed,BOT-08,handles gaps/reconnects and limits stale websocket state,sequence/watermark/freshness required; never synthesize depth from summary values,adopt
+ARCH-04,durable trade/position reconciliation,BOT-03 BOT-08,"separates intended, observed and settled state",paper intents and simulated fills only; deterministic idempotency keys,adopt
+ARCH-05,quote lifecycle and cancel/repost state machine,BOT-01,useful for understanding stale-quote and fill transitions,research simulation only; no order action,adopt_as_model
+ARCH-06,explicit demo/read-only mode,BOT-03 BOT-08,reduces accidental execution,"read-only must be structural capability separation, not a boolean around shared signer code",adopt
+ARCH-07,circuit breakers and drawdown/imbalance guards,BOT-03 BOT-05,defines measurable stop conditions,thresholds provisional and paper-calibrated; include data-quality and leg-failure stops,adopt_as_research_gate
+ARCH-08,smart order routing across depth,BOT-08,shows level aggregation and slippage calculation,require full requested size or explicit shortfall rejection; no fabricated levels; not equivalent to arbitrage,adopt_for_future_paper_simulation
+ARCH-09,same-venue complete-set split/merge/redeem lifecycle,BOT-05,separate arbitrage family with collateral invariant,"rebuild from current V2 official sources; model each leg, merge eligibility, fees and final filled quantities",retain_concept_only
+ARCH-10,activity polling and event deduplication,BOT-06,illustrates cursor/idempotency need,persistent cursor; mark success after durable outcome; no copied execution,adopt_problem_statement_only

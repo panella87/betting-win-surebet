@@ -1,0 +1,9 @@
+flag_id,issue,severity,evidence,canonical_treatment
+M01,query count mismatch,high,Report states 80; raw query audit has 86.,Use raw JSON count 86.
+M02,topical query count mismatch,high,Report states 53; raw audit has 63 topical searches.,Record 63 topical + 15 anchor + 8 citation expansions.
+M03,citation expansion target failure,critical,All eight cited-by expansions target irrelevant medical/general-finance works.,Do not treat citation expansion as evidence coverage; rerun only from verified arbitrage anchors if ever needed.
+M04,relevance overstatement,critical,287 papers passed a broad automated keyword filter; many are gambling-harm/marketing or tangential.,"Call them retained candidates, not manually reviewed relevant evidence."
+M05,duplicate versions,medium,9 normalized-title duplicate groups remain.,"Version-link working papers, preprints and final articles; do not double-count evidence."
+M06,citation counts are snapshot metadata,medium,Captured counts differ from publisher/current indexes and can change.,Preserve captured date and never use citation count as truth or primary quality score.
+M07,core bibliography contains conflation,high,C17 merges the Grant arbitrage paper label with the Buraimo/Peel/Simmons Fink Tank article.,"Correct title/authors and classify Fink Tank as value betting, not surebet."
+M08,manual review evidence absent,high,Raw file records no manual inclusion/exclusion decisions per work.,"Use the 17-row core catalogue as an editorial shortlist, not proof that all 287 works were manually screened."

@@ -19,6 +19,8 @@ test('validate_repo requires critical validator tests as repo assets', () => {
     'tests/validate-source-manifest.test.ts',
     'tests/packaging-helpers.test.ts',
     'tests/local-engine-backlog-contract.test.ts',
+    'tests/three-repo-surebet-boundary.test.ts',
+    'scripts/validate_three_repo_surebet_boundary.py',
   ]) {
     assert.match(validator, new RegExp(marker.replace('.', '\\.')));
   }

@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-07-03 — Three-repo surebet boundary documentation rebaseline
+
+- Re-anchored active docs so `betting-win-surebet` is the dedicated surebet/complete-set strategy repo while current live execution remains gated and disabled.
+- Added surebet boundary, strategy-state ownership, backtest/paper/live-mode roadmap, separate-account policy, legacy-import manifest, and ADR-0004.
+- Added `scripts/validate_three_repo_surebet_boundary.py` and `tests/three-repo-surebet-boundary.test.ts` so docs cannot drift back into provider-truth ownership, predictive/value-betting scope, shared accounts, or ungated live execution.
+- Preserved all SURE-002B private paper-mode gates: provider connections prohibited, execution prohibited, real upstream evaluation blocked until Federico provides a pinned `betting-win` bundle.
+
 ## 2026-07-02 — SURE-002A local safety bugfix hardening
 
 - Hardened the repo-local export bundle reader against symlink and realpath escapes while preserving the no-provider/no-network boundary.

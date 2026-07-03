@@ -1,0 +1,9 @@
+repository_id,bot_type,data_plane,state_model,execution_model,surebet_relevance,trust_tier,decision
+BOT-01,market_maker,SX REST + legacy Ably,in-memory positions and child monitor process,post/cancel/repost maker orders,not surebet; quote lifecycle reference,T2 pattern only,analyze_only
+BOT-02,cross_venue_arbitrage_prototype,Azuro subgraph/RPC + Overtime API/contracts,process-local sets/logs,multi-leg calls with Promise.allSettled,direct but mathematically and operationally incomplete,T3 concept only,reject_implementation
+BOT-03,perpetuals_trading_bot,exchange APIs + Supabase,database positions and reconciliation,demo/real exchange orders,none; risk/reconciliation patterns only,T2 generic patterns,analyze_only
+BOT-04,placeholder,none,none,none,none,T4 insufficient evidence,park
+BOT-05,same_venue_complete_set_arbitrage,Polymarket Gamma/CLOB/on-chain,in-memory traders/PnL,two independent FOK legs + merge/redeem,same-venue complete-set branch,T5 quarantine,never_install_or_run
+BOT-06,copy_trader,Polymarket Data API + CLOB,in-memory seen set,historic-price GTC/market copy,none,T5 quarantine,never_install_or_run
+BOT-07,provider_examples,SX REST + legacy Ably,none/demonstration,post/fill/cancel examples,provider semantics only,T3 historical lineage,do_not_execute
+BOT-08,aggregator_smart_order_router,SX REST/Centrifugo + Polymarket Gamma/CLOB/WS,Prisma + live caches,sequential platform allocations,"identity/quotes foundation, not a surebet engine",T1 architecture reference with rejected execution,reuse_patterns_only

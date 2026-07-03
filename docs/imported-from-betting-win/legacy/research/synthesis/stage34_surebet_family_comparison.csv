@@ -1,0 +1,6 @@
+family,assessment,decision,timing_class,next_mode
+Polymarket standard-binary complete set,"Leading candidate because one venue, collateral generation, identity and resolution path reduce equivalence risk. Non-atomic two-leg completion remains mandatory.",Conditional v0 candidate; not frozen.,required_before_surebet_v0,Manual source acquisition
+Cross-venue surebet,"No exact provider pair has passed identity, rules, depth, fees, clocks and completion evidence.",Park for v0.,optional_later_research,Park
+Back/lay,"Requires a specific exchange/book pair, liability/commission semantics and depth evidence not present.",Park for v0.,optional_later_research,Park
+Synthetic equivalence,Identity research only. Similar labels do not establish equivalent terminal payoffs.,Park for v0.,optional_later_research,Park
+"Smart routing, market making and copy trading",Different strategy families and not surebet.,Explicitly excluded from v0.,intentionally_out_of_scope_v0,Park

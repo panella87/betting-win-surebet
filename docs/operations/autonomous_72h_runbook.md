@@ -15,7 +15,7 @@ npm run validate
 cd ~/app_testing/betting-win-surebet && PYTHONDONTWRITEBYTECODE=1 bash run-autonomous-implementation.sh --duration 72h --cycle-timeout 2h --validation-timeout 20m
 ```
 
-Do not add a model flag unless Federico explicitly asks.
+Do not add a model flag unless Federico explicitly asks. Do not use autonomous runs to invent provider integrations, predictive/value-betting work, shared account coordination, or live execution. Surebet backtest/paper/live-gate changes must follow `docs/019_three_repo_surebet_strategy_boundary.md`.
 
 ## Observe progress
 

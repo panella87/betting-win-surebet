@@ -1,0 +1,10 @@
+repository_id,check,scope,result,limitations
+BOT-01,node --check,5 JavaScript files,"5 passed, 0 failed",syntax only; dependencies and execution not run
+BOT-02,node --check,29 JavaScript files,"29 passed, 0 failed",syntax only; placeholder/execution code not run
+BOT-03,python compileall,22 Python files,"22 passed, 0 failed",syntax/bytecode compile only; dependencies and execution not run
+BOT-04,file inspection,README/config only,no executable bot implementation,no technical runtime to validate
+BOT-05,node --check,13 JavaScript files,"13 passed, 0 failed",quarantined; dependencies not installed; syntax does not mitigate supply-chain/currentness risk
+BOT-06,static-only quarantine,TypeScript source and lockfile,not built or installed,private-key/dependency anomaly makes installation unsafe
+BOT-07,node --check,16 JavaScript files,"16 passed, 0 failed",syntax only; legacy realtime and execution not run
+BOT-08,npm test,bot Vitest suite with dependencies installed using ignore-scripts,166 tests passed; 17 files passed; 2 suites failed before collection because Prisma client was not generated,not a clean test pass; install scripts intentionally suppressed
+BOT-08,TypeScript typecheck,bot workspace,failed with PrismaClient missing plus implicit-any and concrete type errors including router {} to string,not implementation-ready

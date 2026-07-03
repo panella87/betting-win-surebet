@@ -1,0 +1,11 @@
+rejection_id,pattern,source,reason,replacement
+REJ-01,fuzzy event match as authorization,BOT-02,0.45 name score and 36-hour window can merge unrelated/rescheduled events,stable IDs or reviewed candidate mapping plus exact event contract
+REJ-02,generic odds multiplied by 1 minus commission,BOT-02,fees/commissions are venue/order/outcome-specific cash flows,scenario cash-flow function per leg
+REJ-03,best odds or summary liquidity as executable depth,BOT-01 BOT-08,price-only evidence cannot prove capacity or fillability,level-by-level book with timestamps and final accepted fill evidence
+REJ-04,synthetic fallback level,BOT-08,fabricates an executable quote after cache/book failure,reject opportunity as depth_unknown
+REJ-05,Promise.allSettled means arbitrage succeeded,BOT-02,one or more legs may fail; logging success hides residual exposure,group completion state and worst-case residual-loss calculation
+REJ-06,two FOK orders are pair-atomic,BOT-05,FOK applies independently to each order,paper leg-completion model; no execution authorization
+REJ-07,mark requested quantity filled,BOT-05 BOT-08,request acceptance does not prove exact final fill,provider-reported order/trade settlement and filled quantity
+REJ-08,silent defaults after infrastructure failure,BOT-01 BOT-03 BOT-08,unknown state becomes empty/default state,typed unavailable/error state and fail closed
+REJ-09,hardcoded network/domain/fee data,BOT-07 BOT-08,current metadata and fee schedules can change,runtime official metadata with versioned source hash
+REJ-10,copy-trading as strategy module,BOT-05 BOT-06,"stale price, inventory, idempotency and security failures; no academic edge case",park entirely

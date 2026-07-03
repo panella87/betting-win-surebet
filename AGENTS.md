@@ -2,9 +2,21 @@
 
 ## Repository purpose
 
-`betting-win-surebet` is a private, paper-only downstream strategy repository for surebet / complete-set / arbitrage-style research. It consumes versioned contracts, exports, read-only query outputs, and generic paper infrastructure from `betting-win`.
+`betting-win-surebet` is the dedicated surebet / complete-set strategy repository. Current implementation is private paper-only; future gated live surebet execution decisions may belong here only after an explicit authorization. It consumes versioned contracts, exports, read-only query outputs, and generic paper infrastructure from `betting-win`.
 
-It does not own provider truth.
+```text
+repo_role=surebet_strategy_execution_repo
+strategy_family=surebet_complete_set_only
+provider_truth_owner=betting-win
+canonical_history_owner=betting-win
+predictive_strategy_owner=betting-win-betting
+backtesting_owner=betting-win-surebet
+paper_mode_owner=betting-win-surebet
+future_live_decision_owner=betting-win-surebet_after_explicit_gate
+account_policy=separate_from_betting-win-betting
+```
+
+It does not own provider truth. betting-win-betting owns predictive/value-betting strategies, model features, labels, calibration, CLV, and directional reports.
 
 ## Source-of-truth order
 
@@ -17,9 +29,13 @@ Use truth in this order before planning or changing code:
 5. `docs/MASTER_PLAN.md`
 6. `docs/001_scope_and_boundaries.md`
 7. `docs/002_dependency_contract_with_betting_win.md`
-8. `docs/012_runbook.md`
-9. `docs/operations/autonomous_72h_runbook.md`
-10. README and ADRs
+8. `docs/019_three_repo_surebet_strategy_boundary.md`
+9. `docs/020_strategy_data_and_state_ownership.md`
+10. `docs/021_backtest_paper_live_mode_roadmap.md`
+11. `docs/022_separate_account_policy.md`
+12. `docs/012_runbook.md`
+13. `docs/operations/autonomous_72h_runbook.md`
+14. README and ADRs
 
 Current code beats stale docs. Do not generate new work from old backlog claims without re-checking current code and current status.
 
@@ -32,6 +48,10 @@ Do not connect directly to SX, Azuro, Polymarket, Limitless, or any accepted fut
 Do not write `betting-win` `core.*` migrations.
 
 Do not vendor generated `betting-win` contracts manually. Consume a pinned `betting-win` contract/export package or fixture bundle only after Federico provides it.
+
+## Separate account policy
+
+`betting-win-surebet` uses a separate account and separate bankroll from `betting-win-betting`. Do not design shared capital coordination in this repo. `betting-win` may provide provider truth but does not allocate bankroll between downstream strategies.
 
 ## First lane
 
@@ -56,7 +76,7 @@ Reciprocal odds alone are not acceptance evidence.
 - Do not invent more local engine work from stale backlog wording. If all retained backlogs are exhausted, write `AUTONOMOUS_GOAL_COMPLETE=yes` unless a concrete repo-local validation/tooling defect is confirmed.
 - Local-only deterministic solver math, simulation state machines, settlement replay consumers, and private report assembly are allowed only against fake/local fixtures and must not claim real upstream readiness.
 - Real upstream evaluation requires Federico's pinned `betting-win` contract/export interface. Use `docs/016_pinned_betting_win_interface_readiness.md` as the handoff checklist.
-- Do not implement provider ingestion or execution paths.
+- Do not implement provider ingestion or live execution paths under the current gate. Future gated live surebet execution decisions require a separate ADR, explicit operator approval, risk limits, account policy confirmation, and new validators.
 - Do not weaken validators to make a run green.
 - Do not add placeholders that silently pass as evidence.
 - Do not print secrets or mutate `.env`.

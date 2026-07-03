@@ -1,0 +1,9 @@
+repository_id,sx_realtime,polymarket_generation,dependency_status,current_use
+BOT-01,legacy Ably /user/token and order_book/active_orders channels,n/a,package lock present but execution dependencies not installed,no
+BOT-02,n/a,n/a,protocol contracts/routes partly placeholder or inferred,no
+BOT-03,n/a,n/a,not sports-specific; versions not assessed for deployment,patterns only
+BOT-04,n/a,n/a,no executable implementation,no
+BOT-05,n/a,legacy @polymarket/clob-client and USDC.e-era execution,no lockfile; undeclared import mismatch,quarantine
+BOT-06,n/a,legacy @polymarket/clob-client,nonstandard lockfile registry and private-key call anomaly,quarantine
+BOT-07,legacy Ably /user/token,n/a,historical examples,source lineage only
+BOT-08,current Centrifugo /user/realtime-token/api-key,@polymarket/clob-client-v2 and pUSD-aware,closest to current; still hardcoded fee/domain and type/test failures,architecture reference only

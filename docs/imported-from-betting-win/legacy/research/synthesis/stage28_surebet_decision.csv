@@ -1,0 +1,9 @@
+field,decision,status,notes
+module_role,"auxiliary identity, price-quality and mispricing research",accepted,not core strategy and no execution
+selected_family,same-venue complete-set arbitrage,selected_paper_experiment,Polymarket standard binary CLOB V2 pUSD only
+cross_venue,parked,held,"rule equivalence, depth, retention, account friction and atomicity unresolved"
+back_lay,parked,held,no current provider pair and commission/liability evidence
+synthetic_equivalence,identity research only,held,payoff and rule equivalence unproven
+negative_risk,excluded,hard_gate,source pack and classification incomplete
+pair_atomicity,must not be assumed,hard_gate,two FOK orders are independent
+completion_threshold,95 percent provisional planning threshold,predeclare_before_capture,not universal academic constant

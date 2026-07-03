@@ -1,5 +1,8 @@
 # ADR-0003 — Paper-only and no real-money execution
 
+Superseding note: ADR-0004 clarifies that this is the current safety gate, not a permanent ban on this repo owning future gated surebet execution decisions after explicit authorization.
+
+
 ## Status
 
 Accepted.

@@ -20,4 +20,4 @@ A candidate group must not be accepted unless it has exact event and market iden
 - Ambiguous result source.
 - Rule-profile mismatch.
 
-The SURE-001 code only models the shape and blockers. It does not infer identity.
+The SURE-001 code only models the shape and blockers. It does not infer identity. Canonical identity remains owned by `betting-win`; this repo only decides whether the normalized identity/rules are sufficient for a surebet candidate.

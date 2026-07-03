@@ -14,4 +14,4 @@ Void, correction, cancellation, or incomplete finality must block acceptance unt
 upstream `betting-win` settlement replay contract explicitly models them.
 
 The cash-flow model must include stake amount, payout amount, fees, costs, and residual
-exposure per terminal scenario.
+exposure per terminal scenario. This is surebet strategy state and belongs in this repo; provider settlement truth remains upstream in `betting-win`.

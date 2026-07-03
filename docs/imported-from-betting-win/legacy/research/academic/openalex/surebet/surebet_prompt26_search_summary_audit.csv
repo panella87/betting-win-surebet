@@ -1,0 +1,9 @@
+metric,report_claim,raw_observed,audit_status,audit_note
+queries_run,80,86,corrected,Raw JSON contains 86 query-audit entries.
+topical_queries,53,63,corrected,Queries 1-63 are topical/domain searches.
+anchor_queries,15,15,confirmed,Queries 64-78 are anchor searches.
+citation_expansions,8,8,confirmed_but_low_quality,"All eight cited-by targets are off-topic or generic, not arbitrage anchors."
+retrieved_appearances,"~1,400",1471,corrected,"Sum of raw_returned fields is 1,471."
+unique_collected,911,911,confirmed,"Metadata calls this total_raw_collected, but it is cumulative unique after query deduplication."
+retained_by_keyword_filter,287 relevant/reviewed,287,relabelled,287 passed a broad automated keyword filter; this is not proof of full manual relevance review.
+excluded,624,624,confirmed,All exclusions share one no_betting_keyword reason.

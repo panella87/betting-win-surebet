@@ -1,0 +1,9 @@
+pattern_id,source,pattern,target_module,conditions,priority
+USE-01,BOT-08,provider adapter boundary,read-only collectors/adapters,"raw response lineage, no side effects, strict schemas",high
+USE-02,BOT-08,canonical bet IDs and provider sibling grouping,identity graph,"extend with rule profile, result source, period, protocol/collateral generation",high
+USE-03,BOT-08,sequence-aware caches and REST reseed,quote evidence store,freshness watermarks and no synthetic depth,high
+USE-04,BOT-03 BOT-08,durable intent/observed/settled reconciliation,paper ledger,idempotent states and provider evidence hashes,high
+USE-05,BOT-01,quote lifecycle/cancel-repost transition model,market-making research simulator,"paper-only, unknown distinct from empty",low
+USE-06,BOT-03 BOT-05,circuit breaker and imbalance tracking,paper risk engine,"data quality, leg failure, residual exposure and drawdown gates",medium
+USE-07,BOT-05,complete-set merge/redeem lifecycle,Polymarket paper arbitrage branch,rederive from official V2/pUSD sources; never reuse code,medium
+USE-08,BOT-08,testable canonicalization fixtures,identity regression suite,include adversarial reschedule/doubleheader/void/rule mismatch fixtures,high

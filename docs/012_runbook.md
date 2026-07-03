@@ -35,4 +35,4 @@ node cli.js local-report --bundle tests/fixtures/local-only-export-bundles/solve
 
 ## Next required input
 
-Provide Federico's pinned `betting-win` contract/export interface before real upstream evaluation or any later SURE phase. See `docs/016_pinned_betting_win_interface_readiness.md`.
+Provide Federico's pinned `betting-win` contract/export interface before real upstream evaluation or any later SURE phase. See `docs/016_pinned_betting_win_interface_readiness.md`. Use the three-repo boundary docs before planning backtest, paper, or future live-gate work: `docs/019_three_repo_surebet_strategy_boundary.md`, `docs/020_strategy_data_and_state_ownership.md`, `docs/021_backtest_paper_live_mode_roadmap.md`, and `docs/022_separate_account_policy.md`.

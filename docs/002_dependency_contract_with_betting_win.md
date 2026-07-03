@@ -3,13 +3,20 @@
 This repo depends on `betting-win` for canonical truth. The dependency must be explicit,
 pinned, read-only, and reproducible.
 
+```text
+provider_truth_owner=betting-win
+canonical_history_owner=betting-win
+strategy_state_owner=betting-win-surebet
+predictive_strategy_owner=betting-win-betting
+```
+
 ## Accepted dependency forms
 
 - A pinned generated contract package.
 - A pinned export bundle with manifest hash.
 - A read-only query response fixture exported by `betting-win`.
 
-## Required future inputs
+## Required pinned inputs
 
 - Contract package version.
 - Export bundle path and manifest hash.
@@ -26,4 +33,4 @@ pinned, read-only, and reproducible.
 - Provider credentials or provider API calls.
 - Manually vendored generated contracts without a pinned source manifest.
 
-SURE-002 should replace the current blocked stubs with a real pinned import contract.
+SURE-002A/SURE-002B repo-local work is complete. The next non-local step is a real pinned import contract or export/query interface from `betting-win`. This repo consumes that interface for surebet strategy, backtest, and paper-mode work only; it does not duplicate provider adapters or canonical history.

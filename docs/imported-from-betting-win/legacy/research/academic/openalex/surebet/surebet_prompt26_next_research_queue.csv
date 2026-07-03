@@ -1,0 +1,7 @@
+priority,work_item,mode,status,reason
+1,Integrate Prompt 27 cross-sport strategy result,OpenAlex result audit,in_progress,The user is already running Prompt 27; do not start a competing broad branch.
+2,Complete Prompt 25 Polymarket resolution/negative-risk source acquisition,Manual source acquisition,parallel_pending,Needed for reliable on-chain resolution equivalence.
+3,Synthesize Prompt 26 + Prompt 27 + provider evidence,Pro Extended Thinking,after_prompt27,Select core/auxiliary strategy modules and exact operational research targets.
+4,Surebet venue/API/rule overlap audit,Deep Research,after_synthesis,Use primary current sources; focus on free/public/DeFi-compatible venues and exact settlement equivalence.
+5,Bounded paper-only opportunity-frequency capture,Local read-only capture,held,"Only after data rights, rules and source schemas are accepted."
+6,Surebet implementation,Codex,blocked,No implementation until operational evidence and paper validation gates exist.

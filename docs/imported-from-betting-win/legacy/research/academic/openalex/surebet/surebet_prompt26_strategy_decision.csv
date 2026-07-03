@@ -1,0 +1,7 @@
+strategy_family,decision,module_role,confidence,reason
+surebet_detection_as_mispricing_signal,accepted research role,auxiliary,high compatibility,"No execution required; useful for data quality, market identity and price-dispersion analysis."
+cross_bookmaker_surebet_execution,held,secondary only,low execution confidence,"Requires current rule, limit, latency and account-policy evidence."
+bookmaker_exchange_back_lay,held,secondary only,medium academic / low current operational confidence,"Most studied, but requires exact commission/depth and legal venue access."
+exchange_exchange_arbitrage,research candidate,auxiliary,very low evidence,Could reduce account-restriction risk but current sports overlap/liquidity unproven.
+defi_cross_venue_arbitrage,research candidate,auxiliary,no direct academic evidence,"Requires canonical resolution equivalence, executable depth, gas/slippage and non-atomic sequence-risk controls."
+surebet_core_strategy,rejected for current phase,none,insufficient evidence,Quoted opportunities are not enough to justify core architecture.

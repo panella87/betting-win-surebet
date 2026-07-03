@@ -1,0 +1,6 @@
+priority,work_item,recommended_mode,status,completion_gate
+1,Run updated Prompt 28 synthesis including Stage 27 bot evidence,Pro Extended Thinking,next,select paper experiment roadmap and define surebet role without implementation
+2,Finish Polymarket Prompt 25 resolution/negative-risk/Python/docs pack,Manual source acquisition,parallel_if_incomplete,current resolution and negative-risk truth registered
+3,Design a bounded paper-only surebet identity and quote-frequency experiment if synthesis selects it,Pro Extended Thinking then Local read-only capture,held,"source rights, exact market contract, scenario matrix and quote-depth schema accepted"
+4,Research free timestamped reference/CLV data for selected sport and market,Deep Research,after_synthesis,free/legal source stack and retention terms verified
+5,Implementation,Codex,blocked,explicit implementation ADR after experiment/data/source gates

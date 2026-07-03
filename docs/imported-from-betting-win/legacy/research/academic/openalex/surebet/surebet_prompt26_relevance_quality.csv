@@ -1,0 +1,6 @@
+classification,record_count,canonical_use
+direct_surebet_or_arbitrage,15,manual screening required; strongest candidate pool
+gambling_harm_or_marketing,16,context only; exclude from surebet evidence counts
+prediction_market_other_or_support,10,use only when sports/on-chain relevance is explicit
+sports_betting_market_support,186,"supporting market/model literature, not direct surebet evidence"
+tangential_betting_or_gambling,60,low relevance; exclude from core evidence

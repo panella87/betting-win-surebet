@@ -29,6 +29,8 @@ test('validation matrix maps each SURE-001 gate to a concrete failure mode', () 
     'tests/validate-source-manifest.test.ts',
     'tests/validate-repo-contract.test.ts',
     'local implementation backlog disappears or stops enforcing local-only SURE-002A/SURE-007 boundaries',
+    'three-repo surebet boundary',
+    'tests/three-repo-surebet-boundary.test.ts',
   ]) {
     assert.match(doc, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }

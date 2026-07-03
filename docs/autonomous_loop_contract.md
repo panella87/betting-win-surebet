@@ -16,7 +16,7 @@ CONTINUE_REQUIRED=yes
 BLOCKED=yes
 ```
 
-Use `CONTINUE_REQUIRED=yes` when another safe SURE-001 hardening task remains. Use `BLOCKED=yes` only when the first required task needs unavailable upstream `betting-win` contract/export evidence, external credentials, unsafe actions, or a human decision. A malformed, missing, combined, or unknown status must fail closed; the controller must not treat it as continue.
+Use `CONTINUE_REQUIRED=yes` only when another safe, documented repo-local task remains in the active backlog. Do not route from stale SURE-001/SURE-002A/SURE-002B wording after those backlogs are exhausted. Use `BLOCKED=yes` only when the first required task needs unavailable upstream `betting-win` contract/export evidence, external credentials, unsafe actions, or a human decision. A malformed, missing, combined, or unknown status must fail closed; the controller must not treat it as continue.
 
 Each cycle must also write `request_flags.txt` with exactly two lines and in this exact order:
 
@@ -31,7 +31,7 @@ Each required cycle report artifact must be real. The controller may create plac
 
 `AUTONOMOUS_GOAL_COMPLETE=yes` is accepted only after the post-cycle `npm run validate` gate passes. A nonzero Codex exit code must fail closed even if validation still passes.
 
-Hard bans: provider SDKs/URLs, wallet/signer/order/transaction paths, `.env` mutation, git branch mutation, long services, live operations, weakened validators, and fabricated upstream evidence.
+Hard bans under the current gate: provider SDKs/URLs, wallet/signer/order/transaction paths, `.env` mutation, git branch mutation, long services, live operations, weakened validators, fabricated upstream evidence, predictive/value-betting work, and shared-account coordination.
 
 ## Runtime loader invariant
 

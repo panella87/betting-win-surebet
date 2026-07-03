@@ -1,6 +1,13 @@
 # 016 — Pinned betting-win interface readiness checklist
 
-This document is the next handoff gate after SURE-001 and the safe SURE-002A local backlog.
+This document is the next handoff gate after SURE-001 and the safe SURE-002A/SURE-002B local backlogs.
+
+```text
+provider_truth_owner=betting-win
+surebet_strategy_owner=betting-win-surebet
+predictive_strategy_owner=betting-win-betting
+account_policy=separate_from_betting-win-betting
+```
 
 ## Current state
 

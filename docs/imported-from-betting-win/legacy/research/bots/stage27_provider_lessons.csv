@@ -1,0 +1,5 @@
+provider,lessons,references,project_effect
+SX Bet,runtime sport discovery; current Centrifugo; full orders/depth distinct from best odds; trade and settlement replay valuable,BOT-01 BOT-07 BOT-08,keep REST/backfill spec; realtime/depth held; do not reuse legacy Ably or execution
+Azuro,no supplied working bot; cross-venue prototype relied on guessed/inferred surfaces and simulated calculations,BOT-02 BOT-04,existing first-party source pack remains authoritative; no new runtime promotion
+Polymarket,current V2/pUSD generation matters; complete-set arbitrage is distinct; negative-risk and fees are first-class,BOT-05 BOT-06 BOT-08,only BOT-08 is generation-current; finish Prompt 25 source pack before any paper capture
+Cross-provider,identity and settlement equivalence dominate arithmetic; execution is non-atomic; quote evidence needs depth/freshness,BOT-02 BOT-08,surebet becomes identity/cash-flow/completion research module

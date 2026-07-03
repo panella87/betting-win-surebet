@@ -4,6 +4,15 @@
 repo=betting-win-surebet
 status=SURE-002B_PRIVATE_PAPER_MODE_INTAKE
 runtime=paper_only
+repo_role=surebet_strategy_execution_repo
+strategy_family=surebet_complete_set_only
+provider_truth_owner=betting-win
+canonical_history_owner=betting-win
+predictive_strategy_owner=betting-win-betting
+backtesting_owner=betting-win-surebet
+paper_mode_owner=betting-win-surebet
+future_live_decision_owner=betting-win-surebet_after_explicit_gate
+account_policy=separate_from_betting-win-betting
 provider_connections=prohibited
 execution=prohibited
 first_lane=polymarket_standard_binary_complete_set_v0
@@ -13,11 +22,14 @@ next_task=wait_for_federico_pinned_betting_win_contract_export_interface_before_
 
 Current state:
 
-- The repo is a downstream strategy skeleton for private paper-only surebet / complete-set research.
+- The repo is the dedicated surebet / complete-set strategy repository under the accepted three-repo architecture.
+- Current implementation remains private paper-only and live execution remains disabled until a separate explicit gate.
+- It owns surebet strategy logic, backtesting, private paper mode, reports, and future gated live surebet execution decisions.
 - It does not own provider truth.
 - It does not connect to SX, Azuro, Polymarket, Limitless, or any future provider.
 - It does not implement wallets, signers, token approvals, orders, cancellations, redemptions, cashouts, transactions, live collectors, public signals, or profitability claims.
 - It consumes only stable contracts/exports/read-only evidence from `betting-win` after those interfaces exist.
+- It uses a separate account and bankroll from `betting-win-betting`; no shared-capital coordinator exists here.
 
 Authoritative active docs:
 
@@ -26,8 +38,12 @@ Authoritative active docs:
 3. `docs/repo_status_current.md`
 4. `docs/001_scope_and_boundaries.md`
 5. `docs/002_dependency_contract_with_betting_win.md`
-6. `docs/012_runbook.md`
-7. `docs/operations/autonomous_72h_runbook.md`
+6. `docs/019_three_repo_surebet_strategy_boundary.md`
+7. `docs/020_strategy_data_and_state_ownership.md`
+8. `docs/021_backtest_paper_live_mode_roadmap.md`
+9. `docs/022_separate_account_policy.md`
+10. `docs/012_runbook.md`
+11. `docs/operations/autonomous_72h_runbook.md`
 
 Validation command:
 

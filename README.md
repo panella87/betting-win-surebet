@@ -1,8 +1,24 @@
 # betting-win-surebet
 
-Private paper-only surebet / complete-set research repository.
+Dedicated surebet / complete-set strategy repository. Current implementation is private paper-only; future live surebet execution decisions are gated and disabled until a separate explicit authorization.
 
-This repository consumes stable contracts, exports, read-only query outputs, and generic paper evidence from `betting-win`. It does not connect to providers, does not execute orders, does not use wallets or signers, and does not make profitability claims.
+This repository consumes stable contracts, exports, read-only query outputs, and generic paper evidence from `betting-win`. It does not connect to providers, does not execute orders, does not use wallets or signers, and does not make profitability claims under the current gate.
+
+## Three-repo role
+
+```text
+repo_role=surebet_strategy_execution_repo
+strategy_family=surebet_complete_set_only
+provider_truth_owner=betting-win
+canonical_history_owner=betting-win
+predictive_strategy_owner=betting-win-betting
+backtesting_owner=betting-win-surebet
+paper_mode_owner=betting-win-surebet
+future_live_decision_owner=betting-win-surebet_after_explicit_gate
+account_policy=separate_from_betting-win-betting
+```
+
+`betting-win-surebet` owns surebet strategy logic, backtesting, private paper mode, reports, and future gated surebet execution decisions. It does not own provider adapters, canonical history, provider settlement truth, predictive/value-betting models, or shared capital coordination.
 
 Initial lane:
 
@@ -32,8 +48,12 @@ Read these first:
 3. `docs/repo_status_current.md`
 4. `docs/001_scope_and_boundaries.md`
 5. `docs/002_dependency_contract_with_betting_win.md`
-6. `docs/012_runbook.md`
-7. `docs/operations/autonomous_72h_runbook.md`
+6. `docs/019_three_repo_surebet_strategy_boundary.md`
+7. `docs/020_strategy_data_and_state_ownership.md`
+8. `docs/021_backtest_paper_live_mode_roadmap.md`
+9. `docs/022_separate_account_policy.md`
+10. `docs/012_runbook.md`
+11. `docs/operations/autonomous_72h_runbook.md`
 
 Current code and current retained evidence beat stale documentation.
 
@@ -59,7 +79,7 @@ bash commands/run-sure-local-engine-autonomous.sh
 node cli.js local-report --bundle tests/fixtures/local-only-export-bundles/solver-ready-resource-export.json --output artifacts/local-paper-reports/smoke.report.json
 ```
 
-`start.sh` is intentionally a validation wrapper, not a daemon launcher. This repo has no long-running service in SURE-001 or SURE-002A.
+`start.sh` is intentionally a validation wrapper, not a daemon launcher. This repo has no long-running service under the current private paper-only gate.
 
 ## Hard boundary
 

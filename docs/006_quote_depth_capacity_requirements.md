@@ -12,4 +12,4 @@ Required fields for future implementation:
 - Fee and cost inputs.
 - Rounding and minimum-size constraints.
 
-SURE-001 exposes only the type shape and blocker helpers.
+SURE-001 exposes only the type shape and blocker helpers. Future backtests or paper runs must use pinned `betting-win` quote/depth evidence rather than direct provider calls or a local canonical-history database.

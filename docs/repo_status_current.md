@@ -5,6 +5,15 @@ repo=betting-win-surebet
 current_task=SURE-002B_PRIVATE_PAPER_MODE_INTAKE
 current_task_status=complete_repo_local_private_paper_mode_backlog_blocked_on_pinned_interface
 next_allowed_task=wait for Federico's pinned betting-win contract/export interface before real upstream evaluation
+repo_role=surebet_strategy_execution_repo
+strategy_family=surebet_complete_set_only
+provider_truth_owner=betting-win
+canonical_history_owner=betting-win
+predictive_strategy_owner=betting-win-betting
+backtesting_owner=betting-win-surebet
+paper_mode_owner=betting-win-surebet
+future_live_decision_owner=betting-win-surebet_after_explicit_gate
+account_policy=separate_from_betting-win-betting
 provider_connections=prohibited
 execution=prohibited
 runtime_service=none
@@ -25,11 +34,13 @@ runtime_service=none
 
 ## Current safe work
 
+The accepted three-repo boundary is documented in `docs/019_three_repo_surebet_strategy_boundary.md`, `docs/020_strategy_data_and_state_ownership.md`, `docs/021_backtest_paper_live_mode_roadmap.md`, and `docs/022_separate_account_policy.md`.
+
 SURE-001 hardening is complete. The documented SURE-002A local implementation backlog is also complete: contracts, parsers, local fixture readers, deterministic paper math, state machines, private reports, and CLI/reporting over local fixtures are implemented. The documented SURE-002B private paper-mode backlog is also complete: pinned-intake validation, private artifact contracts, batch summaries, smoke fixtures, and the operator freeze gate are implemented. Real upstream evaluation remains blocked.
 
 ## Blocked work
 
-The following remain blocked: provider integration, live execution, public reporting, profitability claims, direct upstream database access, generated-contract vendoring, and real upstream readiness claims. Local deterministic stake-vector, completion, residual exposure, and settlement replay consumption may now be implemented only against fake/local fixtures and must remain blocked from real acceptance.
+The following remain blocked under the current gate: provider integration, live execution, public reporting, profitability claims, direct upstream database access, generated-contract vendoring, and real upstream readiness claims. Local deterministic stake-vector, completion, residual exposure, and settlement replay consumption may now be implemented only against fake/local fixtures and must remain blocked from real acceptance.
 
 ## Operational command
 

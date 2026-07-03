@@ -1,0 +1,9 @@
+finding_id,repository_id,severity,finding,evidence,decision
+SEC-01,BOT-06,critical,"private key is passed to enquirer.verifyConfiguration, a nonstandard method, while lockfile resolves enquirer from registrynpmjs.to and adds unexpected archiver dependency",src/config/index.ts; package-lock.json,"quarantine archive; never npm install, build or run; no code reuse"
+SEC-02,BOT-05,critical,"source imports undeclared js-web3.prc while package declares js-client-node, then gates startup and runtime on remote prices().responsive threshold",src/index.js; package.json,quarantine archive; never install or run; retain only manually reviewed concepts
+SEC-03,BOT-05,high,startup performs token approvals and wallet/CLOB credential derivation before strategy operation,src/index.js; src/onchain.js,execution surface rejected
+SEC-04,BOT-01,high,transport failures after retries return an empty active-order array,network.js,fail-closed rule added; do not reuse implementation
+SEC-05,BOT-02,high,"global uncaught/unhandled handlers log and continue, while placeholder/mock data can reach opportunity/execution logic",index.js and fetchers,reject implementation; fatal data-integrity failures must stop the run
+SEC-06,BOT-08,critical,router can synthesize executable levels from summary odds/depth and execute sequential allocations with partial completion,bot/src/router/index.ts; bot/src/routes/trade.ts,execution layer rejected; architecture only
+SEC-07,BOT-08,high,configuration values can silently fall back when database lookup fails,bot/src/router/index.ts,future config reads must distinguish missing from datastore failure and fail closed
+SEC-08,BOT-07,high,examples include hardcoded addresses/private-key order actions and legacy realtime path,"post-order, fill-orders, websocket examples",historical lineage only

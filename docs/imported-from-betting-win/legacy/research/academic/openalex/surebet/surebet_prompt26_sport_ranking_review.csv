@@ -1,0 +1,11 @@
+reported_rank,sport,reported_total,evidence_basis,confidence,canonical_treatment
+1,Football / Soccer,63,direct quoted-opportunity evidence,medium,Strongest historical coverage; execution and modernity unresolved.
+2,Basketball,57,operational inference,low,No direct surebet frequency/execution study identified.
+3,American Football,57,operational inference,low,No direct surebet frequency/execution study identified.
+4,Tennis,55,market-structure inference plus betting-exchange literature,low-medium,Retirement-rule mismatch is material.
+5,Darts,51,operational inference,very low,No direct academic surebet evidence in the result.
+6,Horse Racing,50,direct quasi-arbitrage/cross-market evidence,medium,Market structure differs materially from sportsbook fixed odds.
+7,Ice Hockey,47,operational inference,very low,No direct evidence.
+8,Baseball,46,operational inference,very low,Listed-pitcher rule mismatch adds risk.
+9,Rugby,45,limited Super Rugby-related evidence,low,Needs current venue evidence.
+10,Table Tennis,41,operational inference,very low,Integrity and low-liquidity risks dominate.
