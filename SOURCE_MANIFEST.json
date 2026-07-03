@@ -1,7 +1,7 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-07-03T16:33:22Z",
-  "overlay": "SURE-002B three-repo boundary legacy surebet import rehome follow-up",
+  "generated": "2026-07-03T17:42:30Z",
+  "overlay": "SURE-002B three-repo boundary final cleanup confirmation",
   "files": [
     {
       "path": ".env.example",
@@ -30,18 +30,18 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "c50f7cdfe07064b1f635c511bbbd3f7f6dd6d896e36806b68752560027e49a98",
-      "size": 10840
+      "sha256": "3cbdb4713f716388b919da25fa917a80e620815e11c55060d85222063d75eecf",
+      "size": 11526
     },
     {
       "path": "DOCUMENTATION_CHECK_REPORT.md",
-      "sha256": "2e6c059c39017db527e60fe0af06132ec10e0975e83fa833c0aa7a41c7fdf4d3",
-      "size": 1866
+      "sha256": "bcb7770dc8bbc4a99beca929b37b956de66cfed61fb1b2a132b5d74bf8354a26",
+      "size": 2213
     },
     {
       "path": "OVERLAY_MANIFEST.json",
-      "sha256": "7f3dd7affaf2083e7bf875747f9ec83925c2623ff87595c99e1a9eeb59fffb3a",
-      "size": 12468
+      "sha256": "55ef3611d151f2f87abb6bfebfcdfe1b933cd79334988bbcd143cefeb866adfa",
+      "size": 782
     },
     {
       "path": "PROJECT_STATUS.md",
@@ -220,8 +220,8 @@
     },
     {
       "path": "docs/023_legacy_betting_win_surebet_import_manifest.md",
-      "sha256": "fffff52409e1e6d66d194676166efa4ada8157f3299053ef1f0a033e8703999e",
-      "size": 2644
+      "sha256": "caa42f0c86c2762a286424431563377c0988376c4c5101c2b7e2f31ce5c9e86d",
+      "size": 2833
     },
     {
       "path": "docs/MASTER_PLAN.md",

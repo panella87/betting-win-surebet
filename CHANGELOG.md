@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-07-03 — Legacy surebet import cleanup confirmed
+
+- Confirmed the temporary `docs/imported-from-betting-win/` staging path is absent after the legacy surebet rehome.
+- Updated the documentation check report and overlay manifest so no future operator reads the already-completed cleanup as pending.
+- Preserved the accepted three-repo boundary: `betting-win` owns provider truth/canonical history, `betting-win-surebet` owns surebet strategy/backtest/paper/future gated execution decisions, and `betting-win-betting` owns predictive/value betting with a separate account.
+- No code, provider adapters, execution paths, strategy behavior, fixtures, or runtime commands changed.
+
 ## 2026-07-03 — Legacy surebet import re-homed after boundary landing
 
 - Confirmed the three-repo surebet boundary overlay landed, then re-homed temporary `docs/imported-from-betting-win` material into archive-safe surebet legacy locations.

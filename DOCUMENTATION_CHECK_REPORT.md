@@ -1,37 +1,14 @@
-# Documentation check report — betting-win-surebet boundary follow-up
+# Documentation check report — betting-win-surebet final cleanup confirmation
 
 Date: 2026-07-03
 
-Source checked: `betting-win-surebet10.zip`
+Source checked: `betting-win-surebet11.zip`
 
 ## Result
 
-The three-repo boundary overlay landed correctly, but the uploaded repo now contains a temporary legacy import tree:
+The three-repo boundary and legacy surebet import rehome are now in the expected final documentation state.
 
-```text
-docs/imported-from-betting-win/
-```
-
-That conflicts with `docs/023_legacy_betting_win_surebet_import_manifest.md`, which still said the legacy surebet material had not been imported. It also leaves raw OpenAlex, bot-reference, schema, and synthesis artifacts under `docs/`, where they can be mistaken for active operator documentation.
-
-## Follow-up action
-
-This follow-up overlay re-homes the imported surebet material into archive-safe destinations:
-
-```text
-docs/legacy/surebet-research/
-research/imported-from-betting-win/legacy/surebet/
-templates/imported-from-betting-win/legacy/surebet/
-schemas/imported-from-betting-win/legacy/surebet/
-```
-
-The final repo state must remove the temporary source path:
-
-```text
-docs/imported-from-betting-win/
-```
-
-## Boundary status after cleanup
+Confirmed final state:
 
 ```text
 repo_role=surebet_strategy_execution_repo
@@ -45,15 +22,53 @@ future_live_decision_owner=betting-win-surebet_after_explicit_gate
 account_policy=separate_from_betting-win-betting
 legacy_surebet_import_status=imported_and_rehomed
 source_import_path_removed=yes
-raw_research_artifacts_under_docs=no
+raw_research_artifacts_under_active_docs=no
 ```
+
+The temporary staging path is absent:
+
+```text
+docs/imported-from-betting-win/
+```
+
+The imported legacy material is retained only in archive-safe locations:
+
+```text
+docs/legacy/surebet-research/
+research/imported-from-betting-win/legacy/surebet/
+schemas/imported-from-betting-win/legacy/surebet/
+templates/imported-from-betting-win/legacy/surebet/
+```
+
+## Boundary status
+
+`betting-win-surebet` is documented as the dedicated surebet / complete-set strategy and execution-decision repo. Current live execution remains prohibited. Future live surebet execution decisions are allowed only after an explicit separate gate.
+
+`betting-win` remains the provider-truth and canonical-history owner. This repo must not duplicate provider adapters, canonical sport/competition history, provider settlement truth, or raw provider capture.
+
+`betting-win-betting` remains the predictive/value-betting owner and uses a separate account and bankroll.
 
 ## Delete/move decision
 
-After applying this overlay, run the cleanup command that removes the temporary import source path:
+No cleanup command is pending.
 
-```bash
-rm -rf docs/imported-from-betting-win
+```text
+rm_required=no
+mv_required=no
 ```
 
-No additional `mv` command is required because this overlay already includes the re-homed archive copies.
+If `docs/imported-from-betting-win/` reappears in a future zip, treat it as regression and remove it only after confirming the archive paths above still contain the imported material.
+
+## Validation summary
+
+The expected validation path is:
+
+```bash
+npm run validate
+```
+
+The boundary-specific validation is:
+
+```bash
+npm run validate:three-repo-boundary
+```

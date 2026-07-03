@@ -23,7 +23,16 @@ The stale staging path below must not exist in the final source tree:
 docs/imported-from-betting-win
 ```
 
-If that path reappears, remove it after confirming the archive paths above contain the imported material.
+If that path reappears, treat it as a documentation-boundary regression. Remove it only after confirming the archive paths above still contain the imported material.
+
+## Cleanup command status
+
+No cleanup command is pending in the expected final tree.
+
+```text
+rm_required=no
+mv_required=no
+```
 
 ## Imported Markdown archive
 
