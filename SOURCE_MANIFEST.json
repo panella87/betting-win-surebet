@@ -1,7 +1,7 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-07-03T17:42:30Z",
-  "overlay": "SURE-002B three-repo boundary final cleanup confirmation",
+  "generated": "2026-07-03T18:40:07Z",
+  "overlay": "three-repo-documentation-completion-checkpoint",
   "files": [
     {
       "path": ".env.example",
@@ -30,18 +30,18 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "3cbdb4713f716388b919da25fa917a80e620815e11c55060d85222063d75eecf",
-      "size": 11526
+      "sha256": "68c5865f5e51c970406e26b91a7d420d938bf5d05e9bd19d873774aa52581ebf",
+      "size": 11989
     },
     {
       "path": "DOCUMENTATION_CHECK_REPORT.md",
-      "sha256": "bcb7770dc8bbc4a99beca929b37b956de66cfed61fb1b2a132b5d74bf8354a26",
-      "size": 2213
+      "sha256": "ff15766b05a96d403192f1ddd35a10449bd6f00dea62e8839062ec932f86d163",
+      "size": 2648
     },
     {
       "path": "OVERLAY_MANIFEST.json",
-      "sha256": "55ef3611d151f2f87abb6bfebfcdfe1b933cd79334988bbcd143cefeb866adfa",
-      "size": 782
+      "sha256": "0ff1a340c09478d4b078fc0196fa5df7fcb17ecd1ba3935673c13ed4d79dc247",
+      "size": 684
     },
     {
       "path": "PROJECT_STATUS.md",
@@ -222,6 +222,11 @@
       "path": "docs/023_legacy_betting_win_surebet_import_manifest.md",
       "sha256": "caa42f0c86c2762a286424431563377c0988376c4c5101c2b7e2f31ce5c9e86d",
       "size": 2833
+    },
+    {
+      "path": "docs/024_three_repo_documentation_completion_status.md",
+      "sha256": "efd1aee96fa1bc79564de7b3d8a08844dba8b58444f6027763f76558d33fb075",
+      "size": 1440
     },
     {
       "path": "docs/MASTER_PLAN.md",
@@ -595,8 +600,8 @@
     },
     {
       "path": "scripts/validate_repo.py",
-      "sha256": "7aeb3e8026257c3f1271cf31cde882348765700d6f9e23796c6f9de8dfbbdd82",
-      "size": 5868
+      "sha256": "2d39866cdf6f5100d8fa82b7430c73570d89feae7598bd7e217c69b1d1d46a9d",
+      "size": 5925
     },
     {
       "path": "scripts/validate_shell_local_assignments.py",
@@ -610,8 +615,8 @@
     },
     {
       "path": "scripts/validate_three_repo_surebet_boundary.py",
-      "sha256": "388f846c8f206ecc15887b83501381fafa670522d520512c44d72024f25ce709",
-      "size": 8479
+      "sha256": "5a5a61bac14cc2060129103b26f98594710c69d38e198e2ce1455e69cd8fb8bf",
+      "size": 8932
     },
     {
       "path": "src/adapters/betting-win-export-reader.ts",

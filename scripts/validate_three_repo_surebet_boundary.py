@@ -11,6 +11,7 @@ REQUIRED_FILES = [
     'docs/021_backtest_paper_live_mode_roadmap.md',
     'docs/022_separate_account_policy.md',
     'docs/023_legacy_betting_win_surebet_import_manifest.md',
+    'docs/024_three_repo_documentation_completion_status.md',
     'docs/legacy/surebet-research/README.md',
     'research/imported-from-betting-win/legacy/surebet/README.md',
     'schemas/imported-from-betting-win/legacy/surebet/README.md',
@@ -122,6 +123,15 @@ REQUIRED_MARKERS = {
         'schemas_legacy_destination=schemas/imported-from-betting-win/legacy/surebet',
         'templates_legacy_destination=templates/imported-from-betting-win/legacy/surebet',
         'active_authority=no',
+    ],
+    'docs/024_three_repo_documentation_completion_status.md': [
+        'cross_repo_documentation_status=complete',
+        'repo_role=surebet_complete_set_strategy_execution_repo',
+        'provider_truth_owner=betting-win',
+        'predictive_strategy_owner=betting-win-betting',
+        'legacy_surebet_import_status=complete',
+        'rm_required=no',
+        'mv_required=no',
     ],
     'docs/legacy/surebet-research/README.md': [
         'legacy_surebet_import_status=imported_and_rehomed',

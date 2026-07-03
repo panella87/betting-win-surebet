@@ -2,7 +2,7 @@
 
 Date: 2026-07-03
 
-Source checked: `betting-win-surebet11.zip`
+Source checked together with final cross-repo check: `betting-win-surebet12.zip`, `betting-win85.zip`, and `betting-win-betting8.zip`
 
 ## Result
 
@@ -72,3 +72,7 @@ The boundary-specific validation is:
 ```bash
 npm run validate:three-repo-boundary
 ```
+
+## Cross-repo final checkpoint
+
+The paired `betting-win` and `betting-win-betting` documentation passes are now complete. No cleanup command is pending for this repository. The old `docs/imported-from-betting-win/` path must remain absent, and the surebet legacy archive paths listed above remain the final homes for imported surebet material.

@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-07-03 - Cross-repo documentation completion checkpoint
+
+- Recorded that the `betting-win`, `betting-win-betting`, and `betting-win-surebet` documentation boundary passes are complete.
+- Added the surebet cross-repo completion status doc.
+- Preserved the completed surebet legacy import archive and kept the stale `docs/imported-from-betting-win/` path forbidden.
+- Kept `rm_required=no` and `mv_required=no`; no cleanup command is pending for this repo.
+
 ## 2026-07-03 — Legacy surebet import cleanup confirmed
 
 - Confirmed the temporary `docs/imported-from-betting-win/` staging path is absent after the legacy surebet rehome.
