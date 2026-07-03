@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-07-03 — Legacy surebet import re-homed after boundary landing
+
+- Confirmed the three-repo surebet boundary overlay landed, then re-homed temporary `docs/imported-from-betting-win` material into archive-safe surebet legacy locations.
+- Added archive README files for imported legacy docs, raw research artifacts, schema drafts, and templates.
+- Updated the legacy import manifest and boundary validator so raw imported research does not remain under active `docs/` and the temporary import source path is removed.
+- Preserved current safety gates: provider connections prohibited, execution prohibited, real upstream evaluation blocked until Federico provides a pinned `betting-win` bundle.
+
 ## 2026-07-03 — Three-repo surebet boundary documentation rebaseline
 
 - Re-anchored active docs so `betting-win-surebet` is the dedicated surebet/complete-set strategy repo while current live execution remains gated and disabled.

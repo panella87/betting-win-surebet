@@ -54,4 +54,4 @@ These tests lock the narrow regressions that previously caused or could cause bo
 | `python3 scripts/validate_private_paper_mode_backlog_contract.py` | Private paper-mode intake docs, commands, and autonomous continuation drift into provider/live/execution scope or stop ignoring the active SURE-002B backlog. |
 | `python3 scripts/validate_three_repo_surebet_boundary.py` | The three-repo surebet boundary drifts: this repo stops being the surebet strategy/backtest/paper repo, starts claiming provider truth, omits separate-account policy, or fails to keep future live execution behind an explicit gate. |
 | `tests/private-paper-mode-backlog-contract.test.ts` | Private paper-mode backlog or smoke command starts accepting remote URLs, provider/database access, execution claims, or non-private artifacts. |
-| `tests/three-repo-surebet-boundary.test.ts` | Active docs stop proving the accepted three-repo surebet boundary, separate-account policy, or no-local-move legacy import state. |
+| `tests/three-repo-surebet-boundary.test.ts` | Active docs stop proving the accepted three-repo surebet boundary, separate-account policy, or completed legacy-import rehome state. |

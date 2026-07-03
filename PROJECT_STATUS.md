@@ -104,3 +104,16 @@ bash commands/run-sure-paper-mode-autonomous.sh
 ```
 
 only if a concrete repo-local validation/tooling defect reopens safe work. Use `commands/run-pinned-interface-smoke.sh` only when Federico provides a repo-local pinned `betting-win` export bundle.
+
+
+## Legacy surebet import archive
+
+Surebet-specific legacy material imported from the original `betting-win` repo has been rehomed under dedicated legacy archive paths and is not active authority.
+
+```text
+legacy_surebet_import_status=imported_and_rehomed
+source_import_path_removed=yes
+active_authority=no
+```
+
+The active authority remains the three-repo surebet boundary docs.

@@ -86,3 +86,18 @@ real_upstream_evaluation=blocked_until_federico_pinned_betting_win_interface
 `docs/017_private_paper_mode_implementation_backlog.md` is now a completed safe backlog. `docs/018_private_paper_mode_runbook.md` is the operator runbook and freeze gate. No unchecked repo-local item remains in `docs/017_private_paper_mode_implementation_backlog.md`.
 
 Private paper-mode work may create repo-local validators, commands, fake fixtures, artifact contracts, and batch summaries. It may not connect to providers, read `betting-win` databases, vendor generated contracts, execute orders, publish reports, or make profitability/live-readiness claims. The freeze gate remains: `npm run validate` passes, local fixture smoke passes, and real upstream evaluation still requires Federico's pinned bundle.
+
+
+## Legacy surebet import archive
+
+Surebet-specific legacy material imported from the original `betting-win` repo has been rehomed under dedicated legacy archive paths and is not active authority.
+
+```text
+legacy_surebet_import_status=imported_and_rehomed
+source_import_path_removed=yes
+active_authority=no
+```
+
+The active authority remains the three-repo surebet boundary docs.
+
+`docs/imported-from-betting-win/` must remain absent after legacy surebet material is rehomed.

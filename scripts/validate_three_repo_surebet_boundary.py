@@ -11,6 +11,10 @@ REQUIRED_FILES = [
     'docs/021_backtest_paper_live_mode_roadmap.md',
     'docs/022_separate_account_policy.md',
     'docs/023_legacy_betting_win_surebet_import_manifest.md',
+    'docs/legacy/surebet-research/README.md',
+    'research/imported-from-betting-win/legacy/surebet/README.md',
+    'schemas/imported-from-betting-win/legacy/surebet/README.md',
+    'templates/imported-from-betting-win/legacy/surebet/README.md',
     'decisions/ADR-0004-three-repo-surebet-strategy-execution-boundary.md',
 ]
 
@@ -36,6 +40,7 @@ REQUIRED_MARKERS = {
         'paper_mode_owner=betting-win-surebet',
         'future_live_decision_owner=betting-win-surebet_after_explicit_gate',
         'account_policy=separate_from_betting-win-betting',
+        'legacy_surebet_import_status=imported_and_rehomed',
     ],
     'AGENTS.md': [
         'repo_role=surebet_strategy_execution_repo',
@@ -48,6 +53,7 @@ REQUIRED_MARKERS = {
         'backtesting_owner=betting-win-surebet',
         'paper_mode_owner=betting-win-surebet',
         'account_policy=separate_from_betting-win-betting',
+        'has been rehomed under dedicated legacy archive paths',
     ],
     'STARTER_PACK.md': [
         'repo_role=surebet_strategy_execution_repo',
@@ -63,6 +69,7 @@ REQUIRED_MARKERS = {
         'repo_role=surebet_strategy_execution_repo',
         'account_policy=separate_from_betting-win-betting',
         'backtesting_owner=betting-win-surebet',
+        '`docs/imported-from-betting-win/` must remain absent',
     ],
     'docs/001_scope_and_boundaries.md': [
         'repo_role=surebet_strategy_execution_repo',
@@ -77,6 +84,7 @@ REQUIRED_MARKERS = {
     'docs/011_validation_matrix.md': [
         'scripts/validate_three_repo_surebet_boundary.py',
         'three-repo surebet boundary',
+        'completed legacy-import rehome state',
     ],
     'docs/016_pinned_betting_win_interface_readiness.md': [
         'provider_truth_owner=betting-win',
@@ -106,8 +114,30 @@ REQUIRED_MARKERS = {
         'shared_bankroll_with_betting-win-betting=no',
     ],
     'docs/023_legacy_betting_win_surebet_import_manifest.md': [
-        'legacy_surebet_import_status=not_yet_imported',
-        'operator_move_required=no',
+        'legacy_surebet_import_status=imported_and_rehomed',
+        'operator_move_status=complete',
+        'source_import_path_present=no',
+        'docs_legacy_destination=docs/legacy/surebet-research',
+        'research_legacy_destination=research/imported-from-betting-win/legacy/surebet',
+        'schemas_legacy_destination=schemas/imported-from-betting-win/legacy/surebet',
+        'templates_legacy_destination=templates/imported-from-betting-win/legacy/surebet',
+        'active_authority=no',
+    ],
+    'docs/legacy/surebet-research/README.md': [
+        'legacy_surebet_import_status=imported_and_rehomed',
+        'active_authority=no',
+    ],
+    'research/imported-from-betting-win/legacy/surebet/README.md': [
+        'legacy_surebet_import_status=imported_and_rehomed',
+        'raw_research_archive=yes',
+    ],
+    'schemas/imported-from-betting-win/legacy/surebet/README.md': [
+        'active_schema_authority=no',
+        'legacy_surebet_import_status=imported_and_rehomed',
+    ],
+    'templates/imported-from-betting-win/legacy/surebet/README.md': [
+        'active_template_authority=no',
+        'legacy_surebet_import_status=imported_and_rehomed',
     ],
     'decisions/ADR-0004-three-repo-surebet-strategy-execution-boundary.md': [
         'Accepted.',
@@ -155,6 +185,9 @@ def main() -> None:
             if marker in text:
                 fail(f'{rel} still contains stale authority marker: {marker}')
 
+    if (ROOT / 'docs/imported-from-betting-win').exists():
+        fail('temporary docs/imported-from-betting-win import path must be removed after re-homing legacy surebet material')
+
     package = json.loads(read('package.json'))
     validate_ops = package.get('scripts', {}).get('validate:ops', '')
     if 'scripts/validate_three_repo_surebet_boundary.py' not in validate_ops:
@@ -171,4 +204,3 @@ def main() -> None:
 
 if __name__ == '__main__':
     main()
-

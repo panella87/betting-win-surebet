@@ -1,7 +1,7 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-07-03T16:05:22Z",
-  "overlay": "SURE-002B three-repo surebet boundary documentation rebaseline",
+  "generated": "2026-07-03T16:33:22Z",
+  "overlay": "SURE-002B three-repo boundary legacy surebet import rehome follow-up",
   "files": [
     {
       "path": ".env.example",
@@ -30,28 +30,28 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "59a68108dce8783622a9c8912b7063c38292f89b0b27b2a95843b8238cd067d5",
-      "size": 10139
+      "sha256": "c50f7cdfe07064b1f635c511bbbd3f7f6dd6d896e36806b68752560027e49a98",
+      "size": 10840
     },
     {
       "path": "DOCUMENTATION_CHECK_REPORT.md",
-      "sha256": "4761449d067923232ce1da1e81ce7f4a42dfaebd8a42c262128eccc52c930e1d",
-      "size": 2806
+      "sha256": "2e6c059c39017db527e60fe0af06132ec10e0975e83fa833c0aa7a41c7fdf4d3",
+      "size": 1866
     },
     {
       "path": "OVERLAY_MANIFEST.json",
-      "sha256": "eb8b251c723372682569c391ae16742eedfac2208dd616ce33ebed787cd72d82",
-      "size": 2864
+      "sha256": "7f3dd7affaf2083e7bf875747f9ec83925c2623ff87595c99e1a9eeb59fffb3a",
+      "size": 12468
     },
     {
       "path": "PROJECT_STATUS.md",
-      "sha256": "3d88e409d3d898803fedcce64efda7a3e72e39c735ec5b14e3267640d0a8bb03",
-      "size": 5579
+      "sha256": "5e1b7b62ede69b689cb0a5dc42260e37ec4b6170740d5783a1a0b3eee5e67054",
+      "size": 5959
     },
     {
       "path": "README.md",
-      "sha256": "08790bb7d1b4b3938976ac6962be08e52c644e6456cf58d564b6bd9277f35e47",
-      "size": 4948
+      "sha256": "926f52d6949d1c1fa2652521444f7ea4ba95c636cec579bf3ef2437b377d8cb7",
+      "size": 5470
     },
     {
       "path": "STARTER_PACK.md",
@@ -160,8 +160,8 @@
     },
     {
       "path": "docs/011_validation_matrix.md",
-      "sha256": "d8e208b46777a85e2dfc3d2b6f2465e2ecbb42de490a6091799d539be952e392",
-      "size": 6845
+      "sha256": "6a5417573256334b96c56e1e93e7a19ceef14aa7960e755bce49fc7f1a025e82",
+      "size": 6848
     },
     {
       "path": "docs/012_runbook.md",
@@ -220,8 +220,8 @@
     },
     {
       "path": "docs/023_legacy_betting_win_surebet_import_manifest.md",
-      "sha256": "a5c7dce7b1a04391b92eede8409cd6185a12e6c72d0ec8a0d7bf47c46b872101",
-      "size": 1475
+      "sha256": "fffff52409e1e6d66d194676166efa4ada8157f3299053ef1f0a033e8703999e",
+      "size": 2644
     },
     {
       "path": "docs/MASTER_PLAN.md",
@@ -232,6 +232,41 @@
       "path": "docs/autonomous_loop_contract.md",
       "sha256": "8114744d395284de4b2bb4fc6cbae72ff60de34ae1d4301fb8bf8875bbc9c2dc",
       "size": 2330
+    },
+    {
+      "path": "docs/legacy/surebet-research/105_polymarket_complete_set_paper_experiment_gate_after_prompt28.md",
+      "sha256": "7d2e5630a08efad9584681da2750137a5d5b99835e6b9e183fb7a3f3678d4c97",
+      "size": 2146
+    },
+    {
+      "path": "docs/legacy/surebet-research/90_stage25_prompt26_surebet_academic_review_and_next_steps.md",
+      "sha256": "cb5f2cc2cfa12a86bcb42d33eec03a48a6738976868a3d60fd99bb6e680ff3c0",
+      "size": 2007
+    },
+    {
+      "path": "docs/legacy/surebet-research/91_surebet_math_and_execution_corrections_after_prompt26.md",
+      "sha256": "e7a7323ed03b15ea123e8a1a927ad4585443a5c1fca110563f906ce6a9b8c922",
+      "size": 1661
+    },
+    {
+      "path": "docs/legacy/surebet-research/92_surebet_operational_research_plan_after_prompt26.md",
+      "sha256": "d3675b7eb205267d3f69b08c9b92cc5c2c225511017f46c79c29ddd69184012d",
+      "size": 1632
+    },
+    {
+      "path": "docs/legacy/surebet-research/98_stage27_reference_bot_repository_audit_and_next_steps.md",
+      "sha256": "35ea54dd9011181fabfd9cfd61fb4bedf9f13695455ddc2a374b03ae593775e9",
+      "size": 2523
+    },
+    {
+      "path": "docs/legacy/surebet-research/99_surebet_system_design_lessons_from_reference_bots.md",
+      "sha256": "20dfa2a685512e487c1ad8b97d9eb1caeb3d8a41020bfb5298ba5c93819969a3",
+      "size": 3659
+    },
+    {
+      "path": "docs/legacy/surebet-research/README.md",
+      "sha256": "181d0e66b0fa1a84b159c0c34bb6e2ffca0d4bdf1cb3b0f586a6bcbee5acdbbe",
+      "size": 805
     },
     {
       "path": "docs/operations/autonomous_72h_runbook.md",
@@ -245,8 +280,8 @@
     },
     {
       "path": "docs/repo_status_current.md",
-      "sha256": "536dd8a607a14ab83ab1a743f5b6fcaa18e11ea39b1e9c19a51115a508ad112c",
-      "size": 5596
+      "sha256": "bd7d1881851c8b4390149f795b759ed229f1a9e7dbab837549756ea93ddb48da",
+      "size": 6072
     },
     {
       "path": "open_log.sh",
@@ -269,9 +304,214 @@
       "size": 7599
     },
     {
+      "path": "research/imported-from-betting-win/legacy/surebet/README.md",
+      "sha256": "bfce3135c50a59b260c2ff53820f99523fd9cf927491a955f133be8890533736",
+      "size": 647
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/2026-06-18_prompt_26_openalex_raw.json",
+      "sha256": "755dceb37478c8bc8aef31ac3007efd8fc6dfbb1b2154e629f55de97b80e165f",
+      "size": 644654
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/2026-06-18_prompt_26_result_surebet_academic_review.md",
+      "sha256": "90ef94d824b95d05b9f326fde5978c4d799c44007810260b4ab6616d4c7e12c9",
+      "size": 89893
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/2026-06-18_stage25_prompt26_reviewed_assessment.md",
+      "sha256": "630f0ed33dbee5a24d461fbeaa6cc67a54741f0935cac3d51cebe6eafe12a351",
+      "size": 4340
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/README.md",
+      "sha256": "28a21b5fabca62fd6abbe73e479a2e7375c496cb2b073026c9df565b5872f6d7",
+      "size": 961
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/surebet_prompt26_core_claim_audit.csv",
+      "sha256": "9f8d6fb4c0a151ae0b3cc07fe9fcd0b0a47b305790f524081b3d681957fcb5c8",
+      "size": 3624
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/surebet_prompt26_duplicate_groups.csv",
+      "sha256": "f942b9664c5de47b7d5d34a404b44da372777412612e6d91569dbcef4ea2435d",
+      "size": 3519
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/surebet_prompt26_evidence_gaps_review.csv",
+      "sha256": "7a9b9cd8ca70929cf50368724d8572ac79716846fb7c294fe82a2dfbb16eba16",
+      "size": 1282
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/surebet_prompt26_execution_risk_priorities.csv",
+      "sha256": "06f4407dadf2d43ac050c4a8fd9ca6d9edc376c94bd01fc87eb76b42f1235995",
+      "size": 1293
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/surebet_prompt26_market_type_review.csv",
+      "sha256": "86c3f7b08b351771addafb8d9dd3a1c582218e70effd29c3a9479c530a21787b",
+      "size": 776
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/surebet_prompt26_math_corrections.csv",
+      "sha256": "1078017a675529324f60b7dab7d7f3d2746e8daa613258a2769dd1453cb4c945",
+      "size": 1629
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/surebet_prompt26_methodology_flags.csv",
+      "sha256": "2658f0f96747d2ac1a48cacbf6ac5122f6446957f58937c14bf8882bb600afa9",
+      "size": 1558
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/surebet_prompt26_next_research_queue.csv",
+      "sha256": "ec8150ce4b2b614a218b751a7656d3db7ace98745bfd2b77bc1a744f512daadb",
+      "size": 989
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/surebet_prompt26_paper_catalogue.csv",
+      "sha256": "3b07e9297ccdb5e56b7523316313ff5d0af486cc553affc26eb72c20850bcb42",
+      "size": 144980
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/surebet_prompt26_relevance_quality.csv",
+      "sha256": "ed4ab2fd91ed92e48ed7e20af83afbc0eb88aa0c75efdbfc4d936078e05f9a2e",
+      "size": 478
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/surebet_prompt26_search_query_audit.csv",
+      "sha256": "8272a4863d22bfc56a7bd24c1ad3612e7d0b8a4ab513a7bab3e13c4d892a7dc8",
+      "size": 5664
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/surebet_prompt26_search_summary_audit.csv",
+      "sha256": "a3c20bd013c005f99baed9d72993a5e2c7656798a640c5d99097ee840410c939",
+      "size": 861
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/surebet_prompt26_source_artifact_hashes.csv",
+      "sha256": "3abd71a1b0b6d1ad614819db086b5aa51ee46bccbd01ae86e8b66a73808ac1f2",
+      "size": 442
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/surebet_prompt26_sport_ranking_review.csv",
+      "sha256": "1472dbf0ff9166ad0aba061b665820a9aafa2452621ba52d34e891e36a7f67c1",
+      "size": 1103
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/surebet_prompt26_strategy_decision.csv",
+      "sha256": "907a773a22db7dad317a1fef5f35e3e9e7557a2d3b1993de838429a0ab703c17",
+      "size": 1076
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/bots/2026-06-18_stage27_reference_bot_repository_audit.md",
+      "sha256": "82b70eaf464e2b586ae4e565ad30eb584c3138e9008563f8aec8123da014cb8e",
+      "size": 9737
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/bots/README.md",
+      "sha256": "08b9f47b278d44be08cf8831b1d912f429db6ef88be66012529e755e287b6b44",
+      "size": 1274
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/bots/stage27_architecture_pattern_matrix.csv",
+      "sha256": "c46f88a28b4d3e15193c65ce74d22d3fd47b4347c5ceebb10cbdb4af435f0ec0",
+      "size": 2125
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/bots/stage27_archive_inventory.csv",
+      "sha256": "74eb9ffbcfd43f1140ee15f830cce4dbd4a2d2beed3f000b48a1b8e71bb186c2",
+      "size": 5107
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/bots/stage27_dependency_currentness.csv",
+      "sha256": "cc3dc0e57a810933de443bc561cf6f2292cda94d27633572e63103152c10728d",
+      "size": 934
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/bots/stage27_execution_atomicity_matrix.csv",
+      "sha256": "14b57fbde153b68a45d3f4c116fe2357355b3b5fa3e4877e38fb11fa58ae6dfc",
+      "size": 1653
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/bots/stage27_market_identity_risk_matrix.csv",
+      "sha256": "e3c29e89d1cb8cce679d19eaf2267d4bc2ceef265d7d5d275fd4e7fdeb232b3b",
+      "size": 1783
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/bots/stage27_next_research_queue.csv",
+      "sha256": "be32e11c2e4ae1f3b6803b7592384a241afb6166145ac365bd2bc10411374001",
+      "size": 912
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/bots/stage27_provider_lessons.csv",
+      "sha256": "ba9014a80cc8f6dff147d607884b716d91a6a5a7dd522d37ac947ab8fc7f7a10",
+      "size": 938
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/bots/stage27_rejected_patterns.csv",
+      "sha256": "6eb974df2275d003e6130eef3556663b07553bce879bb90e81e1601d50a3e897",
+      "size": 1693
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/bots/stage27_repository_classification.csv",
+      "sha256": "93c29c9f1a979ecb1e60b0e293f455400f534eb261964255ca55a5714700e3bf",
+      "size": 1544
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/bots/stage27_reusable_patterns.csv",
+      "sha256": "34afa9a9d227379150cbd018cb268ba788fcfe3ec1961af1333cc05095ee7a5c",
+      "size": 1210
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/bots/stage27_security_findings.csv",
+      "sha256": "3d9c5bc65eea06a986d5d927cbc93d31872f54d66afdcb4e3799bbc486caa371",
+      "size": 1824
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/bots/stage27_source_file_hashes.csv",
+      "sha256": "f62364120ee66ff9c3443680b794083e7f11448dafb016c70281f5577514796f",
+      "size": 7690
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/bots/stage27_surebet_pattern_audit.csv",
+      "sha256": "80c0843ea2e1f4baf540a828b1e7375676caacd55b099e87685d0af02a062882",
+      "size": 2122
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/bots/stage27_verification_results.csv",
+      "sha256": "73cec7b3851f70c131f51608fc3d0e11d692c52865b2d68fce30b4d8c519391b",
+      "size": 1349
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/synthesis/stage28_surebet_decision.csv",
+      "sha256": "1142bc9ff76af1c31a51a1e1cae742987e09f18d6bf1596b8928a28ef1c084d7",
+      "size": 817
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/synthesis/stage34_surebet_family_comparison.csv",
+      "sha256": "dd67acfde462fa8513caa9125084e5256babfdb39ca7c01e0f1a3531850a27e8",
+      "size": 968
+    },
+    {
       "path": "run-autonomous-implementation.sh",
       "sha256": "aa8142d236dce3ed6b121afb994f4dd32ea2cce4a73ba895caed0c983e9b2b2f",
       "size": 20734
+    },
+    {
+      "path": "schemas/imported-from-betting-win/legacy/surebet/README.md",
+      "sha256": "9f4c9d08e2a97a4292bded8bd0d24dfd1b2d84a8bbeb94e38b50f7f3c8567183",
+      "size": 572
+    },
+    {
+      "path": "schemas/imported-from-betting-win/legacy/surebet/surebet_academic_evidence_and_paper_arbitrage_v0.sql",
+      "sha256": "d1683dcd7c33d5cb23dfc91e27dafaa93e9a2fa2a8813559c22a5aa3f4b60605",
+      "size": 2928
+    },
+    {
+      "path": "schemas/imported-from-betting-win/legacy/surebet/surebet_market_identity_cashflow_and_completion_v0.sql",
+      "sha256": "b87a47db381d8780a3848d88f58304d2a290996165e0127d6a287f9c5e89ba32",
+      "size": 7559
     },
     {
       "path": "scripts/create-source-handoff-archive.sh",
@@ -355,8 +595,8 @@
     },
     {
       "path": "scripts/validate_repo.py",
-      "sha256": "a5a6fe91ee6b338a11f62348b56cfbca7686bf7d9079c998b012407c9eeea872",
-      "size": 5641
+      "sha256": "7aeb3e8026257c3f1271cf31cde882348765700d6f9e23796c6f9de8dfbbdd82",
+      "size": 5868
     },
     {
       "path": "scripts/validate_shell_local_assignments.py",
@@ -370,8 +610,8 @@
     },
     {
       "path": "scripts/validate_three_repo_surebet_boundary.py",
-      "sha256": "3ba6849ca1b0c863c4c8e0dd9c2c88da832acddc4039b7a7614fa06af90bc9e6",
-      "size": 6727
+      "sha256": "388f846c8f206ecc15887b83501381fafa670522d520512c44d72024f25ce709",
+      "size": 8479
     },
     {
       "path": "src/adapters/betting-win-export-reader.ts",
@@ -517,6 +757,16 @@
       "path": "stop.sh",
       "sha256": "d9591d3e7c489f2b590aa90039bc27073edf65c25a08cb6bbf6fbd99585ffbfe",
       "size": 182
+    },
+    {
+      "path": "templates/imported-from-betting-win/legacy/surebet/README.md",
+      "sha256": "8ce379a9a706f5a645c2f6dc18c849c0ba165ae068a3e3c045757b07f9759995",
+      "size": 384
+    },
+    {
+      "path": "templates/imported-from-betting-win/legacy/surebet/surebet_market_identity_and_cashflow_review_template.md",
+      "sha256": "2cb7a4471254f6ed3c74b746fc14c6da9a20674d0d072f10f5d344306c7f784f",
+      "size": 1087
     },
     {
       "path": "tests/autonomous-continuation-contract.test.ts",
@@ -705,8 +955,8 @@
     },
     {
       "path": "tests/three-repo-surebet-boundary.test.ts",
-      "sha256": "0982712441ce6dedfd7574b20abdf6765546ddfcf4f86ac21dcac75824ad0adf",
-      "size": 2101
+      "sha256": "6192810eebed5b8a077d0646eefa891983afbbefca27301d44d7275c8d2eb9d3",
+      "size": 2684
     },
     {
       "path": "tests/validate-artifact-hygiene.test.ts",

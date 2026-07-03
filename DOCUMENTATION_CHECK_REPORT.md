@@ -1,74 +1,59 @@
-# Documentation check report — betting-win-surebet three-repo boundary
+# Documentation check report — betting-win-surebet boundary follow-up
 
 Date: 2026-07-03
 
-Source checked: `betting-win-surebet9(3).zip`
+Source checked: `betting-win-surebet10.zip`
 
 ## Result
 
-The repo was already clean from a safety perspective: no provider-history docs, predictive/value-betting docs, or imported legacy tree needed to be removed from this repo.
-
-The remaining documentation issue was scope wording. Active docs described the repo mostly as a private paper-only skeleton. That is correct for the current gate, but incomplete for the accepted three-repo target architecture.
-
-This overlay rebaselines active docs to:
+The three-repo boundary overlay landed correctly, but the uploaded repo now contains a temporary legacy import tree:
 
 ```text
-betting-win-surebet = surebet/complete-set strategy and execution repo
-current_gate = private paper-only, no providers, no live execution
-provider_truth_owner = betting-win
-predictive_strategy_owner = betting-win-betting
-account_policy = separate_from_betting-win-betting
-backtesting_owner = betting-win-surebet
-paper_mode_owner = betting-win-surebet
-future_live_decision_owner = betting-win-surebet_after_explicit_gate
+docs/imported-from-betting-win/
 ```
 
-## Files updated
+That conflicts with `docs/023_legacy_betting_win_surebet_import_manifest.md`, which still said the legacy surebet material had not been imported. It also leaves raw OpenAlex, bot-reference, schema, and synthesis artifacts under `docs/`, where they can be mistaken for active operator documentation.
 
-- README.md
-- AGENTS.md
-- PROJECT_STATUS.md
-- STARTER_PACK.md
-- CHANGELOG.md
-- package.json
-- package-lock.json
-- SOURCE_MANIFEST.json
-- docs/MASTER_PLAN.md
-- docs/repo_status_current.md
-- docs/001_scope_and_boundaries.md
-- docs/002_dependency_contract_with_betting_win.md
-- docs/003_surebet_family_decision.md
-- docs/004_market_identity_and_rule_equivalence.md
-- docs/005_terminal_scenario_cashflow_model.md
-- docs/006_quote_depth_capacity_requirements.md
-- docs/010_paper_evaluation_and_kill_criteria.md
-- docs/011_validation_matrix.md
-- docs/012_runbook.md
-- docs/016_pinned_betting_win_interface_readiness.md
-- docs/018_private_paper_mode_runbook.md
-- docs/autonomous_loop_contract.md
-- docs/operations/autonomous_72h_runbook.md
-- docs/operations/service_run.md
-- decisions/ADR-0001-repo-boundary-and-no-provider-connections.md
-- decisions/ADR-0003-paper-only-no-execution.md
-- scripts/validate_repo.py
-- tests/validate-repo-contract.test.ts
-- tests/validation-matrix-contract.test.ts
+## Follow-up action
 
-## Files added
+This follow-up overlay re-homes the imported surebet material into archive-safe destinations:
 
-- docs/019_three_repo_surebet_strategy_boundary.md
-- docs/020_strategy_data_and_state_ownership.md
-- docs/021_backtest_paper_live_mode_roadmap.md
-- docs/022_separate_account_policy.md
-- docs/023_legacy_betting_win_surebet_import_manifest.md
-- decisions/ADR-0004-three-repo-surebet-strategy-execution-boundary.md
-- scripts/validate_three_repo_surebet_boundary.py
-- tests/three-repo-surebet-boundary.test.ts
+```text
+docs/legacy/surebet-research/
+research/imported-from-betting-win/legacy/surebet/
+templates/imported-from-betting-win/legacy/surebet/
+schemas/imported-from-betting-win/legacy/surebet/
+```
+
+The final repo state must remove the temporary source path:
+
+```text
+docs/imported-from-betting-win/
+```
+
+## Boundary status after cleanup
+
+```text
+repo_role=surebet_strategy_execution_repo
+strategy_family=surebet_complete_set_only
+provider_truth_owner=betting-win
+canonical_history_owner=betting-win
+predictive_strategy_owner=betting-win-betting
+backtesting_owner=betting-win-surebet
+paper_mode_owner=betting-win-surebet
+future_live_decision_owner=betting-win-surebet_after_explicit_gate
+account_policy=separate_from_betting-win-betting
+legacy_surebet_import_status=imported_and_rehomed
+source_import_path_removed=yes
+raw_research_artifacts_under_docs=no
+```
 
 ## Delete/move decision
 
-No `rm` or `mv` is required for this repo in this wave.
+After applying this overlay, run the cleanup command that removes the temporary import source path:
 
-There is no local `docs/imported-from-betting-win` tree to delete. Surebet-specific legacy material from `betting-win` should be imported later only after all three repo documentation passes are complete and the old `betting-win` validator/path references are safe.
+```bash
+rm -rf docs/imported-from-betting-win
+```
 
+No additional `mv` command is required because this overlay already includes the re-homed archive copies.

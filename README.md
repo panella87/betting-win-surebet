@@ -39,6 +39,17 @@ local deterministic contracts, fixture readers, paper math, simulation state mac
 real upstream evaluation = blocked until Federico provides the pinned betting-win contract/export interface
 ```
 
+
+## Legacy surebet research archive
+
+```text
+legacy_surebet_import_status=imported_and_rehomed
+source_import_path_removed=yes
+active_authority=no
+```
+
+Historical surebet material imported from the original `betting-win` repo is retained under `docs/legacy/surebet-research/`, `research/imported-from-betting-win/legacy/surebet/`, `schemas/imported-from-betting-win/legacy/surebet/`, and `templates/imported-from-betting-win/legacy/surebet/`. The stale temporary path `docs/imported-from-betting-win/` must remain absent.
+
 ## Source of truth
 
 Read these first:

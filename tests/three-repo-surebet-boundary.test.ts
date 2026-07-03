@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const REPO_ROOT = process.cwd();
@@ -40,11 +40,17 @@ test('separate account policy is explicit and not delegated to betting-win', () 
   assert.match(policy, /betting-win_account_coordination=not_owned_here/);
 });
 
-test('legacy import manifest confirms no local delete or move is currently required', () => {
+test('legacy import manifest confirms imported surebet material is re-homed', () => {
   const manifest = read('docs/023_legacy_betting_win_surebet_import_manifest.md');
 
-  assert.match(manifest, /legacy_surebet_import_status=not_yet_imported/);
-  assert.match(manifest, /operator_move_required=no/);
-  assert.match(manifest, /source_import_path_present=no/);
-});
+  assert.match(manifest, /legacy_surebet_import_status=imported_and_rehomed/);
+  assert.match(manifest, /operator_move_status=complete/);
+  assert.match(manifest, /source_import_path_removed=yes/);
+  assert.match(manifest, /active_authority=no/);
 
+  assert.equal(existsSync(join(REPO_ROOT, 'docs/imported-from-betting-win')), false);
+  assert.equal(existsSync(join(REPO_ROOT, 'docs/legacy/surebet-research/README.md')), true);
+  assert.equal(existsSync(join(REPO_ROOT, 'research/imported-from-betting-win/legacy/surebet/README.md')), true);
+  assert.equal(existsSync(join(REPO_ROOT, 'schemas/imported-from-betting-win/legacy/surebet/README.md')), true);
+  assert.equal(existsSync(join(REPO_ROOT, 'templates/imported-from-betting-win/legacy/surebet/README.md')), true);
+});
