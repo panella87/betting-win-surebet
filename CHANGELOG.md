@@ -1,12 +1,5 @@
 # Changelog
 
-## 2026-07-03 - Cross-repo documentation completion checkpoint
-
-- Recorded that the `betting-win`, `betting-win-betting`, and `betting-win-surebet` documentation boundary passes are complete.
-- Added the surebet cross-repo completion status doc.
-- Preserved the completed surebet legacy import archive and kept the stale `docs/imported-from-betting-win/` path forbidden.
-- Kept `rm_required=no` and `mv_required=no`; no cleanup command is pending for this repo.
-
 ## 2026-07-03 — Legacy surebet import cleanup confirmed
 
 - Confirmed the temporary `docs/imported-from-betting-win/` staging path is absent after the legacy surebet rehome.
@@ -125,3 +118,10 @@
 - Hardened local report output containment against realpath/symlink escapes.
 - Added per-candidate settlement summaries for multi-candidate private paper reports.
 - Added validator and tests for the private paper-mode backlog contract.
+
+## 2026-07-04 research archive completion
+
+- Completed research archive ownership migration from `betting-win` into `betting-win-surebet`.
+- Added research import manifest and archive completion status doc.
+- Preserved imported raw OpenAlex JSON bytes with explicit `.gitattributes` rules.
+

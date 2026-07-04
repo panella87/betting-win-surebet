@@ -1,18 +1,33 @@
 {
-  "schema": "three-repo-documentation-completion-overlay.v1",
+  "schema": "betting-win-surebet-doc-boundary-final-cleanup-confirmation-overlay-v1",
   "createdAt": "2026-07-03",
+  "sourceZip": "betting-win-surebet11.zip",
   "repo": "betting-win-surebet",
-  "sourceZip": "betting-win-surebet12.zip",
-  "purpose": "Record cross-repo documentation completion status for the surebet repo; no cleanup command is pending and the imported surebet archives remain final.",
+  "purpose": "Confirm the legacy surebet import cleanup is complete and remove stale pending-cleanup wording from docs/reporting metadata.",
   "deleteOrMoveRequired": false,
   "requiredCleanupCommand": null,
+  "finalLegacyImportStatus": "imported_and_rehomed",
+  "sourceImportPathRemoved": true,
+  "rawResearchArtifactsUnderActiveDocs": false,
   "files": [
-    "CHANGELOG.md",
-    "DOCUMENTATION_CHECK_REPORT.md",
-    "OVERLAY_MANIFEST.json",
-    "SOURCE_MANIFEST.json",
-    "docs/024_three_repo_documentation_completion_status.md",
-    "scripts/validate_repo.py",
-    "scripts/validate_three_repo_surebet_boundary.py"
-  ]
+    {
+      "path": "CHANGELOG.md"
+    },
+    {
+      "path": "DOCUMENTATION_CHECK_REPORT.md"
+    },
+    {
+      "path": "OVERLAY_MANIFEST.json"
+    },
+    {
+      "path": "SOURCE_MANIFEST.json"
+    },
+    {
+      "path": "docs/023_legacy_betting_win_surebet_import_manifest.md"
+    }
+  ],
+  "overlay": "research-archive-completion-2026-07-04",
+  "researchArchiveStatus": "complete",
+  "rmRequired": false,
+  "mvRequired": false
 }

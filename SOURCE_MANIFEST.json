@@ -1,7 +1,7 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-07-03T18:40:07Z",
-  "overlay": "three-repo-documentation-completion-checkpoint",
+  "generated": "2026-07-04T07:14:22Z",
+  "overlay": "research archive completion 2026-07-04",
   "files": [
     {
       "path": ".env.example",
@@ -10,8 +10,8 @@
     },
     {
       "path": ".gitattributes",
-      "sha256": "30f89fa2c10642365fc9de80869ee18886c24e754e4be304ccfd5aab3ac2e5d7",
-      "size": 286
+      "sha256": "fff9628fd61eec217522750bed304b13f3f33e1ff2745772730759e122e68994",
+      "size": 413
     },
     {
       "path": ".gitignore",
@@ -30,18 +30,18 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "68c5865f5e51c970406e26b91a7d420d938bf5d05e9bd19d873774aa52581ebf",
-      "size": 11989
+      "sha256": "e210407c86f7086c74d449c2907d2868791195e8af84ed2b59d782fdfd65a255",
+      "size": 11818
     },
     {
       "path": "DOCUMENTATION_CHECK_REPORT.md",
-      "sha256": "ff15766b05a96d403192f1ddd35a10449bd6f00dea62e8839062ec932f86d163",
-      "size": 2648
+      "sha256": "a5a9817717f9b92514c8bbacd57721aa9ddd4f8393f35d4887a0800904c1388a",
+      "size": 2505
     },
     {
       "path": "OVERLAY_MANIFEST.json",
-      "sha256": "0ff1a340c09478d4b078fc0196fa5df7fcb17ecd1ba3935673c13ed4d79dc247",
-      "size": 684
+      "sha256": "dce1d81595ed9f6720fc09228e259cb91181ff72eaeb1871da645a4f39f3bfdc",
+      "size": 982
     },
     {
       "path": "PROJECT_STATUS.md",
@@ -224,9 +224,9 @@
       "size": 2833
     },
     {
-      "path": "docs/024_three_repo_documentation_completion_status.md",
-      "sha256": "efd1aee96fa1bc79564de7b3d8a08844dba8b58444f6027763f76558d33fb075",
-      "size": 1440
+      "path": "docs/025_research_archive_completion_status.md",
+      "sha256": "86e1bbf92ad524c5b127bfe511cffc24231b884eacc1211c0fefc26d099237e3",
+      "size": 710
     },
     {
       "path": "docs/MASTER_PLAN.md",
@@ -310,8 +310,13 @@
     },
     {
       "path": "research/imported-from-betting-win/legacy/surebet/README.md",
-      "sha256": "bfce3135c50a59b260c2ff53820f99523fd9cf927491a955f133be8890533736",
-      "size": 647
+      "sha256": "99ca64d7c46d52b45475870af04d488f6c5336e93583b38f35b30313d537fda9",
+      "size": 888
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/RESEARCH_IMPORT_MANIFEST.json",
+      "sha256": "da5b40903d904bc5d77684a5de2fca3f6c03d0ea6eb2c8c945e1f8c9fc7f6f5d",
+      "size": 9931
     },
     {
       "path": "research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/2026-06-18_prompt_26_openalex_raw.json",
@@ -489,6 +494,21 @@
       "size": 1349
     },
     {
+      "path": "research/imported-from-betting-win/legacy/surebet/synthesis/2026-06-18_prompt_28_result_academic_strategy_provider_reference_bot_synthesis.md",
+      "sha256": "d92fecf96c97b81c891fbf4e13b0e0637ed8d611e46e70e6a2638a3a2c8575d1",
+      "size": 38835
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/synthesis/2026-06-18_stage28_reviewed_assessment.md",
+      "sha256": "33c1dc24a8d87d6f47c6c7cb8a436482b35b0e1b11424704501918018a7df2ae",
+      "size": 1204
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/synthesis/cross_sport_prompt27_surebet_bridge_decision.csv",
+      "sha256": "659519feb3db2a3aa5389567c10ef1cf529a96032ec8ffa68546ef3cb352fa49",
+      "size": 509
+    },
+    {
       "path": "research/imported-from-betting-win/legacy/surebet/synthesis/stage28_surebet_decision.csv",
       "sha256": "1142bc9ff76af1c31a51a1e1cae742987e09f18d6bf1596b8928a28ef1c084d7",
       "size": 817
@@ -600,8 +620,8 @@
     },
     {
       "path": "scripts/validate_repo.py",
-      "sha256": "2d39866cdf6f5100d8fa82b7430c73570d89feae7598bd7e217c69b1d1d46a9d",
-      "size": 5925
+      "sha256": "506847e9100be2c3378d7c34d534198fc54a8077c61a5ad4f0d21755c7f15eab",
+      "size": 5999
     },
     {
       "path": "scripts/validate_shell_local_assignments.py",
@@ -615,8 +635,8 @@
     },
     {
       "path": "scripts/validate_three_repo_surebet_boundary.py",
-      "sha256": "5a5a61bac14cc2060129103b26f98594710c69d38e198e2ce1455e69cd8fb8bf",
-      "size": 8932
+      "sha256": "8a37ff253a90253ffa1ba15d563a30f2761d7e518d02a799bc21b92b48034c44",
+      "size": 10377
     },
     {
       "path": "src/adapters/betting-win-export-reader.ts",

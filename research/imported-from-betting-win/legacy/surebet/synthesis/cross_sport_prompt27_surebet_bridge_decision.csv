@@ -1,0 +1,5 @@
+bridge_object,decision,reason
+surebet_core_strategy,not promoted,Prompt 26 still says theory positive but execution evidence missing
+surebet_as_market_identity_test,accepted,cross-sport model/rule mapping can help detect false-equivalence in markets
+surebet_as_stale_odds_detector,accepted_research_role,model-disagreement and CLV can flag stale or off-market quotes
+surebet_execution_module,blocked,"requires executable depth, settlement equivalence, account restrictions, fees and completion evidence"

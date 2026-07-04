@@ -1,0 +1,215 @@
+{
+  "schema": "betting-win-surebet.research-import-manifest.v1",
+  "repo": "betting-win-surebet",
+  "created": "2026-07-04",
+  "import_type": "surebet_complete_set_research",
+  "active_authority": false,
+  "source_repo": "betting-win",
+  "notes": [
+    "Historical research archive only.",
+    "Provider truth and canonical history remain owned by betting-win.",
+    "Strategy-specific interpretation belongs to this downstream repo."
+  ],
+  "files": [
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/2026-06-18_prompt_26_openalex_raw.json",
+      "sha256": "755dceb37478c8bc8aef31ac3007efd8fc6dfbb1b2154e629f55de97b80e165f",
+      "size": 644654
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/2026-06-18_prompt_26_result_surebet_academic_review.md",
+      "sha256": "90ef94d824b95d05b9f326fde5978c4d799c44007810260b4ab6616d4c7e12c9",
+      "size": 89893
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/2026-06-18_stage25_prompt26_reviewed_assessment.md",
+      "sha256": "630f0ed33dbee5a24d461fbeaa6cc67a54741f0935cac3d51cebe6eafe12a351",
+      "size": 4340
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/README.md",
+      "sha256": "28a21b5fabca62fd6abbe73e479a2e7375c496cb2b073026c9df565b5872f6d7",
+      "size": 961
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/surebet_prompt26_core_claim_audit.csv",
+      "sha256": "9f8d6fb4c0a151ae0b3cc07fe9fcd0b0a47b305790f524081b3d681957fcb5c8",
+      "size": 3624
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/surebet_prompt26_duplicate_groups.csv",
+      "sha256": "f942b9664c5de47b7d5d34a404b44da372777412612e6d91569dbcef4ea2435d",
+      "size": 3519
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/surebet_prompt26_evidence_gaps_review.csv",
+      "sha256": "7a9b9cd8ca70929cf50368724d8572ac79716846fb7c294fe82a2dfbb16eba16",
+      "size": 1282
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/surebet_prompt26_execution_risk_priorities.csv",
+      "sha256": "06f4407dadf2d43ac050c4a8fd9ca6d9edc376c94bd01fc87eb76b42f1235995",
+      "size": 1293
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/surebet_prompt26_market_type_review.csv",
+      "sha256": "86c3f7b08b351771addafb8d9dd3a1c582218e70effd29c3a9479c530a21787b",
+      "size": 776
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/surebet_prompt26_math_corrections.csv",
+      "sha256": "1078017a675529324f60b7dab7d7f3d2746e8daa613258a2769dd1453cb4c945",
+      "size": 1629
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/surebet_prompt26_methodology_flags.csv",
+      "sha256": "2658f0f96747d2ac1a48cacbf6ac5122f6446957f58937c14bf8882bb600afa9",
+      "size": 1558
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/surebet_prompt26_next_research_queue.csv",
+      "sha256": "ec8150ce4b2b614a218b751a7656d3db7ace98745bfd2b77bc1a744f512daadb",
+      "size": 989
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/surebet_prompt26_paper_catalogue.csv",
+      "sha256": "3b07e9297ccdb5e56b7523316313ff5d0af486cc553affc26eb72c20850bcb42",
+      "size": 144980
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/surebet_prompt26_relevance_quality.csv",
+      "sha256": "ed4ab2fd91ed92e48ed7e20af83afbc0eb88aa0c75efdbfc4d936078e05f9a2e",
+      "size": 478
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/surebet_prompt26_search_query_audit.csv",
+      "sha256": "8272a4863d22bfc56a7bd24c1ad3612e7d0b8a4ab513a7bab3e13c4d892a7dc8",
+      "size": 5664
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/surebet_prompt26_search_summary_audit.csv",
+      "sha256": "a3c20bd013c005f99baed9d72993a5e2c7656798a640c5d99097ee840410c939",
+      "size": 861
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/surebet_prompt26_source_artifact_hashes.csv",
+      "sha256": "3abd71a1b0b6d1ad614819db086b5aa51ee46bccbd01ae86e8b66a73808ac1f2",
+      "size": 442
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/surebet_prompt26_sport_ranking_review.csv",
+      "sha256": "1472dbf0ff9166ad0aba061b665820a9aafa2452621ba52d34e891e36a7f67c1",
+      "size": 1103
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/surebet_prompt26_strategy_decision.csv",
+      "sha256": "907a773a22db7dad317a1fef5f35e3e9e7557a2d3b1993de838429a0ab703c17",
+      "size": 1076
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/bots/2026-06-18_stage27_reference_bot_repository_audit.md",
+      "sha256": "82b70eaf464e2b586ae4e565ad30eb584c3138e9008563f8aec8123da014cb8e",
+      "size": 9737
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/bots/README.md",
+      "sha256": "08b9f47b278d44be08cf8831b1d912f429db6ef88be66012529e755e287b6b44",
+      "size": 1274
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/bots/stage27_architecture_pattern_matrix.csv",
+      "sha256": "c46f88a28b4d3e15193c65ce74d22d3fd47b4347c5ceebb10cbdb4af435f0ec0",
+      "size": 2125
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/bots/stage27_archive_inventory.csv",
+      "sha256": "74eb9ffbcfd43f1140ee15f830cce4dbd4a2d2beed3f000b48a1b8e71bb186c2",
+      "size": 5107
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/bots/stage27_dependency_currentness.csv",
+      "sha256": "cc3dc0e57a810933de443bc561cf6f2292cda94d27633572e63103152c10728d",
+      "size": 934
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/bots/stage27_execution_atomicity_matrix.csv",
+      "sha256": "14b57fbde153b68a45d3f4c116fe2357355b3b5fa3e4877e38fb11fa58ae6dfc",
+      "size": 1653
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/bots/stage27_market_identity_risk_matrix.csv",
+      "sha256": "e3c29e89d1cb8cce679d19eaf2267d4bc2ceef265d7d5d275fd4e7fdeb232b3b",
+      "size": 1783
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/bots/stage27_next_research_queue.csv",
+      "sha256": "be32e11c2e4ae1f3b6803b7592384a241afb6166145ac365bd2bc10411374001",
+      "size": 912
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/bots/stage27_provider_lessons.csv",
+      "sha256": "ba9014a80cc8f6dff147d607884b716d91a6a5a7dd522d37ac947ab8fc7f7a10",
+      "size": 938
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/bots/stage27_rejected_patterns.csv",
+      "sha256": "6eb974df2275d003e6130eef3556663b07553bce879bb90e81e1601d50a3e897",
+      "size": 1693
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/bots/stage27_repository_classification.csv",
+      "sha256": "93c29c9f1a979ecb1e60b0e293f455400f534eb261964255ca55a5714700e3bf",
+      "size": 1544
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/bots/stage27_reusable_patterns.csv",
+      "sha256": "34afa9a9d227379150cbd018cb268ba788fcfe3ec1961af1333cc05095ee7a5c",
+      "size": 1210
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/bots/stage27_security_findings.csv",
+      "sha256": "3d9c5bc65eea06a986d5d927cbc93d31872f54d66afdcb4e3799bbc486caa371",
+      "size": 1824
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/bots/stage27_source_file_hashes.csv",
+      "sha256": "f62364120ee66ff9c3443680b794083e7f11448dafb016c70281f5577514796f",
+      "size": 7690
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/bots/stage27_surebet_pattern_audit.csv",
+      "sha256": "80c0843ea2e1f4baf540a828b1e7375676caacd55b099e87685d0af02a062882",
+      "size": 2122
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/bots/stage27_verification_results.csv",
+      "sha256": "73cec7b3851f70c131f51608fc3d0e11d692c52865b2d68fce30b4d8c519391b",
+      "size": 1349
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/synthesis/2026-06-18_prompt_28_result_academic_strategy_provider_reference_bot_synthesis.md",
+      "sha256": "d92fecf96c97b81c891fbf4e13b0e0637ed8d611e46e70e6a2638a3a2c8575d1",
+      "size": 38835
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/synthesis/2026-06-18_stage28_reviewed_assessment.md",
+      "sha256": "33c1dc24a8d87d6f47c6c7cb8a436482b35b0e1b11424704501918018a7df2ae",
+      "size": 1204
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/synthesis/cross_sport_prompt27_surebet_bridge_decision.csv",
+      "sha256": "659519feb3db2a3aa5389567c10ef1cf529a96032ec8ffa68546ef3cb352fa49",
+      "size": 509
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/synthesis/stage28_surebet_decision.csv",
+      "sha256": "1142bc9ff76af1c31a51a1e1cae742987e09f18d6bf1596b8928a28ef1c084d7",
+      "size": 817
+    },
+    {
+      "path": "research/imported-from-betting-win/legacy/surebet/synthesis/stage34_surebet_family_comparison.csv",
+      "sha256": "dd67acfde462fa8513caa9125084e5256babfdb39ca7c01e0f1a3531850a27e8",
+      "size": 968
+    }
+  ]
+}
