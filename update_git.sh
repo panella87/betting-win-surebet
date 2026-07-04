@@ -1,9 +1,14 @@
 #!/usr/bin/env bash
-# Source-safe git helper. Uses GITHUB_TOKEN through GIT_ASKPASS; no Authorization extraheader injection.
+# Universal update_git.sh
+# Default action with no args: --pull
+# Source-safe: returns non-zero without terminating an interactive parent shell.
 
-ug_usage() {
+usage() {
   cat <<'USAGE'
 Usage: ./update_git.sh [command]
+
+Default with no args:
+  --pull
 
 Commands:
   --status
@@ -13,22 +18,32 @@ Commands:
   --add-commit-push [-m|--message MESSAGE]
   --acp [-m|--message MESSAGE]
   --clone OWNER/REPO TARGET_DIR
+  -h, --help
 
-Notes:
-  --acp is shorthand for git add -A, commit, and push.
-  If no commit message is provided, a safe generic message is selected.
-  GITHUB_TOKEN is read from the environment first, then from .env without sourcing it.
-  Token auth uses GIT_ASKPASS and does not write the token to git config.
+Auth:
+  Reads GITHUB_TOKEN from environment first, then .env.
+  Uses GIT_ASKPASS for GitHub HTTPS auth.
+  Does not inject Authorization extraheaders.
+  Does not persist token in .git/config.
 USAGE
 }
 
-ug_fail() { printf 'ERROR: %s\n' "$*" >&2; return 1; }
-ug_have() { command -v "$1" >/dev/null 2>&1; }
+say_error() {
+  printf 'ERROR: %s\n' "$*" >&2
+}
 
-ug_read_env_value() {
-  local key="$1" env_file="${2:-.env}" line value
+script_dir() {
+  local src dir
+  src="${BASH_SOURCE[0]:-$0}"
+  dir="$(cd "$(dirname "$src")" 2>/dev/null && pwd -P)" || return 1
+  printf '%s\n' "$dir"
+}
+
+read_env_value() {
+  local key="$1" env_file line value
+  env_file="${ENV_FILE:-.env}"
   [ -f "$env_file" ] || return 1
-  line="$(grep -E "^[[:space:]]*${key}=" "$env_file" | tail -n 1)" || return 1
+  line="$(grep -E "^[[:space:]]*${key}=" "$env_file" 2>/dev/null | tail -n 1)" || return 1
   [ -n "$line" ] || return 1
   value="${line#*=}"
   value="${value%$'\r'}"
@@ -37,164 +52,211 @@ ug_read_env_value() {
   printf '%s\n' "$value"
 }
 
-ug_github_token() {
-  if [ -n "${GITHUB_TOKEN:-}" ]; then
-    printf '%s\n' "$GITHUB_TOKEN"
+read_setting() {
+  local key="$1" env_value file_value
+  env_value="${!key:-}"
+  if [ -n "$env_value" ]; then
+    printf '%s\n' "$env_value"
     return 0
   fi
-  ug_read_env_value GITHUB_TOKEN .env
+  file_value="$(read_env_value "$key")" || return 1
+  [ -n "$file_value" ] || return 1
+  printf '%s\n' "$file_value"
 }
 
-ug_github_user() {
-  if [ -n "${GITHUB_USER:-}" ]; then
-    printf '%s\n' "$GITHUB_USER"
-    return 0
-  fi
-  ug_read_env_value GITHUB_USER .env 2>/dev/null || printf 'x-access-token\n'
+read_github_token() {
+  read_setting GITHUB_TOKEN
 }
 
-ug_is_github_https_url() {
+read_github_user() {
+  local value
+  value="$(read_setting GITHUB_USER 2>/dev/null)" && [ -n "$value" ] && { printf '%s\n' "$value"; return 0; }
+  value="$(read_setting GIT_USER 2>/dev/null)" && [ -n "$value" ] && { printf '%s\n' "$value"; return 0; }
+  printf '%s\n' "x-access-token"
+}
+
+is_github_https_url() {
   case "${1:-}" in
     https://github.com/*|https://*@github.com/*) return 0 ;;
     *) return 1 ;;
   esac
 }
 
-ug_clear_extraheaders() {
+canonical_github_url() {
+  local url="$1" rest
+  case "$url" in
+    https://github.com/*)
+      printf '%s\n' "$url"
+      return 0
+      ;;
+    https://*@github.com/*)
+      rest="${url#https://*@github.com/}"
+      printf 'https://github.com/%s\n' "$rest"
+      return 0
+      ;;
+    *)
+      printf '%s\n' "$url"
+      return 0
+      ;;
+  esac
+}
+
+make_askpass() {
+  local askpass_file="$1"
+  cat > "$askpass_file" <<'ASKPASS'
+#!/usr/bin/env sh
+case "$1" in
+  *Username*) printf '%s\n' "${GITHUB_USER_FOR_ASKPASS:-x-access-token}" ;;
+  *Password*) printf '%s\n' "${GITHUB_TOKEN_FOR_ASKPASS:-}" ;;
+  *) printf '%s\n' "${GITHUB_TOKEN_FOR_ASKPASS:-}" ;;
+esac
+ASKPASS
+  chmod 700 "$askpass_file" 2>/dev/null || return 1
+  return 0
+}
+
+clear_local_extraheaders_quietly() {
   git config --local --unset-all http.extraheader >/dev/null 2>&1 || true
   git config --local --unset-all http.https://github.com/.extraheader >/dev/null 2>&1 || true
   git config --local --unset-all http.https://panella87@github.com/.extraheader >/dev/null 2>&1 || true
-  return 0
 }
 
-ug_git_with_token_if_needed() {
-  local remote_url token askpass rc username
-  remote_url="$(git remote get-url origin 2>/dev/null)" || remote_url=""
-  if ug_is_github_https_url "$remote_url"; then
-    token="$(ug_github_token)" || { ug_fail "GITHUB_TOKEN missing in environment or .env"; return 2; }
-    username="$(ug_github_user)"
-    askpass="$(mktemp)" || return 1
-    cat > "$askpass" <<'ASKPASS'
-#!/usr/bin/env sh
-case "$1" in
-  *Username*) printf '%s\n' "${GIT_USERNAME_FOR_ASKPASS:-x-access-token}" ;;
-  *) printf '%s\n' "$GIT_TOKEN_FOR_ASKPASS" ;;
-esac
-ASKPASS
-    chmod 700 "$askpass" 2>/dev/null || true
-    ug_clear_extraheaders
-    GIT_ASKPASS="$askpass" \
-    GIT_TERMINAL_PROMPT=0 \
-    GIT_TOKEN_FOR_ASKPASS="$token" \
-    GIT_USERNAME_FOR_ASKPASS="$username" \
-    git \
-      -c credential.helper= \
-      -c http.extraheader= \
-      -c http.https://github.com/.extraheader= \
-      -c http.https://panella87@github.com/.extraheader= \
-      "$@"
-    rc=$?
-    rm -f "$askpass"
-    return "$rc"
+git_with_token_if_needed() {
+  local remote_url canonical_url token user askpass_file rc
+  remote_url="$(git remote get-url origin 2>/dev/null)" || return $?
+  if ! is_github_https_url "$remote_url"; then
+    git "$@"
+    return $?
   fi
-  git "$@"
-  return $?
+
+  token="$(read_github_token)" || {
+    say_error "origin is GitHub HTTPS but GITHUB_TOKEN is missing from environment/.env"
+    return 2
+  }
+  [ -n "$token" ] || {
+    say_error "origin is GitHub HTTPS but GITHUB_TOKEN is empty"
+    return 2
+  }
+
+  user="$(read_github_user)"
+  canonical_url="$(canonical_github_url "$remote_url")"
+  askpass_file="$(mktemp 2>/dev/null)" || {
+    say_error "mktemp failed"
+    return 1
+  }
+  make_askpass "$askpass_file" || {
+    rm -f "$askpass_file"
+    say_error "could not create temporary askpass helper"
+    return 1
+  }
+
+  clear_local_extraheaders_quietly
+  GIT_TERMINAL_PROMPT=0 \
+  GIT_ASKPASS="$askpass_file" \
+  GITHUB_TOKEN_FOR_ASKPASS="$token" \
+  GITHUB_USER_FOR_ASKPASS="$user" \
+  git \
+    -c credential.helper= \
+    -c http.extraheader= \
+    -c http.https://github.com/.extraheader= \
+    -c http."$canonical_url".extraheader= \
+    "$@"
+  rc=$?
+  rm -f "$askpass_file"
+  return "$rc"
 }
 
-ug_require_repo() {
-  git rev-parse --is-inside-work-tree >/dev/null 2>&1 || { ug_fail "not inside a git repository"; return 2; }
+require_git_repo() {
+  git rev-parse --is-inside-work-tree >/dev/null 2>&1 || {
+    say_error "not inside a git repository"
+    return 2
+  }
   return 0
 }
 
-ug_require_branch() {
+require_not_detached() {
   local branch
   branch="$(git symbolic-ref --quiet --short HEAD 2>/dev/null)" || branch=""
-  [ -n "$branch" ] || { ug_fail "detached HEAD is not supported"; return 2; }
+  [ -n "$branch" ] || {
+    say_error "detached HEAD is not supported"
+    return 2
+  }
   return 0
 }
 
-ug_require_clean_for_pull() {
-  if [ -n "$(git status --porcelain)" ]; then
-    ug_fail "working tree is dirty; commit/stash before --pull"
-    git status --short >&2 || true
+require_clean_tree_for_pull() {
+  local status
+  status="$(git status --porcelain 2>/dev/null)" || return $?
+  if [ -n "$status" ]; then
+    say_error "working tree is dirty; commit/stash before --pull"
+    git status --short >&2
     return 2
   fi
   return 0
 }
 
-ug_random_message() {
-  local idx messages
-  messages='chore: sync repo state
-chore: save workspace changes
-chore: update project files
-chore: checkpoint repo state
-chore: refresh local changes'
-  idx=$(( RANDOM % 5 + 1 ))
-  printf '%s\n' "$messages" | sed -n "${idx}p"
+random_commit_message() {
+  case $(( RANDOM % 5 )) in
+    0) printf '%s\n' 'chore: sync repo state' ;;
+    1) printf '%s\n' 'chore: save workspace changes' ;;
+    2) printf '%s\n' 'chore: update project files' ;;
+    3) printf '%s\n' 'chore: checkpoint repo state' ;;
+    *) printf '%s\n' 'chore: refresh local changes' ;;
+  esac
 }
 
-ug_is_allowed_env_example() {
-  case "$1" in
-    .env.example|.env.sample|.env.template|*/.env.example|*/.env.sample|*/.env.template) return 0 ;;
+secret_like_path() {
+  local path="$1"
+  case "$path" in
+    .env.example|.env.sample|.env.template) return 1 ;;
+    .env|.env.*|*.pem|*.key|*.p12|*.pfx|id_rsa|id_ed25519|*_rsa|*_ed25519|secrets/*|.secrets/*|credentials/*) return 0 ;;
     *) return 1 ;;
   esac
 }
 
-ug_staged_sensitive_files() {
-  local file found=0
-  while IFS= read -r file; do
-    [ -n "$file" ] || continue
-    if ug_is_allowed_env_example "$file"; then
-      continue
+refuse_secret_commit() {
+  local staged path blocked=0
+  staged="$(git diff --cached --name-only 2>/dev/null)" || return $?
+  while IFS= read -r path; do
+    [ -n "$path" ] || continue
+    if secret_like_path "$path"; then
+      printf 'ERROR: refusing to commit secret-like path: %s\n' "$path" >&2
+      blocked=1
     fi
-    case "$file" in
-      .env|.env.*|*/.env|*/.env.*|*.pem|*.key|*.p12|*.pfx|secrets/*|*/secrets/*|credentials/*|*/credentials/*)
-        printf '%s\n' "$file"
-        found=1
-        ;;
-    esac
   done <<EOF
-$(git diff --cached --name-only)
+$staged
 EOF
-  return "$found"
+  [ "$blocked" = "0" ] || return 2
+  return 0
 }
 
-ug_clone() {
-  local spec="$1" target="$2" token username askpass rc
-  [ -n "$spec" ] && [ -n "$target" ] || { ug_fail "--clone requires OWNER/REPO and TARGET_DIR"; return 2; }
-  case "$spec" in */*) ;; *) ug_fail "--clone spec must be OWNER/REPO"; return 2 ;; esac
-  [ ! -e "$target" ] || { ug_fail "clone target already exists: $target"; return 2; }
-  token="$(ug_github_token)" || { ug_fail "GITHUB_TOKEN required for GitHub clone"; return 2; }
-  username="$(ug_github_user)"
-  askpass="$(mktemp)" || return 1
-  cat > "$askpass" <<'ASKPASS'
-#!/usr/bin/env sh
-case "$1" in
-  *Username*) printf '%s\n' "${GIT_USERNAME_FOR_ASKPASS:-x-access-token}" ;;
-  *) printf '%s\n' "$GIT_TOKEN_FOR_ASKPASS" ;;
-esac
-ASKPASS
-  chmod 700 "$askpass" 2>/dev/null || true
-  GIT_ASKPASS="$askpass" \
+clone_repo() {
+  local spec="$1" target="$2" token user askpass_file rc
+  [ -n "$spec" ] && [ -n "$target" ] || { say_error "--clone requires OWNER/REPO and TARGET_DIR"; return 2; }
+  case "$spec" in */*) ;; *) say_error "--clone spec must be OWNER/REPO"; return 2 ;; esac
+  [ ! -e "$target" ] || { say_error "clone target already exists: $target"; return 2; }
+  token="$(read_github_token)" || { say_error "GITHUB_TOKEN is required for GitHub clone"; return 2; }
+  user="$(read_github_user)"
+  askpass_file="$(mktemp 2>/dev/null)" || { say_error "mktemp failed"; return 1; }
+  make_askpass "$askpass_file" || { rm -f "$askpass_file"; say_error "could not create temporary askpass helper"; return 1; }
   GIT_TERMINAL_PROMPT=0 \
-  GIT_TOKEN_FOR_ASKPASS="$token" \
-  GIT_USERNAME_FOR_ASKPASS="$username" \
-  git \
-    -c credential.helper= \
-    -c http.extraheader= \
-    -c http.https://github.com/.extraheader= \
-    -c http.https://panella87@github.com/.extraheader= \
-    clone "https://github.com/${spec}.git" "$target"
+  GIT_ASKPASS="$askpass_file" \
+  GITHUB_TOKEN_FOR_ASKPASS="$token" \
+  GITHUB_USER_FOR_ASKPASS="$user" \
+  git -c credential.helper= clone "https://github.com/${spec}.git" "$target"
   rc=$?
-  rm -f "$askpass"
+  rm -f "$askpass_file"
   return "$rc"
 }
 
-ug_main() {
-  local script_dir do_status=0 do_pull=0 do_push=0 do_acp=0 do_clone=0 clone_spec='' clone_target='' message='' sensitive rc
-  script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd -P)" || return 1
-  cd "$script_dir" || return 1
-  ug_have git || { ug_fail "required command not found: git"; return 127; }
+main() {
+  local dir do_status=0 do_pull=0 do_push=0 do_acp=0 do_clone=0 clone_spec="" clone_target="" message="" rc=0 status_out
+  dir="$(script_dir)" || { say_error "cannot resolve script directory"; return 1; }
+  cd "$dir" || { say_error "cannot cd to script directory: $dir"; return 1; }
+
+  if [ "$#" -eq 0 ]; then
+    do_pull=1
+  fi
 
   while [ "$#" -gt 0 ]; do
     case "$1" in
@@ -202,59 +264,56 @@ ug_main() {
       --pull) do_pull=1; shift ;;
       --push) do_push=1; shift ;;
       --add-commit-push|--acp) do_acp=1; shift ;;
-      --clone) clone_spec="${2:-}"; clone_target="${3:-}"; do_clone=1; shift 3 ;;
-      -m|--message) message="${2:-}"; shift 2 ;;
+      --clone)
+        clone_spec="${2:-}"; clone_target="${3:-}"; do_clone=1; shift 3 ;;
+      -m|--message)
+        message="${2:-}"; shift 2 ;;
       --message=*) message="${1#*=}"; shift ;;
-      -h|--help) ug_usage; return 0 ;;
-      *) ug_usage >&2; ug_fail "unknown option: $1"; return 2 ;;
+      -h|--help) usage; return 0 ;;
+      *) say_error "unknown option: $1"; usage >&2; return 2 ;;
     esac
   done
 
   if [ "$do_clone" = "1" ]; then
-    ug_clone "$clone_spec" "$clone_target"
+    clone_repo "$clone_spec" "$clone_target"
     return $?
   fi
 
-  ug_require_repo || return $?
-  ug_require_branch || return $?
-  ug_clear_extraheaders
-
-  if [ "$do_status$do_pull$do_push$do_acp" = "0000" ]; then
-    do_status=1
-  fi
+  require_git_repo || return $?
+  require_not_detached || return $?
 
   if [ "$do_status" = "1" ]; then
     printf 'repo=%s\n' "$(pwd -P)"
-    printf 'branch=%s\n' "$(git symbolic-ref --quiet --short HEAD)"
-    printf 'commit=%s\n' "$(git rev-parse HEAD)"
+    printf 'branch=%s\n' "$(git symbolic-ref --quiet --short HEAD 2>/dev/null)"
+    printf 'commit=%s\n' "$(git rev-parse HEAD 2>/dev/null)"
     git status --short
+    rc=$?
+    [ "$rc" = "0" ] || return "$rc"
   fi
 
   if [ "$do_pull" = "1" ]; then
-    ug_require_clean_for_pull || return $?
-    ug_git_with_token_if_needed pull --ff-only || return $?
+    require_clean_tree_for_pull || return $?
+    git_with_token_if_needed pull --ff-only || return $?
   fi
 
   if [ "$do_acp" = "1" ]; then
     git add -A || return $?
-    sensitive="$(ug_staged_sensitive_files)" && rc=0 || rc=$?
-    if [ -n "$sensitive" ]; then
-      printf 'ERROR: refusing to commit sensitive files:\n%s\n' "$sensitive" >&2
-      return 2
-    fi
-    if [ -z "$(git status --porcelain)" ]; then
-      printf 'NO_CHANGES_TO_COMMIT\n'
+    refuse_secret_commit || return $?
+    status_out="$(git status --porcelain 2>/dev/null)" || return $?
+    if [ -z "$status_out" ]; then
+      printf '%s\n' 'NO_CHANGES_TO_COMMIT'
     else
-      [ -n "$message" ] || message="$(ug_random_message)"
+      [ -n "$message" ] || message="$(random_commit_message)"
       git commit -m "$message" || return $?
     fi
     do_push=1
   fi
 
   if [ "$do_push" = "1" ]; then
-    ug_git_with_token_if_needed push || return $?
+    git_with_token_if_needed push || return $?
   fi
+
   return 0
 }
 
-ug_main "$@"
+main "$@"
