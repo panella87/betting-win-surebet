@@ -60,7 +60,7 @@ function listTarEntries(archivePath: string): string[] {
 function makeZipCodebaseFixture(): { dir: string; repoDir: string; zipPath: string } {
   const dir = mkdtempSync(join(tmpdir(), 'surebet-zip-codebase-'));
   const repoDir = join(dir, 'repo');
-  const zipPath = join(dir, 'codebase.zip');
+  const zipPath = join(repoDir, 'repo1.zip');
 
   mkdirSync(join(repoDir, 'scripts'), { recursive: true });
   copyFileSync(ZIP_CODEBASE, join(repoDir, 'zip_codebase.sh'));
@@ -114,12 +114,6 @@ function makeZipCodebaseFixture(): { dir: string; repoDir: string; zipPath: stri
 
   execFileSync('bash', ['zip_codebase.sh'], {
     cwd: repoDir,
-    env: {
-      ...process.env,
-      LOCAL_ROOT: repoDir,
-      CODEBASE_OUTPUT: zipPath,
-      CODEBASE_OVERWRITE: '0',
-    },
     encoding: 'utf-8',
     stdio: 'pipe',
   });
@@ -135,6 +129,7 @@ function makeSourceHandoffFixture(): { dir: string; repoDir: string; archivePath
   mkdirSync(join(repoDir, 'commands'), { recursive: true });
   mkdirSync(join(repoDir, 'scripts'), { recursive: true });
   mkdirSync(join(repoDir, 'tools'), { recursive: true });
+  mkdirSync(join(repoDir, '.automation', 'lib'), { recursive: true });
 
   copyFileSync(CREATE_SOURCE_HANDOFF, join(repoDir, 'scripts', 'create-source-handoff-archive.sh'));
   copyFileSync(RESTORE_EXECUTABLE_BITS, join(repoDir, 'scripts', 'restore-required-executable-bits.js'));
@@ -156,6 +151,9 @@ function makeSourceHandoffFixture(): { dir: string; repoDir: string; archivePath
     'pull_artifacts_and_zip_codebase.sh',
     'zip_codebase.sh',
     'run-autonomous-implementation.sh',
+    'run-paper-evaluation.sh',
+    'run-autonomous-bugfix.sh',
+    '.automation/lib/run_common.sh',
     'scripts/load-node-runtime.sh',
     'commands/run-sure-001-autonomous.sh',
     'commands/run-sure-local-engine-autonomous.sh',
@@ -192,23 +190,27 @@ function makeSourceHandoffFixture(): { dir: string; repoDir: string; archivePath
   return { dir, repoDir, archivePath };
 }
 
-test('zip_codebase help documents clean local packaging exclusions', () => {
+test('zip_codebase help documents the numbered repo-root packaging contract', () => {
   const output = execFileSync('bash', [ZIP_CODEBASE, '--help'], {
     cwd: REPO_ROOT,
     encoding: 'utf-8',
     stdio: 'pipe',
   });
 
-  assert.match(output, /Creates a clean local codebase ZIP for betting-win-surebet\./);
-  assert.match(output, /Secrets, \.env files, dependencies, build output, logs, artifacts, and generated archives are excluded\./);
+  assert.match(output, /Creates the next numbered codebase zip in the repository root/);
+  assert.match(output, /Untracked non-ignored files are included by default/);
+  assert.match(output, /Existing zip\/archive files/);
 });
 
-test('zip_codebase validates the temporary archive before publish', () => {
+test('zip_codebase uses the shared numbered archive and exclusion contract', () => {
   const script = read(ZIP_CODEBASE);
 
-  assert.match(script, /publish_contract=validated_temp_archive_then_atomic_replace/);
-  assert.match(script, /python3 scripts\/validate_artifact_hygiene\.py --codebase-zip "\$TMP_CODEBASE" >/);
-  assert.match(script, /mv -f -- "\$TMP_CODEBASE" "\$LOCAL_CODEBASE_ZIP"/);
+  assert.match(script, /next_numbered_zip_path\(\)/);
+  assert.match(script, /git -C "\$REPO_ROOT" ls-files -z --cached --others --exclude-standard/);
+  assert.match(script, /\*\.zip\|\*\.tar\|\*\.tar\.gz\|\*\.tgz\|\*\.7z\|\*\.rar/);
+  assert.match(script, /CODEBASE_ZIP_CREATED=%s/);
+  assert.match(script, /SHA256=%s/);
+  assert.doesNotMatch(script, /CODEBASE_OUTPUT/);
 });
 
 test('pull_artifacts_and_zip_codebase delegates codebase creation to the repo-local helper', () => {
@@ -219,9 +221,9 @@ test('pull_artifacts_and_zip_codebase delegates codebase creation to the repo-lo
   });
   const script = read(PULL_AND_ZIP);
 
-  assert.match(help, /The codebase archive is created by repo-local \.\/zip_codebase\.sh\./);
-  assert.match(script, /repo zip_codebase\.sh not found: \$LOCAL_ROOT\/zip_codebase\.sh/);
-  assert.match(script, /CODEBASE_OUTPUT="\$TMP_CODEBASE" LOCAL_ROOT="\$LOCAL_ROOT" CODEBASE_OVERWRITE=0 bash "\$LOCAL_ROOT\/zip_codebase\.sh"/);
+  assert.match(help, /Create a local numbered codebase zip by calling \.\/zip_codebase\.sh/);
+  assert.match(script, /bash \.\/zip_codebase\.sh/);
+  assert.doesNotMatch(script, /automation\.config\.sh/);
 });
 
 test('zip_codebase excludes local secrets, archives, artifacts, dependencies, logs, and temp files', () => {

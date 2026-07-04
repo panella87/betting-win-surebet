@@ -1,33 +1,10 @@
 {
-  "schema": "betting-win-surebet-doc-boundary-final-cleanup-confirmation-overlay-v1",
-  "createdAt": "2026-07-03",
-  "sourceZip": "betting-win-surebet11.zip",
+  "schema": "betting-win-surebet-automation-standardization-overlay-v1",
+  "createdAt": "2026-07-04",
+  "sourceZip": "betting-win-surebet12(1).zip",
   "repo": "betting-win-surebet",
-  "purpose": "Confirm the legacy surebet import cleanup is complete and remove stale pending-cleanup wording from docs/reporting metadata.",
-  "deleteOrMoveRequired": false,
-  "requiredCleanupCommand": null,
-  "finalLegacyImportStatus": "imported_and_rehomed",
-  "sourceImportPathRemoved": true,
-  "rawResearchArtifactsUnderActiveDocs": false,
-  "files": [
-    {
-      "path": "CHANGELOG.md"
-    },
-    {
-      "path": "DOCUMENTATION_CHECK_REPORT.md"
-    },
-    {
-      "path": "OVERLAY_MANIFEST.json"
-    },
-    {
-      "path": "SOURCE_MANIFEST.json"
-    },
-    {
-      "path": "docs/023_legacy_betting_win_surebet_import_manifest.md"
-    }
-  ],
-  "overlay": "research-archive-completion-2026-07-04",
-  "researchArchiveStatus": "complete",
-  "rmRequired": false,
-  "mvRequired": false
+  "purpose": "Install standardized repo automation scripts/docs and align betting-win-surebet documentation/validators to canonical implementation, paper-evaluation, and bugfix controllers.",
+  "deleteOrMoveRequired": true,
+  "requiredCleanupCommand": "rm -f run-paper-evaluation-12h.sh stop-autonomous-run.sh scripts/stop-autonomous-run.sh && find . -maxdepth 3 -type f -name 'run-paper-evaluation-12h.sh' -delete && find . -maxdepth 3 -type f -name 'stop-autonomous-run.sh' -delete",
+  "paperScope": "repo-local private fixture only; real upstream evaluation blocked until Federico pinned betting-win bundle"
 }

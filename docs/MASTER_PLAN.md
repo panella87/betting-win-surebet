@@ -161,3 +161,25 @@ accepted=false
 This phase still requires Federico's pinned `betting-win` export/interface before real upstream evaluation. It may not add provider connections, direct database reads, wallet/signer/order code, public signals, profitability claims, or execution readiness. The live execution prohibition is the current safety gate; future surebet execution decisions require a separate ADR and new validators.
 
 Current retained state: the repo-local SURE-002B backlog is complete, the freeze gate is documented, and the first remaining non-local step still requires Federico's pinned `betting-win` bundle.
+
+## Automation operating model
+
+The repo now uses the shared root automation command surface:
+
+```text
+zip_codebase.sh
+pull_artifacts_and_zip_codebase.sh
+update_git.sh
+run-autonomous-implementation.sh
+run-paper-evaluation.sh
+run-autonomous-bugfix.sh
+```
+
+`run-paper-evaluation.sh` is the canonical private paper supervisor and replaces
+`run-paper-evaluation-12h.sh` naming. For the current `SURE-002B` freeze state it
+is configured only for repo-local fixture paper evaluation. It collects artifacts,
+invokes `run-autonomous-bugfix.sh` on crash/error evidence, waits between cycles,
+and resumes until duration, blocker, or completion.
+
+Protected automation files are documented in `docs/automation/PROTECTED_AUTOMATION_FILES.md`.
+Normal autonomous cycles must not change them.

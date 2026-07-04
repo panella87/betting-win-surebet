@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-07-04 — Standard automation contract overlay
+
+- Installed the shared root automation contract: `zip_codebase.sh`, `pull_artifacts_and_zip_codebase.sh`, `update_git.sh`, `run-autonomous-implementation.sh`, `run-paper-evaluation.sh`, `run-autonomous-bugfix.sh`, `automation.config.sh`, `.automation/lib/run_common.sh`, and `docs/automation/*`.
+- Added `run-paper-evaluation.sh` as the canonical private paper supervisor, limited in this repo to repo-local fixture paper evaluation until Federico provides the pinned `betting-win` bundle.
+- Added `run-autonomous-bugfix.sh` as the canonical proactive/reactive bugfix helper and kept no standalone stop helper.
+- Updated automation validators/tests/docs so old controller internals and `run-paper-evaluation-12h.sh` naming are no longer required.
+- Preserved hard boundaries: provider connections prohibited, execution prohibited, public signals prohibited, profitability claims prohibited, and real upstream evaluation blocked on the pinned interface.
+
+
 ## 2026-07-03 — Legacy surebet import cleanup confirmed
 
 - Confirmed the temporary `docs/imported-from-betting-win/` staging path is absent after the legacy surebet rehome.
@@ -118,10 +127,3 @@
 - Hardened local report output containment against realpath/symlink escapes.
 - Added per-candidate settlement summaries for multi-candidate private paper reports.
 - Added validator and tests for the private paper-mode backlog contract.
-
-## 2026-07-04 research archive completion
-
-- Completed research archive ownership migration from `betting-win` into `betting-win-surebet`.
-- Added research import manifest and archive completion status doc.
-- Preserved imported raw OpenAlex JSON bytes with explicit `.gitattributes` rules.
-

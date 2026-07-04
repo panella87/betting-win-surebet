@@ -102,3 +102,26 @@ SURE-002B_PRIVATE_PAPER_MODE_INTAKE
 ```
 
 As of 2026-07-02, the repo-local private paper-mode backlog is complete and `docs/018_private_paper_mode_runbook.md` defines the freeze gate: `npm run validate` passes, local fixture smoke passes, and real upstream evaluation still requires Federico's pinned bundle. Use `commands/run-sure-paper-mode-autonomous.sh` only if a concrete repo-local defect reopens safe work. Use `commands/run-pinned-interface-smoke.sh` only for a repo-local pinned `betting-win` bundle path supplied by Federico. Do not use remote URLs. Do not connect to providers. Do not claim live readiness or profitability.
+
+## Standard automation contract
+
+Use the standardized root scripts:
+
+```bash
+./run-autonomous-implementation.sh
+./run-paper-evaluation.sh
+./run-autonomous-bugfix.sh
+./zip_codebase.sh
+./pull_artifacts_and_zip_codebase.sh
+./update_git.sh
+```
+
+The root automation scripts, `automation.config.sh`, `.automation/lib/run_common.sh`,
+and `docs/automation/PROTECTED_AUTOMATION_FILES.md` are protected. Do not edit them
+unless the task explicitly says automation maintenance. Repo-specific rules live in
+`docs/automation/`.
+
+`run-paper-evaluation.sh` is the canonical paper supervisor. It may run only the
+repo-local private fixture paper path until Federico provides the pinned
+`betting-win` export bundle. It must never create provider connections or execution
+paths.

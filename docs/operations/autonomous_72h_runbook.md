@@ -50,3 +50,17 @@ Use `commands/run-sure-001-autonomous.sh` or call `bash run-autonomous-implement
 
 The repo launcher must not source `nvm.sh` directly. `scripts/load-node-runtime.sh` selects the installed `.nvmrc` runtime from `$NVM_DIR/versions/node/v<version>/bin` and then performs an explicit Node major-version check. This keeps startup visible and avoids NVM shell-context failures before the controller log is created.
 
+## Standardized automation commands
+
+Use canonical root scripts:
+
+```bash
+./run-autonomous-implementation.sh --check-only
+./run-autonomous-implementation.sh --duration 72h
+./run-autonomous-bugfix.sh --duration 72h
+./run-paper-evaluation.sh --duration 72h --adaptive
+```
+
+`run-paper-evaluation.sh` replaces `run-paper-evaluation-12h.sh`. There is no
+`stop-autonomous-run.sh`; use each controller's `--status` and `--force-unlock`
+only when needed. All `run-*` scripts create root `artifacts.zip` before exit.

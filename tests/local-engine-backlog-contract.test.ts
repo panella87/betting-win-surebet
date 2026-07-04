@@ -11,7 +11,7 @@ function read(rel: string): string {
 
 test('local engine backlog authorizes maximum safe implementation without provider or execution work', () => {
   const backlog = read('docs/015_local_engine_implementation_backlog.md');
-  const runner = read('run-autonomous-implementation.sh');
+  const runner = read('docs/automation/autonomous-implementation.md');
   const status = read('docs/repo_status_current.md');
 
   for (const marker of [
@@ -28,8 +28,8 @@ test('local engine backlog authorizes maximum safe implementation without provid
   }
 
   assert.match(runner, /docs\/015_local_engine_implementation_backlog\.md/);
-  assert.match(runner, /first safe unchecked local implementation item/);
-  assert.match(runner, /Use CONTINUE_REQUIRED=yes when docs\/015_local_engine_implementation_backlog\.md still has a safe unchecked local implementation item/);
+  assert.match(runner, /repo-local backlogs are complete/);
+  assert.match(runner, /Do not invent/);
   assert.match(status, /safe SURE-002A local implementation backlog/);
 });
 

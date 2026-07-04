@@ -8,6 +8,7 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 FORBIDDEN_ROOTS = {'.git', '.github', '.locks', 'artifacts', 'node_modules', 'dist', 'coverage', 'output', 'tmp', '.tmp'}
+SKIP_PREFIXES = {'.automation/locks'}
 FORBIDDEN_EXACT = {
     'true',
     '.env.local',
@@ -43,7 +44,7 @@ def fail(message: str) -> None:
 def cleanup_python_cache() -> None:
     for dirpath, dirnames, filenames in os.walk(ROOT, topdown=True):
         rel_parts = Path(dirpath).relative_to(ROOT).parts if Path(dirpath) != ROOT else ()
-        if any(part in FORBIDDEN_ROOTS for part in rel_parts):
+        if any(part in FORBIDDEN_ROOTS for part in rel_parts) or '/'.join(rel_parts).startswith(tuple(SKIP_PREFIXES)):
             dirnames[:] = []
             continue
         for dirname in list(dirnames):
@@ -61,10 +62,10 @@ def iter_source_files():
     for dirpath, dirnames, filenames in os.walk(ROOT, topdown=True):
         current = Path(dirpath)
         rel_parts = current.relative_to(ROOT).parts if current != ROOT else ()
-        if any(part in FORBIDDEN_ROOTS for part in rel_parts):
+        if any(part in FORBIDDEN_ROOTS for part in rel_parts) or '/'.join(rel_parts).startswith(tuple(SKIP_PREFIXES)):
             dirnames[:] = []
             continue
-        dirnames[:] = [d for d in dirnames if d not in FORBIDDEN_ROOTS and d != '__pycache__']
+        dirnames[:] = [d for d in dirnames if d not in FORBIDDEN_ROOTS and d != '__pycache__' and not (current == ROOT / '.automation' and d == 'locks')]
         for filename in filenames:
             yield current / filename
 

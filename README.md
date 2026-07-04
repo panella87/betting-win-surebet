@@ -114,3 +114,24 @@ docs/018_private_paper_mode_runbook.md
 This phase is still private and paper-only. It accepts only repo-local JSON bundles, writes only under `artifacts/private-paper-mode/`, and keeps `accepted=false`. The freeze gate is: `npm run validate` passes, local fixture smoke passes, and real upstream evaluation still requires Federico's pinned bundle. Provider connections, execution, public reports, profitability claims, and live-readiness claims remain prohibited. Until Federico provides the pinned bundle, autonomous runs should stop with `AUTONOMOUS_GOAL_COMPLETE=yes` unless a concrete repo-local validation/tooling defect is confirmed.
 
 The repo-local private paper-mode backlog is complete.
+
+## Standard automation commands
+
+Canonical root automation commands:
+
+```bash
+./zip_codebase.sh
+./pull_artifacts_and_zip_codebase.sh
+./update_git.sh --status
+./update_git.sh --acp
+./run-autonomous-implementation.sh
+./run-paper-evaluation.sh --adaptive
+./run-autonomous-bugfix.sh
+```
+
+`run-paper-evaluation.sh` replaces any `run-paper-evaluation-12h.sh` naming. It is
+configured for repo-local private paper fixture evaluation only. It must not be
+used as real upstream acceptance evidence until Federico provides the pinned
+`betting-win` bundle. All `run-*` scripts write root `artifacts.zip` before exit.
+Protected automation files are documented under `docs/automation/` and must not be
+changed by normal autonomous work.

@@ -1,261 +1,167 @@
 #!/usr/bin/env bash
-set -euo pipefail
+# Source-safe artifact puller. Uses .env SSH_* contract; no SSH_TARGET or ollama-node default.
 
-SCRIPT_VERSION="2026-06-30.surebet-v2-repo-local-zip-codebase"
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-INVOCATION_DIR="$(pwd -P)"
-ENV_FILE="${ENV_FILE:-$SCRIPT_DIR/.env}"
-LOCAL_ROOT="${LOCAL_ROOT:-$SCRIPT_DIR}"
-LOCAL_OUTPUT_DIR="${LOCAL_OUTPUT_DIR:-$INVOCATION_DIR}"
-
-if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+pa_usage() {
   cat <<'USAGE'
-Usage: ./pull_artifacts_and_zip_codebase.sh
+Usage: ./pull_artifacts_and_zip_codebase.sh [--remote-codebase]
 
-Pulls remote artifacts.zip when present and creates a local clean codebase zip.
-Requires .env with SSH_HOST, SSH_USER, SSH_PASSWORD, and REMOTE_REPO.
-The codebase archive is created by repo-local ./zip_codebase.sh.
-The local numbering scans existing artifacts*.zip and betting-win-surebet*.zip files,
-including browser duplicate names such as betting-win-surebet1(2).zip.
+Default laptop flow:
+  1. Read .env for SSH_HOST, SSH_USER, SSH_PASSWORD, and REMOTE_REPO.
+  2. Pull remote repo-root artifacts.zip from the server with sshpass.
+  3. Save it locally as next numbered artifacts zip, e.g. artifacts12.zip.
+  4. Create a local numbered codebase zip by calling ./zip_codebase.sh.
+
+Required .env keys:
+  SSH_HOST=88.99.165.82
+  SSH_USER=dev
+  SSH_PASSWORD=...
+  REMOTE_REPO=/home/dev/app_testing/<repo-name>
+
+Optional:
+  REMOTE_ARTIFACT=/custom/path/artifacts.zip
+
+pv is used for a transfer progress bar when installed.
 USAGE
-  exit 0
-fi
-
-if [[ ! -f "$ENV_FILE" ]]; then
-  echo "ERROR: env file not found: $ENV_FILE" >&2
-  exit 1
-fi
-
-set -a
-# shellcheck disable=SC1090
-. "$ENV_FILE"
-set +a
-
-: "${SSH_HOST:?Missing SSH_HOST in .env}"
-: "${SSH_USER:?Missing SSH_USER in .env}"
-: "${SSH_PASSWORD:?Missing SSH_PASSWORD in .env}"
-: "${REMOTE_REPO:?Missing REMOTE_REPO in .env}"
-
-REMOTE_REPO="${REMOTE_REPO%/}"
-REMOTE_ARTIFACT="$REMOTE_REPO/artifacts.zip"
-CODEBASE_PREFIX="$(basename "$REMOTE_REPO")"
-ARTIFACTS_PREFIX="artifacts"
-
-for command in sshpass ssh scp python3 sha256sum bash; do
-  if ! command -v "$command" >/dev/null 2>&1; then
-    echo "ERROR: required command missing: $command" >&2
-    case "$command" in
-      sshpass) echo "Install on Ubuntu/Debian/WSL: sudo apt update && sudo apt install -y sshpass" >&2 ;;
-      ssh|scp) echo "Install on Ubuntu/Debian/WSL: sudo apt update && sudo apt install -y openssh-client" >&2 ;;
-    esac
-    exit 1
-  fi
-done
-
-if [[ ! -d "$LOCAL_ROOT" ]]; then
-  echo "ERROR: local root not found: $LOCAL_ROOT" >&2
-  exit 1
-fi
-LOCAL_ROOT="$(cd "$LOCAL_ROOT" && pwd -P)"
-if [[ ! -f "$LOCAL_ROOT/zip_codebase.sh" ]]; then
-  echo "ERROR: repo zip_codebase.sh not found: $LOCAL_ROOT/zip_codebase.sh" >&2
-  exit 1
-fi
-mkdir -p "$LOCAL_OUTPUT_DIR"
-LOCAL_OUTPUT_DIR="$(cd "$LOCAL_OUTPUT_DIR" && pwd -P)"
-
-next_number_for_prefix() {
-  local prefix="$1"
-  python3 - "$prefix" "$LOCAL_OUTPUT_DIR" "$SCRIPT_DIR" "$INVOCATION_DIR" <<'PYNUM'
-from pathlib import Path
-import re
-import sys
-
-prefix = sys.argv[1]
-roots = []
-for raw in sys.argv[2:]:
-    root = Path(raw).resolve()
-    if root.is_dir() and root not in roots:
-        roots.append(root)
-pattern = re.compile(
-    rf'^{re.escape(prefix)}(?P<generation>[0-9]*)(?:\([0-9]+\))?\.zip$',
-    re.IGNORECASE,
-)
-maximum = 0
-for root in roots:
-    for item in root.iterdir():
-        if not item.is_file():
-            continue
-        match = pattern.fullmatch(item.name)
-        if match is None:
-            continue
-        raw_generation = match.group('generation')
-        generation = int(raw_generation, 10) if raw_generation else 0
-        maximum = max(maximum, generation)
-print(maximum + 1)
-PYNUM
 }
 
-remote_artifact_size() {
-  SSHPASS="$SSH_PASSWORD" sshpass -e ssh \
-    -o StrictHostKeyChecking=accept-new \
-    -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
-    "${SSH_USER}@${SSH_HOST}" \
-    bash -s -- "$REMOTE_ARTIFACT" <<'REMOTE_SH'
-set -euo pipefail
-artifact="$1"
-if [[ ! -s "$artifact" ]]; then
-  exit 2
-fi
-wc -c < "$artifact"
-REMOTE_SH
+pa_have() { command -v "$1" >/dev/null 2>&1; }
+pa_fail() { printf 'ERROR: %s\n' "$*" >&2; return 1; }
+
+pa_read_env_value() {
+  local key="$1" env_file="$2" line value
+  [ -f "$env_file" ] || return 1
+  line="$(grep -E "^[[:space:]]*${key}=" "$env_file" | tail -n 1)" || return 1
+  [ -n "$line" ] || return 1
+  value="${line#*=}"
+  value="${value%$'\r'}"
+  value="${value#\"}"; value="${value%\"}"
+  value="${value#\'}"; value="${value%\'}"
+  printf '%s\n' "$value"
 }
 
-download_remote_artifact() {
-  local target="$1"
-  local tmp_download="$2"
-  local remote_size=""
-  local status=""
-  local downloaded_size=""
-
-  echo "== check remote artifacts.zip =="
-  echo "remote=${SSH_USER}@${SSH_HOST}:${REMOTE_ARTIFACT}"
-  echo "local=$target"
-
-  set +e
-  remote_size="$(remote_artifact_size 2>/dev/null)"
-  status="$?"
-  set -e
-  if [[ "$status" -eq 2 ]]; then
-    echo "remote_artifact=missing"
-    echo "action=skip artifact download"
-    return 2
+pa_get_config() {
+  local key="$1" env_file="$2" value
+  value="${!key:-}"
+  if [ -n "$value" ]; then
+    printf '%s\n' "$value"
+    return 0
   fi
-  if [[ "$status" -ne 0 ]]; then
-    echo "ERROR: remote artifact check failed." >&2
-    return 1
-  fi
-  if [[ ! "$remote_size" =~ ^[1-9][0-9]*$ ]]; then
-    echo "ERROR: invalid remote artifact size: $remote_size" >&2
-    return 1
-  fi
+  pa_read_env_value "$key" "$env_file"
+}
 
-  rm -f -- "$tmp_download"
-  if command -v pv >/dev/null 2>&1; then
-    echo "download_progress=pv"
-    echo "remote_size_bytes=$remote_size"
-    if ! SSHPASS="$SSH_PASSWORD" sshpass -e ssh \
-      -o StrictHostKeyChecking=accept-new \
-      -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
-      "${SSH_USER}@${SSH_HOST}" \
-      bash -s -- "$REMOTE_ARTIFACT" <<'REMOTE_SH' | pv -s "$remote_size" > "$tmp_download"
-set -euo pipefail
-cat -- "$1"
-REMOTE_SH
-    then
-      rm -f -- "$tmp_download"
-      echo "ERROR: pv download failed for remote artifact: $REMOTE_ARTIFACT" >&2
-      return 1
-    fi
+pa_shell_quote() { printf '%q' "$1"; }
+
+pa_next_numbered_zip() {
+  local prefix="$1" max=0 f b rest generation n
+  shopt -s nullglob
+  for f in ./${prefix}*.zip; do
+    b="${f#./}"
+    rest="${b#"$prefix"}"
+    [ "$rest" != "$b" ] || continue
+    case "$rest" in *.zip) ;; *) continue ;; esac
+    generation="${rest%.zip}"
+    generation="${generation%%\(*}"
+    case "$generation" in '') n=0 ;; *[!0-9]*) continue ;; *) n=$((10#$generation)) ;; esac
+    [ "$n" -gt "$max" ] && max="$n"
+  done
+  shopt -u nullglob
+  printf '%s\n' "$((max + 1))"
+}
+
+pa_ssh_base() {
+  sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=accept-new -o BatchMode=no -o ConnectTimeout=20 "$SSH_USER@$SSH_HOST" "$@"
+}
+
+pa_stream_remote_file() {
+  local remote_path="$1" local_path="$2" q size tmp_status
+  q="$(pa_shell_quote "$remote_path")" || return 1
+  size="$(pa_ssh_base "stat -c %s $q" 2>/dev/null)" || return 1
+  if pa_have pv; then
+    sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=accept-new -o BatchMode=no -o ConnectTimeout=20 "$SSH_USER@$SSH_HOST" "cat $q" | pv -s "$size" > "$local_path"
+    tmp_status=${PIPESTATUS[0]}
+    [ "$tmp_status" = "0" ] || return "$tmp_status"
   else
-    echo "download_progress=scp_default"
-    echo "hint=install pv locally for explicit progress bar: sudo apt update && sudo apt install -y pv"
-    if ! SSHPASS="$SSH_PASSWORD" sshpass -e scp \
-      -o StrictHostKeyChecking=accept-new \
-      -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
-      "${SSH_USER}@${SSH_HOST}:${REMOTE_ARTIFACT}" \
-      "$tmp_download"; then
-      rm -f -- "$tmp_download"
-      echo "ERROR: scp failed for remote artifact: $REMOTE_ARTIFACT" >&2
-      return 1
-    fi
+    printf 'progress_bar=unavailable_pv_not_installed size_bytes=%s\n' "$size"
+    sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=accept-new -o BatchMode=no -o ConnectTimeout=20 "$SSH_USER@$SSH_HOST" "cat $q" > "$local_path" || return 1
   fi
-
-  if [[ ! -s "$tmp_download" ]]; then
-    rm -f -- "$tmp_download"
-    echo "ERROR: downloaded artifact is missing or empty." >&2
-    return 1
-  fi
-  downloaded_size="$(wc -c < "$tmp_download")"
-  if [[ "$downloaded_size" != "$remote_size" ]]; then
-    rm -f -- "$tmp_download"
-    echo "ERROR: downloaded artifact byte size mismatch: remote=$remote_size local=$downloaded_size" >&2
-    return 1
-  fi
-
-  mv -- "$tmp_download" "$target"
   return 0
 }
 
-ARTIFACT_N="$(next_number_for_prefix "$ARTIFACTS_PREFIX")"
-CODEBASE_N="$(next_number_for_prefix "$CODEBASE_PREFIX")"
-LOCAL_ARTIFACT_ZIP="$LOCAL_OUTPUT_DIR/${ARTIFACTS_PREFIX}${ARTIFACT_N}.zip"
-LOCAL_CODEBASE_ZIP="$LOCAL_OUTPUT_DIR/${CODEBASE_PREFIX}${CODEBASE_N}.zip"
-TMP_DIR="$(mktemp -d "$LOCAL_OUTPUT_DIR/.betting-win-surebet-pull.XXXXXX")"
-TMP_DOWNLOAD="$TMP_DIR/${ARTIFACTS_PREFIX}${ARTIFACT_N}.download.tmp.zip"
-TMP_CODEBASE="$TMP_DIR/${CODEBASE_PREFIX}${CODEBASE_N}.tmp.zip"
-ARTIFACT_CREATED="no"
+pa_main() {
+  local remote_codebase=0 script_dir repo_root repo_name env_file remote_artifact q artifact_number local_artifact tmp_artifact latest remote_codebase_path local_remote tmp_remote
+  while [ "$#" -gt 0 ]; do
+    case "$1" in
+      --remote-codebase) remote_codebase=1; shift ;;
+      -h|--help) pa_usage; return 0 ;;
+      *) pa_usage >&2; pa_fail "unknown option: $1"; return 2 ;;
+    esac
+  done
 
-cleanup() {
-  rm -rf -- "$TMP_DIR"
+  script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd -P)" || return 1
+  cd "$script_dir" || return 1
+  repo_root="$(pwd -P)" || return 1
+  repo_name="$(basename "$repo_root")"
+  env_file="${ENV_FILE:-$repo_root/.env}"
+
+  [ -x "$repo_root/zip_codebase.sh" ] || { pa_fail "missing executable ./zip_codebase.sh"; return 1; }
+  pa_have sshpass || { pa_fail "required command not found: sshpass"; return 127; }
+  pa_have ssh || { pa_fail "required command not found: ssh"; return 127; }
+  pa_have grep || { pa_fail "required command not found: grep"; return 127; }
+
+  SSH_HOST="$(pa_get_config SSH_HOST "$env_file")" || { pa_fail "SSH_HOST missing in $env_file"; return 2; }
+  SSH_USER="$(pa_get_config SSH_USER "$env_file")" || { pa_fail "SSH_USER missing in $env_file"; return 2; }
+  SSH_PASSWORD="$(pa_get_config SSH_PASSWORD "$env_file")" || { pa_fail "SSH_PASSWORD missing in $env_file"; return 2; }
+  REMOTE_REPO="$(pa_get_config REMOTE_REPO "$env_file")" || { pa_fail "REMOTE_REPO missing in $env_file"; return 2; }
+  REMOTE_REPO="${REMOTE_REPO%/}"
+  REMOTE_ARTIFACT="$(pa_get_config REMOTE_ARTIFACT "$env_file" 2>/dev/null)" || REMOTE_ARTIFACT="${REMOTE_REPO}/artifacts.zip"
+
+  q="$(pa_shell_quote "$REMOTE_ARTIFACT")" || return 1
+  if ! pa_ssh_base "test -s $q" >/dev/null 2>&1; then
+    pa_fail "remote artifacts.zip not found or empty: ${SSH_USER}@${SSH_HOST}:${REMOTE_ARTIFACT}"
+    return 1
+  fi
+
+  artifact_number="$(pa_next_numbered_zip artifacts)" || return 1
+  local_artifact="artifacts${artifact_number}.zip"
+  tmp_artifact=".${local_artifact}.tmp.$$"
+  rm -f "$tmp_artifact"
+  printf 'downloading_artifacts=%s@%s:%s\n' "$SSH_USER" "$SSH_HOST" "$REMOTE_ARTIFACT"
+  if ! pa_stream_remote_file "$REMOTE_ARTIFACT" "$tmp_artifact"; then
+    rm -f "$tmp_artifact"
+    pa_fail "artifact download failed"
+    return 1
+  fi
+  if ! mv "$tmp_artifact" "$local_artifact"; then
+    rm -f "$tmp_artifact"
+    pa_fail "could not publish local artifact: $local_artifact"
+    return 1
+  fi
+  printf 'downloaded_artifacts=%s\n' "$repo_root/$local_artifact"
+
+  if [ "$remote_codebase" = "1" ]; then
+    q="$(pa_shell_quote "$REMOTE_REPO")" || return 1
+    latest="$(pa_ssh_base "cd $q && ls -1 ${repo_name}[0-9]*.zip 2>/dev/null | sort -V | tail -n 1" 2>/dev/null)" || latest=""
+    if [ -z "$latest" ]; then
+      pa_fail "--remote-codebase requested but no remote ${repo_name}N.zip was found in $REMOTE_REPO"
+      return 1
+    fi
+    remote_codebase_path="${REMOTE_REPO}/${latest}"
+    local_remote="remote-${latest}"
+    tmp_remote=".${local_remote}.tmp.$$"
+    rm -f "$tmp_remote"
+    printf 'downloading_remote_codebase=%s@%s:%s\n' "$SSH_USER" "$SSH_HOST" "$remote_codebase_path"
+    if ! pa_stream_remote_file "$remote_codebase_path" "$tmp_remote"; then
+      rm -f "$tmp_remote"
+      pa_fail "remote codebase download failed"
+      return 1
+    fi
+    mv "$tmp_remote" "$local_remote" || { rm -f "$tmp_remote"; pa_fail "could not publish remote codebase"; return 1; }
+    printf 'downloaded_remote_codebase=%s\n' "$repo_root/$local_remote"
+  fi
+
+  printf 'creating_local_codebase_zip=./zip_codebase.sh\n'
+  "$repo_root/zip_codebase.sh"
+  return $?
 }
-trap cleanup EXIT INT TERM HUP
 
-for target in "$LOCAL_ARTIFACT_ZIP" "$LOCAL_CODEBASE_ZIP"; do
-  if [[ -e "$target" ]]; then
-    echo "ERROR: target already exists: $target" >&2
-    exit 1
-  fi
-done
-
-if download_remote_artifact "$LOCAL_ARTIFACT_ZIP" "$TMP_DOWNLOAD"; then
-  ARTIFACT_CREATED="yes"
-else
-  DOWNLOAD_STATUS="$?"
-  if [[ "$DOWNLOAD_STATUS" -eq 2 ]]; then
-    ARTIFACT_CREATED="skipped_missing_remote"
-  else
-    echo "ERROR: artifact download failed." >&2
-    exit 1
-  fi
-fi
-
-echo
-echo "== create local codebase zip =="
-echo "local=$LOCAL_CODEBASE_ZIP"
-echo "local_contract=repo zip_codebase.sh"
-
-CODEBASE_OUTPUT="$TMP_CODEBASE" LOCAL_ROOT="$LOCAL_ROOT" CODEBASE_OVERWRITE=0 bash "$LOCAL_ROOT/zip_codebase.sh"
-if [[ ! -s "$TMP_CODEBASE" ]]; then
-  echo "ERROR: codebase zip was not created or is empty." >&2
-  exit 1
-fi
-mv -- "$TMP_CODEBASE" "$LOCAL_CODEBASE_ZIP"
-
-trap - EXIT INT TERM HUP
-cleanup
-
-echo
-echo "== done =="
-if [[ "$ARTIFACT_CREATED" == "yes" ]]; then
-  ls -lh "$LOCAL_ARTIFACT_ZIP" "$LOCAL_CODEBASE_ZIP"
-else
-  ls -lh "$LOCAL_CODEBASE_ZIP"
-fi
-
-echo
-echo "Created:"
-if [[ "$ARTIFACT_CREATED" == "yes" ]]; then
-  echo "$LOCAL_ARTIFACT_ZIP"
-else
-  echo "artifact zip skipped because remote file does not exist: $REMOTE_ARTIFACT"
-fi
-echo "$LOCAL_CODEBASE_ZIP"
-
-echo
-sha256sum "$LOCAL_CODEBASE_ZIP"
-if [[ "$ARTIFACT_CREATED" == "yes" ]]; then
-  sha256sum "$LOCAL_ARTIFACT_ZIP"
-fi
-
-echo "Shell intentionally kept open."
+pa_main "$@"

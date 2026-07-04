@@ -73,9 +73,18 @@ The boundary-specific validation is:
 npm run validate:three-repo-boundary
 ```
 
-## 2026-07-04 research archive completion
+## Automation alignment confirmed
 
-- Completed research archive ownership migration from `betting-win` into `betting-win-surebet`.
-- Added research import manifest and archive completion status doc.
-- Preserved imported raw OpenAlex JSON bytes with explicit `.gitattributes` rules.
+```text
+automation_contract=standard_root_scripts_v1
+canonical_implementation=run-autonomous-implementation.sh
+canonical_paper=run-paper-evaluation.sh
+canonical_bugfix=run-autonomous-bugfix.sh
+stop_autonomous_run_helper=absent
+run_paper_evaluation_12h=obsolete
+paper_scope=repo_local_private_fixture_only
+```
 
+The documentation is aligned to the standardized automation contract. Repo-local
+private paper-mode evaluation is available for fake/local fixture smoke only; real
+upstream evaluation remains blocked on Federico's pinned `betting-win` bundle.

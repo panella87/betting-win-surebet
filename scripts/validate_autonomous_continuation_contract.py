@@ -1,99 +1,55 @@
 from __future__ import annotations
-
 from pathlib import Path
 import json
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
-RUNNER = ROOT / 'run-autonomous-implementation.sh'
-BACKLOG = ROOT / 'docs' / '014_sure_001_remaining_hardening_backlog.md'
-LOCAL_BACKLOG = ROOT / 'docs' / '015_local_engine_implementation_backlog.md'
-PAPER_BACKLOG = ROOT / 'docs' / '017_private_paper_mode_implementation_backlog.md'
-AGENTS = ROOT / 'AGENTS.md'
-MASTER_PLAN = ROOT / 'docs' / 'MASTER_PLAN.md'
-PACKAGE = ROOT / 'package.json'
-VALIDATE_REPO = ROOT / 'scripts' / 'validate_repo.py'
-
 
 def fail(message: str) -> None:
     print(f'ERROR: {message}', file=sys.stderr)
     raise SystemExit(1)
 
-
-def read(path: Path) -> str:
+def read(rel: str) -> str:
+    path = ROOT / rel
     if not path.is_file():
-        fail(f'missing required file: {path.relative_to(ROOT)}')
+        fail(f'missing required file: {rel}')
     return path.read_text(encoding='utf-8')
-
 
 def require(text: str, marker: str, rel: str) -> None:
     if marker not in text:
         fail(f'{rel} missing required marker: {marker}')
 
-
 def main() -> None:
-    runner = read(RUNNER)
-    backlog = read(BACKLOG)
-    local_backlog = read(LOCAL_BACKLOG)
-    paper_backlog = read(PAPER_BACKLOG)
-    agents = read(AGENTS)
-    master_plan = read(MASTER_PLAN)
-    package = json.loads(read(PACKAGE))
-    validate_repo = read(VALIDATE_REPO)
-
-    forbidden_runner_markers = [
-        'Implement exactly one bounded safe SURE-001 hardening slice from the current repository truth. Stop after one slice.',
-        'If the next required work is SURE-002 or later, return BLOCKED=yes with the missing pinned betting-win contract/export interface.',
-    ]
-    for marker in forbidden_runner_markers:
-        if marker in runner:
-            fail(f'run-autonomous-implementation.sh still contains one-slice stop marker: {marker}')
+    implementation = read('docs/automation/autonomous-implementation.md')
+    task = read('docs/automation/current-implementation-task.md')
+    status = read('docs/repo_status_current.md')
+    package = json.loads(read('package.json'))
+    validate_repo = read('scripts/validate_repo.py')
 
     for marker in [
         'docs/014_sure_001_remaining_hardening_backlog.md',
+        'docs/015_local_engine_implementation_backlog.md',
         'docs/017_private_paper_mode_implementation_backlog.md',
-        'Continue across cycles while safe documented backlog remains in docs/014_sure_001_remaining_hardening_backlog.md, docs/015_local_engine_implementation_backlog.md, or docs/017_private_paper_mode_implementation_backlog.md',
-        'Do not stop with AUTONOMOUS_GOAL_COMPLETE=yes after one completed slice',
-        'Use CONTINUE_REQUIRED=yes when docs/014_sure_001_remaining_hardening_backlog.md still has a safe unchecked SURE-001 item',
-        'Use CONTINUE_REQUIRED=yes when docs/015_local_engine_implementation_backlog.md still has a safe unchecked local implementation item',
-        'Use CONTINUE_REQUIRED=yes when docs/017_private_paper_mode_implementation_backlog.md still has a safe unchecked private paper-mode item',
-        'Use AUTONOMOUS_GOAL_COMPLETE=yes only when all retained backlogs are exhausted',
-    ]:
-        require(runner, marker, 'run-autonomous-implementation.sh')
-
-    for marker in [
-        'SURE-001 remaining hardening backlog',
-        'CONTINUE_REQUIRED=yes',
+        'repo-local backlogs are complete',
         'AUTONOMOUS_GOAL_COMPLETE=yes',
-        'SOURCE_MANIFEST.json regeneration helper',
-        'SURE-002+ remains blocked',
-        'provider connections',
-        'solver implementation',
+        'Federico',
     ]:
-        require(backlog, marker, 'docs/014_sure_001_remaining_hardening_backlog.md')
-
-    require(agents, 'Implement one bounded slice per cycle', 'AGENTS.md')
-    require(master_plan, 'docs/014_sure_001_remaining_hardening_backlog.md', 'docs/MASTER_PLAN.md')
-    require(master_plan, 'docs/015_local_engine_implementation_backlog.md', 'docs/MASTER_PLAN.md')
-    require(master_plan, 'docs/017_private_paper_mode_implementation_backlog.md', 'docs/MASTER_PLAN.md')
+        require(implementation, marker, 'docs/automation/autonomous-implementation.md')
 
     for marker in [
-        'SURE-002A_LOCAL_INTERFACE_AND_ENGINE_BOOTSTRAP',
-        'Local implementation backlog',
-        'CONTINUE_REQUIRED=yes',
-        'provider SDK/client imports',
-        'profitability claims',
+        'Fix only confirmed repo-local validation/tooling defects',
+        'provider_connections=prohibited',
+        'execution=prohibited',
+        'real_upstream_evaluation=blocked_until_federico_pinned_betting_win_interface',
     ]:
-        require(local_backlog, marker, 'docs/015_local_engine_implementation_backlog.md')
+        require(task, marker, 'docs/automation/current-implementation-task.md')
 
     for marker in [
-        'SURE-002B_PRIVATE_PAPER_MODE_INTAKE',
-        'private paper-mode',
-        'CONTINUE_REQUIRED=yes',
-        'provider_connection = prohibited',
-        'execution = prohibited',
+        'The repo-local SURE-001 hardening backlog, the safe SURE-002A local implementation backlog, and the safe SURE-002B private paper-mode backlog are exhausted',
+        'AUTONOMOUS_GOAL_COMPLETE=yes',
+        'Federico',
     ]:
-        require(paper_backlog, marker, 'docs/017_private_paper_mode_implementation_backlog.md')
+        require(status, marker, 'docs/repo_status_current.md')
 
     validate_ops = package.get('scripts', {}).get('validate:ops', '')
     if 'scripts/validate_autonomous_continuation_contract.py' not in validate_ops:
@@ -102,9 +58,7 @@ def main() -> None:
         fail('scripts/validate_repo.py must require validate_autonomous_continuation_contract.py')
     if 'tests/autonomous-continuation-contract.test.ts' not in validate_repo:
         fail('scripts/validate_repo.py must require tests/autonomous-continuation-contract.test.ts')
-
     print('validate_autonomous_continuation_contract: ok')
-
 
 if __name__ == '__main__':
     main()

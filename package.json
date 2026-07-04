@@ -20,7 +20,14 @@
     "validate:starter": "npm run typecheck && npm test && npm run validate:repo && npm run validate:boundary && npm run validate:ops",
     "validate": "npm run validate:starter",
     "archive:source": "bash scripts/create-source-handoff-archive.sh",
-    "validate:three-repo-boundary": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_three_repo_surebet_boundary.py"
+    "validate:three-repo-boundary": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_three_repo_surebet_boundary.py",
+    "zip:codebase": "bash zip_codebase.sh",
+    "autonomous:check": "bash run-autonomous-implementation.sh --check-only",
+    "autonomous:start": "bash run-autonomous-implementation.sh",
+    "autonomous:bugfix": "bash run-autonomous-bugfix.sh",
+    "paper:evaluation": "bash run-paper-evaluation.sh",
+    "bugfix": "bash run-autonomous-bugfix.sh",
+    "automation:status": "bash run-autonomous-implementation.sh --status && bash run-paper-evaluation.sh --status && bash run-autonomous-bugfix.sh --status"
   },
   "devDependencies": {
     "@types/node": "20.12.11",

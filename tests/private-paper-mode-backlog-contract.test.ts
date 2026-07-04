@@ -30,11 +30,11 @@ test('private paper-mode backlog allows only repo-local pinned-bundle work', () 
 });
 
 test('autonomous prompt continues through the private paper-mode backlog', () => {
-  const script = read('run-autonomous-implementation.sh');
+  const script = read('docs/automation/autonomous-implementation.md');
 
   assert.match(script, /docs\/017_private_paper_mode_implementation_backlog\.md/);
-  assert.match(script, /private paper-mode intake\/reporting item/);
-  assert.match(script, /Use CONTINUE_REQUIRED=yes when docs\/017_private_paper_mode_implementation_backlog\.md still has a safe unchecked private paper-mode item/);
+  assert.match(script, /repo-local backlogs are complete/);
+  assert.match(script, /AUTONOMOUS_GOAL_COMPLETE=yes/);
 });
 
 test('pinned-interface smoke command stays repo-local and delegates to local-report', () => {

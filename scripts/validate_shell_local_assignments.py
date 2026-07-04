@@ -5,7 +5,7 @@ import re
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
-SHELL_GLOBS = ['*.sh', 'scripts/*.sh', 'commands/*.sh']
+SHELL_GLOBS = ['*.sh', 'scripts/*.sh', 'commands/*.sh', '.automation/lib/*.sh']
 LOCAL_ASSIGNMENT = re.compile(r'(?<![A-Za-z0-9_])([A-Za-z_][A-Za-z0-9_]*)=')
 
 

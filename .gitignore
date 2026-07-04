@@ -55,3 +55,6 @@ __pycache__/
 
 # Historical accidental file from upstream reference repos
 /true
+
+.automation/locks/
+artifacts.zip.tmp.*

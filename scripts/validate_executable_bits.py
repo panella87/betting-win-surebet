@@ -15,10 +15,20 @@ REQUIRED = [
     'pull_artifacts_and_zip_codebase.sh',
     'zip_codebase.sh',
     'run-autonomous-implementation.sh',
+    'run-paper-evaluation.sh',
+    'run-autonomous-bugfix.sh',
+    '.automation/lib/run_common.sh',
     'scripts/create-source-handoff-archive.sh',
     'scripts/load-node-runtime.sh',
     'commands/run-sure-001-autonomous.sh',
     'commands/run-sure-local-engine-autonomous.sh',
+    'commands/run-sure-paper-mode-autonomous.sh',
+    'commands/run-pinned-interface-smoke.sh',
+]
+FORBIDDEN = [
+    'run-paper-evaluation-12h.sh',
+    'stop-autonomous-run.sh',
+    'scripts/stop-autonomous-run.sh',
 ]
 
 def fail(message: str) -> None:
@@ -32,6 +42,9 @@ def main() -> None:
             fail(f'missing required executable file: {rel}')
         if path.stat().st_mode & stat.S_IXUSR == 0:
             fail(f'missing executable bit: {rel}')
+    for rel in FORBIDDEN:
+        if (ROOT / rel).exists():
+            fail(f'obsolete automation helper still present: {rel}')
     print('validate_executable_bits: ok')
 
 if __name__ == '__main__':

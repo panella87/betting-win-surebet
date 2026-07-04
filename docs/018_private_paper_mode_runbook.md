@@ -84,3 +84,15 @@ Stop after the freeze gate passes unless a concrete repo-local defect is confirm
 Stop if the pinned bundle is missing, the pinned smoke command returns an intake error, or any private paper-mode report stays blocked.
 
 Do not claim live readiness, profitability, execution readiness, or provider-backed acceptance from any private paper-mode artifact.
+
+## Standard paper supervisor
+
+Use the canonical root supervisor for long private fixture observation:
+
+```bash
+./run-paper-evaluation.sh --duration 72h --adaptive
+```
+
+This runs the configured repo-local fixture paper command and health checks from
+`automation.config.sh`. It is not a replacement for Federico's pinned bundle and
+must not be interpreted as real upstream acceptance evidence.

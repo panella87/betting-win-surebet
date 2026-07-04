@@ -4,7 +4,8 @@ import json
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
-RUNNER = ROOT / 'run-autonomous-implementation.sh'
+AUTOMATION_IMPLEMENTATION = ROOT / 'docs' / 'automation' / 'autonomous-implementation.md'
+AUTOMATION_PAPER = ROOT / 'docs' / 'automation' / 'paper-evaluation.md'
 BACKLOG = ROOT / 'docs' / '017_private_paper_mode_implementation_backlog.md'
 RUNBOOK = ROOT / 'docs' / '018_private_paper_mode_runbook.md'
 AGENTS = ROOT / 'AGENTS.md'
@@ -17,30 +18,26 @@ COMMAND = ROOT / 'commands' / 'run-sure-paper-mode-autonomous.sh'
 SMOKE_COMMAND = ROOT / 'commands' / 'run-pinned-interface-smoke.sh'
 EXECUTABLES = ROOT / 'tools' / 'required_executable_paths.js'
 
-
 def fail(message: str) -> None:
     print(f'ERROR: {message}', file=sys.stderr)
     raise SystemExit(1)
-
 
 def read(path: Path) -> str:
     if not path.is_file():
         fail(f'missing required file: {path.relative_to(ROOT)}')
     return path.read_text(encoding='utf-8')
 
-
 def require(text: str, marker: str, rel: str) -> None:
     if marker not in text:
         fail(f'{rel} missing required marker: {marker}')
-
 
 def forbid(text: str, marker: str, rel: str) -> None:
     if marker in text:
         fail(f'{rel} contains forbidden marker: {marker}')
 
-
 def main() -> None:
-    runner = read(RUNNER)
+    automation_impl = read(AUTOMATION_IMPLEMENTATION)
+    automation_paper = read(AUTOMATION_PAPER)
     backlog = read(BACKLOG)
     runbook = read(RUNBOOK)
     agents = read(AGENTS)
@@ -55,11 +52,18 @@ def main() -> None:
 
     for marker in [
         'docs/017_private_paper_mode_implementation_backlog.md',
-        'private paper-mode intake/reporting item',
-        'Use CONTINUE_REQUIRED=yes when docs/017_private_paper_mode_implementation_backlog.md still has a safe unchecked private paper-mode item',
-        'all retained backlogs are exhausted',
+        'repo-local backlogs are complete',
+        'Federico',
     ]:
-        require(runner, marker, 'run-autonomous-implementation.sh')
+        require(automation_impl, marker, 'docs/automation/autonomous-implementation.md')
+
+    for marker in [
+        'run-paper-evaluation.sh',
+        'PAPER_SUPPORTED=1',
+        'repo-local private paper-mode smoke',
+        'blocked_until_federico_pinned_betting_win_interface',
+    ]:
+        require(automation_paper, marker, 'docs/automation/paper-evaluation.md')
 
     for marker in [
         'SURE-002B_PRIVATE_PAPER_MODE_INTAKE',
@@ -87,6 +91,7 @@ def main() -> None:
         'Freeze gate',
         'status=blocked',
         'Stop conditions',
+        'run-paper-evaluation.sh',
     ]:
         require(runbook, marker, 'docs/018_private_paper_mode_runbook.md')
 
@@ -105,6 +110,7 @@ def main() -> None:
         'docs/017_private_paper_mode_implementation_backlog.md',
         'docs/018_private_paper_mode_runbook.md',
         'No unchecked repo-local item remains in `docs/017_private_paper_mode_implementation_backlog.md`.',
+        'run_paper_evaluation=canonical_repo_local_private_fixture_only',
     ]:
         require(status, marker, 'docs/repo_status_current.md')
 
@@ -112,18 +118,10 @@ def main() -> None:
     require(master_plan, 'SURE-002B_PRIVATE_PAPER_MODE_INTAKE', 'docs/MASTER_PLAN.md')
     require(master_plan, 'private_paper_mode=repo_local_complete', 'docs/MASTER_PLAN.md')
 
-    for marker in [
-        'run-autonomous-implementation.sh --duration 72h',
-        'npm run validate',
-    ]:
+    for marker in ['run-autonomous-implementation.sh --duration 72h', 'npm run validate']:
         require(command, marker, 'commands/run-sure-paper-mode-autonomous.sh')
 
-    for marker in [
-        'SUREBET_PINNED_BUNDLE',
-        'remote URLs are prohibited',
-        'artifacts/private-paper-mode',
-        'node cli.js local-report',
-    ]:
+    for marker in ['SUREBET_PINNED_BUNDLE', 'remote URLs are prohibited', 'artifacts/private-paper-mode', 'node cli.js local-report']:
         require(smoke_command, marker, 'commands/run-pinned-interface-smoke.sh')
     for forbidden in ['curl ', 'wget ', 'psql ', 'DATABASE_URL', 'DB_URL']:
         forbid(smoke_command, forbidden, 'commands/run-pinned-interface-smoke.sh')
@@ -134,17 +132,13 @@ def main() -> None:
     for required in [
         'scripts/validate_private_paper_mode_backlog_contract.py',
         'tests/private-paper-mode-backlog-contract.test.ts',
-        'docs/017_private_paper_mode_implementation_backlog.md',
-        'docs/018_private_paper_mode_runbook.md',
-        'commands/run-pinned-interface-smoke.sh',
         'commands/run-sure-paper-mode-autonomous.sh',
+        'commands/run-pinned-interface-smoke.sh',
     ]:
         require(validate_repo, required, 'scripts/validate_repo.py')
-    for required in ['commands/run-pinned-interface-smoke.sh', 'commands/run-sure-paper-mode-autonomous.sh']:
-        require(executables, required, 'tools/required_executable_paths.js')
+        require(executables, required if required.startswith('commands/') else required, 'tools/required_executable_paths.js') if required.startswith('commands/') else None
 
     print('validate_private_paper_mode_backlog_contract: ok')
-
 
 if __name__ == '__main__':
     main()

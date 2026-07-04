@@ -117,3 +117,22 @@ active_authority=no
 ```
 
 The active authority remains the three-repo surebet boundary docs.
+
+## Standard automation status
+
+```text
+automation_contract=standard_root_scripts_v1
+implementation_controller=run-autonomous-implementation.sh
+paper_controller=run-paper-evaluation.sh
+bugfix_controller=run-autonomous-bugfix.sh
+paper_supported=repo_local_private_fixture_only
+paper_real_upstream=blocked_until_federico_pinned_betting_win_interface
+lock_dir=.automation/locks
+root_artifacts_zip=required_before_run_script_exit
+stop_autonomous_run_helper=removed
+```
+
+`run-paper-evaluation.sh` is now the canonical paper supervisor. It replaces the
+old `run-paper-evaluation-12h.sh` naming and should be used only for local private
+fixture paper evaluation in this repo state. The private paper-mode backlog remains
+complete; real upstream evaluation still requires Federico's pinned bundle.

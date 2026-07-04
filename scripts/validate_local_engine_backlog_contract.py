@@ -4,8 +4,8 @@ import json
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
-RUNNER = ROOT / 'run-autonomous-implementation.sh'
 BACKLOG = ROOT / 'docs' / '015_local_engine_implementation_backlog.md'
+AUTOMATION_DOC = ROOT / 'docs' / 'automation' / 'autonomous-implementation.md'
 AGENTS = ROOT / 'AGENTS.md'
 STATUS = ROOT / 'docs' / 'repo_status_current.md'
 README = ROOT / 'README.md'
@@ -30,7 +30,7 @@ def require(text: str, marker: str, rel: str) -> None:
         fail(f'{rel} missing required marker: {marker}')
 
 def main() -> None:
-    runner = read(RUNNER)
+    automation_doc = read(AUTOMATION_DOC)
     backlog = read(BACKLOG)
     agents = read(AGENTS)
     status = read(STATUS)
@@ -44,12 +44,11 @@ def main() -> None:
 
     for marker in [
         'docs/015_local_engine_implementation_backlog.md',
-        'Implement exactly one bounded safe private paper-mode slice per cycle',
-        'first safe unchecked local implementation item',
-        'Use CONTINUE_REQUIRED=yes when docs/015_local_engine_implementation_backlog.md still has a safe unchecked local implementation item',
-        'the only remaining work requires Federico',
+        'repo-local backlogs are complete',
+        'Do not invent',
+        'Federico',
     ]:
-        require(runner, marker, 'run-autonomous-implementation.sh')
+        require(automation_doc, marker, 'docs/automation/autonomous-implementation.md')
 
     for marker in [
         'SURE-002A_LOCAL_INTERFACE_AND_ENGINE_BOOTSTRAP',

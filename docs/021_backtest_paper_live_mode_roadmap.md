@@ -52,3 +52,9 @@ Future live surebet execution decisions may belong here only after a separate ex
 
 Until that gate exists, live execution remains prohibited.
 
+## Automation alignment
+
+Backtest and paper authority remains in this repo for surebet strategies, but the
+canonical paper supervisor is now `run-paper-evaluation.sh`. Under the current gate
+it is limited to repo-local private fixture smoke. Future real upstream paper mode
+requires a pinned `betting-win` interface and explicit config update.

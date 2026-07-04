@@ -101,3 +101,22 @@ active_authority=no
 The active authority remains the three-repo surebet boundary docs.
 
 `docs/imported-from-betting-win/` must remain absent after legacy surebet material is rehomed.
+
+## Standard automation status
+
+```text
+automation_contract=standard_root_scripts_v1
+run_autonomous_implementation=canonical
+run_paper_evaluation=canonical_repo_local_private_fixture_only
+run_autonomous_bugfix=canonical
+paper_adaptive_interval=5m_to_60m
+lock_dir=.automation/locks
+root_artifacts_zip=required_before_run_script_exit
+stop_autonomous_run_helper=removed
+```
+
+The current safe automation command for implementation is
+`./run-autonomous-implementation.sh`. The current safe paper command is
+`./run-paper-evaluation.sh` and is limited to fake/local fixture private paper-mode
+smoke. Real upstream private paper evaluation remains blocked until Federico
+provides the pinned `betting-win` bundle.
