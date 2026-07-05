@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Universal update_git.sh
-# Default action with no args: --pull
+# Default action with no args: --pull (VS Code style autostash)
 # Source-safe: returns non-zero without terminating an interactive parent shell.
 
 usage() {
@@ -9,6 +9,10 @@ Usage: ./update_git.sh [command]
 
 Default with no args:
   --pull
+
+Pull behavior:
+  --pull uses git pull --ff-only --autostash so local tracked edits/deletions are
+  temporarily stashed, remote changes are pulled, and local changes are reapplied.
 
 Commands:
   --status
@@ -184,17 +188,6 @@ require_not_detached() {
   return 0
 }
 
-require_clean_tree_for_pull() {
-  local status
-  status="$(git status --porcelain 2>/dev/null)" || return $?
-  if [ -n "$status" ]; then
-    say_error "working tree is dirty; commit/stash before --pull"
-    git status --short >&2
-    return 2
-  fi
-  return 0
-}
-
 random_commit_message() {
   case $(( RANDOM % 5 )) in
     0) printf '%s\n' 'chore: sync repo state' ;;
@@ -292,8 +285,7 @@ main() {
   fi
 
   if [ "$do_pull" = "1" ]; then
-    require_clean_tree_for_pull || return $?
-    git_with_token_if_needed pull --ff-only || return $?
+    git_with_token_if_needed pull --ff-only --autostash || return $?
   fi
 
   if [ "$do_acp" = "1" ]; then

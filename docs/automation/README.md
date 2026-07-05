@@ -1,43 +1,63 @@
 # Repo automation contract: betting-win-surebet
 
-This repository uses the standardized root automation command surface:
+This repository uses the standardized root automation helper surface:
 
 ```bash
-./zip_codebase.sh
-./pull_artifacts_and_zip_codebase.sh
 ./update_git.sh
-./run-autonomous-implementation.sh
-./run-paper-evaluation.sh
-./run-autonomous-bugfix.sh
+./zip_codebase.sh
+./zip_codebase.sh --artifacts-only
+./pull_artifacts_and_zip_codebase.sh
+./watch_progress.sh --once --fast
+./check_progress.sh
+./open_log.sh
+./start.sh
+./stop.sh
 ```
 
-The root shell files and `.automation/lib/run_common.sh` are protected automation
-machinery. Normal implementation, paper evaluation, and bugfix runs must not
-change them.
+The three long root `run-*` controllers still exist, but they are intentionally out
+of scope for this helper-standardization wave.
 
-`zip_codebase.sh` creates the next numbered repo-root archive, includes untracked
-non-ignored files by default, excludes existing archives/secrets/generated output,
-and does not write a manifest.
+Root operator scripts inherit the active Node runtime from the parent shell. Before
+launching long controllers, activate the repo runtime explicitly:
 
-`pull_artifacts_and_zip_codebase.sh` is intentionally dumb and does not use
-`automation.config.sh`. On the laptop it pulls server-side root `artifacts.zip` as
-the next local `artifactsN.zip`, then calls local `./zip_codebase.sh`.
+```bash
+. "$HOME/.nvm/nvm.sh" && nvm use 20
+```
 
-`update_git.sh` supports `--status`, `--pull`, `--push`, `--clone`,
-`--add-commit-push`, and shorthand `--acp`. It keeps `GITHUB_TOKEN` support for
-GitHub HTTPS remotes.
+`update_git.sh` defaults to `--pull` and uses `git pull --ff-only --autostash`. It
+uses temporary `GIT_ASKPASS` for GitHub HTTPS auth and does not reset, clean, or
+auto-resolve conflicts.
 
-`run-autonomous-implementation.sh` handles bounded implementation tasks and reads
-its task from `--prompt-file` or `docs/automation/current-implementation-task.md`.
-The current repo-local backlogs are complete, so it should fix only concrete safe
-defects or stop with `AUTONOMOUS_GOAL_COMPLETE=yes`.
+`zip_codebase.sh` creates the next numbered codebase zip from tracked files plus
+untracked non-ignored files. It excludes secrets, archives, artifacts, logs,
+dependencies, build output, databases, temp/cache folders, and runtime evidence.
+It preserves real source folders such as `src/reports/`.
 
-`run-paper-evaluation.sh` supervises repo-local private paper mode over fake/local
-fixtures, collects evidence, calls `run-autonomous-bugfix.sh` on bugs, waits
-between cycles, and resumes. Real upstream paper evaluation remains blocked until
-Federico provides the pinned `betting-win` bundle.
+`zip_codebase.sh --artifacts-only` creates the next numbered `artifactsN.zip` from
+`./artifacts/` only, while still excluding nested archives, secrets, DB files,
+locks, temp/cache files, and private keys.
 
-`run-autonomous-bugfix.sh` always combines reactive artifact evidence and proactive
-paper-mode bug audit in one run.
+`pull_artifacts_and_zip_codebase.sh` reads `SSH_HOST`, `SSH_USER`, `SSH_PASSWORD`,
+and `REMOTE_REPO` from environment or `.env`, supports optional `REMOTE_ARTIFACT`,
+downloads remote artifacts without mutating the server, then calls `bash
+./zip_codebase.sh`. It has no `automation.config.sh` dependency.
 
-All `run-*` scripts create root `./artifacts.zip` before stopping.
+`check_progress.sh`, `watch_progress.sh`, and `open_log.sh` are read-only artifact
+viewers for `artifacts/autonomous_implementation_*`, `artifacts/autonomous_bugfix_*`,
+and `artifacts/paper_evaluation_*`. `watch_progress.sh --base-url` is accepted for
+workflow compatibility, but this repo has no service, so local artifacts are the
+source of truth.
+
+`start.sh` validates the repo and does not start a daemon. `stop.sh` intentionally
+stops nothing because `betting-win-surebet` has no long-running service in the
+current private paper-only phase.
+
+`.automation/lib/telegram_notify.sh` is installed as the shared completion notifier
+for future controller wiring. It reads `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`
+from environment first, then `.env`, sends one final message only, never prints the
+token, and does not fail a controller if delivery fails. Disable it with
+`TELEGRAM_NOTIFY=0`.
+
+Boundaries remain active: no provider connections, no provider SDKs/URLs, no
+wallets/signers/orders, no direct `betting-win` DB access, no public reports, no
+profitability claims, and no execution-readiness claims.

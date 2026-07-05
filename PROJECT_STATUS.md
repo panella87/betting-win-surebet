@@ -136,3 +136,15 @@ stop_autonomous_run_helper=removed
 old `run-paper-evaluation-12h.sh` naming and should be used only for local private
 fixture paper evaluation in this repo state. The private paper-mode backlog remains
 complete; real upstream evaluation still requires Federico's pinned bundle.
+
+
+## Automation helper standardization
+
+```text
+update_git_pull=git_pull_ff_only_autostash
+zip_codebase_artifacts_only=supported
+pull_artifacts_remote_artifact_override=supported
+progress_helpers=current_artifact_layout
+shared_telegram_helper=.automation/lib/telegram_notify.sh
+run_controllers=unchanged_in_this_wave
+```

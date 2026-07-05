@@ -183,3 +183,8 @@ and resumes until duration, blocker, or completion.
 
 Protected automation files are documented in `docs/automation/PROTECTED_AUTOMATION_FILES.md`.
 Normal autonomous cycles must not change them.
+
+
+## Automation helper standardization
+
+Approved helper wave standardizes `update_git.sh`, `zip_codebase.sh --artifacts-only`, `pull_artifacts_and_zip_codebase.sh`, progress/log helpers, `start.sh`, `stop.sh`, and `.automation/lib/telegram_notify.sh`. Root `run-*` controllers remain unchanged in this wave.

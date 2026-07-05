@@ -24,7 +24,7 @@ npm run validate
 | `python3 scripts/validate_artifact_hygiene.py` | The source tree or generated archives start carrying local secrets, generated archives, logs, temp files, caches, dependencies, or build output. |
 | `python3 scripts/validate_node_runtime_loader.py` | Autonomous wrappers bypass the shared Node runtime loader or start sourcing NVM directly instead of using the repo contract. |
 | `python3 scripts/validate_shell_local_assignments.py` | Shell scripts reintroduce same-line dependent `local` assignments that can trip `set -u` with unbound expansion. |
-| `python3 scripts/validate_autonomous_controller_contract.py` | The controller accepts malformed cycle artifacts, malformed request flags, malformed continue status, duplicates required reports, or unsafe validation ordering. |
+| `python3 scripts/validate_autonomous_controller_contract.py` | The controller accepts malformed cycle artifacts, malformed request flags, malformed continue status, duplicates required reports, or unsafe validation ordering; automation helper contracts drift: Git pull stops using autostash, packaging loses artifact-only mode, progress helpers stop reading the current artifact layout, Telegram helper disappears, or controller contract markers regress. |
 | `python3 scripts/validate_source_manifest.py` | `SOURCE_MANIFEST.json` loses non-empty audit metadata or stops matching the exact current source tree. |
 | `python3 scripts/validate_autonomous_continuation_contract.py` | Long autonomous runs stop after one bounded slice even though safe SURE-001 backlog still remains. |
 | `python3 scripts/validate_local_engine_backlog_contract.py` | The local implementation backlog disappears or stops enforcing local-only SURE-002A/SURE-007 boundaries. |
@@ -37,7 +37,7 @@ These tests lock the narrow regressions that previously caused or could cause bo
 | --- | --- |
 | `tests/autonomous-controller-contract.test.ts` | Required cycle report placeholders, duplicate artifact names, or malformed `request_flags.txt` handling return in the controller. |
 | `tests/autonomous-continuation-contract.test.ts` | Old one-slice stop wording returns and long runs stop cleanly even though safe SURE-001 work still exists. |
-| `tests/packaging-helpers.test.ts` | `zip_codebase.sh` or `create-source-handoff-archive.sh` starts including `.env`, generated archives, artifacts, dependencies, build output, locks, logs, or temp files. |
+| `tests/packaging-helpers.test.ts` | `zip_codebase.sh`, artifact-only packaging, `pull_artifacts_and_zip_codebase.sh`, or `create-source-handoff-archive.sh` starts including `.env`, generated archives, artifacts, dependencies, build output, locks, logs, or temp files. |
 | `tests/validate-artifact-hygiene.test.ts` | The archive hygiene validator stops rejecting secret-like filenames or log-style generated files inside codebase ZIPs. |
 | `tests/validate-fixture-integrity.test.ts` | The local pinned-interface placeholder fixture starts claiming real `betting-win` export metadata or non-empty upstream records. |
 | `tests/validate-shell-local-assignments.test.ts` | The shell validator stops rejecting same-line dependent `local` assignments and lets a `set -u` hazard back in. |

@@ -85,6 +85,7 @@ Useful wrappers:
 ./update_git.sh --help
 ./pull_artifacts_and_zip_codebase.sh --help
 ./zip_codebase.sh
+./zip_codebase.sh --artifacts-only
 ./run-autonomous-implementation.sh --check-only
 bash commands/run-sure-local-engine-autonomous.sh
 node cli.js local-report --bundle tests/fixtures/local-only-export-bundles/solver-ready-resource-export.json --output artifacts/local-paper-reports/smoke.report.json
@@ -135,3 +136,15 @@ used as real upstream acceptance evidence until Federico provides the pinned
 `betting-win` bundle. All `run-*` scripts write root `artifacts.zip` before exit.
 Protected automation files are documented under `docs/automation/` and must not be
 changed by normal autonomous work.
+
+
+## Automation helper standardization
+
+```text
+helper_standardization_wave=approved_subset_run_controllers_unchanged
+update_git_pull=git_pull_ff_only_autostash
+zip_codebase_artifacts_only=supported
+pull_artifacts_remote_artifact_override=supported
+progress_helpers=current_artifact_layout
+shared_telegram_helper=.automation/lib/telegram_notify.sh
+```

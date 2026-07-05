@@ -120,3 +120,16 @@ The current safe automation command for implementation is
 `./run-paper-evaluation.sh` and is limited to fake/local fixture private paper-mode
 smoke. Real upstream private paper evaluation remains blocked until Federico
 provides the pinned `betting-win` bundle.
+
+
+## Automation helper standardization
+
+```text
+update_git_pull=git_pull_ff_only_autostash
+zip_codebase_artifacts_only=supported
+pull_artifacts_remote_artifact_override=supported
+progress_helpers=current_artifact_layout
+start_stop=no_service_validation_and_noop
+shared_telegram_helper=.automation/lib/telegram_notify.sh
+run_controllers=unchanged_in_this_wave
+```

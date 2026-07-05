@@ -3,11 +3,15 @@
 
 zc_usage() {
   cat <<'USAGE'
-Usage: ./zip_codebase.sh
+Usage: ./zip_codebase.sh [--artifacts-only]
 
 Creates the next numbered codebase zip in the repo root, for example repo12.zip -> repo13.zip.
 Includes git-tracked files plus untracked non-ignored files by default.
 Excludes archives, secrets, logs, databases, generated folders, artifacts, and runtime evidence.
+
+Options:
+  --artifacts-only   Create the next numbered artifacts zip from ./artifacts only,
+                     for example artifacts12.zip -> artifacts13.zip.
 USAGE
 }
 
@@ -35,7 +39,7 @@ zc_is_excluded_path() {
   esac
 
   case "/$path/" in
-    */.git/*|*/.github/*|*/.locks/*|*/.automation/locks/*|*/node_modules/*|*/.pnpm-store/*|*/.npm/*|*/.yarn/*|*/.cache/*|*/.next/*|*/.nuxt/*|*/.turbo/*|*/.parcel-cache/*|*/dist/*|*/build/*|*/out/*|*/coverage/*|*/.nyc_output/*|*/artifacts/*|*/reports/*|*/runtime/*|*/logs/*|*/log/*|*/tmp/*|*/temp/*|*/output/*|*/backup/*|*/backups/*|*/cache/*|*/__pycache__/*|*/.pytest_cache/*|*/.mypy_cache/*|*/.ruff_cache/*|*/.venv/*|*/venv/*|*/secrets/*|*/.secrets/*|*/credentials/*)
+    */.git/*|*/.github/*|*/.locks/*|*/.automation/locks/*|*/node_modules/*|*/.pnpm-store/*|*/.npm/*|*/.yarn/*|*/.cache/*|*/.next/*|*/.nuxt/*|*/.turbo/*|*/.parcel-cache/*|*/dist/*|*/build/*|*/out/*|*/coverage/*|*/.nyc_output/*|*/artifacts/*|/reports/*|*/runtime/*|*/logs/*|*/log/*|*/tmp/*|*/.tmp/*|*/temp/*|*/output/*|*/backup/*|*/backups/*|*/cache/*|*/__pycache__/*|*/.pytest_cache/*|*/.mypy_cache/*|*/.ruff_cache/*|*/.venv/*|*/venv/*|*/secrets/*|*/.secrets/*|*/credentials/*)
       return 0
       ;;
   esac
@@ -49,8 +53,29 @@ zc_is_excluded_path() {
   return 1
 }
 
+zc_is_artifacts_excluded_path() {
+  local path base
+  path="${1#./}"
+  base="${path##*/}"
+
+  case "$base" in
+    .env|.env.*|*.zip|*.tar|*.tar.gz|*.tgz|*.7z|*.rar|*.pid|*.lock|*.tmp|*.sqlite|*.sqlite3|*.db|*.db-shm|*.db-wal|*.pem|*.key|*.p12|*.pfx|id_rsa|id_ed25519|*_rsa|*_ed25519|.DS_Store|Thumbs.db|true)
+      return 0
+      ;;
+  esac
+
+  case "/$path/" in
+    */.git/*|*/.locks/*|*/.automation/locks/*|*/node_modules/*|*/.pnpm-store/*|*/.npm/*|*/.yarn/*|*/.cache/*|*/.next/*|*/.nuxt/*|*/.turbo/*|*/.parcel-cache/*|*/dist/*|*/build/*|*/out/*|*/coverage/*|*/.nyc_output/*|*/tmp/*|*/.tmp/*|*/temp/*|*/cache/*|*/__pycache__/*|*/.pytest_cache/*|*/.mypy_cache/*|*/.ruff_cache/*|*/.venv/*|*/venv/*|*/secrets/*|*/.secrets/*|*/credentials/*)
+      return 0
+      ;;
+  esac
+
+  return 1
+}
+
 zc_next_numbered_zip() {
-  local prefix="$1" max=0 f b rest generation n
+  local prefix="$1" max=0 f b rest generation n nullglob_was_set=0
+  shopt -q nullglob && nullglob_was_set=1
   shopt -s nullglob
   for f in ./${prefix}*.zip; do
     b="${f#./}"
@@ -63,8 +88,29 @@ zc_next_numbered_zip() {
     n=$((10#$generation))
     [ "$n" -gt "$max" ] && max="$n"
   done
-  shopt -u nullglob
+  if [ "$nullglob_was_set" = "0" ]; then
+    shopt -u nullglob
+  fi
   printf '%s\n' "$((max + 1))"
+}
+
+
+zc_collect_artifacts_files() {
+  local repo_root="$1" list_file="$2" file_path
+  : > "$list_file" || return 1
+  if [ ! -d "$repo_root/artifacts" ]; then
+    zc_fail "artifacts directory not found: $repo_root/artifacts"
+    return 1
+  fi
+
+  while IFS= read -r -d '' file_path; do
+    file_path="${file_path#./}"
+    [ -f "$file_path" ] || continue
+    zc_is_artifacts_excluded_path "$file_path" || printf '%s\n' "$file_path" >> "$list_file"
+  done < <(find artifacts -type f -print0)
+
+  sort -u "$list_file" -o "$list_file" 2>/dev/null || return 1
+  return 0
 }
 
 zc_collect_files() {
@@ -96,9 +142,14 @@ zc_collect_files() {
 }
 
 zc_main() {
+  local artifacts_only=0 zip_prefix
   if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
     zc_usage
     return 0
+  fi
+  if [ "${1:-}" = "--artifacts-only" ]; then
+    artifacts_only=1
+    shift
   fi
   if [ "$#" -ne 0 ]; then
     zc_usage >&2
@@ -118,16 +169,26 @@ zc_main() {
   zc_have sort || { zc_fail "required command not found: sort"; return 127; }
 
   list_file="$(mktemp)" || return 1
-  zc_collect_files "$repo_root" "$list_file" || { rm -f "$list_file"; return 1; }
+  if [ "$artifacts_only" = "1" ]; then
+    zc_collect_artifacts_files "$repo_root" "$list_file" || { rm -f "$list_file"; return 1; }
+    zip_prefix="artifacts"
+  else
+    zc_collect_files "$repo_root" "$list_file" || { rm -f "$list_file"; return 1; }
+    zip_prefix="$repo_name"
+  fi
   file_count="$(wc -l < "$list_file" | tr -d '[:space:]')"
   if [ "$file_count" = "0" ]; then
     rm -f "$list_file"
-    zc_fail "no files selected for codebase zip"
+    if [ "$artifacts_only" = "1" ]; then
+      zc_fail "no files selected for artifacts zip"
+    else
+      zc_fail "no files selected for codebase zip"
+    fi
     return 1
   fi
 
-  next_number="$(zc_next_numbered_zip "$repo_name")" || { rm -f "$list_file"; return 1; }
-  zip_name="${repo_name}${next_number}.zip"
+  next_number="$(zc_next_numbered_zip "$zip_prefix")" || { rm -f "$list_file"; return 1; }
+  zip_name="${zip_prefix}${next_number}.zip"
   zip_path="$repo_root/$zip_name"
   tmp_zip="$repo_root/.${zip_name}.tmp.$$.zip"
   if [ -e "$zip_path" ]; then
