@@ -50,9 +50,9 @@ def main() -> None:
         'README.md': ['betting-win-surebet', 'Standard automation commands', 'run-paper-evaluation.sh'],
         'AGENTS.md': ['does not own provider truth', 'Source-of-truth order', 'Standard automation contract'],
         'docs/automation/repo-profile.md': ['repo_role=surebet_strategy_execution_repo', 'SURE-002B_PRIVATE_PAPER_MODE_INTAKE', 'Standard helper scripts'],
-        'docs/automation/paper-evaluation.md': ['PAPER_SUPPORTED=1', 'repo-local private paper-mode smoke', '5..60'],
+        'docs/automation/paper-evaluation.md': ['run-paper-evaluation.sh', 'no-service private paper', 'SUREBET_PINNED_BUNDLE'],
         'PROJECT_STATUS.md': ['Standard automation status', 'paper_supported=repo_local_private_fixture_only'],
-        'docs/repo_status_current.md': ['Standard automation status', 'run_paper_evaluation=canonical_repo_local_private_fixture_only'],
+        'docs/repo_status_current.md': ['Standard automation status', 'run_paper_evaluation=canonical_repo_local_private_fixture_and_pinned_bundle_only'],
         'docs/MASTER_PLAN.md': ['Automation operating model', 'run-autonomous-bugfix.sh'],
     }
     for rel, markers in required_doc_markers.items():
@@ -61,7 +61,7 @@ def main() -> None:
             if marker not in text:
                 fail(f'{rel} missing required marker: {marker}')
     gitignore = read(ROOT / '.gitignore')
-    for needle in ['node_modules/', '.env', 'artifacts/*', '*.zip', '.codex_current_artifact_dir', '.automation/locks/']:
+    for needle in ['node_modules/', '.env', 'artifacts/*', '*.zip', '.codex_current_artifact_dir', '.automation/locks/', '.automation/corrupt/', '.automation/paper-mode-to-autonomous-implementation.env', '.automation/autonomous-implementation-handover.env']:
         if needle not in gitignore:
             fail(f'.gitignore missing: {needle}')
     print('validate_repo: ok')

@@ -221,8 +221,8 @@ def main() -> None:
     validate_ops = package.get('scripts', {}).get('validate:ops', '')
     if 'scripts/validate_three_repo_surebet_boundary.py' not in validate_ops:
         fail('package.json validate:ops must include validate_three_repo_surebet_boundary.py')
-    if package.get('version') != '0.0.0-private-sure-002b-three-repo-boundary':
-        fail('package.json version must reflect the SURE-002B three-repo boundary rebaseline')
+    if package.get('version') != '0.0.0-private-sure-002b-paper-evaluation-standardized':
+        fail('package.json version must reflect the SURE-002B paper-evaluation standardization baseline')
 
     validate_repo = read('scripts/validate_repo.py')
     for marker in REQUIRED_FILES + ['docs/025_research_archive_completion_status.md', 'research/imported-from-betting-win/legacy/surebet/RESEARCH_IMPORT_MANIFEST.json', 'scripts/validate_three_repo_surebet_boundary.py', 'tests/three-repo-surebet-boundary.test.ts']:

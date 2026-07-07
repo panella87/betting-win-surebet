@@ -9,10 +9,22 @@ Active shared helpers:
 .automation/lib/telegram_notify.sh
 ```
 
-`run_common.sh` is used by the current long controllers. `telegram_notify.sh` is
-installed for the standardized completion-notification contract and is ready to be
-wired into the long controllers in a later explicit run-controller wave.
+`run_common.sh` is used by the long controllers for locking, validation, Codex
+execution, artifact packaging, fail-closed cycle status parsing, and required
+cycle artifact checks.
 
-This repo has no service-owned paper lifecycle. Local paper evidence is written
-under `artifacts/`, and the read-only progress helpers inspect those artifact
-folders directly.
+`telegram_notify.sh` is wired into `run-autonomous-implementation.sh`,
+`run-autonomous-bugfix.sh`, and `run-paper-evaluation.sh` for one final
+HTML-formatted completion notification per run. It supports
+`TELEGRAM_NOTIFY_DRY_RUN=1` for local formatting checks without contacting
+Telegram.
+
+This repo has no service-owned paper lifecycle. `run-paper-evaluation.sh` is the
+standard no-service private paper controller: it validates source, runs a private
+fixture smoke, writes local artifacts, and never starts/stops services or calls
+providers. Do not use real `SUREBET_PINNED_BUNDLE` input until the known
+paper-controller shell-command quoting and strict pinned-bundle boolean
+validation hardening has landed.
+
+
+Telegram status note: surebet's private-fixture-only status `PAPER_EVALUATION_READY_PRIVATE_FIXTURE_ONLY_BLOCKED_ON_PINNED_BUNDLE` is rendered as blocked rather than success, because real upstream paper evaluation still requires the approved hardening gate and a pinned `betting-win` bundle.

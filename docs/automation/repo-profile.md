@@ -37,6 +37,7 @@ export bundle.
 Primary validation:
 
 ```bash
+. "$HOME/.nvm/nvm.sh" && nvm use 20
 npm run validate
 ```
 
@@ -56,4 +57,4 @@ claims, and live/execution-readiness claims.
 
 ## Standard helper scripts
 
-`update_git.sh`, `zip_codebase.sh --artifacts-only`, `pull_artifacts_and_zip_codebase.sh`, `watch_progress.sh`, `check_progress.sh`, `open_log.sh`, `start.sh`, `stop.sh`, and `.automation/lib/telegram_notify.sh` are standardized. The root `run-*` controllers are unchanged in this helper wave.
+`update_git.sh`, `zip_codebase.sh --artifacts-only`, `pull_artifacts_and_zip_codebase.sh`, `watch_progress.sh`, `check_progress.sh`, `open_log.sh`, `start.sh`, `stop.sh`, and `.automation/lib/telegram_notify.sh` are standardized. `run-autonomous-implementation.sh`, `run-autonomous-bugfix.sh`, and `run-paper-evaluation.sh` are standardized with canonical flags and Telegram final notifications. `run-paper-evaluation.sh` is a no-service private fixture/pinned-bundle paper controller for this repo.

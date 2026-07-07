@@ -10,7 +10,7 @@ function read(path: string): string {
   return readFileSync(path, 'utf-8');
 }
 
-test('validation matrix maps each SURE-001 gate to a concrete failure mode', () => {
+test('validation matrix maps each repo validation gate to a concrete failure mode', () => {
   const doc = read(VALIDATION_MATRIX);
 
   for (const marker of [
@@ -23,7 +23,7 @@ test('validation matrix maps each SURE-001 gate to a concrete failure mode', () 
     'same-line dependent `local` assignments that can trip `set -u` with unbound expansion',
     'The controller accepts malformed cycle artifacts, malformed request flags, malformed continue status, duplicates required reports, or unsafe validation ordering',
     '`SOURCE_MANIFEST.json` loses non-empty audit metadata or stops matching the exact current source tree',
-    'Long autonomous runs stop after one bounded slice even though safe SURE-001 backlog still remains',
+    'Long autonomous runs stop after one bounded slice even though documented safe repo-local backlog work still remains',
     'tests/packaging-helpers.test.ts',
     'tests/validate-fixture-integrity.test.ts',
     'tests/validate-source-manifest.test.ts',

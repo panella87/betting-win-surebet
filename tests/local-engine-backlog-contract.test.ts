@@ -50,12 +50,16 @@ test('completed local backlog docs point to the pinned betting-win interface gat
   assert.match(handoff, /reference\.source=betting-win/);
 });
 
-test('local engine command keeps the normal validation-before-autonomous contract', () => {
+test('local engine command delegates to the standardized root implementation controller', () => {
   const command = read('commands/run-sure-local-engine-autonomous.sh');
 
-  assert.match(command, /scripts\/load-node-runtime\.sh/);
-  assert.match(command, /restore-required-executable-bits\.js/);
-  assert.match(command, /npm install/);
-  assert.match(command, /npm run validate/);
-  assert.match(command, /run-autonomous-implementation\.sh --duration 72h/);
+  assert.doesNotMatch(command, /scripts\/load-node-runtime\.sh/);
+  assert.doesNotMatch(command, /npm install/);
+  assert.doesNotMatch(command, /npm run validate/);
+  assert.match(command, /run-autonomous-implementation\.sh/);
+  assert.match(command, /--duration 72h/);
+  assert.match(command, /--model cli-default/);
+  assert.match(command, /--fallback-model none/);
+  assert.match(command, /--cycle-timeout 2h/);
+  assert.match(command, /--validation-timeout 20m/);
 });

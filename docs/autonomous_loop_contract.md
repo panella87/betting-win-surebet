@@ -35,4 +35,4 @@ Hard bans under the current gate: provider SDKs/URLs, wallet/signer/order/transa
 
 ## Runtime loader invariant
 
-Autonomous entrypoints must use `scripts/load-node-runtime.sh`. They must not source `nvm.sh` directly; startup must fail with an explicit Node version error instead of exiting through NVM shell internals.
+Root autonomous controllers inherit the active Node runtime from the parent shell. They must not source `nvm.sh` directly and must not source `scripts/load-node-runtime.sh`. Compatibility wrappers under `commands/` may still use `scripts/load-node-runtime.sh`, which also must not source `nvm.sh` directly. Startup must fail with an explicit Node version error instead of exiting through NVM shell internals.

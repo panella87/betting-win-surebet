@@ -400,8 +400,14 @@ automation_run_codex_prompt() {
 }
 
 automation_read_continue_status() {
-  local file="$1" line count=0 status=""
-  [[ -f "$file" ]] || { printf 'CONTINUE_REQUIRED=yes\n'; return 0; }
+  local file="$1"
+  local line=""
+  local count=0
+  local status=""
+  if [[ ! -f "$file" ]]; then
+    echo "ERROR: missing continue status file: $file" >&2
+    return 1
+  fi
   while IFS= read -r line || [[ -n "$line" ]]; do
     line="${line%$'\r'}"
     [[ -z "$line" ]] && continue
@@ -409,13 +415,52 @@ automation_read_continue_status() {
     status="$line"
   done < "$file"
   if [[ "$count" -ne 1 ]]; then
-    printf 'CONTINUE_REQUIRED=yes\n'
-    return 0
+    echo "ERROR: continue status must contain exactly one non-empty line: $file" >&2
+    return 1
   fi
   case "$status" in
-    CONTINUE_REQUIRED=yes|AUTONOMOUS_GOAL_COMPLETE=yes|BLOCKED=yes) printf '%s\n' "$status" ;;
-    *) printf 'CONTINUE_REQUIRED=yes\n' ;;
+    CONTINUE_REQUIRED=yes|AUTONOMOUS_GOAL_COMPLETE=yes|BLOCKED=yes)
+      printf '%s\n' "$status"
+      ;;
+    *)
+      echo "ERROR: unknown continue status '$status' in $file" >&2
+      return 1
+      ;;
   esac
+}
+
+automation_require_cycle_artifacts() {
+  local base_dir="$1"
+  shift
+  local allow_empty_git_diff=0
+  if [[ "${1:-}" == "allow_empty_git_diff" ]]; then
+    allow_empty_git_diff=1
+    shift
+  fi
+  local rel=""
+  local path=""
+  local missing=0
+  for rel in "$@"; do
+    path="$base_dir/$rel"
+    if [[ ! -e "$path" ]]; then
+      automation_log "required_cycle_artifact_missing path=$path"
+      missing=1
+      continue
+    fi
+    if [[ ! -s "$path" ]]; then
+      if [[ "$allow_empty_git_diff" == "1" && "$rel" == "git_diff.patch" ]]; then
+        continue
+      fi
+      automation_log "required_cycle_artifact_empty path=$path"
+      missing=1
+      continue
+    fi
+    if grep -Eiq 'AUTOMATION_REQUIRED_ARTIFACT_PLACEHOLDER|TODO_PLACEHOLDER|placeholder only|replace this placeholder' "$path" 2>/dev/null; then
+      automation_log "required_cycle_artifact_placeholder path=$path"
+      missing=1
+    fi
+  done
+  [[ "$missing" == "0" ]]
 }
 
 automation_build_artifacts_zip() {

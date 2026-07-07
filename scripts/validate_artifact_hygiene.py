@@ -8,7 +8,7 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 FORBIDDEN_ROOTS = {'.git', '.github', '.locks', 'artifacts', 'node_modules', 'dist', 'coverage', 'output', 'tmp', '.tmp'}
-SKIP_PREFIXES = {'.automation/locks'}
+SKIP_PREFIXES = {'.automation/locks', '.automation/corrupt'}
 FORBIDDEN_EXACT = {
     'true',
     '.env.local',

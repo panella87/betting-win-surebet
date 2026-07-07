@@ -1,4 +1,137 @@
+## 2026-07-07 — Telegram pinned-bundle blocked-status correction
+
+- Corrected the Telegram helper's status classification so `PAPER_EVALUATION_READY_PRIVATE_FIXTURE_ONLY_BLOCKED_ON_PINNED_BUNDLE` renders as blocked instead of success.
+- Added regression coverage for the surebet private-fixture-only pinned-bundle status card.
+- Kept the Hyperliquid pretty HTML card format and repo-specific no-service/private-paper boundary intact.
+
 # Changelog
+
+## 2026-07-07 - Telegram final notification pretty HTML helper alignment
+
+- Ported the latest approved Hyperliquid Telegram helper behavior into `betting-win-surebet` with repo-specific wording only.
+- `.automation/lib/telegram_notify.sh` now builds HTML-formatted final notification cards with status icons, copyable code fields, UTC timestamp, next-action hint, and helper version marker `20260706.pretty_v2_html_cards`.
+- Added `TELEGRAM_NOTIFY_DRY_RUN=1` support for local formatting checks without contacting Telegram and made `telegram_notification_status.txt` writes replace stale duplicate status lines instead of appending.
+- Added Telegram helper tests for HTML formatting, dry-run status payloads, deterministic status icons, secret non-disclosure, and non-legacy key/value message bodies.
+- Updated automation docs and `.env.example` for the pretty HTML Telegram helper while preserving one-final-message-only behavior and non-failing delivery semantics.
+- No application source, strategy logic, provider integration, direct betting-win DB access, execution path, or pinned-bundle runtime behavior changed.
+
+## 2026-07-06 - Documentation recheck: attachment-agnostic audit metadata
+
+- Rechecked active documentation/config references against `betting-win-surebet30.zip`.
+- Confirmed the standardized automation command surface remains aligned: canonical root helper/controller scripts, compatibility-only `commands/run-sure-*` wrappers, absent obsolete paper-12h/stop helpers, documented Node 20 parent-shell activation, bounded protected-file exception for the approved paper-controller hardening task, and no-service/private-fixture paper behavior.
+- Updated `DOCUMENTATION_CHECK_REPORT.md` so its top source metadata is attachment-agnostic while recording `betting-win-surebet30.zip` as historical audit context. This avoids future documentation-only drift when a new current zip is uploaded for another recheck.
+- Preserved the known non-documentation gate: real `SUREBET_PINNED_BUNDLE` use still waits for paper-controller shell-command quoting and strict `SUREBET_REQUIRE_PINNED_BUNDLE` validation hardening.
+- No application source, runtime controller logic, package scripts, validation logic, strategy behavior, provider integration, execution path, or pinned-bundle runtime behavior changed.
+
+
+## 2026-07-06 - Documentation recheck: current source metadata refresh for betting-win-surebet29
+
+- Rechecked active documentation/config references against `betting-win-surebet29.zip`.
+- Confirmed the standardized automation command surface remains aligned: canonical root helper/controller scripts, compatibility-only `commands/run-sure-*` wrappers, absent obsolete paper-12h/stop helpers, documented Node 20 parent-shell activation, bounded protected-file exception for the approved paper-controller hardening task, and no-service/private-fixture paper behavior.
+- Refreshed `DOCUMENTATION_CHECK_REPORT.md` from `betting-win-surebet28.zip` to `betting-win-surebet29.zip`.
+- Preserved the known non-documentation gate: real `SUREBET_PINNED_BUNDLE` use still waits for paper-controller shell-command quoting and strict `SUREBET_REQUIRE_PINNED_BUNDLE` validation hardening.
+- No application source, runtime controller logic, package scripts, validation logic, strategy behavior, provider integration, execution path, or pinned-bundle runtime behavior changed.
+
+## 2026-07-06 - Documentation recheck: current source metadata refresh for betting-win-surebet28
+
+- Rechecked active documentation/config references against `betting-win-surebet28.zip`.
+- Confirmed the standardized automation command surface remains aligned: canonical root helper/controller scripts, compatibility-only `commands/run-sure-*` wrappers, absent obsolete paper-12h/stop helpers, documented Node 20 parent-shell activation, bounded protected-file exception for the approved paper-controller hardening task, and no-service/private-fixture paper behavior.
+- Refreshed `DOCUMENTATION_CHECK_REPORT.md` from `betting-win-surebet27.zip` to `betting-win-surebet28.zip`.
+- Preserved the known non-documentation gate: real `SUREBET_PINNED_BUNDLE` use still waits for paper-controller shell-command quoting and strict `SUREBET_REQUIRE_PINNED_BUNDLE` validation hardening.
+- No application source, runtime controller logic, package scripts, validation logic, strategy behavior, provider integration, execution path, or pinned-bundle runtime behavior changed.
+
+## 2026-07-06 - Documentation recheck: current source metadata refresh for betting-win-surebet27
+
+- Rechecked active documentation/config references against `betting-win-surebet27.zip`.
+- Confirmed the standardized automation command surface remains aligned: canonical root helper/controller scripts, compatibility-only `commands/run-sure-*` wrappers, absent obsolete paper-12h/stop helpers, documented Node 20 parent-shell activation, bounded protected-file exception for the approved paper-controller hardening task, and no-service/private-fixture paper behavior.
+- Refreshed `DOCUMENTATION_CHECK_REPORT.md` from `betting-win-surebet26.zip` to `betting-win-surebet27.zip`.
+- Preserved the known non-documentation gate: real `SUREBET_PINNED_BUNDLE` use still waits for paper-controller shell-command quoting and strict `SUREBET_REQUIRE_PINNED_BUNDLE` validation hardening.
+- No application source, runtime controller logic, package scripts, validation logic, strategy behavior, provider integration, execution path, or pinned-bundle runtime behavior changed.
+
+## 2026-07-06 - Documentation recheck: current source metadata refresh
+
+- Rechecked active documentation/config references against `betting-win-surebet26.zip`.
+- Confirmed the standardized automation command surface remains aligned: canonical root helper/controller scripts, compatibility-only `commands/run-sure-*` wrappers, absent obsolete paper-12h/stop helpers, documented Node 20 parent-shell activation, bounded protected-file exception for the approved paper-controller hardening task, and no-service/private-fixture paper behavior.
+- Refreshed `DOCUMENTATION_CHECK_REPORT.md` from `betting-win-surebet25.zip` to `betting-win-surebet26.zip`.
+- Preserved the known non-documentation gate: real `SUREBET_PINNED_BUNDLE` use still waits for paper-controller shell-command quoting and strict `SUREBET_REQUIRE_PINNED_BUNDLE` validation hardening.
+- No application source, runtime controller logic, package scripts, validation logic, strategy behavior, provider integration, execution path, or pinned-bundle runtime behavior changed.
+
+## 2026-07-06 - Documentation recheck: automation-maintenance protected-file exception
+
+- Rechecked active documentation/config references against `betting-win-surebet25.zip`.
+- Confirmed the standardized automation command surface remains aligned: canonical root helper/controller scripts, compatibility-only `commands/run-sure-*` wrappers, absent obsolete paper-12h/stop helpers, documented Node 20 parent-shell activation, protected automation docs, and no-service/private-fixture paper behavior.
+- Updated the current implementation-task and operator docs so the approved paper-controller pinned-bundle shell-command hardening is clearly treated as explicit automation maintenance and launched with `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`.
+- Kept the protected-file rule for normal implementation, paper evaluation, and bug-audit runs unchanged.
+- Preserved the known non-documentation gate: real `SUREBET_PINNED_BUNDLE` use still waits for paper-controller shell-command quoting and strict `SUREBET_REQUIRE_PINNED_BUNDLE` validation hardening.
+- No application source, runtime controller logic, package scripts, validation logic, strategy behavior, provider integration, execution path, or pinned-bundle runtime behavior changed.
+
+
+## 2026-07-06 - Documentation recheck: env template and validation matrix alignment
+
+- Rechecked active documentation/config references against `betting-win-surebet24.zip`.
+- Updated `.env.example` from stale SURE-001 contract/export placeholders to the current private-paper operator template for `GITHUB_TOKEN`, SSH artifact pulling, optional `REMOTE_ARTIFACT`, Telegram final notifications, and future-use `SUREBET_PINNED_BUNDLE` / `SUREBET_REQUIRE_PINNED_BUNDLE` settings.
+- Refreshed `docs/011_validation_matrix.md` so autonomous continuation risks are described generically as documented safe repo-local backlog work instead of stale SURE-001-active wording.
+- Refreshed `DOCUMENTATION_CHECK_REPORT.md` for `betting-win-surebet24.zip`.
+- No app source, runtime controller logic, package scripts, validation logic, strategy behavior, provider integration, execution path, or pinned-bundle runtime behavior changed.
+
+## 2026-07-06 — Documentation recheck: current-source report and future pinned command preflight
+
+- Rechecked active automation docs against `betting-win-surebet23.zip`.
+- Confirmed the standardized automation command surface remains aligned: canonical root controllers, compatibility-only `commands/run-sure-*` wrappers, Node 20 parent-shell activation, no obsolete stop/paper-12h helpers, and private paper-mode/pinned-bundle hardening boundaries.
+- Refreshed `DOCUMENTATION_CHECK_REPORT.md` from `betting-win-surebet22.zip` to `betting-win-surebet23.zip` and updated its validation snippets to include the Node 20 parent-shell preflight.
+- Updated the future pinned-bundle example in `docs/018_private_paper_mode_runbook.md` so it explicitly activates Node 20 before launching the root paper controller.
+- No app source, runtime controller logic, package scripts, validation logic, or strategy behavior changed.
+
+## 2026-07-06 — Documentation recheck: root-controller Node activation examples
+
+- Rechecked active automation docs against `betting-win-surebet22.zip`.
+- Updated standalone root-controller command examples so implementation, bugfix, and paper-evaluation controller commands explicitly show parent-shell Node 20 activation before launch.
+- Refreshed `DOCUMENTATION_CHECK_REPORT.md` for `betting-win-surebet22.zip`; no app source, runtime controller logic, package scripts, or strategy behavior changed.
+
+## 2026-07-06 — Documentation recheck: Node 20 preflight wording alignment
+
+- Updated active bootstrap/runbook documentation so `npm install`, `npm run validate`, and root-controller check commands are shown after explicit parent-shell Node 20 activation.
+- Kept the standardized automation rule unchanged: root controllers inherit the active parent shell runtime and must not source `nvm.sh` themselves.
+- Refreshed the documentation check report for `betting-win-surebet21.zip`; no app source, runtime controller, package script, or strategy logic changes were made.
+
+
+## 2026-07-06 — Documentation recheck: generated overlay manifest ignored by source manifest
+
+- Rechecked active README, status, runbook, and automation docs against the standardized automation command surface after the previous cleanup overlay.
+- Confirmed active docs already treat `OVERLAY_MANIFEST.json` as generated drag-and-drop metadata, not repo authority.
+- Updated the source-manifest validator/regenerator contract so `OVERLAY_MANIFEST.json` is ignored like other generated overlay/runtime metadata while source-owned automation files remain tracked.
+- Added regression coverage so generated overlay metadata cannot stale `SOURCE_MANIFEST.json`, while real source drift is still rejected.
+- Updated the documentation check report and post-overlay cleanup note for `betting-win-surebet20.zip`.
+
+## 2026-07-06 — Documentation recheck cleanup: stale overlay manifest removal
+
+- Rechecked active README, status, runbook, and automation docs against the standardized automation surface after the previous documentation alignment overlay.
+- Removed stale root `OVERLAY_MANIFEST.json` from source authority because it described an older drag-and-drop overlay and obsolete cleanup command, not the current repo state.
+- Added `OVERLAY_MANIFEST.json` to `.gitignore` so future local overlay metadata does not become active source documentation.
+- Updated `docs/automation/POST_OVERLAY_CLEANUP.md` and `DOCUMENTATION_CHECK_REPORT.md` to document that stale overlay metadata is generated and may be removed.
+
+
+## 2026-07-06 — Documentation alignment for standardized automation surface
+
+- Refreshed active README, status, runbook, and automation docs so canonical daily entrypoints are the root scripts: `run-autonomous-implementation.sh`, `run-paper-evaluation.sh`, and `run-autonomous-bugfix.sh`.
+- Labeled `STARTER_PACK.md` as historical so it no longer reads as current SURE-001-only status.
+- Updated SSH/artifact-pull docs to match the actual `pull_artifacts_and_zip_codebase.sh` contract: explicit `SSH_HOST`, `SSH_USER`, `SSH_PASSWORD`, `REMOTE_REPO`, optional `REMOTE_ARTIFACT`, no `automation.config.sh`, and no default remote host.
+- Updated paper-evaluation docs to describe the no-service private fixture/pinned-bundle controller and the remaining pinned-bundle shell-hardening note without changing runtime logic.
+
+## 2026-07-06 — Automation runtime artifact hardening
+
+- Hardened `SOURCE_MANIFEST.json` validation/regeneration so controller-created runtime state under `.automation/locks/`, `.automation/corrupt/`, and exact paper/bugfix/implementation handoff files are ignored while source-owned `.automation` helpers remain tracked.
+- Added regression tests proving runtime locks/handoffs do not stale the manifest and that real source drift is still rejected.
+- Fixed `run-paper-evaluation.sh` finalizer exit-code capture so `final-summary.md` and Telegram final notifications report the real failing exit status.
+- Documented the runtime-artifact policy and preserved the Hyperliquid-style parent-shell runtime, shared Telegram, final-artifacts, and no-service surebet adaptations.
+
+## 2026-07-05 — Paper-evaluation standardization and containment hardening
+
+- Standardized `run-paper-evaluation.sh` with the approved root-controller flags, parent-shell Node assertion, no-service private fixture flow, optional `SUREBET_PINNED_BUNDLE` smoke, `SUREBET_REQUIRE_PINNED_BUNDLE` fail-closed mode, deterministic final statuses, paper-mode implementation handoff, final `artifacts.zip`, and Telegram final notification.
+- Hardened `local-report` and `local-report-batch` output containment so dangling output-file symlinks and nested `artifacts/` symlink path components are rejected before outside files or directories can be created.
+- Removed shell-level artifact-output `mkdir -p` from the pinned-interface smoke path and automation paper command so CLI containment owns artifact directory creation.
+- Converted historical `commands/run-sure-*` wrappers into thin compatibility wrappers over the standardized root controllers.
+- Updated docs, validators, and tests to enforce the no-service surebet paper contract while preserving no-provider, no-execution, no-direct-DB, no-public-report, no-profitability-claim, and no-live-readiness boundaries.
 
 ## 2026-07-04 — Standard automation contract overlay
 
@@ -127,3 +260,15 @@
 - Hardened local report output containment against realpath/symlink escapes.
 - Added per-candidate settlement summaries for multi-candidate private paper reports.
 - Added validator and tests for the private paper-mode backlog contract.
+
+
+## 2026-07-06 — Documentation recheck for pinned-bundle hardening gate
+
+- Clarified active runbooks and automation docs so real `SUREBET_PINNED_BUNDLE`
+  commands are not presented as ready until paper-controller shell-command
+  quoting and strict pinned-bundle boolean validation hardening lands.
+- Updated the current implementation task and status docs to identify that
+  hardening as the next allowed repo-local tooling task before using a real
+  pinned `betting-win` export bundle.
+- Refreshed validation-matrix wording from stale SURE-001/SURE-002A phrasing to
+  the current completed SURE-002B private paper-mode gate.

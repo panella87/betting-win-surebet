@@ -11,9 +11,16 @@ claims. Private paper mode and future surebet backtesting belong in this repo; l
 ## Canonical paper supervisor
 
 `run-paper-evaluation.sh` is the canonical paper supervisor. In the current repo
-state it is configured for local private fixture smoke only and writes private
-artifacts under `artifacts/private-paper-mode/`. It may invoke
-`run-autonomous-bugfix.sh` when logs contain crash/error evidence, then resume.
+state it is configured for local private fixture smoke and writes private
+artifacts under `artifacts/private-paper-mode/`. The pinned-bundle branch is
+reserved until paper-controller shell-command quoting and strict pinned-bundle
+boolean validation hardening lands. It does not start or stop services and does not
+call `run-autonomous-bugfix.sh` as an integrated repair path. When source work is
+needed, it writes a paper-mode-to-autonomous-implementation handoff for the root
+implementation controller.
 
-Adaptive mode may choose only the wait interval between cycles, clamped to 5..60
-minutes. It must not change commands, add provider access, or weaken kill criteria.
+Adaptive and interval flags are accepted for workflow compatibility. Because this
+repo has no service lifecycle, the current controller completes a no-service
+single-cycle private fixture or pinned-bundle check instead of running a long
+service-monitoring loop. The flags must not change commands, add provider access,
+or weaken kill criteria.

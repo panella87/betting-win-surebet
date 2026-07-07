@@ -17,7 +17,7 @@ provider_connections=prohibited
 execution=prohibited
 first_lane=polymarket_standard_binary_complete_set_v0
 current_task=SURE-002B_PRIVATE_PAPER_MODE_INTAKE
-next_task=wait_for_federico_pinned_betting_win_contract_export_interface_before_real_upstream_evaluation
+next_task=paper_controller_pinned_bundle_shell_hardening_then_wait_for_federico_pinned_betting_win_contract_export_interface_before_real_upstream_evaluation
 ```
 
 Current state:
@@ -30,6 +30,8 @@ Current state:
 - It does not implement wallets, signers, token approvals, orders, cancellations, redemptions, cashouts, transactions, live collectors, public signals, or profitability claims.
 - It consumes only stable contracts/exports/read-only evidence from `betting-win` after those interfaces exist.
 - It uses a separate account and bankroll from `betting-win-betting`; no shared-capital coordinator exists here.
+- Controller runtime locks and handoff files are ignored by source-manifest validation/regeneration while source-owned `.automation` helpers remain tracked.
+- `run-paper-evaluation.sh` final summaries and Telegram notifications must preserve the actual process exit status.
 
 Authoritative active docs:
 
@@ -48,6 +50,7 @@ Authoritative active docs:
 Validation command:
 
 ```bash
+. "$HOME/.nvm/nvm.sh" && nvm use 20
 npm run validate
 ```
 
@@ -56,7 +59,7 @@ Local `.env` policy: allowed in the working folder only because `.gitignore` exp
 
 ## Launcher hardening
 
-The autonomous launcher uses `scripts/load-node-runtime.sh` and logs Node/NPM runtime checks before validation. `.env` may exist locally when ignored by `.gitignore`; it must not be archived or committed.
+Root controllers inherit the active Node runtime from the parent shell and log Node/NPM runtime checks before validation. Compatibility wrappers under `commands/` may still use `scripts/load-node-runtime.sh`; the canonical daily entrypoints are the root scripts. `.env` may exist locally when ignored by `.gitignore`; it must not be archived or committed.
 
 ## Packaging helpers
 
@@ -97,13 +100,14 @@ output=artifacts/private-paper-mode/*.report.json
 
 `docs/017_private_paper_mode_implementation_backlog.md` is now a completed implementation ledger after SURE-001 and SURE-002A completion. `docs/018_private_paper_mode_runbook.md` captures the freeze gate: `npm run validate` passes, local fixture smoke passes, and real upstream evaluation still requires Federico's repo-local pinned `betting-win` bundle.
 
-Use:
+Use the canonical root controller after activating Node 20 in the parent shell:
 
 ```bash
-bash commands/run-sure-paper-mode-autonomous.sh
+. "$HOME/.nvm/nvm.sh" && nvm use 20
+bash ./run-paper-evaluation.sh --duration 72h --interval 5m --adaptive --keep-monitoring-when-ready --model cli-default --fallback-model none
 ```
 
-only if a concrete repo-local validation/tooling defect reopens safe work. Use `commands/run-pinned-interface-smoke.sh` only when Federico provides a repo-local pinned `betting-win` export bundle.
+for repo-local private fixture paper checks. After the same Node activation, use `AUTOMATION_ALLOW_PROTECTED_CHANGES=1 bash ./run-autonomous-implementation.sh --duration 72h --model cli-default --fallback-model none` for the confirmed paper-controller pinned-bundle shell-command hardening because it is explicit automation maintenance touching a protected root controller. For ordinary repo-local source defects, omit `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`. `commands/run-sure-*` wrappers are compatibility wrappers only. Use `commands/run-pinned-interface-smoke.sh` only when Federico provides a repo-local pinned `betting-win` export bundle, and do not treat pinned-bundle evaluation as ready until paper-controller pinned-bundle shell hardening is complete.
 
 
 ## Legacy surebet import archive
@@ -122,9 +126,9 @@ The active authority remains the three-repo surebet boundary docs.
 
 ```text
 automation_contract=standard_root_scripts_v1
-implementation_controller=run-autonomous-implementation.sh
-paper_controller=run-paper-evaluation.sh
-bugfix_controller=run-autonomous-bugfix.sh
+implementation_controller=run-autonomous-implementation.sh standardized_with_canonical_flags_and_telegram
+paper_controller=run-paper-evaluation.sh standardized_with_telegram_no_service_private_fixture_pinned_bundle
+bugfix_controller=run-autonomous-bugfix.sh standardized_audit_handoff_with_telegram
 paper_supported=repo_local_private_fixture_only
 paper_real_upstream=blocked_until_federico_pinned_betting_win_interface
 lock_dir=.automation/locks
@@ -132,10 +136,7 @@ root_artifacts_zip=required_before_run_script_exit
 stop_autonomous_run_helper=removed
 ```
 
-`run-paper-evaluation.sh` is now the canonical paper supervisor. It replaces the
-old `run-paper-evaluation-12h.sh` naming and should be used only for local private
-fixture paper evaluation in this repo state. The private paper-mode backlog remains
-complete; real upstream evaluation still requires Federico's pinned bundle.
+`run-autonomous-implementation.sh`, `run-autonomous-bugfix.sh`, and `run-paper-evaluation.sh` now use the standardized root-controller flag, artifact, exit-code, and Telegram final-notification contract. The paper controller is surebet-specific and no-service: it validates source, runs private fixture smoke, contains a pinned-bundle branch that must not be used with real operator input until shell hardening lands, and never starts/stops services or calls providers. The private paper-mode backlog remains complete; real upstream evaluation still requires Federico's pinned bundle.
 
 
 ## Automation helper standardization
@@ -146,5 +147,7 @@ zip_codebase_artifacts_only=supported
 pull_artifacts_remote_artifact_override=supported
 progress_helpers=current_artifact_layout
 shared_telegram_helper=.automation/lib/telegram_notify.sh
-run_controllers=unchanged_in_this_wave
+run_autonomous_implementation=standardized_with_canonical_flags_and_telegram
+run_autonomous_bugfix=standardized_audit_handoff_with_telegram
+run_paper_evaluation_standardization=standardized_with_telegram_no_service_private_fixture_pinned_bundle
 ```

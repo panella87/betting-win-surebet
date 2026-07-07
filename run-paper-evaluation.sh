@@ -1,75 +1,221 @@
 #!/usr/bin/env bash
+# Canonical no-service private paper-evaluation controller for betting-win-surebet.
+# Default duration: 72h. This repo has no paper service lifecycle; evaluation is repo-local fixture/pinned-bundle only.
 set -Eeuo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 AUTOMATION_REPO_ROOT="$SCRIPT_DIR"
 # shellcheck source=.automation/lib/run_common.sh
-. "$AUTOMATION_REPO_ROOT/.automation/lib/run_common.sh"
+. "$SCRIPT_DIR/.automation/lib/run_common.sh"
+# shellcheck source=.automation/lib/telegram_notify.sh
+. "$SCRIPT_DIR/.automation/lib/telegram_notify.sh"
 
 DURATION_SECONDS="$(automation_parse_duration_seconds 72h)"
 INTERVAL_SECONDS=""
 ADAPTIVE=0
+KEEP_MONITORING_WHEN_READY=0
 STATUS_ONLY=0
 FORCE_UNLOCK=0
+CHECK_ONLY=0
+PRINT_CONFIG=0
+AUTO_INSTALL=0
+ALLOW_PARALLEL=0
 FINISHED=0
 EXIT_STATUS=0
 STOP_REASON="not_started"
 FINAL_STATUS="not_started"
 CYCLES_ATTEMPTED=0
-BUGFIX_ATTEMPTS=0
+LOCK_ACQUIRED=0
+REPO_DIR_OVERRIDE=""
+CODEX_PHASE_TIMEOUT_SECONDS=""
+VALIDATION_TIMEOUT_SECONDS=""
+INSTALL_TIMEOUT_SECONDS=""
+MAX_CYCLES=""
+CODEX_MODEL=""
+CODEX_FALLBACK_MODEL=""
+CODEX_SANDBOX=""
+CODEX_STREAM_LOGS=""
+PAPER_COMMAND_TIMEOUT_SECONDS=""
+PINNED_BUNDLE_PATH="${SUREBET_PINNED_BUNDLE:-}"
+REQUIRE_PINNED_BUNDLE="${SUREBET_REQUIRE_PINNED_BUNDLE:-0}"
+LOCAL_FIXTURE_BUNDLE="tests/fixtures/private-paper-mode-smoke/accepted-local-bundle.json"
+PAPER_LOCAL_REPORT_PATH=""
+PAPER_PINNED_REPORT_PATH=""
+SCRIPT_NAME="run-paper-evaluation.sh"
 
 usage() {
-  cat <<'EOF'
+  cat <<'EOF_USAGE'
 Usage:
-  ./run-paper-evaluation.sh
-  ./run-paper-evaluation.sh --duration 72h
-  ./run-paper-evaluation.sh --interval 30m
-  ./run-paper-evaluation.sh --adaptive
-  ./run-paper-evaluation.sh --status
-  ./run-paper-evaluation.sh --force-unlock
+  ./run-paper-evaluation.sh [options]
 
-Default duration: 72h.
-Paper evaluation supervises paper mode, collects evidence, invokes
-./run-autonomous-bugfix.sh when bugs are detected, waits between cycles, and then resumes.
+Primary options:
+  --duration VALUE               Campaign scheduling budget. Default: 72h.
+  --interval VALUE               Compatibility cadence value. Accepted for standard workflow compatibility.
+  --adaptive                     Compatibility flag. This no-service repo does not delegate wait intervals to Codex.
+  --keep-monitoring-when-ready   Accepted for compatibility; no service monitoring is performed in this repo.
+  --model MODEL                  Override the Codex model for any future paper handoff/audit integration. Use cli-default for profile default.
+  --fallback-model MODEL         Fallback model selector. Use none to disable fallback.
+  --repo-dir PATH                Override repository path.
 
-The --interval value is the wait between completed paper cycles. With --adaptive,
-Codex recommends the next wait and the shell clamps it to 5..60 minutes.
-EOF
+Controller behavior:
+  --check-only                   Run preflight validation only. No private report write, no Codex phase.
+  --status                       Show the current paper-controller lock state and exit.
+  --force-unlock                 Terminate only a verified repo-scoped paper controller lock owner, remove the lock, and exit.
+  --auto-install                 Permit one npm install --ignore-scripts when node_modules is absent.
+  --max-cycles N                 Accepted canonical option. No-service surebet evaluation completes in one cycle.
+  --sandbox MODE                 read-only, workspace-write, or danger-full-access.
+  --codex-phase-timeout VALUE    Accepted canonical option for handoff parity. Alias: --codex-timeout.
+  --codex-timeout VALUE          Alias for --codex-phase-timeout.
+  --validation-timeout VALUE     Maximum duration of local validation commands.
+  --install-timeout VALUE        Maximum optional dependency-install duration.
+  --print-config                 Print effective configuration and exit.
+  --stream                       Stream Codex output if future paper audit integration uses Codex.
+  --no-stream                    Do not stream Codex output.
+  -h, --help                     Show this help.
+
+Environment:
+  SUREBET_PINNED_BUNDLE=path/to/pinned-betting-win-export.json
+  SUREBET_REQUIRE_PINNED_BUNDLE=1
+
+Surebet behavior:
+  - Validates the repo and hard no-provider/no-execution/no-direct-DB boundaries.
+  - Runs one repo-local private fixture paper smoke.
+  - Runs pinned-bundle smoke only when SUREBET_PINNED_BUNDLE is explicitly provided.
+  - Writes .automation/paper-mode-to-autonomous-implementation.env only for source/validation defects.
+  - Does not start, stop, refresh, poll, or mutate any service.
+  - Does not source nvm.sh; root run scripts inherit the active parent-shell Node runtime.
+  - Does not call providers, read betting-win DBs, place orders, mutate .env, or claim live/paper readiness.
+
+Exit codes:
+  0 = check-only passed, private fixture smoke accepted, or pinned bundle accepted into private report.
+  1 = controller/setup/local preflight failure before classified paper state.
+  2 = blocked by invalid pinned bundle, safety, validation, tooling, or source-fix requirement.
+  3 = duration/max-cycle elapsed while continuation remains required.
+  130 = interrupted.
+EOF_USAGE
 }
 
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --duration|--run-duration)
-      [[ $# -ge 2 ]] || { echo "ERROR: $1 requires a value" >&2; exit 2; }
-      DURATION_SECONDS="$(automation_parse_duration_seconds "$2")" || { echo "ERROR: invalid duration: $2" >&2; exit 2; }
-      shift 2 ;;
-    --duration=*|--run-duration=*) DURATION_SECONDS="$(automation_parse_duration_seconds "${1#*=}")" || { echo "ERROR: invalid duration: ${1#*=}" >&2; exit 2; }; shift ;;
-    --interval)
-      [[ $# -ge 2 ]] || { echo "ERROR: --interval requires a value" >&2; exit 2; }
-      INTERVAL_SECONDS="$(automation_parse_duration_seconds "$2")" || { echo "ERROR: invalid interval: $2" >&2; exit 2; }
-      shift 2 ;;
-    --interval=*) INTERVAL_SECONDS="$(automation_parse_duration_seconds "${1#*=}")" || { echo "ERROR: invalid interval: ${1#*=}" >&2; exit 2; }; shift ;;
-    --adaptive) ADAPTIVE=1; shift ;;
-    --status) STATUS_ONLY=1; shift ;;
-    --force-unlock) FORCE_UNLOCK=1; shift ;;
-    -h|--help) usage; exit 0 ;;
-    *) echo "ERROR: unknown option: $1" >&2; usage >&2; exit 2 ;;
-  esac
-done
+model_display() { if [[ -z "${CODEX_MODEL:-}" || "${CODEX_MODEL:-}" == "cli-default" ]]; then printf 'cli-default'; else printf '%s' "$CODEX_MODEL"; fi; }
+fallback_display() { if [[ -z "${CODEX_FALLBACK_MODEL:-}" ]]; then printf 'none'; else printf '%s' "$CODEX_FALLBACK_MODEL"; fi; }
+parse_positive_integer() { local value="$1" label="$2"; [[ "$value" =~ ^[1-9][0-9]*$ ]] || { echo "ERROR: $label requires a positive integer: $value" >&2; return 2; }; }
 
-cd "$AUTOMATION_REPO_ROOT"
-automation_load_config
-SCRIPT_NAME="run-paper-evaluation.sh"
-LOCK_FILE="$AUTOMATION_REPO_ROOT/.automation/locks/run-paper-evaluation.lock"
+parse_args() {
+  local parsed
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --duration|--run-duration) [[ $# -ge 2 ]] || { echo "ERROR: $1 requires a value" >&2; return 2; }; parsed="$(automation_parse_duration_seconds "$2")" || { echo "ERROR: invalid $1: $2" >&2; return 2; }; DURATION_SECONDS="$parsed"; shift 2 ;;
+      --duration=*|--run-duration=*) parsed="$(automation_parse_duration_seconds "${1#*=}")" || { echo "ERROR: invalid duration: ${1#*=}" >&2; return 2; }; DURATION_SECONDS="$parsed"; shift ;;
+      --interval|--check-interval) [[ $# -ge 2 ]] || { echo "ERROR: $1 requires a value" >&2; return 2; }; parsed="$(automation_parse_duration_seconds "$2")" || { echo "ERROR: invalid $1: $2" >&2; return 2; }; INTERVAL_SECONDS="$parsed"; shift 2 ;;
+      --interval=*|--check-interval=*) parsed="$(automation_parse_duration_seconds "${1#*=}")" || { echo "ERROR: invalid interval: ${1#*=}" >&2; return 2; }; INTERVAL_SECONDS="$parsed"; shift ;;
+      --adaptive|--adaptive-interval) ADAPTIVE=1; shift ;;
+      --no-adaptive|--no-adaptive-interval) ADAPTIVE=0; shift ;;
+      --keep-monitoring-when-ready) KEEP_MONITORING_WHEN_READY=1; shift ;;
+      --model) [[ $# -ge 2 ]] || { echo "ERROR: --model requires a value" >&2; return 2; }; CODEX_MODEL="$2"; shift 2 ;;
+      --model=*) CODEX_MODEL="${1#*=}"; shift ;;
+      --fallback-model) [[ $# -ge 2 ]] || { echo "ERROR: --fallback-model requires a value" >&2; return 2; }; CODEX_FALLBACK_MODEL="$2"; shift 2 ;;
+      --fallback-model=*) CODEX_FALLBACK_MODEL="${1#*=}"; shift ;;
+      --repo-dir) [[ $# -ge 2 ]] || { echo "ERROR: --repo-dir requires a value" >&2; return 2; }; REPO_DIR_OVERRIDE="$2"; shift 2 ;;
+      --repo-dir=*) REPO_DIR_OVERRIDE="${1#*=}"; shift ;;
+      --check-only) CHECK_ONLY=1; shift ;;
+      --status) STATUS_ONLY=1; shift ;;
+      --force-unlock) FORCE_UNLOCK=1; shift ;;
+      --auto-install) AUTO_INSTALL=1; shift ;;
+      --max-cycles) [[ $# -ge 2 ]] || { echo "ERROR: --max-cycles requires a value" >&2; return 2; }; parse_positive_integer "$2" --max-cycles || return 2; MAX_CYCLES="$2"; shift 2 ;;
+      --max-cycles=*) parse_positive_integer "${1#*=}" --max-cycles || return 2; MAX_CYCLES="${1#*=}"; shift ;;
+      --sandbox) [[ $# -ge 2 ]] || { echo "ERROR: --sandbox requires a value" >&2; return 2; }; CODEX_SANDBOX="$2"; shift 2 ;;
+      --sandbox=*) CODEX_SANDBOX="${1#*=}"; shift ;;
+      --codex-phase-timeout|--codex-timeout) [[ $# -ge 2 ]] || { echo "ERROR: $1 requires a value" >&2; return 2; }; parsed="$(automation_parse_duration_seconds "$2")" || { echo "ERROR: invalid $1: $2" >&2; return 2; }; CODEX_PHASE_TIMEOUT_SECONDS="$parsed"; shift 2 ;;
+      --codex-phase-timeout=*|--codex-timeout=*) parsed="$(automation_parse_duration_seconds "${1#*=}")" || { echo "ERROR: invalid codex timeout: ${1#*=}" >&2; return 2; }; CODEX_PHASE_TIMEOUT_SECONDS="$parsed"; shift ;;
+      --validation-timeout) [[ $# -ge 2 ]] || { echo "ERROR: --validation-timeout requires a value" >&2; return 2; }; parsed="$(automation_parse_duration_seconds "$2")" || { echo "ERROR: invalid --validation-timeout: $2" >&2; return 2; }; VALIDATION_TIMEOUT_SECONDS="$parsed"; shift 2 ;;
+      --validation-timeout=*) parsed="$(automation_parse_duration_seconds "${1#*=}")" || { echo "ERROR: invalid validation timeout: ${1#*=}" >&2; return 2; }; VALIDATION_TIMEOUT_SECONDS="$parsed"; shift ;;
+      --install-timeout) [[ $# -ge 2 ]] || { echo "ERROR: --install-timeout requires a value" >&2; return 2; }; parsed="$(automation_parse_duration_seconds "$2")" || { echo "ERROR: invalid --install-timeout: $2" >&2; return 2; }; INSTALL_TIMEOUT_SECONDS="$parsed"; shift 2 ;;
+      --install-timeout=*) parsed="$(automation_parse_duration_seconds "${1#*=}")" || { echo "ERROR: invalid install timeout: ${1#*=}" >&2; return 2; }; INSTALL_TIMEOUT_SECONDS="$parsed"; shift ;;
+      --print-config) PRINT_CONFIG=1; shift ;;
+      --stream) CODEX_STREAM_LOGS=1; shift ;;
+      --no-stream) CODEX_STREAM_LOGS=0; shift ;;
+      --allow-parallel) ALLOW_PARALLEL=1; shift ;;
+      -h|--help) usage; exit 0 ;;
+      *) echo "ERROR: unknown option: $1" >&2; usage >&2; return 2 ;;
+    esac
+  done
+}
 
-if [[ "$STATUS_ONLY" == "1" ]]; then
-  automation_status_lock "$LOCK_FILE"
-  exit 0
-fi
-if [[ "$FORCE_UNLOCK" == "1" ]]; then
-  automation_force_unlock "$LOCK_FILE" "$SCRIPT_NAME" "$AUTOMATION_REPO_ROOT"
-  exit 0
-fi
+configure_defaults() {
+  if [[ -n "$REPO_DIR_OVERRIDE" ]]; then [[ -d "$REPO_DIR_OVERRIDE" ]] || { echo "ERROR: --repo-dir does not exist: $REPO_DIR_OVERRIDE" >&2; return 1; }; AUTOMATION_REPO_ROOT="$(cd "$REPO_DIR_OVERRIDE" && pwd -P)"; fi
+  cd "$AUTOMATION_REPO_ROOT"
+  automation_load_config
+  INTERVAL_SECONDS="${INTERVAL_SECONDS:-$(automation_parse_duration_seconds "${PAPER_DEFAULT_INTERVAL:-30m}")}"
+  VALIDATION_TIMEOUT_SECONDS="${VALIDATION_TIMEOUT_SECONDS:-$(automation_parse_duration_seconds "${AUTOMATION_VALIDATION_TIMEOUT:-20m}")}"
+  INSTALL_TIMEOUT_SECONDS="${INSTALL_TIMEOUT_SECONDS:-$(automation_parse_duration_seconds "${AUTOMATION_INSTALL_TIMEOUT:-15m}")}"
+  CODEX_PHASE_TIMEOUT_SECONDS="${CODEX_PHASE_TIMEOUT_SECONDS:-$(automation_parse_duration_seconds "${CODEX_PHASE_TIMEOUT:-30m}")}"
+  PAPER_COMMAND_TIMEOUT_SECONDS="$(automation_parse_duration_seconds "${PAPER_COMMAND_TIMEOUT:-20m}")"
+  MAX_CYCLES="${MAX_CYCLES:-${AUTOMATION_PAPER_MAX_CYCLES:-1}}"
+  CODEX_MODEL="${CODEX_MODEL:-${AUTOMATION_CODEX_MODEL:-}}"
+  CODEX_FALLBACK_MODEL="${CODEX_FALLBACK_MODEL:-${AUTOMATION_CODEX_FALLBACK_MODEL:-}}"
+  CODEX_SANDBOX="${CODEX_SANDBOX:-${AUTOMATION_CODEX_SANDBOX:-danger-full-access}}"
+  CODEX_STREAM_LOGS="${CODEX_STREAM_LOGS:-${AUTOMATION_CODEX_STREAM_LOGS:-1}}"
+  case "$CODEX_MODEL" in default|cli-default) CODEX_MODEL="" ;; esac
+  case "$CODEX_FALLBACK_MODEL" in default|cli-default) CODEX_FALLBACK_MODEL="cli-default" ;; none|off|disabled) CODEX_FALLBACK_MODEL="" ;; esac
+  case "$CODEX_SANDBOX" in read-only|workspace-write|danger-full-access) ;; *) echo "ERROR: unsupported sandbox: $CODEX_SANDBOX" >&2; return 2 ;; esac
+  parse_positive_integer "$MAX_CYCLES" --max-cycles || return 2
+  export AUTOMATION_CODEX_MODEL="$CODEX_MODEL" AUTOMATION_CODEX_FALLBACK_MODEL="$CODEX_FALLBACK_MODEL" AUTOMATION_CODEX_SANDBOX="$CODEX_SANDBOX" AUTOMATION_CODEX_STREAM_LOGS="$CODEX_STREAM_LOGS"
+}
+
+print_config() {
+  cat <<EOF_CONFIG
+controller=run-paper-evaluation.sh
+repo_dir=$AUTOMATION_REPO_ROOT
+duration_seconds=$DURATION_SECONDS
+interval_seconds=$INTERVAL_SECONDS
+adaptive=$ADAPTIVE
+keep_monitoring_when_ready=$KEEP_MONITORING_WHEN_READY
+validation_timeout_seconds=$VALIDATION_TIMEOUT_SECONDS
+install_timeout_seconds=$INSTALL_TIMEOUT_SECONDS
+codex_phase_timeout_seconds=$CODEX_PHASE_TIMEOUT_SECONDS
+paper_command_timeout_seconds=$PAPER_COMMAND_TIMEOUT_SECONDS
+max_cycles=$MAX_CYCLES
+model=$(model_display)
+fallback_model=$(fallback_display)
+sandbox=$CODEX_SANDBOX
+stream_logs=$CODEX_STREAM_LOGS
+auto_install=$AUTO_INSTALL
+surebet_pinned_bundle=${PINNED_BUNDLE_PATH:-}
+surebet_require_pinned_bundle=$REQUIRE_PINNED_BUNDLE
+paper_service_lifecycle=none
+telegram_notify=${TELEGRAM_NOTIFY:-1}
+EOF_CONFIG
+}
+
+assert_active_node_runtime() {
+  automation_require_command node; automation_require_command npm
+  local expected_major="" node_version
+  node_version="$(node --version 2>/dev/null || true)"
+  if [[ -f "$AUTOMATION_REPO_ROOT/.nvmrc" ]]; then expected_major="$(tr -d '[:space:]' < "$AUTOMATION_REPO_ROOT/.nvmrc" | sed -E 's/^v?([0-9]+).*/\1/')"; fi
+  if [[ -n "$expected_major" && ! "$node_version" =~ ^v${expected_major}\. ]]; then
+    cat >&2 <<EOF_NODE
+ERROR: active Node runtime does not match .nvmrc
+expected_major=$expected_major
+actual_node=${node_version:-missing}
+Activate the repo runtime in the parent shell first:
+. "\$HOME/.nvm/nvm.sh" && nvm use $expected_major
+EOF_NODE
+    return 1
+  fi
+  automation_log "NODE_OK=$node_version"; automation_log "NPM_OK=$(npm --version 2>/dev/null || true)"
+}
+
+maybe_auto_install() { if [[ "$AUTO_INSTALL" != "1" ]]; then return 0; fi; if [[ -d "$AUTOMATION_REPO_ROOT/node_modules" ]]; then automation_log "auto_install=skipped node_modules_present"; return 0; fi; automation_run_shell_command "auto_install_npm_install" "npm install --ignore-scripts" "$INSTALL_TIMEOUT_SECONDS" "$AUTOMATION_RUN_DIR/auto-install.log"; }
+
+write_paper_mode_handoff() {
+  local reason evidence_dir env_file final_dir
+  reason="$1"
+  evidence_dir="$2"
+  env_file="$AUTOMATION_REPO_ROOT/.automation/paper-mode-to-autonomous-implementation.env"
+  final_dir="$AUTOMATION_RUN_DIR/final"
+  mkdir -p "$AUTOMATION_REPO_ROOT/.automation" "$final_dir"
+  { printf 'HANDOVER_KIND=paper-mode-to-autonomous-implementation\n'; printf 'REPO_NAME=%s\n' "${AUTOMATION_REPO_NAME:-betting-win-surebet}"; printf 'CONTROLLER=run-paper-evaluation.sh\n'; printf 'FINAL_STATUS=%s\n' "$FINAL_STATUS"; printf 'STOP_REASON=%s\n' "$STOP_REASON"; printf 'HANDOFF_REASON=%s\n' "$reason"; printf 'EVIDENCE_DIR=%s\n' "$evidence_dir"; printf 'SERVICE_REFRESH_REQUIRED=0\n'; printf 'RUNTIME_EVIDENCE_REQUIRED=0\n'; printf 'PAPER_SERVICE_SUPPORTED=0\n'; printf 'PINNED_BUNDLE_REQUIRED=%s\n' "$REQUIRE_PINNED_BUNDLE"; printf 'SUREBET_PINNED_BUNDLE=%s\n' "${PINNED_BUNDLE_PATH:-}"; printf 'NEXT_COMMAND=%s\n' 'bash ./run-autonomous-implementation.sh --duration 72h --model cli-default --fallback-model none --handover-paper-mode'; printf 'RUN_DIR=%s\n' "$AUTOMATION_RUN_DIR"; printf 'WRITTEN_AT=%s\n' "$(automation_now_iso)"; } > "$env_file"
+  cp "$env_file" "$final_dir/paper-mode-to-autonomous-implementation.env"
+}
 
 finish() {
   local rc=$?
@@ -77,236 +223,74 @@ finish() {
   FINISHED=1
   EXIT_STATUS="$rc"
   if [[ -n "${AUTOMATION_RUN_DIR:-}" ]]; then
-    {
-      printf '# Paper evaluation final summary\n\n'
-      printf 'final_status=%s\n' "$FINAL_STATUS"
-      printf 'stop_reason=%s\n' "$STOP_REASON"
-      printf 'exit_status=%s\n' "$EXIT_STATUS"
-      printf 'cycles_attempted=%s\n' "$CYCLES_ATTEMPTED"
-      printf 'bugfix_attempts=%s\n' "$BUGFIX_ATTEMPTS"
-      printf 'duration_seconds=%s\n' "$DURATION_SECONDS"
-      printf 'completed_at=%s\n' "$(automation_now_iso)"
-    } > "$AUTOMATION_RUN_DIR/final-summary.md"
-    automation_collect_repo_snapshot "$AUTOMATION_RUN_DIR/final-repo-snapshot"
-    automation_build_artifacts_zip "$AUTOMATION_RUN_DIR" "$AUTOMATION_REPO_ROOT" || true
+    mkdir -p "$AUTOMATION_RUN_DIR/final"
+    { printf '# Paper evaluation final summary\n\n'; printf 'final_status=%s\n' "$FINAL_STATUS"; printf 'stop_reason=%s\n' "$STOP_REASON"; printf 'exit_status=%s\n' "$EXIT_STATUS"; printf 'cycles_attempted=%s\n' "$CYCLES_ATTEMPTED"; printf 'duration_seconds=%s\n' "$DURATION_SECONDS"; printf 'interval_seconds=%s\n' "$INTERVAL_SECONDS"; printf 'adaptive=%s\n' "$ADAPTIVE"; printf 'keep_monitoring_when_ready=%s\n' "$KEEP_MONITORING_WHEN_READY"; printf 'local_fixture_report=%s\n' "${PAPER_LOCAL_REPORT_PATH:-}"; printf 'pinned_bundle_report=%s\n' "${PAPER_PINNED_REPORT_PATH:-}"; printf 'surebet_pinned_bundle=%s\n' "${PINNED_BUNDLE_PATH:-}"; printf 'paper_service_lifecycle=none\n'; printf 'completed_at=%s\n' "$(automation_now_iso)"; } > "$AUTOMATION_RUN_DIR/final-summary.md"
+    cp "$AUTOMATION_RUN_DIR/final-summary.md" "$AUTOMATION_RUN_DIR/final/final-summary.md" 2>/dev/null || true
+    automation_collect_repo_snapshot "$AUTOMATION_RUN_DIR/final-repo-snapshot"; automation_build_artifacts_zip "$AUTOMATION_RUN_DIR" "$AUTOMATION_REPO_ROOT" || true
+    telegram_notify_send_final "run-paper-evaluation.sh" "${AUTOMATION_REPO_NAME:-betting-win-surebet}" "$FINAL_STATUS" "$STOP_REASON" "$CYCLES_ATTEMPTED" "$EXIT_STATUS" "$AUTOMATION_RUN_DIR" "$AUTOMATION_CONTROLLER_LOG" "$AUTOMATION_REPO_ROOT" || true
   fi
-  automation_release_lock || true
+  [[ "$LOCK_ACQUIRED" == "1" ]] && automation_release_lock || true
 }
 trap finish EXIT
+trap 'FINAL_STATUS="interrupted"; STOP_REASON="interrupted"; exit 130' INT TERM
 
-automation_create_run_dir "paper_evaluation"
-AUTOMATION_SCRIPT_COMMAND="$0 $*"
-automation_acquire_lock "$SCRIPT_NAME" "$AUTOMATION_REPO_ROOT"
-automation_start_heartbeat
-
-REPO_DIR="$AUTOMATION_REPO_ROOT"
-if [[ -f "scripts/load-node-runtime.sh" ]]; then
-  # shellcheck source=scripts/load-node-runtime.sh
-  . scripts/load-node-runtime.sh "$REPO_DIR"
-fi
-
-automation_collect_repo_snapshot "$AUTOMATION_RUN_DIR/initial-repo-snapshot"
-automation_snapshot_protected "$AUTOMATION_RUN_DIR/protected_before.sha256"
-
-if [[ "${PAPER_SUPPORTED:-0}" != "1" ]]; then
-  FINAL_STATUS="unsupported"
-  STOP_REASON="PAPER_EVALUATION_UNSUPPORTED_FOR_THIS_REPO"
-  automation_log "$STOP_REASON"
-  exit 12
-fi
-if [[ -z "${PAPER_COMMAND:-}" ]]; then
-  FINAL_STATUS="unsupported"
-  STOP_REASON="PAPER_COMMAND_MISSING"
-  automation_log "$STOP_REASON"
-  exit 12
-fi
-if [[ "$ADAPTIVE" == "1" ]]; then
-  automation_require_command "${AUTOMATION_CODEX_BIN:-codex}"
-fi
-[[ -x ./run-autonomous-bugfix.sh || -f ./run-autonomous-bugfix.sh ]] || automation_die "missing ./run-autonomous-bugfix.sh" 13
-
-if [[ -z "$INTERVAL_SECONDS" ]]; then
-  INTERVAL_SECONDS="$(automation_parse_duration_seconds "${PAPER_DEFAULT_INTERVAL:-30m}")"
-fi
-# The adaptive wait interval is intentionally clamped to 5..60 minutes.
-INTERVAL_MINUTES=$((INTERVAL_SECONDS / 60))
-INTERVAL_MINUTES="$(automation_clamp_minutes "$INTERVAL_MINUTES" 5 60)"
-INTERVAL_SECONDS=$((INTERVAL_MINUTES * 60))
-BUGFIX_DURATION="${PAPER_BUGFIX_DURATION:-6h}"
-PAPER_COMMAND_TIMEOUT_SECONDS="$(automation_parse_duration_seconds "${PAPER_COMMAND_TIMEOUT:-20m}")"
-VALIDATION_TIMEOUT_SECONDS="$(automation_parse_duration_seconds "${AUTOMATION_VALIDATION_TIMEOUT:-20m}")"
-START_EPOCH="$(automation_now_epoch)"
-SIGNATURE_COUNTS_FILE="$AUTOMATION_RUN_DIR/bug-signature-counts.tsv"
-: > "$SIGNATURE_COUNTS_FILE"
-
-increment_signature_count() {
-  local sig="$1"
-  local existing
-  local count
-  local tmp
-  tmp="${SIGNATURE_COUNTS_FILE}.tmp.$$"
-  existing="$(awk -F'\t' -v s="$sig" '$1 == s { print $2; found=1 } END { if (!found) print 0 }' "$SIGNATURE_COUNTS_FILE")"
-  count=$((existing + 1))
-  awk -F'\t' -v s="$sig" '$1 != s { print }' "$SIGNATURE_COUNTS_FILE" > "$tmp"
-  printf '%s\t%s\n' "$sig" "$count" >> "$tmp"
-  mv "$tmp" "$SIGNATURE_COUNTS_FILE"
-  printf '%s\n' "$count"
+run_repo_validation() {
+  local out_dir
+  out_dir="$1"
+  mkdir -p "$out_dir"
+  automation_run_shell_command "repo_validation" "npm run validate" "$VALIDATION_TIMEOUT_SECONDS" "$out_dir/npm-run-validate.log"
+}
+run_private_fixture_smoke() {
+  local cycle_dir stamp out_rel cmd rc verify_log
+  cycle_dir="$1"
+  stamp="$(date -u +%Y%m%dT%H%M%SZ)"; out_rel="artifacts/private-paper-mode/standard-paper-evaluation-${stamp}.report.json"; PAPER_LOCAL_REPORT_PATH="$out_rel"
+  cmd="node cli.js local-report --bundle ${LOCAL_FIXTURE_BUNDLE} --output ${out_rel}"; printf '%s\n' "$cmd" > "$cycle_dir/local-fixture-command.txt"
+  automation_run_shell_command "private_fixture_smoke" "$cmd" "$PAPER_COMMAND_TIMEOUT_SECONDS" "$cycle_dir/local-fixture-smoke.log" || return 1
+  verify_log="$cycle_dir/local-fixture-artifact-validation.log"
+  node - "$out_rel" > "$verify_log" 2>&1 <<'NODE'
+const { readFileSync } = require('node:fs');
+const report = JSON.parse(readFileSync(process.argv[2], 'utf8'));
+if (report.accepted !== false) throw new Error('private fixture report must keep accepted=false');
+if (report.status !== 'fixture_results_only') throw new Error(`unexpected private fixture status: ${report.status}`);
+if (!Array.isArray(report.candidateReports) || report.candidateReports.length < 1) throw new Error('private fixture report must include candidateReports');
+console.log('private_fixture_report_validated=yes');
+NODE
+  rc=$?; [[ "$rc" -eq 0 ]] || { automation_log "private_fixture_artifact_validation_failed log=$verify_log"; return 1; }
+}
+run_pinned_bundle_smoke() {
+  local cycle_dir stamp out_rel cmd rc verify_log
+  cycle_dir="$1"
+  stamp="$(date -u +%Y%m%dT%H%M%SZ)"; out_rel="artifacts/private-paper-mode/pinned-interface-smoke-${stamp}.report.json"; PAPER_PINNED_REPORT_PATH="$out_rel"
+  cmd="node cli.js local-report --bundle ${PINNED_BUNDLE_PATH} --output ${out_rel} --pinned-intake"; printf '%s\n' "$cmd" > "$cycle_dir/pinned-bundle-command.txt"
+  automation_run_shell_command "pinned_bundle_smoke" "$cmd" "$PAPER_COMMAND_TIMEOUT_SECONDS" "$cycle_dir/pinned-bundle-smoke.log" || return 1
+  verify_log="$cycle_dir/pinned-bundle-artifact-validation.log"
+  node - "$out_rel" > "$verify_log" 2>&1 <<'NODE'
+const { readFileSync } = require('node:fs');
+const report = JSON.parse(readFileSync(process.argv[2], 'utf8'));
+if (report.accepted !== false) throw new Error('pinned bundle report must keep accepted=false');
+if (report.status !== 'fixture_results_only') throw new Error(`unexpected pinned bundle private report status: ${report.status}`);
+if (!Array.isArray(report.candidateReports)) throw new Error('pinned bundle report must include candidateReports');
+console.log('pinned_bundle_report_validated=yes');
+NODE
+  rc=$?; [[ "$rc" -eq 0 ]] || { automation_log "pinned_bundle_artifact_validation_failed log=$verify_log"; return 1; }
 }
 
-detect_bugs() {
-  local cycle_dir="$1"
-  local paper_rc="$2"
-  local bug_file="$3"
-  local pattern
-  local log_file
-  local matches=0
-  : > "$bug_file"
-  if [[ "$paper_rc" -ne 0 && "$paper_rc" -ne 124 ]]; then
-    printf 'PAPER_COMMAND_EXIT=%s\n' "$paper_rc" >> "$bug_file"
-    matches=$((matches + 1))
-  fi
-  while IFS= read -r -d '' log_file; do
-    for pattern in "${PAPER_BUG_PATTERNS[@]:-}"; do
-      if grep -EIn -- "$pattern" "$log_file" >> "$bug_file" 2>/dev/null; then
-        matches=$((matches + 1))
-      fi
-    done
-  done < <(find "$cycle_dir" -type f \( -name '*.log' -o -name '*.txt' -o -name '*.md' \) -print0)
-  if [[ "$matches" -gt 0 ]]; then
-    sort -u "$bug_file" -o "$bug_file"
-  fi
-  printf '%s\n' "$matches"
-}
-
-compute_adaptive_interval() {
-  local cycle_dir="$1"
-  local health_packet="$2"
-  local current_minutes="$3"
-  local prompt
-  local out
-  local rc
-  local proposed
-  prompt="$cycle_dir/adaptive_interval_prompt.md"
-  out="$cycle_dir/adaptive_interval_codex.log"
-  cat > "$prompt" <<EOF_PROMPT
-You are controlling only the wait interval between paper evaluation cycles.
-Return exactly one line in this format and nothing else:
-NEXT_INTERVAL_MINUTES=<integer>
-
-Rules:
-- Minimum: 5
-- Maximum: 60
-- Use shorter intervals when the paper run is unstable, crashing, or producing new bugs.
-- Use longer intervals when paper mode is stable and producing useful evidence.
-- Do not request code changes.
-
-Paper-health packet:
-$(cat "$health_packet")
-EOF_PROMPT
-  local -a cmd=("${AUTOMATION_CODEX_BIN:-codex}" exec -C "$AUTOMATION_REPO_ROOT" --sandbox read-only "$(cat "$prompt")")
-  set +e
-  timeout --foreground 600s "${cmd[@]}" < /dev/null > "$out" 2>&1
-  rc=$?
-  set -e
-  if [[ "$rc" -ne 0 ]]; then
-    automation_log "adaptive_interval_codex_failed exit=$rc keeping_minutes=$current_minutes"
-    printf '%s\n' "$current_minutes"
-    return 0
-  fi
-  proposed="$(grep -Eo 'NEXT_INTERVAL_MINUTES=[0-9]+' "$out" | tail -n 1 | cut -d= -f2 || true)"
-  proposed="$(automation_clamp_minutes "${proposed:-$current_minutes}" 5 60)"
-  printf '%s\n' "$proposed"
-}
-
-sleep_between_cycles() {
-  local seconds="$1"
-  local now
-  local elapsed
-  now="$(automation_now_epoch)"
-  elapsed=$((now - START_EPOCH))
-  if (( elapsed + seconds > DURATION_SECONDS )); then
-    seconds=$((DURATION_SECONDS - elapsed))
-  fi
-  (( seconds > 0 )) || return 0
-  automation_log "paper_wait_seconds=$seconds"
-  sleep "$seconds"
-}
-
-while true; do
-  NOW="$(automation_now_epoch)"
-  if (( NOW - START_EPOCH >= DURATION_SECONDS )); then
-    FINAL_STATUS="duration_elapsed"
-    STOP_REASON="duration_elapsed"
-    break
-  fi
-
-  CYCLES_ATTEMPTED=$((CYCLES_ATTEMPTED + 1))
-  CYCLE_DIR="$AUTOMATION_RUN_DIR/cycles/cycle_${CYCLES_ATTEMPTED}"
-  mkdir -p "$CYCLE_DIR"
-  PAPER_LOG="$CYCLE_DIR/paper.log"
-  PAPER_RC_FILE="$CYCLE_DIR/paper_exit_code.txt"
-  HEALTH_PACKET="$CYCLE_DIR/paper_health_packet.md"
-  BUG_PACKET="$CYCLE_DIR/bug_packet.md"
-
-  automation_log "paper_cycle_start cycle=$CYCLES_ATTEMPTED wait_interval_minutes=$INTERVAL_MINUTES paper_timeout_seconds=$PAPER_COMMAND_TIMEOUT_SECONDS"
-  printf '%s\n' "$PAPER_COMMAND" > "$CYCLE_DIR/paper_command.txt"
-
-  set +e
-  timeout --foreground "${PAPER_COMMAND_TIMEOUT_SECONDS}s" bash -lc "$PAPER_COMMAND" > "$PAPER_LOG" 2>&1
-  PAPER_RC=$?
-  set -e
-  printf '%s\n' "$PAPER_RC" > "$PAPER_RC_FILE"
-
-  HEALTH_DIR="$CYCLE_DIR/health"
-  mkdir -p "$HEALTH_DIR"
-  automation_run_command_array PAPER_HEALTH_COMMANDS "paper_health" "$VALIDATION_TIMEOUT_SECONDS" "$HEALTH_DIR" || true
-
-  BUG_MATCH_COUNT="$(detect_bugs "$CYCLE_DIR" "$PAPER_RC" "$BUG_PACKET")"
-
-  {
-    printf '# Paper health packet\n\n'
-    printf 'cycle=%s\n' "$CYCLES_ATTEMPTED"
-    printf 'paper_exit_code=%s\n' "$PAPER_RC"
-    printf 'bug_match_count=%s\n' "$BUG_MATCH_COUNT"
-    printf 'bugfix_attempts=%s\n' "$BUGFIX_ATTEMPTS"
-    printf 'wait_interval_minutes=%s\n' "$INTERVAL_MINUTES"
-    printf 'paper_timeout_seconds=%s\n' "$PAPER_COMMAND_TIMEOUT_SECONDS"
-    printf 'paper_log=%s\n' "$PAPER_LOG"
-    printf 'bug_packet=%s\n' "$BUG_PACKET"
-    printf 'timestamp=%s\n' "$(automation_now_iso)"
-  } > "$HEALTH_PACKET"
-
-  if [[ "$BUG_MATCH_COUNT" -gt 0 ]]; then
-    SIG="$(sha256sum "$BUG_PACKET" | awk '{print $1}')"
-    SIG_COUNT="$(increment_signature_count "$SIG")"
-    printf 'bug_signature=%s\n' "$SIG" >> "$HEALTH_PACKET"
-    printf 'bug_signature_count=%s\n' "$SIG_COUNT" >> "$HEALTH_PACKET"
-    if (( SIG_COUNT > ${PAPER_MAX_FIX_ATTEMPTS_PER_SIGNATURE:-3} )); then
-      FINAL_STATUS="blocked"
-      STOP_REASON="same_bug_signature_repeated_too_many_times"
-      automation_log "$STOP_REASON signature=$SIG count=$SIG_COUNT"
-      break
-    fi
-    BUGFIX_ATTEMPTS=$((BUGFIX_ATTEMPTS + 1))
-    automation_log "bug_detected cycle=$CYCLES_ATTEMPTED invoking_bugfix attempt=$BUGFIX_ATTEMPTS"
-    bash ./run-autonomous-bugfix.sh --from-artifacts "$CYCLE_DIR" --duration "$BUGFIX_DURATION"
-    if ! automation_check_protected_unchanged "$AUTOMATION_RUN_DIR/protected_before.sha256" "$CYCLE_DIR/protected_after_bugfix.sha256" "$CYCLE_DIR/protected_diff_after_bugfix.patch"; then
-      FINAL_STATUS="protected_files_changed"
-      STOP_REASON="protected_files_changed_after_bugfix"
-      exit 11
-    fi
-  fi
-
-  if [[ "$ADAPTIVE" == "1" ]]; then
-    INTERVAL_MINUTES="$(compute_adaptive_interval "$CYCLE_DIR" "$HEALTH_PACKET" "$INTERVAL_MINUTES")"
-    INTERVAL_SECONDS=$((INTERVAL_MINUTES * 60))
-    automation_log "adaptive_interval_next_minutes=$INTERVAL_MINUTES"
-  fi
-
-  FINAL_STATUS="running"
-  STOP_REASON="continuing"
-  sleep_between_cycles "$INTERVAL_SECONDS"
-done
-
-[[ "$FINAL_STATUS" == "duration_elapsed" || "$FINAL_STATUS" == "running" ]] && exit 0
-exit 1
+parse_args "$@" || exit 1
+configure_defaults || exit 1
+LOCK_FILE="$AUTOMATION_REPO_ROOT/.automation/locks/run-paper-evaluation.lock"
+if [[ "$STATUS_ONLY" == "1" ]]; then automation_status_lock "$LOCK_FILE"; exit 0; fi
+if [[ "$FORCE_UNLOCK" == "1" ]]; then automation_force_unlock "$LOCK_FILE" "$SCRIPT_NAME" "$AUTOMATION_REPO_ROOT"; exit 0; fi
+if [[ "$PRINT_CONFIG" == "1" ]]; then print_config; exit 0; fi
+automation_create_run_dir "paper_evaluation"; AUTOMATION_SCRIPT_COMMAND="$0 $*"
+if [[ "$ALLOW_PARALLEL" == "1" ]]; then automation_log "lock=skipped allow_parallel=1"; else automation_acquire_lock "$SCRIPT_NAME" "$AUTOMATION_REPO_ROOT"; LOCK_ACQUIRED=1; automation_start_heartbeat; fi
+assert_active_node_runtime || { FINAL_STATUS="setup_failed"; STOP_REASON="node_runtime_invalid"; exit 1; }
+automation_collect_repo_snapshot "$AUTOMATION_RUN_DIR/initial-repo-snapshot"; automation_snapshot_protected "$AUTOMATION_RUN_DIR/protected_before.sha256"; maybe_auto_install || { FINAL_STATUS="setup_failed"; STOP_REASON="auto_install_failed"; exit 1; }
+if [[ "$CHECK_ONLY" == "1" ]]; then automation_log "check_only=1"; if ! run_repo_validation "$AUTOMATION_RUN_DIR/check-only-validation"; then FINAL_STATUS="PAPER_EVALUATION_BLOCKED_REPO_VALIDATION_FAILED"; STOP_REASON="check_only_validation_failed"; exit 1; fi; FINAL_STATUS="check_only_complete"; STOP_REASON="check_only"; exit 0; fi
+CYCLES_ATTEMPTED=1; CYCLE_DIR="$AUTOMATION_RUN_DIR/cycles/cycle_1"; mkdir -p "$CYCLE_DIR"
+{ printf 'cycle=1\n'; printf 'paper_service_lifecycle=none\n'; printf 'adaptive_requested=%s\n' "$ADAPTIVE"; printf 'keep_monitoring_when_ready=%s\n' "$KEEP_MONITORING_WHEN_READY"; printf 'pinned_bundle=%s\n' "${PINNED_BUNDLE_PATH:-}"; printf 'require_pinned_bundle=%s\n' "$REQUIRE_PINNED_BUNDLE"; printf 'started_at=%s\n' "$(automation_now_iso)"; } > "$CYCLE_DIR/paper_health_packet.md"
+automation_log "paper_cycle_start cycle=1 service_lifecycle=none"
+if ! run_repo_validation "$CYCLE_DIR/source-validation"; then FINAL_STATUS="PAPER_EVALUATION_BLOCKED_REPO_VALIDATION_FAILED"; STOP_REASON="repo_validation_failed"; write_paper_mode_handoff "repo_validation_failed" "$CYCLE_DIR/source-validation" || true; exit 2; fi
+if ! run_private_fixture_smoke "$CYCLE_DIR"; then FINAL_STATUS="PAPER_EVALUATION_BLOCKED_SOURCE_FIX_REQUIRED"; STOP_REASON="private_fixture_smoke_failed"; write_paper_mode_handoff "private_fixture_smoke_failed" "$CYCLE_DIR" || true; exit 2; fi
+if [[ -z "${PINNED_BUNDLE_PATH:-}" ]]; then if [[ "$REQUIRE_PINNED_BUNDLE" == "1" ]]; then FINAL_STATUS="PAPER_EVALUATION_BLOCKED_INVALID_PINNED_BUNDLE"; STOP_REASON="surebet_pinned_bundle_required_but_missing"; automation_log "$STOP_REASON"; exit 2; fi; FINAL_STATUS="PAPER_EVALUATION_READY_PRIVATE_FIXTURE_ONLY_BLOCKED_ON_PINNED_BUNDLE"; STOP_REASON="private_fixture_only_blocked_on_pinned_bundle"; automation_log "paper_result=$FINAL_STATUS"; exit 0; fi
+if ! run_pinned_bundle_smoke "$CYCLE_DIR"; then FINAL_STATUS="PAPER_EVALUATION_BLOCKED_INVALID_PINNED_BUNDLE"; STOP_REASON="pinned_bundle_smoke_failed"; automation_log "$STOP_REASON"; exit 2; fi
+FINAL_STATUS="PAPER_EVALUATION_PINNED_BUNDLE_ACCEPTED_PRIVATE_REPORT_WRITTEN"; STOP_REASON="pinned_bundle_private_report_written"; automation_log "paper_result=$FINAL_STATUS"; exit 0

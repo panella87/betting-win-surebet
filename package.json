@@ -1,6 +1,6 @@
 {
   "name": "betting-win-surebet",
-  "version": "0.0.0-private-sure-002b-three-repo-boundary",
+  "version": "0.0.0-private-sure-002b-paper-evaluation-standardized",
   "private": true,
   "type": "module",
   "description": "Dedicated surebet / complete-set strategy repo consuming betting-win provider truth; current implementation is private paper-only.",

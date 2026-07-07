@@ -93,8 +93,9 @@ no solver implementation
 Acceptance:
 
 ```bash
+. "$HOME/.nvm/nvm.sh" && nvm use 20
 npm run validate
-./run-autonomous-implementation.sh --check-only
+./run-autonomous-implementation.sh --check-only --model cli-default --fallback-model none
 ```
 
 ### SURE-002 — Dependency contract with betting-win
@@ -127,12 +128,15 @@ The autonomous controller may work only on the first safe unchecked SURE phase o
 
 It must not connect to providers, create execution modules, add wallet/signer/order dependencies, read or mutate `betting-win` databases, copy provider adapters from another repo, claim readiness based on reciprocal odds only, or mark later phases complete without pinned upstream evidence.
 
-## Definition of done for this overlay
+## Definition of done for the current local baseline
+
+Activate the repo Node runtime before package installation, validation, or root-controller checks:
 
 ```bash
+. "$HOME/.nvm/nvm.sh" && nvm use 20
 npm install
 npm run validate
-./run-autonomous-implementation.sh --check-only
+./run-autonomous-implementation.sh --check-only --model cli-default --fallback-model none
 python3 scripts/validate_autonomous_controller_contract.py
 ./pull_artifacts_and_zip_codebase.sh --help
 ./zip_codebase.sh
@@ -177,9 +181,10 @@ run-autonomous-bugfix.sh
 
 `run-paper-evaluation.sh` is the canonical private paper supervisor and replaces
 `run-paper-evaluation-12h.sh` naming. For the current `SURE-002B` freeze state it
-is configured only for repo-local fixture paper evaluation. It collects artifacts,
-invokes `run-autonomous-bugfix.sh` on crash/error evidence, waits between cycles,
-and resumes until duration, blocker, or completion.
+is configured only for repo-local private fixture evaluation. Its pinned-bundle
+branch must not be used with real operator input until the known shell-command
+quoting and strict pinned-bundle boolean validation hardening lands. It does not
+start services, stop services, call providers, or mutate live/runtime state.
 
 Protected automation files are documented in `docs/automation/PROTECTED_AUTOMATION_FILES.md`.
 Normal autonomous cycles must not change them.
@@ -187,4 +192,4 @@ Normal autonomous cycles must not change them.
 
 ## Automation helper standardization
 
-Approved helper wave standardizes `update_git.sh`, `zip_codebase.sh --artifacts-only`, `pull_artifacts_and_zip_codebase.sh`, progress/log helpers, `start.sh`, `stop.sh`, and `.automation/lib/telegram_notify.sh`. Root `run-*` controllers remain unchanged in this wave.
+Approved helper wave standardizes `update_git.sh`, `zip_codebase.sh --artifacts-only`, `pull_artifacts_and_zip_codebase.sh`, progress/log helpers, `start.sh`, `stop.sh`, and `.automation/lib/telegram_notify.sh`. The controller waves standardize `run-autonomous-implementation.sh`, `run-autonomous-bugfix.sh`, and `run-paper-evaluation.sh` with canonical flags, fail-closed artifact/status handling, and Telegram final notifications. The paper controller is surebet-specific and no-service: private fixture smoke now, with real pinned-bundle smoke reserved until the known shell-hardening gate lands.

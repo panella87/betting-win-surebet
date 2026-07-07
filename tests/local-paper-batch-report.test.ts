@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { tmpdir } from 'node:os';
 import {
@@ -171,6 +171,36 @@ test('local paper batch report rejects artifact output symlink escapes', () => {
     rmSync(linkPath, { recursive: true, force: true });
     rmSync(outsideDir, { recursive: true, force: true });
   }
+});
+
+
+test('local paper batch report rejects nested artifact output symlink escapes before creating outside directories', () => {
+  const bundleDir = createBundleDirectory('batch-output-nested-symlink', [{ fileName: 'solver-ready.json', sourcePath: 'tests/fixtures/local-only-export-bundles/solver-ready-resource-export.json' }]);
+  mkdirSync(join(REPO_ROOT, 'artifacts'), { recursive: true });
+  const outsideDir = mkdtempSync(join(tmpdir(), 'surebet-batch-output-nested-escape-'));
+  const linkPath = join(REPO_ROOT, 'artifacts', `batch-nested-symlink-output-${Date.now()}`);
+  symlinkSync(outsideDir, linkPath, 'dir');
+  try {
+    const result = writeLocalPaperBatchReport({ bundleDirectoryPath: relative(REPO_ROOT, bundleDir), outputPath: relative(REPO_ROOT, join(linkPath, 'nested', 'batch-summary.json')), repoRoot: REPO_ROOT });
+    assert.equal(result.ok, false);
+    assert.equal(result.blockers[0]?.code, 'LOCAL_REPORT_BATCH_OUTPUT_SYMLINK_FORBIDDEN');
+    assert.equal(existsSync(join(outsideDir, 'nested')), false);
+  } finally { rmSync(bundleDir, { recursive: true, force: true }); rmSync(linkPath, { recursive: true, force: true }); rmSync(outsideDir, { recursive: true, force: true }); }
+});
+
+
+test('local paper batch report rejects dangling summary output symlinks before writing outside artifacts', () => {
+  const bundleDir = createBundleDirectory('batch-output-dangling-symlink', [{ fileName: 'solver-ready.json', sourcePath: 'tests/fixtures/local-only-export-bundles/solver-ready-resource-export.json' }]);
+  const summaryOutputPath = createArtifactOutputPath('dangling-batch-summary');
+  const outsideFile = join(tmpdir(), `surebet-dangling-batch-${Date.now()}.json`);
+  mkdirSync(dirname(summaryOutputPath), { recursive: true });
+  symlinkSync(outsideFile, summaryOutputPath, 'file');
+  try {
+    const result = writeLocalPaperBatchReport({ bundleDirectoryPath: relative(REPO_ROOT, bundleDir), outputPath: relative(REPO_ROOT, summaryOutputPath), repoRoot: REPO_ROOT });
+    assert.equal(result.ok, false);
+    assert.equal(result.blockers[0]?.code, 'LOCAL_REPORT_BATCH_OUTPUT_SYMLINK_FORBIDDEN');
+    assert.equal(existsSync(outsideFile), false);
+  } finally { rmSync(bundleDir, { recursive: true, force: true }); rmSync(summaryOutputPath, { force: true }); rmSync(outsideFile, { force: true }); rmSync(dirname(summaryOutputPath), { recursive: true, force: true }); }
 });
 
 test('local paper batch report fails closed before writing outputs when a pinned bundle intake is invalid', () => {

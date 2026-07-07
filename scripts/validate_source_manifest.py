@@ -9,7 +9,24 @@ ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / 'SOURCE_MANIFEST.json'
 SCHEMA = 'betting-win-surebet-source-manifest-v1'
 SKIP_ROOTS = {'.git', '.locks', 'artifacts', 'node_modules', 'dist', 'coverage', 'tmp', '.tmp'}
-SKIP_EXACT = {'.env', 'SOURCE_MANIFEST.json'}
+SKIP_EXACT = {
+    '.env',
+    'SOURCE_MANIFEST.json',
+    'OVERLAY_MANIFEST.json',
+    '.automation/locks',
+    '.automation/corrupt',
+    '.automation/autonomous-implementation-handover.env',
+    '.automation/autonomous-implementation-handover.md',
+    '.automation/bugfix-to-autonomous-implementation.env',
+    '.automation/bugfix-to-autonomous-implementation.md',
+    '.automation/paper-mode-handover.env',
+    '.automation/paper-mode-to-autonomous-implementation.env',
+}
+# Runtime automation state is intentionally excluded from the source manifest.
+SKIP_PREFIXES = (
+    '.automation/locks/',
+    '.automation/corrupt/',
+)
 SKIP_SUFFIXES = ('.zip', '.log', '.tmp', '.pyc', '.tar', '.tgz', '.tar.gz')
 UTC_TIMESTAMP = re.compile(r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$')
 
@@ -25,6 +42,8 @@ def should_include(path: Path) -> bool:
     if not path.is_file():
         return False
     if rel in SKIP_EXACT:
+        return False
+    if rel.startswith(SKIP_PREFIXES):
         return False
     if parts and parts[0] in SKIP_ROOTS:
         return False

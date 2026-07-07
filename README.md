@@ -36,7 +36,7 @@ SURE-002A local interface and engine bootstrap = complete for local fixtures
 SURE-001 hardening = complete
 SURE-002B private paper-mode intake/reporting backlog = complete for repo-local work
 local deterministic contracts, fixture readers, paper math, simulation state machines, settlement replay consumption, private reports, and offline fixture-to-artifact reporting = implemented
-real upstream evaluation = blocked until Federico provides the pinned betting-win contract/export interface
+real upstream evaluation = blocked until paper-controller pinned-bundle shell hardening lands and Federico provides the pinned betting-win contract/export interface
 ```
 
 
@@ -70,12 +70,15 @@ Current code and current retained evidence beat stale documentation.
 
 ## Install and validate
 
+Activate the repo Node runtime before package installation, validation, or long root controllers:
+
 ```bash
+. "$HOME/.nvm/nvm.sh" && nvm use 20
 npm install
 npm run validate
 ```
 
-Useful wrappers:
+Useful commands:
 
 ```bash
 ./start.sh
@@ -86,10 +89,13 @@ Useful wrappers:
 ./pull_artifacts_and_zip_codebase.sh --help
 ./zip_codebase.sh
 ./zip_codebase.sh --artifacts-only
-./run-autonomous-implementation.sh --check-only
-bash commands/run-sure-local-engine-autonomous.sh
+./run-autonomous-implementation.sh --check-only --model cli-default --fallback-model none
+./run-autonomous-bugfix.sh --check-only --model cli-default --fallback-model none
+./run-paper-evaluation.sh --check-only --model cli-default --fallback-model none
 node cli.js local-report --bundle tests/fixtures/local-only-export-bundles/solver-ready-resource-export.json --output artifacts/local-paper-reports/smoke.report.json
 ```
+
+Compatibility wrappers under `commands/run-sure-*` still exist for old muscle memory, including `commands/run-sure-paper-mode-autonomous.sh`, but the canonical daily entrypoints are the root scripts above.
 
 `start.sh` is intentionally a validation wrapper, not a daemon launcher. This repo has no long-running service under the current private paper-only gate.
 
@@ -97,7 +103,7 @@ node cli.js local-report --bundle tests/fixtures/local-only-export-bundles/solve
 
 The repository must fail closed if it contains provider SDK/client imports, provider URLs, wallet/signer/order/transaction paths, direct `betting-win` database access, `core.*` migrations, manually vendored generated contracts, malformed autonomous cycle status, nonzero Codex exit, or failed post-cycle validation.
 
-Federico asked for the maximum safe local implementation possible, and the retained SURE-002A local backlog in `docs/015_local_engine_implementation_backlog.md` is now exhausted. Do not invent more local engine work. The next real implementation step requires Federico's pinned `betting-win` contract/export interface; until then, autonomous runs should either repair a concrete repo-local validation/tooling defect or stop with `AUTONOMOUS_GOAL_COMPLETE=yes`.
+Federico asked for the maximum safe local implementation possible, and the retained SURE-002A local backlog in `docs/015_local_engine_implementation_backlog.md` is now exhausted. Do not invent more local engine work. The next product step requires Federico's pinned `betting-win` contract/export interface. Before using a real pinned bundle, the next repo-local tooling step is paper-controller pinned-bundle shell-command hardening. Because that task is explicit automation maintenance touching a protected root controller, launch it with `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`; otherwise autonomous runs should repair only concrete repo-local validation/tooling defects or stop with `AUTONOMOUS_GOAL_COMPLETE=yes`.
 
 
 ## Private paper-mode continuation
@@ -106,32 +112,39 @@ The SURE-002B private paper-mode intake backlog is now complete for repo-local w
 
 ```text
 SURE-002B_PRIVATE_PAPER_MODE_INTAKE
-commands/run-sure-paper-mode-autonomous.sh
-commands/run-pinned-interface-smoke.sh
+run-paper-evaluation.sh
+commands/run-pinned-interface-smoke.sh compatibility_one_shot_only
 docs/017_private_paper_mode_implementation_backlog.md
 docs/018_private_paper_mode_runbook.md
 ```
 
-This phase is still private and paper-only. It accepts only repo-local JSON bundles, writes only under `artifacts/private-paper-mode/`, and keeps `accepted=false`. The freeze gate is: `npm run validate` passes, local fixture smoke passes, and real upstream evaluation still requires Federico's pinned bundle. Provider connections, execution, public reports, profitability claims, and live-readiness claims remain prohibited. Until Federico provides the pinned bundle, autonomous runs should stop with `AUTONOMOUS_GOAL_COMPLETE=yes` unless a concrete repo-local validation/tooling defect is confirmed.
+This phase is still private and paper-only. It accepts only repo-local JSON bundles, writes only under `artifacts/private-paper-mode/`, and keeps `accepted=false`. The freeze gate is: `npm run validate` passes, local fixture smoke passes, and real upstream evaluation still requires Federico's pinned bundle. Provider connections, execution, public reports, profitability claims, and live-readiness claims remain prohibited.
 
-The repo-local private paper-mode backlog is complete.
+The repo-local private paper-mode backlog is complete. The known current follow-up before using a real `SUREBET_PINNED_BUNDLE` is paper-controller pinned-bundle shell-command hardening: the docs must not treat real pinned-bundle evaluation as ready until the controller quotes operator-provided bundle paths fail-closed. This is an automation-maintenance task and requires the protected-file exception in the implementation command. Generic autonomous feature runs should still stop with `AUTONOMOUS_GOAL_COMPLETE=yes` unless a concrete repo-local validation/tooling defect is confirmed.
 
 ## Standard automation commands
 
-Canonical root automation commands:
+Canonical helper commands:
 
 ```bash
 ./zip_codebase.sh
 ./pull_artifacts_and_zip_codebase.sh
 ./update_git.sh --status
 ./update_git.sh --acp
-./run-autonomous-implementation.sh
-./run-paper-evaluation.sh --adaptive
-./run-autonomous-bugfix.sh
+```
+
+Canonical root controller commands, after activating Node 20 in the parent shell:
+
+```bash
+. "$HOME/.nvm/nvm.sh" && nvm use 20
+AUTOMATION_ALLOW_PROTECTED_CHANGES=1 ./run-autonomous-implementation.sh --duration 72h --model cli-default --fallback-model none
+./run-paper-evaluation.sh --duration 72h --interval 5m --adaptive --keep-monitoring-when-ready --model cli-default --fallback-model none
+./run-autonomous-bugfix.sh --duration 72h --model cli-default --fallback-model none --handover-autonomous-implementation
 ```
 
 `run-paper-evaluation.sh` replaces any `run-paper-evaluation-12h.sh` naming. It is
-configured for repo-local private paper fixture evaluation only. It must not be
+configured for repo-local private fixture evaluation. Its pinned-bundle
+branch is reserved until the known shell-command quoting and strict pinned-bundle boolean hardening lands. It must not be
 used as real upstream acceptance evidence until Federico provides the pinned
 `betting-win` bundle. All `run-*` scripts write root `artifacts.zip` before exit.
 Protected automation files are documented under `docs/automation/` and must not be
@@ -141,10 +154,24 @@ changed by normal autonomous work.
 ## Automation helper standardization
 
 ```text
-helper_standardization_wave=approved_subset_run_controllers_unchanged
+helper_standardization_wave=approved_subset_plus_all_three_root_controllers
 update_git_pull=git_pull_ff_only_autostash
 zip_codebase_artifacts_only=supported
 pull_artifacts_remote_artifact_override=supported
 progress_helpers=current_artifact_layout
 shared_telegram_helper=.automation/lib/telegram_notify.sh
+run_autonomous_implementation=standardized_with_canonical_flags_and_telegram
+run_autonomous_bugfix=standardized_audit_handoff_with_telegram
+run_paper_evaluation_standardization=standardized_with_telegram_no_service_private_fixture_pinned_bundle
 ```
+
+
+Runtime automation policy:
+
+```text
+source_manifest_runtime_locks_and_handoffs=ignored
+source_manifest_source_owned_automation_helpers=tracked
+paper_controller_final_summary_exit_status=real_process_exit_status
+```
+
+Controller runtime locks and handoff files under `.automation/` are ignored by the source manifest and Git, but source-owned `.automation` helpers remain tracked and validated.

@@ -59,9 +59,9 @@ def main() -> None:
 
     for marker in [
         'run-paper-evaluation.sh',
-        'PAPER_SUPPORTED=1',
-        'repo-local private paper-mode smoke',
-        'blocked_until_federico_pinned_betting_win_interface',
+        'no-service private paper',
+        'SUREBET_PINNED_BUNDLE',
+        'blocked until Federico supplies a pinned `betting-win`',
     ]:
         require(automation_paper, marker, 'docs/automation/paper-evaluation.md')
 
@@ -110,7 +110,7 @@ def main() -> None:
         'docs/017_private_paper_mode_implementation_backlog.md',
         'docs/018_private_paper_mode_runbook.md',
         'No unchecked repo-local item remains in `docs/017_private_paper_mode_implementation_backlog.md`.',
-        'run_paper_evaluation=canonical_repo_local_private_fixture_only',
+        'run_paper_evaluation=canonical_repo_local_private_fixture_and_pinned_bundle_only',
     ]:
         require(status, marker, 'docs/repo_status_current.md')
 
@@ -118,7 +118,7 @@ def main() -> None:
     require(master_plan, 'SURE-002B_PRIVATE_PAPER_MODE_INTAKE', 'docs/MASTER_PLAN.md')
     require(master_plan, 'private_paper_mode=repo_local_complete', 'docs/MASTER_PLAN.md')
 
-    for marker in ['run-autonomous-implementation.sh --duration 72h', 'npm run validate']:
+    for marker in ['run-paper-evaluation.sh', '--duration 72h', '--interval 5m', '--keep-monitoring-when-ready']:
         require(command, marker, 'commands/run-sure-paper-mode-autonomous.sh')
 
     for marker in ['SUREBET_PINNED_BUNDLE', 'remote URLs are prohibited', 'artifacts/private-paper-mode', 'node cli.js local-report']:

@@ -21,9 +21,10 @@ accepted=false
 
 ## Validation-first entry
 
-Run full repo validation before any paper-mode smoke:
+Run full repo validation under the repo Node runtime before any paper-mode smoke:
 
 ```bash
+. "$HOME/.nvm/nvm.sh" && nvm use 20
 npm run validate
 ```
 
@@ -43,15 +44,32 @@ The result is private, fixture-only, and not real upstream evidence. A passing f
 
 ## Pinned bundle smoke
 
-When Federico provides a pinned `betting-win` export bundle, place it under the repo working tree or pass a repo-local path. Then run:
+Current status: this section is a future operator path, not the next safe command.
+Before using a real `SUREBET_PINNED_BUNDLE`, first complete the known
+paper-controller hardening item: shell-quote the operator-provided bundle path
+before any `bash -lc` command construction and validate
+`SUREBET_REQUIRE_PINNED_BUNDLE` as strict `0` or `1`.
+
+After that hardening lands and Federico provides a pinned `betting-win` export
+bundle, place the bundle under the repo working tree or pass a repo-local path.
+Then run:
 
 ```bash
-SUREBET_PINNED_BUNDLE=path/to/pinned-betting-win-export.json bash commands/run-pinned-interface-smoke.sh
+. "$HOME/.nvm/nvm.sh" && nvm use 20
+SUREBET_PINNED_BUNDLE=path/to/pinned-betting-win-export.json \
+  bash ./run-paper-evaluation.sh --duration 72h --interval 5m --adaptive --model cli-default --fallback-model none
 ```
 
-The command must fail closed on missing paths, remote URLs, provider URLs, credentials, execution language, or outputs outside `artifacts/private-paper-mode/`.
+The controller must fail closed on missing paths, remote URLs, provider URLs,
+credentials, execution language, or outputs outside `artifacts/private-paper-mode/`.
+`commands/run-pinned-interface-smoke.sh` remains as a one-shot compatibility
+helper and must rely on CLI containment instead of pre-creating artifact
+directories. Do not use the compatibility helper for a real pinned bundle until
+the same hardening has landed.
 
-If the report is blocked, keep the artifact and stop. Do not loosen validation, do not retry with remote inputs, and do not reinterpret the result as live or provider-backed evidence.
+If the report is blocked, keep the artifact and stop. Do not loosen validation,
+do not retry with remote inputs, and do not reinterpret the result as live or
+provider-backed evidence.
 
 ## Pinned bundle batch
 
@@ -90,9 +108,13 @@ Do not claim live readiness, profitability, execution readiness, or provider-bac
 Use the canonical root supervisor for long private fixture observation:
 
 ```bash
-./run-paper-evaluation.sh --duration 72h --adaptive
+. "$HOME/.nvm/nvm.sh" && nvm use 20 && bash ./run-paper-evaluation.sh --duration 72h --interval 5m --adaptive --keep-monitoring-when-ready --model cli-default --fallback-model none
 ```
 
-This runs the configured repo-local fixture paper command and health checks from
-`automation.config.sh`. It is not a replacement for Federico's pinned bundle and
-must not be interpreted as real upstream acceptance evidence.
+This standardized no-service supervisor validates source, runs the configured
+repo-local private fixture smoke, writes local artifacts, sends one final
+Telegram notification, and never starts/stops services. The pinned-bundle path is
+reserved until the shell-command quoting and strict pinned-bundle boolean
+hardening described above has landed. This controller is not a replacement for
+Federico's pinned bundle and must not be interpreted as real upstream acceptance
+evidence.

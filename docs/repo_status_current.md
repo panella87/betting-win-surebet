@@ -4,7 +4,7 @@
 repo=betting-win-surebet
 current_task=SURE-002B_PRIVATE_PAPER_MODE_INTAKE
 current_task_status=complete_repo_local_private_paper_mode_backlog_blocked_on_pinned_interface
-next_allowed_task=wait for Federico's pinned betting-win contract/export interface before real upstream evaluation
+next_allowed_task=paper-controller pinned-bundle shell-command hardening before real SUREBET_PINNED_BUNDLE use; otherwise wait for Federico's pinned betting-win contract/export interface before real upstream evaluation
 repo_role=surebet_strategy_execution_repo
 strategy_family=surebet_complete_set_only
 provider_truth_owner=betting-win
@@ -42,11 +42,15 @@ SURE-001 hardening is complete. The documented SURE-002A local implementation ba
 
 The following remain blocked under the current gate: provider integration, live execution, public reporting, profitability claims, direct upstream database access, generated-contract vendoring, and real upstream readiness claims. Local deterministic stake-vector, completion, residual exposure, and settlement replay consumption may now be implemented only against fake/local fixtures and must remain blocked from real acceptance.
 
-## Operational command
+## Operational commands
+
+Canonical daily entrypoints are root scripts, not historical phase wrappers:
 
 ```bash
-cd ~/app_testing/betting-win-surebet && PYTHONDONTWRITEBYTECODE=1 bash run-autonomous-implementation.sh --duration 72h --cycle-timeout 2h --validation-timeout 20m
+cd ~/app_testing/betting-win-surebet && . "$HOME/.nvm/nvm.sh" && nvm use 20 && bash ./run-paper-evaluation.sh --duration 72h --interval 5m --adaptive --keep-monitoring-when-ready --model cli-default --fallback-model none
 ```
+
+After the same parent-shell Node activation, use `AUTOMATION_ALLOW_PROTECTED_CHANGES=1 bash ./run-autonomous-implementation.sh --duration 72h --model cli-default --fallback-model none` for the confirmed paper-controller pinned-bundle shell-command hardening because it is explicit automation maintenance touching a protected root controller. For ordinary repo-local validation/tooling/source defects, omit `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`. Use `bash ./run-autonomous-bugfix.sh --duration 72h --model cli-default --fallback-model none --handover-autonomous-implementation` when the task is source bug audit and handoff.
 
 
 ```text
@@ -106,20 +110,19 @@ The active authority remains the three-repo surebet boundary docs.
 
 ```text
 automation_contract=standard_root_scripts_v1
-run_autonomous_implementation=canonical
-run_paper_evaluation=canonical_repo_local_private_fixture_only
-run_autonomous_bugfix=canonical
-paper_adaptive_interval=5m_to_60m
+run_autonomous_implementation=standardized_with_canonical_flags_and_telegram
+run_autonomous_bugfix=standardized_audit_handoff_with_telegram
+run_paper_evaluation=canonical_repo_local_private_fixture_and_pinned_bundle_only
+run_paper_evaluation_standardization=standardized_with_telegram_no_service_private_fixture_pinned_bundle
+paper_interval_behavior=no_service_single_cycle_accepts_interval_for_workflow_compatibility
 lock_dir=.automation/locks
 root_artifacts_zip=required_before_run_script_exit
 stop_autonomous_run_helper=removed
 ```
 
-The current safe automation command for implementation is
-`./run-autonomous-implementation.sh`. The current safe paper command is
-`./run-paper-evaluation.sh` and is limited to fake/local fixture private paper-mode
-smoke. Real upstream private paper evaluation remains blocked until Federico
-provides the pinned `betting-win` bundle.
+The current safe automation-maintenance command for the known paper-controller hardening task, after parent-shell Node activation, is
+`AUTOMATION_ALLOW_PROTECTED_CHANGES=1 ./run-autonomous-implementation.sh --model cli-default --fallback-model none`. For ordinary source implementation, omit `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`. The current safe paper command, after the same activation, is
+`./run-paper-evaluation.sh --duration 72h --interval 5m --adaptive --keep-monitoring-when-ready --model cli-default --fallback-model none`. It is limited to private fixture smoke. Real upstream private paper evaluation remains blocked until Federico provides the pinned `betting-win` bundle, and real pinned-bundle use must wait for the known shell-command quoting and strict pinned-bundle boolean hardening in `run-paper-evaluation.sh`.
 
 
 ## Automation helper standardization
@@ -131,5 +134,18 @@ pull_artifacts_remote_artifact_override=supported
 progress_helpers=current_artifact_layout
 start_stop=no_service_validation_and_noop
 shared_telegram_helper=.automation/lib/telegram_notify.sh
-run_controllers=unchanged_in_this_wave
+run_autonomous_implementation=standardized_with_canonical_flags_and_telegram
+run_autonomous_bugfix=standardized_audit_handoff_with_telegram
+run_paper_evaluation_standardization=standardized_with_telegram_no_service_private_fixture_pinned_bundle
 ```
+
+
+## Automation runtime artifact policy
+
+```text
+source_manifest_runtime_artifacts=ignored_fail_safe
+source_manifest_automation_source_helpers=tracked
+paper_controller_final_exit_status=actual_process_status
+```
+
+Controller-created runtime locks and handoff files are operational state, not source authority. `SOURCE_MANIFEST.json` validation and regeneration ignore `.automation/locks/`, `.automation/corrupt/`, and exact paper/bugfix/implementation handoff files while still tracking source-owned files such as `.automation/README.md` and `.automation/lib/*.sh`. `run-paper-evaluation.sh` final summaries and Telegram notifications must report the actual process exit code.

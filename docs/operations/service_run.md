@@ -4,17 +4,11 @@
 
 `start.sh` is intentionally a safe validation wrapper. `stop.sh` is intentionally a no-service wrapper. It does not kill provider, trading, database, or production processes.
 
-Autonomous implementation runs are controlled by `run-autonomous-implementation.sh`, `check_progress.sh`, `watch_progress.sh`, and `open_log.sh`.
+No provider collector, wallet, signer, order executor, public signal service, or service refresh lifecycle is allowed under the current gate. Future live surebet execution decisions require a separate ADR, new validators, and explicit operator approval.
 
-No provider collector, wallet, signer, order executor, or public signal service is allowed under the current gate. Future live surebet execution decisions require a separate ADR, new validators, and explicit operator approval.
+## Canonical controllers
 
-## Local runtime loader
-
-Use `bash commands/run-sure-paper-mode-autonomous.sh` only if a concrete repo-local defect reopens safe private paper-mode work. `commands/run-sure-001-autonomous.sh` is historical for the completed SURE-001 phase. The command restores executable bits, installs dependencies, validates the starter pack, and then starts `run-autonomous-implementation.sh`. The Node runtime loader uses the installed `.nvmrc` runtime path directly and does not source `nvm.sh`.
-
-## Automation controllers
-
-There is no standalone stop helper. Use:
+Use the root scripts as the active command surface:
 
 ```bash
 ./run-autonomous-implementation.sh --status
@@ -22,6 +16,25 @@ There is no standalone stop helper. Use:
 ./run-autonomous-bugfix.sh --status
 ```
 
-Only use `--force-unlock` after confirming the lock belongs to the same repo and
-script. The current paper controller is `./run-paper-evaluation.sh`, configured for
-repo-local private fixture paper mode only.
+Before launching long controllers, activate Node in the parent shell:
+
+```bash
+. "$HOME/.nvm/nvm.sh" && nvm use 20
+```
+
+The root controllers inherit the active Node runtime, assert Node/NPM versions, and never source `nvm.sh` themselves.
+
+## Compatibility wrappers
+
+Historical wrappers remain under `commands/` for old phase-specific entrypoints, but they are not the canonical daily command surface:
+
+```text
+commands/run-sure-001-autonomous.sh
+commands/run-sure-local-engine-autonomous.sh
+commands/run-sure-paper-mode-autonomous.sh
+commands/run-pinned-interface-smoke.sh
+```
+
+Use `commands/run-pinned-interface-smoke.sh` only when Federico provides a repo-local pinned `betting-win` export bundle. Use the other wrappers only for compatibility or explicit historical reproduction.
+
+There is no standalone stop helper. Only use `--force-unlock` after confirming the lock belongs to the same repo and script. The current paper controller is `./run-paper-evaluation.sh`, configured for repo-local private fixture paper mode only until the known pinned-bundle shell-command quoting and strict boolean validation hardening lands. Real pinned-bundle smoke remains reserved for after that gate and after Federico provides a repo-local pinned `betting-win` export bundle.

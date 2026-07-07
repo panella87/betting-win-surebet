@@ -531,7 +531,8 @@ function ensureBatchOutputPathRealpathContained(
   resolvedOutputPath: string,
 ): BoundaryResult<undefined> {
   const realRepoRoot = realpathSync(resolvedRepoRoot);
-  if (existsSync(resolvedArtifactsRoot) && lstatSync(resolvedArtifactsRoot).isSymbolicLink()) {
+  const artifactsRootEntry = readOptionalPathEntry(resolvedArtifactsRoot);
+  if (artifactsRootEntry.exists && artifactsRootEntry.isSymbolicLink) {
     return batchOutputSymlinkBlocker('artifacts root');
   }
 
@@ -542,6 +543,11 @@ function ensureBatchOutputPathRealpathContained(
   }
 
   const outputParent = dirname(resolvedOutputPath);
+  const outputParentComponents = ensureBatchOutputParentComponentsSafe(resolvedArtifactsRoot, outputParent);
+  if (!outputParentComponents.ok) {
+    return outputParentComponents;
+  }
+
   mkdirSync(outputParent, { recursive: true });
   if (lstatSync(outputParent).isSymbolicLink()) {
     return batchOutputSymlinkBlocker('output parent');
@@ -552,12 +558,12 @@ function ensureBatchOutputPathRealpathContained(
     return batchOutputEscapeBlocker();
   }
 
-  if (existsSync(resolvedOutputPath)) {
-    const outputStat = lstatSync(resolvedOutputPath);
-    if (outputStat.isSymbolicLink()) {
+  const outputEntry = readOptionalPathEntry(resolvedOutputPath);
+  if (outputEntry.exists) {
+    if (outputEntry.isSymbolicLink) {
       return batchOutputSymlinkBlocker('output file');
     }
-    if (!outputStat.isFile()) {
+    if (!outputEntry.isFile) {
       return blocked(
         'LOCAL_REPORT_BATCH_OUTPUT_PATH_NOT_FILE',
         'Pinned bundle batch summary output must be a normal JSON file path under artifacts/.',
@@ -567,6 +573,59 @@ function ensureBatchOutputPathRealpathContained(
   }
 
   return accepted(undefined);
+}
+
+function ensureBatchOutputParentComponentsSafe(
+  resolvedArtifactsRoot: string,
+  outputParent: string,
+): BoundaryResult<undefined> {
+  const relativeParentPath = relative(resolvedArtifactsRoot, outputParent);
+  if (relativeParentPath.length === 0) {
+    return accepted(undefined);
+  }
+  if (relativeParentPath.startsWith('..') || isAbsolute(relativeParentPath)) {
+    return batchOutputEscapeBlocker();
+  }
+
+  let currentPath = resolvedArtifactsRoot;
+  for (const pathPart of relativeParentPath.split(/[\/]+/u).filter((entry) => entry.length > 0)) {
+    currentPath = resolve(currentPath, pathPart);
+    const entry = readOptionalPathEntry(currentPath);
+    if (!entry.exists) {
+      return accepted(undefined);
+    }
+    if (entry.isSymbolicLink) {
+      return batchOutputSymlinkBlocker('output path component');
+    }
+    if (!entry.isDirectory) {
+      return blocked(
+        'LOCAL_REPORT_BATCH_OUTPUT_PARENT_COMPONENT_NOT_DIRECTORY',
+        'Pinned bundle batch summary output parent components must be directories under artifacts/.',
+        'Artifacts-local JSON batch summary path with directory-only parent components.',
+      );
+    }
+  }
+
+  return accepted(undefined);
+}
+
+function readOptionalPathEntry(pathValue: string):
+  | { readonly exists: false }
+  | { readonly exists: true; readonly isSymbolicLink: boolean; readonly isDirectory: boolean; readonly isFile: boolean } {
+  try {
+    const stat = lstatSync(pathValue);
+    return Object.freeze({
+      exists: true,
+      isSymbolicLink: stat.isSymbolicLink(),
+      isDirectory: stat.isDirectory(),
+      isFile: stat.isFile(),
+    });
+  } catch (error) {
+    if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'ENOENT') {
+      return Object.freeze({ exists: false });
+    }
+    throw error;
+  }
 }
 
 function batchOutputSymlinkBlocker(pathKind: string): BoundaryResult<undefined> {

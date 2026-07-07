@@ -2,7 +2,10 @@
 
 ## Bootstrap
 
+Activate the repo Node runtime before package installation or validation:
+
 ```bash
+. "$HOME/.nvm/nvm.sh" && nvm use 20
 npm install
 npm run validate
 ```
@@ -41,13 +44,19 @@ Provide Federico's pinned `betting-win` contract/export interface before real up
 
 ```bash
 ./zip_codebase.sh
+./zip_codebase.sh --artifacts-only
 ./pull_artifacts_and_zip_codebase.sh
 ./update_git.sh --acp
-./run-autonomous-implementation.sh --check-only
-./run-paper-evaluation.sh --adaptive
-./run-autonomous-bugfix.sh
+. "$HOME/.nvm/nvm.sh" && nvm use 20
+./run-autonomous-implementation.sh --check-only --model cli-default --fallback-model none
+./run-paper-evaluation.sh --duration 72h --interval 5m --adaptive --keep-monitoring-when-ready --model cli-default --fallback-model none
+./run-autonomous-bugfix.sh --duration 72h --model cli-default --fallback-model none --handover-autonomous-implementation
 ```
 
 `run-paper-evaluation.sh` runs only the local private fixture paper path in the
-current gate. It is not real upstream evidence. All `run-*` scripts write root
-`artifacts.zip` before stopping.
+current gate. The `SUREBET_PINNED_BUNDLE` branch is reserved until the known
+paper-controller shell-command quoting and strict pinned-bundle boolean
+validation hardening lands, and it is not real upstream evidence. All `run-*`
+scripts write root `artifacts.zip` before stopping. Historical
+`commands/run-sure-*` wrappers are compatibility wrappers only; active
+docs should point operators to the root scripts above.

@@ -22,7 +22,11 @@ docs/automation/PROTECTED_AUTOMATION_FILES.md
 ```
 
 Changing protected files is allowed only when the explicit task is automation
-maintenance or repo standardization.
+maintenance or repo standardization. For such tasks, launch the implementation
+controller with `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` and keep the change
+bounded to the named automation files required by the task. Do not set this
+environment variable for normal app/source implementation, paper evaluation, or
+bug-audit runs.
 
 Executable command lists live in `automation.config.sh`,
 `tools/required_executable_paths.js`, and `scripts/validate_executable_bits.py`.

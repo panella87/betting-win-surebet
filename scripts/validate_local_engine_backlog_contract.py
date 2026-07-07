@@ -103,7 +103,8 @@ def main() -> None:
     ]:
         require(interface_handoff, marker, 'docs/016_pinned_betting_win_interface_readiness.md')
 
-    require(command, 'run-autonomous-implementation.sh --duration 72h', 'commands/run-sure-local-engine-autonomous.sh')
+    for marker in ['run-autonomous-implementation.sh', '--duration 72h', '--cycle-timeout 2h', '--validation-timeout 20m']:
+        require(command, marker, 'commands/run-sure-local-engine-autonomous.sh')
 
     validate_ops = package.get('scripts', {}).get('validate:ops', '')
     if 'scripts/validate_local_engine_backlog_contract.py' not in validate_ops:

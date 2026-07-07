@@ -1,6 +1,19 @@
-# betting-win-surebet starter pack
+# betting-win-surebet starter pack — historical note
 
-Three-repo boundary rebaseline:
+This file describes the original SURE-001 starter-pack overlay. It is retained only as historical context and is not the active repo status source.
+
+Current active status lives in:
+
+```text
+PROJECT_STATUS.md
+docs/repo_status_current.md
+docs/MASTER_PLAN.md
+docs/automation/
+```
+
+Current state is no longer SURE-001-only. SURE-001, SURE-002A local engine work, and SURE-002B private paper-mode intake are complete for repo-local work. Real upstream evaluation remains blocked until Federico provides the pinned `betting-win` contract/export bundle, and live execution remains prohibited until a separate explicit gate.
+
+Original starter-pack boundary:
 
 ```text
 repo_role=surebet_strategy_execution_repo
@@ -10,14 +23,4 @@ predictive_strategy_owner=betting-win-betting
 account_policy=separate_from_betting-win-betting
 ```
 
-This overlay implements SURE-001 only: repository skeleton, documentation, ADRs, typed
-blocked stubs, tests, and fail-closed boundary validators.
-
-It intentionally does not include `.env`, provider credentials, provider SDKs,
-wallet/signer packages, generated `betting-win` contracts, direct database access, or real
-strategy implementation under SURE-001. Current surebet strategy/backtest/paper authority is documented in `docs/019_three_repo_surebet_strategy_boundary.md` and `docs/021_backtest_paper_live_mode_roadmap.md`. A repo-root `.env` may exist locally for helper configuration only
-when ignored by Git; it must never be archived or committed.
-
-## Launcher fix
-
-The starter pack includes a no-source-NVM runtime loader. It does not source `nvm.sh` and does not call the NVM shell function; startup should fail with a visible runtime diagnostic instead of aborting inside `nvm.sh`.
+The starter pack intentionally did not include `.env`, provider credentials, provider SDKs, wallets/signers, generated `betting-win` contracts, direct database access, or real strategy implementation. Those hard boundaries still apply unless a later explicit gate changes them.

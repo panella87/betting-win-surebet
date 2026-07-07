@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { tmpdir } from 'node:os';
 import { runLocalPaperReportCli, writeLocalPaperReport } from '../src/cli/local-paper-report.js';
@@ -136,6 +136,34 @@ test('local paper report rejects artifact output symlink escapes', () => {
     rmSync(linkPath, { recursive: true, force: true });
     rmSync(outsideDir, { recursive: true, force: true });
   }
+});
+
+
+test('local paper report rejects nested artifact output symlink escapes before creating outside directories', () => {
+  mkdirSync(join(REPO_ROOT, 'artifacts'), { recursive: true });
+  const outsideDir = mkdtempSync(join(tmpdir(), 'surebet-output-nested-escape-'));
+  const linkPath = join(REPO_ROOT, 'artifacts', `nested-symlink-output-${Date.now()}`);
+  symlinkSync(outsideDir, linkPath, 'dir');
+  try {
+    const result = writeLocalPaperReport({ bundlePath: ACCEPTED_LOCAL_BUNDLE, outputPath: relative(REPO_ROOT, join(linkPath, 'nested', 'report.json')), repoRoot: REPO_ROOT });
+    assert.equal(result.ok, false);
+    assert.equal(result.blockers[0]?.code, 'LOCAL_REPORT_OUTPUT_SYMLINK_FORBIDDEN');
+    assert.equal(existsSync(join(outsideDir, 'nested')), false);
+  } finally { rmSync(linkPath, { recursive: true, force: true }); rmSync(outsideDir, { recursive: true, force: true }); }
+});
+
+
+test('local paper report rejects dangling output-file symlinks before writing outside artifacts', () => {
+  const outputPath = createArtifactOutputPath('dangling-output-symlink');
+  const outsideFile = join(tmpdir(), `surebet-dangling-report-${Date.now()}.json`);
+  mkdirSync(dirname(outputPath), { recursive: true });
+  symlinkSync(outsideFile, outputPath, 'file');
+  try {
+    const result = writeLocalPaperReport({ bundlePath: ACCEPTED_LOCAL_BUNDLE, outputPath: relative(REPO_ROOT, outputPath), repoRoot: REPO_ROOT });
+    assert.equal(result.ok, false);
+    assert.equal(result.blockers[0]?.code, 'LOCAL_REPORT_OUTPUT_SYMLINK_FORBIDDEN');
+    assert.equal(existsSync(outsideFile), false);
+  } finally { rmSync(outputPath, { force: true }); rmSync(outsideFile, { force: true }); rmSync(dirnameForCleanup(outputPath), { recursive: true, force: true }); }
 });
 
 test('private paper-mode smoke fixtures stay marked as local fake bundles', () => {

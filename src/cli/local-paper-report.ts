@@ -523,7 +523,8 @@ function ensureArtifactOutputPathRealpathContained(
   resolvedOutputPath: string,
 ): BoundaryResult<undefined> {
   const realRepoRoot = realpathSync(resolvedRepoRoot);
-  if (existsSync(resolvedArtifactsRoot) && lstatSync(resolvedArtifactsRoot).isSymbolicLink()) {
+  const artifactsRootEntry = readOptionalPathEntry(resolvedArtifactsRoot);
+  if (artifactsRootEntry.exists && artifactsRootEntry.isSymbolicLink) {
     return outputSymlinkBlocker('artifacts root');
   }
 
@@ -534,6 +535,11 @@ function ensureArtifactOutputPathRealpathContained(
   }
 
   const outputParent = dirname(resolvedOutputPath);
+  const outputParentComponents = ensureArtifactOutputParentComponentsSafe(resolvedArtifactsRoot, outputParent);
+  if (!outputParentComponents.ok) {
+    return outputParentComponents;
+  }
+
   mkdirSync(outputParent, { recursive: true });
   if (lstatSync(outputParent).isSymbolicLink()) {
     return outputSymlinkBlocker('output parent');
@@ -543,12 +549,12 @@ function ensureArtifactOutputPathRealpathContained(
     return outputEscapeBlocker();
   }
 
-  if (existsSync(resolvedOutputPath)) {
-    const outputStat = lstatSync(resolvedOutputPath);
-    if (outputStat.isSymbolicLink()) {
+  const outputEntry = readOptionalPathEntry(resolvedOutputPath);
+  if (outputEntry.exists) {
+    if (outputEntry.isSymbolicLink) {
       return outputSymlinkBlocker('output file');
     }
-    if (!outputStat.isFile()) {
+    if (!outputEntry.isFile) {
       return blocked(
         'LOCAL_REPORT_OUTPUT_PATH_NOT_FILE',
         'Local paper reporting output must be a normal JSON file path under artifacts/.',
@@ -558,6 +564,59 @@ function ensureArtifactOutputPathRealpathContained(
   }
 
   return accepted(undefined);
+}
+
+function ensureArtifactOutputParentComponentsSafe(
+  resolvedArtifactsRoot: string,
+  outputParent: string,
+): BoundaryResult<undefined> {
+  const relativeParentPath = relative(resolvedArtifactsRoot, outputParent);
+  if (relativeParentPath.length === 0) {
+    return accepted(undefined);
+  }
+  if (relativeParentPath.startsWith('..') || isAbsolute(relativeParentPath)) {
+    return outputEscapeBlocker();
+  }
+
+  let currentPath = resolvedArtifactsRoot;
+  for (const pathPart of relativeParentPath.split(/[\/]+/u).filter((entry) => entry.length > 0)) {
+    currentPath = resolve(currentPath, pathPart);
+    const entry = readOptionalPathEntry(currentPath);
+    if (!entry.exists) {
+      return accepted(undefined);
+    }
+    if (entry.isSymbolicLink) {
+      return outputSymlinkBlocker('output path component');
+    }
+    if (!entry.isDirectory) {
+      return blocked(
+        'LOCAL_REPORT_OUTPUT_PARENT_COMPONENT_NOT_DIRECTORY',
+        'Local paper reporting output parent components must be directories under artifacts/.',
+        'Artifacts-local JSON report path with directory-only parent components.',
+      );
+    }
+  }
+
+  return accepted(undefined);
+}
+
+function readOptionalPathEntry(pathValue: string):
+  | { readonly exists: false }
+  | { readonly exists: true; readonly isSymbolicLink: boolean; readonly isDirectory: boolean; readonly isFile: boolean } {
+  try {
+    const stat = lstatSync(pathValue);
+    return Object.freeze({
+      exists: true,
+      isSymbolicLink: stat.isSymbolicLink(),
+      isDirectory: stat.isDirectory(),
+      isFile: stat.isFile(),
+    });
+  } catch (error) {
+    if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'ENOENT') {
+      return Object.freeze({ exists: false });
+    }
+    throw error;
+  }
 }
 
 function outputSymlinkBlocker(pathKind: string): BoundaryResult<undefined> {

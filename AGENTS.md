@@ -84,9 +84,10 @@ Reciprocal odds alone are not acceptance evidence.
 
 ## Validation
 
-Every task must run:
+Every task must run under the repo Node runtime:
 
 ```bash
+. "$HOME/.nvm/nvm.sh" && nvm use 20
 npm run validate
 ```
 
@@ -95,13 +96,13 @@ No task may pass by weakening validators or replacing evidence with mocks.
 
 ## Private paper-mode continuation
 
-Federico asked for the maximum safe implementation possible up to paper mode. The SURE-002B private paper-mode intake backlog is the next active backlog at `docs/017_private_paper_mode_implementation_backlog.md` under:
+Federico asked for the maximum safe implementation possible up to paper mode. The SURE-002B private paper-mode intake backlog at `docs/017_private_paper_mode_implementation_backlog.md` is complete under:
 
 ```text
 SURE-002B_PRIVATE_PAPER_MODE_INTAKE
 ```
 
-As of 2026-07-02, the repo-local private paper-mode backlog is complete and `docs/018_private_paper_mode_runbook.md` defines the freeze gate: `npm run validate` passes, local fixture smoke passes, and real upstream evaluation still requires Federico's pinned bundle. Use `commands/run-sure-paper-mode-autonomous.sh` only if a concrete repo-local defect reopens safe work. Use `commands/run-pinned-interface-smoke.sh` only for a repo-local pinned `betting-win` bundle path supplied by Federico. Do not use remote URLs. Do not connect to providers. Do not claim live readiness or profitability.
+As of the current repo state, the private paper-mode backlog is complete and `docs/018_private_paper_mode_runbook.md` defines the freeze gate: `npm run validate` passes, local fixture smoke passes, and real upstream evaluation still requires Federico's pinned bundle. The currently documented paper-controller pinned-bundle shell hardening is explicit automation maintenance; launch that implementation run with `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` and keep the exception bounded to the required controller/docs/tests/validator changes. Use the root `run-paper-evaluation.sh` controller for private fixture paper checks. The historical `commands/run-sure-paper-mode-autonomous.sh` wrapper still exists for compatibility, but it is not the canonical daily entrypoint. Use `commands/run-pinned-interface-smoke.sh` only for a repo-local pinned `betting-win` bundle path supplied by Federico, and do not treat pinned-bundle evaluation as ready until the documented paper-controller pinned-bundle shell hardening is complete. Do not use remote URLs. Do not connect to providers. Do not claim live readiness or profitability.
 
 ## Standard automation contract
 
@@ -122,6 +123,6 @@ unless the task explicitly says automation maintenance. Repo-specific rules live
 `docs/automation/`.
 
 `run-paper-evaluation.sh` is the canonical paper supervisor. It may run only the
-repo-local private fixture paper path until Federico provides the pinned
-`betting-win` export bundle. It must never create provider connections or execution
-paths.
+repo-local private fixture paper path until the known pinned-bundle shell hardening
+lands and Federico provides the pinned `betting-win` export bundle. It must never
+create provider connections or execution paths.
