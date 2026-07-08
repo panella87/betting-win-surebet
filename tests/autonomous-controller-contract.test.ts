@@ -107,7 +107,7 @@ test('paper evaluation controller exposes canonical no-service private fixture a
   for (const marker of [
     '--adaptive','--keep-monitoring-when-ready','--model MODEL','--fallback-model MODEL','--repo-dir PATH',
     '--check-only','--codex-phase-timeout VALUE','--validation-timeout VALUE','SUREBET_PINNED_BUNDLE',
-    'SUREBET_REQUIRE_PINNED_BUNDLE','SUREBET_REQUIRE_PINNED_BUNDLE must be unset, 0, or 1','paper_shell_quote()','paper_service_lifecycle=none',
+    'SUREBET_REQUIRE_PINNED_BUNDLE','SUREBET_REQUIRE_PINNED_BUNDLE must be unset, 0, or 1','validate_surebet_pinned_bundle_path()','paper_shell_quote()','paper_service_lifecycle=none',
     'PAPER_EVALUATION_READY_PRIVATE_FIXTURE_ONLY_BLOCKED_ON_PINNED_BUNDLE',
     'PAPER_EVALUATION_PINNED_BUNDLE_ACCEPTED_PRIVATE_REPORT_WRITTEN',
     'PAPER_EVALUATION_BLOCKED_INVALID_PINNED_BUNDLE','paper-mode-to-autonomous-implementation.env',

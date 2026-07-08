@@ -61,7 +61,7 @@ Even after the pinned interface is provided, this repo must not add provider cli
 
 ## Operator smoke after pinned interface
 
-After Federico provides a pinned local export bundle, the first safe smoke remains local and private:
+After Federico provides a real pinned local export bundle, the first safe smoke remains local and private. Placeholder paths such as `path/to/pinned-betting-win-export.json` are invalid and now fail paper-controller preflight before local paper smoke work starts:
 
 ```bash
 node cli.js local-report --bundle <repo-local-betting-win-export.json> --output artifacts/local-paper-reports/pinned-interface-smoke.report.json --pinned-intake

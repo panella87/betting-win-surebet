@@ -44,7 +44,7 @@ def main() -> None:
 
     for needle in [
         'current_task=SURE-002B_PRIVATE_PAPER_MODE_INTAKE',
-        'current_task_status=complete_repo_local_private_paper_mode_backlog_blocked_on_pinned_interface',
+        'current_task_status=repo_local_private_paper_mode_baseline_complete_full_blueprint_blocked_on_pinned_interface',
         'provider_connections=prohibited',
         'execution=prohibited',
         'docs/015_local_engine_implementation_backlog.md',

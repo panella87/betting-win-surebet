@@ -106,7 +106,7 @@ def main() -> None:
 
     for marker in [
         'current_task=SURE-002B_PRIVATE_PAPER_MODE_INTAKE',
-        'current_task_status=complete_repo_local_private_paper_mode_backlog_blocked_on_pinned_interface',
+        'current_task_status=repo_local_private_paper_mode_baseline_complete_full_blueprint_blocked_on_pinned_interface',
         'docs/017_private_paper_mode_implementation_backlog.md',
         'docs/018_private_paper_mode_runbook.md',
         'No unchecked repo-local item remains in `docs/017_private_paper_mode_implementation_backlog.md`.',

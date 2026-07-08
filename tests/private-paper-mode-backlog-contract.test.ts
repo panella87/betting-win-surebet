@@ -56,7 +56,7 @@ test('status docs record completed private paper-mode backlog and freeze gate', 
   const masterPlan = read('docs/MASTER_PLAN.md');
 
   assert.match(status, /current_task=SURE-002B_PRIVATE_PAPER_MODE_INTAKE/);
-  assert.match(status, /current_task_status=complete_repo_local_private_paper_mode_backlog_blocked_on_pinned_interface/);
+  assert.match(status, /current_task_status=repo_local_private_paper_mode_baseline_complete_full_blueprint_blocked_on_pinned_interface/);
   assert.match(status, /No unchecked repo-local item remains in `docs\/017_private_paper_mode_implementation_backlog\.md`\./);
   assert.match(projectStatus, /status=SURE-002B_PRIVATE_PAPER_MODE_INTAKE/);
   assert.match(projectStatus, /current_task=SURE-002B_PRIVATE_PAPER_MODE_INTAKE/);

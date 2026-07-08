@@ -76,7 +76,7 @@ write .automation/paper-mode-to-autonomous-implementation.env when source work i
 
 Pinned bundle mode status:
 
-The controller contains a pinned-bundle path. Operator-provided `SUREBET_PINNED_BUNDLE` values are shell-quoted before any `bash -lc` command construction, and `SUREBET_REQUIRE_PINNED_BUNDLE` is validated as strict `0` or `1`. Use a real pinned-bundle command only after Federico supplies a repo-local pinned `betting-win` export.
+The controller contains a pinned-bundle path. Operator-provided `SUREBET_PINNED_BUNDLE` values are shell-quoted before any `bash -lc` command construction, `SUREBET_REQUIRE_PINNED_BUNDLE` is validated as strict `0` or `1`, and configured bundle paths fail fast when they are missing, remote, outside the repo, non-JSON, symlinked, or not regular files. Use a real pinned-bundle command only after Federico supplies a repo-local pinned `betting-win` export.
 
 Pinned-bundle command after Federico supplies a repo-local pinned `betting-win` export:
 

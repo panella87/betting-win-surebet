@@ -35,7 +35,7 @@ scripts/stop-autonomous-run.sh
 ```text
 repo=betting-win-surebet
 current_task=SURE-002B_PRIVATE_PAPER_MODE_INTAKE
-current_task_status=complete_repo_local_private_paper_mode_backlog_blocked_on_pinned_interface
+current_task_status=repo_local_private_paper_mode_baseline_complete_full_blueprint_blocked_on_pinned_interface
 mode=private_paper_only
 provider_connections=prohibited
 execution=prohibited

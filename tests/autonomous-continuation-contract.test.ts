@@ -12,7 +12,8 @@ test('automation implementation docs treat retained backlogs as complete ledgers
   assert.match(doc, /docs\/015_local_engine_implementation_backlog\.md/);
   assert.match(doc, /docs\/017_private_paper_mode_implementation_backlog\.md/);
   assert.match(doc, /repo-local backlogs are complete/);
-  assert.match(doc, /AUTONOMOUS_GOAL_COMPLETE=yes/);
+  assert.match(doc, /full product blueprint is not complete/);
+  assert.match(doc, /BLOCKED=yes/);
 });
 
 test('current implementation task allows only confirmed safe defect repair', () => {
@@ -21,4 +22,7 @@ test('current implementation task allows only confirmed safe defect repair', () 
   assert.match(task, /provider_connections=prohibited/);
   assert.match(task, /execution=prohibited/);
   assert.match(task, /blocked_until_federico_pinned_betting_win_interface/);
+  assert.match(task, /BLOCKED=yes/);
+  assert.match(task, /AUTONOMOUS_GOAL_COMPLETE=yes/);
+  assert.match(task, /full product blueprint/);
 });

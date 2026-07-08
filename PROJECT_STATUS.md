@@ -122,6 +122,13 @@ active_authority=no
 
 The active authority remains the three-repo surebet boundary docs.
 
+
+## Blueprint completion clarification
+
+The full surebet product blueprint is not complete. The completed scope is the repo-local fixture/private-paper implementation baseline only. Real upstream evaluation remains blocked until a real repo-local pinned `betting-win` export/interface is provided. Autonomous implementation should write `BLOCKED=yes`, not `AUTONOMOUS_GOAL_COMPLETE=yes`, when the only remaining active blocker is that missing external interface.
+
+The paper controller now also fails fast when `SUREBET_PINNED_BUNDLE` is configured as a placeholder, remote URL, path outside the repo, symlink, directory, non-JSON path, or missing file.
+
 ## Standard automation status
 
 ```text

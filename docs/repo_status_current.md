@@ -3,7 +3,7 @@
 ```text
 repo=betting-win-surebet
 current_task=SURE-002B_PRIVATE_PAPER_MODE_INTAKE
-current_task_status=complete_repo_local_private_paper_mode_backlog_blocked_on_pinned_interface
+current_task_status=repo_local_private_paper_mode_baseline_complete_full_blueprint_blocked_on_pinned_interface
 next_allowed_task=wait_for_federico_pinned_betting_win_contract_export_interface_before_real_upstream_evaluation_or_continue_with_approved_autopilot_alignment
 repo_role=surebet_strategy_execution_repo
 strategy_family=surebet_complete_set_only
@@ -81,7 +81,7 @@ The repo-local SURE-001 hardening backlog, the safe SURE-002A local implementati
 
 ```text
 current_task=SURE-002B_PRIVATE_PAPER_MODE_INTAKE
-current_task_status=complete_repo_local_private_paper_mode_backlog_blocked_on_pinned_interface
+current_task_status=repo_local_private_paper_mode_baseline_complete_full_blueprint_blocked_on_pinned_interface
 provider_connections=prohibited
 execution=prohibited
 real_upstream_evaluation=blocked_until_federico_pinned_betting_win_interface
@@ -121,7 +121,7 @@ stop_autonomous_run_helper=removed
 ```
 
 For ordinary source implementation, omit `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`; use it only for a newly approved automation-maintenance task touching protected root automation files. The current safe paper command, after parent-shell Node activation, is
-`./run-paper-evaluation.sh --duration 72h --interval 5m --adaptive --keep-monitoring-when-ready --model cli-default --fallback-model none`. It is limited to private fixture smoke unless Federico provides a repo-local pinned `betting-win` bundle. The pinned-bundle branch is now shell-quoted and strict about `SUREBET_REQUIRE_PINNED_BUNDLE`, but real upstream private paper evaluation remains blocked until Federico provides the pinned bundle.
+`./run-paper-evaluation.sh --duration 72h --interval 5m --adaptive --keep-monitoring-when-ready --model cli-default --fallback-model none`. It is limited to private fixture smoke unless Federico provides a repo-local pinned `betting-win` bundle. The pinned-bundle branch is now shell-quoted, strict about `SUREBET_REQUIRE_PINNED_BUNDLE`, and fail-fast about missing/remote/out-of-repo/symlink/non-JSON placeholder bundle paths, but real upstream private paper evaluation remains blocked until Federico provides the pinned bundle.
 
 
 ## Automation helper standardization

@@ -44,7 +44,7 @@ The result is private, fixture-only, and not real upstream evidence. A passing f
 
 ## Pinned bundle smoke
 
-Current status: this section is a private paper operator path for a repo-local bundle supplied by Federico. The paper controller now shell-quotes the operator-provided bundle path before any `bash -lc` command construction and validates `SUREBET_REQUIRE_PINNED_BUNDLE` as strict `0` or `1`.
+Current status: this section is a private paper operator path for a real repo-local bundle supplied by Federico. The paper controller now shell-quotes the operator-provided bundle path before any `bash -lc` command construction, validates `SUREBET_REQUIRE_PINNED_BUNDLE` as strict `0` or `1`, and fails fast when the configured bundle path is missing, remote, outside the repo, non-JSON, symlinked, or not a regular file.
 
 After Federico provides a pinned `betting-win` export bundle, place the bundle under the repo working tree or pass a repo-local path. Then run:
 

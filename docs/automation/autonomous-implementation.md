@@ -77,7 +77,7 @@ Telegram is wired through `.automation/lib/telegram_notify.sh`. It sends one fin
 message per run and can be disabled with `TELEGRAM_NOTIFY=0`.
 
 For the current repo state, normal autonomous implementation should not open new
-feature work. Do not invent additional local backlog work. The repo-local backlogs are complete. The completed ledgers are:
+feature work. Do not invent additional local backlog work. The repo-local backlogs are complete, but the full product blueprint is not complete until the pinned `betting-win` interface exists. The completed ledgers are:
 
 ```text
 docs/014_sure_001_remaining_hardening_backlog.md
@@ -91,8 +91,11 @@ The controller may only:
 repair a concrete repo-local validation/tooling defect
 repair documentation drift that contradicts the current safety gate
 repair deterministic local fixture/private paper-mode bugs
-stop with AUTONOMOUS_GOAL_COMPLETE=yes when no safe defect exists
+repair pinned-bundle path preflight/reporting defects
+stop with BLOCKED=yes when no safe defect exists and the only remaining product blocker is Federico's missing pinned `betting-win` interface
 ```
+
+Use `AUTONOMOUS_GOAL_COMPLETE=yes` only for a bounded repo-local task that is genuinely complete; do not use it to imply the full surebet blueprint is done while real upstream evaluation is blocked.
 
 It must not connect to providers, read live upstream services, implement execution,
 add predictive/value-betting scope, share bankroll/account state with

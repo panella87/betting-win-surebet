@@ -80,7 +80,8 @@ Environment:
 Surebet behavior:
   - Validates the repo and hard no-provider/no-execution/no-direct-DB boundaries.
   - Runs one repo-local private fixture paper smoke.
-  - Runs pinned-bundle smoke only when SUREBET_PINNED_BUNDLE is explicitly provided.
+  - Fails fast when SUREBET_PINNED_BUNDLE is missing, remote, outside the repo, non-JSON, a symlink, or not a regular file.
+  - Runs pinned-bundle smoke only when SUREBET_PINNED_BUNDLE is explicitly provided and passes local path preflight.
   - Writes .automation/paper-mode-to-autonomous-implementation.env only for source/validation defects.
   - Does not start, stop, refresh, poll, or mutate any service.
   - Does not source nvm.sh; root run scripts inherit the active parent-shell Node runtime.
@@ -108,6 +109,62 @@ validate_surebet_require_pinned_bundle() {
     0|1) return 0 ;;
     *)
       echo "ERROR: SUREBET_REQUIRE_PINNED_BUNDLE must be unset, 0, or 1; got: ${REQUIRE_PINNED_BUNDLE}" >&2
+      return 2
+      ;;
+  esac
+}
+
+validate_surebet_pinned_bundle_path() {
+  if [[ -z "${PINNED_BUNDLE_PATH:-}" ]]; then
+    if [[ "$REQUIRE_PINNED_BUNDLE" == "1" ]]; then
+      echo "ERROR: SUREBET_REQUIRE_PINNED_BUNDLE=1 requires SUREBET_PINNED_BUNDLE to point to an existing repo-local JSON file." >&2
+      return 2
+    fi
+    return 0
+  fi
+
+  case "$PINNED_BUNDLE_PATH" in
+    *://*)
+      echo "ERROR: SUREBET_PINNED_BUNDLE must be a repo-local filesystem path, not a URL: $PINNED_BUNDLE_PATH" >&2
+      return 2
+      ;;
+  esac
+
+  local candidate_path
+  if [[ "$PINNED_BUNDLE_PATH" == /* ]]; then
+    candidate_path="$PINNED_BUNDLE_PATH"
+  else
+    candidate_path="$AUTOMATION_REPO_ROOT/$PINNED_BUNDLE_PATH"
+  fi
+
+  if [[ ! -e "$candidate_path" ]]; then
+    echo "ERROR: SUREBET_PINNED_BUNDLE must point to an existing repo-local JSON file; got: $PINNED_BUNDLE_PATH" >&2
+    return 2
+  fi
+  if [[ -L "$candidate_path" ]]; then
+    echo "ERROR: SUREBET_PINNED_BUNDLE must be a real file, not a symbolic link: $PINNED_BUNDLE_PATH" >&2
+    return 2
+  fi
+  if [[ ! -f "$candidate_path" ]]; then
+    echo "ERROR: SUREBET_PINNED_BUNDLE must point to a regular JSON file; got: $PINNED_BUNDLE_PATH" >&2
+    return 2
+  fi
+  case "$candidate_path" in
+    *.json) ;;
+    *)
+      echo "ERROR: SUREBET_PINNED_BUNDLE must point to a .json export bundle; got: $PINNED_BUNDLE_PATH" >&2
+      return 2
+      ;;
+  esac
+
+  local repo_real bundle_dir_real bundle_real
+  repo_real="$(cd "$AUTOMATION_REPO_ROOT" && pwd -P)" || return 2
+  bundle_dir_real="$(cd "$(dirname "$candidate_path")" && pwd -P)" || return 2
+  bundle_real="$bundle_dir_real/$(basename "$candidate_path")"
+  case "$bundle_real" in
+    "$repo_real"/*) return 0 ;;
+    *)
+      echo "ERROR: SUREBET_PINNED_BUNDLE must stay inside the repository root; got: $PINNED_BUNDLE_PATH" >&2
       return 2
       ;;
   esac
@@ -161,6 +218,7 @@ configure_defaults() {
   PINNED_BUNDLE_PATH="${SUREBET_PINNED_BUNDLE:-${PINNED_BUNDLE_PATH:-}}"
   REQUIRE_PINNED_BUNDLE="${SUREBET_REQUIRE_PINNED_BUNDLE:-${REQUIRE_PINNED_BUNDLE:-0}}"
   validate_surebet_require_pinned_bundle || return 2
+  validate_surebet_pinned_bundle_path || return 2
   INTERVAL_SECONDS="${INTERVAL_SECONDS:-$(automation_parse_duration_seconds "${PAPER_DEFAULT_INTERVAL:-30m}")}"
   VALIDATION_TIMEOUT_SECONDS="${VALIDATION_TIMEOUT_SECONDS:-$(automation_parse_duration_seconds "${AUTOMATION_VALIDATION_TIMEOUT:-20m}")}"
   INSTALL_TIMEOUT_SECONDS="${INSTALL_TIMEOUT_SECONDS:-$(automation_parse_duration_seconds "${AUTOMATION_INSTALL_TIMEOUT:-15m}")}"
@@ -319,8 +377,8 @@ NODE
   rc=$?; [[ "$rc" -eq 0 ]] || { automation_log "pinned_bundle_artifact_validation_failed log=$verify_log"; return 1; }
 }
 
-parse_args "$@" || exit 1
-configure_defaults || exit 1
+parse_args "$@" || exit $?
+configure_defaults || exit $?
 LOCK_FILE="$AUTOMATION_REPO_ROOT/.automation/locks/run-paper-evaluation.lock"
 if [[ "$STATUS_ONLY" == "1" ]]; then automation_status_lock "$LOCK_FILE"; exit 0; fi
 if [[ "$FORCE_UNLOCK" == "1" ]]; then automation_force_unlock "$LOCK_FILE" "$SCRIPT_NAME" "$AUTOMATION_REPO_ROOT"; exit 0; fi

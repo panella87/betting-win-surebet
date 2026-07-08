@@ -1,3 +1,10 @@
+# 2026-07-08 - Blueprint blocker classification and pinned-bundle preflight
+
+- Clarified that the full surebet blueprint is not complete merely because the repo-local fixture/private-paper baseline is complete.
+- Updated the current implementation task so missing Federico pinned `betting-win` interface is classified as `BLOCKED=yes`, not `AUTONOMOUS_GOAL_COMPLETE=yes`, when no safe repo-local defect exists.
+- Added paper-controller preflight validation for configured `SUREBET_PINNED_BUNDLE` paths so placeholders, remote URLs, out-of-repo paths, symlinks, directories, non-JSON paths, and missing files fail fast with clear errors.
+- Regenerated `SOURCE_MANIFEST.json` after the current `CHANGELOG.md` drift.
+
 # 2026-07-08 - Post-cycle merge-conflict cleanup and validation guard
 
 - Resolved unresolved Git conflict markers left in the paper-controller/autopilot documentation wave.
