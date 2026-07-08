@@ -44,6 +44,7 @@ artifacts.zip
 .DS_Store
 
 # Local archives
+zi??????
 *.zip
 *.tar
 *.tar.gz

@@ -1,19 +1,26 @@
-## 2026-07-07 — Telegram pinned-bundle blocked-status correction
+# 2026-07-08 - Post-cycle merge-conflict cleanup and validation guard
 
-- Corrected the Telegram helper's status classification so `PAPER_EVALUATION_READY_PRIVATE_FIXTURE_ONLY_BLOCKED_ON_PINNED_BUNDLE` renders as blocked instead of success.
-- Added regression coverage for the surebet private-fixture-only pinned-bundle status card.
-- Kept the Hyperliquid pretty HTML card format and repo-specific no-service/private-paper boundary intact.
+- Resolved unresolved Git conflict markers left in the paper-controller/autopilot documentation wave.
+- Restored `run-paper-evaluation.sh` to a valid no-service controller with shell-quoted pinned-bundle command paths and strict `SUREBET_REQUIRE_PINNED_BUNDLE` validation.
+- Regenerated `SOURCE_MANIFEST.json` after cleanup.
+- Added `validate_repo.py` coverage for unresolved merge conflict markers so this failure class cannot pass repo validation again.
+
+# 2026-07-08 - Paper autopilot shell automation alignment
+
+- Added `run-paper-autopilot.sh` as the no-service parent supervisor for private paper evaluation and bounded implementation handoffs.
+- Added Hyperliquid-style HTML Telegram final-card handling with surebet blocked-on-pinned-bundle classification.
+- Hardened `run-paper-evaluation.sh` shell quoting and strict `SUREBET_REQUIRE_PINNED_BUNDLE` validation.
+- Added autopilot handoff metadata, progress/log discovery, zip temp-file hygiene, docs, tests, validators, and source manifest updates.
+
+## 2026-07-08 — Paper pinned-bundle shell hardening and Telegram HTML alignment
+
+- Hardened `run-paper-evaluation.sh` command construction so local fixture and pinned-bundle paths are shell-quoted before execution through `bash -lc`.
+- Added strict `SUREBET_REQUIRE_PINNED_BUNDLE` validation: unset, `0`, and `1` are accepted; any other value fails setup.
+- Aligned `.automation/lib/telegram_notify.sh` with the latest Hyperliquid pretty HTML final-card helper while keeping surebet blocked-on-pinned-bundle statuses classified as blocked, not success.
+- Added Telegram helper regression coverage for HTML parse mode, secret redaction, dry-run output, and status-file overwrite behavior.
+- Updated docs/tests/validators/source manifest for the completed hardening while preserving the private paper-only/no-provider/no-execution boundary.
 
 # Changelog
-
-## 2026-07-07 - Telegram final notification pretty HTML helper alignment
-
-- Ported the latest approved Hyperliquid Telegram helper behavior into `betting-win-surebet` with repo-specific wording only.
-- `.automation/lib/telegram_notify.sh` now builds HTML-formatted final notification cards with status icons, copyable code fields, UTC timestamp, next-action hint, and helper version marker `20260706.pretty_v2_html_cards`.
-- Added `TELEGRAM_NOTIFY_DRY_RUN=1` support for local formatting checks without contacting Telegram and made `telegram_notification_status.txt` writes replace stale duplicate status lines instead of appending.
-- Added Telegram helper tests for HTML formatting, dry-run status payloads, deterministic status icons, secret non-disclosure, and non-legacy key/value message bodies.
-- Updated automation docs and `.env.example` for the pretty HTML Telegram helper while preserving one-final-message-only behavior and non-failing delivery semantics.
-- No application source, strategy logic, provider integration, direct betting-win DB access, execution path, or pinned-bundle runtime behavior changed.
 
 ## 2026-07-06 - Documentation recheck: attachment-agnostic audit metadata
 

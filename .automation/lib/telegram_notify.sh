@@ -95,9 +95,10 @@ telegram_notify_status_icon() {
   normalized="$(printf '%s' "$status" | tr '[:lower:]' '[:upper:]')"
   case "$normalized" in
     TEST) printf '🧪' ;;
-    *NOT*READY*|*NO_GO*|*BLOCKED*|*FAILED*|*FAIL*|*ERROR*) printf '🛑' ;;
+    PAPER_EVALUATION_READY_PRIVATE_FIXTURE_ONLY_BLOCKED_ON_PINNED_BUNDLE|PAPER_AUTOPILOT_BLOCKED_ON_PINNED_BUNDLE|*BLOCKED_ON_PINNED_BUNDLE*) printf '🛑' ;;
     *TARGET_READY*|PAPER_EVALUATION_READY*|*GOAL_COMPLETE*|SUCCESS|PASS|OK|READY) printf '✅' ;;
     *CONTINUE_REQUIRED*|*CONTINUE*|RUNNING) printf '🔁' ;;
+    *NOT*READY*|*NO_GO*|*BLOCKED*|*FAILED*|*FAIL*|*ERROR*) printf '🛑' ;;
     *)
       if [ -n "$final_rc" ] && [ "$final_rc" != "0" ]; then
         printf '❌'
@@ -114,10 +115,11 @@ telegram_notify_status_text() {
   icon="$(telegram_notify_status_icon "$status" "$final_rc")"
   case "$normalized" in
     TEST) printf '%s TEST' "$icon" ;;
-    *FAILED*|*FAIL*|*ERROR*) printf '%s FAILED' "$icon" ;;
-    *NOT*READY*|*NO_GO*|*BLOCKED*) printf '%s BLOCKED' "$icon" ;;
+    PAPER_EVALUATION_READY_PRIVATE_FIXTURE_ONLY_BLOCKED_ON_PINNED_BUNDLE|PAPER_AUTOPILOT_BLOCKED_ON_PINNED_BUNDLE|*BLOCKED_ON_PINNED_BUNDLE*) printf '%s BLOCKED' "$icon" ;;
     *TARGET_READY*|PAPER_EVALUATION_READY*|*GOAL_COMPLETE*|SUCCESS|PASS|OK|READY) printf '%s SUCCESS' "$icon" ;;
     *CONTINUE_REQUIRED*|*CONTINUE*|RUNNING) printf '%s CONTINUE' "$icon" ;;
+    *NOT*READY*|*NO_GO*|*BLOCKED*) printf '%s BLOCKED' "$icon" ;;
+    *FAILED*|*FAIL*|*ERROR*) printf '%s FAILED' "$icon" ;;
     *) printf '%s %s' "$icon" "$status" ;;
   esac
 }
@@ -127,11 +129,11 @@ telegram_notify_next_action() {
   normalized="$(printf '%s' "$status" | tr '[:lower:]' '[:upper:]')"
   case "$normalized" in
     TEST) printf 'Telegram delivery and HTML formatting are verified.' ;;
-    *BLOCKED_ON_PINNED_BUNDLE*) printf 'Do not treat private fixture proof as upstream readiness. Provide or validate the pinned betting-win bundle only after the approved hardening gate.' ;;
-    *FAILED*|*FAIL*|*ERROR*) printf 'Review the failed controller output and artifact summary.' ;;
-    *NOT*READY*|*NO_GO*|*BLOCKED*) printf 'Review the latest artifact, blocker ledger, or handoff before continuing.' ;;
+    PAPER_EVALUATION_READY_PRIVATE_FIXTURE_ONLY_BLOCKED_ON_PINNED_BUNDLE|PAPER_AUTOPILOT_BLOCKED_ON_PINNED_BUNDLE|*BLOCKED_ON_PINNED_BUNDLE*) printf 'Do not treat private fixture proof as upstream readiness; provide a repo-local pinned betting-win export before real paper evaluation.' ;;
     *TARGET_READY*|PAPER_EVALUATION_READY*|*GOAL_COMPLETE*|SUCCESS|PASS|OK|READY) printf 'Archive the evidence and continue only with the approved next step.' ;;
     *CONTINUE_REQUIRED*|*CONTINUE*|RUNNING) printf 'Continue with the next controller step or scheduled evidence loop.' ;;
+    *NOT*READY*|*NO_GO*|*BLOCKED*) printf 'Review the latest artifact, blocker ledger, or handoff before continuing.' ;;
+    *FAILED*|*FAIL*|*ERROR*) printf 'Review the failed controller output and artifact summary.' ;;
     *)
       if [ -n "$final_rc" ] && [ "$final_rc" != "0" ]; then
         printf 'Review the failed controller output and artifact summary.'

@@ -14,6 +14,7 @@ ROOT_CONTROLLERS = [
     ROOT / 'run-autonomous-implementation.sh',
     ROOT / 'run-autonomous-bugfix.sh',
     ROOT / 'run-paper-evaluation.sh',
+    ROOT / 'run-paper-autopilot.sh',
 ]
 
 def fail(message: str) -> None:
@@ -52,7 +53,7 @@ def main() -> None:
         command = read(command_path)
         reject_nvm_source(command_path, command)
         if command_path.name == 'run-sure-paper-mode-autonomous.sh':
-            for marker in ['run-paper-evaluation.sh', '--keep-monitoring-when-ready', '--model cli-default', '--fallback-model none']:
+            for marker in ['run-paper-autopilot.sh', '--paper-duration 72h', '--max-same-handoff', '--model cli-default', '--fallback-model none']:
                 if marker not in command:
                     fail(f'{command_path.relative_to(ROOT)} missing paper compatibility marker: {marker}')
         if command_path.name == 'run-pinned-interface-smoke.sh':

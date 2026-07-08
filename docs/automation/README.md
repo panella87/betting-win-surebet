@@ -26,16 +26,14 @@ Before launching long controllers, activate the repo runtime explicitly:
 . "$HOME/.nvm/nvm.sh" && nvm use 20
 ```
 
-Protected automation files are read-only during normal implementation, paper evaluation, and bug-audit runs. When the explicit task is automation maintenance, run the implementation controller with `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` and keep the exception limited to the named automation files.
+Protected automation files are read-only during normal implementation, paper evaluation, and bug-audit runs. Use `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` only when Federico explicitly approves bounded automation maintenance that touches protected files.
 
 `run-autonomous-implementation.sh`, `run-autonomous-bugfix.sh`, and
 `run-paper-evaluation.sh` are standardized with canonical flags, fail-closed
 status/artifact checks, root artifacts refresh, and
-`.automation/lib/telegram_notify.sh` final notifications. The paper controller is
+`.automation/lib/telegram_notify.sh` final notifications. See `docs/automation/telegram-notifications.md` for the HTML-card contract and dry-run test mode. The paper controller is
 adapted for this no-service repo: it runs private fixture smoke and never starts
-or stops services. The pinned-bundle branch now shell-quotes operator-provided
-`SUREBET_PINNED_BUNDLE` paths before `bash -lc` execution and validates
-`SUREBET_REQUIRE_PINNED_BUNDLE` as strict `0` or `1`.
+or stops services. The pinned-bundle branch may be used only after Federico provides a repo-local pinned bundle; the paper controller shell-quotes that path and strictly validates `SUREBET_REQUIRE_PINNED_BUNDLE`.
 
 `update_git.sh` defaults to `--pull` and uses `git pull --ff-only --autostash`. It
 supports `--acp` as shorthand for add/commit/push, reads `GITHUB_TOKEN` from the
@@ -68,15 +66,15 @@ stops nothing because `betting-win-surebet` has no long-running service in the
 current private paper-only phase.
 
 `.automation/lib/telegram_notify.sh` reads `TELEGRAM_BOT_TOKEN` and
-`TELEGRAM_CHAT_ID` from environment first, then `.env`, sends one final
-HTML-formatted message only, never prints the token, and does not fail a
-controller if delivery fails. Disable it with `TELEGRAM_NOTIFY=0`. Use
-`TELEGRAM_NOTIFY_DRY_RUN=1` for local formatting checks; see
-`docs/automation/telegram-notifications.md`.
+`TELEGRAM_CHAT_ID` from environment first, then `.env`, sends one final message
+only, never prints the token, and does not fail a controller if delivery fails.
+Disable it with `TELEGRAM_NOTIFY=0`.
 
 Boundaries remain active: no provider connections, no provider SDKs/URLs, no
 wallets/signers/orders, no direct `betting-win` DB access, no public reports, no
 profitability claims, and no execution-readiness claims.
 
 
-Telegram status note: the shared helper uses Hyperliquid's pretty HTML card format, adapted for this repo so `PAPER_EVALUATION_READY_PRIVATE_FIXTURE_ONLY_BLOCKED_ON_PINNED_BUNDLE` is shown as blocked instead of full success.
+## Paper autopilot
+
+`run-paper-autopilot.sh` is the canonical unattended no-service parent supervisor for this repo. It is a protected automation file. Manual `run-paper-evaluation.sh` remains available for direct private fixture or pinned-bundle checks, but unattended paper/implementation handoff workflows should use the autopilot.

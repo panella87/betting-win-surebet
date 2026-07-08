@@ -1,6 +1,6 @@
 {
   "name": "betting-win-surebet",
-  "version": "0.0.0-private-sure-002b-paper-evaluation-standardized",
+  "version": "0.0.0-private-sure-002b-paper-autopilot-standardized",
   "private": true,
   "type": "module",
   "description": "Dedicated surebet / complete-set strategy repo consuming betting-win provider truth; current implementation is private paper-only.",
@@ -27,7 +27,8 @@
     "autonomous:bugfix": "bash run-autonomous-bugfix.sh",
     "paper:evaluation": "bash run-paper-evaluation.sh",
     "bugfix": "bash run-autonomous-bugfix.sh",
-    "automation:status": "bash run-autonomous-implementation.sh --status && bash run-paper-evaluation.sh --status && bash run-autonomous-bugfix.sh --status"
+    "automation:status": "bash run-autonomous-implementation.sh --status && bash run-paper-evaluation.sh --status && bash run-paper-autopilot.sh --status && bash run-autonomous-bugfix.sh --status",
+    "paper:autopilot": "bash run-paper-autopilot.sh"
   },
   "devDependencies": {
     "@types/node": "20.12.11",

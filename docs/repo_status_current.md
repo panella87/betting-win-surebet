@@ -4,7 +4,7 @@
 repo=betting-win-surebet
 current_task=SURE-002B_PRIVATE_PAPER_MODE_INTAKE
 current_task_status=complete_repo_local_private_paper_mode_backlog_blocked_on_pinned_interface
-next_allowed_task=wait for Federico's pinned betting-win contract/export interface before real upstream evaluation; otherwise repair only concrete repo-local validation/tooling defects
+next_allowed_task=wait_for_federico_pinned_betting_win_contract_export_interface_before_real_upstream_evaluation_or_continue_with_approved_autopilot_alignment
 repo_role=surebet_strategy_execution_repo
 strategy_family=surebet_complete_set_only
 provider_truth_owner=betting-win
@@ -50,7 +50,7 @@ Canonical daily entrypoints are root scripts, not historical phase wrappers:
 cd ~/app_testing/betting-win-surebet && . "$HOME/.nvm/nvm.sh" && nvm use 20 && bash ./run-paper-evaluation.sh --duration 72h --interval 5m --adaptive --keep-monitoring-when-ready --model cli-default --fallback-model none
 ```
 
-After the same parent-shell Node activation, use `bash ./run-autonomous-implementation.sh --duration 72h --model cli-default --fallback-model none` for ordinary repo-local validation/tooling/source defects. Use `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` only for future explicit automation-maintenance tasks that are approved to touch protected files. Use `bash ./run-autonomous-bugfix.sh --duration 72h --model cli-default --fallback-model none --handover-autonomous-implementation` when the task is source bug audit and handoff.
+For ordinary repo-local validation/tooling/source defects, use `bash ./run-autonomous-implementation.sh --duration 72h --model cli-default --fallback-model none` after parent-shell Node activation. Use `bash ./run-autonomous-bugfix.sh --duration 72h --model cli-default --fallback-model none --handover-autonomous-implementation` when the task is source bug audit and handoff. Use `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` only for a newly approved automation-maintenance task touching protected root automation files.
 
 
 ```text
@@ -120,8 +120,8 @@ root_artifacts_zip=required_before_run_script_exit
 stop_autonomous_run_helper=removed
 ```
 
-The current safe paper command, after parent-shell Node activation, is
-`./run-paper-evaluation.sh --duration 72h --interval 5m --adaptive --keep-monitoring-when-ready --model cli-default --fallback-model none`. It runs private fixture smoke by default and can run repo-local pinned-bundle intake only when `SUREBET_PINNED_BUNDLE` is explicitly provided. Real upstream private paper evaluation remains blocked until Federico provides the pinned `betting-win` bundle/interface.
+For ordinary source implementation, omit `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`; use it only for a newly approved automation-maintenance task touching protected root automation files. The current safe paper command, after parent-shell Node activation, is
+`./run-paper-evaluation.sh --duration 72h --interval 5m --adaptive --keep-monitoring-when-ready --model cli-default --fallback-model none`. It is limited to private fixture smoke unless Federico provides a repo-local pinned `betting-win` bundle. The pinned-bundle branch is now shell-quoted and strict about `SUREBET_REQUIRE_PINNED_BUNDLE`, but real upstream private paper evaluation remains blocked until Federico provides the pinned bundle.
 
 
 ## Automation helper standardization
@@ -148,3 +148,16 @@ paper_controller_final_exit_status=actual_process_status
 ```
 
 Controller-created runtime locks and handoff files are operational state, not source authority. `SOURCE_MANIFEST.json` validation and regeneration ignore `.automation/locks/`, `.automation/corrupt/`, and exact paper/bugfix/implementation handoff files while still tracking source-owned files such as `.automation/README.md` and `.automation/lib/*.sh`. `run-paper-evaluation.sh` final summaries and Telegram notifications must report the actual process exit code.
+
+
+## Paper autopilot
+
+run_paper_autopilot=standardized_no_service_parent_supervisor
+
+Default unattended command:
+
+```bash
+bash ./run-paper-autopilot.sh --duration 7d --paper-duration 72h --implementation-duration 72h --interval 5m --adaptive --max-rounds 6 --max-same-handoff 2 --model cli-default --fallback-model none
+```
+
+The controller is no-service/private-paper only. Missing pinned bundle is an external-input blocker, not a source implementation task.

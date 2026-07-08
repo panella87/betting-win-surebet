@@ -55,10 +55,21 @@ Provide Federico's pinned `betting-win` contract/export interface before real up
 
 `run-paper-evaluation.sh` runs the local private fixture paper path in the
 current gate and can run repo-local pinned-bundle intake only when
-`SUREBET_PINNED_BUNDLE` is explicitly provided. It now shell-quotes
+`SUREBET_PINNED_BUNDLE` is explicitly provided. It shell-quotes
 operator-provided bundle paths and validates `SUREBET_REQUIRE_PINNED_BUNDLE` as
-strict `0` or `1`, but it is still not real upstream evidence until Federico
-provides the pinned `betting-win` bundle. All `run-*` scripts write root
-`artifacts.zip` before stopping. Historical
+strict `0` or `1`, but it is still not real upstream acceptance or live evidence
+until Federico provides the pinned `betting-win` bundle. All `run-*` scripts
+write root `artifacts.zip` before stopping. Historical
 `commands/run-sure-*` wrappers are compatibility wrappers only; active
 docs should point operators to the root scripts above.
+
+
+## Unattended paper autopilot
+
+After activating Node 20 in the parent shell, run:
+
+```bash
+bash ./run-paper-autopilot.sh --duration 7d --paper-duration 72h --implementation-duration 72h --interval 5m --adaptive --max-rounds 6 --max-same-handoff 2 --model cli-default --fallback-model none
+```
+
+This is no-service/private-paper only.

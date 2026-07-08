@@ -103,7 +103,7 @@ Compatibility wrappers under `commands/run-sure-*` still exist for old muscle me
 
 The repository must fail closed if it contains provider SDK/client imports, provider URLs, wallet/signer/order/transaction paths, direct `betting-win` database access, `core.*` migrations, manually vendored generated contracts, malformed autonomous cycle status, nonzero Codex exit, or failed post-cycle validation.
 
-Federico asked for the maximum safe local implementation possible, and the retained SURE-002A local backlog in `docs/015_local_engine_implementation_backlog.md` is now exhausted. Do not invent more local engine work. The next product step requires Federico's pinned `betting-win` contract/export interface. The paper controller now shell-quotes operator-provided pinned-bundle paths before `bash -lc` execution and validates `SUREBET_REQUIRE_PINNED_BUNDLE` as strict `0` or `1`; autonomous runs should now repair only concrete repo-local validation/tooling defects or stop with `AUTONOMOUS_GOAL_COMPLETE=yes`.
+Federico asked for the maximum safe local implementation possible, and the retained SURE-002A and SURE-002B local backlogs are now exhausted. The paper-controller pinned-bundle shell-command hardening is implemented. Do not invent more local engine work. The next product step requires Federico's repo-local pinned `betting-win` contract/export interface; otherwise autonomous runs should repair only concrete repo-local validation/tooling defects or stop with `AUTONOMOUS_GOAL_COMPLETE=yes`.
 
 
 ## Private paper-mode continuation
@@ -120,7 +120,7 @@ docs/018_private_paper_mode_runbook.md
 
 This phase is still private and paper-only. It accepts only repo-local JSON bundles, writes only under `artifacts/private-paper-mode/`, and keeps `accepted=false`. The freeze gate is: `npm run validate` passes, local fixture smoke passes, and real upstream evaluation still requires Federico's pinned bundle. Provider connections, execution, public reports, profitability claims, and live-readiness claims remain prohibited.
 
-The repo-local private paper-mode backlog is complete. Real pinned-bundle evaluation is still blocked on Federico's repo-local pinned `betting-win` bundle/interface, but the controller-side command hardening is complete: operator-provided bundle paths are shell-quoted before `bash -lc` execution and `SUREBET_REQUIRE_PINNED_BUNDLE` fails closed unless it is exactly `0` or `1`. Generic autonomous feature runs should still stop with `AUTONOMOUS_GOAL_COMPLETE=yes` unless a concrete repo-local validation/tooling defect is confirmed.
+The repo-local private paper-mode backlog is complete, and the paper controller now quotes pinned-bundle paths before executing shell commands and validates `SUREBET_REQUIRE_PINNED_BUNDLE` as strict `0` or `1`. Generic autonomous feature runs should still stop with `AUTONOMOUS_GOAL_COMPLETE=yes` unless a concrete repo-local validation/tooling defect is confirmed. Real upstream evaluation still requires Federico's repo-local pinned `betting-win` bundle.
 
 ## Standard automation commands
 
@@ -143,11 +143,7 @@ Canonical root controller commands, after activating Node 20 in the parent shell
 ```
 
 `run-paper-evaluation.sh` replaces any `run-paper-evaluation-12h.sh` naming. It is
-configured for repo-local private fixture evaluation and optional repo-local
-pinned-bundle intake when `SUREBET_PINNED_BUNDLE` is explicitly provided. It
-must not be used as real upstream acceptance evidence until Federico provides
-the pinned `betting-win` bundle. All `run-*` scripts write root `artifacts.zip`
-before exit.
+configured for repo-local private fixture evaluation. Its pinned-bundle branch is shell-quoted and strict about `SUREBET_REQUIRE_PINNED_BUNDLE`, but it must not be used as real upstream acceptance evidence until Federico provides the repo-local pinned `betting-win` bundle. All `run-*` scripts write root `artifacts.zip` before exit.
 Protected automation files are documented under `docs/automation/` and must not be
 changed by normal autonomous work.
 
@@ -176,3 +172,16 @@ paper_controller_final_summary_exit_status=real_process_exit_status
 ```
 
 Controller runtime locks and handoff files under `.automation/` are ignored by the source manifest and Git, but source-owned `.automation` helpers remain tracked and validated.
+
+
+## Paper autopilot
+
+`run-paper-autopilot.sh` is the canonical unattended parent workflow for this no-service repo. It runs `run-paper-evaluation.sh`, follows only repo-local implementation handoffs through `run-autonomous-implementation.sh --handover-paper-mode`, then returns to private paper evaluation only after validated source/docs/test changes.
+
+Canonical command after parent-shell Node 20 activation:
+
+```bash
+bash ./run-paper-autopilot.sh --duration 7d --paper-duration 72h --implementation-duration 72h --interval 5m --adaptive --max-rounds 6 --max-same-handoff 2 --model cli-default --fallback-model none
+```
+
+Private fixture success remains blocked on Federico's pinned `betting-win` bundle for real upstream evaluation.

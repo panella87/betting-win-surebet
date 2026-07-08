@@ -28,24 +28,30 @@ AUTOMATION_ALLOW_PROTECTED_CHANGES="${AUTOMATION_ALLOW_PROTECTED_CHANGES:-0}"
 AUTOMATION_PROTECTED_FILES=(
   "zip_codebase.sh" "pull_artifacts_and_zip_codebase.sh" "update_git.sh"
   "check_progress.sh" "watch_progress.sh" "open_log.sh" "start.sh" "stop.sh"
-  "run-autonomous-implementation.sh" "run-paper-evaluation.sh" "run-autonomous-bugfix.sh"
+  "run-autonomous-implementation.sh" "run-paper-evaluation.sh" "run-paper-autopilot.sh" "run-autonomous-bugfix.sh"
   "automation.config.sh" ".automation/lib/run_common.sh" ".automation/lib/telegram_notify.sh"
   "docs/automation/PROTECTED_AUTOMATION_FILES.md"
 )
 AUTOMATION_VALIDATION_COMMANDS=(
-  "bash -n start.sh stop.sh check_progress.sh watch_progress.sh open_log.sh run-autonomous-implementation.sh run-paper-evaluation.sh run-autonomous-bugfix.sh zip_codebase.sh pull_artifacts_and_zip_codebase.sh update_git.sh .automation/lib/run_common.sh .automation/lib/telegram_notify.sh"
+  "bash -n start.sh stop.sh check_progress.sh watch_progress.sh open_log.sh run-autonomous-implementation.sh run-paper-evaluation.sh run-paper-autopilot.sh run-autonomous-bugfix.sh zip_codebase.sh pull_artifacts_and_zip_codebase.sh update_git.sh .automation/lib/run_common.sh .automation/lib/telegram_notify.sh"
   "npm run validate"
 )
 AUTOMATION_IMPLEMENTATION_VALIDATION_COMMANDS=("npm run validate")
 AUTOMATION_BUGFIX_VALIDATION_COMMANDS=("npm run validate")
 PAPER_SUPPORTED="${PAPER_SUPPORTED:-1}"
 AUTOMATION_PAPER_SUPPORTED=1
-PAPER_COMMAND='stamp="$(date -u +%Y%m%dT%H%M%SZ)" && node cli.js local-report --bundle tests/fixtures/private-paper-mode-smoke/accepted-local-bundle.json --output "artifacts/private-paper-mode/standard-paper-evaluation-${stamp}.report.json"'
-AUTOMATION_PAPER_COMMAND="$PAPER_COMMAND"
-AUTOMATION_PAPER_COMMAND_MODE="oneshot"
+# Manual private paper evaluator. It is no-service: fixture/pinned-bundle checks only.
+AUTOMATION_PAPER_EVALUATION_COMMAND="bash ./run-paper-evaluation.sh --duration 72h --interval 5m --adaptive --model cli-default --fallback-model none"
+# Default unattended paper workflow. This parent supervisor alternates paper evaluation and bounded implementation handoffs.
+AUTOMATION_PAPER_AUTOPILOT_COMMAND="bash ./run-paper-autopilot.sh --duration 7d --paper-duration 72h --implementation-duration 72h --interval 5m --adaptive --max-rounds 6 --max-same-handoff 2 --model cli-default --fallback-model none"
+PAPER_COMMAND="$AUTOMATION_PAPER_AUTOPILOT_COMMAND"
+AUTOMATION_PAPER_COMMAND="$AUTOMATION_PAPER_AUTOPILOT_COMMAND"
+AUTOMATION_PAPER_COMMAND_MODE="controller"
 PAPER_COMMAND_TIMEOUT="${PAPER_COMMAND_TIMEOUT:-20m}"
 PAPER_DEFAULT_INTERVAL="${PAPER_DEFAULT_INTERVAL:-5m}"
 AUTOMATION_PAPER_INTERVAL="$PAPER_DEFAULT_INTERVAL"
+AUTOMATION_PAPER_MIN_ADAPTIVE_INTERVAL_SECONDS=300
+AUTOMATION_PAPER_MAX_ADAPTIVE_INTERVAL_SECONDS=3600
 PAPER_BUGFIX_DURATION="${PAPER_BUGFIX_DURATION:-6h}"
 PAPER_MAX_FIX_ATTEMPTS_PER_SIGNATURE="${PAPER_MAX_FIX_ATTEMPTS_PER_SIGNATURE:-3}"
 AUTOMATION_PAPER_MAX_CYCLES="${AUTOMATION_PAPER_MAX_CYCLES:-1}"

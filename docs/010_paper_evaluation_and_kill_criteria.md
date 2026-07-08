@@ -12,10 +12,11 @@ claims. Private paper mode and future surebet backtesting belong in this repo; l
 
 `run-paper-evaluation.sh` is the canonical paper supervisor. In the current repo
 state it is configured for local private fixture smoke and writes private
-artifacts under `artifacts/private-paper-mode/`. It now shell-quotes
-operator-provided pinned-bundle paths before `bash -lc` execution and validates
-`SUREBET_REQUIRE_PINNED_BUNDLE` as strict `0` or `1`. It does not start or stop
-services and does not call `run-autonomous-bugfix.sh` as an integrated repair path. When source work is
+artifacts under `artifacts/private-paper-mode/`. The pinned-bundle branch is
+available only when Federico provides a repo-local pinned `betting-win` bundle;
+the paper controller shell-quotes the pinned path and strictly validates the
+pinned-bundle requirement flag. It does not start or stop services and does not
+call `run-autonomous-bugfix.sh` as an integrated repair path. When source work is
 needed, it writes a paper-mode-to-autonomous-implementation handoff for the root
 implementation controller.
 

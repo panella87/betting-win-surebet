@@ -118,7 +118,7 @@ def main() -> None:
     require(master_plan, 'SURE-002B_PRIVATE_PAPER_MODE_INTAKE', 'docs/MASTER_PLAN.md')
     require(master_plan, 'private_paper_mode=repo_local_complete', 'docs/MASTER_PLAN.md')
 
-    for marker in ['run-paper-evaluation.sh', '--duration 72h', '--interval 5m', '--keep-monitoring-when-ready']:
+    for marker in ['run-paper-autopilot.sh', '--paper-duration 72h', '--interval 5m', '--max-same-handoff']:
         require(command, marker, 'commands/run-sure-paper-mode-autonomous.sh')
 
     for marker in ['SUREBET_PINNED_BUNDLE', 'remote URLs are prohibited', 'artifacts/private-paper-mode', 'node cli.js local-report']:

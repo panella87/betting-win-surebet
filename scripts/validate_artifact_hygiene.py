@@ -21,6 +21,7 @@ FORBIDDEN_EXACT = {
     'secrets.json',
 }
 LOCAL_IGNORED_EXACT = {'.env'}
+ZIP_TEMP_PATTERN_LENGTH = 8
 ARCHIVE_SUFFIXES = ('.tar.gz', '.zip', '.tar', '.tgz')
 LOG_SUFFIXES = (
     '.log',
@@ -81,12 +82,21 @@ def gitignore_has_exact_env_rule() -> bool:
     return any(line in {'.env', '/.env'} for line in gitignore_lines())
 
 
+def is_interrupted_zip_temp(rel: str) -> bool:
+    name = Path(rel).name
+    return '/' not in rel and len(name) == ZIP_TEMP_PATTERN_LENGTH and name.startswith('zi') and name[2:].isalnum()
+
+
 def archive_suffix_for(rel: str) -> str | None:
     lowered = rel.lower()
     for suffix in ARCHIVE_SUFFIXES:
         if lowered.endswith(suffix):
             return suffix
     return None
+
+
+def gitignore_has_zip_temp_rule() -> bool:
+    return any(line in {'zi??????', '/zi??????'} for line in gitignore_lines())
 
 
 def gitignore_has_archive_rule(rel: str) -> bool:
@@ -107,6 +117,8 @@ def git_check_ignore(rel: str) -> bool:
     if not (ROOT / '.git').exists():
         if rel == '.env':
             return gitignore_has_exact_env_rule()
+        if is_interrupted_zip_temp(rel):
+            return gitignore_has_zip_temp_rule()
         return gitignore_has_archive_rule(rel)
     try:
         result = subprocess.run(
@@ -119,6 +131,8 @@ def git_check_ignore(rel: str) -> bool:
     except FileNotFoundError:
         if rel == '.env':
             return gitignore_has_exact_env_rule()
+        if is_interrupted_zip_temp(rel):
+            return gitignore_has_zip_temp_rule()
         return gitignore_has_archive_rule(rel)
     return result.returncode == 0
 
@@ -143,6 +157,9 @@ def check_local_ignored_file(rel: str) -> None:
     if rel == '.env':
         if not gitignore_has_exact_env_rule():
             fail(f'{rel} may exist locally only when .gitignore contains an explicit .env rule')
+    elif is_interrupted_zip_temp(rel):
+        if not gitignore_has_zip_temp_rule():
+            fail(f'{rel} may exist locally only when .gitignore contains zi??????')
     elif archive_suffix_for(rel) is not None:
         if '/' in rel:
             fail(f'local archive is allowed only at repo root when ignored by Git: {rel}')
@@ -162,6 +179,9 @@ def check_source_tree() -> None:
     for path in iter_source_files():
         rel = path.relative_to(ROOT).as_posix()
         if rel in LOCAL_IGNORED_EXACT:
+            check_local_ignored_file(rel)
+            continue
+        if is_interrupted_zip_temp(rel):
             check_local_ignored_file(rel)
             continue
         if archive_suffix_for(rel) is not None and '/' not in rel:
@@ -186,6 +206,8 @@ def check_zip(zip_path: Path) -> None:
                 fail(f'forbidden root in archive: {name}')
             if name in FORBIDDEN_EXACT or name in LOCAL_IGNORED_EXACT:
                 fail(f'forbidden exact path in archive: {name}')
+            if is_interrupted_zip_temp(Path(name).name):
+                fail(f'forbidden interrupted zip temp file in archive: {name}')
             if name.endswith(FORBIDDEN_SUFFIXES):
                 fail(f'forbidden generated file in archive: {name}')
 

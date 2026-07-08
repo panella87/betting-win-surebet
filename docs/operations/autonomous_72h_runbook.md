@@ -16,7 +16,7 @@ npm run validate
 cd ~/app_testing/betting-win-surebet && . "$HOME/.nvm/nvm.sh" && nvm use 20 && PYTHONDONTWRITEBYTECODE=1 bash run-autonomous-implementation.sh --duration 72h --model cli-default --fallback-model none --cycle-timeout 2h --validation-timeout 20m
 ```
 
-Prefix the implementation command with `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` only for explicit approved automation-maintenance tasks touching protected root controllers. Omit that environment variable for normal source implementation.
+Use `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` only for a newly approved automation-maintenance task touching protected root automation files. Omit that environment variable for normal source implementation.
 
 Use `--model cli-default --fallback-model none` unless Federico explicitly asks for another model. Do not use autonomous runs to invent provider integrations, predictive/value-betting work, shared account coordination, or live execution. Surebet backtest/paper/live-gate changes must follow `docs/019_three_repo_surebet_strategy_boundary.md`.
 
@@ -68,3 +68,12 @@ Use canonical root scripts:
 `run-paper-evaluation.sh` replaces `run-paper-evaluation-12h.sh`. There is no
 `stop-autonomous-run.sh`; use each controller's `--status` and `--force-unlock`
 only when needed. All `run-*` scripts create root `artifacts.zip` before exit.
+
+
+## Paper autopilot command
+
+For unattended paper/implementation handoff supervision, run after Node 20 activation:
+
+```bash
+bash ./run-paper-autopilot.sh --duration 7d --paper-duration 72h --implementation-duration 72h --interval 5m --adaptive --max-rounds 6 --max-same-handoff 2 --model cli-default --fallback-model none
+```

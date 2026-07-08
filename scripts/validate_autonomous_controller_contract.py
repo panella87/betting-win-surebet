@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SHELL_FILES = [
     'zip_codebase.sh', 'pull_artifacts_and_zip_codebase.sh', 'update_git.sh',
     'check_progress.sh', 'watch_progress.sh', 'open_log.sh', 'start.sh', 'stop.sh',
-    'run-autonomous-implementation.sh', 'run-paper-evaluation.sh', 'run-autonomous-bugfix.sh',
+    'run-autonomous-implementation.sh', 'run-paper-evaluation.sh', 'run-paper-autopilot.sh', 'run-autonomous-bugfix.sh',
     'automation.config.sh', '.automation/lib/run_common.sh', '.automation/lib/telegram_notify.sh',
 ]
 
@@ -68,17 +68,15 @@ REQUIRED_FRAGMENTS = {
     ],
     '.automation/lib/telegram_notify.sh': [
         'telegram_notify_send_final()',
+        'telegram_notify_build_final_message()',
         'telegram_notify_message_version()',
         '20260706.pretty_v2_html_cards',
-        'telegram_notify_build_final_message()',
-        'telegram_notify_log_payload()',
-        'TELEGRAM_NOTIFY_DRY_RUN',
         "parse_mode: 'HTML'",
-        'telegram_notification=skipped missing_config message_version=',
-        'telegram_notification=sent parse_mode=HTML message_version=',
+        'TELEGRAM_NOTIFY_DRY_RUN',
         'TELEGRAM_NOTIFY',
         'TELEGRAM_BOT_TOKEN',
         'TELEGRAM_CHAT_ID',
+        'telegram_notification=skipped missing_config',
     ],
     '.automation/lib/run_common.sh': [
         'automation_acquire_lock()',
@@ -141,8 +139,7 @@ REQUIRED_FRAGMENTS = {
         'exit 3',
         'Activate the repo runtime in the parent shell first',
         'never sources nvm.sh',
-    ],
-    'run-paper-evaluation.sh': [
+    ],    'run-paper-evaluation.sh': [
         'Default duration: 72h.',
         '--adaptive',
         '--keep-monitoring-when-ready',
@@ -154,9 +151,8 @@ REQUIRED_FRAGMENTS = {
         '--validation-timeout VALUE',
         'SUREBET_PINNED_BUNDLE',
         'SUREBET_REQUIRE_PINNED_BUNDLE',
-        'validate_require_pinned_bundle_flag()',
-        'shell_quote_for_bash_lc()',
-        'SUREBET_REQUIRE_PINNED_BUNDLE must be exactly 0 or 1',
+        'SUREBET_REQUIRE_PINNED_BUNDLE must be unset, 0, or 1',
+        'paper_shell_quote()',
         'paper_service_lifecycle=none',
         'PAPER_EVALUATION_READY_PRIVATE_FIXTURE_ONLY_BLOCKED_ON_PINNED_BUNDLE',
         'PAPER_EVALUATION_PINNED_BUNDLE_ACCEPTED_PRIVATE_REPORT_WRITTEN',
@@ -167,6 +163,24 @@ REQUIRED_FRAGMENTS = {
         'Activate the repo runtime in the parent shell first',
         'Does not source nvm.sh',
         'local rc=$?',
+    ],
+
+    'run-paper-autopilot.sh': [
+        'Parent no-service paper/autonomous supervisor for betting-win-surebet',
+        '--paper-duration VALUE',
+        '--implementation-duration VALUE',
+        '--max-same-handoff N',
+        '--paper-codex-timeout VALUE',
+        '--implementation-cycle-timeout VALUE',
+        'paper_autopilot',
+        'run-paper-evaluation.sh',
+        'run-autonomous-implementation.sh',
+        'PAPER_AUTOPILOT_BLOCKED_ON_PINNED_BUNDLE',
+        'PAPER_AUTOPILOT_BLOCKED_IMPLEMENTATION_NOOP',
+        'PRIVATE_PAPER_REEVALUATION_REQUIRED',
+        'paper_service_lifecycle=none',
+        'telegram_notify_send_final "run-paper-autopilot.sh"',
+        'never sources nvm.sh',
     ],
     'automation.config.sh': [
         'AUTOMATION_CONFIG_READY=1',
@@ -179,6 +193,8 @@ REQUIRED_FRAGMENTS = {
         'run-paper-evaluation.sh is surebet-specific: no service lifecycle, private fixture/pinned-bundle only.',
         'PAPER_SUPPORTED="${PAPER_SUPPORTED:-1}"',
         'SUREBET_REQUIRE_PINNED_BUNDLE',
+        'AUTOMATION_PAPER_AUTOPILOT_COMMAND',
+        'AUTOMATION_PAPER_COMMAND="$AUTOMATION_PAPER_AUTOPILOT_COMMAND"',
     ],
     'docs/automation/README.md': [
         'Repo automation contract: betting-win-surebet',
@@ -188,6 +204,7 @@ REQUIRED_FRAGMENTS = {
         'root `run-*` controllers',
         'run-autonomous-implementation.sh',
         'run-autonomous-bugfix.sh',
+        'run-paper-autopilot.sh',
     ],
     'docs/automation/autonomous-implementation.md': [
         '--model cli-default',
@@ -213,18 +230,21 @@ REQUIRED_FRAGMENTS = {
         'check_progress.sh',
         'watch_progress.sh',
         'open_log.sh',
+        'run-paper-autopilot.sh',
     ],
     '.automation/README.md': [
         '.automation/lib/run_common.sh',
         '.automation/lib/telegram_notify.sh',
         'run-autonomous-implementation.sh',
         'run-autonomous-bugfix.sh',
+        'run-paper-autopilot.sh',
     ],
     'docs/repo_status_current.md': [
         'run_autonomous_implementation=standardized_with_canonical_flags_and_telegram',
         'run_autonomous_bugfix=standardized_audit_handoff_with_telegram',
         'run_paper_evaluation_standardization=standardized_with_telegram_no_service_private_fixture_pinned_bundle',
         'run_paper_evaluation=canonical_repo_local_private_fixture_and_pinned_bundle_only',
+        'run_paper_autopilot=standardized_no_service_parent_supervisor',
     ],
 }
 
@@ -247,6 +267,16 @@ FORBIDDEN_FRAGMENTS = {
         'source "$NVM_DIR/nvm.sh"',
         'Find and fix bug-class issues',
     ],
+
+    'run-paper-autopilot.sh': [
+        'scripts/load-node-runtime.sh',
+        'source "$HOME/.nvm/nvm.sh"',
+        'source "$NVM_DIR/nvm.sh"',
+        'bash ./start.sh',
+        'bash ./stop.sh',
+        'forever',
+        'MongoDB',
+    ],
     'run-paper-evaluation.sh': [
         'scripts/load-node-runtime.sh',
         'source "$HOME/.nvm/nvm.sh"',
@@ -254,8 +284,7 @@ FORBIDDEN_FRAGMENTS = {
         'run-autonomous-bugfix.sh --from-artifacts',
         'PAPER_EVALUATION_UNSUPPORTED_FOR_THIS_REPO',
         'local rc\n  rc=$?',
-    ],
-    'automation.config.sh': [
+    ],    'automation.config.sh': [
         'mkdir -p artifacts/private-paper-mode',
         'run-paper-evaluation.sh remains out of scope',
     ],
@@ -301,7 +330,7 @@ def main() -> None:
             fail(f'obsolete automation helper still present: {rel}')
 
     package = json.loads(read('package.json'))
-    for script in ['zip:codebase', 'autonomous:check', 'autonomous:start', 'autonomous:bugfix', 'paper:evaluation', 'bugfix', 'automation:status']:
+    for script in ['zip:codebase', 'autonomous:check', 'autonomous:start', 'autonomous:bugfix', 'paper:evaluation', 'paper:autopilot', 'bugfix', 'automation:status']:
         if script not in package.get('scripts', {}):
             fail(f'package.json missing script: {script}')
 

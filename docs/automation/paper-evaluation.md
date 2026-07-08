@@ -76,13 +76,9 @@ write .automation/paper-mode-to-autonomous-implementation.env when source work i
 
 Pinned bundle mode status:
 
-The controller now shell-quotes operator-provided pinned-bundle paths before any
-`bash -lc` command construction and validates `SUREBET_REQUIRE_PINNED_BUNDLE` as
-strict `0` or `1`. Real upstream evaluation is still blocked because Federico's
-repo-local pinned `betting-win` export bundle is still required.
+The controller contains a pinned-bundle path. Operator-provided `SUREBET_PINNED_BUNDLE` values are shell-quoted before any `bash -lc` command construction, and `SUREBET_REQUIRE_PINNED_BUNDLE` is validated as strict `0` or `1`. Use a real pinned-bundle command only after Federico supplies a repo-local pinned `betting-win` export.
 
-Pinned-bundle command after Federico supplies a repo-local pinned `betting-win`
-export:
+Pinned-bundle command after Federico supplies a repo-local pinned `betting-win` export:
 
 ```bash
 . "$HOME/.nvm/nvm.sh" && nvm use 20
@@ -156,3 +152,8 @@ runtime locks and handoffs are operational state, not source authority
 A private fixture report is still not real upstream evidence. Real upstream private
 paper evaluation remains blocked until Federico supplies a pinned `betting-win`
 export bundle that passes `--pinned-intake`.
+
+
+## Paper autopilot integration
+
+`run-paper-evaluation.sh` may write `.automation/paper-mode-to-autonomous-implementation.env` only for repo-local source/controller defects. Missing pinned bundle must not create an implementation handoff. The parent `run-paper-autopilot.sh` consumes that handoff and launches implementation with `--handover-paper-mode`.

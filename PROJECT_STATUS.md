@@ -17,7 +17,7 @@ provider_connections=prohibited
 execution=prohibited
 first_lane=polymarket_standard_binary_complete_set_v0
 current_task=SURE-002B_PRIVATE_PAPER_MODE_INTAKE
-next_task=paper_controller_pinned_bundle_shell_hardening_then_wait_for_federico_pinned_betting_win_contract_export_interface_before_real_upstream_evaluation
+next_task=wait_for_federico_pinned_betting_win_contract_export_interface_before_real_upstream_evaluation
 ```
 
 Current state:
@@ -107,7 +107,7 @@ Use the canonical root controller after activating Node 20 in the parent shell:
 bash ./run-paper-evaluation.sh --duration 72h --interval 5m --adaptive --keep-monitoring-when-ready --model cli-default --fallback-model none
 ```
 
-for repo-local private fixture paper checks. After the same Node activation, use `AUTOMATION_ALLOW_PROTECTED_CHANGES=1 bash ./run-autonomous-implementation.sh --duration 72h --model cli-default --fallback-model none` for the confirmed paper-controller pinned-bundle shell-command hardening because it is explicit automation maintenance touching a protected root controller. For ordinary repo-local source defects, omit `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`. `commands/run-sure-*` wrappers are compatibility wrappers only. Use `commands/run-pinned-interface-smoke.sh` only when Federico provides a repo-local pinned `betting-win` export bundle, and do not treat pinned-bundle evaluation as ready until paper-controller pinned-bundle shell hardening is complete.
+for repo-local private fixture paper checks. The paper controller now shell-quotes pinned-bundle paths and strictly validates `SUREBET_REQUIRE_PINNED_BUNDLE`; for ordinary repo-local source defects, omit `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`. `commands/run-sure-*` wrappers are compatibility wrappers only. Use `commands/run-pinned-interface-smoke.sh` only when Federico provides a repo-local pinned `betting-win` export bundle, and do not treat pinned-bundle output as live readiness or profitability evidence.
 
 
 ## Legacy surebet import archive
@@ -136,7 +136,7 @@ root_artifacts_zip=required_before_run_script_exit
 stop_autonomous_run_helper=removed
 ```
 
-`run-autonomous-implementation.sh`, `run-autonomous-bugfix.sh`, and `run-paper-evaluation.sh` now use the standardized root-controller flag, artifact, exit-code, and Telegram final-notification contract. The paper controller is surebet-specific and no-service: it validates source, runs private fixture smoke, contains a pinned-bundle branch that must not be used with real operator input until shell hardening lands, and never starts/stops services or calls providers. The private paper-mode backlog remains complete; real upstream evaluation still requires Federico's pinned bundle.
+`run-autonomous-implementation.sh`, `run-autonomous-bugfix.sh`, and `run-paper-evaluation.sh` now use the standardized root-controller flag, artifact, exit-code, and Telegram final-notification contract. The paper controller is surebet-specific and no-service: it validates source, runs private fixture smoke, shell-quotes any repo-local pinned-bundle path before execution, strictly validates `SUREBET_REQUIRE_PINNED_BUNDLE`, and never starts/stops services or calls providers. The private paper-mode backlog remains complete; real upstream evaluation still requires Federico's pinned bundle.
 
 
 ## Automation helper standardization
@@ -151,3 +151,10 @@ run_autonomous_implementation=standardized_with_canonical_flags_and_telegram
 run_autonomous_bugfix=standardized_audit_handoff_with_telegram
 run_paper_evaluation_standardization=standardized_with_telegram_no_service_private_fixture_pinned_bundle
 ```
+
+
+## Autopilot status
+
+run_paper_autopilot=standardized_no_service_parent_supervisor
+
+`run-paper-autopilot.sh` is now the unattended parent workflow. It has no service lifecycle and only alternates private paper evaluation with bounded source implementation when `.automation/paper-mode-to-autonomous-implementation.env` exists.

@@ -12,19 +12,18 @@ test('standard automation root scripts and shared helpers are installed', () => 
   for (const rel of [
     'zip_codebase.sh','pull_artifacts_and_zip_codebase.sh','update_git.sh',
     'check_progress.sh','watch_progress.sh','open_log.sh','start.sh','stop.sh',
-    'run-autonomous-implementation.sh','run-paper-evaluation.sh','run-autonomous-bugfix.sh',
+    'run-autonomous-implementation.sh','run-paper-evaluation.sh','run-paper-autopilot.sh','run-autonomous-bugfix.sh',
     'automation.config.sh','.automation/lib/run_common.sh','.automation/lib/telegram_notify.sh','.automation/README.md',
   ]) {
     assert.equal(existsSync(join(REPO_ROOT, rel)), true, `${rel} should exist`);
   }
   assert.match(read('.automation/lib/run_common.sh'), /automation_acquire_lock\(\)/);
   assert.match(read('.automation/lib/run_common.sh'), /automation_require_cycle_artifacts\(\)/);
-  const telegram = read('.automation/lib/telegram_notify.sh');
-  assert.match(telegram, /telegram_notify_send_final\(\)/);
-  assert.match(telegram, /telegram_notify_build_final_message\(\)/);
-  assert.match(telegram, /20260706\.pretty_v2_html_cards/);
-  assert.match(telegram, /parse_mode: 'HTML'/);
-  assert.match(telegram, /TELEGRAM_NOTIFY_DRY_RUN/);
+  assert.match(read('.automation/lib/telegram_notify.sh'), /telegram_notify_send_final\(\)/);
+  assert.match(read('.automation/lib/telegram_notify.sh'), /telegram_notify_build_final_message\(\)/);
+  assert.match(read('.automation/lib/telegram_notify.sh'), /telegram_notify_message_version\(\)/);
+  assert.match(read('.automation/lib/telegram_notify.sh'), /20260706\.pretty_v2_html_cards/);
+  assert.match(read('.automation/lib/telegram_notify.sh'), /parse_mode: 'HTML'/);
 });
 
 test('daily git and packaging helpers match the standardized contract', () => {
@@ -52,6 +51,9 @@ test('progress, start, and stop helpers match the no-service artifact contract',
   assert.match(check, /autonomous_implementation_\*/);
   assert.match(check, /autonomous_bugfix_\*/);
   assert.match(check, /paper_evaluation_\*/);
+  assert.match(check, /paper_autopilot_\*/);
+  assert.match(check, /rounds\.tsv/);
+  assert.match(check, /child_result\.env/);
   assert.match(check, /final-summary\.md/);
   assert.match(check, /cycles\/cycle_/);
   assert.match(watch, /--fast/);
@@ -60,6 +62,8 @@ test('progress, start, and stop helpers match the no-service artifact contract',
   assert.match(open, /--controller/);
   assert.match(open, /--codex/);
   assert.match(open, /--paper/);
+  assert.match(open, /--implementation/);
+  assert.match(open, /--round/);
   assert.match(start, /node scripts\/restore-required-executable-bits\.js/);
   assert.match(start, /npm run validate/);
   assert.doesNotMatch(start, /scripts\/load-node-runtime\.sh/);
@@ -103,9 +107,7 @@ test('paper evaluation controller exposes canonical no-service private fixture a
   for (const marker of [
     '--adaptive','--keep-monitoring-when-ready','--model MODEL','--fallback-model MODEL','--repo-dir PATH',
     '--check-only','--codex-phase-timeout VALUE','--validation-timeout VALUE','SUREBET_PINNED_BUNDLE',
-    'SUREBET_REQUIRE_PINNED_BUNDLE','paper_service_lifecycle=none',
-    'validate_require_pinned_bundle_flag()','shell_quote_for_bash_lc()',
-    "SUREBET_REQUIRE_PINNED_BUNDLE must be exactly 0 or 1",
+    'SUREBET_REQUIRE_PINNED_BUNDLE','SUREBET_REQUIRE_PINNED_BUNDLE must be unset, 0, or 1','paper_shell_quote()','paper_service_lifecycle=none',
     'PAPER_EVALUATION_READY_PRIVATE_FIXTURE_ONLY_BLOCKED_ON_PINNED_BUNDLE',
     'PAPER_EVALUATION_PINNED_BUNDLE_ACCEPTED_PRIVATE_REPORT_WRITTEN',
     'PAPER_EVALUATION_BLOCKED_INVALID_PINNED_BUNDLE','paper-mode-to-autonomous-implementation.env',
@@ -115,7 +117,35 @@ test('paper evaluation controller exposes canonical no-service private fixture a
   assert.doesNotMatch(script, /finish\(\) \{\n\s*local rc\n\s*rc=\$\?/);
   assert.doesNotMatch(script, /scripts\/load-node-runtime\.sh/);
   assert.doesNotMatch(script, /run-autonomous-bugfix\.sh --from-artifacts/);
+  assert.doesNotMatch(script, /--bundle \$\{PINNED_BUNDLE_PATH\}/);
+  assert.doesNotMatch(script, /--bundle \$\{LOCAL_FIXTURE_BUNDLE\}/);
   assert.doesNotMatch(script, /PAPER_EVALUATION_UNSUPPORTED_FOR_THIS_REPO/);
+});
+
+
+test('paper autopilot controller exposes no-service parent supervisor contract', () => {
+  const script = read('run-paper-autopilot.sh');
+  for (const marker of [
+    'Parent no-service paper/autonomous supervisor for betting-win-surebet',
+    '--paper-duration VALUE',
+    '--implementation-duration VALUE',
+    '--max-same-handoff N',
+    '--paper-codex-timeout VALUE',
+    '--implementation-cycle-timeout VALUE',
+    'paper_autopilot',
+    'run-paper-evaluation.sh',
+    'run-autonomous-implementation.sh',
+    'PAPER_AUTOPILOT_BLOCKED_ON_PINNED_BUNDLE',
+    'PAPER_AUTOPILOT_BLOCKED_IMPLEMENTATION_NOOP',
+    'PRIVATE_PAPER_REEVALUATION_REQUIRED',
+    'paper_service_lifecycle=none',
+    'telegram_notify_send_final "run-paper-autopilot.sh"',
+    'never sources nvm.sh',
+  ]) assertContains(script, marker);
+  assert.doesNotMatch(script, /scripts\/load-node-runtime\.sh/);
+  assert.doesNotMatch(script, /bash \.\/start\.sh/);
+  assert.doesNotMatch(script, /bash \.\/stop\.sh/);
+  assert.doesNotMatch(script, /forever|MongoDB/);
 });
 
 test('paper smoke and compatibility wrappers do not pre-create artifact outputs', () => {
@@ -124,12 +154,14 @@ test('paper smoke and compatibility wrappers do not pre-create artifact outputs'
   const paperWrapper = read('commands/run-sure-paper-mode-autonomous.sh');
   assertContains(config, 'run-paper-evaluation.sh is surebet-specific: no service lifecycle, private fixture/pinned-bundle only.');
   assertContains(config, 'SUREBET_REQUIRE_PINNED_BUNDLE');
+  assertContains(config, 'AUTOMATION_PAPER_AUTOPILOT_COMMAND');
+  assertContains(config, 'AUTOMATION_PAPER_COMMAND="$AUTOMATION_PAPER_AUTOPILOT_COMMAND"');
   assert.doesNotMatch(config, /mkdir -p artifacts\/private-paper-mode/);
   assert.doesNotMatch(pinnedSmoke, /scripts\/load-node-runtime\.sh/);
   assert.doesNotMatch(pinnedSmoke, /mkdir -p "\$out_dir"/);
   assertContains(pinnedSmoke, 'node cli.js local-report');
-  assertContains(paperWrapper, 'run-paper-evaluation.sh');
-  assertContains(paperWrapper, '--keep-monitoring-when-ready');
+  assertContains(paperWrapper, 'run-paper-autopilot.sh');
+  assertContains(paperWrapper, '--max-same-handoff');
 });
 
 test('status docs record all three standardized root controllers', () => {
@@ -138,6 +170,7 @@ test('status docs record all three standardized root controllers', () => {
   assertContains(status, 'run_autonomous_bugfix=standardized_audit_handoff_with_telegram');
   assertContains(status, 'run_paper_evaluation_standardization=standardized_with_telegram_no_service_private_fixture_pinned_bundle');
   assertContains(status, 'run_paper_evaluation=canonical_repo_local_private_fixture_and_pinned_bundle_only');
+  assertContains(status, 'run_paper_autopilot=standardized_no_service_parent_supervisor');
 });
 
 test('obsolete stop and paper-12h helpers are not present', () => {

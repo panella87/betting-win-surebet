@@ -9,7 +9,7 @@ usage() {
 Usage: ./check_progress.sh [--tail N]
 
 Read-only summary of the latest automation run artifacts.
-Looks at autonomous_implementation_*, autonomous_bugfix_*, paper_evaluation_*,
+Looks at autonomous_implementation_*, autonomous_bugfix_*, paper_evaluation_*, paper_autopilot_*,
 and legacy autonomous_surebet_implementation_* run directories.
 USAGE
 }
@@ -26,7 +26,7 @@ done
 [[ "$TAIL_LINES" =~ ^[1-9][0-9]*$ ]] || { echo "ERROR: --tail must be a positive integer" >&2; exit 1; }
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$repo_root" || exit 1
-latest_run="$(find artifacts -maxdepth 1 -type d \( -name 'autonomous_implementation_*' -o -name 'autonomous_bugfix_*' -o -name 'paper_evaluation_*' -o -name 'autonomous_surebet_implementation_*' \) -print 2>/dev/null | sort | tail -n 1)"
+latest_run="$(find artifacts -maxdepth 1 -type d \( -name 'autonomous_implementation_*' -o -name 'autonomous_bugfix_*' -o -name 'paper_evaluation_*' -o -name 'paper_autopilot_*' -o -name 'autonomous_surebet_implementation_*' \) -print 2>/dev/null | sort | tail -n 1)"
 if [[ -z "$latest_run" ]]; then
   echo "automation_run=none"
   echo "hint=bash ./run-autonomous-implementation.sh --check-only"
@@ -43,6 +43,23 @@ else
 fi
 if [[ -f "$latest_run/controller.log" ]]; then
   echo; echo "== controller.log tail =="; tail -n "$TAIL_LINES" "$latest_run/controller.log"
+fi
+
+if [[ -f "$latest_run/rounds.tsv" ]]; then
+  echo; echo "== rounds.tsv =="; sed -n '1,120p' "$latest_run/rounds.tsv"
+fi
+latest_round="$(find "$latest_run" -maxdepth 1 -type d -name 'round_*_child' -print 2>/dev/null | sort -V | tail -n 1)"
+if [[ -n "$latest_round" ]]; then
+  echo; echo "latest_round=$latest_round"
+  for round_file in child_result.env child_command.txt telegram_notification_status.txt; do
+    if [[ -f "$latest_round/$round_file" ]]; then
+      echo; echo "== latest_round/$round_file =="; sed -n '1,160p' "$latest_round/$round_file"
+    fi
+  done
+  [[ -f "$latest_round/child_output.log" ]] && echo "latest_child_output_log=$latest_round/child_output.log"
+fi
+if [[ -f "$latest_run/telegram_notification_status.txt" ]]; then
+  echo; echo "== telegram_notification_status.txt =="; cat "$latest_run/telegram_notification_status.txt"
 fi
 echo; echo "== cycles =="
 cycle_root="$latest_run/cycles"

@@ -30,3 +30,8 @@ bug-audit runs.
 
 Executable command lists live in `automation.config.sh`,
 `tools/required_executable_paths.js`, and `scripts/validate_executable_bits.py`.
+
+
+## Paper autopilot protected file
+
+`run-paper-autopilot.sh` is protected automation infrastructure. Normal implementation, paper evaluation, and bug-audit runs must not edit it. Changes require an explicit automation-maintenance task.

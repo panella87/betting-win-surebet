@@ -14,17 +14,7 @@ bash ./run-autonomous-implementation.sh \
   --fallback-model none
 ```
 
-For explicit approved automation-maintenance tasks only, the implementation controller may be allowed to touch the specific protected automation files required by the task. Example:
-
-```bash
-. "$HOME/.nvm/nvm.sh" && nvm use 20
-AUTOMATION_ALLOW_PROTECTED_CHANGES=1 bash ./run-autonomous-implementation.sh \
-  --duration 72h \
-  --model cli-default \
-  --fallback-model none
-```
-
-Do not use `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` for normal source implementation. It is only for explicit automation maintenance or repo standardization work.
+Do not use `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` for normal source implementation. It is only for explicit automation maintenance or repo standardization work approved by Federico.
 
 Common command after paper-mode handoff, after the same Node activation:
 
@@ -114,3 +104,8 @@ from `automation.config.sh`, currently `npm run validate`.
 
 Protected automation files must not change unless the explicit task is automation
 maintenance.
+
+
+## Paper autopilot handoff metadata
+
+When launched with `--handover-paper-mode`, implementation writes `.automation/paper-mode-handover.env` with `IMPLEMENTATION_SOURCE_CHANGED`, `IMPLEMENTATION_SOURCE_VALIDATION_PASSED`, and `PRIVATE_PAPER_REEVALUATION_REQUIRED`. The paper autopilot uses those fields to decide whether a new private paper evaluation is justified.

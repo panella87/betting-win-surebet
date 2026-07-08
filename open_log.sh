@@ -4,9 +4,10 @@ set -u -o pipefail
 TAIL_LINES="${TAIL_LINES:-160}"
 MODE="controller"
 CYCLE=""
+ROUND=""
 RUN_DIR=""
 usage() { cat <<'USAGE'
-Usage: ./open_log.sh [--controller|--codex|--paper] [--cycle N] [--tail N] [--run-dir PATH]
+Usage: ./open_log.sh [--controller|--codex|--paper|--implementation] [--cycle N] [--round N] [--tail N] [--run-dir PATH]
 
 Tails automation logs from the latest local artifact run. Read-only.
 USAGE
@@ -16,6 +17,8 @@ while [[ $# -gt 0 ]]; do
     --controller) MODE="controller"; shift ;;
     --codex) MODE="codex"; shift ;;
     --paper) MODE="paper"; shift ;;
+    --implementation) MODE="implementation"; shift ;;
+    --round) [[ $# -ge 2 ]] || { echo "ERROR: --round requires a value" >&2; exit 1; }; ROUND="$2"; shift 2 ;;
     --cycle) [[ $# -ge 2 ]] || { echo "ERROR: --cycle requires a value" >&2; exit 1; }; CYCLE="$2"; shift 2 ;;
     --tail) [[ $# -ge 2 ]] || { echo "ERROR: --tail requires a value" >&2; exit 1; }; TAIL_LINES="$2"; shift 2 ;;
     --run-dir) [[ $# -ge 2 ]] || { echo "ERROR: --run-dir requires a value" >&2; exit 1; }; RUN_DIR="$2"; shift 2 ;;
@@ -27,7 +30,7 @@ done
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$repo_root" || exit 1
 if [[ -z "$RUN_DIR" ]]; then
-  RUN_DIR="$(find artifacts -maxdepth 1 -type d \( -name 'autonomous_implementation_*' -o -name 'autonomous_bugfix_*' -o -name 'paper_evaluation_*' -o -name 'autonomous_surebet_implementation_*' \) -print 2>/dev/null | sort | tail -n 1)"
+  RUN_DIR="$(find artifacts -maxdepth 1 -type d \( -name 'autonomous_implementation_*' -o -name 'autonomous_bugfix_*' -o -name 'paper_evaluation_*' -o -name 'paper_autopilot_*' -o -name 'autonomous_surebet_implementation_*' \) -print 2>/dev/null | sort | tail -n 1)"
 fi
 [[ -n "$RUN_DIR" && -d "$RUN_DIR" ]] || { echo "ERROR: no automation run directory found" >&2; exit 1; }
 resolve_cycle_dir() {
@@ -42,10 +45,24 @@ resolve_cycle_dir() {
   [[ -n "$latest" ]] || return 1
   printf '%s\n' "$latest"
 }
+
+resolve_round_dir() {
+  local run_dir="$1" round="$2" latest=""
+  if [[ -n "$round" ]]; then
+    [[ -d "$run_dir/round_${round}_child" ]] && { printf '%s
+' "$run_dir/round_${round}_child"; return 0; }
+    return 1
+  fi
+  latest="$(find "$run_dir" -maxdepth 1 -type d -name 'round_*_child' -print 2>/dev/null | sort -V | tail -n 1)"
+  [[ -n "$latest" ]] || return 1
+  printf '%s
+' "$latest"
+}
 case "$MODE" in
   controller) log_file="$RUN_DIR/controller.log" ;;
   codex) cycle_dir="$(resolve_cycle_dir "$RUN_DIR" "$CYCLE")" || { echo "ERROR: cycle directory not found" >&2; exit 1; }; log_file="$cycle_dir/codex.log" ;;
-  paper) cycle_dir="$(resolve_cycle_dir "$RUN_DIR" "$CYCLE")" || { echo "ERROR: cycle directory not found" >&2; exit 1; }; [[ -f "$cycle_dir/paper.log" ]] && log_file="$cycle_dir/paper.log" || log_file="$RUN_DIR/paper.log" ;;
+  paper) if [[ "$(basename "$RUN_DIR")" == paper_autopilot_* ]]; then round_dir="$(resolve_round_dir "$RUN_DIR" "$ROUND")" || { echo "ERROR: round directory not found" >&2; exit 1; }; log_file="$round_dir/child_output.log"; else cycle_dir="$(resolve_cycle_dir "$RUN_DIR" "$CYCLE")" || { echo "ERROR: cycle directory not found" >&2; exit 1; }; [[ -f "$cycle_dir/paper.log" ]] && log_file="$cycle_dir/paper.log" || log_file="$RUN_DIR/paper.log"; fi ;;
+  implementation) if [[ "$(basename "$RUN_DIR")" == paper_autopilot_* ]]; then round_dir="$(resolve_round_dir "$RUN_DIR" "$ROUND")" || { echo "ERROR: round directory not found" >&2; exit 1; }; log_file="$round_dir/child_output.log"; else cycle_dir="$(resolve_cycle_dir "$RUN_DIR" "$CYCLE")" || { echo "ERROR: cycle directory not found" >&2; exit 1; }; log_file="$cycle_dir/codex.log"; fi ;;
   *) echo "ERROR: unsupported mode: $MODE" >&2; exit 1 ;;
 esac
 [[ -f "$log_file" ]] || { echo "ERROR: log not found: $log_file" >&2; exit 1; }

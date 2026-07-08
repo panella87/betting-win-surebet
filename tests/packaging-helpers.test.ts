@@ -84,6 +84,7 @@ function makeZipCodebaseFixture(): { dir: string; repoDir: string; zipPath: stri
 
   writeFileSync(join(repoDir, '.env'), 'SECRET=1\n', { encoding: 'utf-8' });
   writeFileSync(join(repoDir, 'existing-codebase.zip'), 'zip bytes\n', { encoding: 'utf-8' });
+  writeFileSync(join(repoDir, 'ziABC123'), 'interrupted zip temp bytes\n', { encoding: 'utf-8' });
   writeFileSync(join(repoDir, 'run.log'), 'log bytes\n', { encoding: 'utf-8' });
   writeFileSync(join(repoDir, 'scratch.tmp'), 'tmp bytes\n', { encoding: 'utf-8' });
   writeFileSync(join(repoDir, 'artifacts', 'cycle_1', 'notes.md'), 'artifact report\n', { encoding: 'utf-8' });
@@ -140,7 +141,7 @@ function makeSourceHandoffFixture(): { dir: string; repoDir: string; archivePath
 
   writeFileSync(join(repoDir, 'AGENTS.md'), '# archive fixture\n', { encoding: 'utf-8' });
   writeFileSync(join(repoDir, 'package.json'), '{\n  "name": "fixture"\n}\n', { encoding: 'utf-8' });
-  writeFileSync(join(repoDir, '.gitignore'), '.env\n*.zip\n', { encoding: 'utf-8' });
+  writeFileSync(join(repoDir, '.gitignore'), '.env\n*.zip\nzi??????\n', { encoding: 'utf-8' });
 
   for (const relativePath of [
     'cli.js',
@@ -154,6 +155,7 @@ function makeSourceHandoffFixture(): { dir: string; repoDir: string; archivePath
     'zip_codebase.sh',
     'run-autonomous-implementation.sh',
     'run-paper-evaluation.sh',
+    'run-paper-autopilot.sh',
     'run-autonomous-bugfix.sh',
     '.automation/lib/run_common.sh',
     '.automation/lib/telegram_notify.sh',
@@ -169,6 +171,7 @@ function makeSourceHandoffFixture(): { dir: string; repoDir: string; archivePath
   writeFileSync(join(repoDir, 'README.md'), '# source handoff fixture\n', { encoding: 'utf-8' });
   writeFileSync(join(repoDir, '.env'), 'SECRET=1\n', { encoding: 'utf-8' });
   writeFileSync(join(repoDir, 'existing-codebase.zip'), 'zip bytes\n', { encoding: 'utf-8' });
+  writeFileSync(join(repoDir, 'ziABC123'), 'interrupted zip temp bytes\n', { encoding: 'utf-8' });
 
   mkdirSync(join(repoDir, 'artifacts', 'cycle_1'), { recursive: true });
   mkdirSync(join(repoDir, 'node_modules', 'left-pad'), { recursive: true });
@@ -250,6 +253,7 @@ test('zip_codebase excludes local secrets, archives, artifacts, dependencies, lo
     ]);
     assert.ok(!entries.includes('.env'));
     assert.ok(!entries.includes('existing-codebase.zip'));
+    assert.ok(!entries.includes('ziABC123'));
     assert.ok(!entries.includes('artifacts/cycle_1/notes.md'));
     assert.ok(!entries.includes('node_modules/left-pad/index.js'));
     assert.ok(!entries.includes('dist/bundle.js'));
@@ -298,6 +302,7 @@ test('source handoff archive excludes local env, archives, artifacts, dependenci
 
     assert.ok(!entries.includes('./.env'));
     assert.ok(!entries.includes('./existing-codebase.zip'));
+    assert.ok(!entries.includes('./ziABC123'));
     assert.ok(!entries.includes('./artifacts/cycle_1/notes.md'));
     assert.ok(!entries.includes('./node_modules/left-pad/index.js'));
     assert.ok(!entries.includes('./dist/bundle.js'));

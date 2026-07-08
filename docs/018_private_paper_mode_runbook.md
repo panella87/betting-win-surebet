@@ -44,13 +44,9 @@ The result is private, fixture-only, and not real upstream evidence. A passing f
 
 ## Pinned bundle smoke
 
-Current status: the controller hardening is complete. `run-paper-evaluation.sh`
-now shell-quotes the operator-provided bundle path before any `bash -lc`
-command construction and validates `SUREBET_REQUIRE_PINNED_BUNDLE` as strict
-`0` or `1`.
+Current status: this section is a private paper operator path for a repo-local bundle supplied by Federico. The paper controller now shell-quotes the operator-provided bundle path before any `bash -lc` command construction and validates `SUREBET_REQUIRE_PINNED_BUNDLE` as strict `0` or `1`.
 
-After Federico provides a pinned `betting-win` export bundle, place the bundle
-under the repo working tree or pass a repo-local path. Then run:
+After Federico provides a pinned `betting-win` export bundle, place the bundle under the repo working tree or pass a repo-local path. Then run:
 
 ```bash
 . "$HOME/.nvm/nvm.sh" && nvm use 20
@@ -62,7 +58,8 @@ The controller must fail closed on missing paths, remote URLs, provider URLs,
 credentials, execution language, or outputs outside `artifacts/private-paper-mode/`.
 `commands/run-pinned-interface-smoke.sh` remains as a one-shot compatibility
 helper and must rely on CLI containment instead of pre-creating artifact
-directories.
+directories. Do not use the compatibility helper for a real pinned bundle until
+Federico has provided the repo-local pinned bundle.
 
 If the report is blocked, keep the artifact and stop. Do not loosen validation,
 do not retry with remote inputs, and do not reinterpret the result as live or
@@ -110,6 +107,13 @@ Use the canonical root supervisor for long private fixture observation:
 
 This standardized no-service supervisor validates source, runs the configured
 repo-local private fixture smoke, writes local artifacts, sends one final
-Telegram notification, and never starts/stops services. Its pinned-bundle path
-is controller-safe now, but this controller is not a replacement for Federico's
-pinned bundle and must not be interpreted as real upstream acceptance evidence.
+Telegram notification, and never starts/stops services. The pinned-bundle path is
+controller-safe now: operator-provided paths are shell-quoted before `bash -lc`
+execution and `SUREBET_REQUIRE_PINNED_BUNDLE` is strict `0` or `1`. This
+controller is not a replacement for Federico's pinned bundle and must not be
+interpreted as real upstream acceptance evidence.
+
+
+## Autopilot entrypoint
+
+For unattended private paper-mode supervision, use `run-paper-autopilot.sh`. It stops as `PAPER_AUTOPILOT_BLOCKED_ON_PINNED_BUNDLE` when fixture-only proof is complete and no pinned `betting-win` export is available.

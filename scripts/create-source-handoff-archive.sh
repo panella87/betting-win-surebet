@@ -42,6 +42,7 @@ tar -czpf "$output_archive" \
   --exclude='./.env' \
   --exclude='./true' \
   --exclude='*.zip' \
+  --exclude='zi??????' \
   --exclude='*.tar' \
   --exclude='*.tar.gz' \
   --exclude='*.tgz' \

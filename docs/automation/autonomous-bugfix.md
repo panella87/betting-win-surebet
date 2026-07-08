@@ -81,3 +81,8 @@ config must fail fast. Do not hide defects with silent defaults.
 
 Protected automation files must not change unless the explicit task is automation
 maintenance.
+
+
+## Autopilot boundary
+
+`run-autonomous-bugfix.sh` remains standalone audit/handoff infrastructure. It is not called by `run-paper-autopilot.sh` in this repo.

@@ -38,6 +38,13 @@ CODEX_FALLBACK_MODEL=""
 CODEX_SANDBOX=""
 CODEX_STREAM_LOGS=""
 TASK_SOURCE=""
+INITIAL_SOURCE_FINGERPRINT=""
+FINAL_SOURCE_FINGERPRINT=""
+RUN_SOURCE_CHANGED="no"
+RUN_SOURCE_VALIDATION_PASSED="no"
+PAPER_HANDOFF_FILE=""
+PAPER_HANDOFF_NOOP_ALLOWED="no"
+PAPER_HANDOFF_AUTOMATION_MAINTENANCE_ALLOWED="no"
 
 usage() {
   cat <<'EOF_USAGE'
@@ -222,23 +229,91 @@ maybe_auto_install() {
   automation_run_shell_command "auto_install_npm_install" "npm install --ignore-scripts" "$INSTALL_TIMEOUT_SECONDS" "$AUTOMATION_RUN_DIR/auto-install.log"
 }
 
+env_value_from_file() {
+  local file="$1" key="$2"
+  [[ -f "$file" ]] || return 1
+  awk -F= -v k="$key" '$1 == k { sub(/^[^=]*=/, ""); print; found=1; exit } END { exit found ? 0 : 1 }' "$file"
+}
+
+compute_source_fingerprint() {
+  local root="$AUTOMATION_REPO_ROOT"
+  (
+    cd "$root" || exit 1
+    find . -type f       ! -path './.git/*'       ! -path './artifacts/*'       ! -path './node_modules/*'       ! -path './dist/*'       ! -path './coverage/*'       ! -path './.automation/locks/*'       ! -path './.automation/corrupt/*'       ! -name '*.zip'       ! -name 'artifacts.zip'       ! -name 'autonomous-codebase.zip'       ! -name 'zi??????'       -print0 | sort -z | xargs -0 sha256sum 2>/dev/null | sha256sum | awk '{print $1}'
+  )
+}
+
+refresh_source_change_state() {
+  FINAL_SOURCE_FINGERPRINT="$(compute_source_fingerprint || true)"
+  if [[ -n "$INITIAL_SOURCE_FINGERPRINT" && -n "$FINAL_SOURCE_FINGERPRINT" && "$INITIAL_SOURCE_FINGERPRINT" != "$FINAL_SOURCE_FINGERPRINT" ]]; then
+    RUN_SOURCE_CHANGED="yes"
+  else
+    RUN_SOURCE_CHANGED="no"
+  fi
+}
+
+load_paper_handoff_context() {
+  [[ "$HANDOVER_PAPER_MODE" == "1" ]] || return 0
+  PAPER_HANDOFF_FILE="$AUTOMATION_REPO_ROOT/.automation/paper-mode-to-autonomous-implementation.env"
+  [[ -s "$PAPER_HANDOFF_FILE" ]] || automation_die "--handover-paper-mode requires .automation/paper-mode-to-autonomous-implementation.env" 1
+  PAPER_HANDOFF_NOOP_ALLOWED="$(env_value_from_file "$PAPER_HANDOFF_FILE" PAPER_MODE_NOOP_SUCCESS_ALLOWED || true)"
+  PAPER_HANDOFF_AUTOMATION_MAINTENANCE_ALLOWED="$(env_value_from_file "$PAPER_HANDOFF_FILE" PAPER_MODE_AUTOMATION_MAINTENANCE_ALLOWED || true)"
+  if [[ "$PAPER_HANDOFF_AUTOMATION_MAINTENANCE_ALLOWED" == "yes" ]]; then
+    AUTOMATION_ALLOW_PROTECTED_CHANGES=1
+    automation_log "protected_files_exception=paper_handoff_automation_maintenance"
+  fi
+}
+
 resolve_task_source() {
-  if [[ -n "$PROMPT_FILE" ]]; then [[ -f "$PROMPT_FILE" ]] || automation_die "prompt file not found: $PROMPT_FILE" 1; TASK_SOURCE="$PROMPT_FILE"; else TASK_SOURCE="docs/automation/current-implementation-task.md"; [[ -f "$TASK_SOURCE" ]] || automation_die "missing current implementation task: $TASK_SOURCE" 1; fi
+  if [[ "$HANDOVER_PAPER_MODE" == "1" ]]; then
+    load_paper_handoff_context
+    TASK_SOURCE="$AUTOMATION_RUN_DIR/paper-mode-implementation-task.md"
+    {
+      printf '# Paper-mode autonomous implementation handoff task\n\n'
+      printf 'This task was generated from `.automation/paper-mode-to-autonomous-implementation.env`.\n\n'
+      printf 'Required action: `%s`.\n\n' "$(env_value_from_file "$PAPER_HANDOFF_FILE" PAPER_MODE_REQUIRED_ACTION || printf bounded_source_implementation)"
+      printf 'Blocker family: `%s`.\n\n' "$(env_value_from_file "$PAPER_HANDOFF_FILE" PAPER_MODE_BLOCKER_FAMILY || printf source)"
+      printf 'Stop reason: `%s`.\n\n' "$(env_value_from_file "$PAPER_HANDOFF_FILE" PAPER_MODE_STOP_REASON || printf unknown)"
+      printf 'Evidence directory: `%s`.\n\n' "$(env_value_from_file "$PAPER_HANDOFF_FILE" EVIDENCE_DIR || printf unknown)"
+      printf 'Expected after a valid fix: `PRIVATE_PAPER_REEVALUATION_REQUIRED=yes`.\n\n'
+      printf 'No-op success allowed: `%s`.\n\n' "${PAPER_HANDOFF_NOOP_ALLOWED:-no}"
+      printf 'Automation maintenance allowed: `%s`.\n\n' "${PAPER_HANDOFF_AUTOMATION_MAINTENANCE_ALLOWED:-no}"
+      printf 'Constraints remain: no providers, no direct betting-win DB reads, no execution, no public reports, no profitability/live-readiness claims.\n'
+    } > "$TASK_SOURCE"
+  elif [[ -n "$PROMPT_FILE" ]]; then
+    [[ -f "$PROMPT_FILE" ]] || automation_die "prompt file not found: $PROMPT_FILE" 1
+    TASK_SOURCE="$PROMPT_FILE"
+  else
+    TASK_SOURCE="docs/automation/current-implementation-task.md"
+    [[ -f "$TASK_SOURCE" ]] || automation_die "missing current implementation task: $TASK_SOURCE" 1
+  fi
   grep -q 'AUTOMATION_TASK_NOT_SET' "$TASK_SOURCE" && automation_die "implementation task is not set in $TASK_SOURCE" 1
   [[ -s "$TASK_SOURCE" ]] || automation_die "implementation task file is empty: $TASK_SOURCE" 1
 }
 
 write_paper_handover() {
   [[ "$HANDOVER_PAPER_MODE" == "1" ]] || return 0
+  refresh_source_change_state
   local target="$AUTOMATION_REPO_ROOT/.automation/paper-mode-handover.env"
+  local reevaluate="no"
+  if [[ "$RUN_SOURCE_CHANGED" == "yes" && "$RUN_SOURCE_VALIDATION_PASSED" == "yes" && "$FINAL_STATUS" == "AUTONOMOUS_GOAL_COMPLETE=yes" ]]; then
+    reevaluate="yes"
+  fi
   mkdir -p "$AUTOMATION_REPO_ROOT/.automation"
   {
     printf 'HANDOVER_KIND=paper-mode-after-autonomous-implementation\n'
     printf 'REPO_NAME=%s\n' "${AUTOMATION_REPO_NAME:-betting-win-surebet}"
     printf 'CONTROLLER=run-autonomous-implementation.sh\n'
+    printf 'RUN_PAPER_EVALUATION_NEXT=yes\n'
+    printf 'AUTONOMOUS_FINAL_STATUS=%s\n' "$FINAL_STATUS"
+    printf 'AUTONOMOUS_STOP_REASON=%s\n' "$STOP_REASON"
+    printf 'AUTONOMOUS_FINAL_EXIT_CODE=%s\n' "${EXIT_STATUS:-0}"
     printf 'FINAL_STATUS=%s\n' "$FINAL_STATUS"
     printf 'STOP_REASON=%s\n' "$STOP_REASON"
     printf 'CYCLES_ATTEMPTED=%s\n' "$CYCLES_ATTEMPTED"
+    printf 'IMPLEMENTATION_SOURCE_CHANGED=%s\n' "$RUN_SOURCE_CHANGED"
+    printf 'IMPLEMENTATION_SOURCE_VALIDATION_PASSED=%s\n' "$RUN_SOURCE_VALIDATION_PASSED"
+    printf 'PRIVATE_PAPER_REEVALUATION_REQUIRED=%s\n' "$reevaluate"
     printf 'SERVICE_REFRESH_REQUIRED=0\n'
     printf 'RUNTIME_EVIDENCE_REQUIRED=0\n'
     printf 'PAPER_SERVICE_SUPPORTED=0\n'
@@ -292,6 +367,7 @@ if [[ "$ALLOW_PARALLEL" == "1" ]]; then automation_log "lock=skipped allow_paral
 
 assert_active_node_runtime || { FINAL_STATUS="setup_failed"; STOP_REASON="node_runtime_invalid"; exit 1; }
 automation_collect_repo_snapshot "$AUTOMATION_RUN_DIR/initial-repo-snapshot"
+INITIAL_SOURCE_FINGERPRINT="$(compute_source_fingerprint || true)"
 automation_snapshot_protected "$AUTOMATION_RUN_DIR/protected_before.sha256"
 maybe_auto_install || { FINAL_STATUS="setup_failed"; STOP_REASON="auto_install_failed"; exit 1; }
 resolve_task_source
@@ -365,11 +441,18 @@ EOF_PROMPT
   if ! automation_check_protected_unchanged "$AUTOMATION_RUN_DIR/protected_before.sha256" "$CYCLE_DIR/protected_after.sha256" "$CYCLE_DIR/protected_diff.patch"; then FINAL_STATUS="BLOCKED=yes"; STOP_REASON="protected_files_changed"; exit 2; fi
   if ! automation_require_cycle_artifacts "$CYCLE_DIR" allow_empty_git_diff implementation_plan.md changes_made.md validation_results.md remaining_gaps.md final_status.md continue_status.txt git_diff.patch; then FINAL_STATUS="BLOCKED=yes"; STOP_REASON="malformed_cycle_artifacts_cycle_${CYCLES_ATTEMPTED}"; exit 2; fi
   if ! automation_run_validations implementation "$CYCLE_DIR/validation" "$VALIDATION_TIMEOUT_SECONDS"; then CONSECUTIVE_VALIDATION_FAILURES=$((CONSECUTIVE_VALIDATION_FAILURES + 1)); FINAL_STATUS="BLOCKED=yes"; STOP_REASON="validation_failed_cycle_${CYCLES_ATTEMPTED}"; (( CONSECUTIVE_VALIDATION_FAILURES >= MAX_CONSECUTIVE_VALIDATION_FAILURES )) && exit 2; continue; fi
+  RUN_SOURCE_VALIDATION_PASSED="yes"
+  refresh_source_change_state
+  printf 'IMPLEMENTATION_SOURCE_CHANGED=%s\nIMPLEMENTATION_SOURCE_VALIDATION_PASSED=%s\n' "$RUN_SOURCE_CHANGED" "$RUN_SOURCE_VALIDATION_PASSED" > "$CYCLE_DIR/implementation_source_state.env"
   CONSECUTIVE_VALIDATION_FAILURES=0
   if ! CONTINUE_STATUS="$(automation_read_continue_status "$CYCLE_DIR/continue_status.txt")"; then FINAL_STATUS="BLOCKED=yes"; STOP_REASON="malformed_continue_status_cycle_${CYCLES_ATTEMPTED}"; exit 2; fi
   automation_log "cycle=${CYCLES_ATTEMPTED} continue_status=$CONTINUE_STATUS"
   case "$CONTINUE_STATUS" in
-    AUTONOMOUS_GOAL_COMPLETE=yes) FINAL_STATUS="AUTONOMOUS_GOAL_COMPLETE=yes"; STOP_REASON="goal_complete"; exit 0 ;;
+    AUTONOMOUS_GOAL_COMPLETE=yes)
+      if [[ "$HANDOVER_PAPER_MODE" == "1" && "$RUN_SOURCE_CHANGED" != "yes" && "$PAPER_HANDOFF_NOOP_ALLOWED" != "yes" ]]; then
+        FINAL_STATUS="BLOCKED=yes"; STOP_REASON="paper_handover_noop_disallowed"; exit 2
+      fi
+      FINAL_STATUS="AUTONOMOUS_GOAL_COMPLETE=yes"; STOP_REASON="goal_complete"; exit 0 ;;
     BLOCKED=yes) FINAL_STATUS="BLOCKED=yes"; STOP_REASON="blocked_by_cycle_${CYCLES_ATTEMPTED}"; exit 2 ;;
     CONTINUE_REQUIRED=yes) FINAL_STATUS="CONTINUE_REQUIRED=yes"; STOP_REASON="continuing" ;;
   esac

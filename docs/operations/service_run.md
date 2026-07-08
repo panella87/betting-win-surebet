@@ -37,4 +37,9 @@ commands/run-pinned-interface-smoke.sh
 
 Use `commands/run-pinned-interface-smoke.sh` only when Federico provides a repo-local pinned `betting-win` export bundle. Use the other wrappers only for compatibility or explicit historical reproduction.
 
-There is no standalone stop helper. Only use `--force-unlock` after confirming the lock belongs to the same repo and script. The current paper controller is `./run-paper-evaluation.sh`, configured for repo-local private fixture paper mode by default and repo-local pinned-bundle intake when `SUREBET_PINNED_BUNDLE` is explicitly provided. Real upstream pinned-bundle evaluation still requires Federico to provide a repo-local pinned `betting-win` export bundle.
+There is no standalone stop helper. Only use `--force-unlock` after confirming the lock belongs to the same repo and script. The current paper controller is `./run-paper-evaluation.sh`, configured for repo-local private fixture paper mode by default and optional repo-local pinned-bundle intake only when Federico provides a pinned `betting-win` export bundle. The pinned-bundle command path is shell-quoted and `SUREBET_REQUIRE_PINNED_BUNDLE` is strict `0` or `1`.
+
+
+## No service autopilot
+
+`run-paper-autopilot.sh` is not a service controller. It reads and writes local artifacts only and never starts or stops a provider, database, worker, or HTTP service.

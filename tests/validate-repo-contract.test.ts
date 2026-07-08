@@ -25,3 +25,12 @@ test('validate_repo requires critical validator tests as repo assets', () => {
     assert.match(validator, new RegExp(marker.replace('.', '\\.')));
   }
 });
+
+
+test('validate_repo rejects unresolved merge conflict markers', () => {
+  const validator = read(VALIDATE_REPO);
+  assert.match(validator, /validate_no_merge_conflict_markers/);
+  assert.match(validator, /unresolved merge conflict marker/);
+  assert.match(validator, /<<<<<<< /);
+  assert.match(validator, />>>>>>> /);
+});

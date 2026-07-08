@@ -33,7 +33,7 @@ zc_is_excluded_path() {
   esac
 
   case "$base" in
-    .env|.env.*|*.zip|*.tar|*.tar.gz|*.tgz|*.7z|*.rar|*.log|*.pid|*.lock|*.tmp|*.sqlite|*.sqlite3|*.db|*.db-shm|*.db-wal|*.pem|*.key|*.p12|*.pfx|id_rsa|id_ed25519|*_rsa|*_ed25519|.DS_Store|Thumbs.db|true)
+    .env|.env.*|zi??????|*.zip|*.tar|*.tar.gz|*.tgz|*.7z|*.rar|*.log|*.pid|*.lock|*.tmp|*.sqlite|*.sqlite3|*.db|*.db-shm|*.db-wal|*.pem|*.key|*.p12|*.pfx|id_rsa|id_ed25519|*_rsa|*_ed25519|.DS_Store|Thumbs.db|true)
       return 0
       ;;
   esac
@@ -59,7 +59,7 @@ zc_is_artifacts_excluded_path() {
   base="${path##*/}"
 
   case "$base" in
-    .env|.env.*|*.zip|*.tar|*.tar.gz|*.tgz|*.7z|*.rar|*.pid|*.lock|*.tmp|*.sqlite|*.sqlite3|*.db|*.db-shm|*.db-wal|*.pem|*.key|*.p12|*.pfx|id_rsa|id_ed25519|*_rsa|*_ed25519|.DS_Store|Thumbs.db|true)
+    .env|.env.*|zi??????|*.zip|*.tar|*.tar.gz|*.tgz|*.7z|*.rar|*.pid|*.lock|*.tmp|*.sqlite|*.sqlite3|*.db|*.db-shm|*.db-wal|*.pem|*.key|*.p12|*.pfx|id_rsa|id_ed25519|*_rsa|*_ed25519|.DS_Store|Thumbs.db|true)
       return 0
       ;;
   esac

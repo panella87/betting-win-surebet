@@ -58,3 +58,10 @@ claims, and live/execution-readiness claims.
 ## Standard helper scripts
 
 `update_git.sh`, `zip_codebase.sh --artifacts-only`, `pull_artifacts_and_zip_codebase.sh`, `watch_progress.sh`, `check_progress.sh`, `open_log.sh`, `start.sh`, `stop.sh`, and `.automation/lib/telegram_notify.sh` are standardized. `run-autonomous-implementation.sh`, `run-autonomous-bugfix.sh`, and `run-paper-evaluation.sh` are standardized with canonical flags and Telegram final notifications. `run-paper-evaluation.sh` is a no-service private fixture/pinned-bundle paper controller for this repo.
+
+
+## Paper autopilot profile
+
+run_paper_autopilot=standardized_no_service_parent_supervisor
+
+The autopilot has `paper_service_lifecycle=none` and `PAPER_SERVICE_SUPPORTED=0`. It never starts/stops services and never calls providers or direct betting-win DB reads.
