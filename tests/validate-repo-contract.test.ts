@@ -10,6 +10,10 @@ function read(path: string): string {
   return readFileSync(path, 'utf-8');
 }
 
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 test('validate_repo requires critical validator tests as repo assets', () => {
   const validator = read(VALIDATE_REPO);
 
@@ -22,15 +26,21 @@ test('validate_repo requires critical validator tests as repo assets', () => {
     'tests/three-repo-surebet-boundary.test.ts',
     'scripts/validate_three_repo_surebet_boundary.py',
   ]) {
-    assert.match(validator, new RegExp(marker.replace('.', '\\.')));
+    assert.match(validator, new RegExp(escapeRegExp(marker)));
   }
 });
 
-
 test('validate_repo rejects unresolved merge conflict markers', () => {
   const validator = read(VALIDATE_REPO);
-  assert.match(validator, /validate_no_merge_conflict_markers/);
-  assert.match(validator, /unresolved merge conflict marker/);
-  assert.match(validator, /<<<<<<< /);
-  assert.match(validator, />>>>>>> /);
+
+  for (const marker of [
+    'validate_no_conflict_markers',
+    'CONFLICT_MARKER_PREFIXES',
+    "'<<<<<<<'",
+    "'>>>>>>>'",
+    "CONFLICT_SEPARATOR = '======='",
+    'unresolved merge conflict markers found',
+  ]) {
+    assert.match(validator, new RegExp(escapeRegExp(marker)));
+  }
 });

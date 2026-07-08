@@ -108,10 +108,9 @@ Use the canonical root supervisor for long private fixture observation:
 This standardized no-service supervisor validates source, runs the configured
 repo-local private fixture smoke, writes local artifacts, sends one final
 Telegram notification, and never starts/stops services. The pinned-bundle path is
-controller-safe now: operator-provided paths are shell-quoted before `bash -lc`
-execution and `SUREBET_REQUIRE_PINNED_BUNDLE` is strict `0` or `1`. This
-controller is not a replacement for Federico's pinned bundle and must not be
-interpreted as real upstream acceptance evidence.
+reserved until Federico provides the repo-local pinned `betting-win` bundle. This controller is not a replacement for
+Federico's pinned bundle and must not be interpreted as real upstream acceptance
+evidence.
 
 
 ## Autopilot entrypoint

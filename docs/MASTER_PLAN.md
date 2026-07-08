@@ -176,18 +176,14 @@ pull_artifacts_and_zip_codebase.sh
 update_git.sh
 run-autonomous-implementation.sh
 run-paper-evaluation.sh
+run-paper-autopilot.sh
 run-autonomous-bugfix.sh
 ```
 
 `run-paper-evaluation.sh` is the canonical private paper supervisor and replaces
 `run-paper-evaluation-12h.sh` naming. For the current `SURE-002B` freeze state it
-is configured for repo-local private fixture evaluation and optional repo-local
-pinned-bundle intake when `SUREBET_PINNED_BUNDLE` is explicitly provided. The
-pinned-bundle branch shell-quotes the operator-provided path and strictly
-validates `SUREBET_REQUIRE_PINNED_BUNDLE`, but it must not be treated as real
-upstream acceptance evidence until Federico provides a repo-local pinned
-`betting-win` bundle. It does not start services, stop services, call providers,
-or mutate live/runtime state.
+is configured only for repo-local private fixture evaluation. Its pinned-bundle branch is shell-quoted and strict about `SUREBET_REQUIRE_PINNED_BUNDLE`, but must not be used with real operator input unless Federico provides a repo-local pinned `betting-win` bundle. It does not
+start services, stop services, call providers, or mutate live/runtime state.
 
 Protected automation files are documented in `docs/automation/PROTECTED_AUTOMATION_FILES.md`.
 Normal autonomous cycles must not change them.
@@ -195,7 +191,7 @@ Normal autonomous cycles must not change them.
 
 ## Automation helper standardization
 
-Approved helper wave standardizes `update_git.sh`, `zip_codebase.sh --artifacts-only`, `pull_artifacts_and_zip_codebase.sh`, progress/log helpers, `start.sh`, `stop.sh`, and `.automation/lib/telegram_notify.sh`. The controller waves standardize `run-autonomous-implementation.sh`, `run-autonomous-bugfix.sh`, `run-paper-evaluation.sh`, and `run-paper-autopilot.sh` with canonical flags, fail-closed artifact/status handling, handoff safety, and Telegram final notifications. The paper controller and autopilot are surebet-specific and no-service: private fixture smoke now, with real pinned-bundle evidence still blocked on Federico's repo-local pinned `betting-win` bundle/interface.
+Approved helper wave standardizes `update_git.sh`, `zip_codebase.sh --artifacts-only`, `pull_artifacts_and_zip_codebase.sh`, progress/log helpers, `start.sh`, `stop.sh`, and `.automation/lib/telegram_notify.sh`. The controller waves standardize `run-autonomous-implementation.sh`, `run-autonomous-bugfix.sh`, `run-paper-evaluation.sh`, and `run-paper-autopilot.sh` with canonical flags, fail-closed artifact/status handling, and Telegram final notifications. The paper controller is surebet-specific and no-service: private fixture smoke now, with pinned-bundle command hardening complete and real upstream evaluation still blocked on Federico's pinned bundle/interface.
 
 
 ## Paper autopilot operating model

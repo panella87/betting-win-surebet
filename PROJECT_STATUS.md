@@ -136,7 +136,7 @@ root_artifacts_zip=required_before_run_script_exit
 stop_autonomous_run_helper=removed
 ```
 
-`run-autonomous-implementation.sh`, `run-autonomous-bugfix.sh`, and `run-paper-evaluation.sh` now use the standardized root-controller flag, artifact, exit-code, and Telegram final-notification contract. The paper controller is surebet-specific and no-service: it validates source, runs private fixture smoke, shell-quotes any repo-local pinned-bundle path before execution, strictly validates `SUREBET_REQUIRE_PINNED_BUNDLE`, and never starts/stops services or calls providers. The private paper-mode backlog remains complete; real upstream evaluation still requires Federico's pinned bundle.
+`run-autonomous-implementation.sh`, `run-autonomous-bugfix.sh`, `run-paper-evaluation.sh`, and `run-paper-autopilot.sh` now use the standardized root-controller flag, artifact, exit-code, and Telegram final-notification contract. The paper controller is surebet-specific and no-service: it validates source, runs private fixture smoke, shell-quotes any repo-local pinned-bundle path before execution, strictly validates `SUREBET_REQUIRE_PINNED_BUNDLE`, and never starts/stops services or calls providers. The private paper-mode backlog remains complete; real upstream evaluation still requires Federico's pinned bundle.
 
 
 ## Automation helper standardization

@@ -10,6 +10,7 @@ This repository uses the standardized root automation helper surface:
 ./run-autonomous-implementation.sh
 ./run-autonomous-bugfix.sh
 ./run-paper-evaluation.sh
+./run-paper-autopilot.sh
 ./watch_progress.sh --once --fast
 ./check_progress.sh
 ./open_log.sh
@@ -28,8 +29,8 @@ Before launching long controllers, activate the repo runtime explicitly:
 
 Protected automation files are read-only during normal implementation, paper evaluation, and bug-audit runs. Use `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` only when Federico explicitly approves bounded automation maintenance that touches protected files.
 
-`run-autonomous-implementation.sh`, `run-autonomous-bugfix.sh`, and
-`run-paper-evaluation.sh` are standardized with canonical flags, fail-closed
+`run-autonomous-implementation.sh`, `run-autonomous-bugfix.sh`,
+`run-paper-evaluation.sh`, and `run-paper-autopilot.sh` are standardized with canonical flags, fail-closed
 status/artifact checks, root artifacts refresh, and
 `.automation/lib/telegram_notify.sh` final notifications. See `docs/automation/telegram-notifications.md` for the HTML-card contract and dry-run test mode. The paper controller is
 adapted for this no-service repo: it runs private fixture smoke and never starts
@@ -57,7 +58,7 @@ remote host.
 
 `check_progress.sh`, `watch_progress.sh`, and `open_log.sh` are read-only artifact
 viewers for `artifacts/autonomous_implementation_*`, `artifacts/autonomous_bugfix_*`,
-and `artifacts/paper_evaluation_*`. `watch_progress.sh --base-url` is accepted for
+`artifacts/paper_evaluation_*`, and `artifacts/paper_autopilot_*`. `watch_progress.sh --base-url` is accepted for
 workflow compatibility, but this repo has no service, so local artifacts are the
 source of truth.
 

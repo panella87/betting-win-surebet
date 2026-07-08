@@ -103,7 +103,7 @@ Compatibility wrappers under `commands/run-sure-*` still exist for old muscle me
 
 The repository must fail closed if it contains provider SDK/client imports, provider URLs, wallet/signer/order/transaction paths, direct `betting-win` database access, `core.*` migrations, manually vendored generated contracts, malformed autonomous cycle status, nonzero Codex exit, or failed post-cycle validation.
 
-Federico asked for the maximum safe local implementation possible, and the retained SURE-002A and SURE-002B local backlogs are now exhausted. The paper-controller pinned-bundle shell-command hardening is implemented. Do not invent more local engine work. The next product step requires Federico's repo-local pinned `betting-win` contract/export interface; otherwise autonomous runs should repair only concrete repo-local validation/tooling defects or stop with `AUTONOMOUS_GOAL_COMPLETE=yes`.
+Federico asked for the maximum safe local implementation possible, and the retained SURE-002A and SURE-002B local backlogs are now exhausted. The paper-controller pinned-bundle shell-command hardening is implemented in the current automation-maintenance wave. Do not invent more local engine work. The next product step requires Federico's repo-local pinned `betting-win` contract/export interface; otherwise autonomous runs should repair only concrete repo-local validation/tooling defects or stop with `AUTONOMOUS_GOAL_COMPLETE=yes`.
 
 
 ## Private paper-mode continuation
@@ -139,6 +139,7 @@ Canonical root controller commands, after activating Node 20 in the parent shell
 . "$HOME/.nvm/nvm.sh" && nvm use 20
 ./run-autonomous-implementation.sh --duration 72h --model cli-default --fallback-model none
 ./run-paper-evaluation.sh --duration 72h --interval 5m --adaptive --keep-monitoring-when-ready --model cli-default --fallback-model none
+./run-paper-autopilot.sh --duration 7d --paper-duration 72h --implementation-duration 72h --interval 5m --adaptive --max-rounds 6 --max-same-handoff 2 --model cli-default --fallback-model none
 ./run-autonomous-bugfix.sh --duration 72h --model cli-default --fallback-model none --handover-autonomous-implementation
 ```
 
@@ -151,7 +152,7 @@ changed by normal autonomous work.
 ## Automation helper standardization
 
 ```text
-helper_standardization_wave=approved_subset_plus_all_three_root_controllers
+helper_standardization_wave=approved_subset_plus_all_four_root_controllers
 update_git_pull=git_pull_ff_only_autostash
 zip_codebase_artifacts_only=supported
 pull_artifacts_remote_artifact_override=supported
@@ -160,6 +161,7 @@ shared_telegram_helper=.automation/lib/telegram_notify.sh
 run_autonomous_implementation=standardized_with_canonical_flags_and_telegram
 run_autonomous_bugfix=standardized_audit_handoff_with_telegram
 run_paper_evaluation_standardization=standardized_with_telegram_no_service_private_fixture_pinned_bundle
+run_paper_autopilot=standardized_no_service_parent_supervisor
 ```
 
 

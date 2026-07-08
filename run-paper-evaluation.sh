@@ -98,8 +98,21 @@ EOF_USAGE
 model_display() { if [[ -z "${CODEX_MODEL:-}" || "${CODEX_MODEL:-}" == "cli-default" ]]; then printf 'cli-default'; else printf '%s' "$CODEX_MODEL"; fi; }
 fallback_display() { if [[ -z "${CODEX_FALLBACK_MODEL:-}" ]]; then printf 'none'; else printf '%s' "$CODEX_FALLBACK_MODEL"; fi; }
 parse_positive_integer() { local value="$1" label="$2"; [[ "$value" =~ ^[1-9][0-9]*$ ]] || { echo "ERROR: $label requires a positive integer: $value" >&2; return 2; }; }
-paper_shell_quote() { printf '%q' "$1"; }
-validate_surebet_require_pinned_bundle() { case "${REQUIRE_PINNED_BUNDLE:-0}" in 0|1) return 0 ;; *) echo "ERROR: SUREBET_REQUIRE_PINNED_BUNDLE must be unset, 0, or 1; got: ${REQUIRE_PINNED_BUNDLE}" >&2; return 2 ;; esac; }
+paper_shell_quote() {
+  local value="$1"
+  printf '%q' "$value"
+}
+
+validate_surebet_require_pinned_bundle() {
+  case "${REQUIRE_PINNED_BUNDLE:-0}" in
+    0|1) return 0 ;;
+    *)
+      echo "ERROR: SUREBET_REQUIRE_PINNED_BUNDLE must be unset, 0, or 1; got: ${REQUIRE_PINNED_BUNDLE}" >&2
+      return 2
+      ;;
+  esac
+}
+
 parse_args() {
   local parsed
   while [[ $# -gt 0 ]]; do

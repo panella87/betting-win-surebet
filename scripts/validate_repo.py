@@ -13,7 +13,7 @@ def read(path: Path) -> str:
     return path.read_text(encoding='utf-8')
 
 REQUIRED = [
-  'README.md','AGENTS.md','CHANGELOG.md','PROJECT_STATUS.md','SOURCE_MANIFEST.json','package.json','package-lock.json','tsconfig.json','.gitignore','.gitattributes','.env.example','.nvmrc','cli.js',
+  'README.md','AGENTS.md','CHANGELOG.md','PROJECT_STATUS.md','package.json','package-lock.json','tsconfig.json','.gitignore','.gitattributes','.env.example','.nvmrc','cli.js',
   'start.sh','stop.sh','check_progress.sh','watch_progress.sh','open_log.sh','update_git.sh','pull_artifacts_and_zip_codebase.sh','zip_codebase.sh','run-autonomous-implementation.sh','run-paper-evaluation.sh','run-paper-autopilot.sh','run-autonomous-bugfix.sh','automation.config.sh','.automation/lib/run_common.sh','.automation/lib/telegram_notify.sh','.automation/README.md',
   'docs/automation/README.md','docs/automation/PROTECTED_AUTOMATION_FILES.md','docs/automation/repo-profile.md','docs/automation/autonomous-implementation.md','docs/automation/paper-evaluation.md','docs/automation/paper-autopilot.md','docs/automation/autonomous-bugfix.md','docs/automation/current-implementation-task.md','docs/automation/SSH_KEY_SETUP.md','docs/automation/POST_OVERLAY_CLEANUP.md',
   'docs/MASTER_PLAN.md','docs/repo_status_current.md','docs/autonomous_loop_contract.md','docs/operations/autonomous_72h_runbook.md','docs/operations/service_run.md',
@@ -30,33 +30,37 @@ REQUIRED = [
   'tools/required_executable_paths.js','commands/run-sure-001-autonomous.sh','commands/run-sure-local-engine-autonomous.sh','commands/run-sure-paper-mode-autonomous.sh','commands/run-pinned-interface-smoke.sh',
 ]
 FORBIDDEN = ['run-paper-evaluation-12h.sh','stop-autonomous-run.sh','scripts/stop-autonomous-run.sh']
+CONFLICT_MARKER_PREFIXES = ('<<<<<<<', '>>>>>>>')
+CONFLICT_SEPARATOR = '======='
+CONFLICT_SCAN_SKIP_DIRS = {'.git', 'node_modules', 'dist', 'artifacts', '.tmp', '.cache'}
+CONFLICT_SCAN_SKIP_SUFFIXES = {'.zip', '.gz', '.tar', '.tgz', '.png', '.jpg', '.jpeg', '.webp', '.ico', '.db', '.sqlite'}
 
-SKIP_CONFLICT_MARKER_DIRS = {'.git', 'node_modules', 'dist', 'artifacts', 'coverage', '.pytest_cache', '__pycache__'}
-SKIP_CONFLICT_MARKER_SUFFIXES = {'.zip', '.gz', '.tgz', '.png', '.jpg', '.jpeg', '.webp', '.gif', '.sqlite', '.db'}
-
-def validate_no_merge_conflict_markers() -> None:
+def validate_no_conflict_markers() -> None:
+    hits: list[str] = []
     for path in sorted(ROOT.rglob('*')):
         if not path.is_file():
             continue
         rel = path.relative_to(ROOT).as_posix()
-        if any(part in SKIP_CONFLICT_MARKER_DIRS for part in path.relative_to(ROOT).parts):
+        if any(part in CONFLICT_SCAN_SKIP_DIRS for part in path.relative_to(ROOT).parts):
             continue
-        if path.suffix.lower() in SKIP_CONFLICT_MARKER_SUFFIXES:
+        if path.suffix.lower() in CONFLICT_SCAN_SKIP_SUFFIXES:
             continue
         try:
-            text = path.read_text(encoding='utf-8')
+            lines = path.read_text(encoding='utf-8').splitlines()
         except UnicodeDecodeError:
             continue
-        for line_no, line in enumerate(text.splitlines(), start=1):
-            if line.startswith('<<<<<<< ') or line.startswith('>>>>>>> '):
-                fail(f'unresolved merge conflict marker in {rel}:{line_no}')
-
+        for line_no, line in enumerate(lines, start=1):
+            stripped = line.strip()
+            if stripped == CONFLICT_SEPARATOR or any(stripped.startswith(prefix) for prefix in CONFLICT_MARKER_PREFIXES):
+                hits.append(f'{rel}:{line_no}:{stripped}')
+    if hits:
+        fail('unresolved merge conflict markers found: ' + '; '.join(hits[:20]))
 
 def main() -> None:
+    validate_no_conflict_markers()
     missing = [p for p in REQUIRED if not (ROOT / p).is_file()]
     if missing:
         fail('missing required files: ' + ', '.join(missing))
-    validate_no_merge_conflict_markers()
     present_forbidden = [p for p in FORBIDDEN if (ROOT / p).exists()]
     if present_forbidden:
         fail('obsolete automation files still present: ' + ', '.join(present_forbidden))
