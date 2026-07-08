@@ -26,16 +26,16 @@ Before launching long controllers, activate the repo runtime explicitly:
 . "$HOME/.nvm/nvm.sh" && nvm use 20
 ```
 
-Protected automation files are read-only during normal implementation, paper evaluation, and bug-audit runs. When the explicit task is automation maintenance, such as the current paper-controller pinned-bundle hardening, run the implementation controller with `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` and keep the exception limited to the named automation files.
+Protected automation files are read-only during normal implementation, paper evaluation, and bug-audit runs. When the explicit task is automation maintenance, run the implementation controller with `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` and keep the exception limited to the named automation files.
 
 `run-autonomous-implementation.sh`, `run-autonomous-bugfix.sh`, and
 `run-paper-evaluation.sh` are standardized with canonical flags, fail-closed
 status/artifact checks, root artifacts refresh, and
 `.automation/lib/telegram_notify.sh` final notifications. The paper controller is
 adapted for this no-service repo: it runs private fixture smoke and never starts
-or stops services. The pinned-bundle branch exists but must not be used with a
-real `SUREBET_PINNED_BUNDLE` until the known shell-command quoting and strict
-`SUREBET_REQUIRE_PINNED_BUNDLE` validation hardening lands.
+or stops services. The pinned-bundle branch now shell-quotes operator-provided
+`SUREBET_PINNED_BUNDLE` paths before `bash -lc` execution and validates
+`SUREBET_REQUIRE_PINNED_BUNDLE` as strict `0` or `1`.
 
 `update_git.sh` defaults to `--pull` and uses `git pull --ff-only --autostash`. It
 supports `--acp` as shorthand for add/commit/push, reads `GITHUB_TOKEN` from the

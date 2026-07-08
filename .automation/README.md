@@ -22,9 +22,9 @@ Telegram.
 This repo has no service-owned paper lifecycle. `run-paper-evaluation.sh` is the
 standard no-service private paper controller: it validates source, runs a private
 fixture smoke, writes local artifacts, and never starts/stops services or calls
-providers. Do not use real `SUREBET_PINNED_BUNDLE` input until the known
-paper-controller shell-command quoting and strict pinned-bundle boolean
-validation hardening has landed.
+providers. It now shell-quotes operator-provided `SUREBET_PINNED_BUNDLE` paths
+before `bash -lc` execution and validates `SUREBET_REQUIRE_PINNED_BUNDLE` as
+strict `0` or `1`.
 
 
-Telegram status note: surebet's private-fixture-only status `PAPER_EVALUATION_READY_PRIVATE_FIXTURE_ONLY_BLOCKED_ON_PINNED_BUNDLE` is rendered as blocked rather than success, because real upstream paper evaluation still requires the approved hardening gate and a pinned `betting-win` bundle.
+Telegram status note: surebet's private-fixture-only status `PAPER_EVALUATION_READY_PRIVATE_FIXTURE_ONLY_BLOCKED_ON_PINNED_BUNDLE` is rendered as blocked rather than success, because real upstream paper evaluation still requires Federico's pinned `betting-win` bundle.

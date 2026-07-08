@@ -16,7 +16,7 @@ npm run validate
 cd ~/app_testing/betting-win-surebet && . "$HOME/.nvm/nvm.sh" && nvm use 20 && PYTHONDONTWRITEBYTECODE=1 bash run-autonomous-implementation.sh --duration 72h --model cli-default --fallback-model none --cycle-timeout 2h --validation-timeout 20m
 ```
 
-For the current approved paper-controller pinned-bundle shell hardening, prefix the implementation command with `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` because the task is explicit automation maintenance touching a protected root controller. Omit that environment variable for normal source implementation.
+Prefix the implementation command with `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` only for explicit approved automation-maintenance tasks touching protected root controllers. Omit that environment variable for normal source implementation.
 
 Use `--model cli-default --fallback-model none` unless Federico explicitly asks for another model. Do not use autonomous runs to invent provider integrations, predictive/value-betting work, shared account coordination, or live execution. Surebet backtest/paper/live-gate changes must follow `docs/019_three_repo_surebet_strategy_boundary.md`.
 

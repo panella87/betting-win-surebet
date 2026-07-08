@@ -53,10 +53,12 @@ Provide Federico's pinned `betting-win` contract/export interface before real up
 ./run-autonomous-bugfix.sh --duration 72h --model cli-default --fallback-model none --handover-autonomous-implementation
 ```
 
-`run-paper-evaluation.sh` runs only the local private fixture paper path in the
-current gate. The `SUREBET_PINNED_BUNDLE` branch is reserved until the known
-paper-controller shell-command quoting and strict pinned-bundle boolean
-validation hardening lands, and it is not real upstream evidence. All `run-*`
-scripts write root `artifacts.zip` before stopping. Historical
+`run-paper-evaluation.sh` runs the local private fixture paper path in the
+current gate and can run repo-local pinned-bundle intake only when
+`SUREBET_PINNED_BUNDLE` is explicitly provided. It now shell-quotes
+operator-provided bundle paths and validates `SUREBET_REQUIRE_PINNED_BUNDLE` as
+strict `0` or `1`, but it is still not real upstream evidence until Federico
+provides the pinned `betting-win` bundle. All `run-*` scripts write root
+`artifacts.zip` before stopping. Historical
 `commands/run-sure-*` wrappers are compatibility wrappers only; active
 docs should point operators to the root scripts above.

@@ -37,7 +37,7 @@ CODEX_SANDBOX=""
 CODEX_STREAM_LOGS=""
 PAPER_COMMAND_TIMEOUT_SECONDS=""
 PINNED_BUNDLE_PATH="${SUREBET_PINNED_BUNDLE:-}"
-REQUIRE_PINNED_BUNDLE="${SUREBET_REQUIRE_PINNED_BUNDLE:-0}"
+REQUIRE_PINNED_BUNDLE="${SUREBET_REQUIRE_PINNED_BUNDLE-0}"
 LOCAL_FIXTURE_BUNDLE="tests/fixtures/private-paper-mode-smoke/accepted-local-bundle.json"
 PAPER_LOCAL_REPORT_PATH=""
 PAPER_PINNED_REPORT_PATH=""
@@ -98,6 +98,8 @@ EOF_USAGE
 model_display() { if [[ -z "${CODEX_MODEL:-}" || "${CODEX_MODEL:-}" == "cli-default" ]]; then printf 'cli-default'; else printf '%s' "$CODEX_MODEL"; fi; }
 fallback_display() { if [[ -z "${CODEX_FALLBACK_MODEL:-}" ]]; then printf 'none'; else printf '%s' "$CODEX_FALLBACK_MODEL"; fi; }
 parse_positive_integer() { local value="$1" label="$2"; [[ "$value" =~ ^[1-9][0-9]*$ ]] || { echo "ERROR: $label requires a positive integer: $value" >&2; return 2; }; }
+validate_require_pinned_bundle_flag() { case "$1" in 0|1) return 0 ;; *) echo "ERROR: SUREBET_REQUIRE_PINNED_BUNDLE must be exactly 0 or 1: $1" >&2; return 2 ;; esac; }
+shell_quote_for_bash_lc() { printf '%q' "$1"; }
 
 parse_args() {
   local parsed
@@ -158,6 +160,7 @@ configure_defaults() {
   case "$CODEX_FALLBACK_MODEL" in default|cli-default) CODEX_FALLBACK_MODEL="cli-default" ;; none|off|disabled) CODEX_FALLBACK_MODEL="" ;; esac
   case "$CODEX_SANDBOX" in read-only|workspace-write|danger-full-access) ;; *) echo "ERROR: unsupported sandbox: $CODEX_SANDBOX" >&2; return 2 ;; esac
   parse_positive_integer "$MAX_CYCLES" --max-cycles || return 2
+  validate_require_pinned_bundle_flag "$REQUIRE_PINNED_BUNDLE" || return 2
   export AUTOMATION_CODEX_MODEL="$CODEX_MODEL" AUTOMATION_CODEX_FALLBACK_MODEL="$CODEX_FALLBACK_MODEL" AUTOMATION_CODEX_SANDBOX="$CODEX_SANDBOX" AUTOMATION_CODEX_STREAM_LOGS="$CODEX_STREAM_LOGS"
 }
 
@@ -241,10 +244,12 @@ run_repo_validation() {
   automation_run_shell_command "repo_validation" "npm run validate" "$VALIDATION_TIMEOUT_SECONDS" "$out_dir/npm-run-validate.log"
 }
 run_private_fixture_smoke() {
-  local cycle_dir stamp out_rel cmd rc verify_log
+  local cycle_dir stamp out_rel cmd quoted_bundle_path quoted_output_path rc verify_log
   cycle_dir="$1"
   stamp="$(date -u +%Y%m%dT%H%M%SZ)"; out_rel="artifacts/private-paper-mode/standard-paper-evaluation-${stamp}.report.json"; PAPER_LOCAL_REPORT_PATH="$out_rel"
-  cmd="node cli.js local-report --bundle ${LOCAL_FIXTURE_BUNDLE} --output ${out_rel}"; printf '%s\n' "$cmd" > "$cycle_dir/local-fixture-command.txt"
+  quoted_bundle_path="$(shell_quote_for_bash_lc "$LOCAL_FIXTURE_BUNDLE")"
+  quoted_output_path="$(shell_quote_for_bash_lc "$out_rel")"
+  cmd="node cli.js local-report --bundle ${quoted_bundle_path} --output ${quoted_output_path}"; printf '%s\n' "$cmd" > "$cycle_dir/local-fixture-command.txt"
   automation_run_shell_command "private_fixture_smoke" "$cmd" "$PAPER_COMMAND_TIMEOUT_SECONDS" "$cycle_dir/local-fixture-smoke.log" || return 1
   verify_log="$cycle_dir/local-fixture-artifact-validation.log"
   node - "$out_rel" > "$verify_log" 2>&1 <<'NODE'
@@ -258,10 +263,12 @@ NODE
   rc=$?; [[ "$rc" -eq 0 ]] || { automation_log "private_fixture_artifact_validation_failed log=$verify_log"; return 1; }
 }
 run_pinned_bundle_smoke() {
-  local cycle_dir stamp out_rel cmd rc verify_log
+  local cycle_dir stamp out_rel cmd quoted_bundle_path quoted_output_path rc verify_log
   cycle_dir="$1"
   stamp="$(date -u +%Y%m%dT%H%M%SZ)"; out_rel="artifacts/private-paper-mode/pinned-interface-smoke-${stamp}.report.json"; PAPER_PINNED_REPORT_PATH="$out_rel"
-  cmd="node cli.js local-report --bundle ${PINNED_BUNDLE_PATH} --output ${out_rel} --pinned-intake"; printf '%s\n' "$cmd" > "$cycle_dir/pinned-bundle-command.txt"
+  quoted_bundle_path="$(shell_quote_for_bash_lc "$PINNED_BUNDLE_PATH")"
+  quoted_output_path="$(shell_quote_for_bash_lc "$out_rel")"
+  cmd="node cli.js local-report --bundle ${quoted_bundle_path} --output ${quoted_output_path} --pinned-intake"; printf '%s\n' "$cmd" > "$cycle_dir/pinned-bundle-command.txt"
   automation_run_shell_command "pinned_bundle_smoke" "$cmd" "$PAPER_COMMAND_TIMEOUT_SECONDS" "$cycle_dir/pinned-bundle-smoke.log" || return 1
   verify_log="$cycle_dir/pinned-bundle-artifact-validation.log"
   node - "$out_rel" > "$verify_log" 2>&1 <<'NODE'

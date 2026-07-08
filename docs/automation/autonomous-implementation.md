@@ -14,7 +14,7 @@ bash ./run-autonomous-implementation.sh \
   --fallback-model none
 ```
 
-For the current approved automation-maintenance task only, the implementation controller must be allowed to touch the specific protected automation file required by the task. Use this command for the paper-controller pinned-bundle shell-command hardening:
+For explicit approved automation-maintenance tasks only, the implementation controller may be allowed to touch the specific protected automation files required by the task. Example:
 
 ```bash
 . "$HOME/.nvm/nvm.sh" && nvm use 20

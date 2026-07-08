@@ -36,7 +36,7 @@ SURE-002A local interface and engine bootstrap = complete for local fixtures
 SURE-001 hardening = complete
 SURE-002B private paper-mode intake/reporting backlog = complete for repo-local work
 local deterministic contracts, fixture readers, paper math, simulation state machines, settlement replay consumption, private reports, and offline fixture-to-artifact reporting = implemented
-real upstream evaluation = blocked until paper-controller pinned-bundle shell hardening lands and Federico provides the pinned betting-win contract/export interface
+real upstream evaluation = blocked until Federico provides the pinned betting-win contract/export interface
 ```
 
 
@@ -103,7 +103,7 @@ Compatibility wrappers under `commands/run-sure-*` still exist for old muscle me
 
 The repository must fail closed if it contains provider SDK/client imports, provider URLs, wallet/signer/order/transaction paths, direct `betting-win` database access, `core.*` migrations, manually vendored generated contracts, malformed autonomous cycle status, nonzero Codex exit, or failed post-cycle validation.
 
-Federico asked for the maximum safe local implementation possible, and the retained SURE-002A local backlog in `docs/015_local_engine_implementation_backlog.md` is now exhausted. Do not invent more local engine work. The next product step requires Federico's pinned `betting-win` contract/export interface. Before using a real pinned bundle, the next repo-local tooling step is paper-controller pinned-bundle shell-command hardening. Because that task is explicit automation maintenance touching a protected root controller, launch it with `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`; otherwise autonomous runs should repair only concrete repo-local validation/tooling defects or stop with `AUTONOMOUS_GOAL_COMPLETE=yes`.
+Federico asked for the maximum safe local implementation possible, and the retained SURE-002A local backlog in `docs/015_local_engine_implementation_backlog.md` is now exhausted. Do not invent more local engine work. The next product step requires Federico's pinned `betting-win` contract/export interface. The paper controller now shell-quotes operator-provided pinned-bundle paths before `bash -lc` execution and validates `SUREBET_REQUIRE_PINNED_BUNDLE` as strict `0` or `1`; autonomous runs should now repair only concrete repo-local validation/tooling defects or stop with `AUTONOMOUS_GOAL_COMPLETE=yes`.
 
 
 ## Private paper-mode continuation
@@ -120,7 +120,7 @@ docs/018_private_paper_mode_runbook.md
 
 This phase is still private and paper-only. It accepts only repo-local JSON bundles, writes only under `artifacts/private-paper-mode/`, and keeps `accepted=false`. The freeze gate is: `npm run validate` passes, local fixture smoke passes, and real upstream evaluation still requires Federico's pinned bundle. Provider connections, execution, public reports, profitability claims, and live-readiness claims remain prohibited.
 
-The repo-local private paper-mode backlog is complete. The known current follow-up before using a real `SUREBET_PINNED_BUNDLE` is paper-controller pinned-bundle shell-command hardening: the docs must not treat real pinned-bundle evaluation as ready until the controller quotes operator-provided bundle paths fail-closed. This is an automation-maintenance task and requires the protected-file exception in the implementation command. Generic autonomous feature runs should still stop with `AUTONOMOUS_GOAL_COMPLETE=yes` unless a concrete repo-local validation/tooling defect is confirmed.
+The repo-local private paper-mode backlog is complete. Real pinned-bundle evaluation is still blocked on Federico's repo-local pinned `betting-win` bundle/interface, but the controller-side command hardening is complete: operator-provided bundle paths are shell-quoted before `bash -lc` execution and `SUREBET_REQUIRE_PINNED_BUNDLE` fails closed unless it is exactly `0` or `1`. Generic autonomous feature runs should still stop with `AUTONOMOUS_GOAL_COMPLETE=yes` unless a concrete repo-local validation/tooling defect is confirmed.
 
 ## Standard automation commands
 
@@ -137,16 +137,17 @@ Canonical root controller commands, after activating Node 20 in the parent shell
 
 ```bash
 . "$HOME/.nvm/nvm.sh" && nvm use 20
-AUTOMATION_ALLOW_PROTECTED_CHANGES=1 ./run-autonomous-implementation.sh --duration 72h --model cli-default --fallback-model none
+./run-autonomous-implementation.sh --duration 72h --model cli-default --fallback-model none
 ./run-paper-evaluation.sh --duration 72h --interval 5m --adaptive --keep-monitoring-when-ready --model cli-default --fallback-model none
 ./run-autonomous-bugfix.sh --duration 72h --model cli-default --fallback-model none --handover-autonomous-implementation
 ```
 
 `run-paper-evaluation.sh` replaces any `run-paper-evaluation-12h.sh` naming. It is
-configured for repo-local private fixture evaluation. Its pinned-bundle
-branch is reserved until the known shell-command quoting and strict pinned-bundle boolean hardening lands. It must not be
-used as real upstream acceptance evidence until Federico provides the pinned
-`betting-win` bundle. All `run-*` scripts write root `artifacts.zip` before exit.
+configured for repo-local private fixture evaluation and optional repo-local
+pinned-bundle intake when `SUREBET_PINNED_BUNDLE` is explicitly provided. It
+must not be used as real upstream acceptance evidence until Federico provides
+the pinned `betting-win` bundle. All `run-*` scripts write root `artifacts.zip`
+before exit.
 Protected automation files are documented under `docs/automation/` and must not be
 changed by normal autonomous work.
 

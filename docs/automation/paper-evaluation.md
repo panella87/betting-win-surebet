@@ -76,15 +76,13 @@ write .automation/paper-mode-to-autonomous-implementation.env when source work i
 
 Pinned bundle mode status:
 
-The controller contains a pinned-bundle path, but real `SUREBET_PINNED_BUNDLE`
-operator use is **not the next safe command yet**. A repo-local automation
-hardening item remains: quote operator-provided pinned-bundle paths before any
-`bash -lc` command construction and validate `SUREBET_REQUIRE_PINNED_BUNDLE` as
-strict `0` or `1`. Until that hardening lands, use this controller for private
-fixture smoke only and do not run a real pinned-bundle command.
+The controller now shell-quotes operator-provided pinned-bundle paths before any
+`bash -lc` command construction and validates `SUREBET_REQUIRE_PINNED_BUNDLE` as
+strict `0` or `1`. Real upstream evaluation is still blocked because Federico's
+repo-local pinned `betting-win` export bundle is still required.
 
-Future pinned-bundle command after that hardening and after Federico supplies a
-repo-local pinned `betting-win` export:
+Pinned-bundle command after Federico supplies a repo-local pinned `betting-win`
+export:
 
 ```bash
 . "$HOME/.nvm/nvm.sh" && nvm use 20
@@ -92,7 +90,7 @@ SUREBET_PINNED_BUNDLE=path/to/pinned-betting-win-export.json \
   bash ./run-paper-evaluation.sh --duration 72h --interval 5m --adaptive --model cli-default --fallback-model none
 ```
 
-Future fail-closed pinned requirement after that hardening:
+Fail-closed pinned requirement:
 
 ```bash
 . "$HOME/.nvm/nvm.sh" && nvm use 20

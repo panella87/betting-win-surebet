@@ -104,6 +104,8 @@ test('paper evaluation controller exposes canonical no-service private fixture a
     '--adaptive','--keep-monitoring-when-ready','--model MODEL','--fallback-model MODEL','--repo-dir PATH',
     '--check-only','--codex-phase-timeout VALUE','--validation-timeout VALUE','SUREBET_PINNED_BUNDLE',
     'SUREBET_REQUIRE_PINNED_BUNDLE','paper_service_lifecycle=none',
+    'validate_require_pinned_bundle_flag()','shell_quote_for_bash_lc()',
+    "SUREBET_REQUIRE_PINNED_BUNDLE must be exactly 0 or 1",
     'PAPER_EVALUATION_READY_PRIVATE_FIXTURE_ONLY_BLOCKED_ON_PINNED_BUNDLE',
     'PAPER_EVALUATION_PINNED_BUNDLE_ACCEPTED_PRIVATE_REPORT_WRITTEN',
     'PAPER_EVALUATION_BLOCKED_INVALID_PINNED_BUNDLE','paper-mode-to-autonomous-implementation.env',

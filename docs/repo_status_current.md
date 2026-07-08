@@ -4,7 +4,7 @@
 repo=betting-win-surebet
 current_task=SURE-002B_PRIVATE_PAPER_MODE_INTAKE
 current_task_status=complete_repo_local_private_paper_mode_backlog_blocked_on_pinned_interface
-next_allowed_task=paper-controller pinned-bundle shell-command hardening before real SUREBET_PINNED_BUNDLE use; otherwise wait for Federico's pinned betting-win contract/export interface before real upstream evaluation
+next_allowed_task=wait for Federico's pinned betting-win contract/export interface before real upstream evaluation; otherwise repair only concrete repo-local validation/tooling defects
 repo_role=surebet_strategy_execution_repo
 strategy_family=surebet_complete_set_only
 provider_truth_owner=betting-win
@@ -50,7 +50,7 @@ Canonical daily entrypoints are root scripts, not historical phase wrappers:
 cd ~/app_testing/betting-win-surebet && . "$HOME/.nvm/nvm.sh" && nvm use 20 && bash ./run-paper-evaluation.sh --duration 72h --interval 5m --adaptive --keep-monitoring-when-ready --model cli-default --fallback-model none
 ```
 
-After the same parent-shell Node activation, use `AUTOMATION_ALLOW_PROTECTED_CHANGES=1 bash ./run-autonomous-implementation.sh --duration 72h --model cli-default --fallback-model none` for the confirmed paper-controller pinned-bundle shell-command hardening because it is explicit automation maintenance touching a protected root controller. For ordinary repo-local validation/tooling/source defects, omit `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`. Use `bash ./run-autonomous-bugfix.sh --duration 72h --model cli-default --fallback-model none --handover-autonomous-implementation` when the task is source bug audit and handoff.
+After the same parent-shell Node activation, use `bash ./run-autonomous-implementation.sh --duration 72h --model cli-default --fallback-model none` for ordinary repo-local validation/tooling/source defects. Use `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` only for future explicit automation-maintenance tasks that are approved to touch protected files. Use `bash ./run-autonomous-bugfix.sh --duration 72h --model cli-default --fallback-model none --handover-autonomous-implementation` when the task is source bug audit and handoff.
 
 
 ```text
@@ -120,9 +120,8 @@ root_artifacts_zip=required_before_run_script_exit
 stop_autonomous_run_helper=removed
 ```
 
-The current safe automation-maintenance command for the known paper-controller hardening task, after parent-shell Node activation, is
-`AUTOMATION_ALLOW_PROTECTED_CHANGES=1 ./run-autonomous-implementation.sh --model cli-default --fallback-model none`. For ordinary source implementation, omit `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`. The current safe paper command, after the same activation, is
-`./run-paper-evaluation.sh --duration 72h --interval 5m --adaptive --keep-monitoring-when-ready --model cli-default --fallback-model none`. It is limited to private fixture smoke. Real upstream private paper evaluation remains blocked until Federico provides the pinned `betting-win` bundle, and real pinned-bundle use must wait for the known shell-command quoting and strict pinned-bundle boolean hardening in `run-paper-evaluation.sh`.
+The current safe paper command, after parent-shell Node activation, is
+`./run-paper-evaluation.sh --duration 72h --interval 5m --adaptive --keep-monitoring-when-ready --model cli-default --fallback-model none`. It runs private fixture smoke by default and can run repo-local pinned-bundle intake only when `SUREBET_PINNED_BUNDLE` is explicitly provided. Real upstream private paper evaluation remains blocked until Federico provides the pinned `betting-win` bundle/interface.
 
 
 ## Automation helper standardization

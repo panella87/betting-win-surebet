@@ -44,15 +44,13 @@ The result is private, fixture-only, and not real upstream evidence. A passing f
 
 ## Pinned bundle smoke
 
-Current status: this section is a future operator path, not the next safe command.
-Before using a real `SUREBET_PINNED_BUNDLE`, first complete the known
-paper-controller hardening item: shell-quote the operator-provided bundle path
-before any `bash -lc` command construction and validate
-`SUREBET_REQUIRE_PINNED_BUNDLE` as strict `0` or `1`.
+Current status: the controller hardening is complete. `run-paper-evaluation.sh`
+now shell-quotes the operator-provided bundle path before any `bash -lc`
+command construction and validates `SUREBET_REQUIRE_PINNED_BUNDLE` as strict
+`0` or `1`.
 
-After that hardening lands and Federico provides a pinned `betting-win` export
-bundle, place the bundle under the repo working tree or pass a repo-local path.
-Then run:
+After Federico provides a pinned `betting-win` export bundle, place the bundle
+under the repo working tree or pass a repo-local path. Then run:
 
 ```bash
 . "$HOME/.nvm/nvm.sh" && nvm use 20
@@ -64,8 +62,7 @@ The controller must fail closed on missing paths, remote URLs, provider URLs,
 credentials, execution language, or outputs outside `artifacts/private-paper-mode/`.
 `commands/run-pinned-interface-smoke.sh` remains as a one-shot compatibility
 helper and must rely on CLI containment instead of pre-creating artifact
-directories. Do not use the compatibility helper for a real pinned bundle until
-the same hardening has landed.
+directories.
 
 If the report is blocked, keep the artifact and stop. Do not loosen validation,
 do not retry with remote inputs, and do not reinterpret the result as live or
@@ -113,8 +110,6 @@ Use the canonical root supervisor for long private fixture observation:
 
 This standardized no-service supervisor validates source, runs the configured
 repo-local private fixture smoke, writes local artifacts, sends one final
-Telegram notification, and never starts/stops services. The pinned-bundle path is
-reserved until the shell-command quoting and strict pinned-bundle boolean
-hardening described above has landed. This controller is not a replacement for
-Federico's pinned bundle and must not be interpreted as real upstream acceptance
-evidence.
+Telegram notification, and never starts/stops services. Its pinned-bundle path
+is controller-safe now, but this controller is not a replacement for Federico's
+pinned bundle and must not be interpreted as real upstream acceptance evidence.

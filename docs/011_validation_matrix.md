@@ -19,7 +19,7 @@ npm run validate
 | `python3 scripts/validate_no_provider_connections.py` | Provider dependencies, provider imports, dynamic imports, `require(...)`, or provider URLs creep into the codebase. |
 | `python3 scripts/validate_no_execution_paths.py` | Executable `src/` code starts describing wallet, signer, order, transaction, cashout, redemption, or split/merge execution paths. |
 | `python3 scripts/validate_fixture_integrity.py` | Placeholder fixture directories stop being empty or the local pinned-interface placeholder starts looking like a real upstream export before Federico provides the real interface. |
-| `python3 scripts/validate_master_plan.py` | Current stage/status docs drift away from completed SURE-002B private paper-mode authority, imply real upstream readiness, omit the known pinned-bundle shell-hardening blocker, or stop preserving the missing pinned `betting-win` interface blocker. |
+| `python3 scripts/validate_master_plan.py` | Current stage/status docs drift away from completed SURE-002B private paper-mode authority, imply real upstream readiness, omit the still-missing pinned `betting-win` interface blocker, or regress the paper-controller pinned-bundle hardening status. |
 | `python3 scripts/validate_executable_bits.py` | Required repo-local operator scripts lose executable permission and fail only at handoff/runtime time. |
 | `python3 scripts/validate_artifact_hygiene.py` | The source tree or generated archives start carrying local secrets, generated archives, logs, temp files, caches, dependencies, or build output. |
 | `python3 scripts/validate_node_runtime_loader.py` | Root controllers or compatibility wrappers start sourcing NVM, silently rewrite PATH, or stop inheriting the active parent-shell Node runtime. |
@@ -67,5 +67,5 @@ notes.
 | Gate | Exact risk it controls |
 | --- | --- |
 | `python3 scripts/validate_local_engine_backlog_contract.py` | The repo claims the SURE-002A local backlog is still active after it is exhausted, or the pinned-interface handoff docs drift away from the blocked-real-upstream truth. |
-| `python3 scripts/validate_private_paper_mode_backlog_contract.py` | Private paper-mode intake docs, commands, and autonomous continuation drift into provider/live/execution scope, stop describing the completed SURE-002B backlog, or treat real pinned-bundle use as ready before the known paper-controller pinned-bundle shell hardening lands. |
+| `python3 scripts/validate_private_paper_mode_backlog_contract.py` | Private paper-mode intake docs, commands, and autonomous continuation drift into provider/live/execution scope, stop describing the completed SURE-002B backlog, or stop preserving the remaining Federico pinned-interface blocker after the paper-controller hardening landed. |
 | `python3 scripts/validate_three_repo_surebet_boundary.py` | The three-repo surebet boundary drifts: this repo stops being the surebet strategy/backtest/paper repo, starts claiming provider truth, omits separate-account policy, or fails to keep future live execution behind an explicit gate. |
