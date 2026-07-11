@@ -307,6 +307,105 @@ automation_check_protected_unchanged() {
   return 0
 }
 
+automation_quote_argv() {
+  local first=1 arg
+  for arg in "$@"; do
+    if [[ "$first" == "1" ]]; then
+      first=0
+    else
+      printf ' '
+    fi
+    printf '%q' "$arg"
+  done
+  printf '\n'
+}
+
+automation_run_argv_command() {
+  local label="$1" timeout_seconds="$2" out_file="$3" rc command_text
+  shift 3
+  (( $# > 0 )) || {
+    automation_log "command_refused label=$label reason=empty_argv"
+    return 2
+  }
+  mkdir -p "$(dirname "$out_file")"
+  command_text="$(automation_quote_argv "$@")"
+  automation_log "command_start label=$label timeout=${timeout_seconds}s command=$command_text"
+  set +e
+  timeout --foreground "${timeout_seconds}s" "$@" > "$out_file" 2>&1
+  rc=$?
+  set -e
+  if [[ "$rc" -eq 0 ]]; then
+    automation_log "command_pass label=$label"
+  else
+    automation_log "command_fail label=$label exit=$rc log=$out_file"
+  fi
+  return "$rc"
+}
+
+automation_source_path_is_excluded() {
+  local rel="${1#./}"
+  case "$rel" in
+    .git|.git/*|artifacts|artifacts/*|node_modules|node_modules/*|dist|dist/*|coverage|coverage/*|tmp|tmp/*|.tmp|.tmp/*|.cache|.cache/*|\
+    .automation/locks|.automation/locks/*|.automation/corrupt|.automation/corrupt/*|\
+    .automation/paper-mode-to-autonomous-implementation.env|.automation/paper-mode-handover.env|\
+    .automation/autonomous-implementation-handover.env|.automation/autonomous-implementation-handover.md|\
+    .automation/bugfix-to-autonomous-implementation.env|.automation/bugfix-to-autonomous-implementation.md|\
+    .automation/bugfix-mode-handover.env|.codex_current_artifact_dir|artifacts.zip|\
+    *.zip|*.tar|*.tgz|*.tar.gz|*.log|*.pid|*.sqlite|*.sqlite3|*.db|*.pyc)
+      return 0
+      ;;
+  esac
+  return 1
+}
+
+automation_source_tree_fingerprint() {
+  local root="${1:-${AUTOMATION_REPO_ROOT:-}}" list_file payload_file rel digest rc=0
+  [[ -n "$root" && -d "$root" ]] || {
+    echo "ERROR: source fingerprint requires an existing repository root" >&2
+    return 1
+  }
+  root="$(cd "$root" && pwd -P)" || return 1
+  list_file="$(mktemp "${TMPDIR:-/tmp}/automation-source-list.XXXXXX")" || return 1
+  payload_file="$(mktemp "${TMPDIR:-/tmp}/automation-source-payload.XXXXXX")" || {
+    rm -f "$list_file"
+    return 1
+  }
+
+  if git -C "$root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    {
+      git -C "$root" ls-files -z
+      git -C "$root" ls-files -z --others --exclude-standard
+    } | sort -zu > "$list_file" || rc=$?
+  else
+    (cd "$root" && find . -type f -print0 | sort -z) > "$list_file" || rc=$?
+  fi
+  if [[ "$rc" -ne 0 ]]; then
+    rm -f "$list_file" "$payload_file"
+    return "$rc"
+  fi
+
+  : > "$payload_file"
+  while IFS= read -r -d '' rel; do
+    rel="${rel#./}"
+    automation_source_path_is_excluded "$rel" && continue
+    [[ -f "$root/$rel" ]] || continue
+    digest="$(sha256sum -- "$root/$rel")" || {
+      rm -f "$list_file" "$payload_file"
+      return 1
+    }
+    digest="${digest%% *}"
+    printf '%s\0%s\0' "$rel" "$digest" >> "$payload_file"
+  done < "$list_file"
+
+  digest="$(sha256sum -- "$payload_file")" || {
+    rm -f "$list_file" "$payload_file"
+    return 1
+  }
+  digest="${digest%% *}"
+  printf '%s\n' "$digest"
+  rm -f "$list_file" "$payload_file"
+}
+
 automation_run_shell_command() {
   local label="$1" command_text="$2" timeout_seconds="$3" out_file="$4" rc
   automation_log "command_start label=$label timeout=${timeout_seconds}s command=$command_text"

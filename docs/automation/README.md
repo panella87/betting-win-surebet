@@ -34,7 +34,7 @@ Protected automation files are read-only during normal implementation, paper eva
 status/artifact checks, root artifacts refresh, and
 `.automation/lib/telegram_notify.sh` final notifications. See `docs/automation/telegram-notifications.md` for the HTML-card contract and dry-run test mode. The paper controller is
 adapted for this no-service repo: it runs private fixture smoke and never starts
-or stops services. The pinned-bundle branch may be used only after Federico provides a repo-local pinned bundle; the paper controller shell-quotes that path and strictly validates `SUREBET_REQUIRE_PINNED_BUNDLE`.
+or stops services. The pinned-bundle branch may be used only after Federico provides a repo-local pinned bundle; the paper controller preflights that path before run creation, executes known report commands as direct argv, verifies source immutability, and strictly validates `SUREBET_REQUIRE_PINNED_BUNDLE`.
 
 `update_git.sh` defaults to `--pull` and uses `git pull --ff-only --autostash`. It
 supports `--acp` as shorthand for add/commit/push, reads `GITHUB_TOKEN` from the

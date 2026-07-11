@@ -124,7 +124,7 @@ Produce deterministic private reports for candidates, blockers, residual exposur
 
 ## Autonomous implementation rules
 
-The autonomous controller may work only on the first safe unchecked SURE phase or documented local implementation backlog. SURE-001 docs/tooling/validator hardening is complete, the safe repo-local SURE-002A backlog is complete, and the safe repo-local SURE-002B private paper-mode backlog is complete. Autonomous work should therefore stop with `BLOCKED=yes` when no repo-local validation/tooling defect exists and the only remaining active blocker is the missing pinned `betting-win` interface. Use `AUTONOMOUS_GOAL_COMPLETE=yes` only for a bounded repo-local task that is genuinely complete; do not use it to imply the full product blueprint is done.
+The autonomous controller may work only on the first safe unchecked SURE phase or documented local implementation backlog. SURE-001 docs/tooling/validator hardening is complete, the safe repo-local SURE-002A backlog is complete, and the safe repo-local SURE-002B private paper-mode backlog is complete. Autonomous work should therefore stop with `AUTONOMOUS_GOAL_COMPLETE=yes` unless a repo-local validation/tooling defect reopens safe work; real upstream evaluation remains blocked on the pinned `betting-win` interface.
 
 It must not connect to providers, create execution modules, add wallet/signer/order dependencies, read or mutate `betting-win` databases, copy provider adapters from another repo, claim readiness based on reciprocal odds only, or mark later phases complete without pinned upstream evidence.
 
@@ -164,7 +164,7 @@ accepted=false
 
 This phase still requires Federico's pinned `betting-win` export/interface before real upstream evaluation. It may not add provider connections, direct database reads, wallet/signer/order code, public signals, profitability claims, or execution readiness. The live execution prohibition is the current safety gate; future surebet execution decisions require a separate ADR and new validators.
 
-Current retained state: the repo-local SURE-002B backlog is complete, the freeze gate is documented, and the first remaining non-local step still requires Federico's real pinned `betting-win` bundle. Placeholder paths are invalid and fail preflight.
+Current retained state: the repo-local SURE-002B backlog is complete, the freeze gate is documented, and the first remaining non-local step still requires Federico's pinned `betting-win` bundle.
 
 ## Automation operating model
 
@@ -182,7 +182,7 @@ run-autonomous-bugfix.sh
 
 `run-paper-evaluation.sh` is the canonical private paper supervisor and replaces
 `run-paper-evaluation-12h.sh` naming. For the current `SURE-002B` freeze state it
-is configured only for repo-local private fixture evaluation. Its pinned-bundle branch is shell-quoted and strict about `SUREBET_REQUIRE_PINNED_BUNDLE`, but must not be used with real operator input unless Federico provides a repo-local pinned `betting-win` bundle. It does not
+is configured only for repo-local private fixture evaluation. Its pinned-bundle branch uses fail-fast repo-local JSON path preflight, direct-argv report execution, source immutability checks, and strict `SUREBET_REQUIRE_PINNED_BUNDLE`, but must not be used with real operator input unless the required repo-local `betting-win` export exists. It does not
 start services, stop services, call providers, or mutate live/runtime state.
 
 Protected automation files are documented in `docs/automation/PROTECTED_AUTOMATION_FILES.md`.

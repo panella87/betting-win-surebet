@@ -44,6 +44,25 @@ Artifacts first
 source second
 ```
 
+
+## Read-only evidence and mutation safety
+
+The artifact hint is resolved before the current run directory is created. This
+prevents the controller from selecting its own new
+`artifacts/autonomous_bugfix_*` directory. This prevents a new empty run from being
+selected as the retained evidence source when no root `artifacts.zip` is present.
+
+Source immutability is enforced with content fingerprints over tracked files plus
+untracked non-ignored files. Runtime artifacts, locks, generated output, archives,
+and handoff files are excluded. `git status --short` snapshots remain diagnostic
+only: they are not the mutation security gate because an already-dirty file can be
+edited again without changing its status line. A content change before, during, or
+after validation blocks the audit.
+
+Final stdout always exposes machine-readable `run_dir`, `final_status`,
+`stop_reason`, `final_exit_code`, and `cycles_completed` fields for parent tools and
+post-run auditing.
+
 When confirmed bugs require source work and
 `--handover-autonomous-implementation` is set, the controller writes:
 

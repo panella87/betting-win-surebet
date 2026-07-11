@@ -107,7 +107,7 @@ Use the canonical root controller after activating Node 20 in the parent shell:
 bash ./run-paper-evaluation.sh --duration 72h --interval 5m --adaptive --keep-monitoring-when-ready --model cli-default --fallback-model none
 ```
 
-for repo-local private fixture paper checks. The paper controller now shell-quotes pinned-bundle paths and strictly validates `SUREBET_REQUIRE_PINNED_BUNDLE`; for ordinary repo-local source defects, omit `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`. `commands/run-sure-*` wrappers are compatibility wrappers only. Use `commands/run-pinned-interface-smoke.sh` only when Federico provides a repo-local pinned `betting-win` export bundle, and do not treat pinned-bundle output as live readiness or profitability evidence.
+for repo-local private fixture paper checks. The paper controller now preflights pinned-bundle paths before run creation, uses direct argv for known report commands, verifies source immutability, and strictly validates `SUREBET_REQUIRE_PINNED_BUNDLE`; for ordinary repo-local source defects, omit `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`. `commands/run-sure-*` wrappers are compatibility wrappers only. Use `commands/run-pinned-interface-smoke.sh` only when Federico provides a repo-local pinned `betting-win` export bundle, and do not treat pinned-bundle output as live readiness or profitability evidence.
 
 
 ## Legacy surebet import archive
@@ -122,13 +122,6 @@ active_authority=no
 
 The active authority remains the three-repo surebet boundary docs.
 
-
-## Blueprint completion clarification
-
-The full surebet product blueprint is not complete. The completed scope is the repo-local fixture/private-paper implementation baseline only. Real upstream evaluation remains blocked until a real repo-local pinned `betting-win` export/interface is provided. Autonomous implementation should write `BLOCKED=yes`, not `AUTONOMOUS_GOAL_COMPLETE=yes`, when the only remaining active blocker is that missing external interface.
-
-The paper controller now also fails fast when `SUREBET_PINNED_BUNDLE` is configured as a placeholder, remote URL, path outside the repo, symlink, directory, non-JSON path, or missing file.
-
 ## Standard automation status
 
 ```text
@@ -136,6 +129,11 @@ automation_contract=standard_root_scripts_v1
 implementation_controller=run-autonomous-implementation.sh standardized_with_canonical_flags_and_telegram
 paper_controller=run-paper-evaluation.sh standardized_with_telegram_no_service_private_fixture_pinned_bundle
 bugfix_controller=run-autonomous-bugfix.sh standardized_audit_handoff_with_telegram
+bugfix_mutation_guard=content_fingerprint_detects_already_dirty_file_edits
+bugfix_artifact_hint=resolved_before_current_run_directory_creation
+paper_input_preflight=existing_regular_non_symlink_repo_local_json_before_run_creation
+paper_known_command_execution=direct_argv
+paper_source_mutation_guard=enabled
 paper_supported=repo_local_private_fixture_only
 paper_real_upstream=blocked_until_federico_pinned_betting_win_interface
 lock_dir=.automation/locks
@@ -143,7 +141,7 @@ root_artifacts_zip=required_before_run_script_exit
 stop_autonomous_run_helper=removed
 ```
 
-`run-autonomous-implementation.sh`, `run-autonomous-bugfix.sh`, `run-paper-evaluation.sh`, and `run-paper-autopilot.sh` now use the standardized root-controller flag, artifact, exit-code, and Telegram final-notification contract. The paper controller is surebet-specific and no-service: it validates source, runs private fixture smoke, shell-quotes any repo-local pinned-bundle path before execution, strictly validates `SUREBET_REQUIRE_PINNED_BUNDLE`, and never starts/stops services or calls providers. The private paper-mode backlog remains complete; real upstream evaluation still requires Federico's pinned bundle.
+`run-autonomous-implementation.sh`, `run-autonomous-bugfix.sh`, `run-paper-evaluation.sh`, and `run-paper-autopilot.sh` now use the standardized root-controller flag, artifact, exit-code, and Telegram final-notification contract. The paper controller is surebet-specific and no-service: it preflights any pinned-bundle path before run creation, executes known local-report commands as direct argv, verifies source/protected-file immutability, strictly validates `SUREBET_REQUIRE_PINNED_BUNDLE`, and never starts/stops services or calls providers. The private paper-mode backlog remains complete; real upstream evaluation still requires Federico's pinned bundle.
 
 
 ## Automation helper standardization
@@ -156,7 +154,9 @@ progress_helpers=current_artifact_layout
 shared_telegram_helper=.automation/lib/telegram_notify.sh
 run_autonomous_implementation=standardized_with_canonical_flags_and_telegram
 run_autonomous_bugfix=standardized_audit_handoff_with_telegram
+run_autonomous_bugfix_mutation_guard=content_fingerprint
 run_paper_evaluation_standardization=standardized_with_telegram_no_service_private_fixture_pinned_bundle
+run_paper_evaluation_input_preflight=fail_fast_before_expensive_validation
 ```
 
 

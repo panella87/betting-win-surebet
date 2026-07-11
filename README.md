@@ -122,13 +122,6 @@ This phase is still private and paper-only. It accepts only repo-local JSON bund
 
 The repo-local private paper-mode backlog is complete, and the paper controller now quotes pinned-bundle paths before executing shell commands and validates `SUREBET_REQUIRE_PINNED_BUNDLE` as strict `0` or `1`. Generic autonomous feature runs should still stop with `AUTONOMOUS_GOAL_COMPLETE=yes` unless a concrete repo-local validation/tooling defect is confirmed. Real upstream evaluation still requires Federico's repo-local pinned `betting-win` bundle.
 
-
-### Current blueprint status
-
-The full surebet product blueprint is not complete. The repo-local fixture/private-paper baseline is complete, but real upstream evaluation is still blocked until Federico provides a real repo-local pinned `betting-win` export/interface. Autonomous implementation must not report the full blueprint as complete merely because local fixtures pass; if no safe repo-local defect exists and the pinned interface is missing, the correct classified state is blocked on external input.
-
-`SUREBET_PINNED_BUNDLE` must point to an existing repo-local `.json` file. Placeholder values such as `path/to/pinned-betting-win-export.json`, remote URLs, paths outside the repo, symlinks, directories, and non-JSON files fail preflight before paper smoke work is started.
-
 ## Standard automation commands
 
 Canonical helper commands:
@@ -151,7 +144,7 @@ Canonical root controller commands, after activating Node 20 in the parent shell
 ```
 
 `run-paper-evaluation.sh` replaces any `run-paper-evaluation-12h.sh` naming. It is
-configured for repo-local private fixture evaluation. Its pinned-bundle branch is shell-quoted and strict about `SUREBET_REQUIRE_PINNED_BUNDLE`, but it must not be used as real upstream acceptance evidence until Federico provides the repo-local pinned `betting-win` bundle. All `run-*` scripts write root `artifacts.zip` before exit.
+configured for repo-local private fixture evaluation. Its pinned-bundle branch now preflights an existing regular, non-symlink, repo-local JSON path before run creation, executes known report commands as direct argv, and remains strict about `SUREBET_REQUIRE_PINNED_BUNDLE`; it must not be used as real upstream acceptance evidence until the required repo-local `betting-win` export exists. All `run-*` scripts write root `artifacts.zip` before exit.
 Protected automation files are documented under `docs/automation/` and must not be
 changed by normal autonomous work.
 

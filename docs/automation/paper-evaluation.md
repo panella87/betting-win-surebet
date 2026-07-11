@@ -3,7 +3,9 @@
 `run-paper-evaluation.sh` is the standardized no-service private paper controller for
 this repo. It follows the canonical root-controller command surface, lock model,
 exit-code model, and Telegram final notification behavior, but it is adapted to
-`betting-win-surebet`: this repo has no service lifecycle.
+`betting-win-surebet`: this repo has no service lifecycle. It is a single-pass
+controller; `--duration` is a maximum controller budget, not a promise to monitor or
+sleep for 72 hours, and `--interval` remains workflow-compatibility metadata.
 
 Normal command:
 
@@ -60,6 +62,7 @@ writes artifacts/paper_evaluation_<timestamp>/
 writes final-summary.md
 creates/refreshed root artifacts.zip only at finalization
 sends one final Telegram notification through .automation/lib/telegram_notify.sh
+prints machine-readable run_dir/final_status/stop_reason/final_exit_code fields
 ```
 
 Surebet-specific paper flow:
@@ -68,15 +71,23 @@ Surebet-specific paper flow:
 validate source with npm run validate
 run no-provider/no-execution/no-direct-DB validators through repo validation
 run a private local fixture paper smoke
+preflight SUREBET_PINNED_BUNDLE before run creation and repo validation
+accept only an existing regular non-symlink repo-local .json bundle
 run pinned-bundle smoke only when SUREBET_PINNED_BUNDLE is explicitly provided
+execute known local-report commands as direct argv, not shell command strings
 write private report artifacts under artifacts/private-paper-mode/
+verify source and protected automation files remain unchanged
 classify the final status deterministically
 write .automation/paper-mode-to-autonomous-implementation.env when source work is needed
 ```
 
 Pinned bundle mode status:
 
-The controller contains a pinned-bundle path. Operator-provided `SUREBET_PINNED_BUNDLE` values are shell-quoted before any `bash -lc` command construction, `SUREBET_REQUIRE_PINNED_BUNDLE` is validated as strict `0` or `1`, and configured bundle paths fail fast when they are missing, remote, outside the repo, non-JSON, symlinked, or not regular files. Use a real pinned-bundle command only after Federico supplies a repo-local pinned `betting-win` export.
+Operator-provided `SUREBET_PINNED_BUNDLE` values are validated before a run
+directory is created or `npm run validate` starts. The path must identify an existing
+regular, non-symlink, repo-local `.json` file. Known `node cli.js local-report` calls
+are executed as direct argv, so no operator path is interpolated into `bash -lc`.
+`SUREBET_REQUIRE_PINNED_BUNDLE` remains strict `0` or `1`.
 
 Pinned-bundle command after Federico supplies a repo-local pinned `betting-win` export:
 
@@ -102,6 +113,7 @@ PAPER_EVALUATION_PINNED_BUNDLE_ACCEPTED_PRIVATE_REPORT_WRITTEN
 PAPER_EVALUATION_BLOCKED_INVALID_PINNED_BUNDLE
 PAPER_EVALUATION_BLOCKED_REPO_VALIDATION_FAILED
 PAPER_EVALUATION_BLOCKED_SOURCE_FIX_REQUIRED
+PAPER_EVALUATION_BLOCKED_SOURCE_MUTATION
 PAPER_EVALUATION_DURATION_ELAPSED_CONTINUE_REQUIRED
 ```
 
@@ -110,7 +122,7 @@ Exit codes:
 ```text
 0 = check-only passed, private fixture smoke accepted, or pinned bundle accepted into a private report
 1 = setup/controller/local validation failure before classified state
-2 = blocked by invalid pinned bundle, tooling, safety, validation, or source-fix requirement
+2 = blocked by invalid pinned bundle, tooling, safety, validation, source mutation, or source-fix requirement
 3 = duration/max-cycle elapsed while continuation remains required
 130 = interrupted
 ```
@@ -147,6 +159,7 @@ Final evidence integrity:
 final-summary.md exit_status must equal the actual process exit status
 Telegram final message uses the same exit_status
 runtime locks and handoffs are operational state, not source authority
+source/protected-file fingerprints must match before a successful terminal state
 ```
 
 A private fixture report is still not real upstream evidence. Real upstream private

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Canonical no-service private paper-evaluation controller for betting-win-surebet.
-# Default duration: 72h. This repo has no paper service lifecycle; evaluation is repo-local fixture/pinned-bundle only.
+# Default duration: 72h. This repo has no paper service lifecycle; evaluation is one repo-local fixture/pinned-bundle pass only.
 set -Eeuo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
@@ -41,6 +41,8 @@ REQUIRE_PINNED_BUNDLE="${SUREBET_REQUIRE_PINNED_BUNDLE-0}"
 LOCAL_FIXTURE_BUNDLE="tests/fixtures/private-paper-mode-smoke/accepted-local-bundle.json"
 PAPER_LOCAL_REPORT_PATH=""
 PAPER_PINNED_REPORT_PATH=""
+INITIAL_SOURCE_FINGERPRINT=""
+FINAL_SOURCE_FINGERPRINT=""
 SCRIPT_NAME="run-paper-evaluation.sh"
 
 usage() {
@@ -49,8 +51,8 @@ Usage:
   ./run-paper-evaluation.sh [options]
 
 Primary options:
-  --duration VALUE               Campaign scheduling budget. Default: 72h.
-  --interval VALUE               Compatibility cadence value. Accepted for standard workflow compatibility.
+  --duration VALUE               Maximum controller budget. Default: 72h. This no-service controller still performs one pass.
+  --interval VALUE               Compatibility cadence value; no waiting occurs in single-pass mode.
   --adaptive                     Compatibility flag. This no-service repo does not delegate wait intervals to Codex.
   --keep-monitoring-when-ready   Accepted for compatibility; no service monitoring is performed in this repo.
   --model MODEL                  Override the Codex model for any future paper handoff/audit integration. Use cli-default for profile default.
@@ -74,14 +76,17 @@ Controller behavior:
   -h, --help                     Show this help.
 
 Environment:
-  SUREBET_PINNED_BUNDLE=path/to/pinned-betting-win-export.json
+  SUREBET_PINNED_BUNDLE=inputs/pinned-bundles/betting-win-export.json
   SUREBET_REQUIRE_PINNED_BUNDLE=1   # accepted values: unset, 0, or 1
 
 Surebet behavior:
+  - Validates any supplied pinned-bundle path before creating a run or starting expensive validation.
+  - Accepts only an existing, regular, non-symlink, repo-local .json pinned bundle.
   - Validates the repo and hard no-provider/no-execution/no-direct-DB boundaries.
   - Runs one repo-local private fixture paper smoke.
-  - Fails fast when SUREBET_PINNED_BUNDLE is missing, remote, outside the repo, non-JSON, a symlink, or not a regular file.
-  - Runs pinned-bundle smoke only when SUREBET_PINNED_BUNDLE is explicitly provided and passes local path preflight.
+  - Runs pinned-bundle smoke only when SUREBET_PINNED_BUNDLE is explicitly provided.
+  - Executes known Node commands as direct argv, never through shell-constructed command text.
+  - Verifies that source and protected automation files remain unchanged.
   - Writes .automation/paper-mode-to-autonomous-implementation.env only for source/validation defects.
   - Does not start, stop, refresh, poll, or mutate any service.
   - Does not source nvm.sh; root run scripts inherit the active parent-shell Node runtime.
@@ -90,7 +95,7 @@ Surebet behavior:
 Exit codes:
   0 = check-only passed, private fixture smoke accepted, or pinned bundle accepted into private report.
   1 = controller/setup/local preflight failure before classified paper state.
-  2 = blocked by invalid pinned bundle, safety, validation, tooling, or source-fix requirement.
+  2 = blocked by invalid pinned bundle, safety, validation, tooling, source mutation, or source-fix requirement.
   3 = duration/max-cycle elapsed while continuation remains required.
   130 = interrupted.
 EOF_USAGE
@@ -99,10 +104,6 @@ EOF_USAGE
 model_display() { if [[ -z "${CODEX_MODEL:-}" || "${CODEX_MODEL:-}" == "cli-default" ]]; then printf 'cli-default'; else printf '%s' "$CODEX_MODEL"; fi; }
 fallback_display() { if [[ -z "${CODEX_FALLBACK_MODEL:-}" ]]; then printf 'none'; else printf '%s' "$CODEX_FALLBACK_MODEL"; fi; }
 parse_positive_integer() { local value="$1" label="$2"; [[ "$value" =~ ^[1-9][0-9]*$ ]] || { echo "ERROR: $label requires a positive integer: $value" >&2; return 2; }; }
-paper_shell_quote() {
-  local value="$1"
-  printf '%q' "$value"
-}
 
 validate_surebet_require_pinned_bundle() {
   case "${REQUIRE_PINNED_BUNDLE:-0}" in
@@ -114,60 +115,71 @@ validate_surebet_require_pinned_bundle() {
   esac
 }
 
-validate_surebet_pinned_bundle_path() {
+validate_pinned_bundle_preflight() {
+  local normalized
   if [[ -z "${PINNED_BUNDLE_PATH:-}" ]]; then
     if [[ "$REQUIRE_PINNED_BUNDLE" == "1" ]]; then
-      echo "ERROR: SUREBET_REQUIRE_PINNED_BUNDLE=1 requires SUREBET_PINNED_BUNDLE to point to an existing repo-local JSON file." >&2
+      echo "ERROR: SUREBET_REQUIRE_PINNED_BUNDLE=1 requires SUREBET_PINNED_BUNDLE to name an existing repo-local JSON file" >&2
       return 2
     fi
     return 0
   fi
 
-  case "$PINNED_BUNDLE_PATH" in
-    *://*)
-      echo "ERROR: SUREBET_PINNED_BUNDLE must be a repo-local filesystem path, not a URL: $PINNED_BUNDLE_PATH" >&2
-      return 2
-      ;;
-  esac
+  automation_require_command python3
+  normalized="$(python3 - "$AUTOMATION_REPO_ROOT" "$PINNED_BUNDLE_PATH" <<'PY'
+from __future__ import annotations
 
-  local candidate_path
-  if [[ "$PINNED_BUNDLE_PATH" == /* ]]; then
-    candidate_path="$PINNED_BUNDLE_PATH"
-  else
-    candidate_path="$AUTOMATION_REPO_ROOT/$PINNED_BUNDLE_PATH"
-  fi
+import os
+from pathlib import Path
+import stat
+import sys
 
-  if [[ ! -e "$candidate_path" ]]; then
-    echo "ERROR: SUREBET_PINNED_BUNDLE must point to an existing repo-local JSON file; got: $PINNED_BUNDLE_PATH" >&2
-    return 2
-  fi
-  if [[ -L "$candidate_path" ]]; then
-    echo "ERROR: SUREBET_PINNED_BUNDLE must be a real file, not a symbolic link: $PINNED_BUNDLE_PATH" >&2
-    return 2
-  fi
-  if [[ ! -f "$candidate_path" ]]; then
-    echo "ERROR: SUREBET_PINNED_BUNDLE must point to a regular JSON file; got: $PINNED_BUNDLE_PATH" >&2
-    return 2
-  fi
-  case "$candidate_path" in
-    *.json) ;;
-    *)
-      echo "ERROR: SUREBET_PINNED_BUNDLE must point to a .json export bundle; got: $PINNED_BUNDLE_PATH" >&2
-      return 2
-      ;;
-  esac
+repo = Path(sys.argv[1]).resolve(strict=True)
+raw = sys.argv[2]
 
-  local repo_real bundle_dir_real bundle_real
-  repo_real="$(cd "$AUTOMATION_REPO_ROOT" && pwd -P)" || return 2
-  bundle_dir_real="$(cd "$(dirname "$candidate_path")" && pwd -P)" || return 2
-  bundle_real="$bundle_dir_real/$(basename "$candidate_path")"
-  case "$bundle_real" in
-    "$repo_real"/*) return 0 ;;
-    *)
-      echo "ERROR: SUREBET_PINNED_BUNDLE must stay inside the repository root; got: $PINNED_BUNDLE_PATH" >&2
-      return 2
-      ;;
-  esac
+def fail(message: str) -> None:
+    print(f"ERROR: SUREBET_PINNED_BUNDLE {message}; got: {raw}", file=sys.stderr)
+    raise SystemExit(2)
+
+if not raw:
+    fail("must not be empty")
+if any(ord(char) < 32 or ord(char) == 127 for char in raw):
+    fail("must not contain control characters")
+if "://" in raw or raw.startswith(("file:", "http:", "https:")):
+    fail("must be a repo-local path, not a URL")
+
+supplied = Path(raw)
+candidate = supplied if supplied.is_absolute() else repo / supplied
+lexical = Path(os.path.abspath(os.path.normpath(str(candidate))))
+try:
+    relative = lexical.relative_to(repo)
+except ValueError:
+    fail("must stay inside the repository")
+
+current = repo
+for part in relative.parts:
+    current = current / part
+    try:
+        metadata = os.lstat(current)
+    except FileNotFoundError:
+        fail("must point to an existing file")
+    if stat.S_ISLNK(metadata.st_mode):
+        fail("must not contain symlink path components")
+
+metadata = os.lstat(lexical)
+if not stat.S_ISREG(metadata.st_mode):
+    fail("must point to a regular file")
+if lexical.suffix.lower() != ".json":
+    fail("must use a .json filename")
+resolved = lexical.resolve(strict=True)
+try:
+    resolved_relative = resolved.relative_to(repo)
+except ValueError:
+    fail("must resolve inside the repository")
+print(resolved_relative.as_posix())
+PY
+)" || return $?
+  PINNED_BUNDLE_PATH="$normalized"
 }
 
 parse_args() {
@@ -218,7 +230,6 @@ configure_defaults() {
   PINNED_BUNDLE_PATH="${SUREBET_PINNED_BUNDLE:-${PINNED_BUNDLE_PATH:-}}"
   REQUIRE_PINNED_BUNDLE="${SUREBET_REQUIRE_PINNED_BUNDLE:-${REQUIRE_PINNED_BUNDLE:-0}}"
   validate_surebet_require_pinned_bundle || return 2
-  validate_surebet_pinned_bundle_path || return 2
   INTERVAL_SECONDS="${INTERVAL_SECONDS:-$(automation_parse_duration_seconds "${PAPER_DEFAULT_INTERVAL:-30m}")}"
   VALIDATION_TIMEOUT_SECONDS="${VALIDATION_TIMEOUT_SECONDS:-$(automation_parse_duration_seconds "${AUTOMATION_VALIDATION_TIMEOUT:-20m}")}"
   INSTALL_TIMEOUT_SECONDS="${INSTALL_TIMEOUT_SECONDS:-$(automation_parse_duration_seconds "${AUTOMATION_INSTALL_TIMEOUT:-15m}")}"
@@ -239,9 +250,12 @@ configure_defaults() {
 print_config() {
   cat <<EOF_CONFIG
 controller=run-paper-evaluation.sh
+controller_mode=single_pass_no_service
 repo_dir=$AUTOMATION_REPO_ROOT
 duration_seconds=$DURATION_SECONDS
+duration_semantics=maximum_controller_budget_not_monitoring_runtime
 interval_seconds=$INTERVAL_SECONDS
+interval_semantics=workflow_compatibility_no_wait_in_single_pass_mode
 adaptive=$ADAPTIVE
 keep_monitoring_when_ready=$KEEP_MONITORING_WHEN_READY
 validation_timeout_seconds=$VALIDATION_TIMEOUT_SECONDS
@@ -280,6 +294,37 @@ EOF_NODE
 }
 
 maybe_auto_install() { if [[ "$AUTO_INSTALL" != "1" ]]; then return 0; fi; if [[ -d "$AUTOMATION_REPO_ROOT/node_modules" ]]; then automation_log "auto_install=skipped node_modules_present"; return 0; fi; automation_run_shell_command "auto_install_npm_install" "npm install --ignore-scripts" "$INSTALL_TIMEOUT_SECONDS" "$AUTOMATION_RUN_DIR/auto-install.log"; }
+
+capture_initial_source_state() {
+  INITIAL_SOURCE_FINGERPRINT="$(automation_source_tree_fingerprint "$AUTOMATION_REPO_ROOT")" || return 1
+  printf 'source_fingerprint=%s\n' "$INITIAL_SOURCE_FINGERPRINT" > "$AUTOMATION_RUN_DIR/source-fingerprint-before.env"
+  automation_snapshot_protected "$AUTOMATION_RUN_DIR/protected_before.sha256"
+}
+
+verify_paper_read_only_state() {
+  local phase="$1"
+  FINAL_SOURCE_FINGERPRINT="$(automation_source_tree_fingerprint "$AUTOMATION_REPO_ROOT")" || return 1
+  {
+    printf 'phase=%s\n' "$phase"
+    printf 'source_fingerprint_before=%s\n' "$INITIAL_SOURCE_FINGERPRINT"
+    printf 'source_fingerprint_after=%s\n' "$FINAL_SOURCE_FINGERPRINT"
+  } > "$AUTOMATION_RUN_DIR/source-state-${phase}.env"
+  if [[ -z "$INITIAL_SOURCE_FINGERPRINT" || "$INITIAL_SOURCE_FINGERPRINT" != "$FINAL_SOURCE_FINGERPRINT" ]]; then
+    automation_log "paper_source_mutation_detected phase=$phase"
+    FINAL_STATUS="PAPER_EVALUATION_BLOCKED_SOURCE_MUTATION"
+    STOP_REASON="paper_source_mutation_detected_${phase}"
+    return 1
+  fi
+  if ! AUTOMATION_ALLOW_PROTECTED_CHANGES=0 automation_check_protected_unchanged \
+      "$AUTOMATION_RUN_DIR/protected_before.sha256" \
+      "$AUTOMATION_RUN_DIR/protected_after.sha256" \
+      "$AUTOMATION_RUN_DIR/protected_diff.patch"; then
+    FINAL_STATUS="PAPER_EVALUATION_BLOCKED_SOURCE_MUTATION"
+    STOP_REASON="paper_protected_file_mutation_detected_${phase}"
+    return 1
+  fi
+  return 0
+}
 
 write_paper_mode_handoff() {
   local reason evidence_dir env_file final_dir blocker_family automation_maintenance
@@ -325,13 +370,42 @@ finish() {
   FINISHED=1
   EXIT_STATUS="$rc"
   if [[ -n "${AUTOMATION_RUN_DIR:-}" ]]; then
+    if [[ -z "$FINAL_SOURCE_FINGERPRINT" ]]; then FINAL_SOURCE_FINGERPRINT="$(automation_source_tree_fingerprint "$AUTOMATION_REPO_ROOT" 2>/dev/null || true)"; fi
     mkdir -p "$AUTOMATION_RUN_DIR/final"
-    { printf '# Paper evaluation final summary\n\n'; printf 'final_status=%s\n' "$FINAL_STATUS"; printf 'stop_reason=%s\n' "$STOP_REASON"; printf 'exit_status=%s\n' "$EXIT_STATUS"; printf 'cycles_attempted=%s\n' "$CYCLES_ATTEMPTED"; printf 'duration_seconds=%s\n' "$DURATION_SECONDS"; printf 'interval_seconds=%s\n' "$INTERVAL_SECONDS"; printf 'adaptive=%s\n' "$ADAPTIVE"; printf 'keep_monitoring_when_ready=%s\n' "$KEEP_MONITORING_WHEN_READY"; printf 'local_fixture_report=%s\n' "${PAPER_LOCAL_REPORT_PATH:-}"; printf 'pinned_bundle_report=%s\n' "${PAPER_PINNED_REPORT_PATH:-}"; printf 'surebet_pinned_bundle=%s\n' "${PINNED_BUNDLE_PATH:-}"; printf 'paper_service_lifecycle=none\n'; printf 'completed_at=%s\n' "$(automation_now_iso)"; } > "$AUTOMATION_RUN_DIR/final-summary.md"
+    {
+      printf '# Paper evaluation final summary\n\n'
+      printf 'final_status=%s\n' "$FINAL_STATUS"
+      printf 'stop_reason=%s\n' "$STOP_REASON"
+      printf 'exit_status=%s\n' "$EXIT_STATUS"
+      printf 'cycles_attempted=%s\n' "$CYCLES_ATTEMPTED"
+      printf 'controller_mode=single_pass_no_service\n'
+      printf 'duration_seconds=%s\n' "$DURATION_SECONDS"
+      printf 'duration_semantics=maximum_controller_budget_not_monitoring_runtime\n'
+      printf 'interval_seconds=%s\n' "$INTERVAL_SECONDS"
+      printf 'interval_semantics=workflow_compatibility_no_wait_in_single_pass_mode\n'
+      printf 'adaptive=%s\n' "$ADAPTIVE"
+      printf 'keep_monitoring_when_ready=%s\n' "$KEEP_MONITORING_WHEN_READY"
+      printf 'local_fixture_report=%s\n' "${PAPER_LOCAL_REPORT_PATH:-}"
+      printf 'pinned_bundle_report=%s\n' "${PAPER_PINNED_REPORT_PATH:-}"
+      printf 'surebet_pinned_bundle=%s\n' "${PINNED_BUNDLE_PATH:-}"
+      printf 'source_fingerprint_before=%s\n' "${INITIAL_SOURCE_FINGERPRINT:-}"
+      printf 'source_fingerprint_after=%s\n' "${FINAL_SOURCE_FINGERPRINT:-}"
+      printf 'paper_service_lifecycle=none\n'
+      printf 'completed_at=%s\n' "$(automation_now_iso)"
+    } > "$AUTOMATION_RUN_DIR/final-summary.md"
     cp "$AUTOMATION_RUN_DIR/final-summary.md" "$AUTOMATION_RUN_DIR/final/final-summary.md" 2>/dev/null || true
-    automation_collect_repo_snapshot "$AUTOMATION_RUN_DIR/final-repo-snapshot"; automation_build_artifacts_zip "$AUTOMATION_RUN_DIR" "$AUTOMATION_REPO_ROOT" || true
+    automation_collect_repo_snapshot "$AUTOMATION_RUN_DIR/final-repo-snapshot"
+    automation_build_artifacts_zip "$AUTOMATION_RUN_DIR" "$AUTOMATION_REPO_ROOT" || true
     telegram_notify_send_final "run-paper-evaluation.sh" "${AUTOMATION_REPO_NAME:-betting-win-surebet}" "$FINAL_STATUS" "$STOP_REASON" "$CYCLES_ATTEMPTED" "$EXIT_STATUS" "$AUTOMATION_RUN_DIR" "$AUTOMATION_CONTROLLER_LOG" "$AUTOMATION_REPO_ROOT" || true
   fi
   [[ "$LOCK_ACQUIRED" == "1" ]] && automation_release_lock || true
+  if [[ -n "${AUTOMATION_RUN_DIR:-}" ]]; then
+    printf 'run_dir=%s\n' "$AUTOMATION_RUN_DIR"
+    printf 'final_status=%s\n' "$FINAL_STATUS"
+    printf 'stop_reason=%s\n' "$STOP_REASON"
+    printf 'final_exit_code=%s\n' "$EXIT_STATUS"
+    printf 'cycles_completed=%s\n' "$CYCLES_ATTEMPTED"
+  fi
 }
 trap finish EXIT
 trap 'FINAL_STATUS="interrupted"; STOP_REASON="interrupted"; exit 130' INT TERM
@@ -342,12 +416,17 @@ run_repo_validation() {
   mkdir -p "$out_dir"
   automation_run_shell_command "repo_validation" "npm run validate" "$VALIDATION_TIMEOUT_SECONDS" "$out_dir/npm-run-validate.log"
 }
+
 run_private_fixture_smoke() {
-  local cycle_dir stamp out_rel cmd rc verify_log
+  local cycle_dir stamp out_rel rc verify_log
+  local -a cmd
   cycle_dir="$1"
-  stamp="$(date -u +%Y%m%dT%H%M%SZ)"; out_rel="artifacts/private-paper-mode/standard-paper-evaluation-${stamp}.report.json"; PAPER_LOCAL_REPORT_PATH="$out_rel"
-  cmd="node cli.js local-report --bundle $(paper_shell_quote "$LOCAL_FIXTURE_BUNDLE") --output $(paper_shell_quote "$out_rel")"; printf '%s\n' "$cmd" > "$cycle_dir/local-fixture-command.txt"
-  automation_run_shell_command "private_fixture_smoke" "$cmd" "$PAPER_COMMAND_TIMEOUT_SECONDS" "$cycle_dir/local-fixture-smoke.log" || return 1
+  stamp="$(date -u +%Y%m%dT%H%M%SZ)"
+  out_rel="artifacts/private-paper-mode/standard-paper-evaluation-${stamp}.report.json"
+  PAPER_LOCAL_REPORT_PATH="$out_rel"
+  cmd=(node cli.js local-report --bundle "$LOCAL_FIXTURE_BUNDLE" --output "$out_rel")
+  automation_quote_argv "${cmd[@]}" > "$cycle_dir/local-fixture-command.txt"
+  automation_run_argv_command "private_fixture_smoke" "$PAPER_COMMAND_TIMEOUT_SECONDS" "$cycle_dir/local-fixture-smoke.log" "${cmd[@]}" || return 1
   verify_log="$cycle_dir/local-fixture-artifact-validation.log"
   node - "$out_rel" > "$verify_log" 2>&1 <<'NODE'
 const { readFileSync } = require('node:fs');
@@ -357,14 +436,20 @@ if (report.status !== 'fixture_results_only') throw new Error(`unexpected privat
 if (!Array.isArray(report.candidateReports) || report.candidateReports.length < 1) throw new Error('private fixture report must include candidateReports');
 console.log('private_fixture_report_validated=yes');
 NODE
-  rc=$?; [[ "$rc" -eq 0 ]] || { automation_log "private_fixture_artifact_validation_failed log=$verify_log"; return 1; }
+  rc=$?
+  [[ "$rc" -eq 0 ]] || { automation_log "private_fixture_artifact_validation_failed log=$verify_log"; return 1; }
 }
+
 run_pinned_bundle_smoke() {
-  local cycle_dir stamp out_rel cmd rc verify_log
+  local cycle_dir stamp out_rel rc verify_log
+  local -a cmd
   cycle_dir="$1"
-  stamp="$(date -u +%Y%m%dT%H%M%SZ)"; out_rel="artifacts/private-paper-mode/pinned-interface-smoke-${stamp}.report.json"; PAPER_PINNED_REPORT_PATH="$out_rel"
-  cmd="node cli.js local-report --bundle $(paper_shell_quote "$PINNED_BUNDLE_PATH") --output $(paper_shell_quote "$out_rel") --pinned-intake"; printf '%s\n' "$cmd" > "$cycle_dir/pinned-bundle-command.txt"
-  automation_run_shell_command "pinned_bundle_smoke" "$cmd" "$PAPER_COMMAND_TIMEOUT_SECONDS" "$cycle_dir/pinned-bundle-smoke.log" || return 1
+  stamp="$(date -u +%Y%m%dT%H%M%SZ)"
+  out_rel="artifacts/private-paper-mode/pinned-interface-smoke-${stamp}.report.json"
+  PAPER_PINNED_REPORT_PATH="$out_rel"
+  cmd=(node cli.js local-report --bundle "$PINNED_BUNDLE_PATH" --output "$out_rel" --pinned-intake)
+  automation_quote_argv "${cmd[@]}" > "$cycle_dir/pinned-bundle-command.txt"
+  automation_run_argv_command "pinned_bundle_smoke" "$PAPER_COMMAND_TIMEOUT_SECONDS" "$cycle_dir/pinned-bundle-smoke.log" "${cmd[@]}" || return 1
   verify_log="$cycle_dir/pinned-bundle-artifact-validation.log"
   node - "$out_rel" > "$verify_log" 2>&1 <<'NODE'
 const { readFileSync } = require('node:fs');
@@ -374,25 +459,83 @@ if (report.status !== 'fixture_results_only') throw new Error(`unexpected pinned
 if (!Array.isArray(report.candidateReports)) throw new Error('pinned bundle report must include candidateReports');
 console.log('pinned_bundle_report_validated=yes');
 NODE
-  rc=$?; [[ "$rc" -eq 0 ]] || { automation_log "pinned_bundle_artifact_validation_failed log=$verify_log"; return 1; }
+  rc=$?
+  [[ "$rc" -eq 0 ]] || { automation_log "pinned_bundle_artifact_validation_failed log=$verify_log"; return 1; }
 }
 
-parse_args "$@" || exit $?
-configure_defaults || exit $?
+parse_args "$@" || exit 1
+configure_defaults || exit 1
 LOCK_FILE="$AUTOMATION_REPO_ROOT/.automation/locks/run-paper-evaluation.lock"
 if [[ "$STATUS_ONLY" == "1" ]]; then automation_status_lock "$LOCK_FILE"; exit 0; fi
 if [[ "$FORCE_UNLOCK" == "1" ]]; then automation_force_unlock "$LOCK_FILE" "$SCRIPT_NAME" "$AUTOMATION_REPO_ROOT"; exit 0; fi
 if [[ "$PRINT_CONFIG" == "1" ]]; then print_config; exit 0; fi
-automation_create_run_dir "paper_evaluation"; AUTOMATION_SCRIPT_COMMAND="$0 $*"
+validate_pinned_bundle_preflight || exit 2
+automation_create_run_dir "paper_evaluation"
+AUTOMATION_SCRIPT_COMMAND="$0 $*"
 if [[ "$ALLOW_PARALLEL" == "1" ]]; then automation_log "lock=skipped allow_parallel=1"; else automation_acquire_lock "$SCRIPT_NAME" "$AUTOMATION_REPO_ROOT"; LOCK_ACQUIRED=1; automation_start_heartbeat; fi
 assert_active_node_runtime || { FINAL_STATUS="setup_failed"; STOP_REASON="node_runtime_invalid"; exit 1; }
-automation_collect_repo_snapshot "$AUTOMATION_RUN_DIR/initial-repo-snapshot"; automation_snapshot_protected "$AUTOMATION_RUN_DIR/protected_before.sha256"; maybe_auto_install || { FINAL_STATUS="setup_failed"; STOP_REASON="auto_install_failed"; exit 1; }
-if [[ "$CHECK_ONLY" == "1" ]]; then automation_log "check_only=1"; if ! run_repo_validation "$AUTOMATION_RUN_DIR/check-only-validation"; then FINAL_STATUS="PAPER_EVALUATION_BLOCKED_REPO_VALIDATION_FAILED"; STOP_REASON="check_only_validation_failed"; exit 1; fi; FINAL_STATUS="check_only_complete"; STOP_REASON="check_only"; exit 0; fi
-CYCLES_ATTEMPTED=1; CYCLE_DIR="$AUTOMATION_RUN_DIR/cycles/cycle_1"; mkdir -p "$CYCLE_DIR"
-{ printf 'cycle=1\n'; printf 'paper_service_lifecycle=none\n'; printf 'adaptive_requested=%s\n' "$ADAPTIVE"; printf 'keep_monitoring_when_ready=%s\n' "$KEEP_MONITORING_WHEN_READY"; printf 'pinned_bundle=%s\n' "${PINNED_BUNDLE_PATH:-}"; printf 'require_pinned_bundle=%s\n' "$REQUIRE_PINNED_BUNDLE"; printf 'started_at=%s\n' "$(automation_now_iso)"; } > "$CYCLE_DIR/paper_health_packet.md"
+automation_collect_repo_snapshot "$AUTOMATION_RUN_DIR/initial-repo-snapshot"
+capture_initial_source_state || { FINAL_STATUS="setup_failed"; STOP_REASON="source_fingerprint_failed"; exit 1; }
+maybe_auto_install || { FINAL_STATUS="setup_failed"; STOP_REASON="auto_install_failed"; exit 1; }
+if [[ "$CHECK_ONLY" == "1" ]]; then
+  automation_log "check_only=1"
+  if ! run_repo_validation "$AUTOMATION_RUN_DIR/check-only-validation"; then FINAL_STATUS="PAPER_EVALUATION_BLOCKED_REPO_VALIDATION_FAILED"; STOP_REASON="check_only_validation_failed"; verify_paper_read_only_state check_only_failed || true; exit 1; fi
+  verify_paper_read_only_state check_only || exit 2
+  FINAL_STATUS="check_only_complete"
+  STOP_REASON="check_only"
+  exit 0
+fi
+
+CYCLES_ATTEMPTED=1
+CYCLE_DIR="$AUTOMATION_RUN_DIR/cycles/cycle_1"
+mkdir -p "$CYCLE_DIR"
+{
+  printf 'cycle=1\n'
+  printf 'controller_mode=single_pass_no_service\n'
+  printf 'paper_service_lifecycle=none\n'
+  printf 'adaptive_requested=%s\n' "$ADAPTIVE"
+  printf 'keep_monitoring_when_ready=%s\n' "$KEEP_MONITORING_WHEN_READY"
+  printf 'pinned_bundle=%s\n' "${PINNED_BUNDLE_PATH:-}"
+  printf 'require_pinned_bundle=%s\n' "$REQUIRE_PINNED_BUNDLE"
+  printf 'started_at=%s\n' "$(automation_now_iso)"
+} > "$CYCLE_DIR/paper_health_packet.md"
 automation_log "paper_cycle_start cycle=1 service_lifecycle=none"
-if ! run_repo_validation "$CYCLE_DIR/source-validation"; then FINAL_STATUS="PAPER_EVALUATION_BLOCKED_REPO_VALIDATION_FAILED"; STOP_REASON="repo_validation_failed"; write_paper_mode_handoff "repo_validation_failed" "$CYCLE_DIR/source-validation" "validation" "no" || true; exit 2; fi
-if ! run_private_fixture_smoke "$CYCLE_DIR"; then FINAL_STATUS="PAPER_EVALUATION_BLOCKED_SOURCE_FIX_REQUIRED"; STOP_REASON="private_fixture_smoke_failed"; write_paper_mode_handoff "private_fixture_smoke_failed" "$CYCLE_DIR" "source" "no" || true; exit 2; fi
-if [[ -z "${PINNED_BUNDLE_PATH:-}" ]]; then if [[ "$REQUIRE_PINNED_BUNDLE" == "1" ]]; then FINAL_STATUS="PAPER_EVALUATION_BLOCKED_INVALID_PINNED_BUNDLE"; STOP_REASON="surebet_pinned_bundle_required_but_missing"; automation_log "$STOP_REASON"; exit 2; fi; FINAL_STATUS="PAPER_EVALUATION_READY_PRIVATE_FIXTURE_ONLY_BLOCKED_ON_PINNED_BUNDLE"; STOP_REASON="private_fixture_only_blocked_on_pinned_bundle"; automation_log "paper_result=$FINAL_STATUS"; exit 0; fi
-if ! run_pinned_bundle_smoke "$CYCLE_DIR"; then FINAL_STATUS="PAPER_EVALUATION_BLOCKED_INVALID_PINNED_BUNDLE"; STOP_REASON="pinned_bundle_smoke_failed"; automation_log "$STOP_REASON"; exit 2; fi
-FINAL_STATUS="PAPER_EVALUATION_PINNED_BUNDLE_ACCEPTED_PRIVATE_REPORT_WRITTEN"; STOP_REASON="pinned_bundle_private_report_written"; automation_log "paper_result=$FINAL_STATUS"; exit 0
+if ! run_repo_validation "$CYCLE_DIR/source-validation"; then
+  FINAL_STATUS="PAPER_EVALUATION_BLOCKED_REPO_VALIDATION_FAILED"
+  STOP_REASON="repo_validation_failed"
+  if ! verify_paper_read_only_state repo_validation_failed; then exit 2; fi
+  write_paper_mode_handoff "repo_validation_failed" "$CYCLE_DIR/source-validation" "validation" "no" || true
+  exit 2
+fi
+if ! run_private_fixture_smoke "$CYCLE_DIR"; then
+  FINAL_STATUS="PAPER_EVALUATION_BLOCKED_SOURCE_FIX_REQUIRED"
+  STOP_REASON="private_fixture_smoke_failed"
+  if ! verify_paper_read_only_state private_fixture_failed; then exit 2; fi
+  write_paper_mode_handoff "private_fixture_smoke_failed" "$CYCLE_DIR" "source" "no" || true
+  exit 2
+fi
+if [[ -z "${PINNED_BUNDLE_PATH:-}" ]]; then
+  verify_paper_read_only_state private_fixture_only || exit 2
+  if [[ "$REQUIRE_PINNED_BUNDLE" == "1" ]]; then
+    FINAL_STATUS="PAPER_EVALUATION_BLOCKED_INVALID_PINNED_BUNDLE"
+    STOP_REASON="surebet_pinned_bundle_required_but_missing"
+    automation_log "$STOP_REASON"
+    exit 2
+  fi
+  FINAL_STATUS="PAPER_EVALUATION_READY_PRIVATE_FIXTURE_ONLY_BLOCKED_ON_PINNED_BUNDLE"
+  STOP_REASON="private_fixture_only_blocked_on_pinned_bundle"
+  automation_log "paper_result=$FINAL_STATUS"
+  exit 0
+fi
+if ! run_pinned_bundle_smoke "$CYCLE_DIR"; then
+  FINAL_STATUS="PAPER_EVALUATION_BLOCKED_INVALID_PINNED_BUNDLE"
+  STOP_REASON="pinned_bundle_smoke_failed"
+  if ! verify_paper_read_only_state pinned_bundle_failed; then exit 2; fi
+  automation_log "$STOP_REASON"
+  exit 2
+fi
+verify_paper_read_only_state pinned_bundle_complete || exit 2
+FINAL_STATUS="PAPER_EVALUATION_PINNED_BUNDLE_ACCEPTED_PRIVATE_REPORT_WRITTEN"
+STOP_REASON="pinned_bundle_private_report_written"
+automation_log "paper_result=$FINAL_STATUS"
+exit 0

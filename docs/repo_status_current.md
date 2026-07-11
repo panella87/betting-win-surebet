@@ -3,7 +3,7 @@
 ```text
 repo=betting-win-surebet
 current_task=SURE-002B_PRIVATE_PAPER_MODE_INTAKE
-current_task_status=repo_local_private_paper_mode_baseline_complete_full_blueprint_blocked_on_pinned_interface
+current_task_status=complete_repo_local_private_paper_mode_backlog_blocked_on_pinned_interface
 next_allowed_task=wait_for_federico_pinned_betting_win_contract_export_interface_before_real_upstream_evaluation_or_continue_with_approved_autopilot_alignment
 repo_role=surebet_strategy_execution_repo
 strategy_family=surebet_complete_set_only
@@ -81,7 +81,7 @@ The repo-local SURE-001 hardening backlog, the safe SURE-002A local implementati
 
 ```text
 current_task=SURE-002B_PRIVATE_PAPER_MODE_INTAKE
-current_task_status=repo_local_private_paper_mode_baseline_complete_full_blueprint_blocked_on_pinned_interface
+current_task_status=complete_repo_local_private_paper_mode_backlog_blocked_on_pinned_interface
 provider_connections=prohibited
 execution=prohibited
 real_upstream_evaluation=blocked_until_federico_pinned_betting_win_interface
@@ -112,8 +112,13 @@ The active authority remains the three-repo surebet boundary docs.
 automation_contract=standard_root_scripts_v1
 run_autonomous_implementation=standardized_with_canonical_flags_and_telegram
 run_autonomous_bugfix=standardized_audit_handoff_with_telegram
+run_autonomous_bugfix_mutation_guard=content_fingerprint_detects_already_dirty_file_edits
+run_autonomous_bugfix_artifact_hint=resolved_before_current_run_directory_creation
 run_paper_evaluation=canonical_repo_local_private_fixture_and_pinned_bundle_only
 run_paper_evaluation_standardization=standardized_with_telegram_no_service_private_fixture_pinned_bundle
+run_paper_evaluation_input_preflight=existing_regular_non_symlink_repo_local_json_before_run_creation
+run_paper_evaluation_command_execution=direct_argv_for_known_local_report_commands
+run_paper_evaluation_source_mutation_guard=enabled
 paper_interval_behavior=no_service_single_cycle_accepts_interval_for_workflow_compatibility
 lock_dir=.automation/locks
 root_artifacts_zip=required_before_run_script_exit
@@ -121,7 +126,7 @@ stop_autonomous_run_helper=removed
 ```
 
 For ordinary source implementation, omit `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`; use it only for a newly approved automation-maintenance task touching protected root automation files. The current safe paper command, after parent-shell Node activation, is
-`./run-paper-evaluation.sh --duration 72h --interval 5m --adaptive --keep-monitoring-when-ready --model cli-default --fallback-model none`. It is limited to private fixture smoke unless Federico provides a repo-local pinned `betting-win` bundle. The pinned-bundle branch is now shell-quoted, strict about `SUREBET_REQUIRE_PINNED_BUNDLE`, and fail-fast about missing/remote/out-of-repo/symlink/non-JSON placeholder bundle paths, but real upstream private paper evaluation remains blocked until Federico provides the pinned bundle.
+`./run-paper-evaluation.sh --duration 72h --interval 5m --adaptive --keep-monitoring-when-ready --model cli-default --fallback-model none`. It is limited to private fixture smoke unless Federico provides a repo-local pinned `betting-win` bundle. The pinned-bundle branch now validates an existing regular, non-symlink, repo-local JSON path before creating a run or starting repo validation; known local-report commands use direct argv and `SUREBET_REQUIRE_PINNED_BUNDLE` remains strict. Real upstream private paper evaluation remains blocked until the required upstream export exists.
 
 
 ## Automation helper standardization
@@ -135,7 +140,9 @@ start_stop=no_service_validation_and_noop
 shared_telegram_helper=.automation/lib/telegram_notify.sh
 run_autonomous_implementation=standardized_with_canonical_flags_and_telegram
 run_autonomous_bugfix=standardized_audit_handoff_with_telegram
+run_autonomous_bugfix_mutation_guard=content_fingerprint
 run_paper_evaluation_standardization=standardized_with_telegram_no_service_private_fixture_pinned_bundle
+run_paper_evaluation_input_preflight=fail_fast_before_expensive_validation
 ```
 
 

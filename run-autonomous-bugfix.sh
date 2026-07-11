@@ -40,6 +40,11 @@ TASK_SOURCE=""
 LATEST_SOURCE_SNAPSHOT=""
 CONFIRMED_BUGS_FILE=""
 HANDOFF_PLAN_FILE=""
+ARTIFACT_HINT=""
+INITIAL_SOURCE_FINGERPRINT=""
+LAST_CYCLE_SOURCE_FINGERPRINT_BEFORE=""
+LAST_CYCLE_SOURCE_FINGERPRINT_AFTER_CODEX=""
+LAST_CYCLE_SOURCE_FINGERPRINT_AFTER_VALIDATION=""
 
 usage() {
   cat <<'EOF_USAGE'
@@ -79,7 +84,8 @@ Operational options:
 
 Audit order:
   Artifacts first when ./artifacts exists or --from-artifacts is supplied.
-  Source review second.
+  The retained artifact hint is resolved before the current run directory is created.
+  Source review second. Source immutability is enforced with content fingerprints, including already-dirty files.
 
 Exit codes:
   0 = check-only passed or bug audit complete with no required implementation handover
@@ -309,6 +315,11 @@ finish() {
       printf 'duration_seconds=%s\n' "$DURATION_SECONDS"
       printf 'cycle_timeout_seconds=%s\n' "$CODEX_TIMEOUT_SECONDS"
       printf 'validation_timeout_seconds=%s\n' "$VALIDATION_TIMEOUT_SECONDS"
+      printf 'artifact_hint=%s\n' "${ARTIFACT_HINT:-none}"
+      printf 'source_fingerprint_initial=%s\n' "${INITIAL_SOURCE_FINGERPRINT:-}"
+      printf 'source_fingerprint_last_before=%s\n' "${LAST_CYCLE_SOURCE_FINGERPRINT_BEFORE:-}"
+      printf 'source_fingerprint_last_after_codex=%s\n' "${LAST_CYCLE_SOURCE_FINGERPRINT_AFTER_CODEX:-}"
+      printf 'source_fingerprint_last_after_validation=%s\n' "${LAST_CYCLE_SOURCE_FINGERPRINT_AFTER_VALIDATION:-}"
       printf 'completed_at=%s\n' "$(automation_now_iso)"
     } > "$AUTOMATION_RUN_DIR/final-summary.md"
     automation_collect_repo_snapshot "$AUTOMATION_RUN_DIR/final-repo-snapshot"
@@ -316,6 +327,13 @@ finish() {
     telegram_notify_send_final "run-autonomous-bugfix.sh" "${AUTOMATION_REPO_NAME:-betting-win-surebet}" "$FINAL_STATUS" "$STOP_REASON" "$CYCLES_ATTEMPTED" "$EXIT_STATUS" "$AUTOMATION_RUN_DIR" "$AUTOMATION_CONTROLLER_LOG" "$AUTOMATION_REPO_ROOT" || true
   fi
   [[ "$LOCK_ACQUIRED" == "1" ]] && automation_release_lock || true
+  if [[ -n "${AUTOMATION_RUN_DIR:-}" ]]; then
+    printf 'run_dir=%s\n' "$AUTOMATION_RUN_DIR"
+    printf 'final_status=%s\n' "$FINAL_STATUS"
+    printf 'stop_reason=%s\n' "$STOP_REASON"
+    printf 'final_exit_code=%s\n' "$EXIT_STATUS"
+    printf 'cycles_completed=%s\n' "$CYCLES_ATTEMPTED"
+  fi
 }
 trap finish EXIT
 trap 'FINAL_STATUS="interrupted"; STOP_REASON="interrupted"; exit 130' INT TERM
@@ -330,21 +348,31 @@ if [[ "$STATUS_ONLY" == "1" ]]; then automation_status_lock "$LOCK_FILE"; exit 0
 if [[ "$FORCE_UNLOCK" == "1" ]]; then automation_force_unlock "$LOCK_FILE" "$SCRIPT_NAME" "$AUTOMATION_REPO_ROOT"; exit 0; fi
 if [[ "$PRINT_CONFIG" == "1" ]]; then print_config; exit 0; fi
 
+resolve_task_source
+ARTIFACT_HINT="$(resolve_artifact_hint || true)"
 automation_create_run_dir "autonomous_bugfix"
 AUTOMATION_SCRIPT_COMMAND="$0 $*"
+mkdir -p "$AUTOMATION_RUN_DIR/preflight"
+{
+  printf 'artifact_hint_resolved_before_run_dir=yes\n'
+  printf 'artifact_hint=%s\n' "${ARTIFACT_HINT:-none}"
+  printf 'resolved_at=%s\n' "$(automation_now_iso)"
+} > "$AUTOMATION_RUN_DIR/preflight/retained-artifact-hint.env"
 if [[ "$ALLOW_PARALLEL" == "1" ]]; then automation_log "lock=skipped allow_parallel=1"; else automation_acquire_lock "$SCRIPT_NAME" "$AUTOMATION_REPO_ROOT"; LOCK_ACQUIRED=1; automation_start_heartbeat; fi
 
 assert_active_node_runtime || { FINAL_STATUS="setup_failed"; STOP_REASON="node_runtime_invalid"; exit 1; }
 automation_collect_repo_snapshot "$AUTOMATION_RUN_DIR/initial-repo-snapshot"
 source_status_snapshot "$AUTOMATION_RUN_DIR/source-status-before.txt"
+INITIAL_SOURCE_FINGERPRINT="$(automation_source_tree_fingerprint "$AUTOMATION_REPO_ROOT")" || { FINAL_STATUS="setup_failed"; STOP_REASON="source_fingerprint_failed"; exit 1; }
+printf 'source_fingerprint=%s\n' "$INITIAL_SOURCE_FINGERPRINT" > "$AUTOMATION_RUN_DIR/source-fingerprint-before.env"
 automation_snapshot_protected "$AUTOMATION_RUN_DIR/protected_before.sha256"
 maybe_auto_install || { FINAL_STATUS="setup_failed"; STOP_REASON="auto_install_failed"; exit 1; }
-resolve_task_source
-ARTIFACT_HINT="$(resolve_artifact_hint || true)"
 
 if [[ "$CHECK_ONLY" == "1" ]]; then
   automation_log "check_only=1"
   if ! automation_run_validations bugfix "$AUTOMATION_RUN_DIR/check-only-validation" "$VALIDATION_TIMEOUT_SECONDS"; then FINAL_STATUS="check_only_validation_failed"; STOP_REASON="check_only_validation_failed"; exit 1; fi
+  LAST_CYCLE_SOURCE_FINGERPRINT_AFTER_VALIDATION="$(automation_source_tree_fingerprint "$AUTOMATION_REPO_ROOT")" || { FINAL_STATUS="setup_failed"; STOP_REASON="source_fingerprint_failed"; exit 1; }
+  if [[ "$INITIAL_SOURCE_FINGERPRINT" != "$LAST_CYCLE_SOURCE_FINGERPRINT_AFTER_VALIDATION" ]]; then FINAL_STATUS="BLOCKED=yes"; STOP_REASON="bugfix_check_only_source_mutation_detected"; exit 2; fi
   FINAL_STATUS="check_only_complete"
   STOP_REASON="check_only"
   exit 0
@@ -364,6 +392,8 @@ while true; do
   mkdir -p "$CYCLE_DIR"
   PROMPT="$CYCLE_DIR/codex_prompt.md"
   source_status_snapshot "$CYCLE_DIR/source-status-before.txt"
+  LAST_CYCLE_SOURCE_FINGERPRINT_BEFORE="$(automation_source_tree_fingerprint "$AUTOMATION_REPO_ROOT")" || { FINAL_STATUS="BLOCKED=yes"; STOP_REASON="source_fingerprint_failed_cycle_${CYCLES_ATTEMPTED}"; exit 2; }
+  printf 'source_fingerprint_before=%s\n' "$LAST_CYCLE_SOURCE_FINGERPRINT_BEFORE" > "$CYCLE_DIR/source-fingerprint-before.env"
   cat > "$PROMPT" <<EOF_PROMPT
 Role:
 Senior autonomous bug-audit and implementation-handoff engineer for the repository at $AUTOMATION_REPO_ROOT.
@@ -415,10 +445,28 @@ EOF_PROMPT
   if ! automation_run_codex_prompt "$PROMPT" "$CYCLE_DIR/codex.log" "$CODEX_TIMEOUT_SECONDS"; then CODEX_FAILURES=$((CODEX_FAILURES + 1)); FINAL_STATUS="BLOCKED=yes"; STOP_REASON="codex_failed_cycle_${CYCLES_ATTEMPTED}"; (( CODEX_FAILURES >= MAX_CODEX_FAILURES )) && exit 2; continue; fi
   git -C "$AUTOMATION_REPO_ROOT" diff --no-ext-diff > "$CYCLE_DIR/git_diff.patch" 2>/dev/null || true
   source_status_snapshot "$CYCLE_DIR/source-status-after.txt"
-  if ! diff -u "$CYCLE_DIR/source-status-before.txt" "$CYCLE_DIR/source-status-after.txt" > "$CYCLE_DIR/source-status-diff.patch" 2>&1; then FINAL_STATUS="BLOCKED=yes"; STOP_REASON="bugfix_attempted_source_change_cycle_${CYCLES_ATTEMPTED}"; exit 2; fi
-  if ! automation_check_protected_unchanged "$AUTOMATION_RUN_DIR/protected_before.sha256" "$CYCLE_DIR/protected_after.sha256" "$CYCLE_DIR/protected_diff.patch"; then FINAL_STATUS="BLOCKED=yes"; STOP_REASON="protected_files_changed"; exit 2; fi
+  diff -u "$CYCLE_DIR/source-status-before.txt" "$CYCLE_DIR/source-status-after.txt" > "$CYCLE_DIR/source-status-diff.patch" 2>&1 || true
+  LAST_CYCLE_SOURCE_FINGERPRINT_AFTER_CODEX="$(automation_source_tree_fingerprint "$AUTOMATION_REPO_ROOT")" || { FINAL_STATUS="BLOCKED=yes"; STOP_REASON="source_fingerprint_failed_cycle_${CYCLES_ATTEMPTED}"; exit 2; }
+  {
+    printf 'source_fingerprint_before=%s\n' "$LAST_CYCLE_SOURCE_FINGERPRINT_BEFORE"
+    printf 'source_fingerprint_after_codex=%s\n' "$LAST_CYCLE_SOURCE_FINGERPRINT_AFTER_CODEX"
+  } > "$CYCLE_DIR/source-change-summary.env"
+  if [[ "$LAST_CYCLE_SOURCE_FINGERPRINT_BEFORE" != "$LAST_CYCLE_SOURCE_FINGERPRINT_AFTER_CODEX" ]]; then
+    FINAL_STATUS="BLOCKED=yes"
+    STOP_REASON="bugfix_attempted_source_change_cycle_${CYCLES_ATTEMPTED}"
+    printf 'source_mutation_detected=yes\n' > "$CYCLE_DIR/source-mutation-detected.txt"
+    exit 2
+  fi
+  if ! AUTOMATION_ALLOW_PROTECTED_CHANGES=0 automation_check_protected_unchanged "$AUTOMATION_RUN_DIR/protected_before.sha256" "$CYCLE_DIR/protected_after.sha256" "$CYCLE_DIR/protected_diff.patch"; then FINAL_STATUS="BLOCKED=yes"; STOP_REASON="protected_files_changed"; exit 2; fi
   if ! automation_require_cycle_artifacts "$CYCLE_DIR" allow_empty_git_diff bug_inventory.md handoff_plan.md validation_results.md remaining_gaps.md final_status.md continue_status.txt git_diff.patch; then FINAL_STATUS="BLOCKED=yes"; STOP_REASON="malformed_cycle_artifacts_cycle_${CYCLES_ATTEMPTED}"; exit 2; fi
-  if ! automation_run_validations bugfix "$CYCLE_DIR/validation" "$VALIDATION_TIMEOUT_SECONDS"; then FINAL_STATUS="BLOCKED=yes"; STOP_REASON="validation_failed_cycle_${CYCLES_ATTEMPTED}"; exit 2; fi
+  if ! automation_run_validations bugfix "$CYCLE_DIR/validation" "$VALIDATION_TIMEOUT_SECONDS"; then
+    LAST_CYCLE_SOURCE_FINGERPRINT_AFTER_VALIDATION="$(automation_source_tree_fingerprint "$AUTOMATION_REPO_ROOT" 2>/dev/null || true)"
+    if [[ -n "$LAST_CYCLE_SOURCE_FINGERPRINT_AFTER_VALIDATION" && "$LAST_CYCLE_SOURCE_FINGERPRINT_BEFORE" != "$LAST_CYCLE_SOURCE_FINGERPRINT_AFTER_VALIDATION" ]]; then FINAL_STATUS="BLOCKED=yes"; STOP_REASON="bugfix_validation_source_mutation_cycle_${CYCLES_ATTEMPTED}"; exit 2; fi
+    FINAL_STATUS="BLOCKED=yes"; STOP_REASON="validation_failed_cycle_${CYCLES_ATTEMPTED}"; exit 2
+  fi
+  LAST_CYCLE_SOURCE_FINGERPRINT_AFTER_VALIDATION="$(automation_source_tree_fingerprint "$AUTOMATION_REPO_ROOT")" || { FINAL_STATUS="BLOCKED=yes"; STOP_REASON="source_fingerprint_failed_cycle_${CYCLES_ATTEMPTED}"; exit 2; }
+  printf 'source_fingerprint_after_validation=%s\n' "$LAST_CYCLE_SOURCE_FINGERPRINT_AFTER_VALIDATION" >> "$CYCLE_DIR/source-change-summary.env"
+  if [[ "$LAST_CYCLE_SOURCE_FINGERPRINT_BEFORE" != "$LAST_CYCLE_SOURCE_FINGERPRINT_AFTER_VALIDATION" ]]; then FINAL_STATUS="BLOCKED=yes"; STOP_REASON="bugfix_validation_source_mutation_cycle_${CYCLES_ATTEMPTED}"; exit 2; fi
   if ! CONTINUE_STATUS="$(automation_read_continue_status "$CYCLE_DIR/continue_status.txt")"; then FINAL_STATUS="BLOCKED=yes"; STOP_REASON="malformed_continue_status_cycle_${CYCLES_ATTEMPTED}"; exit 2; fi
   automation_log "cycle=${CYCLES_ATTEMPTED} continue_status=$CONTINUE_STATUS"
   case "$CONTINUE_STATUS" in

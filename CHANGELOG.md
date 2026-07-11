@@ -1,9 +1,10 @@
-# 2026-07-08 - Blueprint blocker classification and pinned-bundle preflight
+# 2026-07-11 - Run-script hardening wave 1: paper preflight and bug-audit immutability
 
-- Clarified that the full surebet blueprint is not complete merely because the repo-local fixture/private-paper baseline is complete.
-- Updated the current implementation task so missing Federico pinned `betting-win` interface is classified as `BLOCKED=yes`, not `AUTONOMOUS_GOAL_COMPLETE=yes`, when no safe repo-local defect exists.
-- Added paper-controller preflight validation for configured `SUREBET_PINNED_BUNDLE` paths so placeholders, remote URLs, out-of-repo paths, symlinks, directories, non-JSON paths, and missing files fail fast with clear errors.
-- Regenerated `SOURCE_MANIFEST.json` after the current `CHANGELOG.md` drift.
+- Hardened `run-paper-evaluation.sh` so a supplied pinned bundle must pass existing-file, regular-file, non-symlink, repo-containment, and `.json` preflight before run creation or expensive repo validation.
+- Replaced shell-constructed local-report calls with direct argv execution and added source/protected-file immutability verification plus explicit single-pass and machine-readable final-output contracts.
+- Hardened `run-autonomous-bugfix.sh` with content-based source fingerprints so edits to already-dirty files are detected, and resolved retained artifact evidence before creating the current run directory.
+- Added regression tests and controller-contract validation for early preflight, symlink rejection, direct argv execution, already-dirty mutation detection, artifact-hint ordering, and final stdout fields.
+- Preserved the no-service, no-provider, no-direct-DB, no-execution, private-paper-only boundary. `run-autonomous-implementation.sh`, `run-paper-autopilot.sh`, and the missing bugfix parent autopilot remain for later hardening waves.
 
 # 2026-07-08 - Post-cycle merge-conflict cleanup and validation guard
 

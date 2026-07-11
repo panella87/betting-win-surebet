@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, existsSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 const REPO_ROOT = process.cwd();
@@ -19,6 +21,8 @@ test('standard automation root scripts and shared helpers are installed', () => 
   }
   assert.match(read('.automation/lib/run_common.sh'), /automation_acquire_lock\(\)/);
   assert.match(read('.automation/lib/run_common.sh'), /automation_require_cycle_artifacts\(\)/);
+  assert.match(read('.automation/lib/run_common.sh'), /automation_run_argv_command\(\)/);
+  assert.match(read('.automation/lib/run_common.sh'), /automation_source_tree_fingerprint\(\)/);
   assert.match(read('.automation/lib/telegram_notify.sh'), /telegram_notify_send_final\(\)/);
   assert.match(read('.automation/lib/telegram_notify.sh'), /telegram_notify_build_final_message\(\)/);
   assert.match(read('.automation/lib/telegram_notify.sh'), /telegram_notify_message_version\(\)/);
@@ -93,13 +97,54 @@ test('bugfix controller is audit and handoff only with telegram wiring', () => {
     '--validation-timeout VALUE','--handover-autonomous-implementation','--print-config',
     'audit/handoff controller','It must not patch app source directly','Audit order:','Artifacts first',
     'source_status_snapshot','write_implementation_handoff','autonomous-implementation-handover.env',
+    'artifact_hint_resolved_before_run_dir=yes','automation_source_tree_fingerprint',
+    'source_mutation_detected=yes','bugfix_check_only_source_mutation_detected',
     'telegram_notify_send_final "run-autonomous-bugfix.sh"','automation_require_cycle_artifacts',
     'automation_read_continue_status','BLOCKED=yes','exit 3','Activate the repo runtime in the parent shell first',
-    'never sources nvm.sh',
+    'never sources nvm.sh',"printf 'run_dir=%s\\n'","printf 'final_status=%s\\n'",
   ]) assertContains(script, marker);
   assert.doesNotMatch(script, /Find and fix bug-class issues/);
   assert.doesNotMatch(script, /scripts\/load-node-runtime\.sh/);
   assert.doesNotMatch(script, /source .*nvm/);
+});
+
+
+test('bugfix artifact evidence is resolved before the active run directory exists', () => {
+  const script = read('run-autonomous-bugfix.sh');
+  const resolveTask = script.indexOf('resolve_task_source');
+  const resolveEvidence = script.indexOf('ARTIFACT_HINT="$(resolve_artifact_hint || true)"');
+  const createRun = script.indexOf('automation_create_run_dir "autonomous_bugfix"');
+  assert.ok(resolveTask >= 0);
+  assert.ok(resolveEvidence > resolveTask);
+  assert.ok(createRun > resolveEvidence);
+});
+
+test('shared source fingerprint detects edits to an already-dirty tracked file', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'surebet-source-fingerprint-'));
+  const tracked = join(tempRoot, 'tracked.txt');
+  const helper = join(REPO_ROOT, '.automation', 'lib', 'run_common.sh');
+  const fingerprint = (): string => execFileSync(
+    'bash',
+    ['-lc', '. "$HELPER_PATH"; automation_source_tree_fingerprint "$1"', 'bash', tempRoot],
+    { encoding: 'utf-8', env: { ...process.env, HELPER_PATH: helper } },
+  ).trim();
+
+  try {
+    execFileSync('git', ['init', '-q'], { cwd: tempRoot });
+    writeFileSync(tracked, 'base\n', 'utf-8');
+    execFileSync('git', ['add', 'tracked.txt'], { cwd: tempRoot });
+    writeFileSync(tracked, 'dirty version one\n', 'utf-8');
+    const firstDirtyFingerprint = fingerprint();
+
+    writeFileSync(tracked, 'dirty version two\n', 'utf-8');
+    const secondDirtyFingerprint = fingerprint();
+    assert.notEqual(secondDirtyFingerprint, firstDirtyFingerprint);
+
+    writeFileSync(join(tempRoot, 'artifacts.zip'), 'runtime evidence\n', 'utf-8');
+    assert.equal(fingerprint(), secondDirtyFingerprint, 'runtime artifacts must be excluded');
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
 });
 
 test('paper evaluation controller exposes canonical no-service private fixture and pinned-bundle contract', () => {
@@ -107,7 +152,9 @@ test('paper evaluation controller exposes canonical no-service private fixture a
   for (const marker of [
     '--adaptive','--keep-monitoring-when-ready','--model MODEL','--fallback-model MODEL','--repo-dir PATH',
     '--check-only','--codex-phase-timeout VALUE','--validation-timeout VALUE','SUREBET_PINNED_BUNDLE',
-    'SUREBET_REQUIRE_PINNED_BUNDLE','SUREBET_REQUIRE_PINNED_BUNDLE must be unset, 0, or 1','validate_surebet_pinned_bundle_path()','paper_shell_quote()','paper_service_lifecycle=none',
+    'SUREBET_REQUIRE_PINNED_BUNDLE','SUREBET_REQUIRE_PINNED_BUNDLE must be unset, 0, or 1',
+    'validate_pinned_bundle_preflight()','automation_run_argv_command','controller_mode=single_pass_no_service',
+    'verify_paper_read_only_state()','PAPER_EVALUATION_BLOCKED_SOURCE_MUTATION','paper_service_lifecycle=none',
     'PAPER_EVALUATION_READY_PRIVATE_FIXTURE_ONLY_BLOCKED_ON_PINNED_BUNDLE',
     'PAPER_EVALUATION_PINNED_BUNDLE_ACCEPTED_PRIVATE_REPORT_WRITTEN',
     'PAPER_EVALUATION_BLOCKED_INVALID_PINNED_BUNDLE','paper-mode-to-autonomous-implementation.env',
@@ -119,6 +166,7 @@ test('paper evaluation controller exposes canonical no-service private fixture a
   assert.doesNotMatch(script, /run-autonomous-bugfix\.sh --from-artifacts/);
   assert.doesNotMatch(script, /--bundle \$\{PINNED_BUNDLE_PATH\}/);
   assert.doesNotMatch(script, /--bundle \$\{LOCAL_FIXTURE_BUNDLE\}/);
+  assert.doesNotMatch(script, /paper_shell_quote\(\)/);
   assert.doesNotMatch(script, /PAPER_EVALUATION_UNSUPPORTED_FOR_THIS_REPO/);
 });
 
