@@ -1,3 +1,22 @@
+# 2026-07-11 - Run-script hardening wave 3: strict bug audit and campaign autopilot
+
+- Replaced `run-autonomous-bugfix.sh` with a strict read-only four-state audit controller using `BUGFIX_AUDIT_COMPLETE=yes`, `CONTINUE_REQUIRED=yes`, `HANDOVER_AUTONOMOUS_IMPLEMENTATION=yes`, or `BLOCKED=yes` plus a validated `request_flags.txt` contract.
+- Added bounded campaign-area/focus inputs, baseline validation evidence, content-fingerprint immutability checks, context/model failure classification, stable bug signatures, hashed evidence, exact protected-file authorization, and fingerprinted implementation handoffs.
+- Added `run-bugfix-autopilot.sh` with an eight-area surebet audit campaign, parent-budget clamping, semantic repeat protection, child-aware locks and heartbeat, explicit machine-result reconciliation, required validated source changes, and mandatory same-area re-audit before closure.
+- Added independent parent verification that bug-audit children do not mutate source and that audit handoff source fingerprints match the observed source state.
+- Added strict schema-v1 handoff key allowlists, evidence/run-directory and child stdout reconciliation, parent-budget race handling, accurate closed-area round state, and lock preservation when active-child identity cannot be verified during abnormal finalization.
+- Registered the new parent in config, package commands, executable validation, progress/log helpers, protected-file docs, status docs, and source-handoff packaging tests.
+- Preserved the no-service, no-provider, no-direct-DB, no-execution, private-paper-only boundary. The bugfix parent never calls paper evaluation or service lifecycle commands.
+
+# 2026-07-11 - Run-script hardening wave 2: verified implementation and paper parent contracts
+
+- Hardened `run-autonomous-implementation.sh` with pre-cycle baseline validation, strict paper and bugfix handoff parsing, semantic SHA-256 fingerprints, consumed-handoff rejection, exact protected-file allowlists for automated maintenance, accumulated source-change/validation evidence, classified context/capacity fallback handling, bounded `artifacts.zip`, and machine-readable terminal output.
+- Added the strict `--handover-bugfix-audit` consumer and verified return handoffs for both paper re-evaluation and same-area bugfix re-audit. Handoff-triggered implementation no-ops now fail closed unless explicitly authorized.
+- Hardened `run-paper-autopilot.sh` with child preflight before campaign artifacts, `--max-rounds 0` as the normal duration/repeat-guard mode, stale-handoff rotation, stable semantic handoff fingerprints, explicit child stdout reconciliation, remaining-parent-budget clamping, active-child lock metadata, verified child process-group termination, atomic handoff consumption, and mandatory post-change paper re-evaluation.
+- Added protected shared helpers in `.automation/lib/controller_hardening_v2.sh`, including strict env parsing, unique machine-result extraction, repo-local path checks, source fingerprints, verified process identity, and bounded ZIP creation.
+- Added executable behavior coverage for duplicate-key rejection, volatile-field-independent fingerprints, successful paper-to-implementation-to-paper flow, and no-op implementation blocking.
+- Preserved the no-service, no-provider, no-direct-DB, no-execution, private-paper-only boundary. The next controller wave remains `run-autonomous-bugfix.sh` plus the missing `run-bugfix-autopilot.sh`.
+
 # 2026-07-11 - Run-script hardening wave 1: paper preflight and bug-audit immutability
 
 - Hardened `run-paper-evaluation.sh` so a supplied pinned bundle must pass existing-file, regular-file, non-symlink, repo-containment, and `.json` preflight before run creation or expensive repo validation.

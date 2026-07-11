@@ -9,7 +9,7 @@ usage() {
 Usage: ./check_progress.sh [--tail N]
 
 Read-only summary of the latest automation run artifacts.
-Looks at autonomous_implementation_*, autonomous_bugfix_*, paper_evaluation_*, paper_autopilot_*,
+Looks at autonomous_implementation_*, autonomous_bugfix_*, paper_evaluation_*, paper_autopilot_*, bugfix_autopilot_*,
 and legacy autonomous_surebet_implementation_* run directories.
 USAGE
 }
@@ -26,7 +26,7 @@ done
 [[ "$TAIL_LINES" =~ ^[1-9][0-9]*$ ]] || { echo "ERROR: --tail must be a positive integer" >&2; exit 1; }
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$repo_root" || exit 1
-latest_run="$(find artifacts -maxdepth 1 -type d \( -name 'autonomous_implementation_*' -o -name 'autonomous_bugfix_*' -o -name 'paper_evaluation_*' -o -name 'paper_autopilot_*' -o -name 'autonomous_surebet_implementation_*' \) -print 2>/dev/null | sort | tail -n 1)"
+latest_run="$(find artifacts -maxdepth 1 -type d \( -name 'autonomous_implementation_*' -o -name 'autonomous_bugfix_*' -o -name 'paper_evaluation_*' -o -name 'paper_autopilot_*' -o -name 'bugfix_autopilot_*' -o -name 'autonomous_surebet_implementation_*' \) -print 2>/dev/null | sort | tail -n 1)"
 if [[ -z "$latest_run" ]]; then
   echo "automation_run=none"
   echo "hint=bash ./run-autonomous-implementation.sh --check-only"
@@ -48,7 +48,10 @@ fi
 if [[ -f "$latest_run/rounds.tsv" ]]; then
   echo; echo "== rounds.tsv =="; sed -n '1,120p' "$latest_run/rounds.tsv"
 fi
-latest_round="$(find "$latest_run" -maxdepth 1 -type d -name 'round_*_child' -print 2>/dev/null | sort -V | tail -n 1)"
+if [[ -f "$latest_run/campaign_coverage.tsv" ]]; then
+  echo; echo "== campaign_coverage.tsv =="; sed -n '1,120p' "$latest_run/campaign_coverage.tsv"
+fi
+latest_round="$(find "$latest_run" -maxdepth 1 -type d -name 'round_*' -print 2>/dev/null | sort -V | tail -n 1)"
 if [[ -n "$latest_round" ]]; then
   echo; echo "latest_round=$latest_round"
   for round_file in child_result.env child_command.txt telegram_notification_status.txt; do
@@ -76,7 +79,7 @@ else
 fi
 if [[ -n "$latest_cycle" ]]; then
   echo; echo "latest_cycle=$latest_cycle"
-  for status_file in continue_status.env request_flags.env cycle-summary.md summary.md; do
+  for status_file in continue_status.txt request_flags.txt continue_status.env request_flags.env cycle-summary.md summary.md; do
     if [[ -f "$latest_cycle/$status_file" ]]; then
       echo; echo "== latest_cycle/$status_file =="; sed -n '1,160p' "$latest_cycle/$status_file"
     fi

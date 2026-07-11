@@ -128,7 +128,7 @@ The active authority remains the three-repo surebet boundary docs.
 automation_contract=standard_root_scripts_v1
 implementation_controller=run-autonomous-implementation.sh standardized_with_canonical_flags_and_telegram
 paper_controller=run-paper-evaluation.sh standardized_with_telegram_no_service_private_fixture_pinned_bundle
-bugfix_controller=run-autonomous-bugfix.sh standardized_audit_handoff_with_telegram
+bugfix_controller=run-autonomous-bugfix.sh strict_four_state_read_only_audit_handoff
 bugfix_mutation_guard=content_fingerprint_detects_already_dirty_file_edits
 bugfix_artifact_hint=resolved_before_current_run_directory_creation
 paper_input_preflight=existing_regular_non_symlink_repo_local_json_before_run_creation
@@ -153,7 +153,7 @@ pull_artifacts_remote_artifact_override=supported
 progress_helpers=current_artifact_layout
 shared_telegram_helper=.automation/lib/telegram_notify.sh
 run_autonomous_implementation=standardized_with_canonical_flags_and_telegram
-run_autonomous_bugfix=standardized_audit_handoff_with_telegram
+run_autonomous_bugfix=strict_four_state_read_only_audit_handoff
 run_autonomous_bugfix_mutation_guard=content_fingerprint
 run_paper_evaluation_standardization=standardized_with_telegram_no_service_private_fixture_pinned_bundle
 run_paper_evaluation_input_preflight=fail_fast_before_expensive_validation
@@ -165,3 +165,8 @@ run_paper_evaluation_input_preflight=fail_fast_before_expensive_validation
 run_paper_autopilot=standardized_no_service_parent_supervisor
 
 `run-paper-autopilot.sh` is now the unattended parent workflow. It has no service lifecycle and only alternates private paper evaluation with bounded source implementation when `.automation/paper-mode-to-autonomous-implementation.env` exists.
+
+
+## Bugfix autopilot hardening
+
+`run-autonomous-bugfix.sh` now uses a strict four-state audit contract and `run-bugfix-autopilot.sh` provides the bounded audit -> implementation -> same-area re-audit campaign workflow.

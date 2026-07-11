@@ -14,8 +14,8 @@ test('standard automation root scripts and shared helpers are installed', () => 
   for (const rel of [
     'zip_codebase.sh','pull_artifacts_and_zip_codebase.sh','update_git.sh',
     'check_progress.sh','watch_progress.sh','open_log.sh','start.sh','stop.sh',
-    'run-autonomous-implementation.sh','run-paper-evaluation.sh','run-paper-autopilot.sh','run-autonomous-bugfix.sh',
-    'automation.config.sh','.automation/lib/run_common.sh','.automation/lib/telegram_notify.sh','.automation/README.md',
+    'run-autonomous-implementation.sh','run-paper-evaluation.sh','run-paper-autopilot.sh','run-autonomous-bugfix.sh','run-bugfix-autopilot.sh',
+    'automation.config.sh','.automation/lib/run_common.sh','.automation/lib/controller_hardening_v2.sh','.automation/lib/telegram_notify.sh','.automation/README.md',
   ]) {
     assert.equal(existsSync(join(REPO_ROOT, rel)), true, `${rel} should exist`);
   }
@@ -23,6 +23,9 @@ test('standard automation root scripts and shared helpers are installed', () => 
   assert.match(read('.automation/lib/run_common.sh'), /automation_require_cycle_artifacts\(\)/);
   assert.match(read('.automation/lib/run_common.sh'), /automation_run_argv_command\(\)/);
   assert.match(read('.automation/lib/run_common.sh'), /automation_source_tree_fingerprint\(\)/);
+  assert.match(read('.automation/lib/controller_hardening_v2.sh'), /automation_v2_load_env_strict\(\)/);
+  assert.match(read('.automation/lib/controller_hardening_v2.sh'), /automation_v2_semantic_env_fingerprint_loaded\(\)/);
+  assert.match(read('.automation/lib/controller_hardening_v2.sh'), /automation_v2_extract_unique_machine_value\(\)/);
   assert.match(read('.automation/lib/telegram_notify.sh'), /telegram_notify_send_final\(\)/);
   assert.match(read('.automation/lib/telegram_notify.sh'), /telegram_notify_build_final_message\(\)/);
   assert.match(read('.automation/lib/telegram_notify.sh'), /telegram_notify_message_version\(\)/);
@@ -56,6 +59,8 @@ test('progress, start, and stop helpers match the no-service artifact contract',
   assert.match(check, /autonomous_bugfix_\*/);
   assert.match(check, /paper_evaluation_\*/);
   assert.match(check, /paper_autopilot_\*/);
+  assert.match(check, /bugfix_autopilot_\*/);
+  assert.match(check, /campaign_coverage\.tsv/);
   assert.match(check, /rounds\.tsv/);
   assert.match(check, /child_result\.env/);
   assert.match(check, /final-summary\.md/);
@@ -66,6 +71,7 @@ test('progress, start, and stop helpers match the no-service artifact contract',
   assert.match(open, /--controller/);
   assert.match(open, /--codex/);
   assert.match(open, /--paper/);
+  assert.match(open, /--bugfix/);
   assert.match(open, /--implementation/);
   assert.match(open, /--round/);
   assert.match(start, /node scripts\/restore-required-executable-bits\.js/);
@@ -80,32 +86,27 @@ test('implementation controller exposes canonical flags and telegram wiring', ()
   for (const marker of [
     '--model MODEL','--fallback-model MODEL','--repo-dir PATH','--cycle-timeout VALUE',
     '--validation-timeout VALUE','--install-timeout VALUE','--zip-timeout VALUE','--max-cycles N',
-    '--sandbox MODE','--auto-install','--allow-parallel','--handover-paper-mode','--print-config',
+    '--sandbox MODE','--auto-install','--allow-parallel','--handover-paper-mode','--handover-bugfix-audit','--print-config',
     '--stream','--no-stream','No --task flag is supported','docs/automation/current-implementation-task.md',
     'telegram_notify_send_final "run-autonomous-implementation.sh"','automation_require_cycle_artifacts',
     'automation_read_continue_status','check_only_validation_failed','AUTONOMOUS_GOAL_COMPLETE=yes',
-    'BLOCKED=yes','exit 3','Activate the repo runtime in the parent shell first','never sources nvm.sh',
+    'BLOCKED=yes','exit 3','Activate the repo runtime in the parent shell first','never sources nvm.sh','baseline_validation=enabled','strict_handoff_parser=enabled','machine_readable_final_stdout=enabled',
   ]) assertContains(script, marker);
   assert.doesNotMatch(script, /scripts\/load-node-runtime\.sh/);
   assert.doesNotMatch(script, /source .*nvm/);
 });
 
-test('bugfix controller is audit and handoff only with telegram wiring', () => {
+test('bugfix controller is strict read-only audit and handoff infrastructure', () => {
   const script = read('run-autonomous-bugfix.sh');
   for (const marker of [
-    '--from-artifacts PATH','--model MODEL','--fallback-model MODEL','--repo-dir PATH','--cycle-timeout VALUE',
-    '--validation-timeout VALUE','--handover-autonomous-implementation','--print-config',
-    'audit/handoff controller','It must not patch app source directly','Audit order:','Artifacts first',
-    'source_status_snapshot','write_implementation_handoff','autonomous-implementation-handover.env',
-    'artifact_hint_resolved_before_run_dir=yes','automation_source_tree_fingerprint',
-    'source_mutation_detected=yes','bugfix_check_only_source_mutation_detected',
-    'telegram_notify_send_final "run-autonomous-bugfix.sh"','automation_require_cycle_artifacts',
-    'automation_read_continue_status','BLOCKED=yes','exit 3','Activate the repo runtime in the parent shell first',
-    'never sources nvm.sh',"printf 'run_dir=%s\\n'","printf 'final_status=%s\\n'",
+    '--from-artifacts PATH','--bugfix-focus-file PATH','--campaign-area SLUG','--handover-autonomous-implementation',
+    'Read-only source bug-audit','It must not patch app source directly','BUGFIX_AUDIT_COMPLETE=yes',
+    'HANDOVER_AUTONOMOUS_IMPLEMENTATION=yes','strict_request_flags=enabled','BUG_SIGNATURE',
+    'SOURCE_EVIDENCE_SHA256','artifact_hint_resolved_before_run_dir=yes','source_mutation_detected=yes',
+    'telegram_notify_send_final "$SCRIPT_NAME"',"printf 'run_dir=%s\\n'","printf 'final_status=%s\\n'",
   ]) assertContains(script, marker);
-  assert.doesNotMatch(script, /Find and fix bug-class issues/);
-  assert.doesNotMatch(script, /scripts\/load-node-runtime\.sh/);
-  assert.doesNotMatch(script, /source .*nvm/);
+  assert.doesNotMatch(script, /AUTONOMOUS_GOAL_COMPLETE=yes/);
+  assert.doesNotMatch(script, /scripts\/load-node-runtime\.sh|source .*nvm/);
 });
 
 
@@ -113,7 +114,7 @@ test('bugfix artifact evidence is resolved before the active run directory exist
   const script = read('run-autonomous-bugfix.sh');
   const resolveTask = script.indexOf('resolve_task_source');
   const resolveEvidence = script.indexOf('ARTIFACT_HINT="$(resolve_artifact_hint || true)"');
-  const createRun = script.indexOf('automation_create_run_dir "autonomous_bugfix"');
+  const createRun = script.indexOf('automation_create_run_dir autonomous_bugfix');
   assert.ok(resolveTask >= 0);
   assert.ok(resolveEvidence > resolveTask);
   assert.ok(createRun > resolveEvidence);
@@ -212,10 +213,11 @@ test('paper smoke and compatibility wrappers do not pre-create artifact outputs'
   assertContains(paperWrapper, '--max-same-handoff');
 });
 
-test('status docs record all three standardized root controllers', () => {
+test('status docs record the hardened controller surface', () => {
   const status = read('docs/repo_status_current.md');
   assertContains(status, 'run_autonomous_implementation=standardized_with_canonical_flags_and_telegram');
-  assertContains(status, 'run_autonomous_bugfix=standardized_audit_handoff_with_telegram');
+  assertContains(status, 'run_autonomous_bugfix=strict_four_state_read_only_audit_handoff');
+  assertContains(status, 'run_bugfix_autopilot=bounded_eight_area_audit_implementation_reaudit_parent');
   assertContains(status, 'run_paper_evaluation_standardization=standardized_with_telegram_no_service_private_fixture_pinned_bundle');
   assertContains(status, 'run_paper_evaluation=canonical_repo_local_private_fixture_and_pinned_bundle_only');
   assertContains(status, 'run_paper_autopilot=standardized_no_service_parent_supervisor');

@@ -3,7 +3,7 @@
 ```text
 repo=betting-win-surebet
 current_task=SURE-002B_PRIVATE_PAPER_MODE_INTAKE
-current_task_status=complete_repo_local_private_paper_mode_backlog_blocked_on_pinned_interface
+current_task_status=repo_local_private_paper_mode_baseline_complete_full_blueprint_blocked_on_pinned_interface
 next_allowed_task=wait_for_federico_pinned_betting_win_contract_export_interface_before_real_upstream_evaluation_or_continue_with_approved_autopilot_alignment
 repo_role=surebet_strategy_execution_repo
 strategy_family=surebet_complete_set_only
@@ -81,7 +81,7 @@ The repo-local SURE-001 hardening backlog, the safe SURE-002A local implementati
 
 ```text
 current_task=SURE-002B_PRIVATE_PAPER_MODE_INTAKE
-current_task_status=complete_repo_local_private_paper_mode_backlog_blocked_on_pinned_interface
+current_task_status=repo_local_private_paper_mode_baseline_complete_full_blueprint_blocked_on_pinned_interface
 provider_connections=prohibited
 execution=prohibited
 real_upstream_evaluation=blocked_until_federico_pinned_betting_win_interface
@@ -111,7 +111,7 @@ The active authority remains the three-repo surebet boundary docs.
 ```text
 automation_contract=standard_root_scripts_v1
 run_autonomous_implementation=standardized_with_canonical_flags_and_telegram
-run_autonomous_bugfix=standardized_audit_handoff_with_telegram
+run_autonomous_bugfix=strict_four_state_read_only_audit_handoff
 run_autonomous_bugfix_mutation_guard=content_fingerprint_detects_already_dirty_file_edits
 run_autonomous_bugfix_artifact_hint=resolved_before_current_run_directory_creation
 run_paper_evaluation=canonical_repo_local_private_fixture_and_pinned_bundle_only
@@ -139,7 +139,7 @@ progress_helpers=current_artifact_layout
 start_stop=no_service_validation_and_noop
 shared_telegram_helper=.automation/lib/telegram_notify.sh
 run_autonomous_implementation=standardized_with_canonical_flags_and_telegram
-run_autonomous_bugfix=standardized_audit_handoff_with_telegram
+run_autonomous_bugfix=strict_four_state_read_only_audit_handoff
 run_autonomous_bugfix_mutation_guard=content_fingerprint
 run_paper_evaluation_standardization=standardized_with_telegram_no_service_private_fixture_pinned_bundle
 run_paper_evaluation_input_preflight=fail_fast_before_expensive_validation
@@ -164,7 +164,17 @@ run_paper_autopilot=standardized_no_service_parent_supervisor
 Default unattended command:
 
 ```bash
-bash ./run-paper-autopilot.sh --duration 7d --paper-duration 72h --implementation-duration 72h --interval 5m --adaptive --max-rounds 6 --max-same-handoff 2 --model cli-default --fallback-model none
+bash ./run-paper-autopilot.sh --duration 7d --paper-duration 72h --implementation-duration 72h --interval 5m --adaptive --max-rounds 0 --max-same-handoff 2 --model cli-default --fallback-model none
 ```
 
 The controller is no-service/private-paper only. Missing pinned bundle is an external-input blocker, not a source implementation task.
+
+
+## Bugfix autopilot
+
+```text
+run_autonomous_bugfix=strict_four_state_read_only_audit_handoff
+run_bugfix_autopilot=bounded_eight_area_audit_implementation_reaudit_parent
+```
+
+An area is never closed from implementation output alone. The parent requires a clean source re-audit of the exact same area.

@@ -350,7 +350,7 @@ automation_source_path_is_excluded() {
     .automation/paper-mode-to-autonomous-implementation.env|.automation/paper-mode-handover.env|\
     .automation/autonomous-implementation-handover.env|.automation/autonomous-implementation-handover.md|\
     .automation/bugfix-to-autonomous-implementation.env|.automation/bugfix-to-autonomous-implementation.md|\
-    .automation/bugfix-mode-handover.env|.codex_current_artifact_dir|artifacts.zip|\
+    .automation/bugfix-mode-handover.env|.automation/consumed-handoffs|.automation/consumed-handoffs/*|.codex_current_artifact_dir|artifacts.zip|\
     *.zip|*.tar|*.tgz|*.tar.gz|*.log|*.pid|*.sqlite|*.sqlite3|*.db|*.pyc)
       return 0
       ;;

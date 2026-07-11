@@ -12,6 +12,7 @@ export const REQUIRED_EXECUTABLE_PATHS = Object.freeze([
   'run-paper-evaluation.sh',
   'run-paper-autopilot.sh',
   'run-autonomous-bugfix.sh',
+  'run-bugfix-autopilot.sh',
   '.automation/lib/run_common.sh',
   '.automation/lib/telegram_notify.sh',
   'scripts/create-source-handoff-archive.sh',

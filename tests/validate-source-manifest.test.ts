@@ -112,6 +112,9 @@ test('source manifest validator ignores runtime automation locks and handoff fil
     writeFileSync(join(dir, '.automation', 'autonomous-implementation-handover.md'), '# handoff\n', { encoding: 'utf-8' });
     writeFileSync(join(dir, '.automation', 'bugfix-to-autonomous-implementation.env'), 'HANDOVER_KIND=bugfix-to-autonomous-implementation\n', { encoding: 'utf-8' });
     writeFileSync(join(dir, '.automation', 'bugfix-to-autonomous-implementation.md'), '# bugfix handoff\n', { encoding: 'utf-8' });
+    writeFileSync(join(dir, '.automation', 'bugfix-mode-handover.env'), 'HANDOVER_KIND=bugfix-mode\n', { encoding: 'utf-8' });
+    mkdirSync(join(dir, '.automation', 'consumed-handoffs'), { recursive: true });
+    writeFileSync(join(dir, '.automation', 'consumed-handoffs', 'abc.env'), 'HANDOVER_FINGERPRINT=abc\n', { encoding: 'utf-8' });
     writeFileSync(join(dir, 'OVERLAY_MANIFEST.json'), '{"generated":true}\n', { encoding: 'utf-8' });
 
     const output = execFileSync('python3', ['scripts/validate_source_manifest.py'], { cwd: dir, encoding: 'utf-8', stdio: 'pipe' });
@@ -189,6 +192,9 @@ test('source manifest ignores runtime automation locks and handoff files but tra
     writeFileSync(join(dir, '.automation', 'autonomous-implementation-handover.env'), 'HANDOVER_KIND=bugfix\n', { encoding: 'utf-8' });
     writeFileSync(join(dir, '.automation', 'autonomous-implementation-handover.md'), '# runtime handoff\n', { encoding: 'utf-8' });
     writeFileSync(join(dir, '.automation', 'bugfix-to-autonomous-implementation.env'), 'HANDOVER_KIND=bugfix\n', { encoding: 'utf-8' });
+    writeFileSync(join(dir, '.automation', 'bugfix-mode-handover.env'), 'HANDOVER_KIND=bugfix-mode\n', { encoding: 'utf-8' });
+    mkdirSync(join(dir, '.automation', 'consumed-handoffs'), { recursive: true });
+    writeFileSync(join(dir, '.automation', 'consumed-handoffs', 'abc.env'), 'HANDOVER_FINGERPRINT=abc\n', { encoding: 'utf-8' });
 
     execFileSync('python3', ['scripts/regenerate_source_manifest.py'], { cwd: dir, encoding: 'utf-8', stdio: 'pipe' });
 
@@ -203,6 +209,8 @@ test('source manifest ignores runtime automation locks and handoff files but tra
     assert.ok(!paths.includes('.automation/autonomous-implementation-handover.env'));
     assert.ok(!paths.includes('.automation/autonomous-implementation-handover.md'));
     assert.ok(!paths.includes('.automation/bugfix-to-autonomous-implementation.env'));
+    assert.ok(!paths.includes('.automation/bugfix-mode-handover.env'));
+    assert.ok(!paths.includes('.automation/consumed-handoffs/abc.env'));
 
     const output = execFileSync('python3', ['scripts/validate_source_manifest.py'], { cwd: dir, encoding: 'utf-8', stdio: 'pipe' });
     assert.match(output, /validate_source_manifest: ok/);

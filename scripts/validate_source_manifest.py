@@ -19,6 +19,7 @@ SKIP_EXACT = {
     '.automation/autonomous-implementation-handover.md',
     '.automation/bugfix-to-autonomous-implementation.env',
     '.automation/bugfix-to-autonomous-implementation.md',
+    '.automation/bugfix-mode-handover.env',
     '.automation/paper-mode-handover.env',
     '.automation/paper-mode-to-autonomous-implementation.env',
 }
@@ -26,6 +27,7 @@ SKIP_EXACT = {
 SKIP_PREFIXES = (
     '.automation/locks/',
     '.automation/corrupt/',
+    '.automation/consumed-handoffs/',
 )
 SKIP_SUFFIXES = ('.zip', '.log', '.tmp', '.pyc', '.tar', '.tgz', '.tar.gz')
 UTC_TIMESTAMP = re.compile(r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$')

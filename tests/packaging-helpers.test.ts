@@ -157,6 +157,7 @@ function makeSourceHandoffFixture(): { dir: string; repoDir: string; archivePath
     'run-paper-evaluation.sh',
     'run-paper-autopilot.sh',
     'run-autonomous-bugfix.sh',
+    'run-bugfix-autopilot.sh',
     '.automation/lib/run_common.sh',
     '.automation/lib/telegram_notify.sh',
     'scripts/load-node-runtime.sh',

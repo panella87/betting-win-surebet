@@ -43,6 +43,7 @@ Useful flags now supported:
 --force-unlock
 --allow-parallel
 --handover-paper-mode
+--handover-bugfix-audit
 --print-config
 --stream / --no-stream
 ```
@@ -112,3 +113,22 @@ maintenance.
 ## Paper autopilot handoff metadata
 
 When launched with `--handover-paper-mode`, implementation writes `.automation/paper-mode-handover.env` with `IMPLEMENTATION_SOURCE_CHANGED`, `IMPLEMENTATION_SOURCE_VALIDATION_PASSED`, and `PRIVATE_PAPER_REEVALUATION_REQUIRED`. The paper autopilot uses those fields to decide whether a new private paper evaluation is justified.
+
+
+## Hardened validation and handoff contract
+
+Before the first Codex cycle, the controller runs the configured validation and preserves its exact artifacts under `preflight/baseline-validation`. A red baseline is implementation evidence, not a silent success and not an automatic reason to skip the bounded task. `--check-only` still fails when that baseline is red.
+
+The controller tracks source change and validation across the whole run. Runtime handoff files, locks, logs, archives, dependencies, and generated artifacts do not count as implementation progress. A later model or capacity failure does not erase evidence that an earlier cycle made and validated a real source change.
+
+Paper and bugfix handoffs are parsed as strict `KEY=VALUE` data. Duplicate keys, repository mismatch, unsupported schema, invalid booleans, stale/consumed fingerprints, missing evidence, or an unauthorized protected-file change fail closed. Autopilot handoffs may authorize only an exact comma-separated protected-file allowlist. The broad `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` override remains manual-only.
+
+The bugfix consumer entrypoint is:
+
+```bash
+bash ./run-autonomous-implementation.sh   --duration 72h   --model cli-default   --fallback-model none   --handover-bugfix-audit
+```
+
+It consumes `.automation/autonomous-implementation-handover.env` and writes the verified return handoff `.automation/bugfix-mode-handover.env`. The producer is `run-autonomous-bugfix.sh`; unattended campaigns are coordinated by `run-bugfix-autopilot.sh`. Do not fabricate the handoff manually.
+
+Every terminal run prints exactly one machine-readable record for `run_dir`, `final_status`, `stop_reason`, `final_exit_code`, and `cycles_completed`. Final `artifacts.zip` creation is bounded by `--zip-timeout`.

@@ -2,12 +2,13 @@
 
 Repository: betting-win-surebet.
 
-Objective: inspect the current code, docs, and validation output. The paper-controller pinned-bundle hardening is implemented: `SUREBET_PINNED_BUNDLE` paths are preflighted before run creation, known report commands execute as direct argv, source/protected-file immutability is checked, and `SUREBET_REQUIRE_PINNED_BUNDLE` is strict `0` or `1`. Fix only confirmed repo-local validation/tooling defects, documentation drift, approved automation-maintenance gaps, or private-paper local fixture bugs. If no concrete safe defect exists, produce the
-required cycle artifacts and write:
+Objective: inspect the current code, docs, and validation output. The paper-controller pinned-bundle hardening is implemented: `SUREBET_PINNED_BUNDLE` paths are preflighted before run creation, known report commands execute as direct argv, source/protected-file immutability is checked, and `SUREBET_REQUIRE_PINNED_BUNDLE` is strict `0` or `1`. Fix only confirmed repo-local validation/tooling defects, documentation drift, approved automation-maintenance gaps, or private-paper local fixture bugs. If no concrete safe defect exists and the only remaining blocker is the missing upstream interface, produce the required cycle artifacts and write:
 
 ```text
-AUTONOMOUS_GOAL_COMPLETE=yes
+BLOCKED=yes
 ```
+
+Use `AUTONOMOUS_GOAL_COMPLETE=yes` only when the current bounded repo-local task is genuinely complete. It must never imply that the full product blueprint is complete while real upstream evaluation remains blocked.
 
 Constraints:
 

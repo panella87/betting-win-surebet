@@ -9,6 +9,7 @@ This repository uses the standardized root automation helper surface:
 ./pull_artifacts_and_zip_codebase.sh
 ./run-autonomous-implementation.sh
 ./run-autonomous-bugfix.sh
+./run-bugfix-autopilot.sh
 ./run-paper-evaluation.sh
 ./run-paper-autopilot.sh
 ./watch_progress.sh --once --fast
@@ -79,3 +80,13 @@ profitability claims, and no execution-readiness claims.
 ## Paper autopilot
 
 `run-paper-autopilot.sh` is the canonical unattended no-service parent supervisor for this repo. It is a protected automation file. Manual `run-paper-evaluation.sh` remains available for direct private fixture or pinned-bundle checks, but unattended paper/implementation handoff workflows should use the autopilot.
+
+
+## Verified controller handoffs
+
+`.automation/lib/controller_hardening_v2.sh` is protected shared infrastructure for strict handoff parsing, semantic fingerprints, source-tree fingerprints, child-result validation, verified child termination, and bounded archives. `run-autonomous-implementation.sh` consumes both paper and bugfix handoffs; `run-paper-autopilot.sh` requires explicit machine-readable child results and uses `--max-rounds 0` by default.
+
+
+## Bugfix autopilot
+
+`run-bugfix-autopilot.sh` is the unattended bounded source-audit campaign parent. It calls only `run-autonomous-bugfix.sh` and `run-autonomous-implementation.sh --handover-bugfix-audit`, requires a clean re-audit of the same campaign area after each implementation, and never calls paper evaluation or service lifecycle commands.

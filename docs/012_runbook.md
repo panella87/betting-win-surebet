@@ -66,7 +66,7 @@ docs should point operators to the root scripts above.
 After activating Node 20 in the parent shell, run:
 
 ```bash
-bash ./run-paper-autopilot.sh --duration 7d --paper-duration 72h --implementation-duration 72h --interval 5m --adaptive --max-rounds 6 --max-same-handoff 2 --model cli-default --fallback-model none
+bash ./run-paper-autopilot.sh --duration 7d --paper-duration 72h --implementation-duration 72h --interval 5m --adaptive --max-rounds 0 --max-same-handoff 2 --model cli-default --fallback-model none
 ```
 
 This is no-service/private-paper only.

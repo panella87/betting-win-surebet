@@ -65,8 +65,11 @@ artifacts.zip.tmp.*
 .automation/autonomous-implementation-handover.md
 .automation/bugfix-to-autonomous-implementation.env
 .automation/bugfix-to-autonomous-implementation.md
+.automation/bugfix-mode-handover.env
 .automation/paper-mode-handover.env
 .automation/paper-mode-to-autonomous-implementation.env
 # Local overlay metadata from drag-and-drop ChatGPT overlays
 OVERLAY_MANIFEST.json
 
+
+.automation/consumed-handoffs/

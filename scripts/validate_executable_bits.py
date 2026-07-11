@@ -17,6 +17,7 @@ REQUIRED = [
     'run-autonomous-implementation.sh',
     'run-paper-evaluation.sh',
     'run-autonomous-bugfix.sh',
+    'run-bugfix-autopilot.sh',
     '.automation/lib/run_common.sh',
     '.automation/lib/telegram_notify.sh',
     'scripts/create-source-handoff-archive.sh',

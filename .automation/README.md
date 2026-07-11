@@ -32,3 +32,10 @@ is still private paper evidence, not live readiness.
 ## Paper autopilot runtime state
 
 `run-paper-autopilot.sh` writes parent-supervisor artifacts under `artifacts/paper_autopilot_*`. Runtime locks and handoff files remain generated state and are not source authority.
+
+`.automation/lib/controller_hardening_v2.sh` contains protected fail-closed helpers for semantic handoff fingerprints, repo-local path checks, source fingerprints, strict child result extraction, process identity verification, and bounded ZIP creation.
+
+
+## Bugfix autopilot
+
+`run-bugfix-autopilot.sh` is the unattended bounded source-audit campaign parent. It calls only `run-autonomous-bugfix.sh` and `run-autonomous-implementation.sh --handover-bugfix-audit`, requires a clean re-audit of the same campaign area after each implementation, and never calls paper evaluation or service lifecycle commands.

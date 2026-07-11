@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # betting-win-surebet automation configuration.
 # This file documents the repo-specific commands used by the standardized automation layer.
-# run-autonomous-implementation.sh, run-autonomous-bugfix.sh, and run-paper-evaluation.sh are standardized here.
+# Root implementation, bugfix, paper, and parent-autopilot controllers are standardized here.
 # run-paper-evaluation.sh is surebet-specific: no service lifecycle, private fixture/pinned-bundle only.
 
 AUTOMATION_CONFIG_READY=1
@@ -28,22 +28,26 @@ AUTOMATION_ALLOW_PROTECTED_CHANGES="${AUTOMATION_ALLOW_PROTECTED_CHANGES:-0}"
 AUTOMATION_PROTECTED_FILES=(
   "zip_codebase.sh" "pull_artifacts_and_zip_codebase.sh" "update_git.sh"
   "check_progress.sh" "watch_progress.sh" "open_log.sh" "start.sh" "stop.sh"
-  "run-autonomous-implementation.sh" "run-paper-evaluation.sh" "run-paper-autopilot.sh" "run-autonomous-bugfix.sh"
-  "automation.config.sh" ".automation/lib/run_common.sh" ".automation/lib/telegram_notify.sh"
+  "run-autonomous-implementation.sh" "run-paper-evaluation.sh" "run-paper-autopilot.sh" "run-autonomous-bugfix.sh" "run-bugfix-autopilot.sh"
+  "automation.config.sh" ".automation/lib/run_common.sh" ".automation/lib/controller_hardening_v2.sh" ".automation/lib/telegram_notify.sh"
   "docs/automation/PROTECTED_AUTOMATION_FILES.md"
 )
 AUTOMATION_VALIDATION_COMMANDS=(
-  "bash -n start.sh stop.sh check_progress.sh watch_progress.sh open_log.sh run-autonomous-implementation.sh run-paper-evaluation.sh run-paper-autopilot.sh run-autonomous-bugfix.sh zip_codebase.sh pull_artifacts_and_zip_codebase.sh update_git.sh .automation/lib/run_common.sh .automation/lib/telegram_notify.sh"
+  "bash -n start.sh stop.sh check_progress.sh watch_progress.sh open_log.sh run-autonomous-implementation.sh run-paper-evaluation.sh run-paper-autopilot.sh run-autonomous-bugfix.sh run-bugfix-autopilot.sh zip_codebase.sh pull_artifacts_and_zip_codebase.sh update_git.sh .automation/lib/run_common.sh .automation/lib/controller_hardening_v2.sh .automation/lib/telegram_notify.sh"
   "npm run validate"
 )
 AUTOMATION_IMPLEMENTATION_VALIDATION_COMMANDS=("npm run validate")
 AUTOMATION_BUGFIX_VALIDATION_COMMANDS=("npm run validate")
+
+# Default unattended bug-audit campaign. It audits one bounded area, implements confirmed defects, and re-audits the same area before closure.
+AUTOMATION_BUGFIX_AUTOPILOT_COMMAND="bash ./run-bugfix-autopilot.sh --duration 7d --bugfix-duration 72h --implementation-duration 72h --max-rounds 0 --max-same-handoff 2 --model cli-default --fallback-model none"
+AUTOMATION_BUGFIX_COMMAND="$AUTOMATION_BUGFIX_AUTOPILOT_COMMAND"
 PAPER_SUPPORTED="${PAPER_SUPPORTED:-1}"
 AUTOMATION_PAPER_SUPPORTED=1
 # Manual private paper evaluator. It is no-service: fixture/pinned-bundle checks only.
 AUTOMATION_PAPER_EVALUATION_COMMAND="bash ./run-paper-evaluation.sh --duration 72h --interval 5m --adaptive --model cli-default --fallback-model none"
 # Default unattended paper workflow. This parent supervisor alternates paper evaluation and bounded implementation handoffs.
-AUTOMATION_PAPER_AUTOPILOT_COMMAND="bash ./run-paper-autopilot.sh --duration 7d --paper-duration 72h --implementation-duration 72h --interval 5m --adaptive --max-rounds 6 --max-same-handoff 2 --model cli-default --fallback-model none"
+AUTOMATION_PAPER_AUTOPILOT_COMMAND="bash ./run-paper-autopilot.sh --duration 7d --paper-duration 72h --implementation-duration 72h --interval 5m --adaptive --max-rounds 0 --max-same-handoff 2 --model cli-default --fallback-model none"
 PAPER_COMMAND="$AUTOMATION_PAPER_AUTOPILOT_COMMAND"
 AUTOMATION_PAPER_COMMAND="$AUTOMATION_PAPER_AUTOPILOT_COMMAND"
 AUTOMATION_PAPER_COMMAND_MODE="controller"

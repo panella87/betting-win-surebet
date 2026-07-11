@@ -1,6 +1,6 @@
 # Paper autopilot controller
 
-`run-paper-autopilot.sh` is the standardized no-service parent supervisor for `betting-win-surebet`.
+`run-paper-autopilot.sh` is the standardized no-service parent supervisor for `betting-win-surebet`. The normal default is `--max-rounds 0`: parent duration and the repeated semantic-handoff guard own termination; a positive round ceiling is diagnostic only.
 
 It is intentionally adapted from the approved Hyperliquid automation workflow, but it does not own a service lifecycle. It does not call `start.sh`, `stop.sh`, provider APIs, direct `betting-win` database reads, wallets, signers, orders, or execution paths.
 
@@ -10,7 +10,7 @@ Activate Node 20 in the parent shell first:
 
 ```bash
 . "$HOME/.nvm/nvm.sh" && nvm use 20
-bash ./run-paper-autopilot.sh --duration 7d --paper-duration 72h --implementation-duration 72h --interval 5m --adaptive --max-rounds 6 --max-same-handoff 2 --model cli-default --fallback-model none
+bash ./run-paper-autopilot.sh --duration 7d --paper-duration 72h --implementation-duration 72h --interval 5m --adaptive --max-rounds 0 --max-same-handoff 2 --model cli-default --fallback-model none
 ```
 
 ## What it supervises
@@ -70,10 +70,13 @@ The controller writes `artifacts/paper_autopilot_*` with:
 ```text
 controller.log
 rounds.tsv
-round_N_child/child_command.txt
-round_N_child/child_output.log
-round_N_child/child_result.env
-round_N_child/handoffs/
+round_N_paper/child_command.txt
+round_N_paper/child_output.log
+round_N_paper/child_result.env
+round_N_implementation/child_command.txt
+round_N_implementation/child_output.log
+round_N_implementation/child_result.env
+consumed handoffs inside the corresponding implementation round
 final_summary.txt
 final-summary.md
 telegram_notification_status.txt
@@ -84,3 +87,16 @@ It refreshes root `artifacts.zip` only at finalization.
 ## Boundaries
 
 This repo remains private paper-only until the pinned `betting-win` export bundle exists. Provider connections, direct `betting-win` DB access, execution, public reports, profitability claims, and live-readiness claims remain prohibited.
+
+
+## Parent hardening
+
+Before creating a campaign artifact directory, the parent verifies both child scripts are repo-local, executable non-symlink regular files and pass `bash -n`. Existing runtime handoffs are rotated as stale evidence before the first child launch.
+
+Each child budget is clamped to the remaining parent duration. The parent requires exactly one machine-readable child result for `run_dir`, `final_status`, `stop_reason`, and `final_exit_code`, and reconciles the declared exit with the real process exit. It does not guess the newest artifact directory.
+
+Paper handoffs are normalized to schema version 1 and receive a stable semantic SHA-256 that excludes timestamps and run paths. Implementation return handoffs must name that exact source fingerprint. Repeated logical requests therefore trigger `--max-same-handoff` even when generated at different times.
+
+The parent lock records the active child PID, type, script, command, repository realpath, controller realpath, run directory, and heartbeat. Signal handling and verified `--force-unlock` terminate the active child process group before releasing the parent lock. PID or script mismatches fail closed.
+
+Successful implementation never closes the paper objective by itself. It must report a validated source change (or an explicitly permitted validated no-op) and request private-paper re-evaluation; the parent then runs the paper child again.

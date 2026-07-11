@@ -44,18 +44,20 @@ test('paper evaluation writes autopilot-readable implementation handoff metadata
   ]) contains(script, marker);
 });
 
-test('implementation controller writes autopilot-readable paper re-evaluation handoff metadata', () => {
+test('implementation controller writes fingerprinted paper re-evaluation handoff metadata', () => {
   const script = read('run-autonomous-implementation.sh');
   for (const marker of [
-    'HANDOVER_KIND=paper-mode-after-autonomous-implementation',
-    'RUN_PAPER_EVALUATION_NEXT=yes',
-    'IMPLEMENTATION_SOURCE_CHANGED=',
-    'IMPLEMENTATION_SOURCE_VALIDATION_PASSED=',
-    'PRIVATE_PAPER_REEVALUATION_REQUIRED=',
+    'kind="paper-mode-after-autonomous-implementation"',
+    'next_key="RUN_PAPER_EVALUATION_NEXT"',
+    'IMPLEMENTATION_SOURCE_CHANGED=$RUN_SOURCE_CHANGED',
+    'IMPLEMENTATION_SOURCE_VALIDATION_PASSED=$RUN_SOURCE_VALIDATION_PASSED',
+    'PRIVATE_PAPER_REEVALUATION_REQUIRED=$reevaluate',
+    'SOURCE_HANDOFF_FINGERPRINT=$ACTIVE_HANDOFF_FINGERPRINT',
+    'automation_v2_add_or_verify_fingerprint',
     'PAPER_SERVICE_SUPPORTED=0',
     'SERVICE_REFRESH_REQUIRED=0',
     'RUNTIME_EVIDENCE_REQUIRED=0',
-    'paper_handover_noop_disallowed',
+    '${ACTIVE_HANDOFF_MODE}_handover_noop_disallowed',
     'PAPER_MODE_NOOP_SUCCESS_ALLOWED',
     'PAPER_MODE_AUTOMATION_MAINTENANCE_ALLOWED',
   ]) contains(script, marker);
@@ -72,12 +74,18 @@ test('automation config and docs register paper autopilot as the unattended pape
 });
 
 
-test('paper autopilot handles nonzero child exits explicitly instead of failing through set -e', () => {
+test('paper autopilot reconciles nonzero child exits through explicit machine-readable results', () => {
   const script = read('run-paper-autopilot.sh');
-  contains(script, 'set +e\n    run_child_controller "$child" "$round_dir"\n    rc=$?\n    set -e');
-  contains(script, 'resolve_child_run_dir "$output_log"');
-  contains(script, 'ACTIVE_CHILD_PID="$!"; automation_write_lock_file; wait "$ACTIVE_CHILD_PID"; rc=$?');
-  assert.doesNotMatch(script, /wait "\$ACTIVE_CHILD_PID"; rc=\$\?; set -e/);
-  contains(script, 'return 0; }');
-  contains(script, 'parse_child_summary "$latest" "$output_log"');
+  for (const marker of [
+    'if run_child_controller paper "$round_dir"; then rc=0; else rc=$?; fi',
+    'if run_child_controller implementation "$round_dir"; then rc=0; else rc=$?; fi',
+    'automation_v2_extract_unique_machine_value "$output" run_dir',
+    'automation_v2_extract_unique_machine_value "$output" final_status',
+    'automation_v2_extract_unique_machine_value "$output" final_exit_code',
+    'child declared exit $declared_rc but process exited $rc',
+    'setsid "${cmd[@]}"',
+    'ACTIVE_CHILD_PID=$!',
+    'parent_budget_clamping=enabled',
+  ]) contains(script, marker);
+  assert.doesNotMatch(script, /latest artifact|latest_artifact|resolve_child_run_dir/);
 });

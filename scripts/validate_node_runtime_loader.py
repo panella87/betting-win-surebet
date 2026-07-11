@@ -15,6 +15,7 @@ ROOT_CONTROLLERS = [
     ROOT / 'run-autonomous-bugfix.sh',
     ROOT / 'run-paper-evaluation.sh',
     ROOT / 'run-paper-autopilot.sh',
+    ROOT / 'run-bugfix-autopilot.sh',
 ]
 
 def fail(message: str) -> None:

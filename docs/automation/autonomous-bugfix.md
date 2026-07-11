@@ -1,13 +1,10 @@
 # Autonomous bugfix rules: betting-win-surebet
 
-`run-autonomous-bugfix.sh` is now an audit/handoff controller. It does not patch app
-source directly. In plain operator terms, it does not patch app source directly. It audits artifacts first when available, audits source second,
-and writes a bounded implementation handoff when confirmed bugs remain.
+`run-autonomous-bugfix.sh` is a read-only audit and strict implementation-handoff controller. It must not patch app source directly.
 
-Default command, after activating Node 20 in the parent shell:
+Default standalone command after activating Node 20 in the parent shell:
 
 ```bash
-. "$HOME/.nvm/nvm.sh" && nvm use 20
 bash ./run-autonomous-bugfix.sh \
   --duration 72h \
   --model cli-default \
@@ -15,11 +12,13 @@ bash ./run-autonomous-bugfix.sh \
   --handover-autonomous-implementation
 ```
 
-Useful flags:
+Important flags:
 
 ```text
 --from-artifacts PATH
 --prompt-file PATH
+--bugfix-focus-file PATH
+--campaign-area SLUG
 --repo-dir PATH
 --cycle-timeout VALUE
 --validation-timeout VALUE
@@ -33,75 +32,30 @@ Useful flags:
 --force-unlock
 --allow-parallel
 --handover-autonomous-implementation
+--no-context-retry
 --print-config
 --stream / --no-stream
 ```
 
-Audit order:
+The retained artifact hint is resolved before the current run directory is created. Source immutability uses content fingerprints over tracked files plus untracked non-ignored files, so edits to already-dirty files are detected. Runtime artifacts, locks, archives, generated output, and handoff files are excluded.
+
+Each cycle uses exactly one terminal state:
 
 ```text
-Artifacts first
-source second
+BUGFIX_AUDIT_COMPLETE=yes
+CONTINUE_REQUIRED=yes
+HANDOVER_AUTONOMOUS_IMPLEMENTATION=yes
+BLOCKED=yes
 ```
 
+`request_flags.txt` is a strict machine contract containing bug presence, handoff requirement, campaign area, evidence completeness, stable bug IDs, bounded implementation scope, and exact protected-file authorization. Duplicate, unknown, missing, or contradictory fields fail closed.
 
-## Read-only evidence and mutation safety
+Confirmed bugs produce `.automation/autonomous-implementation-handover.env` with schema version, repository identity, audit area, stable bug signature, source fingerprint, evidence hash, exact implementation scope, protected-file allowlist, and semantic SHA-256 fingerprint. The consumer is:
 
-The artifact hint is resolved before the current run directory is created. This
-prevents the controller from selecting its own new
-`artifacts/autonomous_bugfix_*` directory. This prevents a new empty run from being
-selected as the retained evidence source when no root `artifacts.zip` is present.
-
-Source immutability is enforced with content fingerprints over tracked files plus
-untracked non-ignored files. Runtime artifacts, locks, generated output, archives,
-and handoff files are excluded. `git status --short` snapshots remain diagnostic
-only: they are not the mutation security gate because an already-dirty file can be
-edited again without changing its status line. A content change before, during, or
-after validation blocks the audit.
-
-Final stdout always exposes machine-readable `run_dir`, `final_status`,
-`stop_reason`, `final_exit_code`, and `cycles_completed` fields for parent tools and
-post-run auditing.
-
-When confirmed bugs require source work and
-`--handover-autonomous-implementation` is set, the controller writes:
-
-```text
-.automation/autonomous-implementation-handover.env
-.automation/autonomous-implementation-handover.md
+```bash
+bash ./run-autonomous-implementation.sh --handover-bugfix-audit
 ```
 
-The next operator action is then `run-autonomous-implementation.sh`, not another
-source-patching bugfix pass.
+A validation-red baseline is audit evidence, not automatic controller failure. Clean audit completion still requires validation to pass. Context-window and model-availability failures are classified; retries are allowed only while source remains unchanged.
 
-Telegram is wired through `.automation/lib/telegram_notify.sh`. It sends one final
-message per run and can be disabled with `TELEGRAM_NOTIFY=0`.
-
-For this repo, the audit must focus on private paper-mode and local deterministic
-surebet code paths:
-
-```text
-repo-local pinned bundle intake
-local fixture reader containment and symlink/realpath rejection
-standard-binary complete-set grouping
-quote freshness and currency checks
-stake-vector math over local fixtures
-leg completion and residual exposure simulation
-settlement replay consumption
-private report artifact contracts
-batch summary generation
-validation/source-manifest drift
-shell entrypoint safety
-```
-
-Do not add provider adapters, live collectors, wallet or order paths, public
-reports, profitability claims, or predictive/value-betting work. Missing required
-config must fail fast. Do not hide defects with silent defaults.
-
-Protected automation files must not change unless the explicit task is automation
-maintenance.
-
-
-## Autopilot boundary
-
-`run-autonomous-bugfix.sh` remains standalone audit/handoff infrastructure. It is not called by `run-paper-autopilot.sh` in this repo.
+The allowed audit surface is repo-local private-paper logic, validators, deterministic fixtures, report contracts, filesystem safety, automation handoffs, and packaging. Provider adapters, live collectors, direct upstream database access, wallets, orders, transactions, public reports, profitability claims, and execution-readiness claims remain prohibited.

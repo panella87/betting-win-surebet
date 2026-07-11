@@ -27,8 +27,9 @@
     "autonomous:bugfix": "bash run-autonomous-bugfix.sh",
     "paper:evaluation": "bash run-paper-evaluation.sh",
     "bugfix": "bash run-autonomous-bugfix.sh",
-    "automation:status": "bash run-autonomous-implementation.sh --status && bash run-paper-evaluation.sh --status && bash run-paper-autopilot.sh --status && bash run-autonomous-bugfix.sh --status",
-    "paper:autopilot": "bash run-paper-autopilot.sh"
+    "automation:status": "bash run-autonomous-implementation.sh --status && bash run-paper-evaluation.sh --status && bash run-paper-autopilot.sh --status && bash run-autonomous-bugfix.sh --status && bash run-bugfix-autopilot.sh --status",
+    "paper:autopilot": "bash run-paper-autopilot.sh",
+    "bugfix:autopilot": "bash run-bugfix-autopilot.sh"
   },
   "devDependencies": {
     "@types/node": "20.12.11",

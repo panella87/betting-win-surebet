@@ -75,5 +75,5 @@ only when needed. All `run-*` scripts create root `artifacts.zip` before exit.
 For unattended paper/implementation handoff supervision, run after Node 20 activation:
 
 ```bash
-bash ./run-paper-autopilot.sh --duration 7d --paper-duration 72h --implementation-duration 72h --interval 5m --adaptive --max-rounds 6 --max-same-handoff 2 --model cli-default --fallback-model none
+bash ./run-paper-autopilot.sh --duration 7d --paper-duration 72h --implementation-duration 72h --interval 5m --adaptive --max-rounds 0 --max-same-handoff 2 --model cli-default --fallback-model none
 ```

@@ -139,7 +139,7 @@ Canonical root controller commands, after activating Node 20 in the parent shell
 . "$HOME/.nvm/nvm.sh" && nvm use 20
 ./run-autonomous-implementation.sh --duration 72h --model cli-default --fallback-model none
 ./run-paper-evaluation.sh --duration 72h --interval 5m --adaptive --keep-monitoring-when-ready --model cli-default --fallback-model none
-./run-paper-autopilot.sh --duration 7d --paper-duration 72h --implementation-duration 72h --interval 5m --adaptive --max-rounds 6 --max-same-handoff 2 --model cli-default --fallback-model none
+./run-paper-autopilot.sh --duration 7d --paper-duration 72h --implementation-duration 72h --interval 5m --adaptive --max-rounds 0 --max-same-handoff 2 --model cli-default --fallback-model none
 ./run-autonomous-bugfix.sh --duration 72h --model cli-default --fallback-model none --handover-autonomous-implementation
 ```
 
@@ -159,7 +159,7 @@ pull_artifacts_remote_artifact_override=supported
 progress_helpers=current_artifact_layout
 shared_telegram_helper=.automation/lib/telegram_notify.sh
 run_autonomous_implementation=standardized_with_canonical_flags_and_telegram
-run_autonomous_bugfix=standardized_audit_handoff_with_telegram
+run_autonomous_bugfix=strict_four_state_read_only_audit_handoff
 run_paper_evaluation_standardization=standardized_with_telegram_no_service_private_fixture_pinned_bundle
 run_paper_autopilot=standardized_no_service_parent_supervisor
 ```
@@ -183,7 +183,12 @@ Controller runtime locks and handoff files under `.automation/` are ignored by t
 Canonical command after parent-shell Node 20 activation:
 
 ```bash
-bash ./run-paper-autopilot.sh --duration 7d --paper-duration 72h --implementation-duration 72h --interval 5m --adaptive --max-rounds 6 --max-same-handoff 2 --model cli-default --fallback-model none
+bash ./run-paper-autopilot.sh --duration 7d --paper-duration 72h --implementation-duration 72h --interval 5m --adaptive --max-rounds 0 --max-same-handoff 2 --model cli-default --fallback-model none
 ```
 
 Private fixture success remains blocked on Federico's pinned `betting-win` bundle for real upstream evaluation.
+
+
+### Bugfix autopilot
+
+Use `run-bugfix-autopilot.sh` for an unattended eight-area read-only audit campaign. Confirmed defects move through a strict fingerprinted handoff to autonomous implementation, then the exact same area is re-audited before it can close.

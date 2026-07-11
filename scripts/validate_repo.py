@@ -14,8 +14,8 @@ def read(path: Path) -> str:
 
 REQUIRED = [
   'README.md','AGENTS.md','CHANGELOG.md','PROJECT_STATUS.md','package.json','package-lock.json','tsconfig.json','.gitignore','.gitattributes','.env.example','.nvmrc','cli.js',
-  'start.sh','stop.sh','check_progress.sh','watch_progress.sh','open_log.sh','update_git.sh','pull_artifacts_and_zip_codebase.sh','zip_codebase.sh','run-autonomous-implementation.sh','run-paper-evaluation.sh','run-paper-autopilot.sh','run-autonomous-bugfix.sh','automation.config.sh','.automation/lib/run_common.sh','.automation/lib/telegram_notify.sh','.automation/README.md',
-  'docs/automation/README.md','docs/automation/PROTECTED_AUTOMATION_FILES.md','docs/automation/repo-profile.md','docs/automation/autonomous-implementation.md','docs/automation/paper-evaluation.md','docs/automation/paper-autopilot.md','docs/automation/autonomous-bugfix.md','docs/automation/current-implementation-task.md','docs/automation/SSH_KEY_SETUP.md','docs/automation/POST_OVERLAY_CLEANUP.md',
+  'start.sh','stop.sh','check_progress.sh','watch_progress.sh','open_log.sh','update_git.sh','pull_artifacts_and_zip_codebase.sh','zip_codebase.sh','run-autonomous-implementation.sh','run-paper-evaluation.sh','run-paper-autopilot.sh','run-autonomous-bugfix.sh','run-bugfix-autopilot.sh','automation.config.sh','.automation/lib/run_common.sh','.automation/lib/controller_hardening_v2.sh','.automation/lib/telegram_notify.sh','.automation/README.md',
+  'docs/automation/README.md','docs/automation/PROTECTED_AUTOMATION_FILES.md','docs/automation/repo-profile.md','docs/automation/autonomous-implementation.md','docs/automation/paper-evaluation.md','docs/automation/paper-autopilot.md','docs/automation/autonomous-bugfix.md','docs/automation/bugfix-autopilot.md','docs/automation/current-implementation-task.md','docs/automation/SSH_KEY_SETUP.md','docs/automation/POST_OVERLAY_CLEANUP.md',
   'docs/MASTER_PLAN.md','docs/repo_status_current.md','docs/autonomous_loop_contract.md','docs/operations/autonomous_72h_runbook.md','docs/operations/service_run.md',
   'docs/001_scope_and_boundaries.md','docs/002_dependency_contract_with_betting_win.md','docs/003_surebet_family_decision.md','docs/004_market_identity_and_rule_equivalence.md',
   'docs/005_terminal_scenario_cashflow_model.md','docs/006_quote_depth_capacity_requirements.md','docs/007_stake_vector_solver_contract.md','docs/008_leg_completion_and_residual_exposure.md',
@@ -24,7 +24,7 @@ REQUIRED = [
   'src/contracts/betting-win-contract-imports.ts','src/contracts/local-types.ts',
   'scripts/validate_contract_boundary.py','scripts/validate_no_provider_connections.py','scripts/validate_no_execution_paths.py','scripts/validate_fixture_integrity.py',
   'scripts/validate_master_plan.py','scripts/validate_executable_bits.py','scripts/validate_artifact_hygiene.py','scripts/validate_node_runtime_loader.py','scripts/validate_shell_local_assignments.py','scripts/validate_autonomous_controller_contract.py','scripts/validate_source_manifest.py','scripts/regenerate_source_manifest.py','scripts/validate_autonomous_continuation_contract.py','scripts/validate_local_engine_backlog_contract.py','scripts/validate_private_paper_mode_backlog_contract.py','scripts/validate_three_repo_surebet_boundary.py','scripts/load-node-runtime.sh','scripts/create-source-handoff-archive.sh','scripts/restore-required-executable-bits.js',
-  'tests/autonomous-controller-contract.test.ts','tests/paper-autopilot-contract.test.ts','tests/autonomous-continuation-contract.test.ts','tests/local-engine-backlog-contract.test.ts','tests/private-paper-mode-backlog-contract.test.ts','tests/three-repo-surebet-boundary.test.ts','tests/validate-artifact-hygiene.test.ts','tests/validate-fixture-integrity.test.ts','tests/validate-shell-local-assignments.test.ts','tests/validate-source-manifest.test.ts','tests/packaging-helpers.test.ts','tests/validate-repo-contract.test.ts','tests/validation-matrix-contract.test.ts',
+  'tests/autonomous-controller-contract.test.ts','tests/paper-autopilot-contract.test.ts','tests/bugfix-autopilot-contract.test.ts','tests/run-script-hardening-wave2.test.ts','tests/autonomous-continuation-contract.test.ts','tests/local-engine-backlog-contract.test.ts','tests/private-paper-mode-backlog-contract.test.ts','tests/three-repo-surebet-boundary.test.ts','tests/validate-artifact-hygiene.test.ts','tests/validate-fixture-integrity.test.ts','tests/validate-shell-local-assignments.test.ts','tests/validate-source-manifest.test.ts','tests/packaging-helpers.test.ts','tests/validate-repo-contract.test.ts','tests/validation-matrix-contract.test.ts',
   'tests/fixtures/pinned-interface-placeholder/.gitkeep','tests/fixtures/pinned-interface-placeholder/local-placeholder.json',
   'tests/fixtures/private-paper-mode-smoke/accepted-local-bundle.json','tests/fixtures/private-paper-mode-smoke/blocked-missing-settlement-bundle.json','tests/fixtures/private-paper-mode-smoke/blocked-stale-quotes-bundle.json','tests/fixtures/private-paper-mode-smoke/blocked-mixed-currency-bundle.json','tests/fixtures/private-paper-mode-smoke/multi-candidate-bundle.json',
   'tools/required_executable_paths.js','commands/run-sure-001-autonomous.sh','commands/run-sure-local-engine-autonomous.sh','commands/run-sure-paper-mode-autonomous.sh','commands/run-pinned-interface-smoke.sh',
@@ -67,19 +67,21 @@ def main() -> None:
     package = json.loads(read(ROOT / 'package.json'))
     if package.get('private') is not True:
         fail('package.json must set private=true')
-    for script in ['typecheck','test','validate','validate:starter','validate:ops','validate:three-repo-boundary','restore:executables','regen:source-manifest','zip:codebase','autonomous:check','autonomous:start','autonomous:bugfix','paper:evaluation','paper:autopilot','bugfix','automation:status']:
+    for script in ['typecheck','test','validate','validate:starter','validate:ops','validate:three-repo-boundary','restore:executables','regen:source-manifest','zip:codebase','autonomous:check','autonomous:start','autonomous:bugfix','paper:evaluation','paper:autopilot','bugfix','bugfix:autopilot','automation:status']:
         if script not in package.get('scripts', {}):
             fail(f'package.json missing script: {script}')
     if package.get('bin', {}).get('betting-win-surebet') != './cli.js':
         fail('package.json bin must expose ./cli.js')
     required_doc_markers = {
-        'README.md': ['betting-win-surebet', 'Standard automation commands', 'run-paper-autopilot.sh'],
+        'README.md': ['betting-win-surebet', 'Standard automation commands', 'run-paper-autopilot.sh', 'run-bugfix-autopilot.sh'],
         'AGENTS.md': ['does not own provider truth', 'Source-of-truth order', 'Standard automation contract'],
         'docs/automation/repo-profile.md': ['repo_role=surebet_strategy_execution_repo', 'SURE-002B_PRIVATE_PAPER_MODE_INTAKE', 'Standard helper scripts'],
         'docs/automation/paper-evaluation.md': ['run-paper-evaluation.sh', 'no-service private paper', 'SUREBET_PINNED_BUNDLE'],
         'docs/automation/paper-autopilot.md': ['run-paper-autopilot.sh', 'no-service parent supervisor', 'PAPER_AUTOPILOT_BLOCKED_ON_PINNED_BUNDLE'],
+        'docs/automation/autonomous-bugfix.md': ['strict implementation-handoff controller', 'BUGFIX_AUDIT_COMPLETE=yes', 'request_flags.txt'],
+        'docs/automation/bugfix-autopilot.md': ['run-bugfix-autopilot.sh', 'same-area re-audit', 'campaign_coverage.tsv'],
         'PROJECT_STATUS.md': ['Standard automation status', 'paper_supported=repo_local_private_fixture_only'],
-        'docs/repo_status_current.md': ['Standard automation status', 'run_paper_autopilot=standardized_no_service_parent_supervisor'],
+        'docs/repo_status_current.md': ['Standard automation status', 'run_paper_autopilot=standardized_no_service_parent_supervisor', 'run_bugfix_autopilot=bounded_eight_area_audit_implementation_reaudit_parent'],
         'docs/MASTER_PLAN.md': ['Automation operating model', 'run-autonomous-bugfix.sh'],
     }
     for rel, markers in required_doc_markers.items():

@@ -24,6 +24,8 @@ If one of those files reappears in a future zip, remove only that obsolete file 
 run-autonomous-implementation.sh
 run-paper-evaluation.sh
 run-autonomous-bugfix.sh
+run-bugfix-autopilot.sh
+run-paper-autopilot.sh
 ```
 
-Required executable paths include the root helper scripts, compatibility wrappers, `.automation/lib/run_common.sh`, and `.automation/lib/telegram_notify.sh`.
+Required executable paths include the root helper scripts, compatibility wrappers, `.automation/lib/run_common.sh`, `.automation/lib/controller_hardening_v2.sh`, and `.automation/lib/telegram_notify.sh`.

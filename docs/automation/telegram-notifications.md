@@ -11,7 +11,9 @@ It is used by the root controllers:
 ```text
 run-autonomous-implementation.sh
 run-autonomous-bugfix.sh
+run-bugfix-autopilot.sh
 run-paper-evaluation.sh
+run-paper-autopilot.sh
 ```
 
 Configuration is optional and read from environment first, then `.env`:

@@ -15,8 +15,11 @@ stop.sh
 run-autonomous-implementation.sh
 run-paper-evaluation.sh
 run-autonomous-bugfix.sh
+run-paper-autopilot.sh
+run-bugfix-autopilot.sh
 automation.config.sh
 .automation/lib/run_common.sh
+.automation/lib/controller_hardening_v2.sh
 .automation/lib/telegram_notify.sh
 docs/automation/PROTECTED_AUTOMATION_FILES.md
 ```
@@ -31,7 +34,3 @@ bug-audit runs.
 Executable command lists live in `automation.config.sh`,
 `tools/required_executable_paths.js`, and `scripts/validate_executable_bits.py`.
 
-
-## Paper autopilot protected file
-
-`run-paper-autopilot.sh` is protected automation infrastructure. Normal implementation, paper evaluation, and bug-audit runs must not edit it. Changes require an explicit automation-maintenance task.
