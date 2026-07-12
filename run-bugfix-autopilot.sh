@@ -11,7 +11,7 @@ AUTOMATION_REPO_ROOT="$SCRIPT_DIR"
 # shellcheck source=.automation/lib/telegram_notify.sh
 . "$SCRIPT_DIR/.automation/lib/telegram_notify.sh"
 
-SCRIPT_VERSION="2026-07-11.surebet-bugfix-autopilot-v1"
+SCRIPT_VERSION="2026-07-11.surebet-bugfix-autopilot-v2-cross-controller-preflight"
 SCRIPT_NAME="run-bugfix-autopilot.sh"
 DURATION_SECONDS="$(automation_parse_duration_seconds 7d)"
 BUGFIX_DURATION_SECONDS="$(automation_parse_duration_seconds 72h)"
@@ -245,6 +245,7 @@ semantic_bug_signature_repeat_guard=enabled
 explicit_child_result_contract=enabled
 parent_budget_clamping=enabled
 child_aware_lock=enabled
+cross_controller_lock_guard=enabled
 paper_controller_calls=prohibited
 service_lifecycle=none
 EOF_CONFIG
@@ -797,6 +798,7 @@ automation_v2_validate_child_script "$AUTOMATION_REPO_ROOT" "$BUGFIX_CHILD_SCRIP
 automation_v2_validate_child_script "$AUTOMATION_REPO_ROOT" "$IMPLEMENTATION_CHILD_SCRIPT" || exit 1
 trap 'finish $?' EXIT
 trap on_signal INT TERM
+automation_assert_no_incompatible_locks "$SCRIPT_NAME" "$AUTOMATION_REPO_ROOT" "$LOCK_FILE"
 acquire_parent_lock || { FINAL_STATUS=setup_failed; STOP_REASON=lock_acquisition_failed; exit 1; }
 automation_create_run_dir bugfix_autopilot
 CAMPAIGN_LEDGER="$AUTOMATION_RUN_DIR/campaign_coverage.tsv"

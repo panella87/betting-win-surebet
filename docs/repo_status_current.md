@@ -119,6 +119,15 @@ run_paper_evaluation_standardization=standardized_with_telegram_no_service_priva
 run_paper_evaluation_input_preflight=existing_regular_non_symlink_repo_local_json_before_run_creation
 run_paper_evaluation_command_execution=direct_argv_for_known_local_report_commands
 run_paper_evaluation_source_mutation_guard=enabled
+run_paper_evaluation_handoff=schema_v1_atomic_source_and_evidence_fingerprinted
+run_paper_evaluation_artifacts_zip=timeout_bounded
+run_paper_autopilot_handoff_consumer=canonical_schema_v1_exact_keys_source_evidence_and_child_result_verified
+run_paper_autopilot_legacy_normalization=disabled
+run_paper_autopilot_paper_child_zip_timeout=forwarded
+shared_controller_lock_protocol=managed_child_process_groups_graceful_force_unlock_and_cross_controller_guard
+bugfix_parent_cross_controller_preflight=enabled
+telegram_controller_action_guidance=enabled
+run_autonomous_implementation_standalone_handoff=exact_schema_source_fingerprint_and_evidence_sha_verified
 paper_interval_behavior=no_service_single_cycle_accepts_interval_for_workflow_compatibility
 lock_dir=.automation/locks
 root_artifacts_zip=required_before_run_script_exit
@@ -143,6 +152,8 @@ run_autonomous_bugfix=strict_four_state_read_only_audit_handoff
 run_autonomous_bugfix_mutation_guard=content_fingerprint
 run_paper_evaluation_standardization=standardized_with_telegram_no_service_private_fixture_pinned_bundle
 run_paper_evaluation_input_preflight=fail_fast_before_expensive_validation
+run_paper_evaluation_handoff=schema_v1_atomic
+run_autonomous_implementation_handoff_evidence=sha256_verified_and_immutable_copy_retained
 ```
 
 
@@ -178,3 +189,25 @@ run_bugfix_autopilot=bounded_eight_area_audit_implementation_reaudit_parent
 ```
 
 An area is never closed from implementation output alone. The parent requires a clean source re-audit of the exact same area.
+
+
+## Canonical standalone handoff verification
+
+The paper producer and implementation consumer now share one schema-v1 integrity boundary. Actionable paper handoffs are atomic and bind the paper status, exit code, source fingerprint, source-run directory, evidence SHA-256, and semantic fingerprint. Standalone `--handover-paper-mode` and `--handover-bugfix-audit` runs reject unknown keys, evidence tampering, source drift, symlinks, repo escapes, stale fingerprints, and mismatched producer identity before Codex is allowed to run.
+
+
+## Standalone controller lock lifecycle
+
+```text
+run_autonomous_implementation_lock=atomic_claim_before_run_directory
+run_autonomous_bugfix_lock=atomic_claim_before_run_directory
+run_paper_evaluation_lock=atomic_claim_before_run_directory
+standalone_lock_claim=full_file_hard_link_no_check_then_write_race
+lock_release_failure_reason=lock_release_failed_lock_preserved
+lock_release_failure_exit=2
+lock_release_failure_lock=preserved_for_operator_inspection
+```
+
+All standalone finalizers now report lock-release state explicitly. A failed managed-child identity or termination check cannot be hidden by `|| true`; terminal evidence, machine output, return handoffs, and Telegram state are corrected before exit.
+
+The paper parent also uses an atomic full-file lock claim. `PAPER_AUTOPILOT_BLOCKED_CHILD_IDENTITY` and `PAPER_AUTOPILOT_BLOCKED_LOCK_RELEASE` preserve operator evidence and prevent false success. Parent campaign resume and parent-lock schema convergence with the bugfix parent remain separate future work.

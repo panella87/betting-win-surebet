@@ -315,22 +315,34 @@ automation_v2_validate_child_script() {
 automation_v2_process_matches_script() {
   local pid=${1:?pid is required}
   local expected=${2:?expected script is required}
-  local expected_real cwd arg candidate
-  [[ "$pid" =~ ^[1-9][0-9]*$ && -r "/proc/$pid/cmdline" && -e "/proc/$pid/cwd" ]] || return 1
+  local expected_real expected_dir cwd arg candidate cmdline_snapshot matched=1
+  [[ "$pid" =~ ^[1-9][0-9]*$ && -r "/proc/$pid/cmdline" ]] || return 1
   expected_real=$(realpath -e -- "$expected" 2>/dev/null) || return 1
-  cwd=$(readlink -f -- "/proc/$pid/cwd" 2>/dev/null) || return 1
+  expected_dir=$(dirname -- "$expected_real")
+  cwd=$(readlink -f -- "/proc/$pid/cwd" 2>/dev/null || true)
+  cmdline_snapshot=$(mktemp "${TMPDIR:-/tmp}/automation-v2-cmdline.XXXXXX") || return 1
+  if ! cat "/proc/$pid/cmdline" > "$cmdline_snapshot" 2>/dev/null; then
+    rm -f -- "$cmdline_snapshot"
+    return 1
+  fi
   while IFS= read -r arg; do
     [[ -n "$arg" ]] || continue
     if [[ "$arg" == /* ]]; then
       candidate=$arg
-    else
+    elif [[ -e "$expected_dir/$arg" ]]; then
+      candidate=$expected_dir/$arg
+    elif [[ -n "$cwd" ]]; then
       candidate=$cwd/$arg
+    else
+      continue
     fi
     if [[ -e "$candidate" ]] && [[ "$(realpath -e -- "$candidate" 2>/dev/null || true)" == "$expected_real" ]]; then
-      return 0
+      matched=0
+      break
     fi
-  done < <(tr '\0' '\n' < "/proc/$pid/cmdline")
-  return 1
+  done < <(tr '\0' '\n' < "$cmdline_snapshot")
+  rm -f -- "$cmdline_snapshot"
+  return "$matched"
 }
 
 automation_v2_terminate_process_group() {

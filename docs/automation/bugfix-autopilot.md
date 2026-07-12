@@ -41,6 +41,8 @@ cross_area_regression_and_campaign_closure
 
 Normal `--max-rounds 0` means the parent duration and repeated bug-signature guard control termination. The parent clamps each child duration to the remaining parent budget.
 
+Before acquiring its own lock or creating `artifacts/bugfix_autopilot_*`, the parent runs the shared cross-controller incompatibility guard. A verified live paper parent, standalone implementation, standalone paper evaluation, or unrelated bugfix controller blocks the campaign before any campaign artifact is created. Verified parent-launched audit and implementation children remain the only allowed exceptions. `--print-config` reports `cross_controller_lock_guard=enabled`.
+
 The controller writes `artifacts/bugfix_autopilot_*`, `campaign_coverage.tsv`, `rounds.tsv`, per-round child command/output/result files, final summaries, `artifacts.zip`, and one final Telegram notification. Audit and implementation handoffs use strict schema-v1 allowlists, evidence hashes, semantic fingerprints, and exact child stdout/run-directory reconciliation. If active-child process identity cannot be verified during abnormal finalization, the controller preserves the lock for explicit operator inspection instead of silently orphaning or unlocking the child.
 
 Safety boundaries remain unchanged: no providers, no direct `betting-win` database access, no wallets/orders/transactions, no service lifecycle, no paper controller calls, no public reports, and no profitability/live-readiness claims.

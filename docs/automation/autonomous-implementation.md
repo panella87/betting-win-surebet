@@ -121,7 +121,7 @@ Before the first Codex cycle, the controller runs the configured validation and 
 
 The controller tracks source change and validation across the whole run. Runtime handoff files, locks, logs, archives, dependencies, and generated artifacts do not count as implementation progress. A later model or capacity failure does not erase evidence that an earlier cycle made and validated a real source change.
 
-Paper and bugfix handoffs are parsed as strict `KEY=VALUE` data. Duplicate keys, repository mismatch, unsupported schema, invalid booleans, stale/consumed fingerprints, missing evidence, or an unauthorized protected-file change fail closed. Autopilot handoffs may authorize only an exact comma-separated protected-file allowlist. The broad `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` override remains manual-only.
+Paper and bugfix handoffs are parsed as strict `KEY=VALUE` data. Schema v1 uses exact key allowlists: unknown or duplicate keys, repository/controller mismatch, unsupported schema, invalid booleans, stale/consumed fingerprints, missing evidence, or an unauthorized protected-file change fail closed. Before a standalone handoff is accepted, the controller recomputes the evidence SHA-256, requires the evidence to be a non-symlink file contained under the declared repo-local `RUN_DIR`, and reconciles the producer source fingerprint against the current repository state. Autopilot handoffs may authorize only an exact comma-separated protected-file allowlist. The broad `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` override remains manual-only.
 
 The bugfix consumer entrypoint is:
 
@@ -132,3 +132,19 @@ bash ./run-autonomous-implementation.sh   --duration 72h   --model cli-default  
 It consumes `.automation/autonomous-implementation-handover.env` and writes the verified return handoff `.automation/bugfix-mode-handover.env`. The producer is `run-autonomous-bugfix.sh`; unattended campaigns are coordinated by `run-bugfix-autopilot.sh`. Do not fabricate the handoff manually.
 
 Every terminal run prints exactly one machine-readable record for `run_dir`, `final_status`, `stop_reason`, `final_exit_code`, and `cycles_completed`. Final `artifacts.zip` creation is bounded by `--zip-timeout`.
+
+
+## Standalone handoff evidence verification
+
+Both `--handover-paper-mode` and `--handover-bugfix-audit` enforce the same producer-proof boundary used by the parent controllers. A valid input handoff must provide an exact schema-v1 key set, producer controller identity, source-run directory, source fingerprint, evidence path, evidence SHA-256, and semantic handoff fingerprint. The validated handoff is copied byte-for-byte into the new implementation run as `input-paper-implementation-handoff.env` or `input-bugfix-implementation-handoff.env` before baseline validation begins.
+
+Any evidence mutation, source-tree drift, unknown schema key, repo escape, symlink component, or fingerprint mismatch blocks the run before Codex can execute. This means a manually launched handoff command is held to the same integrity standard as an autopilot-launched implementation.
+
+
+## Standalone lock lifecycle
+
+The standalone controller acquires and verifies its repo-scoped lock before creating `artifacts/autonomous_implementation_*`. An active same-controller or incompatible-controller lock therefore fails before a new run directory is created. After the run directory exists, the lock is refreshed with that exact artifact path and the managed-child heartbeat starts.
+
+Finalization no longer suppresses lock-release failures. Machine-readable output now also contains `lock_release_status`, `lock_release_exit_code`, and `lock_preserved`. If active-child identity cannot be verified or the child process group cannot be terminated, the controller changes the result to `BLOCKED=yes`, uses `stop_reason=lock_release_failed_lock_preserved`, exits `2`, preserves the lock for inspection, rewrites its return handoff and final summary, and refreshes `artifacts.zip` with the blocked result before Telegram notification.
+
+A paper or bugfix input handoff is marked consumed only after its terminal return handoff and final artifacts have been written. If final lock release fails, the consumed marker is removed and the return handoff is rewritten as blocked, so a parent or later manual run cannot treat unsafe finalization as completed implementation.

@@ -10,7 +10,7 @@ AUTOMATION_REPO_ROOT="$SCRIPT_DIR"
 # shellcheck source=.automation/lib/telegram_notify.sh
 . "$AUTOMATION_REPO_ROOT/.automation/lib/telegram_notify.sh"
 
-SCRIPT_VERSION="2026-07-11.surebet-v2-verified-handoffs"
+SCRIPT_VERSION="2026-07-12.surebet-v5-standalone-lock-lifecycle"
 SCRIPT_NAME="run-autonomous-implementation.sh"
 DURATION_SECONDS="$(automation_parse_duration_seconds 72h)"
 PROMPT_FILE=""
@@ -31,6 +31,9 @@ CYCLES_ATTEMPTED=0
 CODEX_FAILURES=0
 CONSECUTIVE_VALIDATION_FAILURES=0
 LOCK_ACQUIRED=0
+LOCK_RELEASE_STATUS="not_attempted"
+LOCK_RELEASE_EXIT_CODE=0
+LOCK_PRESERVED="no"
 CODEX_TIMEOUT_SECONDS=""
 VALIDATION_TIMEOUT_SECONDS=""
 INSTALL_TIMEOUT_SECONDS=""
@@ -63,6 +66,10 @@ ACTIVE_HANDOFF_EVIDENCE=""
 ACTIVE_HANDOFF_AUDIT_AREA=""
 ACTIVE_HANDOFF_BUG_IDS=""
 ACTIVE_HANDOFF_CONSUMED_MARKER=""
+ACTIVE_HANDOFF_EVIDENCE_SHA256=""
+ACTIVE_HANDOFF_SOURCE_FINGERPRINT=""
+ACTIVE_HANDOFF_RUN_DIR=""
+ACTIVE_HANDOFF_SOURCE_RUN_ID=""
 
 usage() {
   cat <<'EOF_USAGE'
@@ -226,7 +233,14 @@ baseline_validation=enabled
 strict_handoff_parser=enabled
 semantic_handoff_fingerprints=enabled
 exact_handoff_protected_allowlist=enabled
+strict_schema_v1_key_allowlists=enabled
+source_evidence_sha256_verification=enabled
+source_fingerprint_reconciliation=enabled
+input_handoff_immutable=enabled
 machine_readable_final_stdout=enabled
+lock_acquisition_before_run_dir=enabled
+lock_release_failure_classification=enabled
+lock_preservation_on_release_failure=enabled
 telegram_notify=${TELEGRAM_NOTIFY:-1}
 EOF_CONFIG
 }
@@ -315,8 +329,59 @@ validate_allowed_protected_files() {
   done
 }
 
+
+validate_loaded_handoff_keys() {
+  local allowed_csv="$1" key
+  for key in "${!AUTOMATION_V2_ENV[@]}"; do
+    case ",$allowed_csv," in
+      *",$key,"*) ;;
+      *) echo "ERROR: unsupported handoff key for schema v1: $key" >&2; return 2 ;;
+    esac
+  done
+}
+
+require_handoff_zero_one() {
+  local key="$1" value
+  value="$(automation_v2_env_require "$key")" || return 2
+  case "$value" in 0|1) printf '%s\n' "$value" ;; *) echo "ERROR: $key must be exactly 0 or 1; got: $value" >&2; return 2 ;; esac
+}
+
+validate_handoff_run_and_evidence() {
+  local run_dir_value="$1" evidence_value="$2" expected_hash="$3" run_abs evidence_abs actual_hash relative current part
+  local -a evidence_parts=()
+  [[ "$run_dir_value" == /* ]] || { echo "ERROR: handoff RUN_DIR must be an absolute repo-local path" >&2; return 2; }
+  run_abs="$(automation_v2_safe_repo_path "$AUTOMATION_REPO_ROOT" "$run_dir_value" yes)" || return 2
+  [[ -d "$run_abs" && ! -L "$run_abs" ]] || { echo "ERROR: handoff RUN_DIR must be a non-symlink directory" >&2; return 2; }
+  [[ -n "$evidence_value" && "$evidence_value" != /* && "$evidence_value" != *'..'* ]] || { echo "ERROR: SOURCE_EVIDENCE_PATH must be a relative repo-local path" >&2; return 2; }
+  evidence_abs="$(automation_v2_safe_repo_path "$AUTOMATION_REPO_ROOT" "$AUTOMATION_REPO_ROOT/$evidence_value" yes)" || return 2
+  [[ -f "$evidence_abs" && ! -L "$evidence_abs" ]] || { echo "ERROR: source evidence must be a non-symlink regular file" >&2; return 2; }
+  case "$evidence_abs" in "$run_abs"/*) ;; *) echo "ERROR: source evidence must be contained by the handoff RUN_DIR" >&2; return 2 ;; esac
+  relative="${evidence_abs#$AUTOMATION_REPO_ROOT/}"
+  current="$AUTOMATION_REPO_ROOT"
+  IFS='/' read -r -a evidence_parts <<< "$relative"
+  for part in "${evidence_parts[@]}"; do
+    current="$current/$part"
+    [[ ! -L "$current" ]] || { echo "ERROR: source evidence path must not contain symlink components" >&2; return 2; }
+  done
+  [[ "$expected_hash" =~ ^[a-f0-9]{64}$ ]] || { echo "ERROR: SOURCE_EVIDENCE_SHA256 must be a lowercase SHA-256" >&2; return 2; }
+  actual_hash="$(automation_v2_sha256_file "$evidence_abs")" || return 2
+  [[ "$actual_hash" == "$expected_hash" ]] || { echo "ERROR: source evidence SHA-256 mismatch" >&2; return 2; }
+  ACTIVE_HANDOFF_RUN_DIR="$run_abs"
+  ACTIVE_HANDOFF_EVIDENCE="$relative"
+  ACTIVE_HANDOFF_EVIDENCE_SHA256="$expected_hash"
+}
+
+validate_optional_pinned_bundle_from_handoff() {
+  local raw="$1" resolved
+  [[ -n "$raw" ]] || return 0
+  [[ "$raw" != /* && "$raw" != *'..'* && "$raw" == *.json ]] || { echo "ERROR: handoff SUREBET_PINNED_BUNDLE must be a relative repo-local .json path" >&2; return 2; }
+  resolved="$(automation_v2_safe_repo_path "$AUTOMATION_REPO_ROOT" "$AUTOMATION_REPO_ROOT/$raw" yes)" || return 2
+  [[ -f "$resolved" && ! -L "$resolved" ]] || { echo "ERROR: handoff SUREBET_PINNED_BUNDLE must be a non-symlink regular file" >&2; return 2; }
+}
+
 load_active_handoff() {
-  local expected_kind expected_flag repo schema fingerprint existing marker evidence_abs
+  local expected_kind expected_flag repo schema fingerprint existing marker evidence_hash source_run_id run_dir_value
+  local paper_status paper_exit blocker_family pinned_required current_source
 
   if [[ "$HANDOVER_PAPER_MODE" == "1" ]]; then
     ACTIVE_HANDOFF_MODE="paper"
@@ -333,106 +398,91 @@ load_active_handoff() {
   fi
 
   automation_v2_load_env_strict "$ACTIVE_HANDOFF_FILE" || return 2
-  ACTIVE_HANDOFF_KIND="$(automation_v2_env_require HANDOVER_KIND)" || return 2
-  [[ "$ACTIVE_HANDOFF_KIND" == "$expected_kind" ]] || {
-    echo "ERROR: handoff kind mismatch: expected $expected_kind, got $ACTIVE_HANDOFF_KIND" >&2
-    return 2
-  }
-  repo="${AUTOMATION_V2_ENV[REPOSITORY]-${AUTOMATION_V2_ENV[REPO_NAME]-}}"
-  [[ "$repo" == "$(repo_name)" ]] || {
-    echo "ERROR: handoff repository mismatch: ${repo:-missing}" >&2
-    return 2
-  }
-  [[ "$(automation_v2_env_require RUN_AUTONOMOUS_IMPLEMENTATION_NEXT)" == "yes" ]] || {
-    echo "ERROR: handoff does not request autonomous implementation" >&2
-    return 2
-  }
-  [[ "$(automation_v2_env_require AUTONOMOUS_IMPLEMENTATION_EXPECTED_FLAG)" == "$expected_flag" ]] || {
-    echo "ERROR: handoff expected flag mismatch" >&2
-    return 2
-  }
+  schema="$(automation_v2_env_require HANDOVER_SCHEMA_VERSION)" || return 2
+  [[ "$schema" == "1" ]] || { echo "ERROR: unsupported $ACTIVE_HANDOFF_MODE handoff schema version: $schema" >&2; return 2; }
 
   if [[ "$ACTIVE_HANDOFF_MODE" == "paper" ]]; then
-    schema="${AUTOMATION_V2_ENV[HANDOVER_SCHEMA_VERSION]-1}"
-    [[ "$schema" == "1" ]] || { echo "ERROR: unsupported paper handoff schema version: $schema" >&2; return 2; }
-    ACTIVE_HANDOFF_NOOP_ALLOWED="$(require_handoff_yes_no PAPER_MODE_NOOP_SUCCESS_ALLOWED)" || return 2
-    ACTIVE_HANDOFF_AUTOMATION_MAINTENANCE_ALLOWED="$(require_handoff_yes_no PAPER_MODE_AUTOMATION_MAINTENANCE_ALLOWED)" || return 2
-    ACTIVE_HANDOFF_ALLOWED_PROTECTED_FILES="${AUTOMATION_V2_ENV[ALLOWED_PROTECTED_FILES]-none}"
-    ACTIVE_HANDOFF_REQUIRED_SCOPE="$(automation_v2_env_require PAPER_MODE_REQUIRED_ACTION)" || return 2
-    ACTIVE_HANDOFF_EVIDENCE="${AUTOMATION_V2_ENV[EVIDENCE_DIR]-unknown}"
-    [[ -n "$(automation_v2_env_require PAPER_MODE_BLOCKER_FAMILY)" ]] || return 2
-
-    existing="${AUTOMATION_V2_ENV[HANDOVER_FINGERPRINT]-}"
-    if [[ -n "$existing" ]]; then
-      fingerprint="$(automation_v2_semantic_env_fingerprint_loaded)" || return 2
-      [[ "$existing" == "$fingerprint" ]] || {
-        echo "ERROR: paper handoff fingerprint mismatch" >&2
-        return 2
-      }
-    fi
-    AUTOMATION_V2_ENV[HANDOVER_SCHEMA_VERSION]="1"
-    AUTOMATION_V2_ENV[REPOSITORY]="$(repo_name)"
-    AUTOMATION_V2_ENV[ALLOWED_PROTECTED_FILES]="$ACTIVE_HANDOFF_ALLOWED_PROTECTED_FILES"
-    unset 'AUTOMATION_V2_ENV[HANDOVER_FINGERPRINT]'
-    fingerprint="$(automation_v2_semantic_env_fingerprint_loaded)" || return 2
-    AUTOMATION_V2_ENV[HANDOVER_FINGERPRINT]="$fingerprint"
-    automation_v2_write_loaded_env_atomic "$ACTIVE_HANDOFF_FILE" || return 2
+    validate_loaded_handoff_keys 'HANDOVER_SCHEMA_VERSION,HANDOVER_KIND,REPOSITORY,CONTROLLER,SOURCE_RUN_ID,RUN_AUTONOMOUS_IMPLEMENTATION_NEXT,AUTONOMOUS_IMPLEMENTATION_EXPECTED_FLAG,PAPER_MODE_FINAL_STATUS,PAPER_MODE_STOP_REASON,PAPER_MODE_FINAL_EXIT_CODE,PAPER_MODE_RESUME_AFTER_IMPLEMENTATION,PAPER_MODE_NOOP_SUCCESS_ALLOWED,PAPER_MODE_REQUIRED_ACTION,PAPER_MODE_BLOCKER_FAMILY,PAPER_MODE_EXPECTED_PRIVATE_PAPER_REEVALUATION_AFTER_SOURCE_CHANGE,PAPER_MODE_AUTOMATION_MAINTENANCE_ALLOWED,ALLOWED_PROTECTED_FILES,PAPER_SERVICE_SUPPORTED,SERVICE_REFRESH_REQUIRED,RUNTIME_EVIDENCE_REQUIRED,PINNED_BUNDLE_REQUIRED,SUREBET_PINNED_BUNDLE,HANDOFF_REASON,PAPER_SOURCE_FINGERPRINT,SOURCE_EVIDENCE_PATH,SOURCE_EVIDENCE_SHA256,VALIDATION_REQUIRED,RUN_DIR,WRITTEN_AT,HANDOVER_FINGERPRINT' || return 2
   else
-    schema="$(automation_v2_env_require HANDOVER_SCHEMA_VERSION)" || return 2
-    [[ "$schema" == "1" ]] || { echo "ERROR: unsupported bugfix handoff schema version: $schema" >&2; return 2; }
-    [[ "$(automation_v2_env_require HANDOVER_AUTONOMOUS_IMPLEMENTATION)" == "yes" ]] || {
-      echo "ERROR: bugfix handoff does not authorize implementation" >&2
-      return 2
-    }
-    ACTIVE_HANDOFF_AUDIT_AREA="$(automation_v2_env_require AUDIT_AREA)" || return 2
-    ACTIVE_HANDOFF_BUG_IDS="$(automation_v2_env_require BUG_IDS)" || return 2
-    ACTIVE_HANDOFF_REQUIRED_SCOPE="$(automation_v2_env_require IMPLEMENTATION_SCOPE)" || return 2
-    ACTIVE_HANDOFF_EVIDENCE="$(automation_v2_env_require SOURCE_EVIDENCE_PATH)" || return 2
-    ACTIVE_HANDOFF_NOOP_ALLOWED="$(require_handoff_yes_no BUGFIX_MODE_NOOP_SUCCESS_ALLOWED)" || return 2
-    ACTIVE_HANDOFF_AUTOMATION_MAINTENANCE_ALLOWED="$(require_handoff_yes_no BUGFIX_MODE_AUTOMATION_MAINTENANCE_ALLOWED)" || return 2
-    ACTIVE_HANDOFF_ALLOWED_PROTECTED_FILES="$(automation_v2_env_require ALLOWED_PROTECTED_FILES)" || return 2
-
-    if [[ "$ACTIVE_HANDOFF_EVIDENCE" == /* ]]; then
-      evidence_abs="$ACTIVE_HANDOFF_EVIDENCE"
-    else
-      evidence_abs="$AUTOMATION_REPO_ROOT/$ACTIVE_HANDOFF_EVIDENCE"
-    fi
-    evidence_abs="$(automation_v2_safe_repo_path "$AUTOMATION_REPO_ROOT" "$evidence_abs" yes)" || return 2
-    [[ -f "$evidence_abs" || -d "$evidence_abs" ]] || {
-      echo "ERROR: bugfix evidence path is not a regular file or directory" >&2
-      return 2
-    }
-
-    fingerprint="$(automation_v2_semantic_env_fingerprint_loaded)" || return 2
-    existing="$(automation_v2_env_require HANDOVER_FINGERPRINT)" || return 2
-    [[ "$existing" == "$fingerprint" ]] || {
-      echo "ERROR: bugfix handoff fingerprint mismatch" >&2
-      return 2
-    }
+    validate_loaded_handoff_keys 'HANDOVER_SCHEMA_VERSION,HANDOVER_KIND,REPOSITORY,CONTROLLER,RUN_AUTONOMOUS_IMPLEMENTATION_NEXT,AUTONOMOUS_IMPLEMENTATION_EXPECTED_FLAG,HANDOVER_AUTONOMOUS_IMPLEMENTATION,AUDIT_AREA,AUDIT_SOURCE_FINGERPRINT,BUG_IDS,BUG_SIGNATURE,IMPLEMENTATION_SCOPE,SOURCE_EVIDENCE_PATH,SOURCE_EVIDENCE_SHA256,VALIDATION_REQUIRED,BUGFIX_MODE_NOOP_SUCCESS_ALLOWED,BUGFIX_MODE_AUTOMATION_MAINTENANCE_ALLOWED,ALLOWED_PROTECTED_FILES,RUN_DIR,WRITTEN_AT,HANDOVER_FINGERPRINT' || return 2
   fi
 
+  ACTIVE_HANDOFF_KIND="$(automation_v2_env_require HANDOVER_KIND)" || return 2
+  [[ "$ACTIVE_HANDOFF_KIND" == "$expected_kind" ]] || { echo "ERROR: handoff kind mismatch: expected $expected_kind, got $ACTIVE_HANDOFF_KIND" >&2; return 2; }
+  repo="$(automation_v2_env_require REPOSITORY)" || return 2
+  [[ "$repo" == "$(repo_name)" ]] || { echo "ERROR: handoff repository mismatch: ${repo:-missing}" >&2; return 2; }
+  [[ "$(automation_v2_env_require RUN_AUTONOMOUS_IMPLEMENTATION_NEXT)" == "yes" ]] || { echo "ERROR: handoff does not request autonomous implementation" >&2; return 2; }
+  [[ "$(automation_v2_env_require AUTONOMOUS_IMPLEMENTATION_EXPECTED_FLAG)" == "$expected_flag" ]] || { echo "ERROR: handoff expected flag mismatch" >&2; return 2; }
+  run_dir_value="$(automation_v2_env_require RUN_DIR)" || return 2
+  evidence_hash="$(automation_v2_env_require SOURCE_EVIDENCE_SHA256)" || return 2
+  validate_handoff_run_and_evidence "$run_dir_value" "$(automation_v2_env_require SOURCE_EVIDENCE_PATH)" "$evidence_hash" || return 2
+
+  if [[ "$ACTIVE_HANDOFF_MODE" == "paper" ]]; then
+    [[ "$(automation_v2_env_require CONTROLLER)" == "run-paper-evaluation.sh" ]] || { echo "ERROR: paper handoff controller mismatch" >&2; return 2; }
+    source_run_id="$(automation_v2_env_require SOURCE_RUN_ID)" || return 2
+    [[ "$source_run_id" =~ ^[A-Za-z0-9._:-]+$ && "$(basename "$ACTIVE_HANDOFF_RUN_DIR")" == "$source_run_id" ]] || { echo "ERROR: paper SOURCE_RUN_ID does not match RUN_DIR" >&2; return 2; }
+    ACTIVE_HANDOFF_SOURCE_RUN_ID="$source_run_id"
+    paper_status="$(automation_v2_env_require PAPER_MODE_FINAL_STATUS)" || return 2
+    case "$paper_status" in PAPER_EVALUATION_BLOCKED_REPO_VALIDATION_FAILED|PAPER_EVALUATION_BLOCKED_SOURCE_FIX_REQUIRED) ;; *) echo "ERROR: paper handoff final status is not implementation-actionable: $paper_status" >&2; return 2 ;; esac
+    [[ -n "$(automation_v2_env_require PAPER_MODE_STOP_REASON)" ]] || return 2
+    paper_exit="$(automation_v2_env_require PAPER_MODE_FINAL_EXIT_CODE)" || return 2
+    [[ "$paper_exit" == "2" ]] || { echo "ERROR: paper handoff exit code must be 2; got: $paper_exit" >&2; return 2; }
+    [[ "$(automation_v2_env_require PAPER_MODE_RESUME_AFTER_IMPLEMENTATION)" == "yes" ]] || return 2
+    ACTIVE_HANDOFF_NOOP_ALLOWED="$(require_handoff_yes_no PAPER_MODE_NOOP_SUCCESS_ALLOWED)" || return 2
+    ACTIVE_HANDOFF_AUTOMATION_MAINTENANCE_ALLOWED="$(require_handoff_yes_no PAPER_MODE_AUTOMATION_MAINTENANCE_ALLOWED)" || return 2
+    ACTIVE_HANDOFF_ALLOWED_PROTECTED_FILES="$(automation_v2_env_require ALLOWED_PROTECTED_FILES)" || return 2
+    ACTIVE_HANDOFF_REQUIRED_SCOPE="$(automation_v2_env_require PAPER_MODE_REQUIRED_ACTION)" || return 2
+    [[ "$ACTIVE_HANDOFF_REQUIRED_SCOPE" == "bounded_source_implementation" ]] || { echo "ERROR: unsupported paper implementation action: $ACTIVE_HANDOFF_REQUIRED_SCOPE" >&2; return 2; }
+    blocker_family="$(automation_v2_env_require PAPER_MODE_BLOCKER_FAMILY)" || return 2
+    case "$blocker_family" in validation|source|controller|artifact) ;; *) echo "ERROR: unsupported paper blocker family: $blocker_family" >&2; return 2 ;; esac
+    [[ "$(automation_v2_env_require PAPER_MODE_EXPECTED_PRIVATE_PAPER_REEVALUATION_AFTER_SOURCE_CHANGE)" == "yes" ]] || return 2
+    [[ "$(automation_v2_env_require PAPER_SERVICE_SUPPORTED)" == "0" ]] || return 2
+    [[ "$(automation_v2_env_require SERVICE_REFRESH_REQUIRED)" == "0" ]] || return 2
+    [[ "$(automation_v2_env_require RUNTIME_EVIDENCE_REQUIRED)" == "0" ]] || return 2
+    pinned_required="$(require_handoff_zero_one PINNED_BUNDLE_REQUIRED)" || return 2
+    validate_optional_pinned_bundle_from_handoff "${AUTOMATION_V2_ENV[SUREBET_PINNED_BUNDLE]-}" || return 2
+    [[ -n "$(automation_v2_env_require HANDOFF_REASON)" ]] || return 2
+    [[ "$(automation_v2_env_require VALIDATION_REQUIRED)" == "npm_run_validate" ]] || return 2
+    ACTIVE_HANDOFF_SOURCE_FINGERPRINT="$(automation_v2_env_require PAPER_SOURCE_FINGERPRINT)" || return 2
+  else
+    [[ "$(automation_v2_env_require CONTROLLER)" == "run-autonomous-bugfix.sh" ]] || { echo "ERROR: bugfix handoff controller mismatch" >&2; return 2; }
+    [[ "$(automation_v2_env_require HANDOVER_AUTONOMOUS_IMPLEMENTATION)" == "yes" ]] || { echo "ERROR: bugfix handoff does not authorize implementation" >&2; return 2; }
+    ACTIVE_HANDOFF_AUDIT_AREA="$(automation_v2_env_require AUDIT_AREA)" || return 2
+    [[ "$ACTIVE_HANDOFF_AUDIT_AREA" =~ ^[A-Za-z0-9._:-]+$ ]] || { echo "ERROR: invalid bugfix AUDIT_AREA" >&2; return 2; }
+    ACTIVE_HANDOFF_BUG_IDS="$(automation_v2_env_require BUG_IDS)" || return 2
+    [[ "$ACTIVE_HANDOFF_BUG_IDS" != "none" && "$ACTIVE_HANDOFF_BUG_IDS" =~ ^[A-Za-z0-9._:-]+(,[A-Za-z0-9._:-]+)*$ ]] || { echo "ERROR: invalid bugfix BUG_IDS" >&2; return 2; }
+    [[ "$(automation_v2_env_require BUG_SIGNATURE)" =~ ^[a-f0-9]{64}$ ]] || { echo "ERROR: invalid BUG_SIGNATURE" >&2; return 2; }
+    ACTIVE_HANDOFF_REQUIRED_SCOPE="$(automation_v2_env_require IMPLEMENTATION_SCOPE)" || return 2
+    [[ "$ACTIVE_HANDOFF_REQUIRED_SCOPE" != "none" ]] || { echo "ERROR: bugfix IMPLEMENTATION_SCOPE must be concrete" >&2; return 2; }
+    [[ "$(automation_v2_env_require VALIDATION_REQUIRED)" == "npm_run_validate" ]] || return 2
+    ACTIVE_HANDOFF_NOOP_ALLOWED="$(require_handoff_yes_no BUGFIX_MODE_NOOP_SUCCESS_ALLOWED)" || return 2
+    [[ "$ACTIVE_HANDOFF_NOOP_ALLOWED" == "no" ]] || { echo "ERROR: bugfix implementation handoff must not allow no-op success" >&2; return 2; }
+    ACTIVE_HANDOFF_AUTOMATION_MAINTENANCE_ALLOWED="$(require_handoff_yes_no BUGFIX_MODE_AUTOMATION_MAINTENANCE_ALLOWED)" || return 2
+    ACTIVE_HANDOFF_ALLOWED_PROTECTED_FILES="$(automation_v2_env_require ALLOWED_PROTECTED_FILES)" || return 2
+    ACTIVE_HANDOFF_SOURCE_FINGERPRINT="$(automation_v2_env_require AUDIT_SOURCE_FINGERPRINT)" || return 2
+  fi
+
+  [[ "$ACTIVE_HANDOFF_SOURCE_FINGERPRINT" =~ ^[a-f0-9]{64}$ ]] || { echo "ERROR: handoff source fingerprint must be a lowercase SHA-256" >&2; return 2; }
+  current_source="${INITIAL_SOURCE_FINGERPRINT:-$(compute_source_fingerprint)}"
+  [[ "$ACTIVE_HANDOFF_SOURCE_FINGERPRINT" == "$current_source" ]] || { echo "ERROR: handoff source fingerprint does not match the current repository state" >&2; return 2; }
+
   if [[ "$ACTIVE_HANDOFF_AUTOMATION_MAINTENANCE_ALLOWED" == "yes" ]]; then
-    [[ "$ACTIVE_HANDOFF_ALLOWED_PROTECTED_FILES" != "none" ]] || {
-      echo "ERROR: automated maintenance handoff requires an exact ALLOWED_PROTECTED_FILES list" >&2
-      return 2
-    }
+    [[ "$ACTIVE_HANDOFF_ALLOWED_PROTECTED_FILES" != "none" ]] || { echo "ERROR: automated maintenance handoff requires an exact ALLOWED_PROTECTED_FILES list" >&2; return 2; }
     validate_allowed_protected_files "$ACTIVE_HANDOFF_ALLOWED_PROTECTED_FILES" || return 2
   else
-    [[ -z "$ACTIVE_HANDOFF_ALLOWED_PROTECTED_FILES" || "$ACTIVE_HANDOFF_ALLOWED_PROTECTED_FILES" == "none" ]] || {
-      echo "ERROR: ALLOWED_PROTECTED_FILES is set while automation maintenance is disabled" >&2
-      return 2
-    }
+    [[ -z "$ACTIVE_HANDOFF_ALLOWED_PROTECTED_FILES" || "$ACTIVE_HANDOFF_ALLOWED_PROTECTED_FILES" == "none" ]] || { echo "ERROR: ALLOWED_PROTECTED_FILES is set while automation maintenance is disabled" >&2; return 2; }
     ACTIVE_HANDOFF_ALLOWED_PROTECTED_FILES="none"
   fi
 
+  fingerprint="$(automation_v2_semantic_env_fingerprint_loaded)" || return 2
+  existing="$(automation_v2_env_require HANDOVER_FINGERPRINT)" || return 2
+  [[ "$existing" == "$fingerprint" ]] || { echo "ERROR: $ACTIVE_HANDOFF_MODE handoff fingerprint mismatch" >&2; return 2; }
   ACTIVE_HANDOFF_FINGERPRINT="$fingerprint"
   marker="$AUTOMATION_REPO_ROOT/.automation/consumed-handoffs/${ACTIVE_HANDOFF_FINGERPRINT}.env"
   ACTIVE_HANDOFF_CONSUMED_MARKER="$marker"
-  [[ ! -e "$marker" ]] || {
-    echo "ERROR: handoff was already consumed: $ACTIVE_HANDOFF_FINGERPRINT" >&2
-    return 2
-  }
-  automation_log "handoff_validated mode=$ACTIVE_HANDOFF_MODE schema=1 fingerprint=$ACTIVE_HANDOFF_FINGERPRINT"
+  [[ ! -e "$marker" ]] || { echo "ERROR: handoff was already consumed: $ACTIVE_HANDOFF_FINGERPRINT" >&2; return 2; }
+  automation_v2_atomic_copy "$ACTIVE_HANDOFF_FILE" "$AUTOMATION_RUN_DIR/input-${ACTIVE_HANDOFF_MODE}-implementation-handoff.env" || return 2
+  automation_log "handoff_validated mode=$ACTIVE_HANDOFF_MODE schema=1 fingerprint=$ACTIVE_HANDOFF_FINGERPRINT evidence_sha256=$ACTIVE_HANDOFF_EVIDENCE_SHA256"
 }
 
 resolve_task_source() {
@@ -446,6 +496,9 @@ resolve_task_source() {
       [[ -n "$ACTIVE_HANDOFF_BUG_IDS" ]] && printf 'Bug IDs: `%s`.\n\n' "$ACTIVE_HANDOFF_BUG_IDS"
       printf 'Required bounded scope: `%s`.\n\n' "$ACTIVE_HANDOFF_REQUIRED_SCOPE"
       printf 'Evidence: `%s`.\n\n' "$ACTIVE_HANDOFF_EVIDENCE"
+      printf 'Evidence SHA-256: `%s`.\n\n' "$ACTIVE_HANDOFF_EVIDENCE_SHA256"
+      printf 'Source fingerprint: `%s`.\n\n' "$ACTIVE_HANDOFF_SOURCE_FINGERPRINT"
+      printf 'Source run directory: `%s`.\n\n' "$ACTIVE_HANDOFF_RUN_DIR"
       printf 'No-op success allowed: `%s`.\n\n' "$ACTIVE_HANDOFF_NOOP_ALLOWED"
       printf 'Automation maintenance allowed: `%s`.\n\n' "$ACTIVE_HANDOFF_AUTOMATION_MAINTENANCE_ALLOWED"
       printf 'Exact protected-file allowlist: `%s`.\n\n' "$ACTIVE_HANDOFF_ALLOWED_PROTECTED_FILES"
@@ -688,15 +741,50 @@ write_return_handover() {
   automation_v2_add_or_verify_fingerprint "$target" >/dev/null
   cp "$target" "$AUTOMATION_RUN_DIR/$(basename "$target")"
 
-  if [[ "$FINAL_STATUS" == "AUTONOMOUS_GOAL_COMPLETE=yes" ]]; then
-    mkdir -p "$(dirname "$ACTIVE_HANDOFF_CONSUMED_MARKER")"
-    automation_v2_write_env_atomic "$ACTIVE_HANDOFF_CONSUMED_MARKER" \
-      "HANDOVER_FINGERPRINT=$ACTIVE_HANDOFF_FINGERPRINT" \
-      "HANDOVER_KIND=$ACTIVE_HANDOFF_KIND" \
-      "FINAL_STATUS=$FINAL_STATUS" \
-      "RUN_DIR=$AUTOMATION_RUN_DIR" \
-      "WRITTEN_AT=$(automation_now_iso)"
+}
+
+write_consumed_handoff_marker() {
+  [[ "$ACTIVE_HANDOFF_MODE" != "none" ]] || return 0
+  [[ "$FINAL_STATUS" == "AUTONOMOUS_GOAL_COMPLETE=yes" ]] || return 0
+  [[ -n "$ACTIVE_HANDOFF_CONSUMED_MARKER" ]] || return 2
+  mkdir -p "$(dirname "$ACTIVE_HANDOFF_CONSUMED_MARKER")"
+  automation_v2_write_env_atomic "$ACTIVE_HANDOFF_CONSUMED_MARKER" \
+    "HANDOVER_FINGERPRINT=$ACTIVE_HANDOFF_FINGERPRINT" \
+    "HANDOVER_KIND=$ACTIVE_HANDOFF_KIND" \
+    "FINAL_STATUS=$FINAL_STATUS" \
+    "RUN_DIR=$AUTOMATION_RUN_DIR" \
+    "WRITTEN_AT=$(automation_now_iso)"
+}
+
+remove_consumed_handoff_marker() {
+  [[ -n "$ACTIVE_HANDOFF_CONSUMED_MARKER" ]] || return 0
+  rm -f -- "$ACTIVE_HANDOFF_CONSUMED_MARKER"
+}
+
+attempt_final_lock_release() {
+  local rc=0
+  if [[ "$LOCK_ACQUIRED" != "1" ]]; then
+    LOCK_RELEASE_STATUS="not_acquired"
+    LOCK_RELEASE_EXIT_CODE=0
+    LOCK_PRESERVED="no"
+    return 0
   fi
+  if automation_release_lock; then
+    rc=0
+  else
+    rc=$?
+  fi
+  LOCK_RELEASE_EXIT_CODE="$rc"
+  if [[ "$rc" == "0" ]]; then
+    LOCK_RELEASE_STATUS="released"
+    LOCK_PRESERVED="no"
+    LOCK_ACQUIRED=0
+    return 0
+  fi
+  LOCK_RELEASE_STATUS="preserved"
+  LOCK_PRESERVED="yes"
+  automation_log "final_lock_release_failed exit=$rc lock_preserved=yes lock=${AUTOMATION_LOCK_FILE:-unknown}"
+  return "$rc"
 }
 
 build_artifacts_zip_bounded() {
@@ -732,6 +820,12 @@ write_final_summary() {
     printf 'active_handoff_mode=%s\n' "$ACTIVE_HANDOFF_MODE"
     printf 'active_handoff_fingerprint=%s\n' "${ACTIVE_HANDOFF_FINGERPRINT:-none}"
     printf 'last_codex_failure_class=%s\n' "$LAST_CODEX_FAILURE_CLASS"
+    if [[ "$LOCK_RELEASE_STATUS" != "not_attempted" ]]; then
+      printf 'lock_release_status=%s\n' "$LOCK_RELEASE_STATUS"
+      printf 'lock_release_exit_code=%s\n' "$LOCK_RELEASE_EXIT_CODE"
+      printf 'lock_preserved=%s\n' "$LOCK_PRESERVED"
+      printf 'lock_file=%s\n' "${AUTOMATION_LOCK_FILE:-none}"
+    fi
     printf 'duration_seconds=%s\n' "$DURATION_SECONDS"
     printf 'cycle_timeout_seconds=%s\n' "$CODEX_TIMEOUT_SECONDS"
     printf 'validation_timeout_seconds=%s\n' "$VALIDATION_TIMEOUT_SECONDS"
@@ -741,7 +835,7 @@ write_final_summary() {
 }
 
 finish() {
-  local rc="${1:-$?}" handoff_rc=0 zip_rc=0
+  local rc="${1:-$?}" handoff_rc=0 marker_rc=0 zip_rc=0 lock_rc=0 corrective_zip_rc=0
   [[ "$FINISHED" == "1" ]] && return 0
   FINISHED=1
   trap - EXIT INT TERM
@@ -752,6 +846,7 @@ finish() {
   elif [[ "$rc" != "0" && "$STOP_REASON" == "loop_started" ]]; then
     FINAL_STATUS="BLOCKED=yes"
     STOP_REASON="unexpected_controller_exit"
+    rc=2
   fi
   EXIT_STATUS="$rc"
   refresh_source_change_state || true
@@ -781,15 +876,72 @@ finish() {
       EXIT_STATUS=2
       write_final_summary || true
     fi
+
+    if [[ "$ACTIVE_HANDOFF_MODE" != "none" && "$FINAL_STATUS" == "AUTONOMOUS_GOAL_COMPLETE=yes" ]]; then
+      set +e
+      write_consumed_handoff_marker
+      marker_rc=$?
+      set -e
+      if [[ "$marker_rc" != "0" ]]; then
+        automation_log "consumed_handoff_marker_failed exit=$marker_rc"
+        FINAL_STATUS="BLOCKED=yes"
+        STOP_REASON="consumed_handoff_marker_write_failed"
+        EXIT_STATUS=2
+        set +e
+        write_return_handover
+        handoff_rc=$?
+        set -e
+        [[ "$handoff_rc" == "0" ]] || automation_log "corrective_return_handoff_failed exit=$handoff_rc"
+        write_final_summary || true
+        set +e
+        build_artifacts_zip_bounded
+        corrective_zip_rc=$?
+        set -e
+        [[ "$corrective_zip_rc" == "0" ]] || automation_log "corrective_artifacts_zip_failed exit=$corrective_zip_rc"
+      fi
+    fi
+  fi
+
+  set +e
+  attempt_final_lock_release
+  lock_rc=$?
+  set -e
+  if [[ "$lock_rc" != "0" ]]; then
+    remove_consumed_handoff_marker || true
+    FINAL_STATUS="BLOCKED=yes"
+    STOP_REASON="lock_release_failed_lock_preserved"
+    EXIT_STATUS=2
+    if [[ -n "${AUTOMATION_RUN_DIR:-}" ]]; then
+      if [[ "$ACTIVE_HANDOFF_MODE" != "none" ]]; then
+        set +e
+        write_return_handover
+        handoff_rc=$?
+        set -e
+        [[ "$handoff_rc" == "0" ]] || automation_log "lock_failure_return_handoff_failed exit=$handoff_rc"
+      fi
+      write_final_summary || true
+      set +e
+      build_artifacts_zip_bounded
+      corrective_zip_rc=$?
+      set -e
+      [[ "$corrective_zip_rc" == "0" ]] || automation_log "lock_failure_artifacts_zip_failed exit=$corrective_zip_rc"
+    fi
+  elif [[ -n "${AUTOMATION_RUN_DIR:-}" ]]; then
+    write_final_summary || true
+  fi
+
+  if [[ -n "${AUTOMATION_RUN_DIR:-}" ]]; then
     telegram_notify_send_final "run-autonomous-implementation.sh" "${AUTOMATION_REPO_NAME:-betting-win-surebet}" "$FINAL_STATUS" "$STOP_REASON" "$CYCLES_ATTEMPTED" "$EXIT_STATUS" "$AUTOMATION_RUN_DIR" "$AUTOMATION_CONTROLLER_LOG" "$AUTOMATION_REPO_ROOT" || true
   fi
-  [[ "$LOCK_ACQUIRED" == "1" ]] && automation_release_lock || true
 
   printf 'run_dir=%s\n' "${AUTOMATION_RUN_DIR:-}"
   printf 'final_status=%s\n' "$FINAL_STATUS"
   printf 'stop_reason=%s\n' "$STOP_REASON"
   printf 'final_exit_code=%s\n' "$EXIT_STATUS"
   printf 'cycles_completed=%s\n' "$CYCLES_ATTEMPTED"
+  printf 'lock_release_status=%s\n' "$LOCK_RELEASE_STATUS"
+  printf 'lock_release_exit_code=%s\n' "$LOCK_RELEASE_EXIT_CODE"
+  printf 'lock_preserved=%s\n' "$LOCK_PRESERVED"
   exit "$EXIT_STATUS"
 }
 
@@ -820,13 +972,16 @@ if [[ "$PRINT_CONFIG" == "1" ]]; then print_config; exit 0; fi
 trap 'finish $?' EXIT
 trap on_signal INT TERM
 
-automation_create_run_dir "autonomous_implementation"
 AUTOMATION_SCRIPT_COMMAND="$0 $*"
 if [[ "$ALLOW_PARALLEL" == "1" ]]; then
   automation_log "lock=skipped allow_parallel=1"
 else
   automation_acquire_lock "$SCRIPT_NAME" "$AUTOMATION_REPO_ROOT"
   LOCK_ACQUIRED=1
+fi
+automation_create_run_dir "autonomous_implementation"
+if [[ "$LOCK_ACQUIRED" == "1" ]]; then
+  automation_write_lock_file
   automation_start_heartbeat
 fi
 

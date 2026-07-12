@@ -3,7 +3,7 @@
 # Source this file and call telegram_notify_send_final. No polling is performed.
 
 telegram_notify_message_version() {
-  printf '%s\n' '20260706.pretty_v2_html_cards'
+  printf '%s\n' '20260712.pretty_v4_lock_actions'
 }
 
 telegram_notify_env_file() {
@@ -96,8 +96,9 @@ telegram_notify_status_icon() {
   case "$normalized" in
     TEST) printf '🧪' ;;
     PAPER_EVALUATION_READY_PRIVATE_FIXTURE_ONLY_BLOCKED_ON_PINNED_BUNDLE|PAPER_AUTOPILOT_BLOCKED_ON_PINNED_BUNDLE|*BLOCKED_ON_PINNED_BUNDLE*) printf '🛑' ;;
+    BUGFIX_AUTOPILOT_COMPLETE|PAPER_AUTOPILOT_PINNED_BUNDLE_ACCEPTED_PRIVATE_REPORT_WRITTEN|PAPER_EVALUATION_PINNED_BUNDLE_ACCEPTED_PRIVATE_REPORT_WRITTEN|*CHECK_ONLY_COMPLETE*) printf '✅' ;;
+    BUGFIX_AUTOPILOT_BUDGET_EXHAUSTED|*CONTINUE_REQUIRED*|*CONTINUE*|RUNNING) printf '🔁' ;;
     *TARGET_READY*|PAPER_EVALUATION_READY*|*GOAL_COMPLETE*|SUCCESS|PASS|OK|READY) printf '✅' ;;
-    *CONTINUE_REQUIRED*|*CONTINUE*|RUNNING) printf '🔁' ;;
     *NOT*READY*|*NO_GO*|*BLOCKED*|*FAILED*|*FAIL*|*ERROR*) printf '🛑' ;;
     *)
       if [ -n "$final_rc" ] && [ "$final_rc" != "0" ]; then
@@ -116,8 +117,9 @@ telegram_notify_status_text() {
   case "$normalized" in
     TEST) printf '%s TEST' "$icon" ;;
     PAPER_EVALUATION_READY_PRIVATE_FIXTURE_ONLY_BLOCKED_ON_PINNED_BUNDLE|PAPER_AUTOPILOT_BLOCKED_ON_PINNED_BUNDLE|*BLOCKED_ON_PINNED_BUNDLE*) printf '%s BLOCKED' "$icon" ;;
+    BUGFIX_AUTOPILOT_COMPLETE|PAPER_AUTOPILOT_PINNED_BUNDLE_ACCEPTED_PRIVATE_REPORT_WRITTEN|PAPER_EVALUATION_PINNED_BUNDLE_ACCEPTED_PRIVATE_REPORT_WRITTEN|*CHECK_ONLY_COMPLETE*) printf '%s SUCCESS' "$icon" ;;
+    BUGFIX_AUTOPILOT_BUDGET_EXHAUSTED|*CONTINUE_REQUIRED*|*CONTINUE*|RUNNING) printf '%s CONTINUE' "$icon" ;;
     *TARGET_READY*|PAPER_EVALUATION_READY*|*GOAL_COMPLETE*|SUCCESS|PASS|OK|READY) printf '%s SUCCESS' "$icon" ;;
-    *CONTINUE_REQUIRED*|*CONTINUE*|RUNNING) printf '%s CONTINUE' "$icon" ;;
     *NOT*READY*|*NO_GO*|*BLOCKED*) printf '%s BLOCKED' "$icon" ;;
     *FAILED*|*FAIL*|*ERROR*) printf '%s FAILED' "$icon" ;;
     *) printf '%s %s' "$icon" "$status" ;;
@@ -129,6 +131,31 @@ telegram_notify_next_action() {
   normalized="$(printf '%s' "$status" | tr '[:lower:]' '[:upper:]')"
   case "$normalized" in
     TEST) printf 'Telegram delivery and HTML formatting are verified.' ;;
+    BUGFIX_AUTOPILOT_COMPLETE) printf 'Archive campaign_coverage.tsv and the final audit evidence; open new work only from an approved task.' ;;
+    BUGFIX_AUTOPILOT_BUDGET_EXHAUSTED) printf 'Review campaign_coverage.tsv and the first unclosed area before starting a new campaign; automatic resume is not enabled.' ;;
+    BUGFIX_AUTOPILOT_BLOCKED_AUDIT_CHILD) printf 'Inspect the latest audit child summary, request_flags.txt, and source-mutation evidence before rerunning the area.' ;;
+    BUGFIX_AUTOPILOT_BLOCKED_IMPLEMENTATION_CHILD) printf 'Inspect the implementation child summary and validation output before another audit round.' ;;
+    BUGFIX_AUTOPILOT_BLOCKED_IMPLEMENTATION_NOOP) printf 'Do not mark the confirmed bug fixed; inspect the implementation handoff, source-change claim, and validation evidence.' ;;
+    BUGFIX_AUTOPILOT_BLOCKED_HANDOFF_MISMATCH) printf 'Compare the round child_result.env with the input and return handoffs; correct the schema, fingerprint, or evidence mismatch first.' ;;
+    BUGFIX_AUTOPILOT_BLOCKED_REPEATED_HANDOFF) printf 'Review the repeated bug signature manually and change the implementation approach before restarting the campaign.' ;;
+    BUGFIX_AUTOPILOT_BLOCKED_CHILD_IDENTITY) printf 'Inspect the preserved controller lock and active-child process identity before using force-unlock.' ;;
+    BUGFIX_AUTOPILOT_BLOCKED_ARTIFACT_PACKAGING) printf 'The run evidence remains in its run directory; inspect the packaging log and repair artifacts.zip creation.' ;;
+    PAPER_AUTOPILOT_BLOCKED_CHILD_IDENTITY) printf 'Inspect the preserved paper-parent lock and verify the active child process identity before using force-unlock.' ;;
+    PAPER_AUTOPILOT_BLOCKED_LOCK_RELEASE) printf 'Inspect the paper-parent lock ownership and release evidence; do not start another controller until the preserved lock is resolved.' ;;
+    PAPER_AUTOPILOT_BLOCKED_PAPER_SOURCE_MUTATION) printf 'Do not trust the paper result; inspect the paper child source diff and restore the read-only paper boundary.' ;;
+    PAPER_AUTOPILOT_BLOCKED_IMPLEMENTATION_PARTIAL_SOURCE_CHANGE) printf 'Inspect the partial implementation run and validation state before launching another paper round.' ;;
+    PAPER_AUTOPILOT_BLOCKED_HANDOFF_MISMATCH) printf 'Compare the paper or implementation handoff with child_result.env and its evidence hash before continuing.' ;;
+    PAPER_AUTOPILOT_BLOCKED_PAPER_CHILD) printf 'Inspect the latest paper child summary and paper logs before retrying the campaign.' ;;
+    PAPER_AUTOPILOT_BLOCKED_IMPLEMENTATION_CHILD) printf 'Inspect the implementation child summary, source diff, and validation output before retrying.' ;;
+    PAPER_AUTOPILOT_BLOCKED_IMPLEMENTATION_NOOP) printf 'Do not re-run paper as if a fix landed; inspect why the implementation handoff produced no validated source change.' ;;
+    PAPER_AUTOPILOT_BLOCKED_IMPLEMENTATION_HANDOVER_NOT_REFRESHABLE) printf 'Inspect the implementation return handoff and set re-evaluation only after a validated source change.' ;;
+    PAPER_AUTOPILOT_BLOCKED_SAME_HANDOFF_REPEATED) printf 'Review the repeated semantic handoff manually and correct the unresolved root cause before restarting.' ;;
+    PAPER_AUTOPILOT_BLOCKED_ARTIFACT_PACKAGING) printf 'The run evidence remains in its run directory; inspect the packaging log and repair artifacts.zip creation.' ;;
+    PAPER_AUTOPILOT_PINNED_BUNDLE_ACCEPTED_PRIVATE_REPORT_WRITTEN|PAPER_EVALUATION_PINNED_BUNDLE_ACCEPTED_PRIVATE_REPORT_WRITTEN) printf 'Archive the private report and evidence; do not treat it as profitability, live-readiness, or execution approval.' ;;
+    PAPER_AUTOPILOT_CHECK_ONLY_COMPLETE|*CHECK_ONLY_COMPLETE*) printf 'Validation-only checks passed; no paper-readiness or implementation claim was made.' ;;
+    PAPER_EVALUATION_BLOCKED_LOCK_RELEASE) printf 'Inspect the preserved standalone paper lock and active-child identity before using verified force-unlock.' ;;
+    PAPER_EVALUATION_BLOCKED_INVALID_PINNED_BUNDLE) printf 'Inspect the pinned-intake log and correct the repo-local upstream export; do not launch source implementation without a confirmed local defect.' ;;
+    PAPER_EVALUATION_BLOCKED_REPO_VALIDATION_FAILED|PAPER_EVALUATION_BLOCKED_SOURCE_FIX_REQUIRED) printf 'Inspect the canonical paper-to-implementation handoff and validation evidence before running bounded source implementation.' ;;
     PAPER_EVALUATION_READY_PRIVATE_FIXTURE_ONLY_BLOCKED_ON_PINNED_BUNDLE|PAPER_AUTOPILOT_BLOCKED_ON_PINNED_BUNDLE|*BLOCKED_ON_PINNED_BUNDLE*) printf 'Do not treat private fixture proof as upstream readiness; provide a repo-local pinned betting-win export before real paper evaluation.' ;;
     *TARGET_READY*|PAPER_EVALUATION_READY*|*GOAL_COMPLETE*|SUCCESS|PASS|OK|READY) printf 'Archive the evidence and continue only with the approved next step.' ;;
     *CONTINUE_REQUIRED*|*CONTINUE*|RUNNING) printf 'Continue with the next controller step or scheduled evidence loop.' ;;

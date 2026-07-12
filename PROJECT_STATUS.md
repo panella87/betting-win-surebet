@@ -31,7 +31,8 @@ Current state:
 - It consumes only stable contracts/exports/read-only evidence from `betting-win` after those interfaces exist.
 - It uses a separate account and bankroll from `betting-win-betting`; no shared-capital coordinator exists here.
 - Controller runtime locks and handoff files are ignored by source-manifest validation/regeneration while source-owned `.automation` helpers remain tracked.
-- `run-paper-evaluation.sh` final summaries and Telegram notifications must preserve the actual process exit status.
+- `run-paper-evaluation.sh` acquires its lock before run creation or stale-handoff rotation and reports lock-release state before Telegram.
+- `run-paper-autopilot.sh` uses an atomic full-file parent-lock claim and preserves the lock on child-identity or release failure.
 
 Authoritative active docs:
 
@@ -134,6 +135,9 @@ bugfix_artifact_hint=resolved_before_current_run_directory_creation
 paper_input_preflight=existing_regular_non_symlink_repo_local_json_before_run_creation
 paper_known_command_execution=direct_argv
 paper_source_mutation_guard=enabled
+paper_handoff_contract=schema_v1_atomic_source_and_evidence_fingerprinted
+paper_artifacts_zip=timeout_bounded
+implementation_standalone_handoff_consumer=exact_schema_source_fingerprint_and_evidence_sha_verified
 paper_supported=repo_local_private_fixture_only
 paper_real_upstream=blocked_until_federico_pinned_betting_win_interface
 lock_dir=.automation/locks
@@ -169,4 +173,42 @@ run_paper_autopilot=standardized_no_service_parent_supervisor
 
 ## Bugfix autopilot hardening
 
-`run-autonomous-bugfix.sh` now uses a strict four-state audit contract and `run-bugfix-autopilot.sh` provides the bounded audit -> implementation -> same-area re-audit campaign workflow.
+`run-autonomous-bugfix.sh` now uses a strict four-state audit contract and `run-bugfix-autopilot.sh` provides the bounded audit -> implementation -> same-area re-audit campaign workflow. The bugfix parent now applies the shared cross-controller guard before lock acquisition or campaign artifact creation, and Telegram final cards provide controller-specific next actions for parent terminal states.
+
+
+## Run-script hardening wave 4
+
+`run-paper-evaluation.sh` now emits only canonical atomic schema-v1 implementation handoffs. Each actionable handoff records the classified exit code, producer/source-run identity, current source fingerprint, evidence path/hash, and stable semantic fingerprint. `run-autonomous-implementation.sh` independently verifies those fields for standalone paper and bugfix handoffs, preserves the accepted input handoff in run evidence, and fails before Codex on evidence tampering, source drift, unknown schema keys, or run-path mismatch.
+
+```text
+run_paper_evaluation_artifacts_zip=timeout_bounded
+run_paper_autopilot_handoff_consumer=canonical_schema_v1_exact_keys_source_evidence_and_child_result_verified
+run_paper_autopilot_legacy_normalization=disabled
+run_paper_autopilot_paper_child_zip_timeout=forwarded
+shared_controller_lock_protocol=managed_child_process_groups_graceful_force_unlock_and_cross_controller_guard
+```
+
+
+## Run-script hardening wave 7
+
+```text
+standalone_implementation_lock_acquisition=before_run_directory
+standalone_bugfix_lock_acquisition=before_run_directory
+standalone_lock_release_failure=blocked_with_lock_preserved
+standalone_lock_machine_output=release_status_exit_code_and_preserved_state
+implementation_handoff_consumption=revoked_when_final_lock_release_fails
+```
+
+The implementation and bug-audit controllers no longer suppress shared lock-release failures. They classify active-child identity or termination failures before final notification, preserve the lock, correct terminal summaries and archives, and return exit code `2`. The implementation controller also removes a consumed-handoff marker and rewrites its return handoff if final lock release is unsafe.
+
+
+## Paper controller lock completion
+
+```text
+run_paper_evaluation_lock=atomic_claim_before_run_directory
+run_paper_evaluation_release=classified_before_telegram
+run_paper_autopilot_lock=atomic_full_file_parent_claim
+run_paper_autopilot_child_cleanup=fail_closed_with_preserved_lock
+```
+
+Concurrent paper starts cannot both acquire the same repo-scoped lock. A failed managed-child identity check or strict release no longer appears as paper success.

@@ -21,6 +21,11 @@ test('paper autopilot is a surebet no-service parent supervisor', () => {
     'PAPER_AUTOPILOT_BLOCKED_ON_PINNED_BUNDLE',
     'PAPER_AUTOPILOT_BLOCKED_IMPLEMENTATION_NOOP',
     'PAPER_AUTOPILOT_BLOCKED_IMPLEMENTATION_HANDOVER_NOT_REFRESHABLE',
+    'PAPER_AUTOPILOT_BLOCKED_CHILD_IDENTITY',
+    'PAPER_AUTOPILOT_BLOCKED_LOCK_RELEASE',
+    'atomic_parent_lock_acquisition=enabled',
+    'parent_child_cleanup_failure_classification=enabled',
+    'parent_lock_release_failure_classification=enabled',
     'telegram_notify_send_final "run-paper-autopilot.sh"',
   ]) contains(script, marker);
   assert.doesNotMatch(script, /scripts\/load-node-runtime\.sh/);
@@ -83,7 +88,7 @@ test('paper autopilot reconciles nonzero child exits through explicit machine-re
     'automation_v2_extract_unique_machine_value "$output" final_status',
     'automation_v2_extract_unique_machine_value "$output" final_exit_code',
     'child declared exit $declared_rc but process exited $rc',
-    'setsid "${cmd[@]}"',
+    'setsid "${launch_cmd[@]}"',
     'ACTIVE_CHILD_PID=$!',
     'parent_budget_clamping=enabled',
   ]) contains(script, marker);

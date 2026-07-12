@@ -7,6 +7,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 AUTOMATION_REPO_ROOT="$SCRIPT_DIR"
 # shellcheck source=.automation/lib/run_common.sh
 . "$SCRIPT_DIR/.automation/lib/run_common.sh"
+# shellcheck source=.automation/lib/controller_hardening_v2.sh
+. "$SCRIPT_DIR/.automation/lib/controller_hardening_v2.sh"
 # shellcheck source=.automation/lib/telegram_notify.sh
 . "$SCRIPT_DIR/.automation/lib/telegram_notify.sh"
 
@@ -43,7 +45,15 @@ PAPER_LOCAL_REPORT_PATH=""
 PAPER_PINNED_REPORT_PATH=""
 INITIAL_SOURCE_FINGERPRINT=""
 FINAL_SOURCE_FINGERPRINT=""
+SCRIPT_VERSION="2026-07-12.surebet-v5-standalone-lock-lifecycle"
 SCRIPT_NAME="run-paper-evaluation.sh"
+ZIP_TIMEOUT_SECONDS=""
+PAPER_HANDOFF_FILE=""
+PAPER_HANDOFF_FINGERPRINT=""
+ARTIFACT_PACKAGING_EXIT_STATUS=0
+LOCK_RELEASE_STATUS="not_attempted"
+LOCK_RELEASE_EXIT_CODE=0
+LOCK_PRESERVED="no"
 
 usage() {
   cat <<'EOF_USAGE'
@@ -70,6 +80,7 @@ Controller behavior:
   --codex-timeout VALUE          Alias for --codex-phase-timeout.
   --validation-timeout VALUE     Maximum duration of local validation commands.
   --install-timeout VALUE        Maximum optional dependency-install duration.
+  --zip-timeout VALUE            Maximum final artifacts.zip creation duration. Default: 10m.
   --print-config                 Print effective configuration and exit.
   --stream                       Stream Codex output if future paper audit integration uses Codex.
   --no-stream                    Do not stream Codex output.
@@ -213,6 +224,8 @@ parse_args() {
       --validation-timeout=*) parsed="$(automation_parse_duration_seconds "${1#*=}")" || { echo "ERROR: invalid validation timeout: ${1#*=}" >&2; return 2; }; VALIDATION_TIMEOUT_SECONDS="$parsed"; shift ;;
       --install-timeout) [[ $# -ge 2 ]] || { echo "ERROR: --install-timeout requires a value" >&2; return 2; }; parsed="$(automation_parse_duration_seconds "$2")" || { echo "ERROR: invalid --install-timeout: $2" >&2; return 2; }; INSTALL_TIMEOUT_SECONDS="$parsed"; shift 2 ;;
       --install-timeout=*) parsed="$(automation_parse_duration_seconds "${1#*=}")" || { echo "ERROR: invalid install timeout: ${1#*=}" >&2; return 2; }; INSTALL_TIMEOUT_SECONDS="$parsed"; shift ;;
+      --zip-timeout) [[ $# -ge 2 ]] || { echo "ERROR: --zip-timeout requires a value" >&2; return 2; }; parsed="$(automation_parse_duration_seconds "$2")" || { echo "ERROR: invalid --zip-timeout: $2" >&2; return 2; }; ZIP_TIMEOUT_SECONDS="$parsed"; shift 2 ;;
+      --zip-timeout=*) parsed="$(automation_parse_duration_seconds "${1#*=}")" || { echo "ERROR: invalid zip timeout: ${1#*=}" >&2; return 2; }; ZIP_TIMEOUT_SECONDS="$parsed"; shift ;;
       --print-config) PRINT_CONFIG=1; shift ;;
       --stream) CODEX_STREAM_LOGS=1; shift ;;
       --no-stream) CODEX_STREAM_LOGS=0; shift ;;
@@ -233,6 +246,7 @@ configure_defaults() {
   INTERVAL_SECONDS="${INTERVAL_SECONDS:-$(automation_parse_duration_seconds "${PAPER_DEFAULT_INTERVAL:-30m}")}"
   VALIDATION_TIMEOUT_SECONDS="${VALIDATION_TIMEOUT_SECONDS:-$(automation_parse_duration_seconds "${AUTOMATION_VALIDATION_TIMEOUT:-20m}")}"
   INSTALL_TIMEOUT_SECONDS="${INSTALL_TIMEOUT_SECONDS:-$(automation_parse_duration_seconds "${AUTOMATION_INSTALL_TIMEOUT:-15m}")}"
+  ZIP_TIMEOUT_SECONDS="${ZIP_TIMEOUT_SECONDS:-$(automation_parse_duration_seconds "${AUTOMATION_ZIP_TIMEOUT:-10m}")}"
   CODEX_PHASE_TIMEOUT_SECONDS="${CODEX_PHASE_TIMEOUT_SECONDS:-$(automation_parse_duration_seconds "${CODEX_PHASE_TIMEOUT:-30m}")}"
   PAPER_COMMAND_TIMEOUT_SECONDS="$(automation_parse_duration_seconds "${PAPER_COMMAND_TIMEOUT:-20m}")"
   MAX_CYCLES="${MAX_CYCLES:-${AUTOMATION_PAPER_MAX_CYCLES:-1}}"
@@ -260,6 +274,7 @@ adaptive=$ADAPTIVE
 keep_monitoring_when_ready=$KEEP_MONITORING_WHEN_READY
 validation_timeout_seconds=$VALIDATION_TIMEOUT_SECONDS
 install_timeout_seconds=$INSTALL_TIMEOUT_SECONDS
+zip_timeout_seconds=$ZIP_TIMEOUT_SECONDS
 codex_phase_timeout_seconds=$CODEX_PHASE_TIMEOUT_SECONDS
 paper_command_timeout_seconds=$PAPER_COMMAND_TIMEOUT_SECONDS
 max_cycles=$MAX_CYCLES
@@ -271,6 +286,14 @@ auto_install=$AUTO_INSTALL
 surebet_pinned_bundle=${PINNED_BUNDLE_PATH:-}
 surebet_require_pinned_bundle=$REQUIRE_PINNED_BUNDLE
 paper_service_lifecycle=none
+canonical_paper_handoff_schema=1
+atomic_paper_handoff=enabled
+source_evidence_hash_verification=enabled
+bounded_artifacts_zip=enabled
+atomic_standalone_lock_acquisition=enabled
+lock_acquisition_before_run_dir=enabled
+lock_release_failure_classification=enabled
+lock_preservation_on_release_failure=enabled
 telegram_notify=${TELEGRAM_NOTIFY:-1}
 EOF_CONFIG
 }
@@ -296,14 +319,14 @@ EOF_NODE
 maybe_auto_install() { if [[ "$AUTO_INSTALL" != "1" ]]; then return 0; fi; if [[ -d "$AUTOMATION_REPO_ROOT/node_modules" ]]; then automation_log "auto_install=skipped node_modules_present"; return 0; fi; automation_run_shell_command "auto_install_npm_install" "npm install --ignore-scripts" "$INSTALL_TIMEOUT_SECONDS" "$AUTOMATION_RUN_DIR/auto-install.log"; }
 
 capture_initial_source_state() {
-  INITIAL_SOURCE_FINGERPRINT="$(automation_source_tree_fingerprint "$AUTOMATION_REPO_ROOT")" || return 1
+  INITIAL_SOURCE_FINGERPRINT="$(automation_v2_source_tree_fingerprint "$AUTOMATION_REPO_ROOT")" || return 1
   printf 'source_fingerprint=%s\n' "$INITIAL_SOURCE_FINGERPRINT" > "$AUTOMATION_RUN_DIR/source-fingerprint-before.env"
   automation_snapshot_protected "$AUTOMATION_RUN_DIR/protected_before.sha256"
 }
 
 verify_paper_read_only_state() {
   local phase="$1"
-  FINAL_SOURCE_FINGERPRINT="$(automation_source_tree_fingerprint "$AUTOMATION_REPO_ROOT")" || return 1
+  FINAL_SOURCE_FINGERPRINT="$(automation_v2_source_tree_fingerprint "$AUTOMATION_REPO_ROOT")" || return 1
   {
     printf 'phase=%s\n' "$phase"
     printf 'source_fingerprint_before=%s\n' "$INITIAL_SOURCE_FINGERPRINT"
@@ -326,89 +349,246 @@ verify_paper_read_only_state() {
   return 0
 }
 
+rotate_stale_paper_handoff() {
+  local stale_dir destination
+  PAPER_HANDOFF_FILE="$AUTOMATION_REPO_ROOT/.automation/paper-mode-to-autonomous-implementation.env"
+  [[ -e "$PAPER_HANDOFF_FILE" ]] || return 0
+  [[ -f "$PAPER_HANDOFF_FILE" && ! -L "$PAPER_HANDOFF_FILE" ]] || {
+    echo "ERROR: existing paper handoff must be a non-symlink regular file: $PAPER_HANDOFF_FILE" >&2
+    return 2
+  }
+  stale_dir="$AUTOMATION_REPO_ROOT/.automation/corrupt"
+  mkdir -p "$stale_dir"
+  destination="$stale_dir/$(basename "$PAPER_HANDOFF_FILE").$(date -u +%Y%m%dT%H%M%SZ).stale"
+  mv -- "$PAPER_HANDOFF_FILE" "$destination"
+  automation_log "stale_paper_handoff_rotated path=$destination"
+}
+
 write_paper_mode_handoff() {
-  local reason evidence_dir env_file final_dir blocker_family automation_maintenance
-  reason="$1"
-  evidence_dir="$2"
-  blocker_family="${3:-source}"
-  automation_maintenance="${4:-no}"
-  env_file="$AUTOMATION_REPO_ROOT/.automation/paper-mode-to-autonomous-implementation.env"
+  local reason="$1" evidence_dir="$2" blocker_family="${3:-source}" automation_maintenance="${4:-no}" expected_exit_code="${5:-2}"
+  local allowed_protected_files="${6:-none}" final_dir evidence_abs evidence_rel evidence_file evidence_hash source_run_id
+
+  PAPER_HANDOFF_FILE="$AUTOMATION_REPO_ROOT/.automation/paper-mode-to-autonomous-implementation.env"
+  automation_v2_validate_yes_no_value PAPER_MODE_AUTOMATION_MAINTENANCE_ALLOWED "$automation_maintenance" || return 2
+  case "$blocker_family" in validation|source|controller|artifact) ;; *) echo "ERROR: unsupported paper blocker family: $blocker_family" >&2; return 2 ;; esac
+  [[ "$expected_exit_code" == "2" ]] || { echo "ERROR: paper implementation handoff must use final exit code 2" >&2; return 2; }
+  if [[ "$automation_maintenance" == "yes" ]]; then
+    [[ -n "$allowed_protected_files" && "$allowed_protected_files" != "none" ]] || { echo "ERROR: paper automation maintenance requires exact ALLOWED_PROTECTED_FILES" >&2; return 2; }
+  else
+    [[ -z "$allowed_protected_files" || "$allowed_protected_files" == "none" ]] || { echo "ERROR: paper allowlist is set while automation maintenance is disabled" >&2; return 2; }
+    allowed_protected_files="none"
+  fi
+
+  evidence_abs="$(automation_v2_safe_repo_path "$AUTOMATION_REPO_ROOT" "$evidence_dir" yes)" || return 2
+  [[ -d "$evidence_abs" && ! -L "$evidence_abs" ]] || { echo "ERROR: paper handoff evidence directory must be a non-symlink directory" >&2; return 2; }
+  evidence_rel="${evidence_abs#$AUTOMATION_REPO_ROOT/}"
+  source_run_id="$(basename "$AUTOMATION_RUN_DIR")"
+  evidence_file="$evidence_abs/paper-implementation-handoff-evidence.md"
+  {
+    printf '# Paper implementation handoff evidence\n\n'
+    printf 'source_run_id=%s\n' "$source_run_id"
+    printf 'paper_final_status=%s\n' "$FINAL_STATUS"
+    printf 'paper_stop_reason=%s\n' "$STOP_REASON"
+    printf 'paper_final_exit_code=%s\n' "$expected_exit_code"
+    printf 'handoff_reason=%s\n' "$reason"
+    printf 'blocker_family=%s\n' "$blocker_family"
+    printf 'source_fingerprint=%s\n' "$INITIAL_SOURCE_FINGERPRINT"
+    printf 'evidence_directory=%s\n' "$evidence_rel"
+    printf 'validation_required=npm_run_validate\n'
+  } > "$evidence_file"
+  evidence_hash="$(automation_v2_sha256_file "$evidence_file")" || return 2
+  evidence_rel="${evidence_file#$AUTOMATION_REPO_ROOT/}"
+
   final_dir="$AUTOMATION_RUN_DIR/final"
   mkdir -p "$AUTOMATION_REPO_ROOT/.automation" "$final_dir"
+  automation_v2_write_env_atomic "$PAPER_HANDOFF_FILE" \
+    "HANDOVER_SCHEMA_VERSION=1" \
+    "HANDOVER_KIND=paper-mode-to-autonomous-implementation" \
+    "REPOSITORY=${AUTOMATION_REPO_NAME:-betting-win-surebet}" \
+    "CONTROLLER=$SCRIPT_NAME" \
+    "SOURCE_RUN_ID=$source_run_id" \
+    "RUN_AUTONOMOUS_IMPLEMENTATION_NEXT=yes" \
+    "AUTONOMOUS_IMPLEMENTATION_EXPECTED_FLAG=--handover-paper-mode" \
+    "PAPER_MODE_FINAL_STATUS=$FINAL_STATUS" \
+    "PAPER_MODE_STOP_REASON=$STOP_REASON" \
+    "PAPER_MODE_FINAL_EXIT_CODE=$expected_exit_code" \
+    "PAPER_MODE_RESUME_AFTER_IMPLEMENTATION=yes" \
+    "PAPER_MODE_NOOP_SUCCESS_ALLOWED=no" \
+    "PAPER_MODE_REQUIRED_ACTION=bounded_source_implementation" \
+    "PAPER_MODE_BLOCKER_FAMILY=$blocker_family" \
+    "PAPER_MODE_EXPECTED_PRIVATE_PAPER_REEVALUATION_AFTER_SOURCE_CHANGE=yes" \
+    "PAPER_MODE_AUTOMATION_MAINTENANCE_ALLOWED=$automation_maintenance" \
+    "ALLOWED_PROTECTED_FILES=$allowed_protected_files" \
+    "PAPER_SERVICE_SUPPORTED=0" \
+    "SERVICE_REFRESH_REQUIRED=0" \
+    "RUNTIME_EVIDENCE_REQUIRED=0" \
+    "PINNED_BUNDLE_REQUIRED=$REQUIRE_PINNED_BUNDLE" \
+    "SUREBET_PINNED_BUNDLE=${PINNED_BUNDLE_PATH:-}" \
+    "HANDOFF_REASON=$reason" \
+    "PAPER_SOURCE_FINGERPRINT=$INITIAL_SOURCE_FINGERPRINT" \
+    "SOURCE_EVIDENCE_PATH=$evidence_rel" \
+    "SOURCE_EVIDENCE_SHA256=$evidence_hash" \
+    "VALIDATION_REQUIRED=npm_run_validate" \
+    "RUN_DIR=$AUTOMATION_RUN_DIR" \
+    "WRITTEN_AT=$(automation_now_iso)"
+  PAPER_HANDOFF_FINGERPRINT="$(automation_v2_add_or_verify_fingerprint "$PAPER_HANDOFF_FILE")" || return 2
+  automation_v2_atomic_copy "$PAPER_HANDOFF_FILE" "$final_dir/paper-mode-to-autonomous-implementation.env" || return 2
+  automation_log "paper_handoff_written schema=1 fingerprint=$PAPER_HANDOFF_FINGERPRINT evidence_sha256=$evidence_hash"
+}
+
+attempt_final_lock_release() {
+  local rc=0
+  if [[ "$LOCK_ACQUIRED" != "1" ]]; then
+    LOCK_RELEASE_STATUS="not_acquired"
+    LOCK_RELEASE_EXIT_CODE=0
+    LOCK_PRESERVED="no"
+    return 0
+  fi
+  if automation_release_lock; then
+    rc=0
+  else
+    rc=$?
+  fi
+  LOCK_RELEASE_EXIT_CODE="$rc"
+  if [[ "$rc" == "0" ]]; then
+    LOCK_RELEASE_STATUS="released"
+    LOCK_PRESERVED="no"
+    LOCK_ACQUIRED=0
+    return 0
+  fi
+  LOCK_RELEASE_STATUS="preserved"
+  LOCK_PRESERVED="yes"
+  automation_log "final_lock_release_failed exit=$rc lock_preserved=yes lock=${AUTOMATION_LOCK_FILE:-unknown}"
+  return "$rc"
+}
+
+build_artifacts_zip_bounded() {
+  local tmp rel
+  [[ -d "${AUTOMATION_RUN_DIR:-}" ]] || return 0
+  rel="${AUTOMATION_RUN_DIR#$AUTOMATION_REPO_ROOT/}"
+  tmp="$AUTOMATION_REPO_ROOT/.artifacts.zip.tmp.$$.zip"
+  rm -f "$tmp"
+  if automation_v2_zip_with_timeout "$ZIP_TIMEOUT_SECONDS" "$tmp" "$AUTOMATION_REPO_ROOT" "$rel"; then
+    mv -f "$tmp" "$AUTOMATION_REPO_ROOT/artifacts.zip"
+    automation_log "artifacts_zip_created path=$AUTOMATION_REPO_ROOT/artifacts.zip"
+  else
+    local rc=$?
+    rm -f "$tmp"
+    automation_log "artifacts_zip_failed exit=$rc timeout=${ZIP_TIMEOUT_SECONDS}s"
+    return "$rc"
+  fi
+}
+
+write_final_summary() {
+  [[ -n "${AUTOMATION_RUN_DIR:-}" ]] || return 0
+  mkdir -p "$AUTOMATION_RUN_DIR/final"
   {
-    printf 'HANDOVER_KIND=paper-mode-to-autonomous-implementation\n'
-    printf 'REPO_NAME=%s\n' "${AUTOMATION_REPO_NAME:-betting-win-surebet}"
-    printf 'CONTROLLER=run-paper-evaluation.sh\n'
-    printf 'RUN_AUTONOMOUS_IMPLEMENTATION_NEXT=yes\n'
-    printf 'AUTONOMOUS_IMPLEMENTATION_EXPECTED_FLAG=--handover-paper-mode\n'
-    printf 'PAPER_MODE_FINAL_STATUS=%s\n' "$FINAL_STATUS"
-    printf 'PAPER_MODE_STOP_REASON=%s\n' "$STOP_REASON"
-    printf 'PAPER_MODE_FINAL_EXIT_CODE=%s\n' "${EXIT_STATUS:-0}"
-    printf 'PAPER_MODE_RESUME_AFTER_IMPLEMENTATION=yes\n'
-    printf 'PAPER_MODE_NOOP_SUCCESS_ALLOWED=no\n'
-    printf 'PAPER_MODE_REQUIRED_ACTION=bounded_source_implementation\n'
-    printf 'PAPER_MODE_BLOCKER_FAMILY=%s\n' "$blocker_family"
-    printf 'PAPER_MODE_EXPECTED_PRIVATE_PAPER_REEVALUATION_AFTER_SOURCE_CHANGE=yes\n'
-    printf 'PAPER_MODE_AUTOMATION_MAINTENANCE_ALLOWED=%s\n' "$automation_maintenance"
-    printf 'PAPER_SERVICE_SUPPORTED=0\n'
-    printf 'SERVICE_REFRESH_REQUIRED=0\n'
-    printf 'RUNTIME_EVIDENCE_REQUIRED=0\n'
-    printf 'PINNED_BUNDLE_REQUIRED=%s\n' "$REQUIRE_PINNED_BUNDLE"
-    printf 'SUREBET_PINNED_BUNDLE=%s\n' "${PINNED_BUNDLE_PATH:-}"
-    printf 'HANDOFF_REASON=%s\n' "$reason"
-    printf 'EVIDENCE_DIR=%s\n' "$evidence_dir"
-    printf 'NEXT_COMMAND=%s\n' 'bash ./run-autonomous-implementation.sh --duration 72h --model cli-default --fallback-model none --handover-paper-mode'
-    printf 'RUN_DIR=%s\n' "$AUTOMATION_RUN_DIR"
-    printf 'WRITTEN_AT=%s\n' "$(automation_now_iso)"
-  } > "$env_file"
-  cp "$env_file" "$final_dir/paper-mode-to-autonomous-implementation.env"
+    printf '# Paper evaluation final summary\n\n'
+    printf 'script_version=%s\n' "$SCRIPT_VERSION"
+    printf 'final_status=%s\n' "$FINAL_STATUS"
+    printf 'stop_reason=%s\n' "$STOP_REASON"
+    printf 'exit_status=%s\n' "$EXIT_STATUS"
+    printf 'cycles_attempted=%s\n' "$CYCLES_ATTEMPTED"
+    printf 'controller_mode=single_pass_no_service\n'
+    printf 'duration_seconds=%s\n' "$DURATION_SECONDS"
+    printf 'duration_semantics=maximum_controller_budget_not_monitoring_runtime\n'
+    printf 'interval_seconds=%s\n' "$INTERVAL_SECONDS"
+    printf 'interval_semantics=workflow_compatibility_no_wait_in_single_pass_mode\n'
+    printf 'adaptive=%s\n' "$ADAPTIVE"
+    printf 'keep_monitoring_when_ready=%s\n' "$KEEP_MONITORING_WHEN_READY"
+    printf 'local_fixture_report=%s\n' "${PAPER_LOCAL_REPORT_PATH:-}"
+    printf 'pinned_bundle_report=%s\n' "${PAPER_PINNED_REPORT_PATH:-}"
+    printf 'surebet_pinned_bundle=%s\n' "${PINNED_BUNDLE_PATH:-}"
+    printf 'source_fingerprint_before=%s\n' "${INITIAL_SOURCE_FINGERPRINT:-}"
+    printf 'source_fingerprint_after=%s\n' "${FINAL_SOURCE_FINGERPRINT:-}"
+    printf 'paper_handoff_fingerprint=%s\n' "${PAPER_HANDOFF_FINGERPRINT:-none}"
+    printf 'zip_timeout_seconds=%s\n' "$ZIP_TIMEOUT_SECONDS"
+    printf 'artifacts_zip_exit_status=%s\n' "$ARTIFACT_PACKAGING_EXIT_STATUS"
+    if [[ "$LOCK_RELEASE_STATUS" != "not_attempted" ]]; then
+      printf 'lock_release_status=%s\n' "$LOCK_RELEASE_STATUS"
+      printf 'lock_release_exit_code=%s\n' "$LOCK_RELEASE_EXIT_CODE"
+      printf 'lock_preserved=%s\n' "$LOCK_PRESERVED"
+      printf 'lock_file=%s\n' "${AUTOMATION_LOCK_FILE:-none}"
+    fi
+    printf 'paper_service_lifecycle=none\n'
+    printf 'completed_at=%s\n' "$(automation_now_iso)"
+  } > "$AUTOMATION_RUN_DIR/final-summary.md"
+  cp "$AUTOMATION_RUN_DIR/final-summary.md" "$AUTOMATION_RUN_DIR/final/final-summary.md" 2>/dev/null || true
 }
 
 finish() {
-  local rc=$?
+  local rc="${1:-$?}" zip_rc=0 lock_rc=0 corrective_zip_rc=0
   [[ "$FINISHED" == "1" ]] && return 0
   FINISHED=1
+  trap - EXIT INT TERM
+  if [[ "$FINAL_STATUS" == "not_started" ]]; then
+    FINAL_STATUS="setup_failed"
+    STOP_REASON="unexpected_exit_before_start"
+  elif [[ "$rc" != "0" && "$STOP_REASON" == "not_started" ]]; then
+    FINAL_STATUS="PAPER_EVALUATION_BLOCKED_CONTROLLER_FAILURE"
+    STOP_REASON="unexpected_controller_exit"
+  fi
   EXIT_STATUS="$rc"
+
   if [[ -n "${AUTOMATION_RUN_DIR:-}" ]]; then
-    if [[ -z "$FINAL_SOURCE_FINGERPRINT" ]]; then FINAL_SOURCE_FINGERPRINT="$(automation_source_tree_fingerprint "$AUTOMATION_REPO_ROOT" 2>/dev/null || true)"; fi
-    mkdir -p "$AUTOMATION_RUN_DIR/final"
-    {
-      printf '# Paper evaluation final summary\n\n'
-      printf 'final_status=%s\n' "$FINAL_STATUS"
-      printf 'stop_reason=%s\n' "$STOP_REASON"
-      printf 'exit_status=%s\n' "$EXIT_STATUS"
-      printf 'cycles_attempted=%s\n' "$CYCLES_ATTEMPTED"
-      printf 'controller_mode=single_pass_no_service\n'
-      printf 'duration_seconds=%s\n' "$DURATION_SECONDS"
-      printf 'duration_semantics=maximum_controller_budget_not_monitoring_runtime\n'
-      printf 'interval_seconds=%s\n' "$INTERVAL_SECONDS"
-      printf 'interval_semantics=workflow_compatibility_no_wait_in_single_pass_mode\n'
-      printf 'adaptive=%s\n' "$ADAPTIVE"
-      printf 'keep_monitoring_when_ready=%s\n' "$KEEP_MONITORING_WHEN_READY"
-      printf 'local_fixture_report=%s\n' "${PAPER_LOCAL_REPORT_PATH:-}"
-      printf 'pinned_bundle_report=%s\n' "${PAPER_PINNED_REPORT_PATH:-}"
-      printf 'surebet_pinned_bundle=%s\n' "${PINNED_BUNDLE_PATH:-}"
-      printf 'source_fingerprint_before=%s\n' "${INITIAL_SOURCE_FINGERPRINT:-}"
-      printf 'source_fingerprint_after=%s\n' "${FINAL_SOURCE_FINGERPRINT:-}"
-      printf 'paper_service_lifecycle=none\n'
-      printf 'completed_at=%s\n' "$(automation_now_iso)"
-    } > "$AUTOMATION_RUN_DIR/final-summary.md"
-    cp "$AUTOMATION_RUN_DIR/final-summary.md" "$AUTOMATION_RUN_DIR/final/final-summary.md" 2>/dev/null || true
-    automation_collect_repo_snapshot "$AUTOMATION_RUN_DIR/final-repo-snapshot"
-    automation_build_artifacts_zip "$AUTOMATION_RUN_DIR" "$AUTOMATION_REPO_ROOT" || true
+    if [[ -z "$FINAL_SOURCE_FINGERPRINT" ]]; then
+      FINAL_SOURCE_FINGERPRINT="$(automation_v2_source_tree_fingerprint "$AUTOMATION_REPO_ROOT" 2>/dev/null || true)"
+    fi
+    write_final_summary || true
+    automation_collect_repo_snapshot "$AUTOMATION_RUN_DIR/final-repo-snapshot" || true
+    set +e
+    build_artifacts_zip_bounded
+    zip_rc=$?
+    set -e
+    ARTIFACT_PACKAGING_EXIT_STATUS="$zip_rc"
+    if [[ "$zip_rc" != "0" && "$EXIT_STATUS" == "0" ]]; then
+      FINAL_STATUS="PAPER_EVALUATION_BLOCKED_ARTIFACT_PACKAGING"
+      STOP_REASON="artifacts_zip_failed"
+      EXIT_STATUS=2
+      write_final_summary || true
+    fi
+  fi
+
+  set +e
+  attempt_final_lock_release
+  lock_rc=$?
+  set -e
+  if [[ "$lock_rc" != "0" ]]; then
+    FINAL_STATUS="PAPER_EVALUATION_BLOCKED_LOCK_RELEASE"
+    STOP_REASON="lock_release_failed_lock_preserved"
+    EXIT_STATUS=2
+    if [[ -n "${AUTOMATION_RUN_DIR:-}" ]]; then
+      write_final_summary || true
+      set +e
+      build_artifacts_zip_bounded
+      corrective_zip_rc=$?
+      set -e
+      [[ "$corrective_zip_rc" == "0" ]] || automation_log "lock_failure_artifacts_zip_failed exit=$corrective_zip_rc"
+    fi
+  elif [[ -n "${AUTOMATION_RUN_DIR:-}" ]]; then
+    write_final_summary || true
+  fi
+
+  if [[ -n "${AUTOMATION_RUN_DIR:-}" ]]; then
     telegram_notify_send_final "run-paper-evaluation.sh" "${AUTOMATION_REPO_NAME:-betting-win-surebet}" "$FINAL_STATUS" "$STOP_REASON" "$CYCLES_ATTEMPTED" "$EXIT_STATUS" "$AUTOMATION_RUN_DIR" "$AUTOMATION_CONTROLLER_LOG" "$AUTOMATION_REPO_ROOT" || true
   fi
-  [[ "$LOCK_ACQUIRED" == "1" ]] && automation_release_lock || true
-  if [[ -n "${AUTOMATION_RUN_DIR:-}" ]]; then
-    printf 'run_dir=%s\n' "$AUTOMATION_RUN_DIR"
-    printf 'final_status=%s\n' "$FINAL_STATUS"
-    printf 'stop_reason=%s\n' "$STOP_REASON"
-    printf 'final_exit_code=%s\n' "$EXIT_STATUS"
-    printf 'cycles_completed=%s\n' "$CYCLES_ATTEMPTED"
-  fi
+  printf 'run_dir=%s\n' "${AUTOMATION_RUN_DIR:-}"
+  printf 'final_status=%s\n' "$FINAL_STATUS"
+  printf 'stop_reason=%s\n' "$STOP_REASON"
+  printf 'final_exit_code=%s\n' "$EXIT_STATUS"
+  printf 'cycles_completed=%s\n' "$CYCLES_ATTEMPTED"
+  printf 'paper_result=%s\n' "$FINAL_STATUS"
+  printf 'lock_release_status=%s\n' "$LOCK_RELEASE_STATUS"
+  printf 'lock_release_exit_code=%s\n' "$LOCK_RELEASE_EXIT_CODE"
+  printf 'lock_preserved=%s\n' "$LOCK_PRESERVED"
+  exit "$EXIT_STATUS"
 }
-trap finish EXIT
-trap 'FINAL_STATUS="interrupted"; STOP_REASON="interrupted"; exit 130' INT TERM
+
+on_signal() {
+  FINAL_STATUS="interrupted"
+  STOP_REASON="interrupted"
+  exit 130
+}
 
 run_repo_validation() {
   local out_dir
@@ -470,9 +650,21 @@ if [[ "$STATUS_ONLY" == "1" ]]; then automation_status_lock "$LOCK_FILE"; exit 0
 if [[ "$FORCE_UNLOCK" == "1" ]]; then automation_force_unlock "$LOCK_FILE" "$SCRIPT_NAME" "$AUTOMATION_REPO_ROOT"; exit 0; fi
 if [[ "$PRINT_CONFIG" == "1" ]]; then print_config; exit 0; fi
 validate_pinned_bundle_preflight || exit 2
-automation_create_run_dir "paper_evaluation"
+trap 'finish $?' EXIT
+trap on_signal INT TERM
 AUTOMATION_SCRIPT_COMMAND="$0 $*"
-if [[ "$ALLOW_PARALLEL" == "1" ]]; then automation_log "lock=skipped allow_parallel=1"; else automation_acquire_lock "$SCRIPT_NAME" "$AUTOMATION_REPO_ROOT"; LOCK_ACQUIRED=1; automation_start_heartbeat; fi
+if [[ "$ALLOW_PARALLEL" == "1" ]]; then
+  automation_log "lock=skipped allow_parallel=1"
+else
+  automation_acquire_lock "$SCRIPT_NAME" "$AUTOMATION_REPO_ROOT"
+  LOCK_ACQUIRED=1
+fi
+automation_create_run_dir "paper_evaluation"
+if [[ "$LOCK_ACQUIRED" == "1" ]]; then
+  automation_write_lock_file
+  automation_start_heartbeat
+fi
+rotate_stale_paper_handoff || { FINAL_STATUS="setup_failed"; STOP_REASON="stale_handoff_rotation_failed"; exit 2; }
 assert_active_node_runtime || { FINAL_STATUS="setup_failed"; STOP_REASON="node_runtime_invalid"; exit 1; }
 automation_collect_repo_snapshot "$AUTOMATION_RUN_DIR/initial-repo-snapshot"
 capture_initial_source_state || { FINAL_STATUS="setup_failed"; STOP_REASON="source_fingerprint_failed"; exit 1; }
@@ -504,14 +696,20 @@ if ! run_repo_validation "$CYCLE_DIR/source-validation"; then
   FINAL_STATUS="PAPER_EVALUATION_BLOCKED_REPO_VALIDATION_FAILED"
   STOP_REASON="repo_validation_failed"
   if ! verify_paper_read_only_state repo_validation_failed; then exit 2; fi
-  write_paper_mode_handoff "repo_validation_failed" "$CYCLE_DIR/source-validation" "validation" "no" || true
+  write_paper_mode_handoff "repo_validation_failed" "$CYCLE_DIR/source-validation" "validation" "no" "2" "none" || {
+    FINAL_STATUS="PAPER_EVALUATION_BLOCKED_HANDOFF_WRITE_FAILED"
+    STOP_REASON="paper_handoff_write_failed_after_repo_validation"
+  }
   exit 2
 fi
 if ! run_private_fixture_smoke "$CYCLE_DIR"; then
   FINAL_STATUS="PAPER_EVALUATION_BLOCKED_SOURCE_FIX_REQUIRED"
   STOP_REASON="private_fixture_smoke_failed"
   if ! verify_paper_read_only_state private_fixture_failed; then exit 2; fi
-  write_paper_mode_handoff "private_fixture_smoke_failed" "$CYCLE_DIR" "source" "no" || true
+  write_paper_mode_handoff "private_fixture_smoke_failed" "$CYCLE_DIR" "source" "no" "2" "none" || {
+    FINAL_STATUS="PAPER_EVALUATION_BLOCKED_HANDOFF_WRITE_FAILED"
+    STOP_REASON="paper_handoff_write_failed_after_fixture_smoke"
+  }
   exit 2
 fi
 if [[ -z "${PINNED_BUNDLE_PATH:-}" ]]; then

@@ -12,7 +12,7 @@ AUTOMATION_REPO_ROOT="$SCRIPT_DIR"
 # shellcheck source=.automation/lib/telegram_notify.sh
 . "$SCRIPT_DIR/.automation/lib/telegram_notify.sh"
 
-SCRIPT_VERSION="2026-07-11.surebet-v2-verified-parent"
+SCRIPT_VERSION="2026-07-12.surebet-v4-atomic-parent-lock-finalization"
 SCRIPT_NAME="run-paper-autopilot.sh"
 DURATION_SECONDS="$(automation_parse_duration_seconds 7d)"
 PAPER_DURATION_SECONDS="$(automation_parse_duration_seconds 72h)"
@@ -51,6 +51,9 @@ LAST_CHILD_RC="not_run"
 LAST_CHILD_STATUS="unknown"
 LAST_CHILD_STOP_REASON="unknown"
 LAST_CHILD_RUN_DIR=""
+LAST_CHILD_SOURCE_BEFORE=""
+LAST_CHILD_SOURCE_AFTER=""
+LAST_CHILD_SOURCE_CHANGED="unknown"
 LAST_HANDOFF_FINGERPRINT=""
 LAST_HANDOFF_COUNT=0
 ACTIVE_CHILD_PID=""
@@ -64,6 +67,16 @@ IMPLEMENTATION_CHILD_SCRIPT=""
 PAPER_HANDOFF_FILE=""
 IMPLEMENTATION_HANDOFF_FILE=""
 CURRENT_PAPER_HANDOFF_FINGERPRINT=""
+CURRENT_PAPER_HANDOFF_NOOP_ALLOWED="no"
+CURRENT_PAPER_HANDOFF_RUN_DIR=""
+CURRENT_PAPER_HANDOFF_FINAL_STATUS=""
+CURRENT_PAPER_HANDOFF_STOP_REASON=""
+CURRENT_PAPER_HANDOFF_EXIT_CODE=""
+CHILD_CLEANUP_STATUS="not_attempted"
+CHILD_CLEANUP_EXIT_CODE=0
+LOCK_RELEASE_STATUS="not_attempted"
+LOCK_RELEASE_EXIT_CODE=0
+LOCK_PRESERVED="no"
 
 usage() {
   cat <<'EOF_USAGE'
@@ -248,6 +261,15 @@ semantic_handoff_fingerprints=enabled
 explicit_child_result_contract=enabled
 parent_budget_clamping=enabled
 child_aware_lock=enabled
+cross_controller_lock_guard=enabled
+canonical_paper_handoff_required=enabled
+legacy_paper_handoff_normalization=disabled
+strict_implementation_return_schema=enabled
+paper_child_zip_timeout=enabled
+atomic_parent_lock_acquisition=enabled
+parent_child_cleanup_failure_classification=enabled
+parent_lock_release_failure_classification=enabled
+lock_preservation_on_child_identity_failure=enabled
 EOF_CONFIG
 }
 
@@ -297,9 +319,9 @@ lock_value() {
   printf '%s\n' "${AUTOMATION_V2_ENV[$key]-}"
 }
 
-write_parent_lock() {
-  [[ "$LOCK_ACQUIRED" == "1" ]] || return 0
-  automation_v2_write_env_atomic "$LOCK_FILE" \
+write_parent_lock_file() {
+  local target="$1"
+  automation_v2_write_env_atomic "$target" \
     "LOCK_SCHEMA_VERSION=1" \
     "CONTROLLER=$SCRIPT_NAME" \
     "CONTROLLER_PID=$$" \
@@ -313,6 +335,23 @@ write_parent_lock() {
     "ACTIVE_CHILD_KIND=${ACTIVE_CHILD_KIND:-none}" \
     "ACTIVE_CHILD_SCRIPT=${ACTIVE_CHILD_SCRIPT:-}" \
     "ACTIVE_CHILD_COMMAND=${ACTIVE_CHILD_COMMAND:-}"
+}
+
+write_parent_lock() {
+  [[ "$LOCK_ACQUIRED" == "1" ]] || return 0
+  write_parent_lock_file "$LOCK_FILE"
+}
+
+claim_parent_lock() {
+  local claim
+  claim="${LOCK_FILE}.claim.$$.$RANDOM"
+  write_parent_lock_file "$claim" || { rm -f -- "$claim"; return 2; }
+  if ln -- "$claim" "$LOCK_FILE" 2>/dev/null; then
+    rm -f -- "$claim"
+    return 0
+  fi
+  rm -f -- "$claim"
+  return 1
 }
 
 status_lock() {
@@ -353,9 +392,15 @@ force_unlock_parent() {
     kill -TERM "$pid" 2>/dev/null || true
     local waited=0
     while kill -0 "$pid" 2>/dev/null && (( waited < ${AUTOMATION_GRACEFUL_UNLOCK_SECONDS:-30} )); do sleep 1; waited=$((waited + 1)); done
-    kill -0 "$pid" 2>/dev/null && kill -KILL "$pid" 2>/dev/null || true
+    if kill -0 "$pid" 2>/dev/null; then
+      kill -KILL "$pid" 2>/dev/null || true
+      waited=0
+      while kill -0 "$pid" 2>/dev/null && (( waited < 10 )); do sleep 1; waited=$((waited + 1)); done
+      kill -0 "$pid" 2>/dev/null && { echo "ERROR: force-unlock failed: verified controller PID remains alive: $pid" >&2; return 2; }
+    fi
   fi
   rm -f -- "$LOCK_FILE"
+  [[ ! -e "$LOCK_FILE" ]] || { echo "ERROR: force-unlock failed to remove lock: $LOCK_FILE" >&2; return 2; }
   echo "FORCE_UNLOCK=done"
 }
 
@@ -391,8 +436,13 @@ acquire_parent_lock() {
     rm -f -- "$LOCK_FILE"
   fi
   LOCK_ACQUIRED=1
-  write_parent_lock
+  if ! claim_parent_lock; then
+    LOCK_ACQUIRED=0
+    echo "ERROR: paper autopilot lock was acquired concurrently" >&2
+    return 2
+  fi
   (
+    trap 'exit 0' TERM INT
     while kill -0 "$$" 2>/dev/null; do
       refresh_parent_lock_heartbeat >/dev/null 2>&1 || true
       sleep "${AUTOMATION_LOCK_HEARTBEAT_SECONDS:-60}"
@@ -402,11 +452,19 @@ acquire_parent_lock() {
 }
 
 release_parent_lock() {
-  [[ -n "$HEARTBEAT_PID" ]] && { kill "$HEARTBEAT_PID" 2>/dev/null || true; wait "$HEARTBEAT_PID" 2>/dev/null || true; }
-  if [[ -f "$LOCK_FILE" ]]; then
-    automation_v2_load_env_strict "$LOCK_FILE" >/dev/null 2>&1 || return 0
-    [[ "${AUTOMATION_V2_ENV[CONTROLLER_PID]-}" == "$$" ]] && rm -f -- "$LOCK_FILE"
+  local pid
+  if [[ -n "$HEARTBEAT_PID" ]]; then
+    kill "$HEARTBEAT_PID" 2>/dev/null || true
+    wait "$HEARTBEAT_PID" 2>/dev/null || true
+    HEARTBEAT_PID=""
   fi
+  [[ -f "$LOCK_FILE" && ! -L "$LOCK_FILE" ]] || return 2
+  automation_v2_load_env_strict "$LOCK_FILE" >/dev/null 2>&1 || return 2
+  pid="${AUTOMATION_V2_ENV[CONTROLLER_PID]-}"
+  [[ "$pid" == "$$" ]] || return 2
+  rm -f -- "$LOCK_FILE" || return 2
+  [[ ! -e "$LOCK_FILE" ]] || return 2
+  LOCK_ACQUIRED=0
 }
 
 rotate_stale_handoffs() {
@@ -419,60 +477,227 @@ rotate_stale_handoffs() {
   done
 }
 
-normalize_paper_handoff() {
-  local existing computed repo maintenance allowed
+validate_loaded_env_keys() {
+  local allowed_csv="$1" key
+  for key in "${!AUTOMATION_V2_ENV[@]}"; do
+    case ",$allowed_csv," in
+      *",$key,"*) ;;
+      *) echo "ERROR: unsupported handoff key for schema v1: $key" >&2; return 2 ;;
+    esac
+  done
+}
+
+require_handoff_zero_one() {
+  local key="$1" value
+  value="$(automation_v2_env_require "$key")" || return 2
+  case "$value" in
+    0|1) printf '%s\n' "$value" ;;
+    *) echo "ERROR: $key must be exactly 0 or 1; got: $value" >&2; return 2 ;;
+  esac
+}
+
+validate_handoff_timestamp() {
+  local key="$1" value
+  value="$(automation_v2_env_require "$key")" || return 2
+  [[ "$value" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$ ]] || {
+    echo "ERROR: $key must be an ISO-8601 UTC timestamp" >&2
+    return 2
+  }
+}
+
+validate_exact_protected_file_allowlist() {
+  local csv="$1" item known found
+  local -a items=()
+  [[ -n "$csv" && "$csv" != none ]] || return 2
+  IFS=',' read -r -a items <<< "$csv"
+  (( ${#items[@]} > 0 )) || return 2
+  for item in "${items[@]}"; do
+    [[ -n "$item" && "$item" != /* ]] || { echo "ERROR: invalid protected-file allowlist entry: $item" >&2; return 2; }
+    case "/$item/" in *'/../'*) echo "ERROR: protected-file allowlist entry escapes the repo: $item" >&2; return 2 ;; esac
+    found=0
+    for known in "${AUTOMATION_PROTECTED_FILES[@]}"; do
+      if [[ "$item" == "$known" ]]; then found=1; break; fi
+    done
+    [[ "$found" == 1 ]] || { echo "ERROR: handoff allowlist entry is not a protected automation file: $item" >&2; return 2; }
+  done
+}
+
+validate_handoff_run_and_evidence() {
+  local run_dir_value="$1" evidence_value="$2" expected_hash="$3" expected_run_prefix="$4"
+  local run_abs evidence_abs actual_hash relative current part
+  local -a evidence_parts=()
+  [[ "$run_dir_value" == /* ]] || { echo "ERROR: handoff RUN_DIR must be an absolute repo-local path" >&2; return 2; }
+  run_abs="$(automation_v2_safe_repo_path "$AUTOMATION_REPO_ROOT" "$run_dir_value" yes)" || return 2
+  [[ -d "$run_abs" && ! -L "$run_abs" ]] || { echo "ERROR: handoff RUN_DIR must be a non-symlink directory" >&2; return 2; }
+  case "$run_abs" in
+    "$AUTOMATION_REPO_ROOT/artifacts/${expected_run_prefix}"*) ;;
+    *) echo "ERROR: handoff RUN_DIR does not match expected controller artifact prefix" >&2; return 2 ;;
+  esac
+  [[ -n "$evidence_value" && "$evidence_value" != /* ]] || { echo "ERROR: SOURCE_EVIDENCE_PATH must be a relative repo-local path" >&2; return 2; }
+  case "/$evidence_value/" in *'/../'*) echo "ERROR: SOURCE_EVIDENCE_PATH must not contain parent traversal" >&2; return 2 ;; esac
+  evidence_abs="$(automation_v2_safe_repo_path "$AUTOMATION_REPO_ROOT" "$AUTOMATION_REPO_ROOT/$evidence_value" yes)" || return 2
+  [[ -f "$evidence_abs" && ! -L "$evidence_abs" ]] || { echo "ERROR: source evidence must be a non-symlink regular file" >&2; return 2; }
+  case "$evidence_abs" in "$run_abs"/*) ;; *) echo "ERROR: source evidence must be contained by the handoff RUN_DIR" >&2; return 2 ;; esac
+  relative="${evidence_abs#$AUTOMATION_REPO_ROOT/}"
+  current="$AUTOMATION_REPO_ROOT"
+  IFS='/' read -r -a evidence_parts <<< "$relative"
+  for part in "${evidence_parts[@]}"; do
+    current="$current/$part"
+    [[ ! -L "$current" ]] || { echo "ERROR: source evidence path must not contain symlink components" >&2; return 2; }
+  done
+  [[ "$expected_hash" =~ ^[a-f0-9]{64}$ ]] || { echo "ERROR: SOURCE_EVIDENCE_SHA256 must be a lowercase SHA-256" >&2; return 2; }
+  actual_hash="$(automation_v2_sha256_file "$evidence_abs")" || return 2
+  [[ "$actual_hash" == "$expected_hash" ]] || { echo "ERROR: source evidence SHA-256 mismatch" >&2; return 2; }
+  printf '%s\n' "$run_abs"
+}
+
+validate_optional_pinned_bundle_from_handoff() {
+  local raw="$1" resolved relative current part
+  local -a parts=()
+  [[ -n "$raw" ]] || return 0
+  [[ "$raw" != /* && "$raw" == *.json ]] || { echo "ERROR: handoff SUREBET_PINNED_BUNDLE must be a relative repo-local .json path" >&2; return 2; }
+  case "/$raw/" in *'/../'*) echo "ERROR: handoff SUREBET_PINNED_BUNDLE must not contain parent traversal" >&2; return 2 ;; esac
+  resolved="$(automation_v2_safe_repo_path "$AUTOMATION_REPO_ROOT" "$AUTOMATION_REPO_ROOT/$raw" yes)" || return 2
+  [[ -f "$resolved" && ! -L "$resolved" ]] || { echo "ERROR: handoff SUREBET_PINNED_BUNDLE must be a non-symlink regular file" >&2; return 2; }
+  relative="${resolved#$AUTOMATION_REPO_ROOT/}"
+  current="$AUTOMATION_REPO_ROOT"
+  IFS='/' read -r -a parts <<< "$relative"
+  for part in "${parts[@]}"; do
+    current="$current/$part"
+    [[ ! -L "$current" ]] || { echo "ERROR: pinned bundle path must not contain symlink components" >&2; return 2; }
+  done
+}
+
+validate_paper_handoff() {
+  local validation_phase="${1:-retained}"
+  local schema repo controller source_run_id paper_status paper_stop paper_exit blocker_family
+  local maintenance allowed pinned_required run_dir evidence_hash source_fingerprint current_source existing computed
   automation_v2_load_env_strict "$PAPER_HANDOFF_FILE" || return 2
-  [[ "$(automation_v2_env_require HANDOVER_KIND)" == "paper-mode-to-autonomous-implementation" ]] || return 2
-  repo="${AUTOMATION_V2_ENV[REPOSITORY]-${AUTOMATION_V2_ENV[REPO_NAME]-}}"
+  validate_loaded_env_keys 'HANDOVER_SCHEMA_VERSION,HANDOVER_KIND,REPOSITORY,CONTROLLER,SOURCE_RUN_ID,RUN_AUTONOMOUS_IMPLEMENTATION_NEXT,AUTONOMOUS_IMPLEMENTATION_EXPECTED_FLAG,PAPER_MODE_FINAL_STATUS,PAPER_MODE_STOP_REASON,PAPER_MODE_FINAL_EXIT_CODE,PAPER_MODE_RESUME_AFTER_IMPLEMENTATION,PAPER_MODE_NOOP_SUCCESS_ALLOWED,PAPER_MODE_REQUIRED_ACTION,PAPER_MODE_BLOCKER_FAMILY,PAPER_MODE_EXPECTED_PRIVATE_PAPER_REEVALUATION_AFTER_SOURCE_CHANGE,PAPER_MODE_AUTOMATION_MAINTENANCE_ALLOWED,ALLOWED_PROTECTED_FILES,PAPER_SERVICE_SUPPORTED,SERVICE_REFRESH_REQUIRED,RUNTIME_EVIDENCE_REQUIRED,PINNED_BUNDLE_REQUIRED,SUREBET_PINNED_BUNDLE,HANDOFF_REASON,PAPER_SOURCE_FINGERPRINT,SOURCE_EVIDENCE_PATH,SOURCE_EVIDENCE_SHA256,VALIDATION_REQUIRED,RUN_DIR,WRITTEN_AT,HANDOVER_FINGERPRINT' || return 2
+
+  schema="$(automation_v2_env_require HANDOVER_SCHEMA_VERSION)" || return 2
+  [[ "$schema" == 1 ]] || { echo "ERROR: unsupported paper handoff schema version: $schema" >&2; return 2; }
+  [[ "$(automation_v2_env_require HANDOVER_KIND)" == paper-mode-to-autonomous-implementation ]] || return 2
+  repo="$(automation_v2_env_require REPOSITORY)" || return 2
   [[ "$repo" == "${AUTOMATION_REPO_NAME:-betting-win-surebet}" ]] || { echo "ERROR: paper handoff repository mismatch" >&2; return 2; }
-  [[ "$(automation_v2_env_require RUN_AUTONOMOUS_IMPLEMENTATION_NEXT)" == "yes" ]] || return 2
-  [[ "$(automation_v2_env_require AUTONOMOUS_IMPLEMENTATION_EXPECTED_FLAG)" == "--handover-paper-mode" ]] || return 2
-  automation_v2_validate_yes_no_value PAPER_MODE_NOOP_SUCCESS_ALLOWED "$(automation_v2_env_require PAPER_MODE_NOOP_SUCCESS_ALLOWED)" || return 2
-  automation_v2_validate_yes_no_value PAPER_MODE_AUTOMATION_MAINTENANCE_ALLOWED "$(automation_v2_env_require PAPER_MODE_AUTOMATION_MAINTENANCE_ALLOWED)" || return 2
-  automation_v2_env_require PAPER_MODE_REQUIRED_ACTION >/dev/null || return 2
-  automation_v2_env_require PAPER_MODE_BLOCKER_FAMILY >/dev/null || return 2
-  maintenance="${AUTOMATION_V2_ENV[PAPER_MODE_AUTOMATION_MAINTENANCE_ALLOWED]}"
-  allowed="${AUTOMATION_V2_ENV[ALLOWED_PROTECTED_FILES]-none}"
-  if [[ "$maintenance" == "yes" && "$allowed" == "none" ]]; then
-    echo "ERROR: paper maintenance handoff requires exact ALLOWED_PROTECTED_FILES" >&2
-    return 2
+  controller="$(automation_v2_env_require CONTROLLER)" || return 2
+  [[ "$controller" == run-paper-evaluation.sh ]] || { echo "ERROR: paper handoff producer controller mismatch" >&2; return 2; }
+  [[ "$(automation_v2_env_require RUN_AUTONOMOUS_IMPLEMENTATION_NEXT)" == yes ]] || return 2
+  [[ "$(automation_v2_env_require AUTONOMOUS_IMPLEMENTATION_EXPECTED_FLAG)" == --handover-paper-mode ]] || return 2
+
+  paper_status="$(automation_v2_env_require PAPER_MODE_FINAL_STATUS)" || return 2
+  case "$paper_status" in
+    PAPER_EVALUATION_BLOCKED_REPO_VALIDATION_FAILED|PAPER_EVALUATION_BLOCKED_SOURCE_FIX_REQUIRED) ;;
+    *) echo "ERROR: paper handoff final status is not implementation-actionable: $paper_status" >&2; return 2 ;;
+  esac
+  paper_stop="$(automation_v2_env_require PAPER_MODE_STOP_REASON)" || return 2
+  paper_exit="$(automation_v2_env_require PAPER_MODE_FINAL_EXIT_CODE)" || return 2
+  [[ "$paper_exit" == 2 ]] || { echo "ERROR: paper handoff exit code must be 2" >&2; return 2; }
+  case "$validation_phase" in
+    producer)
+      [[ "$LAST_CHILD" == paper ]] || { echo "ERROR: paper handoff producer validation requires the paper child result" >&2; return 2; }
+      [[ "$paper_status" == "$LAST_CHILD_STATUS" && "$paper_stop" == "$LAST_CHILD_STOP_REASON" && "$paper_exit" == "$LAST_CHILD_RC" ]] || {
+        echo "ERROR: paper handoff does not reconcile with child result" >&2
+        return 2
+      }
+      [[ "$LAST_CHILD_SOURCE_CHANGED" == no ]] || { echo "ERROR: paper child changed source" >&2; return 2; }
+      ;;
+    retained)
+      [[ -n "$CURRENT_PAPER_HANDOFF_FINAL_STATUS" ]] || { echo "ERROR: no previously validated paper handoff state is retained" >&2; return 2; }
+      [[ "$paper_status" == "$CURRENT_PAPER_HANDOFF_FINAL_STATUS" && "$paper_stop" == "$CURRENT_PAPER_HANDOFF_STOP_REASON" && "$paper_exit" == "$CURRENT_PAPER_HANDOFF_EXIT_CODE" ]] || {
+        echo "ERROR: retained paper handoff terminal fields changed" >&2
+        return 2
+      }
+      ;;
+    *) echo "ERROR: unsupported paper handoff validation phase: $validation_phase" >&2; return 2 ;;
+  esac
+
+  [[ "$(automation_v2_env_require PAPER_MODE_RESUME_AFTER_IMPLEMENTATION)" == yes ]] || return 2
+  CURRENT_PAPER_HANDOFF_NOOP_ALLOWED="$(automation_v2_env_require PAPER_MODE_NOOP_SUCCESS_ALLOWED)" || return 2
+  automation_v2_validate_yes_no_value PAPER_MODE_NOOP_SUCCESS_ALLOWED "$CURRENT_PAPER_HANDOFF_NOOP_ALLOWED" || return 2
+  [[ "$CURRENT_PAPER_HANDOFF_NOOP_ALLOWED" == no ]] || { echo "ERROR: canonical paper handoff must not allow no-op implementation success" >&2; return 2; }
+  [[ "$(automation_v2_env_require PAPER_MODE_REQUIRED_ACTION)" == bounded_source_implementation ]] || return 2
+  blocker_family="$(automation_v2_env_require PAPER_MODE_BLOCKER_FAMILY)" || return 2
+  case "$blocker_family" in validation|source|controller|artifact) ;; *) return 2 ;; esac
+  [[ "$(automation_v2_env_require PAPER_MODE_EXPECTED_PRIVATE_PAPER_REEVALUATION_AFTER_SOURCE_CHANGE)" == yes ]] || return 2
+  maintenance="$(automation_v2_env_require PAPER_MODE_AUTOMATION_MAINTENANCE_ALLOWED)" || return 2
+  automation_v2_validate_yes_no_value PAPER_MODE_AUTOMATION_MAINTENANCE_ALLOWED "$maintenance" || return 2
+  allowed="$(automation_v2_env_require ALLOWED_PROTECTED_FILES)" || return 2
+  if [[ "$maintenance" == yes ]]; then
+    [[ "$allowed" != none && -n "$allowed" ]] || { echo "ERROR: paper maintenance handoff requires exact ALLOWED_PROTECTED_FILES" >&2; return 2; }
+    validate_exact_protected_file_allowlist "$allowed" || return 2
+  else
+    [[ "$allowed" == none ]] || { echo "ERROR: paper allowlist set while maintenance is disabled" >&2; return 2; }
   fi
-  if [[ "$maintenance" == "no" && "$allowed" != "none" ]]; then
-    echo "ERROR: paper handoff allowlist set while maintenance is disabled" >&2
-    return 2
+  [[ "$(automation_v2_env_require PAPER_SERVICE_SUPPORTED)" == 0 ]] || return 2
+  [[ "$(automation_v2_env_require SERVICE_REFRESH_REQUIRED)" == 0 ]] || return 2
+  [[ "$(automation_v2_env_require RUNTIME_EVIDENCE_REQUIRED)" == 0 ]] || return 2
+  pinned_required="$(require_handoff_zero_one PINNED_BUNDLE_REQUIRED)" || return 2
+  validate_optional_pinned_bundle_from_handoff "${AUTOMATION_V2_ENV[SUREBET_PINNED_BUNDLE]-}" || return 2
+  if [[ "$pinned_required" == 1 ]]; then [[ -n "${AUTOMATION_V2_ENV[SUREBET_PINNED_BUNDLE]-}" ]] || return 2; fi
+  automation_v2_env_require HANDOFF_REASON >/dev/null || return 2
+  [[ "$(automation_v2_env_require VALIDATION_REQUIRED)" == npm_run_validate ]] || return 2
+  validate_handoff_timestamp WRITTEN_AT || return 2
+
+  run_dir="$(validate_handoff_run_and_evidence "$(automation_v2_env_require RUN_DIR)" "$(automation_v2_env_require SOURCE_EVIDENCE_PATH)" "$(automation_v2_env_require SOURCE_EVIDENCE_SHA256)" paper_evaluation_)" || return 2
+  if [[ "$validation_phase" == producer ]]; then
+    [[ "$run_dir" == "$LAST_CHILD_RUN_DIR" ]] || { echo "ERROR: paper handoff RUN_DIR does not match child result" >&2; return 2; }
+  else
+    [[ "$run_dir" == "$CURRENT_PAPER_HANDOFF_RUN_DIR" ]] || { echo "ERROR: retained paper handoff RUN_DIR changed" >&2; return 2; }
   fi
-  existing="${AUTOMATION_V2_ENV[HANDOVER_FINGERPRINT]-}"
-  if [[ -n "$existing" ]]; then
-    computed="$(automation_v2_semantic_env_fingerprint_loaded)" || return 2
-    [[ "$existing" == "$computed" ]] || { echo "ERROR: paper handoff fingerprint mismatch" >&2; return 2; }
-  fi
-  AUTOMATION_V2_ENV[HANDOVER_SCHEMA_VERSION]=1
-  AUTOMATION_V2_ENV[REPOSITORY]="${AUTOMATION_REPO_NAME:-betting-win-surebet}"
-  AUTOMATION_V2_ENV[ALLOWED_PROTECTED_FILES]="$allowed"
-  unset 'AUTOMATION_V2_ENV[HANDOVER_FINGERPRINT]'
+  source_run_id="$(automation_v2_env_require SOURCE_RUN_ID)" || return 2
+  [[ "$source_run_id" =~ ^[A-Za-z0-9._:-]+$ && "$(basename "$run_dir")" == "$source_run_id" ]] || { echo "ERROR: paper SOURCE_RUN_ID does not match RUN_DIR" >&2; return 2; }
+  evidence_hash="$(automation_v2_env_require SOURCE_EVIDENCE_SHA256)" || return 2
+  source_fingerprint="$(automation_v2_env_require PAPER_SOURCE_FINGERPRINT)" || return 2
+  [[ "$source_fingerprint" =~ ^[a-f0-9]{64}$ ]] || return 2
+  current_source="$(automation_v2_source_tree_fingerprint "$AUTOMATION_REPO_ROOT")" || return 2
+  [[ "$source_fingerprint" == "$current_source" ]] || { echo "ERROR: paper handoff source fingerprint is stale" >&2; return 2; }
+
+  existing="$(automation_v2_env_require HANDOVER_FINGERPRINT)" || return 2
   computed="$(automation_v2_semantic_env_fingerprint_loaded)" || return 2
-  AUTOMATION_V2_ENV[HANDOVER_FINGERPRINT]="$computed"
-  automation_v2_write_loaded_env_atomic "$PAPER_HANDOFF_FILE" || return 2
+  [[ "$existing" == "$computed" ]] || { echo "ERROR: paper handoff fingerprint mismatch" >&2; return 2; }
   CURRENT_PAPER_HANDOFF_FINGERPRINT="$computed"
+  CURRENT_PAPER_HANDOFF_RUN_DIR="$run_dir"
+  CURRENT_PAPER_HANDOFF_FINAL_STATUS="$paper_status"
+  CURRENT_PAPER_HANDOFF_STOP_REASON="$paper_stop"
+  CURRENT_PAPER_HANDOFF_EXIT_CODE="$paper_exit"
+  automation_log "paper_handoff_validated schema=1 fingerprint=$computed evidence_sha256=$evidence_hash"
 }
 
 validate_implementation_handoff() {
-  local computed existing source_changed source_valid reevaluate
+  local computed existing source_changed source_valid reevaluate reaud run_dir
   automation_v2_load_env_strict "$IMPLEMENTATION_HANDOFF_FILE" || return 2
-  [[ "$(automation_v2_env_require HANDOVER_SCHEMA_VERSION)" == "1" ]] || return 2
-  [[ "$(automation_v2_env_require HANDOVER_KIND)" == "paper-mode-after-autonomous-implementation" ]] || return 2
+  validate_loaded_env_keys 'HANDOVER_SCHEMA_VERSION,HANDOVER_KIND,REPOSITORY,CONTROLLER,SOURCE_HANDOFF_FINGERPRINT,RUN_PAPER_EVALUATION_NEXT,AUTONOMOUS_FINAL_STATUS,AUTONOMOUS_STOP_REASON,AUTONOMOUS_FINAL_EXIT_CODE,IMPLEMENTATION_SOURCE_CHANGED,IMPLEMENTATION_SOURCE_VALIDATION_PASSED,PRIVATE_PAPER_REEVALUATION_REQUIRED,BUGFIX_REAUDIT_REQUIRED,AUDIT_AREA,BUG_IDS,PAPER_SERVICE_SUPPORTED,SERVICE_REFRESH_REQUIRED,RUNTIME_EVIDENCE_REQUIRED,REAL_UPSTREAM_EVALUATION,RUN_DIR,WRITTEN_AT,HANDOVER_FINGERPRINT' || return 2
+  [[ "$(automation_v2_env_require HANDOVER_SCHEMA_VERSION)" == 1 ]] || return 2
+  [[ "$(automation_v2_env_require HANDOVER_KIND)" == paper-mode-after-autonomous-implementation ]] || return 2
   [[ "$(automation_v2_env_require REPOSITORY)" == "${AUTOMATION_REPO_NAME:-betting-win-surebet}" ]] || return 2
+  [[ "$(automation_v2_env_require CONTROLLER)" == run-autonomous-implementation.sh ]] || { echo "ERROR: implementation return producer controller mismatch" >&2; return 2; }
   [[ "$(automation_v2_env_require SOURCE_HANDOFF_FINGERPRINT)" == "$CURRENT_PAPER_HANDOFF_FINGERPRINT" ]] || { echo "ERROR: implementation return source handoff fingerprint mismatch" >&2; return 2; }
-  [[ "$(automation_v2_env_require RUN_PAPER_EVALUATION_NEXT)" == "yes" ]] || { echo "ERROR: implementation return does not request paper re-evaluation" >&2; return 2; }
+  [[ "$(automation_v2_env_require RUN_PAPER_EVALUATION_NEXT)" == yes ]] || { echo "ERROR: implementation return does not request paper re-evaluation" >&2; return 2; }
   [[ "$(automation_v2_env_require AUTONOMOUS_FINAL_STATUS)" == "$LAST_CHILD_STATUS" ]] || { echo "ERROR: implementation return final status mismatch" >&2; return 2; }
+  [[ "$LAST_CHILD_STATUS" == 'AUTONOMOUS_GOAL_COMPLETE=yes' ]] || { echo "ERROR: implementation return is not a terminal goal-complete result" >&2; return 2; }
   [[ "$(automation_v2_env_require AUTONOMOUS_STOP_REASON)" == "$LAST_CHILD_STOP_REASON" ]] || { echo "ERROR: implementation return stop reason mismatch" >&2; return 2; }
   [[ "$(automation_v2_env_require AUTONOMOUS_FINAL_EXIT_CODE)" == "$LAST_CHILD_RC" ]] || { echo "ERROR: implementation return exit code mismatch" >&2; return 2; }
+  run_dir="$(automation_v2_safe_repo_path "$AUTOMATION_REPO_ROOT" "$(automation_v2_env_require RUN_DIR)" yes)" || return 2
+  [[ -d "$run_dir" && ! -L "$run_dir" && "$run_dir" == "$LAST_CHILD_RUN_DIR" ]] || { echo "ERROR: implementation return RUN_DIR mismatch" >&2; return 2; }
+  case "$run_dir" in "$AUTOMATION_REPO_ROOT/artifacts/autonomous_implementation_"*) ;; *) return 2 ;; esac
+
   source_changed="$(automation_v2_env_require IMPLEMENTATION_SOURCE_CHANGED)" || return 2
   source_valid="$(automation_v2_env_require IMPLEMENTATION_SOURCE_VALIDATION_PASSED)" || return 2
   reevaluate="$(automation_v2_env_require PRIVATE_PAPER_REEVALUATION_REQUIRED)" || return 2
+  reaud="$(automation_v2_env_require BUGFIX_REAUDIT_REQUIRED)" || return 2
   automation_v2_validate_yes_no_value IMPLEMENTATION_SOURCE_CHANGED "$source_changed" || return 2
   automation_v2_validate_yes_no_value IMPLEMENTATION_SOURCE_VALIDATION_PASSED "$source_valid" || return 2
   automation_v2_validate_yes_no_value PRIVATE_PAPER_REEVALUATION_REQUIRED "$reevaluate" || return 2
+  automation_v2_validate_yes_no_value BUGFIX_REAUDIT_REQUIRED "$reaud" || return 2
+  [[ "$reaud" == "$reevaluate" ]] || return 2
+  [[ "$(automation_v2_env_require AUDIT_AREA)" == none ]] || return 2
+  [[ "$(automation_v2_env_require BUG_IDS)" == none ]] || return 2
+  [[ "$(automation_v2_env_require PAPER_SERVICE_SUPPORTED)" == 0 ]] || return 2
+  [[ "$(automation_v2_env_require SERVICE_REFRESH_REQUIRED)" == 0 ]] || return 2
+  [[ "$(automation_v2_env_require RUNTIME_EVIDENCE_REQUIRED)" == 0 ]] || return 2
+  [[ "$(automation_v2_env_require REAL_UPSTREAM_EVALUATION)" == blocked_on_required_upstream_input ]] || return 2
+  validate_handoff_timestamp WRITTEN_AT || return 2
   existing="$(automation_v2_env_require HANDOVER_FINGERPRINT)" || return 2
   computed="$(automation_v2_semantic_env_fingerprint_loaded)" || return 2
   [[ "$existing" == "$computed" ]] || { echo "ERROR: implementation return fingerprint mismatch" >&2; return 2; }
@@ -485,14 +710,14 @@ append_round() {
 
 run_child_controller() {
   local kind="$1" round_dir="$2" budget script output rc declared_rc child_source_before child_source_after
-  local -a cmd=()
+  local -a cmd=() launch_cmd=()
   budget="$(clamped_child_budget "$([[ "$kind" == paper ]] && echo "$PAPER_DURATION_SECONDS" || echo "$IMPLEMENTATION_DURATION_SECONDS")")" || return 3
   if [[ "$kind" == "paper" ]]; then
     script="$PAPER_CHILD_SCRIPT"
     cmd=(bash "$script" --duration "$budget" --interval "$INTERVAL_SECONDS")
     [[ "$ADAPTIVE" == "1" ]] && cmd+=(--adaptive) || cmd+=(--no-adaptive)
     [[ "$KEEP_MONITORING_WHEN_READY" == "1" ]] && cmd+=(--keep-monitoring-when-ready)
-    cmd+=(--model "$CODEX_MODEL" --fallback-model "$CODEX_FALLBACK_MODEL" --repo-dir "$AUTOMATION_REPO_ROOT" --sandbox "$CODEX_SANDBOX" --max-cycles "$PAPER_MAX_CYCLES" --codex-phase-timeout "$PAPER_CODEX_TIMEOUT_SECONDS" --validation-timeout "$VALIDATION_TIMEOUT_SECONDS" --install-timeout "$INSTALL_TIMEOUT_SECONDS")
+    cmd+=(--model "$CODEX_MODEL" --fallback-model "$CODEX_FALLBACK_MODEL" --repo-dir "$AUTOMATION_REPO_ROOT" --sandbox "$CODEX_SANDBOX" --max-cycles "$PAPER_MAX_CYCLES" --codex-phase-timeout "$PAPER_CODEX_TIMEOUT_SECONDS" --validation-timeout "$VALIDATION_TIMEOUT_SECONDS" --install-timeout "$INSTALL_TIMEOUT_SECONDS" --zip-timeout "$ZIP_TIMEOUT_SECONDS")
   else
     script="$IMPLEMENTATION_CHILD_SCRIPT"
     cmd=(bash "$script" --duration "$budget" --model "$CODEX_MODEL" --fallback-model "$CODEX_FALLBACK_MODEL" --repo-dir "$AUTOMATION_REPO_ROOT" --sandbox "$CODEX_SANDBOX" --max-cycles "$IMPLEMENTATION_MAX_CYCLES" --cycle-timeout "$IMPLEMENTATION_CYCLE_TIMEOUT_SECONDS" --validation-timeout "$VALIDATION_TIMEOUT_SECONDS" --install-timeout "$INSTALL_TIMEOUT_SECONDS" --zip-timeout "$ZIP_TIMEOUT_SECONDS" --handover-paper-mode)
@@ -506,7 +731,12 @@ run_child_controller() {
   ACTIVE_CHILD_KIND="$kind"
   ACTIVE_CHILD_SCRIPT="$script"
   ACTIVE_CHILD_COMMAND="$(automation_quote_argv "${cmd[@]}")"
-  setsid "${cmd[@]}" > "$output" 2>&1 &
+  launch_cmd=(env \
+    "AUTOMATION_PARENT_CONTROLLER=$SCRIPT_NAME" \
+    "AUTOMATION_PARENT_PID=$$" \
+    "AUTOMATION_PARENT_LOCK_FILE=$LOCK_FILE" \
+    "${cmd[@]}")
+  setsid "${launch_cmd[@]}" > "$output" 2>&1 &
   ACTIVE_CHILD_PID=$!
   write_parent_lock
   if [[ "$CODEX_STREAM_LOGS" == "1" ]]; then
@@ -522,6 +752,13 @@ run_child_controller() {
 
   LAST_CHILD="$kind"
   LAST_CHILD_RC="$rc"
+  child_source_after="$(automation_v2_source_tree_fingerprint "$AUTOMATION_REPO_ROOT")" || return 2
+  LAST_CHILD_SOURCE_BEFORE="$child_source_before"
+  LAST_CHILD_SOURCE_AFTER="$child_source_after"
+  if [[ "$child_source_before" == "$child_source_after" ]]; then LAST_CHILD_SOURCE_CHANGED=no; else LAST_CHILD_SOURCE_CHANGED=yes; fi
+  LAST_CHILD_RUN_DIR=""
+  LAST_CHILD_STATUS="unknown"
+  LAST_CHILD_STOP_REASON="unknown"
   LAST_CHILD_RUN_DIR="$(automation_v2_extract_unique_machine_value "$output" run_dir)" || return 2
   LAST_CHILD_STATUS="$(automation_v2_extract_unique_machine_value "$output" final_status)" || return 2
   LAST_CHILD_STOP_REASON="$(automation_v2_extract_unique_machine_value "$output" stop_reason)" || return 2
@@ -529,12 +766,11 @@ run_child_controller() {
   [[ "$declared_rc" =~ ^[0-9]+$ && "$declared_rc" == "$rc" ]] || { echo "ERROR: child declared exit $declared_rc but process exited $rc" >&2; return 2; }
   LAST_CHILD_RUN_DIR="$(automation_v2_safe_repo_path "$AUTOMATION_REPO_ROOT" "$LAST_CHILD_RUN_DIR" yes)" || return 2
   case "$LAST_CHILD_RUN_DIR" in "$AUTOMATION_REPO_ROOT/artifacts/"*) ;; *) echo "ERROR: child run directory is outside artifacts" >&2; return 2 ;; esac
-  child_source_after="$(automation_v2_source_tree_fingerprint "$AUTOMATION_REPO_ROOT")" || return 2
   automation_v2_write_env_atomic "$round_dir/child_result.env" \
     "CHILD_KIND=$kind" "CHILD_EXIT_CODE=$rc" "CHILD_FINAL_STATUS=$LAST_CHILD_STATUS" \
     "CHILD_STOP_REASON=$LAST_CHILD_STOP_REASON" "CHILD_RUN_DIR=$LAST_CHILD_RUN_DIR" \
     "CHILD_SOURCE_BEFORE=$child_source_before" "CHILD_SOURCE_AFTER=$child_source_after" \
-    "CHILD_SOURCE_CHANGED=$([[ "$child_source_before" == "$child_source_after" ]] && echo no || echo yes)"
+    "CHILD_SOURCE_CHANGED=$LAST_CHILD_SOURCE_CHANGED"
   return "$rc"
 }
 
@@ -561,6 +797,14 @@ write_final_summary() {
     printf 'duration_seconds=%s\n' "$DURATION_SECONDS"
     printf 'max_rounds=%s\n' "$MAX_ROUNDS"
     printf 'max_same_handoff=%s\n' "$MAX_SAME_HANDOFF"
+    printf 'child_cleanup_status=%s\n' "$CHILD_CLEANUP_STATUS"
+    printf 'child_cleanup_exit_code=%s\n' "$CHILD_CLEANUP_EXIT_CODE"
+    if [[ "$LOCK_RELEASE_STATUS" != "not_attempted" ]]; then
+      printf 'lock_release_status=%s\n' "$LOCK_RELEASE_STATUS"
+      printf 'lock_release_exit_code=%s\n' "$LOCK_RELEASE_EXIT_CODE"
+      printf 'lock_preserved=%s\n' "$LOCK_PRESERVED"
+      printf 'lock_file=%s\n' "$LOCK_FILE"
+    fi
     printf 'paper_service_lifecycle=none\n'
     printf 'completed_at=%s\n' "$(automation_now_iso)"
   } > "$AUTOMATION_RUN_DIR/final_summary.txt"
@@ -578,37 +822,149 @@ build_artifacts_zip_bounded() {
 }
 
 terminate_active_child() {
-  [[ "$ACTIVE_CHILD_PID" =~ ^[1-9][0-9]*$ ]] || return 0
-  kill -0 "$ACTIVE_CHILD_PID" 2>/dev/null || return 0
-  automation_v2_process_matches_script "$ACTIVE_CHILD_PID" "$ACTIVE_CHILD_SCRIPT" || { automation_log "active_child_identity_mismatch pid=$ACTIVE_CHILD_PID"; return 2; }
-  automation_v2_terminate_process_group "$ACTIVE_CHILD_PID" "${AUTOMATION_GRACEFUL_UNLOCK_SECONDS:-30}"
+  if [[ ! "$ACTIVE_CHILD_PID" =~ ^[1-9][0-9]*$ ]]; then
+    return 0
+  fi
+  if ! kill -0 "$ACTIVE_CHILD_PID" 2>/dev/null; then
+    ACTIVE_CHILD_PID=""
+    ACTIVE_CHILD_KIND="none"
+    ACTIVE_CHILD_SCRIPT=""
+    ACTIVE_CHILD_COMMAND=""
+    write_parent_lock || return 2
+    return 0
+  fi
+  automation_v2_process_matches_script "$ACTIVE_CHILD_PID" "$ACTIVE_CHILD_SCRIPT" || {
+    automation_log "active_child_identity_mismatch pid=$ACTIVE_CHILD_PID"
+    return 2
+  }
+  automation_v2_terminate_process_group "$ACTIVE_CHILD_PID" "${AUTOMATION_GRACEFUL_UNLOCK_SECONDS:-30}" || return 2
+  ACTIVE_CHILD_PID=""
+  ACTIVE_CHILD_KIND="none"
+  ACTIVE_CHILD_SCRIPT=""
+  ACTIVE_CHILD_COMMAND=""
+  write_parent_lock || return 2
+}
+
+attempt_final_parent_lock_release() {
+  local rc=0
+  if [[ "$LOCK_ACQUIRED" != "1" ]]; then
+    LOCK_RELEASE_STATUS="not_acquired"
+    LOCK_RELEASE_EXIT_CODE=0
+    LOCK_PRESERVED="no"
+    return 0
+  fi
+  if release_parent_lock; then
+    rc=0
+  else
+    rc=$?
+  fi
+  LOCK_RELEASE_EXIT_CODE="$rc"
+  if [[ "$rc" == "0" ]]; then
+    LOCK_RELEASE_STATUS="released"
+    LOCK_PRESERVED="no"
+    return 0
+  fi
+  if [[ -e "$LOCK_FILE" ]]; then
+    LOCK_RELEASE_STATUS="preserved"
+    LOCK_PRESERVED="yes"
+  else
+    LOCK_RELEASE_STATUS="failed_missing"
+    LOCK_PRESERVED="no"
+  fi
+  automation_log "final_parent_lock_release_failed exit=$rc status=$LOCK_RELEASE_STATUS lock=$LOCK_FILE"
+  return "$rc"
 }
 
 finish() {
-  local rc="${1:-$?}" zip_rc=0
+  local rc="${1:-$?}" zip_rc=0 child_cleanup_rc=0 lock_rc=0 corrective_zip_rc=0
   [[ "$FINISHED" == "1" ]] && return 0
   FINISHED=1
   trap - EXIT INT TERM
   EXIT_STATUS="$rc"
-  terminate_active_child || true
-  if [[ "$FINAL_STATUS" == "not_started" ]]; then FINAL_STATUS="setup_failed"; STOP_REASON="unexpected_exit_before_start"; fi
+
+  set +e
+  terminate_active_child
+  child_cleanup_rc=$?
+  set -e
+  CHILD_CLEANUP_EXIT_CODE="$child_cleanup_rc"
+  if [[ "$child_cleanup_rc" == "0" ]]; then
+    CHILD_CLEANUP_STATUS="complete"
+  else
+    CHILD_CLEANUP_STATUS="identity_or_termination_failed"
+    FINAL_STATUS="PAPER_AUTOPILOT_BLOCKED_CHILD_IDENTITY"
+    STOP_REASON="active_child_identity_or_termination_failed"
+    EXIT_STATUS=2
+    LOCK_RELEASE_STATUS="preserved_due_to_child_cleanup_failure"
+    LOCK_RELEASE_EXIT_CODE=0
+    LOCK_PRESERVED="yes"
+  fi
+
+  if [[ "$FINAL_STATUS" == "not_started" ]]; then
+    FINAL_STATUS="setup_failed"
+    STOP_REASON="unexpected_exit_before_start"
+  fi
   if [[ -n "${AUTOMATION_RUN_DIR:-}" ]]; then
     write_final_summary || true
     automation_collect_repo_snapshot "$AUTOMATION_RUN_DIR/final-repo-snapshot" || true
-    set +e; build_artifacts_zip_bounded; zip_rc=$?; set -e
-    if [[ "$zip_rc" != "0" && "$EXIT_STATUS" == "0" ]]; then FINAL_STATUS="PAPER_AUTOPILOT_BLOCKED_ARTIFACT_PACKAGING"; STOP_REASON="artifacts_zip_failed"; EXIT_STATUS=2; write_final_summary || true; fi
+    set +e
+    build_artifacts_zip_bounded
+    zip_rc=$?
+    set -e
+    if [[ "$zip_rc" != "0" && "$EXIT_STATUS" == "0" ]]; then
+      FINAL_STATUS="PAPER_AUTOPILOT_BLOCKED_ARTIFACT_PACKAGING"
+      STOP_REASON="artifacts_zip_failed"
+      EXIT_STATUS=2
+      write_final_summary || true
+    fi
+  fi
+
+  if [[ "$child_cleanup_rc" == "0" ]]; then
+    set +e
+    attempt_final_parent_lock_release
+    lock_rc=$?
+    set -e
+    if [[ "$lock_rc" != "0" ]]; then
+      FINAL_STATUS="PAPER_AUTOPILOT_BLOCKED_LOCK_RELEASE"
+      if [[ "$LOCK_PRESERVED" == "yes" ]]; then
+        STOP_REASON="lock_release_failed_lock_preserved"
+      else
+        STOP_REASON="lock_release_failed"
+      fi
+      EXIT_STATUS=2
+      if [[ -n "${AUTOMATION_RUN_DIR:-}" ]]; then
+        write_final_summary || true
+        set +e
+        build_artifacts_zip_bounded
+        corrective_zip_rc=$?
+        set -e
+        [[ "$corrective_zip_rc" == "0" ]] || automation_log "lock_failure_artifacts_zip_failed exit=$corrective_zip_rc"
+      fi
+    elif [[ -n "${AUTOMATION_RUN_DIR:-}" ]]; then
+      write_final_summary || true
+    fi
+  fi
+
+  if [[ -n "${AUTOMATION_RUN_DIR:-}" ]]; then
     telegram_notify_send_final "run-paper-autopilot.sh" "${AUTOMATION_REPO_NAME:-betting-win-surebet}" "$FINAL_STATUS" "$STOP_REASON" "$ROUNDS_COMPLETED" "$EXIT_STATUS" "$AUTOMATION_RUN_DIR" "$AUTOMATION_RUN_DIR/telegram_notification_status.txt" "$AUTOMATION_REPO_ROOT" || true
   fi
-  [[ "$LOCK_ACQUIRED" == "1" ]] && release_parent_lock || true
   printf 'run_dir=%s\n' "${AUTOMATION_RUN_DIR:-}"
   printf 'final_status=%s\n' "$FINAL_STATUS"
   printf 'stop_reason=%s\n' "$STOP_REASON"
   printf 'final_exit_code=%s\n' "$EXIT_STATUS"
   printf 'rounds_completed=%s\n' "$ROUNDS_COMPLETED"
+  printf 'child_cleanup_status=%s\n' "$CHILD_CLEANUP_STATUS"
+  printf 'child_cleanup_exit_code=%s\n' "$CHILD_CLEANUP_EXIT_CODE"
+  printf 'lock_release_status=%s\n' "$LOCK_RELEASE_STATUS"
+  printf 'lock_release_exit_code=%s\n' "$LOCK_RELEASE_EXIT_CODE"
+  printf 'lock_preserved=%s\n' "$LOCK_PRESERVED"
   exit "$EXIT_STATUS"
 }
 
-on_signal() { FINAL_STATUS="interrupted"; STOP_REASON="interrupted"; terminate_active_child || true; exit 130; }
+on_signal() {
+  FINAL_STATUS="interrupted"
+  STOP_REASON="interrupted"
+  exit 130
+}
 
 main_loop() {
   local next_child="paper" round_dir rc decision fingerprint source_before source_after no_op_allowed source_changed source_valid reevaluate
@@ -624,8 +980,14 @@ main_loop() {
     if [[ "$next_child" == "paper" ]]; then
       rm -f -- "$PAPER_HANDOFF_FILE" "$IMPLEMENTATION_HANDOFF_FILE"
       if run_child_controller paper "$round_dir"; then rc=0; else rc=$?; fi
+      if [[ "$LAST_CHILD_SOURCE_CHANGED" != no ]]; then
+        append_round "$ROUNDS_COMPLETED" paper "$rc" "$LAST_CHILD_STATUS" "$LAST_CHILD_STOP_REASON" "$LAST_CHILD_RUN_DIR" blocked_paper_source_mutation none
+        FINAL_STATUS="PAPER_AUTOPILOT_BLOCKED_PAPER_SOURCE_MUTATION"
+        STOP_REASON="paper_child_changed_source"
+        exit 2
+      fi
       if [[ -f "$PAPER_HANDOFF_FILE" ]]; then
-        normalize_paper_handoff || {
+        validate_paper_handoff producer || {
           append_round "$ROUNDS_COMPLETED" paper "$rc" "$LAST_CHILD_STATUS" "$LAST_CHILD_STOP_REASON" "$LAST_CHILD_RUN_DIR" invalid_paper_handoff none
           FINAL_STATUS="PAPER_AUTOPILOT_BLOCKED_HANDOFF_MISMATCH"; STOP_REASON="invalid_paper_handoff"; exit 2
         }
@@ -670,7 +1032,7 @@ main_loop() {
       append_round "$ROUNDS_COMPLETED" implementation not_run not_run missing_input_paper_handoff "" blocked_missing_input_handoff none
       FINAL_STATUS="PAPER_AUTOPILOT_BLOCKED_HANDOFF_MISMATCH"; STOP_REASON="missing_input_paper_handoff"; exit 2
     }
-    normalize_paper_handoff || {
+    validate_paper_handoff retained || {
       append_round "$ROUNDS_COMPLETED" implementation not_run not_run invalid_input_paper_handoff "" blocked_invalid_input_handoff none
       FINAL_STATUS="PAPER_AUTOPILOT_BLOCKED_HANDOFF_MISMATCH"; STOP_REASON="invalid_input_paper_handoff"; exit 2
     }
@@ -686,6 +1048,12 @@ main_loop() {
     rm -f -- "$IMPLEMENTATION_HANDOFF_FILE"
     if run_child_controller implementation "$round_dir"; then rc=0; else rc=$?; fi
     if [[ "$rc" == "3" && "$LAST_CHILD_STATUS" == "CONTINUE_REQUIRED=yes" ]]; then
+      if [[ "$LAST_CHILD_SOURCE_CHANGED" == yes ]]; then
+        append_round "$ROUNDS_COMPLETED" implementation "$rc" "$LAST_CHILD_STATUS" "$LAST_CHILD_STOP_REASON" "$LAST_CHILD_RUN_DIR" blocked_partial_source_change "$fingerprint"
+        FINAL_STATUS="PAPER_AUTOPILOT_BLOCKED_IMPLEMENTATION_PARTIAL_SOURCE_CHANGE"
+        STOP_REASON="implementation_continue_changed_source_without_terminal_handoff"
+        exit 2
+      fi
       append_round "$ROUNDS_COMPLETED" implementation "$rc" "$LAST_CHILD_STATUS" "$LAST_CHILD_STOP_REASON" "$LAST_CHILD_RUN_DIR" continue_same_implementation "$fingerprint"
       next_child="implementation"
       continue
@@ -707,8 +1075,7 @@ main_loop() {
     source_changed="${AUTOMATION_V2_ENV[IMPLEMENTATION_SOURCE_CHANGED]}"
     source_valid="${AUTOMATION_V2_ENV[IMPLEMENTATION_SOURCE_VALIDATION_PASSED]}"
     reevaluate="${AUTOMATION_V2_ENV[PRIVATE_PAPER_REEVALUATION_REQUIRED]}"
-    automation_v2_load_env_strict "$PAPER_HANDOFF_FILE"
-    no_op_allowed="${AUTOMATION_V2_ENV[PAPER_MODE_NOOP_SUCCESS_ALLOWED]}"
+    no_op_allowed="$CURRENT_PAPER_HANDOFF_NOOP_ALLOWED"
     if [[ "$source_before" == "$source_after" ]]; then
       [[ "$source_changed" == "no" ]] || { FINAL_STATUS="PAPER_AUTOPILOT_BLOCKED_HANDOFF_MISMATCH"; STOP_REASON="implementation_source_change_claim_mismatch"; exit 2; }
       [[ "$source_valid" == "yes" ]] || { FINAL_STATUS="PAPER_AUTOPILOT_BLOCKED_HANDOFF_MISMATCH"; STOP_REASON="implementation_noop_without_validation"; exit 2; }
@@ -741,6 +1108,7 @@ automation_v2_validate_child_script "$AUTOMATION_REPO_ROOT" "$IMPLEMENTATION_CHI
 trap 'finish $?' EXIT
 trap on_signal INT TERM
 
+automation_assert_no_incompatible_locks "$SCRIPT_NAME" "$AUTOMATION_REPO_ROOT" "$LOCK_FILE"
 acquire_parent_lock || { FINAL_STATUS="setup_failed"; STOP_REASON="lock_acquisition_failed"; exit 1; }
 automation_create_run_dir paper_autopilot
 write_parent_lock

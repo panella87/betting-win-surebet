@@ -59,3 +59,10 @@ bash ./run-autonomous-implementation.sh --handover-bugfix-audit
 A validation-red baseline is audit evidence, not automatic controller failure. Clean audit completion still requires validation to pass. Context-window and model-availability failures are classified; retries are allowed only while source remains unchanged.
 
 The allowed audit surface is repo-local private-paper logic, validators, deterministic fixtures, report contracts, filesystem safety, automation handoffs, and packaging. Provider adapters, live collectors, direct upstream database access, wallets, orders, transactions, public reports, profitability claims, and execution-readiness claims remain prohibited.
+
+
+## Standalone lock lifecycle
+
+The audit controller resolves its retained evidence first, then acquires and verifies its repo-scoped lock before creating `artifacts/autonomous_bugfix_*`. A live same-controller or incompatible-controller lock therefore leaves no empty audit run directory. After run creation, the lock is refreshed with the exact artifact path and managed-child heartbeat metadata.
+
+Final lock release is part of the terminal audit contract. Output now includes `lock_release_status`, `lock_release_exit_code`, and `lock_preserved`. A child-identity or termination failure produces `BLOCKED=yes`, `stop_reason=lock_release_failed_lock_preserved`, exit code `2`, a preserved lock, a corrective final summary and `artifacts.zip`, and only then the final Telegram card. Unexpected shell exits while the audit loop is active are normalized to `BLOCKED=yes` with `stop_reason=unexpected_controller_exit` and the documented blocked exit code `2`.

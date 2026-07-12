@@ -180,6 +180,8 @@ Controller runtime locks and handoff files under `.automation/` are ignored by t
 
 `run-paper-autopilot.sh` is the canonical unattended parent workflow for this no-service repo. It runs `run-paper-evaluation.sh`, follows only repo-local implementation handoffs through `run-autonomous-implementation.sh --handover-paper-mode`, then returns to private paper evaluation only after validated source/docs/test changes.
 
+The paper parent now requires the canonical schema-v1 handoff emitted by the paper child and verifies exact keys, producer identity, child result, source fingerprint, producer-run containment, evidence SHA-256, and semantic fingerprint without rewriting the file. Shared lock hardening blocks incompatible root controllers and tracks managed child process groups for graceful force-unlock.
+
 Canonical command after parent-shell Node 20 activation:
 
 ```bash
@@ -191,4 +193,11 @@ Private fixture success remains blocked on Federico's pinned `betting-win` bundl
 
 ### Bugfix autopilot
 
-Use `run-bugfix-autopilot.sh` for an unattended eight-area read-only audit campaign. Confirmed defects move through a strict fingerprinted handoff to autonomous implementation, then the exact same area is re-audited before it can close.
+Use `run-bugfix-autopilot.sh` for an unattended eight-area read-only audit campaign. Confirmed defects move through a strict fingerprinted handoff to autonomous implementation, then the exact same area is re-audited before it can close. The parent rejects incompatible live root-controller locks before creating a campaign directory.
+
+
+## Standalone controller lock finalization
+
+All three standalone controllers, `run-autonomous-implementation.sh`, `run-autonomous-bugfix.sh`, and `run-paper-evaluation.sh`, acquire their repo-scoped locks before creating run directories. The shared lock claim is a full-file atomic hard-link operation, so concurrent starts cannot both pass a check-then-write race. Each controller exposes `lock_release_status`, `lock_release_exit_code`, and `lock_preserved` at termination. An unverifiable or unterminated managed child changes the result to a blocked state, preserves the lock for operator inspection, and updates final evidence before Telegram notification instead of reporting false success.
+
+`run-paper-autopilot.sh` now applies the same atomic full-file claim to its parent lock. Active-child identity/termination failure or strict parent-lock release failure is terminal, preserves the lock when present, and is reported through machine-readable output before Telegram.

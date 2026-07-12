@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { execFileSync, spawnSync } from 'node:child_process';
-import { chmodSync, copyFileSync, cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { execFileSync, spawn, spawnSync } from 'node:child_process';
+import { chmodSync, copyFileSync, cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -69,10 +69,61 @@ test('bugfix autopilot exposes the bounded audit implementation re-audit campaig
     'BUGFIX_AUTOPILOT_COMPLETE', 'BUGFIX_AUTOPILOT_BLOCKED_IMPLEMENTATION_NOOP',
     'next_same_area_bugfix_reaudit', 'validate_bugfix_completion_contract()',
     'semantic_bug_signature_repeat_guard=enabled', 'parent_budget_clamping=enabled',
-    'child_aware_lock=enabled', 'refresh_parent_lock_heartbeat()', 'bugfix_child_mutated_source',
+    'child_aware_lock=enabled', 'cross_controller_lock_guard=enabled',
+    'automation_assert_no_incompatible_locks', 'refresh_parent_lock_heartbeat()', 'bugfix_child_mutated_source',
     'unsupported handoff key for schema v1', 'active_child_identity_verification_failed', 'parent_budget_exhausted',
   ]) assert.match(script, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   assert.doesNotMatch(script, /run-paper-evaluation\.sh|run-paper-autopilot\.sh|bash \.\/start\.sh|bash \.\/stop\.sh|forever|MongoDB/);
+});
+
+test('bugfix autopilot rejects an incompatible controller before creating campaign artifacts', () => {
+  const repo = prepareTempRepo();
+  let paperParent: ReturnType<typeof spawn> | undefined;
+  try {
+    writeExecutable(join(repo, 'run-autonomous-bugfix.sh'), '#!/usr/bin/env bash\nexit 99\n');
+    writeExecutable(join(repo, 'run-autonomous-implementation.sh'), '#!/usr/bin/env bash\nexit 99\n');
+    const paperScript = join(repo, 'run-paper-autopilot.sh');
+    writeExecutable(paperScript, '#!/usr/bin/env bash\ntrap "exit 0" TERM INT\nwhile true; do sleep 1; done\n');
+    paperParent = spawn('bash', [paperScript], { cwd: repo, stdio: 'ignore' });
+    assert.ok(paperParent.pid);
+
+    const locks = join(repo, '.automation', 'locks');
+    mkdirSync(locks, { recursive: true });
+    writeFileSync(join(locks, 'run-paper-autopilot.lock'), [
+      'LOCK_SCHEMA_VERSION=1',
+      'CONTROLLER=run-paper-autopilot.sh',
+      `CONTROLLER_PID=${paperParent.pid}`,
+      'REPOSITORY=betting-win-surebet',
+      `REPO_REALPATH=${realpathSync(repo)}`,
+      `SCRIPT_REALPATH=${realpathSync(paperScript)}`,
+      'RUN_DIR=',
+      `HEARTBEAT_EPOCH=${Math.floor(Date.now() / 1000)}`,
+      'ACTIVE_CHILD_PID=',
+      'ACTIVE_CHILD_KIND=none',
+      'ACTIVE_CHILD_SCRIPT=',
+      'ACTIVE_CHILD_COMMAND=',
+      '',
+    ].join('\n'), 'utf8');
+
+    const result = spawnSync('bash', ['./run-bugfix-autopilot.sh', '--duration', '60', '--bugfix-duration', '30', '--implementation-duration', '30', '--max-rounds', '1', '--model', 'cli-default', '--fallback-model', 'none', '--no-stream'], {
+      cwd: repo,
+      env: { ...process.env, TELEGRAM_NOTIFY: '0' },
+      encoding: 'utf8',
+      timeout: 10000,
+    });
+
+    assert.equal(result.status, 27, `${result.stdout}\n${result.stderr}`);
+    assert.match(result.stderr, /incompatible controller is active: run-paper-autopilot\.sh/);
+    assert.match(result.stdout, /final_status=setup_failed/);
+    const artifacts = join(repo, 'artifacts');
+    const campaigns = existsSync(artifacts)
+      ? readdirSync(artifacts).filter((entry) => entry.startsWith('bugfix_autopilot_'))
+      : [];
+    assert.deepEqual(campaigns, []);
+  } finally {
+    paperParent?.kill('SIGTERM');
+    rmSync(repo, { recursive: true, force: true });
+  }
 });
 
 test('semantic handoff fingerprint ignores volatile evidence path but retains evidence hash', () => {

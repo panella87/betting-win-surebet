@@ -45,6 +45,7 @@ Supported compatibility flags:
 --codex-timeout
 --validation-timeout
 --install-timeout
+--zip-timeout
 --print-config
 --stream
 --no-stream
@@ -60,7 +61,7 @@ fails clearly when active Node does not satisfy .nvmrc/package engines
 uses .automation/locks/run-paper-evaluation.lock
 writes artifacts/paper_evaluation_<timestamp>/
 writes final-summary.md
-creates/refreshed root artifacts.zip only at finalization
+creates/refreshes root artifacts.zip only at finalization with a bounded --zip-timeout
 sends one final Telegram notification through .automation/lib/telegram_notify.sh
 prints machine-readable run_dir/final_status/stop_reason/final_exit_code fields
 ```
@@ -78,7 +79,7 @@ execute known local-report commands as direct argv, not shell command strings
 write private report artifacts under artifacts/private-paper-mode/
 verify source and protected automation files remain unchanged
 classify the final status deterministically
-write .automation/paper-mode-to-autonomous-implementation.env when source work is needed
+write an atomic, versioned `.automation/paper-mode-to-autonomous-implementation.env` only when source work is needed
 ```
 
 Pinned bundle mode status:
@@ -170,3 +171,29 @@ export bundle that passes `--pinned-intake`.
 ## Paper autopilot integration
 
 `run-paper-evaluation.sh` may write `.automation/paper-mode-to-autonomous-implementation.env` only for repo-local source/controller defects. Missing pinned bundle must not create an implementation handoff. The parent `run-paper-autopilot.sh` consumes that handoff and launches implementation with `--handover-paper-mode`.
+
+
+## Canonical paper-to-implementation handoff
+
+When a repo-local validation or source defect requires implementation, the controller writes a schema-v1 handoff atomically and copies the same file into the paper run evidence. The contract includes:
+
+```text
+HANDOVER_SCHEMA_VERSION=1
+HANDOVER_KIND=paper-mode-to-autonomous-implementation
+REPOSITORY=betting-win-surebet
+CONTROLLER=run-paper-evaluation.sh
+SOURCE_RUN_ID=<paper run id>
+PAPER_MODE_FINAL_EXIT_CODE=2
+PAPER_SOURCE_FINGERPRINT=<sha256>
+SOURCE_EVIDENCE_PATH=<repo-local path under RUN_DIR>
+SOURCE_EVIDENCE_SHA256=<sha256>
+RUN_DIR=<absolute repo-local paper run directory>
+HANDOVER_FINGERPRINT=<semantic sha256>
+```
+
+After acquiring its repo-scoped lock and creating the exact run directory, the producer rewrites the lock with that run path and only then rotates a stale standalone handoff before evaluation begins. Missing pinned input and invalid upstream bundle content remain external/input blockers and do not create source-implementation work. Final machine output contains exactly one `paper_result=` record in addition to `run_dir`, `final_status`, `stop_reason`, `final_exit_code`, `cycles_completed`, `lock_release_status`, `lock_release_exit_code`, and `lock_preserved`.
+
+
+## Standalone lock finalization
+
+The controller uses the shared full-file atomic lock claim before creating `artifacts/paper_evaluation_*` or rotating a handoff. On normal completion it reports `lock_release_status=released`. If a managed child cannot be verified or terminated, shared release fails closed, the lock remains for inspection, the result becomes `PAPER_EVALUATION_BLOCKED_LOCK_RELEASE`, and the final summary plus `artifacts.zip` are corrected before Telegram is sent.

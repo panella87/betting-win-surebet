@@ -23,13 +23,16 @@ test('standard automation root scripts and shared helpers are installed', () => 
   assert.match(read('.automation/lib/run_common.sh'), /automation_require_cycle_artifacts\(\)/);
   assert.match(read('.automation/lib/run_common.sh'), /automation_run_argv_command\(\)/);
   assert.match(read('.automation/lib/run_common.sh'), /automation_source_tree_fingerprint\(\)/);
+  assert.match(read('.automation/lib/run_common.sh'), /automation_assert_no_incompatible_locks\(\)/);
+  assert.match(read('.automation/lib/run_common.sh'), /automation_run_managed_argv\(\)/);
+  assert.match(read('.automation/lib/run_common.sh'), /automation_terminate_process_group\(\)/);
   assert.match(read('.automation/lib/controller_hardening_v2.sh'), /automation_v2_load_env_strict\(\)/);
   assert.match(read('.automation/lib/controller_hardening_v2.sh'), /automation_v2_semantic_env_fingerprint_loaded\(\)/);
   assert.match(read('.automation/lib/controller_hardening_v2.sh'), /automation_v2_extract_unique_machine_value\(\)/);
   assert.match(read('.automation/lib/telegram_notify.sh'), /telegram_notify_send_final\(\)/);
   assert.match(read('.automation/lib/telegram_notify.sh'), /telegram_notify_build_final_message\(\)/);
   assert.match(read('.automation/lib/telegram_notify.sh'), /telegram_notify_message_version\(\)/);
-  assert.match(read('.automation/lib/telegram_notify.sh'), /20260706\.pretty_v2_html_cards/);
+  assert.match(read('.automation/lib/telegram_notify.sh'), /20260712\.pretty_v4_lock_actions/);
   assert.match(read('.automation/lib/telegram_notify.sh'), /parse_mode: 'HTML'/);
 });
 
@@ -90,7 +93,7 @@ test('implementation controller exposes canonical flags and telegram wiring', ()
     '--stream','--no-stream','No --task flag is supported','docs/automation/current-implementation-task.md',
     'telegram_notify_send_final "run-autonomous-implementation.sh"','automation_require_cycle_artifacts',
     'automation_read_continue_status','check_only_validation_failed','AUTONOMOUS_GOAL_COMPLETE=yes',
-    'BLOCKED=yes','exit 3','Activate the repo runtime in the parent shell first','never sources nvm.sh','baseline_validation=enabled','strict_handoff_parser=enabled','machine_readable_final_stdout=enabled',
+    'BLOCKED=yes','exit 3','Activate the repo runtime in the parent shell first','never sources nvm.sh','baseline_validation=enabled','strict_handoff_parser=enabled','strict_schema_v1_key_allowlists=enabled','source_evidence_sha256_verification=enabled','source_fingerprint_reconciliation=enabled','input_handoff_immutable=enabled','machine_readable_final_stdout=enabled','lock_acquisition_before_run_dir=enabled','lock_release_failure_classification=enabled','lock_release_failed_lock_preserved',"printf 'lock_release_status=%s\\n'","printf 'lock_preserved=%s\\n'",'write_consumed_handoff_marker','remove_consumed_handoff_marker',
   ]) assertContains(script, marker);
   assert.doesNotMatch(script, /scripts\/load-node-runtime\.sh/);
   assert.doesNotMatch(script, /source .*nvm/);
@@ -103,7 +106,7 @@ test('bugfix controller is strict read-only audit and handoff infrastructure', (
     'Read-only source bug-audit','It must not patch app source directly','BUGFIX_AUDIT_COMPLETE=yes',
     'HANDOVER_AUTONOMOUS_IMPLEMENTATION=yes','strict_request_flags=enabled','BUG_SIGNATURE',
     'SOURCE_EVIDENCE_SHA256','artifact_hint_resolved_before_run_dir=yes','source_mutation_detected=yes',
-    'telegram_notify_send_final "$SCRIPT_NAME"',"printf 'run_dir=%s\\n'","printf 'final_status=%s\\n'",
+    'telegram_notify_send_final "$SCRIPT_NAME"',"printf 'run_dir=%s\\n'","printf 'final_status=%s\\n'",'lock_acquisition_before_run_dir=enabled','lock_release_failure_classification=enabled','lock_release_failed_lock_preserved','unexpected_controller_exit',"printf 'lock_release_status=%s\\n'","printf 'lock_preserved=%s\\n'",
   ]) assertContains(script, marker);
   assert.doesNotMatch(script, /AUTONOMOUS_GOAL_COMPLETE=yes/);
   assert.doesNotMatch(script, /scripts\/load-node-runtime\.sh|source .*nvm/);
@@ -114,10 +117,12 @@ test('bugfix artifact evidence is resolved before the active run directory exist
   const script = read('run-autonomous-bugfix.sh');
   const resolveTask = script.indexOf('resolve_task_source');
   const resolveEvidence = script.indexOf('ARTIFACT_HINT="$(resolve_artifact_hint || true)"');
+  const acquireLock = script.indexOf('automation_acquire_lock "$SCRIPT_NAME" "$AUTOMATION_REPO_ROOT"', resolveEvidence);
   const createRun = script.indexOf('automation_create_run_dir autonomous_bugfix');
   assert.ok(resolveTask >= 0);
   assert.ok(resolveEvidence > resolveTask);
-  assert.ok(createRun > resolveEvidence);
+  assert.ok(acquireLock > resolveEvidence);
+  assert.ok(createRun > acquireLock);
 });
 
 test('shared source fingerprint detects edits to an already-dirty tracked file', () => {
@@ -152,15 +157,21 @@ test('paper evaluation controller exposes canonical no-service private fixture a
   const script = read('run-paper-evaluation.sh');
   for (const marker of [
     '--adaptive','--keep-monitoring-when-ready','--model MODEL','--fallback-model MODEL','--repo-dir PATH',
-    '--check-only','--codex-phase-timeout VALUE','--validation-timeout VALUE','SUREBET_PINNED_BUNDLE',
+    '--check-only','--codex-phase-timeout VALUE','--validation-timeout VALUE','--zip-timeout VALUE','SUREBET_PINNED_BUNDLE',
     'SUREBET_REQUIRE_PINNED_BUNDLE','SUREBET_REQUIRE_PINNED_BUNDLE must be unset, 0, or 1',
     'validate_pinned_bundle_preflight()','automation_run_argv_command','controller_mode=single_pass_no_service',
     'verify_paper_read_only_state()','PAPER_EVALUATION_BLOCKED_SOURCE_MUTATION','paper_service_lifecycle=none',
     'PAPER_EVALUATION_READY_PRIVATE_FIXTURE_ONLY_BLOCKED_ON_PINNED_BUNDLE',
     'PAPER_EVALUATION_PINNED_BUNDLE_ACCEPTED_PRIVATE_REPORT_WRITTEN',
     'PAPER_EVALUATION_BLOCKED_INVALID_PINNED_BUNDLE','paper-mode-to-autonomous-implementation.env',
-    'telegram_notify_send_final "run-paper-evaluation.sh"','automation_build_artifacts_zip',
+    'HANDOVER_SCHEMA_VERSION=1','SOURCE_EVIDENCE_SHA256','automation_v2_add_or_verify_fingerprint','automation_v2_write_env_atomic',
+    'canonical_paper_handoff_schema=1','atomic_paper_handoff=enabled','bounded_artifacts_zip=enabled',
+    'atomic_standalone_lock_acquisition=enabled','lock_acquisition_before_run_dir=enabled',
+    'lock_release_failure_classification=enabled','lock_preservation_on_release_failure=enabled',
+    'PAPER_EVALUATION_BLOCKED_LOCK_RELEASE',"printf 'lock_release_status=%s\\n'","printf 'lock_preserved=%s\\n'",
+    'telegram_notify_send_final "run-paper-evaluation.sh"','automation_v2_zip_with_timeout',
     'Activate the repo runtime in the parent shell first','Does not source nvm.sh','local rc=$?',
+    "printf 'paper_result=%s\\n'",
   ]) assertContains(script, marker);
   assert.doesNotMatch(script, /finish\(\) \{\n\s*local rc\n\s*rc=\$\?/);
   assert.doesNotMatch(script, /scripts\/load-node-runtime\.sh/);
@@ -187,6 +198,18 @@ test('paper autopilot controller exposes no-service parent supervisor contract',
     'PAPER_AUTOPILOT_BLOCKED_ON_PINNED_BUNDLE',
     'PAPER_AUTOPILOT_BLOCKED_IMPLEMENTATION_NOOP',
     'PRIVATE_PAPER_REEVALUATION_REQUIRED',
+    'canonical_paper_handoff_required=enabled',
+    'legacy_paper_handoff_normalization=disabled',
+    'validate_paper_handoff()',
+    'SOURCE_EVIDENCE_SHA256',
+    'cross_controller_lock_guard=enabled',
+    'atomic_parent_lock_acquisition=enabled',
+    'parent_child_cleanup_failure_classification=enabled',
+    'parent_lock_release_failure_classification=enabled',
+    'lock_preservation_on_child_identity_failure=enabled',
+    'PAPER_AUTOPILOT_BLOCKED_CHILD_IDENTITY',
+    'PAPER_AUTOPILOT_BLOCKED_LOCK_RELEASE',
+    "printf 'lock_release_status=%s\\n'",
     'paper_service_lifecycle=none',
     'telegram_notify_send_final "run-paper-autopilot.sh"',
     'never sources nvm.sh',

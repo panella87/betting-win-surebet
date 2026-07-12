@@ -95,8 +95,17 @@ Before creating a campaign artifact directory, the parent verifies both child sc
 
 Each child budget is clamped to the remaining parent duration. The parent requires exactly one machine-readable child result for `run_dir`, `final_status`, `stop_reason`, and `final_exit_code`, and reconciles the declared exit with the real process exit. It does not guess the newest artifact directory.
 
-Paper handoffs are normalized to schema version 1 and receive a stable semantic SHA-256 that excludes timestamps and run paths. Implementation return handoffs must name that exact source fingerprint. Repeated logical requests therefore trigger `--max-same-handoff` even when generated at different times.
+Paper handoffs must already be canonical schema version 1 files emitted by `run-paper-evaluation.sh`. The parent rejects legacy `REPO_NAME` handoffs, unknown or duplicate keys, producer/controller mismatches, stale source fingerprints, run/evidence paths outside the producer run, evidence SHA-256 mismatches, and child-result inconsistencies. It copies the producer file unchanged into round evidence and never normalizes or rewrites it. Implementation return handoffs are enforced through a separate exact schema-v1 allowlist and must reconcile with the implementation child result and source handoff fingerprint. Repeated logical requests therefore trigger `--max-same-handoff` even when generated at different times.
 
-The parent lock records the active child PID, type, script, command, repository realpath, controller realpath, run directory, and heartbeat. Signal handling and verified `--force-unlock` terminate the active child process group before releasing the parent lock. PID or script mismatches fail closed.
+The parent lock records the active child PID, type, script, command, repository realpath, controller realpath, run directory, and heartbeat. Initial acquisition writes a complete claim file and atomically hard-links it into place; two simultaneous parents cannot both pass an absence check. Before acquiring it, the parent invokes the shared cross-controller guard so an unrelated implementation, bugfix, paper, or parent campaign cannot run concurrently. Parent-launched paper and implementation children are authorized only through verified parent PID/script identity. Signal handling and verified `--force-unlock` terminate the active child process group before releasing the parent lock. PID or script mismatches fail closed. The parent forwards the bounded ZIP timeout to both children.
 
 Successful implementation never closes the paper objective by itself. It must report a validated source change (or an explicitly permitted validated no-op) and request private-paper re-evaluation; the parent then runs the paper child again.
+
+Additional fail-closed statuses include `PAPER_AUTOPILOT_BLOCKED_PAPER_SOURCE_MUTATION` and `PAPER_AUTOPILOT_BLOCKED_IMPLEMENTATION_PARTIAL_SOURCE_CHANGE`.
+
+A paper child is independently fingerprinted by the parent and any source mutation blocks the campaign even if the child emits no handoff. An implementation child that returns `CONTINUE_REQUIRED=yes` after changing source is also blocked: the original paper handoff is stale and cannot be safely replayed without a terminal validated return contract.
+
+
+## Parent finalization states
+
+`PAPER_AUTOPILOT_BLOCKED_CHILD_IDENTITY` means the recorded active child could not be safely verified or terminated. The parent does not release the lock in that state. `PAPER_AUTOPILOT_BLOCKED_LOCK_RELEASE` means child cleanup completed but strict lock ownership or removal failed. In both cases machine output includes child-cleanup and lock-release fields, terminal artifacts are corrected, and Telegram is sent only after the blocked state is final. Verified force-unlock waits after TERM and any KILL escalation and refuses to remove the lock while the verified controller remains alive.

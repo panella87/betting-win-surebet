@@ -1,3 +1,51 @@
+# 2026-07-12 - Run-script hardening wave 8: paper lock lifecycle and atomic parent finalization
+
+- Hardened `run-paper-evaluation.sh` so it acquires the repo-scoped lock before run-directory creation or stale-handoff rotation, rewrites the lock with the exact run path, and starts the heartbeat only after that rewrite.
+- Replaced the suppressed standalone paper lock release with explicit `lock_release_status`, `lock_release_exit_code`, and `lock_preserved` evidence. Unsafe child cleanup or lock release now produces `PAPER_EVALUATION_BLOCKED_LOCK_RELEASE`, exit code `2`, a preserved lock, corrected terminal artifacts, and Telegram notification only after classification.
+- Hardened `.automation/lib/run_common.sh` with an atomic full-file hard-link claim so simultaneous standalone controller starts cannot both pass a check-then-write lock race.
+- Hardened `run-paper-autopilot.sh` with the same full-file atomic parent-lock claim, strict parent-lock ownership on release, verified TERM/KILL completion during force-unlock, and explicit child-cleanup/lock-release terminal classifications.
+- Added `PAPER_AUTOPILOT_BLOCKED_CHILD_IDENTITY` and `PAPER_AUTOPILOT_BLOCKED_LOCK_RELEASE` with preserved-lock evidence and controller-specific Telegram actions.
+- Added executable regression coverage for concurrent lock claims, paper standalone release correction, parent child-identity failure, parent release failure, and successful terminal cleanup.
+- Preserved the no-service, no-provider, no-direct-DB, no-execution, private-paper-only boundary.
+
+# 2026-07-12 - Run-script hardening wave 7: standalone lock lifecycle and truthful finalization
+
+- Hardened `run-autonomous-implementation.sh` and `run-autonomous-bugfix.sh` so repo-scoped locks are acquired before run-directory creation, preventing empty artifact runs on same-controller or cross-controller lock conflicts.
+- Added explicit terminal `lock_release_status`, `lock_release_exit_code`, and `lock_preserved` evidence.
+- Replaced suppressed lock-release failures with `BLOCKED=yes`, `stop_reason=lock_release_failed_lock_preserved`, exit code `2`, preserved locks, corrective summaries/archives, and post-classification Telegram notification.
+- Delayed implementation handoff consumption and revoked the consumed marker if final lock release fails, then rewrote the return handoff as blocked.
+- Normalized unexpected bug-audit shell exits during the active loop to the documented blocked exit code.
+- Added executable finalizer regression tests plus controller-contract and documentation alignment.
+- Preserved the no-service, no-provider, no-direct-DB, no-execution, private-paper-only boundary.
+
+# 2026-07-11 - Run-script hardening wave 6: bugfix parent preflight and controller-specific Telegram actions
+
+- Hardened `run-bugfix-autopilot.sh` with the shared cross-controller incompatibility guard before parent-lock acquisition or campaign artifact creation, matching the paper parent and standalone controller contract.
+- Added regression coverage proving a verified live paper-parent lock blocks bugfix autopilot with no `artifacts/bugfix_autopilot_*` directory created.
+- Upgraded `.automation/lib/telegram_notify.sh` to `20260711.pretty_v3_controller_actions` with explicit success, continuation, and next-action guidance for bugfix and paper parent terminal states.
+- Added dedicated Telegram guidance for campaign completion, budget exhaustion, audit/implementation child blockers, no-op fixes, handoff mismatches, repeated handoffs, child-identity failures, partial source changes, accepted private reports, and packaging failures.
+- Preserved the no-service, no-provider, no-direct-DB, no-execution, private-paper-only boundary.
+
+# 2026-07-11 - Run-script hardening wave 5: strict paper parent and shared lock protocol
+
+- Hardened `run-paper-autopilot.sh` to accept only the canonical schema-v1 handoff emitted by `run-paper-evaluation.sh`; legacy `REPO_NAME` normalization and consumer-side handoff rewriting are removed.
+- Added exact paper and implementation-return key allowlists, producer identity checks, child-result reconciliation, source-fingerprint verification, producer-run/evidence containment, evidence SHA-256 verification, and immutable round copies.
+- Forwarded the configured ZIP timeout to the paper child and independently blocked paper-child source mutation.
+- Blocked nonterminal implementation retries after a partial source change, because the original paper source fingerprint is stale and no terminal validated return handoff exists.
+- Hardened `.automation/lib/run_common.sh` with lock schema v2, duplicate-aware lock fields, cross-controller exclusion, verified parent-child exceptions, managed child process groups, active-child status, heartbeat-safe metadata, zombie detection, and TERM-with-grace force-unlock before KILL escalation.
+- Hardened shared process identity checks so they do not depend on readable `/proc/<pid>/cwd` and preserve exact path verification when proc cwd access is restricted.
+- Added regression coverage for canonical paper flow, no-op blocking, lock metadata, graceful child termination, unrelated-controller blocking, and verified parent-launched child allowance.
+- Preserved the no-service, no-provider, no-direct-DB, no-execution, private-paper-only boundary.
+
+# 2026-07-11 - Run-script hardening wave 4: canonical paper handoff and strict standalone consumption
+
+- Hardened `run-paper-evaluation.sh` to emit a versioned schema-v1 paper-to-implementation handoff with repository/controller identity, stable semantic fingerprint, source fingerprint, immutable source-run identity, and SHA-256-bound evidence.
+- Replaced direct handoff redirection with atomic temp-file-and-rename writes, rotated stale standalone paper handoffs before a new run, and fixed failure handoffs to record the classified exit code `2` instead of an unset/default controller status.
+- Added timeout-bounded final `artifacts.zip` creation, consistent final-summary rewrite on packaging failure, and a unique machine-readable `paper_result=` record.
+- Hardened `run-autonomous-implementation.sh` so standalone paper and bugfix handoffs must match exact schema-v1 key allowlists, the current repository source fingerprint, a repo-contained source run, and a non-symlink evidence file whose SHA-256 matches the handoff.
+- Added immutable input-handoff evidence to each implementation run and regression coverage for canonical paper production, valid standalone consumption, evidence tampering, and unknown schema-key rejection.
+- Preserved the no-service, no-provider, no-direct-DB, no-execution, private-paper-only boundary.
+
 # 2026-07-11 - Run-script hardening wave 3: strict bug audit and campaign autopilot
 
 - Replaced `run-autonomous-bugfix.sh` with a strict read-only four-state audit controller using `BUGFIX_AUDIT_COMPLETE=yes`, `CONTINUE_REQUIRED=yes`, `HANDOVER_AUTONOMOUS_IMPLEMENTATION=yes`, or `BLOCKED=yes` plus a validated `request_flags.txt` contract.

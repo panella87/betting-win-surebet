@@ -86,40 +86,235 @@ automation_require_command() {
 automation_lock_value() {
   local file="$1" key="$2"
   [[ -f "$file" ]] || return 1
-  awk -F= -v k="$key" '$1 == k { sub(/^[^=]*=/, ""); print; found=1; exit } END { exit found ? 0 : 1 }' "$file"
+  awk -F= -v k="$key" '
+    $1 == k {
+      count++
+      value=$0
+      sub(/^[^=]*=/, "", value)
+    }
+    END {
+      if (count == 1) { print value; exit 0 }
+      if (count > 1) { exit 2 }
+      exit 1
+    }
+  ' "$file"
+}
+
+automation_lock_value_any() {
+  local file="$1"
+  shift
+  local key value rc
+  for key in "$@"; do
+    if value="$(automation_lock_value "$file" "$key")"; then
+      rc=0
+    else
+      rc=$?
+    fi
+    case "$rc" in
+      0) printf '%s\n' "$value"; return 0 ;;
+      1) ;;
+      *) return "$rc" ;;
+    esac
+  done
+  return 1
 }
 
 automation_pid_alive() {
-  local pid="${1:-}"
+  local pid="${1:-}" state
   [[ "$pid" =~ ^[0-9]+$ ]] || return 1
-  kill -0 "$pid" >/dev/null 2>&1
+  kill -0 "$pid" >/dev/null 2>&1 || return 1
+  if [[ -r "/proc/$pid/stat" ]]; then
+    state="$(awk '{print $3}' "/proc/$pid/stat" 2>/dev/null || true)"
+    [[ "$state" != Z && "$state" != X ]] || return 1
+  fi
+  return 0
 }
 
 automation_pid_command_matches_script() {
-  local pid="$1" script_name="$2" cmdline
-  [[ -r "/proc/$pid/cmdline" ]] || return 1
-  cmdline="$(tr '\0' ' ' < "/proc/$pid/cmdline")"
-  [[ "$cmdline" == *"$script_name"* ]]
+  local pid="$1" expected="$2" repo_root="${3:-${AUTOMATION_REPO_ROOT:-}}"
+  local expected_real cwd arg candidate resolved cmdline_snapshot matched=1
+  [[ "$pid" =~ ^[1-9][0-9]*$ && -r "/proc/$pid/cmdline" ]] || return 1
+
+  if [[ "$expected" == /* ]]; then
+    expected_real="$(realpath -e -- "$expected" 2>/dev/null || true)"
+  elif [[ -n "$repo_root" && -e "$repo_root/$expected" ]]; then
+    expected_real="$(realpath -e -- "$repo_root/$expected" 2>/dev/null || true)"
+  else
+    resolved="$(command -v -- "$expected" 2>/dev/null || true)"
+    [[ -n "$resolved" ]] && expected_real="$(realpath -e -- "$resolved" 2>/dev/null || true)"
+  fi
+  [[ -n "${expected_real:-}" ]] || return 1
+  cwd="$(readlink -f -- "/proc/$pid/cwd" 2>/dev/null || true)"
+  cmdline_snapshot="$(mktemp "${TMPDIR:-/tmp}/automation-cmdline.XXXXXX")" || return 1
+  if ! cat "/proc/$pid/cmdline" > "$cmdline_snapshot" 2>/dev/null; then
+    rm -f -- "$cmdline_snapshot"
+    return 1
+  fi
+
+  while IFS= read -r arg; do
+    [[ -n "$arg" ]] || continue
+    if [[ "$arg" == /* ]]; then
+      candidate="$arg"
+    elif [[ "$arg" != */* && -n "$(command -v -- "$arg" 2>/dev/null || true)" ]]; then
+      candidate="$(command -v -- "$arg")"
+    elif [[ -n "$repo_root" && -e "$repo_root/$arg" ]]; then
+      candidate="$repo_root/$arg"
+    elif [[ -n "$cwd" ]]; then
+      candidate="$cwd/$arg"
+    else
+      continue
+    fi
+    [[ -e "$candidate" ]] || continue
+    if [[ "$(realpath -e -- "$candidate" 2>/dev/null || true)" == "$expected_real" ]]; then
+      matched=0
+      break
+    fi
+  done < <(tr '\0' '\n' < "$cmdline_snapshot")
+  rm -f -- "$cmdline_snapshot"
+  return "$matched"
+}
+
+automation_controller_allows_child() {
+  local parent="$1" child="$2"
+  case "$parent:$child" in
+    run-paper-autopilot.sh:run-paper-evaluation.sh|\
+    run-paper-autopilot.sh:run-autonomous-implementation.sh|\
+    run-bugfix-autopilot.sh:run-autonomous-bugfix.sh|\
+    run-bugfix-autopilot.sh:run-autonomous-implementation.sh)
+      return 0
+      ;;
+  esac
+  return 1
+}
+
+automation_is_verified_parent_lock() {
+  local file="$1" current_script="$2" repo_root="$3"
+  local controller pid repo script_path
+  controller="$(automation_lock_value_any "$file" CONTROLLER script 2>/dev/null || true)"
+  pid="$(automation_lock_value_any "$file" CONTROLLER_PID pid 2>/dev/null || true)"
+  repo="$(automation_lock_value_any "$file" REPO_REALPATH repo_realpath repo_path 2>/dev/null || true)"
+  script_path="$(automation_lock_value_any "$file" SCRIPT_REALPATH script_path 2>/dev/null || true)"
+
+  automation_controller_allows_child "$controller" "$current_script" || return 1
+  [[ "$pid" == "$PPID" ]] || return 1
+  [[ "$(realpath -m -- "$repo" 2>/dev/null || true)" == "$(realpath -e -- "$repo_root" 2>/dev/null || true)" ]] || return 1
+  [[ -n "$script_path" ]] || script_path="$repo_root/$controller"
+  automation_pid_command_matches_script "$pid" "$script_path" "$repo_root"
+}
+
+automation_known_controller_lock_files() {
+  local root="$1"
+  printf '%s\n' \
+    "$root/.automation/locks/run-autonomous-implementation.lock" \
+    "$root/.automation/locks/run-paper-evaluation.lock" \
+    "$root/.automation/locks/run-autonomous-bugfix.lock" \
+    "$root/.automation/locks/run-paper-autopilot.lock" \
+    "$root/.automation/locks/run-bugfix-autopilot.lock"
+}
+
+automation_assert_no_incompatible_locks() {
+  local current_script="$1" repo_root="$2" own_lock_file="${3:-}"
+  local file controller pid repo script_path
+  while IFS= read -r file; do
+    [[ -n "$file" && "$file" != "$own_lock_file" && -e "$file" ]] || continue
+    [[ -f "$file" && ! -L "$file" ]] || automation_die "incompatible controller lock is not a non-symlink regular file: $file" 27
+
+    controller="$(automation_lock_value_any "$file" CONTROLLER script 2>/dev/null || true)"
+    pid="$(automation_lock_value_any "$file" CONTROLLER_PID pid 2>/dev/null || true)"
+    repo="$(automation_lock_value_any "$file" REPO_REALPATH repo_realpath repo_path 2>/dev/null || true)"
+    script_path="$(automation_lock_value_any "$file" SCRIPT_REALPATH script_path 2>/dev/null || true)"
+
+    if [[ -z "$controller" || -z "$pid" || -z "$repo" ]]; then
+      if automation_pid_alive "$pid"; then
+        automation_die "refusing to touch malformed incompatible lock with live PID: $file" 27
+      fi
+      automation_quarantine_lock "$file" malformed-incompatible
+      continue
+    fi
+
+    [[ "$(realpath -m -- "$repo" 2>/dev/null || true)" == "$(realpath -e -- "$repo_root" 2>/dev/null || true)" ]] || \
+      automation_die "incompatible controller lock repo mismatch: $file" 27
+
+    if automation_is_verified_parent_lock "$file" "$current_script" "$repo_root"; then
+      continue
+    fi
+
+    if automation_pid_alive "$pid"; then
+      [[ -n "$script_path" ]] || script_path="$repo_root/$controller"
+      automation_pid_command_matches_script "$pid" "$script_path" "$repo_root" || \
+        automation_die "incompatible controller lock PID identity mismatch: $file" 27
+      automation_die "incompatible controller is active: $controller pid=$pid" 27
+    fi
+
+    automation_quarantine_lock "$file" stale-incompatible
+  done < <(automation_known_controller_lock_files "$repo_root")
+}
+
+automation_emit_lock_file() {
+  local command_text repo_real script_real
+  command_text="${AUTOMATION_SCRIPT_COMMAND:-$AUTOMATION_SCRIPT_NAME}"
+  repo_real="$(realpath -e -- "$AUTOMATION_REPO_ROOT")"
+  script_real="$(realpath -e -- "$AUTOMATION_REPO_ROOT/$AUTOMATION_SCRIPT_NAME" 2>/dev/null || true)"
+  printf 'lock_schema_version=2\n'
+  printf 'script=%s\n' "$AUTOMATION_SCRIPT_NAME"
+  printf 'script_path=%s\n' "$script_real"
+  printf 'repo_path=%s\n' "$AUTOMATION_REPO_ROOT"
+  printf 'repo_realpath=%s\n' "$repo_real"
+  printf 'pid=%s\n' "$AUTOMATION_CONTROLLER_PID"
+  printf 'started_at=%s\n' "$AUTOMATION_STARTED_AT"
+  printf 'heartbeat_at=%s\n' "$(automation_now_epoch)"
+  printf 'heartbeat_iso=%s\n' "$(automation_now_iso)"
+  printf 'artifacts_dir=%s\n' "${AUTOMATION_RUN_DIR:-}"
+  printf 'host=%s\n' "$(hostname 2>/dev/null || printf unknown)"
+  printf 'user=%s\n' "$(id -un 2>/dev/null || printf unknown)"
+  printf 'command=%s\n' "$command_text"
+  printf 'parent_controller=%s\n' "${AUTOMATION_PARENT_CONTROLLER:-none}"
+  printf 'parent_pid=%s\n' "${AUTOMATION_PARENT_PID:-none}"
+  printf 'active_child_pid=%s\n' "${AUTOMATION_ACTIVE_CHILD_PID:-}"
+  printf 'active_child_kind=%s\n' "${AUTOMATION_ACTIVE_CHILD_KIND:-none}"
+  printf 'active_child_script=%s\n' "${AUTOMATION_ACTIVE_CHILD_SCRIPT:-}"
+  printf 'active_child_command=%s\n' "${AUTOMATION_ACTIVE_CHILD_COMMAND:-}"
 }
 
 automation_write_lock_file() {
-  local heartbeat_epoch tmp command_text
-  heartbeat_epoch="$(automation_now_epoch)"
-  tmp="${AUTOMATION_LOCK_FILE}.tmp.$$"
-  command_text="${AUTOMATION_SCRIPT_COMMAND:-$AUTOMATION_SCRIPT_NAME}"
-  {
-    printf 'script=%s\n' "$AUTOMATION_SCRIPT_NAME"
-    printf 'repo_path=%s\n' "$AUTOMATION_REPO_ROOT"
-    printf 'pid=%s\n' "$AUTOMATION_CONTROLLER_PID"
-    printf 'started_at=%s\n' "$AUTOMATION_STARTED_AT"
-    printf 'heartbeat_at=%s\n' "$heartbeat_epoch"
-    printf 'heartbeat_iso=%s\n' "$(automation_now_iso)"
-    printf 'artifacts_dir=%s\n' "${AUTOMATION_RUN_DIR:-}"
-    printf 'host=%s\n' "$(hostname 2>/dev/null || printf unknown)"
-    printf 'user=%s\n' "$(id -un 2>/dev/null || printf unknown)"
-    printf 'command=%s\n' "$command_text"
-  } > "$tmp"
-  mv "$tmp" "$AUTOMATION_LOCK_FILE"
+  local tmp
+  tmp="${AUTOMATION_LOCK_FILE}.tmp.$$.$RANDOM"
+  automation_emit_lock_file > "$tmp"
+  chmod 0600 "$tmp"
+  mv -f -- "$tmp" "$AUTOMATION_LOCK_FILE"
+}
+
+automation_claim_lock_file() {
+  local claim
+  claim="${AUTOMATION_LOCK_FILE}.claim.$$.$RANDOM"
+  automation_emit_lock_file > "$claim"
+  chmod 0600 "$claim"
+  if ln -- "$claim" "$AUTOMATION_LOCK_FILE" 2>/dev/null; then
+    rm -f -- "$claim"
+    return 0
+  fi
+  rm -f -- "$claim"
+  return 1
+}
+
+automation_refresh_lock_heartbeat() {
+  local file="${AUTOMATION_LOCK_FILE:-}" tmp now iso
+  [[ -n "$file" && -f "$file" && ! -L "$file" ]] || return 0
+  now="$(automation_now_epoch)"
+  iso="$(automation_now_iso)"
+  tmp="${file}.heartbeat.$$.$RANDOM"
+  awk -F= -v now="$now" -v iso="$iso" '
+    BEGIN { seen_epoch=0; seen_iso=0 }
+    $1 == "heartbeat_at" { print "heartbeat_at=" now; seen_epoch=1; next }
+    $1 == "heartbeat_iso" { print "heartbeat_iso=" iso; seen_iso=1; next }
+    { print }
+    END {
+      if (!seen_epoch) print "heartbeat_at=" now
+      if (!seen_iso) print "heartbeat_iso=" iso
+    }
+  ' "$file" > "$tmp" || { rm -f "$tmp"; return 1; }
+  chmod 0600 "$tmp"
+  mv -f "$tmp" "$file"
 }
 
 automation_quarantine_lock() {
@@ -138,17 +333,23 @@ automation_status_lock() {
   fi
   echo "LOCK_STATUS=present"
   cat "$file"
-  local pid
+  local pid child_pid
   pid="$(automation_lock_value "$file" pid || true)"
   if automation_pid_alive "$pid"; then
     echo "PID_STATUS=alive"
   else
     echo "PID_STATUS=dead"
   fi
+  child_pid="$(automation_lock_value "$file" active_child_pid || true)"
+  if automation_pid_alive "$child_pid"; then
+    echo "ACTIVE_CHILD_STATUS=alive"
+  else
+    echo "ACTIVE_CHILD_STATUS=absent_or_dead"
+  fi
 }
 
 automation_force_unlock() {
-  local file="$1" expected_script="$2" expected_repo="$3" pid repo script
+  local file="$1" expected_script="$2" expected_repo="$3" pid repo script script_path child_pid child_script waited grace
   if [[ ! -f "$file" ]]; then
     echo "FORCE_UNLOCK=no_lock"
     return 0
@@ -156,17 +357,38 @@ automation_force_unlock() {
   pid="$(automation_lock_value "$file" pid || true)"
   repo="$(automation_lock_value "$file" repo_path || true)"
   script="$(automation_lock_value "$file" script || true)"
+  script_path="$(automation_lock_value "$file" script_path || true)"
+  child_pid="$(automation_lock_value "$file" active_child_pid || true)"
+  child_script="$(automation_lock_value "$file" active_child_script || true)"
   [[ "$repo" == "$expected_repo" ]] || automation_die "refusing force-unlock: lock repo mismatch: $repo" 20
   [[ "$script" == "$expected_script" ]] || automation_die "refusing force-unlock: lock script mismatch: $script" 20
+  [[ -n "$script_path" ]] || script_path="$expected_repo/$expected_script"
+
+  if automation_pid_alive "$child_pid"; then
+    [[ -n "$child_script" ]] || automation_die "refusing force-unlock: live child has no script identity" 20
+    if ! automation_pid_command_matches_script "$child_pid" "$child_script" "$expected_repo"; then
+      automation_pid_alive "$child_pid" && automation_die "refusing force-unlock: cannot verify active child command for $child_pid" 20
+    elif ! automation_terminate_process_group "$child_pid" "$child_script" "${AUTOMATION_GRACEFUL_UNLOCK_SECONDS:-30}"; then
+      automation_pid_alive "$child_pid" && automation_die "force-unlock failed to terminate active child: $child_pid" 21
+    fi
+  fi
+
   if automation_pid_alive "$pid"; then
-    automation_pid_command_matches_script "$pid" "$expected_script" || automation_die "refusing force-unlock: cannot verify PID command for $pid" 20
-    kill -9 "$pid" || true
-    local waited=0
-    while automation_pid_alive "$pid" && (( waited < 10 )); do
-      sleep 1
-      waited=$((waited + 1))
-    done
-    automation_pid_alive "$pid" && automation_die "force-unlock failed: PID still alive: $pid" 21
+    if ! automation_pid_command_matches_script "$pid" "$script_path" "$expected_repo"; then
+      automation_pid_alive "$pid" && automation_die "refusing force-unlock: cannot verify PID command for $pid" 20
+    else
+      grace="${AUTOMATION_GRACEFUL_UNLOCK_SECONDS:-30}"
+      kill -TERM "$pid" 2>/dev/null || true
+      waited=0
+      while automation_pid_alive "$pid" && (( waited < grace )); do
+        sleep 1
+        waited=$((waited + 1))
+      done
+      automation_pid_alive "$pid" && kill -KILL "$pid" 2>/dev/null || true
+      waited=0
+      while automation_pid_alive "$pid" && (( waited < 10 )); do sleep 1; waited=$((waited + 1)); done
+      automation_pid_alive "$pid" && automation_die "force-unlock failed: PID still alive: $pid" 21
+    fi
   fi
   rm -f "$file"
   echo "FORCE_UNLOCK=done"
@@ -181,6 +403,7 @@ automation_acquire_lock() {
   lock_dir="$AUTOMATION_REPO_ROOT/.automation/locks"
   mkdir -p "$lock_dir"
   AUTOMATION_LOCK_FILE="$lock_dir/${script_name%.sh}.lock"
+  automation_assert_no_incompatible_locks "$script_name" "$repo_root" "$AUTOMATION_LOCK_FILE"
 
   if [[ -f "$AUTOMATION_LOCK_FILE" ]]; then
     pid="$(automation_lock_value "$AUTOMATION_LOCK_FILE" pid || true)"
@@ -198,7 +421,7 @@ automation_acquire_lock() {
     else
       [[ "$repo" == "$repo_root" ]] || automation_die "refusing lock auto-unlock: repo mismatch: $repo" 23
       [[ "$script" == "$script_name" ]] || automation_die "refusing lock auto-unlock: script mismatch: $script" 23
-      automation_pid_command_matches_script "$pid" "$script_name" || automation_die "refusing lock auto-unlock: cannot verify PID command for $pid" 24
+      automation_pid_command_matches_script "$pid" "$repo_root/$script_name" "$repo_root" || automation_die "refusing lock auto-unlock: cannot verify PID command for $pid" 24
       now="$(automation_now_epoch)"
       if [[ "$heartbeat" =~ ^[0-9]+$ ]]; then
         age=$((now - heartbeat))
@@ -220,14 +443,16 @@ automation_acquire_lock() {
     fi
   fi
 
-  automation_write_lock_file
+  if ! automation_claim_lock_file; then
+    automation_die "lock was acquired concurrently: $AUTOMATION_LOCK_FILE" 25
+  fi
 }
 
 automation_start_heartbeat() {
   local parent_pid="$AUTOMATION_CONTROLLER_PID"
   (
     while kill -0 "$parent_pid" >/dev/null 2>&1; do
-      automation_write_lock_file >/dev/null 2>&1 || true
+      automation_refresh_lock_heartbeat >/dev/null 2>&1 || true
       sleep "${AUTOMATION_LOCK_HEARTBEAT_SECONDS:-60}"
     done
   ) &
@@ -235,6 +460,12 @@ automation_start_heartbeat() {
 }
 
 automation_release_lock() {
+  local child_cleanup_rc=0
+  automation_terminate_active_child >/dev/null 2>&1 || child_cleanup_rc=$?
+  if [[ "$child_cleanup_rc" -ne 0 ]]; then
+    automation_log "lock_release_blocked active_child_identity_or_termination_failed=$child_cleanup_rc"
+    return "$child_cleanup_rc"
+  fi
   if [[ -n "${AUTOMATION_HEARTBEAT_PID:-}" ]]; then
     kill "$AUTOMATION_HEARTBEAT_PID" >/dev/null 2>&1 || true
     wait "$AUTOMATION_HEARTBEAT_PID" 2>/dev/null || true
@@ -246,6 +477,80 @@ automation_release_lock() {
       rm -f "$AUTOMATION_LOCK_FILE"
     fi
   fi
+}
+
+automation_set_active_child() {
+  local pid="$1" kind="$2" script="$3" command_label="$4"
+  [[ "$pid" =~ ^[1-9][0-9]*$ ]] || return 2
+  AUTOMATION_ACTIVE_CHILD_PID="$pid"
+  AUTOMATION_ACTIVE_CHILD_KIND="$kind"
+  AUTOMATION_ACTIVE_CHILD_SCRIPT="$script"
+  AUTOMATION_ACTIVE_CHILD_COMMAND="$command_label"
+  [[ -n "${AUTOMATION_LOCK_FILE:-}" && -f "$AUTOMATION_LOCK_FILE" ]] && automation_write_lock_file
+}
+
+automation_clear_active_child() {
+  AUTOMATION_ACTIVE_CHILD_PID=""
+  AUTOMATION_ACTIVE_CHILD_KIND="none"
+  AUTOMATION_ACTIVE_CHILD_SCRIPT=""
+  AUTOMATION_ACTIVE_CHILD_COMMAND=""
+  [[ -n "${AUTOMATION_LOCK_FILE:-}" && -f "$AUTOMATION_LOCK_FILE" ]] && automation_write_lock_file
+}
+
+automation_terminate_process_group() {
+  local pid="$1" expected_script="$2" grace="${3:-10}" waited=0
+  automation_pid_alive "$pid" || return 0
+  automation_pid_command_matches_script "$pid" "$expected_script" "${AUTOMATION_REPO_ROOT:-}" || return 2
+  kill -TERM -- "-$pid" 2>/dev/null || kill -TERM "$pid" 2>/dev/null || true
+  while automation_pid_alive "$pid" && (( waited < grace * 10 )); do
+    sleep 0.1
+    waited=$((waited + 1))
+  done
+  if automation_pid_alive "$pid"; then
+    kill -KILL -- "-$pid" 2>/dev/null || kill -KILL "$pid" 2>/dev/null || true
+  fi
+  waited=0
+  while automation_pid_alive "$pid" && (( waited < 100 )); do sleep 0.1; waited=$((waited + 1)); done
+  automation_pid_alive "$pid" && return 2
+  return 0
+}
+
+automation_terminate_active_child() {
+  local pid="${AUTOMATION_ACTIVE_CHILD_PID:-}" script="${AUTOMATION_ACTIVE_CHILD_SCRIPT:-}"
+  [[ "$pid" =~ ^[1-9][0-9]*$ ]] || return 0
+  automation_pid_alive "$pid" || { automation_clear_active_child; return 0; }
+  [[ -n "$script" ]] || return 2
+  automation_terminate_process_group "$pid" "$script" "${AUTOMATION_GRACEFUL_UNLOCK_SECONDS:-30}" || return 2
+  automation_clear_active_child
+}
+
+automation_run_managed_argv() {
+  local array_name="$1" label="$2" timeout_seconds="$3" out_file="$4" stream_logs="$5" expected_script="$6"
+  local -n command_ref="$array_name"
+  local child_pid tail_pid="" rc
+  (( ${#command_ref[@]} > 0 )) || return 2
+  mkdir -p "$(dirname "$out_file")"
+  : > "$out_file"
+  automation_require_command timeout
+  automation_require_command setsid
+  setsid timeout --signal=TERM --kill-after=10s "${timeout_seconds}s" "${command_ref[@]}" < /dev/null > "$out_file" 2>&1 &
+  child_pid=$!
+  if ! automation_set_active_child "$child_pid" "$label" "$expected_script" "$label"; then
+    kill -TERM -- "-$child_pid" 2>/dev/null || true
+    wait "$child_pid" 2>/dev/null || true
+    return 2
+  fi
+  if [[ "$stream_logs" == "1" ]]; then
+    tail -n +1 -f --pid="$child_pid" "$out_file" &
+    tail_pid=$!
+  fi
+  set +e
+  wait "$child_pid"
+  rc=$?
+  set -e
+  [[ -n "$tail_pid" ]] && { wait "$tail_pid" 2>/dev/null || true; }
+  automation_clear_active_child || true
+  return "$rc"
 }
 
 automation_create_run_dir() {
@@ -321,7 +626,7 @@ automation_quote_argv() {
 }
 
 automation_run_argv_command() {
-  local label="$1" timeout_seconds="$2" out_file="$3" rc command_text
+  local label="$1" timeout_seconds="$2" out_file="$3" rc command_text expected_script
   shift 3
   (( $# > 0 )) || {
     automation_log "command_refused label=$label reason=empty_argv"
@@ -330,10 +635,13 @@ automation_run_argv_command() {
   mkdir -p "$(dirname "$out_file")"
   command_text="$(automation_quote_argv "$@")"
   automation_log "command_start label=$label timeout=${timeout_seconds}s command=$command_text"
-  set +e
-  timeout --foreground "${timeout_seconds}s" "$@" > "$out_file" 2>&1
-  rc=$?
-  set -e
+  expected_script="$1"
+  local -a command_argv=("$@")
+  if automation_run_managed_argv command_argv "$label" "$timeout_seconds" "$out_file" 0 "$expected_script"; then
+    rc=0
+  else
+    rc=$?
+  fi
   if [[ "$rc" -eq 0 ]]; then
     automation_log "command_pass label=$label"
   else
@@ -408,11 +716,13 @@ automation_source_tree_fingerprint() {
 
 automation_run_shell_command() {
   local label="$1" command_text="$2" timeout_seconds="$3" out_file="$4" rc
+  local -a command_argv=(bash -lc "$command_text")
   automation_log "command_start label=$label timeout=${timeout_seconds}s command=$command_text"
-  set +e
-  timeout --foreground "${timeout_seconds}s" bash -lc "$command_text" > "$out_file" 2>&1
-  rc=$?
-  set -e
+  if automation_run_managed_argv command_argv "$label" "$timeout_seconds" "$out_file" 0 bash; then
+    rc=0
+  else
+    rc=$?
+  fi
   if [[ "$rc" -eq 0 ]]; then
     automation_log "command_pass label=$label"
   else
@@ -464,15 +774,11 @@ automation_run_codex_prompt() {
   fi
   cmd+=("$(cat "$prompt_file")")
   automation_log "codex_start prompt=$prompt_file timeout=${timeout_seconds}s model=${model:-cli-default}"
-  set +e
-  if [[ "${AUTOMATION_CODEX_STREAM_LOGS:-1}" == "1" ]]; then
-    timeout --foreground "${timeout_seconds}s" "${cmd[@]}" < /dev/null 2>&1 | tee "$log_file"
-    rc=${PIPESTATUS[0]}
+  if automation_run_managed_argv cmd "codex:${model:-cli-default}" "$timeout_seconds" "$log_file" "${AUTOMATION_CODEX_STREAM_LOGS:-1}" "${AUTOMATION_CODEX_BIN:-codex}"; then
+    rc=0
   else
-    timeout --foreground "${timeout_seconds}s" "${cmd[@]}" < /dev/null > "$log_file" 2>&1
     rc=$?
   fi
-  set -e
   if [[ "$rc" -ne 0 && -n "$fallback_model" ]]; then
     automation_log "codex_retry_with_fallback initial_exit=$rc fallback_model=$fallback_model"
     local -a fallback_cmd=("${AUTOMATION_CODEX_BIN:-codex}" exec -C "$AUTOMATION_REPO_ROOT" --sandbox "${AUTOMATION_CODEX_SANDBOX:-danger-full-access}")
@@ -480,15 +786,17 @@ automation_run_codex_prompt() {
       fallback_cmd+=(-m "$fallback_model")
     fi
     fallback_cmd+=("$(cat "$prompt_file")")
-    set +e
-    if [[ "${AUTOMATION_CODEX_STREAM_LOGS:-1}" == "1" ]]; then
-      timeout --foreground "${timeout_seconds}s" "${fallback_cmd[@]}" < /dev/null 2>&1 | tee -a "$log_file"
-      rc=${PIPESTATUS[0]}
+    local fallback_log="${log_file}.fallback"
+    if automation_run_managed_argv fallback_cmd "codex-fallback:$fallback_model" "$timeout_seconds" "$fallback_log" "${AUTOMATION_CODEX_STREAM_LOGS:-1}" "${AUTOMATION_CODEX_BIN:-codex}"; then
+      rc=0
     else
-      timeout --foreground "${timeout_seconds}s" "${fallback_cmd[@]}" < /dev/null >> "$log_file" 2>&1
       rc=$?
     fi
-    set -e
+    {
+      printf '\n--- fallback model: %s ---\n' "$fallback_model"
+      cat "$fallback_log"
+    } >> "$log_file"
+    rm -f -- "$fallback_log"
   fi
   if [[ "$rc" -eq 0 ]]; then
     automation_log "codex_pass prompt=$prompt_file"
@@ -563,13 +871,18 @@ automation_require_cycle_artifacts() {
 }
 
 automation_build_artifacts_zip() {
-  local run_dir="$1" root="$2" zip_tmp rel
+  local run_dir="$1" root="$2" zip_tmp rel timeout_seconds
   [[ -d "$run_dir" ]] || return 0
   automation_require_command zip
   rel="${run_dir#$root/}"
-  zip_tmp="$root/artifacts.zip.tmp.$$"
+  timeout_seconds="$(automation_parse_duration_seconds "${AUTOMATION_ZIP_TIMEOUT:-10m}")" || return 2
+  zip_tmp="$root/.artifacts.zip.tmp.$$.zip"
   rm -f "$zip_tmp"
-  (cd "$root" && zip -q -r "$zip_tmp" "$rel")
+  (cd "$root" && timeout --signal=TERM --kill-after=10s "${timeout_seconds}s" zip -q -r "$zip_tmp" "$rel") || {
+    local rc=$?
+    rm -f -- "$zip_tmp"
+    return "$rc"
+  }
   mv "$zip_tmp" "$root/artifacts.zip"
   automation_log "artifacts_zip_created path=$root/artifacts.zip"
 }

@@ -99,6 +99,12 @@ test('paper evaluation exposes explicit single-pass and read-only contracts', ()
     "printf 'run_dir=%s\\n'",
     "printf 'final_status=%s\\n'",
     "printf 'final_exit_code=%s\\n'",
+    "printf 'paper_result=%s\\n'",
+    'canonical_paper_handoff_schema=1',
+    'atomic_paper_handoff=enabled',
+    'automation_v2_write_env_atomic',
+    'SOURCE_EVIDENCE_SHA256',
+    'automation_v2_zip_with_timeout',
   ]) {
     assert.ok(script.includes(marker), `expected marker: ${marker}`);
   }

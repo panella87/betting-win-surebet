@@ -70,6 +70,9 @@ test('controllers expose corrected wave-two defaults and handoff entrypoints', (
   assert.match(autopilot, /semantic_handoff_fingerprints=enabled/);
   assert.match(autopilot, /explicit_child_result_contract=enabled/);
   assert.match(autopilot, /child_aware_lock=enabled/);
+  assert.match(autopilot, /canonical_paper_handoff_required=enabled/);
+  assert.match(autopilot, /legacy_paper_handoff_normalization=disabled/);
+  assert.match(autopilot, /cross_controller_lock_guard=enabled/);
 });
 
 function writeExecutable(path: string, content: string): void {
@@ -108,6 +111,8 @@ function makeStubRepo(noop: boolean): string {
   writeExecutable(join(repo, 'run-paper-evaluation.sh'), `#!/usr/bin/env bash
 set -Eeuo pipefail
 root="$(cd "$(dirname "$0")" && pwd -P)"
+. "$root/.automation/lib/run_common.sh"
+. "$root/.automation/lib/controller_hardening_v2.sh"
 mkdir -p "$root/artifacts"
 count_file="$root/artifacts/stub-paper-count"
 count=0
@@ -115,25 +120,42 @@ count=0
 count=$((count + 1)); printf '%s\n' "$count" > "$count_file"
 run_dir="$root/artifacts/paper_evaluation_stub_$count"; mkdir -p "$run_dir"
 if [[ "$count" == "1" ]]; then
-  cat > "$root/.automation/paper-mode-to-autonomous-implementation.env" <<'HANDOFF'
-HANDOVER_KIND=paper-mode-to-autonomous-implementation
-REPO_NAME=betting-win-surebet
-RUN_AUTONOMOUS_IMPLEMENTATION_NEXT=yes
-AUTONOMOUS_IMPLEMENTATION_EXPECTED_FLAG=--handover-paper-mode
-PAPER_MODE_FINAL_STATUS=PAPER_EVALUATION_BLOCKED_SOURCE_FIX_REQUIRED
-PAPER_MODE_STOP_REASON=stub_source_fix_required
-PAPER_MODE_FINAL_EXIT_CODE=2
-PAPER_MODE_RESUME_AFTER_IMPLEMENTATION=yes
-PAPER_MODE_NOOP_SUCCESS_ALLOWED=no
-PAPER_MODE_REQUIRED_ACTION=bounded_source_implementation
-PAPER_MODE_BLOCKER_FAMILY=source
-PAPER_MODE_EXPECTED_PRIVATE_PAPER_REEVALUATION_AFTER_SOURCE_CHANGE=yes
-PAPER_MODE_AUTOMATION_MAINTENANCE_ALLOWED=no
-PAPER_SERVICE_SUPPORTED=0
-SERVICE_REFRESH_REQUIRED=0
-RUNTIME_EVIDENCE_REQUIRED=0
-EVIDENCE_DIR=artifacts
-HANDOFF
+  evidence="$run_dir/paper-implementation-handoff-evidence.md"
+  printf 'stub source implementation evidence\n' > "$evidence"
+  evidence_rel="\${evidence#$root/}"
+  evidence_hash="$(automation_v2_sha256_file "$evidence")"
+  source_hash="$(automation_v2_source_tree_fingerprint "$root")"
+  automation_v2_write_env_atomic "$root/.automation/paper-mode-to-autonomous-implementation.env" \\
+    "HANDOVER_SCHEMA_VERSION=1" \\
+    "HANDOVER_KIND=paper-mode-to-autonomous-implementation" \\
+    "REPOSITORY=betting-win-surebet" \\
+    "CONTROLLER=run-paper-evaluation.sh" \\
+    "SOURCE_RUN_ID=$(basename "$run_dir")" \\
+    "RUN_AUTONOMOUS_IMPLEMENTATION_NEXT=yes" \\
+    "AUTONOMOUS_IMPLEMENTATION_EXPECTED_FLAG=--handover-paper-mode" \\
+    "PAPER_MODE_FINAL_STATUS=PAPER_EVALUATION_BLOCKED_SOURCE_FIX_REQUIRED" \\
+    "PAPER_MODE_STOP_REASON=stub_source_fix_required" \\
+    "PAPER_MODE_FINAL_EXIT_CODE=2" \\
+    "PAPER_MODE_RESUME_AFTER_IMPLEMENTATION=yes" \\
+    "PAPER_MODE_NOOP_SUCCESS_ALLOWED=no" \\
+    "PAPER_MODE_REQUIRED_ACTION=bounded_source_implementation" \\
+    "PAPER_MODE_BLOCKER_FAMILY=source" \\
+    "PAPER_MODE_EXPECTED_PRIVATE_PAPER_REEVALUATION_AFTER_SOURCE_CHANGE=yes" \\
+    "PAPER_MODE_AUTOMATION_MAINTENANCE_ALLOWED=no" \\
+    "ALLOWED_PROTECTED_FILES=none" \\
+    "PAPER_SERVICE_SUPPORTED=0" \\
+    "SERVICE_REFRESH_REQUIRED=0" \\
+    "RUNTIME_EVIDENCE_REQUIRED=0" \\
+    "PINNED_BUNDLE_REQUIRED=0" \\
+    "SUREBET_PINNED_BUNDLE=" \\
+    "HANDOFF_REASON=stub_source_fix_required" \\
+    "PAPER_SOURCE_FINGERPRINT=$source_hash" \\
+    "SOURCE_EVIDENCE_PATH=$evidence_rel" \\
+    "SOURCE_EVIDENCE_SHA256=$evidence_hash" \\
+    "VALIDATION_REQUIRED=npm_run_validate" \\
+    "RUN_DIR=$run_dir" \\
+    "WRITTEN_AT=2026-07-11T00:00:00Z"
+  automation_v2_add_or_verify_fingerprint "$root/.automation/paper-mode-to-autonomous-implementation.env" >/dev/null
   status=PAPER_EVALUATION_BLOCKED_SOURCE_FIX_REQUIRED; reason=stub_source_fix_required; rc=2
 else
   status=PAPER_EVALUATION_PINNED_BUNDLE_ACCEPTED_PRIVATE_REPORT_WRITTEN; reason=stub_paper_accepted; rc=0
@@ -150,24 +172,28 @@ run_dir="$root/artifacts/autonomous_implementation_stub"; mkdir -p "$run_dir"
 source_fp="$(awk -F= '$1 == "HANDOVER_FINGERPRINT" {print $2}' "$root/.automation/paper-mode-to-autonomous-implementation.env")"
 changed=yes
 if [[ "${noop ? '1' : '0'}" == "1" ]]; then changed=no; else printf 'implemented\n' >> "$root/source.txt"; fi
-cat > "$root/.automation/paper-mode-handover.env" <<HANDOFF
-HANDOVER_SCHEMA_VERSION=1
-HANDOVER_KIND=paper-mode-after-autonomous-implementation
-REPOSITORY=betting-win-surebet
-SOURCE_HANDOFF_FINGERPRINT=$source_fp
-RUN_PAPER_EVALUATION_NEXT=yes
-AUTONOMOUS_FINAL_STATUS=AUTONOMOUS_GOAL_COMPLETE=yes
-AUTONOMOUS_STOP_REASON=goal_complete
-AUTONOMOUS_FINAL_EXIT_CODE=0
-IMPLEMENTATION_SOURCE_CHANGED=$changed
-IMPLEMENTATION_SOURCE_VALIDATION_PASSED=yes
-PRIVATE_PAPER_REEVALUATION_REQUIRED=yes
-PAPER_SERVICE_SUPPORTED=0
-SERVICE_REFRESH_REQUIRED=0
-RUNTIME_EVIDENCE_REQUIRED=0
-RUN_DIR=$run_dir
-WRITTEN_AT=2026-07-11T00:00:00Z
-HANDOFF
+automation_v2_write_env_atomic "$root/.automation/paper-mode-handover.env" \\
+  "HANDOVER_SCHEMA_VERSION=1" \\
+  "HANDOVER_KIND=paper-mode-after-autonomous-implementation" \\
+  "REPOSITORY=betting-win-surebet" \\
+  "CONTROLLER=run-autonomous-implementation.sh" \\
+  "SOURCE_HANDOFF_FINGERPRINT=$source_fp" \\
+  "RUN_PAPER_EVALUATION_NEXT=yes" \\
+  "AUTONOMOUS_FINAL_STATUS=AUTONOMOUS_GOAL_COMPLETE=yes" \\
+  "AUTONOMOUS_STOP_REASON=goal_complete" \\
+  "AUTONOMOUS_FINAL_EXIT_CODE=0" \\
+  "IMPLEMENTATION_SOURCE_CHANGED=$changed" \\
+  "IMPLEMENTATION_SOURCE_VALIDATION_PASSED=yes" \\
+  "PRIVATE_PAPER_REEVALUATION_REQUIRED=yes" \\
+  "BUGFIX_REAUDIT_REQUIRED=yes" \\
+  "AUDIT_AREA=none" \\
+  "BUG_IDS=none" \\
+  "PAPER_SERVICE_SUPPORTED=0" \\
+  "SERVICE_REFRESH_REQUIRED=0" \\
+  "RUNTIME_EVIDENCE_REQUIRED=0" \\
+  "REAL_UPSTREAM_EVALUATION=blocked_on_required_upstream_input" \\
+  "RUN_DIR=$run_dir" \\
+  "WRITTEN_AT=2026-07-11T00:00:00Z"
 automation_v2_add_or_verify_fingerprint "$root/.automation/paper-mode-handover.env" >/dev/null
 printf 'run_dir=%s\nfinal_status=AUTONOMOUS_GOAL_COMPLETE=yes\nstop_reason=goal_complete\nfinal_exit_code=0\ncycles_completed=1\n' "$run_dir"
 `);

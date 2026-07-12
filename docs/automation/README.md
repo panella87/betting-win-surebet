@@ -21,6 +21,13 @@ This repository uses the standardized root automation helper surface:
 
 The root `run-*` controllers are the canonical daily entrypoints. Historical `commands/run-sure-*` wrappers remain for compatibility only.
 
+
+The shared standalone lock contract rejects incompatible live root controllers before source work begins. Managed validation/Codex commands run in recorded process groups; `--status` exposes active-child state and verified force-unlock sends TERM, waits the configured grace period, then escalates only if the process remains alive. Parent-launched children are allowed only when the parent PID, controller script, repository, and allowed parent/child pairing all verify.
+
+Standalone implementation, bug-audit, and paper-evaluation controllers now acquire an atomically claimed full lock before creating their run directories. Their terminal output includes lock-release status and preserved-lock state. A failed active-child cleanup can no longer be hidden behind a successful final status: the controller blocks, preserves the lock, rewrites terminal evidence, and notifies only after the failure is classified.
+
+The paper parent atomically claims a complete parent lock before campaign artifacts and reports child-cleanup plus lock-release state at finalization. It no longer accepts or rewrites legacy paper handoffs. It requires the canonical schema-v1 producer contract, verifies source/evidence integrity and exact child-result correlation, validates the implementation return through an exact allowlist, and forwards `--zip-timeout` to both child controllers.
+
 The root `run-*` controllers inherit the active Node runtime from the parent shell.
 Before launching long controllers, activate the repo runtime explicitly:
 
@@ -31,7 +38,7 @@ Before launching long controllers, activate the repo runtime explicitly:
 Protected automation files are read-only during normal implementation, paper evaluation, and bug-audit runs. Use `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` only when Federico explicitly approves bounded automation maintenance that touches protected files.
 
 `run-autonomous-implementation.sh`, `run-autonomous-bugfix.sh`,
-`run-paper-evaluation.sh`, and `run-paper-autopilot.sh` are standardized with canonical flags, fail-closed
+`run-bugfix-autopilot.sh`, `run-paper-evaluation.sh`, and `run-paper-autopilot.sh` are standardized with canonical flags, fail-closed
 status/artifact checks, root artifacts refresh, and
 `.automation/lib/telegram_notify.sh` final notifications. See `docs/automation/telegram-notifications.md` for the HTML-card contract and dry-run test mode. The paper controller is
 adapted for this no-service repo: it runs private fixture smoke and never starts
@@ -84,9 +91,15 @@ profitability claims, and no execution-readiness claims.
 
 ## Verified controller handoffs
 
-`.automation/lib/controller_hardening_v2.sh` is protected shared infrastructure for strict handoff parsing, semantic fingerprints, source-tree fingerprints, child-result validation, verified child termination, and bounded archives. `run-autonomous-implementation.sh` consumes both paper and bugfix handoffs; `run-paper-autopilot.sh` requires explicit machine-readable child results and uses `--max-rounds 0` by default.
+`.automation/lib/controller_hardening_v2.sh` is protected shared infrastructure for strict handoff parsing, semantic fingerprints, source-tree fingerprints, child-result validation, verified child termination, and bounded archives. `run-autonomous-implementation.sh` consumes both paper and bugfix handoffs only after exact schema-key, source-fingerprint, source-run containment, and evidence-SHA verification; `run-paper-autopilot.sh` requires explicit machine-readable child results and uses `--max-rounds 0` by default.
 
 
 ## Bugfix autopilot
 
-`run-bugfix-autopilot.sh` is the unattended bounded source-audit campaign parent. It calls only `run-autonomous-bugfix.sh` and `run-autonomous-implementation.sh --handover-bugfix-audit`, requires a clean re-audit of the same campaign area after each implementation, and never calls paper evaluation or service lifecycle commands.
+`run-bugfix-autopilot.sh` is the unattended bounded source-audit campaign parent. It calls only `run-autonomous-bugfix.sh` and `run-autonomous-implementation.sh --handover-bugfix-audit`, requires a clean re-audit of the same campaign area after each implementation, and never calls paper evaluation or service lifecycle commands. Before acquiring its lock or creating campaign artifacts, it applies the same shared cross-controller incompatibility guard as the paper parent.
+
+
+Paper handoffs are written atomically as schema-v1 data with stable fingerprints and hashed source evidence. The standalone implementation consumer preserves an immutable copy in its run directory and rejects evidence tampering or unknown schema keys before Codex execution.
+
+
+Controller-specific Telegram next actions distinguish parent success, continuation/budget exhaustion, handoff errors, child failures, no-op fixes, repeated handoffs, partial source changes, and packaging failures.

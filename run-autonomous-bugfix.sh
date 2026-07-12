@@ -11,7 +11,7 @@ AUTOMATION_REPO_ROOT="$SCRIPT_DIR"
 # shellcheck source=.automation/lib/telegram_notify.sh
 . "$AUTOMATION_REPO_ROOT/.automation/lib/telegram_notify.sh"
 
-SCRIPT_VERSION="2026-07-11.surebet-bugfix-v3-strict-audit-handoff"
+SCRIPT_VERSION="2026-07-12.surebet-bugfix-v4-standalone-lock-lifecycle"
 SCRIPT_NAME="run-autonomous-bugfix.sh"
 DURATION_SECONDS="$(automation_parse_duration_seconds 72h)"
 FROM_ARTIFACTS=""
@@ -33,6 +33,9 @@ STOP_REASON="not_started"
 FINAL_STATUS="not_started"
 CYCLES_ATTEMPTED=0
 LOCK_ACQUIRED=0
+LOCK_RELEASE_STATUS="not_attempted"
+LOCK_RELEASE_EXIT_CODE=0
+LOCK_PRESERVED="no"
 CODEX_TIMEOUT_SECONDS=""
 VALIDATION_TIMEOUT_SECONDS=""
 INSTALL_TIMEOUT_SECONDS=""
@@ -225,6 +228,9 @@ four_state_contract=enabled
 strict_request_flags=enabled
 semantic_handoff_fingerprint=enabled
 machine_readable_final_stdout=enabled
+lock_acquisition_before_run_dir=enabled
+lock_release_failure_classification=enabled
+lock_preservation_on_release_failure=enabled
 EOF_CONFIG
 }
 
@@ -590,6 +596,12 @@ write_final_summary() {
     printf 'last_validation_status=%s\n' "$LAST_VALIDATION_STATUS"
     printf 'last_codex_failure_class=%s\n' "$LAST_CODEX_FAILURE_CLASS"
     printf 'handoff_fingerprint=%s\n' "${HANDOFF_FINGERPRINT:-none}"
+    if [[ "$LOCK_RELEASE_STATUS" != "not_attempted" ]]; then
+      printf 'lock_release_status=%s\n' "$LOCK_RELEASE_STATUS"
+      printf 'lock_release_exit_code=%s\n' "$LOCK_RELEASE_EXIT_CODE"
+      printf 'lock_preserved=%s\n' "$LOCK_PRESERVED"
+      printf 'lock_file=%s\n' "${AUTOMATION_LOCK_FILE:-none}"
+    fi
     printf 'source_fingerprint_initial=%s\n' "$INITIAL_SOURCE_FINGERPRINT"
     printf 'source_fingerprint_last_before=%s\n' "$LAST_CYCLE_SOURCE_FINGERPRINT_BEFORE"
     printf 'source_fingerprint_last_after_codex=%s\n' "$LAST_CYCLE_SOURCE_FINGERPRINT_AFTER_CODEX"
@@ -598,26 +610,92 @@ write_final_summary() {
   } > "$AUTOMATION_RUN_DIR/final-summary.md"
 }
 
+attempt_final_lock_release() {
+  local rc=0
+  if [[ "$LOCK_ACQUIRED" != "1" ]]; then
+    LOCK_RELEASE_STATUS="not_acquired"
+    LOCK_RELEASE_EXIT_CODE=0
+    LOCK_PRESERVED="no"
+    return 0
+  fi
+  if automation_release_lock; then
+    rc=0
+  else
+    rc=$?
+  fi
+  LOCK_RELEASE_EXIT_CODE="$rc"
+  if [[ "$rc" == "0" ]]; then
+    LOCK_RELEASE_STATUS="released"
+    LOCK_PRESERVED="no"
+    LOCK_ACQUIRED=0
+    return 0
+  fi
+  LOCK_RELEASE_STATUS="preserved"
+  LOCK_PRESERVED="yes"
+  automation_log "final_lock_release_failed exit=$rc lock_preserved=yes lock=${AUTOMATION_LOCK_FILE:-unknown}"
+  return "$rc"
+}
+
 finish() {
-  local rc="${1:-$?}" zip_rc=0
+  local rc="${1:-$?}" zip_rc=0 lock_rc=0 corrective_zip_rc=0
   [[ "$FINISHED" == 1 ]] && return 0
   FINISHED=1
   trap - EXIT INT TERM
+  if [[ "$FINAL_STATUS" == "not_started" ]]; then
+    FINAL_STATUS="setup_failed"
+    STOP_REASON="unexpected_exit_before_start"
+  elif [[ "$rc" != "0" && "$STOP_REASON" == "loop_started" ]]; then
+    FINAL_STATUS="BLOCKED=yes"
+    STOP_REASON="unexpected_controller_exit"
+    rc=2
+  fi
   EXIT_STATUS="$rc"
-  [[ "$FINAL_STATUS" != not_started ]] || { FINAL_STATUS=setup_failed; STOP_REASON=unexpected_exit_before_start; }
   if [[ -n "${AUTOMATION_RUN_DIR:-}" ]]; then
     write_final_summary || true
     automation_collect_repo_snapshot "$AUTOMATION_RUN_DIR/final-repo-snapshot" || true
-    set +e; build_artifacts_zip_bounded; zip_rc=$?; set -e
-    if [[ "$zip_rc" != 0 && "$EXIT_STATUS" == 0 ]]; then FINAL_STATUS="BLOCKED=yes"; STOP_REASON="artifacts_zip_failed"; EXIT_STATUS=2; write_final_summary || true; fi
+    set +e
+    build_artifacts_zip_bounded
+    zip_rc=$?
+    set -e
+    if [[ "$zip_rc" != 0 && "$EXIT_STATUS" == 0 ]]; then
+      FINAL_STATUS="BLOCKED=yes"
+      STOP_REASON="artifacts_zip_failed"
+      EXIT_STATUS=2
+      write_final_summary || true
+    fi
+  fi
+
+  set +e
+  attempt_final_lock_release
+  lock_rc=$?
+  set -e
+  if [[ "$lock_rc" != "0" ]]; then
+    FINAL_STATUS="BLOCKED=yes"
+    STOP_REASON="lock_release_failed_lock_preserved"
+    EXIT_STATUS=2
+    if [[ -n "${AUTOMATION_RUN_DIR:-}" ]]; then
+      write_final_summary || true
+      set +e
+      build_artifacts_zip_bounded
+      corrective_zip_rc=$?
+      set -e
+      [[ "$corrective_zip_rc" == "0" ]] || automation_log "lock_failure_artifacts_zip_failed exit=$corrective_zip_rc"
+    fi
+  elif [[ -n "${AUTOMATION_RUN_DIR:-}" ]]; then
+    write_final_summary || true
+  fi
+
+  if [[ -n "${AUTOMATION_RUN_DIR:-}" ]]; then
     telegram_notify_send_final "$SCRIPT_NAME" "${AUTOMATION_REPO_NAME:-betting-win-surebet}" "$FINAL_STATUS" "$STOP_REASON" "$CYCLES_ATTEMPTED" "$EXIT_STATUS" "$AUTOMATION_RUN_DIR" "$AUTOMATION_RUN_DIR/telegram_notification_status.txt" "$AUTOMATION_REPO_ROOT" || true
   fi
-  [[ "$LOCK_ACQUIRED" == 1 ]] && automation_release_lock || true
   printf 'run_dir=%s\n' "${AUTOMATION_RUN_DIR:-}"
   printf 'final_status=%s\n' "$FINAL_STATUS"
   printf 'stop_reason=%s\n' "$STOP_REASON"
   printf 'final_exit_code=%s\n' "$EXIT_STATUS"
   printf 'cycles_completed=%s\n' "$CYCLES_ATTEMPTED"
+  printf 'lock_release_status=%s\n' "$LOCK_RELEASE_STATUS"
+  printf 'lock_release_exit_code=%s\n' "$LOCK_RELEASE_EXIT_CODE"
+  printf 'lock_preserved=%s\n' "$LOCK_PRESERVED"
   exit "$EXIT_STATUS"
 }
 
@@ -711,8 +789,20 @@ if [[ "$PRINT_CONFIG" == 1 ]]; then print_config; exit 0; fi
 
 resolve_task_source
 ARTIFACT_HINT="$(resolve_artifact_hint || true)"
-automation_create_run_dir autonomous_bugfix
+trap 'finish $?' EXIT
+trap on_signal INT TERM
 AUTOMATION_SCRIPT_COMMAND="$0 $*"
+if [[ "$ALLOW_PARALLEL" == 1 ]]; then
+  automation_log 'lock=skipped allow_parallel=1'
+else
+  automation_acquire_lock "$SCRIPT_NAME" "$AUTOMATION_REPO_ROOT"
+  LOCK_ACQUIRED=1
+fi
+automation_create_run_dir autonomous_bugfix
+if [[ "$LOCK_ACQUIRED" == 1 ]]; then
+  automation_write_lock_file
+  automation_start_heartbeat
+fi
 mkdir -p "$AUTOMATION_RUN_DIR/preflight"
 {
   printf 'artifact_hint_resolved_before_run_dir=yes\n'
@@ -721,9 +811,6 @@ mkdir -p "$AUTOMATION_RUN_DIR/preflight"
   printf 'resolved_at=%s\n' "$(automation_now_iso)"
 } > "$AUTOMATION_RUN_DIR/preflight/retained-artifact-hint.env"
 
-trap 'finish $?' EXIT
-trap on_signal INT TERM
-if [[ "$ALLOW_PARALLEL" == 1 ]]; then automation_log 'lock=skipped allow_parallel=1'; else automation_acquire_lock "$SCRIPT_NAME" "$AUTOMATION_REPO_ROOT"; LOCK_ACQUIRED=1; automation_start_heartbeat; fi
 assert_active_node_runtime || { FINAL_STATUS=setup_failed; STOP_REASON=node_runtime_invalid; exit 1; }
 automation_collect_repo_snapshot "$AUTOMATION_RUN_DIR/initial-repo-snapshot"
 source_status_snapshot "$AUTOMATION_RUN_DIR/source-status-before.txt"
