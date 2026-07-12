@@ -173,7 +173,7 @@ run_paper_autopilot=standardized_no_service_parent_supervisor
 
 ## Bugfix autopilot hardening
 
-`run-autonomous-bugfix.sh` now uses a strict four-state audit contract and `run-bugfix-autopilot.sh` provides the bounded audit -> implementation -> same-area re-audit campaign workflow. The bugfix parent now applies the shared cross-controller guard before lock acquisition or campaign artifact creation, and Telegram final cards provide controller-specific next actions for parent terminal states.
+`run-autonomous-bugfix.sh` now uses a strict four-state audit contract and `run-bugfix-autopilot.sh` provides the bounded audit -> implementation -> same-area re-audit campaign workflow. The bugfix parent applies the shared cross-controller guard, atomically claims a complete lock before campaign artifacts, preserves unverifiable child/release locks, and sends Telegram only after terminal lock classification.
 
 
 ## Run-script hardening wave 4
@@ -212,3 +212,16 @@ run_paper_autopilot_child_cleanup=fail_closed_with_preserved_lock
 ```
 
 Concurrent paper starts cannot both acquire the same repo-scoped lock. A failed managed-child identity check or strict release no longer appears as paper success.
+
+
+## Bugfix parent lock completion
+
+```text
+run_bugfix_autopilot_lock=atomic_full_file_parent_claim
+run_bugfix_autopilot_child_cleanup=fail_closed_with_preserved_lock
+run_bugfix_autopilot_lock_release=classified_before_telegram
+```
+
+Concurrent bugfix-parent starts cannot observe or claim an empty live lock. Child-identity or strict release failure becomes a blocked exit with corrected evidence and machine-readable lock state.
+
+Both parent heartbeat workers now update only lock mtime, poll for shutdown every second, and never rewrite the full lock env from a background snapshot. Shared TERM/KILL escalation verifies process exit before lock removal.

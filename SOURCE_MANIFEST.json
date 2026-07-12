@@ -1,17 +1,17 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-07-12T13:30:21Z",
-  "overlay": "run-script-hardening-wave7-standalone-lock-lifecycle",
+  "generated": "2026-07-12T14:15:02Z",
+  "overlay": "run-script-hardening-wave9-parent-lock-finalization-heartbeat-safety",
   "files": [
     {
       "path": ".automation/README.md",
-      "sha256": "eddb240abe2e8abd4c2142c646055ed5bc573d69b3ba25d63ba7dd0d38d0f3b1",
-      "size": 4027
+      "sha256": "527ca1c6e34e1cee19f79f01681c2211414e5e709c2cc6c7b4f33bc1de04221f",
+      "size": 4546
     },
     {
       "path": ".automation/lib/controller_hardening_v2.sh",
-      "sha256": "fda5e815e50c778fa35ff8386f01a503c7851be4e20103bb8feca603117d5d98",
-      "size": 11806
+      "sha256": "e1c0afe8ae93609abc34fe98896272df4fda99c5eeccc5dc47e32bc1aa1defe2",
+      "size": 14402
     },
     {
       "path": ".automation/lib/run_common.sh",
@@ -20,8 +20,8 @@
     },
     {
       "path": ".automation/lib/telegram_notify.sh",
-      "sha256": "d5e046a10d59632303b8976cbde08537dafd5da414cfd524dbf723897f6a0f63",
-      "size": 15567
+      "sha256": "d5be18a122c52a18a68b5e5cd13377089cac138aa187ef1345852076501e3b5e",
+      "size": 15765
     },
     {
       "path": ".env.example",
@@ -50,8 +50,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "1933198f5c64f1b246e3981fc4b4397515f39a6c7bcfa8ff70c96fc114b34f29",
-      "size": 40171
+      "sha256": "f2c2f3e341176cc4d191685d30cb1ae045cc44821d21a99511cefff3a3e5f839",
+      "size": 42145
     },
     {
       "path": "DOCUMENTATION_CHECK_REPORT.md",
@@ -60,13 +60,13 @@
     },
     {
       "path": "PROJECT_STATUS.md",
-      "sha256": "f06a7bf8257636c93b0edab4cf1196be7b00c2be13af3c1d6cc78283c498c82a",
-      "size": 12597
+      "sha256": "6f030cad757bb4770272dbf502af91483e15bdd115f17abceb1aab063dd27818",
+      "size": 13266
     },
     {
       "path": "README.md",
-      "sha256": "4f5698573b4d37d9ea4c45e07d412a75e3943ef9998cf5ef7c9b76945debd4b4",
-      "size": 11341
+      "sha256": "40d5acca163a0cd71e577dbd4a99d4c58dffcfec2126c7ba6486ed2d8f297f73",
+      "size": 11666
     },
     {
       "path": "STARTER_PACK.md",
@@ -270,8 +270,8 @@
     },
     {
       "path": "docs/automation/README.md",
-      "sha256": "06bb450a412faa065f6bb49d3e83e52735102f4a360b7993c91a01487c079b99",
-      "size": 7345
+      "sha256": "e2598b5b505fa18e22d2b86540634cb33399817d719cfaef8932fddca29535b0",
+      "size": 7663
     },
     {
       "path": "docs/automation/SSH_KEY_SETUP.md",
@@ -290,8 +290,8 @@
     },
     {
       "path": "docs/automation/bugfix-autopilot.md",
-      "sha256": "d06e70454b05d5a59135ca5e07bde311a2859e23b80766c8b5b9178ba6856b63",
-      "size": 2743
+      "sha256": "51b5aceaecb5b7b435674be400dce840d55ea1219951142e0857fc4a9c50fc57",
+      "size": 3581
     },
     {
       "path": "docs/automation/current-implementation-task.md",
@@ -300,8 +300,8 @@
     },
     {
       "path": "docs/automation/paper-autopilot.md",
-      "sha256": "3c174e987fe6fb6bf56eff40d59a4288bd08798c891d0ab39c4075e44ea0d615",
-      "size": 7272
+      "sha256": "c2de351b1e25db90c878faa34242791006a143777d2b90b9b5834bd0ba00fe68",
+      "size": 7660
     },
     {
       "path": "docs/automation/paper-evaluation.md",
@@ -315,8 +315,8 @@
     },
     {
       "path": "docs/automation/telegram-notifications.md",
-      "sha256": "2f002a378a02cff0c1a2aa2ca2cd347446beea138057988b2490672a27cd2cca",
-      "size": 2560
+      "sha256": "84797e24a35345175f9a24785a9377cf4ba64b6876b95c1f536a82f8bc07b5d3",
+      "size": 2595
     },
     {
       "path": "docs/autonomous_loop_contract.md",
@@ -370,8 +370,8 @@
     },
     {
       "path": "docs/repo_status_current.md",
-      "sha256": "5b9a9594e7a3acbbff52e3923de8b8b6b7dd98bd8e8fd7d6b897ece5345e70d8",
-      "size": 13161
+      "sha256": "442ff77e8ddb979a0b43d53bd9314aa6d0a795960be8d4bfe3e0c079f9e3e703",
+      "size": 13544
     },
     {
       "path": "open_log.sh",
@@ -615,13 +615,13 @@
     },
     {
       "path": "run-bugfix-autopilot.sh",
-      "sha256": "5e5928f8d53d03f498ac236c6c49d4f0b2ab04830464ebe96ddaa8443de5044d",
-      "size": 49537
+      "sha256": "2028788fb75c0ee6363f14f357044c7fc6ca99e39a8082a607d518f09402608b",
+      "size": 55571
     },
     {
       "path": "run-paper-autopilot.sh",
-      "sha256": "10354e8b6c53c1e10a524474951136e488e39e5d942a56a69e60b16b0bcc4a4b",
-      "size": 60736
+      "sha256": "eb0ea87957524585cb15bd2abacaca6b20fdd62f158c2479b6c9496ea75a5c54",
+      "size": 62441
     },
     {
       "path": "run-paper-evaluation.sh",
@@ -675,8 +675,8 @@
     },
     {
       "path": "scripts/validate_autonomous_controller_contract.py",
-      "sha256": "b13ba13c6d64b5b9b6e2d23393dc21d80f254318325dc6eca1ac09659c9c3576",
-      "size": 19827
+      "sha256": "412fc46a934f34dff208d2badc1a66fc4aad6d3f69dc48be321c3be43eddad21",
+      "size": 21878
     },
     {
       "path": "scripts/validate_contract_boundary.py",
@@ -905,8 +905,8 @@
     },
     {
       "path": "tests/autonomous-controller-contract.test.ts",
-      "sha256": "2c7a8df58c3b7fff39e89df96e6e821bbe6eecf6fe9bad7759077dca283d2ff0",
-      "size": 15501
+      "sha256": "ad833faecdbf2905707fac75965bc3e25e58b80d47827b5c21000d5aa0be1a97",
+      "size": 15836
     },
     {
       "path": "tests/betting-win-adapters.test.ts",
@@ -925,8 +925,8 @@
     },
     {
       "path": "tests/bugfix-autopilot-contract.test.ts",
-      "sha256": "d096dd20f0e4531943f0e2d1a20b38dc1be994a99870b4b88cf6f5e39dea6746",
-      "size": 14693
+      "sha256": "4bb3e79818265c261f1034e2ba81fca1e81be970df1af44ef00f8278f01071a1",
+      "size": 15192
     },
     {
       "path": "tests/complete-set.test.ts",
@@ -1050,8 +1050,8 @@
     },
     {
       "path": "tests/paper-autopilot-contract.test.ts",
-      "sha256": "27f2033886d5c56f791835daceb494f2dc7419971e4fdae59457be6725815432",
-      "size": 4581
+      "sha256": "73f22fd7d58f34dbb788a77be19ac906fb32f0ccbbc580b78cfdfce765e0ca78",
+      "size": 4756
     },
     {
       "path": "tests/paper-evaluation-shell-hardening.test.ts",
@@ -1105,8 +1105,13 @@
     },
     {
       "path": "tests/run-script-hardening-wave8.test.ts",
-      "sha256": "84cdba2bf51c74f54f41312da15e47132c51f63f129ed3a6e81680b2d53f2485",
-      "size": 12862
+      "sha256": "3b657dfc5e6d525e3d39072a59bfd35db86a102bfebcc51430c73a969a86b75f",
+      "size": 12882
+    },
+    {
+      "path": "tests/run-script-hardening-wave9.test.ts",
+      "sha256": "858753ba7249b95049b680307f3ab1a21c843c6e423acfd30efd5d48acdb3308",
+      "size": 12057
     },
     {
       "path": "tests/scenario-cashflow.test.ts",
@@ -1125,13 +1130,13 @@
     },
     {
       "path": "tests/telegram-notify-format.test.ts",
-      "sha256": "d3f7e116da33ec15ac6430e10f92ad9c23d7a38a587c4ce82670f83d780e4bf0",
-      "size": 6107
+      "sha256": "c23308c74c1769efe4e173d4633810e991f1cdd8847eb5691f8f6697261889c2",
+      "size": 6582
     },
     {
       "path": "tests/telegram-notify-helper.test.ts",
-      "sha256": "35157928dc82e282349d01db2fcc9d5e55e55da955218aa7d97eba168d38812a",
-      "size": 2751
+      "sha256": "ca8ddf985538361bc9e2491148b81dacc3a8c090d881b8ad5b9b9ea8f4e7ab37",
+      "size": 2765
     },
     {
       "path": "tests/three-repo-surebet-boundary.test.ts",

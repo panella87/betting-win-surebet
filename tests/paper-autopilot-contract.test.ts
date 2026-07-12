@@ -26,6 +26,10 @@ test('paper autopilot is a surebet no-service parent supervisor', () => {
     'atomic_parent_lock_acquisition=enabled',
     'parent_child_cleanup_failure_classification=enabled',
     'parent_lock_release_failure_classification=enabled',
+    'verified_kill_escalation=enabled',
+    'responsive_parent_heartbeat=enabled',
+    'heartbeat_update_mode=file_mtime_no_state_rewrite',
+    'HEARTBEAT_SOURCE=file_mtime',
     'telegram_notify_send_final "run-paper-autopilot.sh"',
   ]) contains(script, marker);
   assert.doesNotMatch(script, /scripts\/load-node-runtime\.sh/);

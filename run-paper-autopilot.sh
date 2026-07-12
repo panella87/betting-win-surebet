@@ -12,7 +12,7 @@ AUTOMATION_REPO_ROOT="$SCRIPT_DIR"
 # shellcheck source=.automation/lib/telegram_notify.sh
 . "$SCRIPT_DIR/.automation/lib/telegram_notify.sh"
 
-SCRIPT_VERSION="2026-07-12.surebet-v4-atomic-parent-lock-finalization"
+SCRIPT_VERSION="2026-07-12.surebet-v6-parent-lock-heartbeat-safety"
 SCRIPT_NAME="run-paper-autopilot.sh"
 DURATION_SECONDS="$(automation_parse_duration_seconds 7d)"
 PAPER_DURATION_SECONDS="$(automation_parse_duration_seconds 72h)"
@@ -77,6 +77,7 @@ CHILD_CLEANUP_EXIT_CODE=0
 LOCK_RELEASE_STATUS="not_attempted"
 LOCK_RELEASE_EXIT_CODE=0
 LOCK_PRESERVED="no"
+PARENT_LOCK_ENV_LINES=()
 
 usage() {
   cat <<'EOF_USAGE'
@@ -270,6 +271,9 @@ atomic_parent_lock_acquisition=enabled
 parent_child_cleanup_failure_classification=enabled
 parent_lock_release_failure_classification=enabled
 lock_preservation_on_child_identity_failure=enabled
+verified_kill_escalation=enabled
+responsive_parent_heartbeat=enabled
+heartbeat_update_mode=file_mtime_no_state_rewrite
 EOF_CONFIG
 }
 
@@ -319,22 +323,29 @@ lock_value() {
   printf '%s\n' "${AUTOMATION_V2_ENV[$key]-}"
 }
 
+populate_parent_lock_env_lines() {
+  PARENT_LOCK_ENV_LINES=(
+    "LOCK_SCHEMA_VERSION=1"
+    "CONTROLLER=$SCRIPT_NAME"
+    "CONTROLLER_PID=$$"
+    "REPOSITORY=${AUTOMATION_REPO_NAME:-betting-win-surebet}"
+    "REPO_REALPATH=$(realpath -e -- "$AUTOMATION_REPO_ROOT")"
+    "SCRIPT_REALPATH=$(realpath -e -- "$AUTOMATION_REPO_ROOT/$SCRIPT_NAME")"
+    "RUN_DIR=${AUTOMATION_RUN_DIR:-}"
+    "HEARTBEAT_EPOCH=$(automation_now_epoch)"
+    "HEARTBEAT_AT=$(automation_now_iso)"
+    "HEARTBEAT_SOURCE=file_mtime"
+    "ACTIVE_CHILD_PID=${ACTIVE_CHILD_PID:-}"
+    "ACTIVE_CHILD_KIND=${ACTIVE_CHILD_KIND:-none}"
+    "ACTIVE_CHILD_SCRIPT=${ACTIVE_CHILD_SCRIPT:-}"
+    "ACTIVE_CHILD_COMMAND=${ACTIVE_CHILD_COMMAND:-}"
+  )
+}
+
 write_parent_lock_file() {
   local target="$1"
-  automation_v2_write_env_atomic "$target" \
-    "LOCK_SCHEMA_VERSION=1" \
-    "CONTROLLER=$SCRIPT_NAME" \
-    "CONTROLLER_PID=$$" \
-    "REPOSITORY=${AUTOMATION_REPO_NAME:-betting-win-surebet}" \
-    "REPO_REALPATH=$(realpath -e -- "$AUTOMATION_REPO_ROOT")" \
-    "SCRIPT_REALPATH=$(realpath -e -- "$AUTOMATION_REPO_ROOT/$SCRIPT_NAME")" \
-    "RUN_DIR=${AUTOMATION_RUN_DIR:-}" \
-    "HEARTBEAT_EPOCH=$(automation_now_epoch)" \
-    "HEARTBEAT_AT=$(automation_now_iso)" \
-    "ACTIVE_CHILD_PID=${ACTIVE_CHILD_PID:-}" \
-    "ACTIVE_CHILD_KIND=${ACTIVE_CHILD_KIND:-none}" \
-    "ACTIVE_CHILD_SCRIPT=${ACTIVE_CHILD_SCRIPT:-}" \
-    "ACTIVE_CHILD_COMMAND=${ACTIVE_CHILD_COMMAND:-}"
+  populate_parent_lock_env_lines
+  automation_v2_write_env_atomic "$target" "${PARENT_LOCK_ENV_LINES[@]}"
 }
 
 write_parent_lock() {
@@ -343,127 +354,140 @@ write_parent_lock() {
 }
 
 claim_parent_lock() {
-  local claim
-  claim="${LOCK_FILE}.claim.$$.$RANDOM"
-  write_parent_lock_file "$claim" || { rm -f -- "$claim"; return 2; }
-  if ln -- "$claim" "$LOCK_FILE" 2>/dev/null; then
-    rm -f -- "$claim"
-    return 0
-  fi
-  rm -f -- "$claim"
-  return 1
+  populate_parent_lock_env_lines
+  automation_v2_claim_env_lock_atomic "$LOCK_FILE" "${PARENT_LOCK_ENV_LINES[@]}"
 }
 
 status_lock() {
-  if [[ ! -f "$LOCK_FILE" ]]; then
-    echo "LOCK_STATUS=absent"
-    return 0
-  fi
+  [[ -f "$LOCK_FILE" && ! -L "$LOCK_FILE" ]] || {
+    [[ ! -e "$LOCK_FILE" ]] && { echo "LOCK_STATUS=absent"; return 0; }
+    echo "ERROR: paper-autopilot lock is not a non-symlink regular file: $LOCK_FILE" >&2
+    return 2
+  }
   automation_v2_load_env_strict "$LOCK_FILE" || return 2
   echo "LOCK_STATUS=present"
   cat "$LOCK_FILE"
-  local pid="${AUTOMATION_V2_ENV[CONTROLLER_PID]-}"
-  if [[ "$pid" =~ ^[1-9][0-9]*$ ]] && kill -0 "$pid" 2>/dev/null; then echo "PID_STATUS=alive"; else echo "PID_STATUS=dead"; fi
-  local child="${AUTOMATION_V2_ENV[ACTIVE_CHILD_PID]-}"
-  if [[ "$child" =~ ^[1-9][0-9]*$ ]] && kill -0 "$child" 2>/dev/null; then echo "ACTIVE_CHILD_STATUS=alive"; else echo "ACTIVE_CHILD_STATUS=absent_or_dead"; fi
+  local pid="${AUTOMATION_V2_ENV[CONTROLLER_PID]-}" child="${AUTOMATION_V2_ENV[ACTIVE_CHILD_PID]-}" heartbeat_mtime
+  heartbeat_mtime="$(automation_v2_lock_mtime_epoch "$LOCK_FILE")" || return 2
+  echo "HEARTBEAT_MTIME_EPOCH=$heartbeat_mtime"
+  automation_v2_pid_alive "$pid" && echo "PID_STATUS=alive" || echo "PID_STATUS=dead"
+  automation_v2_pid_alive "$child" && echo "ACTIVE_CHILD_STATUS=alive" || echo "ACTIVE_CHILD_STATUS=absent_or_dead"
 }
 
 terminate_verified_child_from_loaded_lock() {
   local child_pid="${AUTOMATION_V2_ENV[ACTIVE_CHILD_PID]-}" child_script="${AUTOMATION_V2_ENV[ACTIVE_CHILD_SCRIPT]-}"
   [[ "$child_pid" =~ ^[1-9][0-9]*$ ]] || return 0
-  kill -0 "$child_pid" 2>/dev/null || return 0
+  automation_v2_pid_alive "$child_pid" || return 0
   [[ -n "$child_script" ]] || { echo "ERROR: live child PID has no script identity" >&2; return 2; }
   automation_v2_process_matches_script "$child_pid" "$child_script" || {
     echo "ERROR: refusing to terminate child PID with mismatched command: $child_pid" >&2
     return 2
   }
-  automation_v2_terminate_process_group "$child_pid" "${AUTOMATION_GRACEFUL_UNLOCK_SECONDS:-30}"
+  automation_v2_terminate_process_group "$child_pid" "${AUTOMATION_GRACEFUL_UNLOCK_SECONDS:-30}" 10
 }
 
 force_unlock_parent() {
-  if [[ ! -f "$LOCK_FILE" ]]; then echo "FORCE_UNLOCK=no_lock"; return 0; fi
+  [[ -f "$LOCK_FILE" && ! -L "$LOCK_FILE" ]] || {
+    [[ ! -e "$LOCK_FILE" ]] && { echo "FORCE_UNLOCK=no_lock"; return 0; }
+    echo "ERROR: paper-autopilot lock is not a non-symlink regular file: $LOCK_FILE" >&2
+    return 2
+  }
   automation_v2_load_env_strict "$LOCK_FILE" || return 2
-  [[ "${AUTOMATION_V2_ENV[REPO_REALPATH]-}" == "$(realpath -e -- "$AUTOMATION_REPO_ROOT")" ]] || { echo "ERROR: lock repo mismatch" >&2; return 2; }
-  [[ "${AUTOMATION_V2_ENV[SCRIPT_REALPATH]-}" == "$(realpath -e -- "$AUTOMATION_REPO_ROOT/$SCRIPT_NAME")" ]] || { echo "ERROR: lock script mismatch" >&2; return 2; }
+  local repo_real script_real pid
+  repo_real="$(realpath -e -- "$AUTOMATION_REPO_ROOT")"
+  script_real="$(realpath -e -- "$AUTOMATION_REPO_ROOT/$SCRIPT_NAME")"
+  [[ "${AUTOMATION_V2_ENV[LOCK_SCHEMA_VERSION]-}" == 1 ]] || { echo "ERROR: lock schema mismatch" >&2; return 2; }
+  [[ "${AUTOMATION_V2_ENV[CONTROLLER]-}" == "$SCRIPT_NAME" ]] || { echo "ERROR: lock controller mismatch" >&2; return 2; }
+  [[ "${AUTOMATION_V2_ENV[REPO_REALPATH]-}" == "$repo_real" ]] || { echo "ERROR: lock repo mismatch" >&2; return 2; }
+  [[ "${AUTOMATION_V2_ENV[SCRIPT_REALPATH]-}" == "$script_real" ]] || { echo "ERROR: lock script mismatch" >&2; return 2; }
   terminate_verified_child_from_loaded_lock || return 2
-  local pid="${AUTOMATION_V2_ENV[CONTROLLER_PID]-}"
-  if [[ "$pid" =~ ^[1-9][0-9]*$ ]] && kill -0 "$pid" 2>/dev/null; then
-    automation_v2_process_matches_script "$pid" "$AUTOMATION_REPO_ROOT/$SCRIPT_NAME" || { echo "ERROR: refusing to terminate mismatched controller PID" >&2; return 2; }
+  pid="${AUTOMATION_V2_ENV[CONTROLLER_PID]-}"
+  [[ "$pid" =~ ^[1-9][0-9]*$ ]] || return 2
+  if automation_v2_pid_alive "$pid"; then
+    automation_v2_process_matches_script "$pid" "$script_real" || { echo "ERROR: refusing to terminate mismatched controller PID" >&2; return 2; }
     kill -TERM "$pid" 2>/dev/null || true
-    local waited=0
-    while kill -0 "$pid" 2>/dev/null && (( waited < ${AUTOMATION_GRACEFUL_UNLOCK_SECONDS:-30} )); do sleep 1; waited=$((waited + 1)); done
-    if kill -0 "$pid" 2>/dev/null; then
+    if ! automation_v2_wait_for_pid_exit "$pid" "${AUTOMATION_GRACEFUL_UNLOCK_SECONDS:-30}"; then
       kill -KILL "$pid" 2>/dev/null || true
-      waited=0
-      while kill -0 "$pid" 2>/dev/null && (( waited < 10 )); do sleep 1; waited=$((waited + 1)); done
-      kill -0 "$pid" 2>/dev/null && { echo "ERROR: force-unlock failed: verified controller PID remains alive: $pid" >&2; return 2; }
+      automation_v2_wait_for_pid_exit "$pid" 10 || { echo "ERROR: force-unlock failed: verified controller PID remains alive: $pid" >&2; return 2; }
     fi
   fi
-  rm -f -- "$LOCK_FILE"
-  [[ ! -e "$LOCK_FILE" ]] || { echo "ERROR: force-unlock failed to remove lock: $LOCK_FILE" >&2; return 2; }
+  if [[ -e "$LOCK_FILE" ]]; then
+    automation_v2_release_owned_env_lock "$LOCK_FILE" "$pid" "$repo_real" "$script_real" || return 2
+  fi
   echo "FORCE_UNLOCK=done"
 }
 
 refresh_parent_lock_heartbeat() {
-  [[ -f "$LOCK_FILE" ]] || return 0
+  [[ -f "$LOCK_FILE" && ! -L "$LOCK_FILE" ]] || return 0
   automation_v2_load_env_strict "$LOCK_FILE" || return 2
   [[ "${AUTOMATION_V2_ENV[CONTROLLER_PID]-}" == "$$" ]] || return 2
-  AUTOMATION_V2_ENV[HEARTBEAT_EPOCH]="$(automation_now_epoch)"
-  AUTOMATION_V2_ENV[HEARTBEAT_AT]="$(automation_now_iso)"
-  automation_v2_write_loaded_env_atomic "$LOCK_FILE"
+  # Heartbeats update only lock liveness. Rewriting the complete env file from
+  # this background process can restore stale active-child metadata.
+  touch -m -- "$LOCK_FILE" || return 2
 }
 
 acquire_parent_lock() {
+  local repo_real script_real pid heartbeat age waited=0
+  repo_real="$(realpath -e -- "$AUTOMATION_REPO_ROOT")"
+  script_real="$(realpath -e -- "$AUTOMATION_REPO_ROOT/$SCRIPT_NAME")"
   mkdir -p -- "$(dirname -- "$LOCK_FILE")"
-  if [[ -f "$LOCK_FILE" ]]; then
-    automation_v2_load_env_strict "$LOCK_FILE" || return 2
-    [[ "${AUTOMATION_V2_ENV[REPO_REALPATH]-}" == "$(realpath -e -- "$AUTOMATION_REPO_ROOT")" ]] || { echo "ERROR: existing lock repo mismatch" >&2; return 2; }
-    [[ "${AUTOMATION_V2_ENV[SCRIPT_REALPATH]-}" == "$(realpath -e -- "$AUTOMATION_REPO_ROOT/$SCRIPT_NAME")" ]] || { echo "ERROR: existing lock script mismatch" >&2; return 2; }
-    local pid="${AUTOMATION_V2_ENV[CONTROLLER_PID]-}" heartbeat="${AUTOMATION_V2_ENV[HEARTBEAT_EPOCH]-0}" age
-    if [[ "$pid" =~ ^[1-9][0-9]*$ ]] && kill -0 "$pid" 2>/dev/null; then
+  if [[ -e "$LOCK_FILE" ]]; then
+    [[ -f "$LOCK_FILE" && ! -L "$LOCK_FILE" ]] || { echo "ERROR: existing paper-autopilot lock is not a non-symlink regular file" >&2; return 2; }
+    automation_v2_load_env_strict "$LOCK_FILE" || { echo "ERROR: existing paper-autopilot lock is malformed; inspect before --force-unlock" >&2; return 2; }
+    [[ "${AUTOMATION_V2_ENV[LOCK_SCHEMA_VERSION]-}" == 1 ]] || { echo "ERROR: existing lock schema mismatch" >&2; return 2; }
+    [[ "${AUTOMATION_V2_ENV[CONTROLLER]-}" == "$SCRIPT_NAME" ]] || { echo "ERROR: existing lock controller mismatch" >&2; return 2; }
+    [[ "${AUTOMATION_V2_ENV[REPO_REALPATH]-}" == "$repo_real" ]] || { echo "ERROR: existing lock repo mismatch" >&2; return 2; }
+    [[ "${AUTOMATION_V2_ENV[SCRIPT_REALPATH]-}" == "$script_real" ]] || { echo "ERROR: existing lock script mismatch" >&2; return 2; }
+    [[ "${AUTOMATION_V2_ENV[HEARTBEAT_SOURCE]-}" == file_mtime ]] || { echo "ERROR: existing lock heartbeat source mismatch" >&2; return 2; }
+    pid="${AUTOMATION_V2_ENV[CONTROLLER_PID]-}"
+    heartbeat="$(automation_v2_lock_mtime_epoch "$LOCK_FILE")" || return 2
+    [[ "$pid" =~ ^[1-9][0-9]*$ ]] || { echo "ERROR: existing lock controller PID is invalid" >&2; return 2; }
+    if automation_v2_pid_alive "$pid"; then
       age=$(( $(automation_now_epoch) - heartbeat ))
       if (( age <= ${AUTOMATION_LOCK_STALE_SECONDS:-3600} )); then
         echo "ERROR: paper autopilot lock is active" >&2
         return 2
       fi
       terminate_verified_child_from_loaded_lock || return 2
-      automation_v2_process_matches_script "$pid" "$AUTOMATION_REPO_ROOT/$SCRIPT_NAME" || { echo "ERROR: stale lock PID identity mismatch" >&2; return 2; }
+      automation_v2_process_matches_script "$pid" "$script_real" || { echo "ERROR: stale lock PID identity mismatch" >&2; return 2; }
       kill -TERM "$pid" 2>/dev/null || true
-      local waited=0
-      while kill -0 "$pid" 2>/dev/null && (( waited < ${AUTOMATION_GRACEFUL_UNLOCK_SECONDS:-30} )); do sleep 1; waited=$((waited + 1)); done
-      kill -0 "$pid" 2>/dev/null && { echo "ERROR: stale parent did not terminate; use --force-unlock after verification" >&2; return 2; }
+      while automation_v2_pid_alive "$pid" && (( waited < ${AUTOMATION_GRACEFUL_UNLOCK_SECONDS:-30} )); do sleep 1; waited=$((waited + 1)); done
+      automation_v2_pid_alive "$pid" && { echo "ERROR: stale parent did not terminate; use --force-unlock after verification" >&2; return 2; }
     fi
-    rm -f -- "$LOCK_FILE"
+    if [[ -e "$LOCK_FILE" ]]; then
+      automation_v2_release_owned_env_lock "$LOCK_FILE" "$pid" "$repo_real" "$script_real" || return 2
+    fi
   fi
-  LOCK_ACQUIRED=1
   if ! claim_parent_lock; then
-    LOCK_ACQUIRED=0
     echo "ERROR: paper autopilot lock was acquired concurrently" >&2
     return 2
   fi
+  LOCK_ACQUIRED=1
   (
     trap 'exit 0' TERM INT
+    local_last_heartbeat=0
     while kill -0 "$$" 2>/dev/null; do
-      refresh_parent_lock_heartbeat >/dev/null 2>&1 || true
-      sleep "${AUTOMATION_LOCK_HEARTBEAT_SECONDS:-60}"
+      local_now="$(automation_now_epoch)"
+      if (( local_now - local_last_heartbeat >= ${AUTOMATION_LOCK_HEARTBEAT_SECONDS:-60} )); then
+        refresh_parent_lock_heartbeat >/dev/null 2>&1 || true
+        local_last_heartbeat="$local_now"
+      fi
+      sleep 1
     done
   ) &
   HEARTBEAT_PID=$!
 }
 
 release_parent_lock() {
-  local pid
+  local repo_real script_real
   if [[ -n "$HEARTBEAT_PID" ]]; then
     kill "$HEARTBEAT_PID" 2>/dev/null || true
     wait "$HEARTBEAT_PID" 2>/dev/null || true
     HEARTBEAT_PID=""
   fi
-  [[ -f "$LOCK_FILE" && ! -L "$LOCK_FILE" ]] || return 2
-  automation_v2_load_env_strict "$LOCK_FILE" >/dev/null 2>&1 || return 2
-  pid="${AUTOMATION_V2_ENV[CONTROLLER_PID]-}"
-  [[ "$pid" == "$$" ]] || return 2
-  rm -f -- "$LOCK_FILE" || return 2
-  [[ ! -e "$LOCK_FILE" ]] || return 2
+  repo_real="$(realpath -e -- "$AUTOMATION_REPO_ROOT")"
+  script_real="$(realpath -e -- "$AUTOMATION_REPO_ROOT/$SCRIPT_NAME")"
+  automation_v2_release_owned_env_lock "$LOCK_FILE" "$$" "$repo_real" "$script_real" || return 2
   LOCK_ACQUIRED=0
 }
 

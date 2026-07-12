@@ -22,7 +22,7 @@ test('telegram helper builds pretty HTML final cards and escapes fields', () => 
   assert.match(output, /<b>📦 Repo<\/b>\s+<code>betting-win-surebet<\/code>/);
   assert.match(output, /<b>📊 Status<\/b> <b>🧪 TEST<\/b> <code>TEST<\/code>/);
   assert.match(output, /manual&lt;test&gt;&amp;stop/);
-  assert.match(output, /<code>20260712\.pretty_v4_lock_actions<\/code>/);
+  assert.match(output, /<code>20260712\.pretty_v5_parent_lock_actions<\/code>/);
 });
 
 test('surebet blocked-on-pinned-bundle status renders as blocked instead of success', () => {
@@ -50,7 +50,7 @@ test('telegram dry-run writes one HTML status payload without contacting Telegra
     });
 
     const payload = readFileSync(statusFile, 'utf-8');
-    assert.match(payload, /telegram_notification=dry_run parse_mode=HTML message_version=20260712\.pretty_v4_lock_actions/);
+    assert.match(payload, /telegram_notification=dry_run parse_mode=HTML message_version=20260712\.pretty_v5_parent_lock_actions/);
     assert.match(payload, /telegram_notification_text_start/);
     assert.match(payload, /telegram_notification_text_end/);
   } finally {
@@ -71,6 +71,10 @@ test('telegram helper gives bugfix campaign statuses specific next actions', () 
   const mismatch = runBash(`. .automation/lib/telegram_notify.sh && telegram_notify_build_final_message 'run-bugfix-autopilot.sh' 'betting-win-surebet' 'BUGFIX_AUTOPILOT_BLOCKED_HANDOFF_MISMATCH' 'invalid_handoff' '2' '2' '${REPO_ROOT}/artifacts/bugfix_autopilot_mismatch' '${REPO_ROOT}'`);
   assert.match(mismatch, /<b>📊 Status<\/b> <b>🛑 BLOCKED<\/b>/);
   assert.match(mismatch, /child_result\.env/);
+
+  const lockRelease = runBash(`. .automation/lib/telegram_notify.sh && telegram_notify_build_final_message 'run-bugfix-autopilot.sh' 'betting-win-surebet' 'BUGFIX_AUTOPILOT_BLOCKED_LOCK_RELEASE' 'lock_release_failed_lock_preserved' '2' '2' '${REPO_ROOT}/artifacts/bugfix_autopilot_lock' '${REPO_ROOT}'`);
+  assert.match(lockRelease, /<b>📊 Status<\/b> <b>🛑 BLOCKED<\/b>/);
+  assert.match(lockRelease, /bugfix-parent lock ownership and release evidence/);
 });
 
 test('telegram helper distinguishes accepted private reports from paper controller blockers', () => {

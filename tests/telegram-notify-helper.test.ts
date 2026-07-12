@@ -16,7 +16,7 @@ test('telegram helper uses HTML parse mode and never prints secrets directly', (
   const source = readFileSync(HELPER, 'utf-8');
 
   assert.equal(source.includes("parse_mode: 'HTML'"), true);
-  assert.equal(source.includes('20260712.pretty_v4_lock_actions'), true);
+  assert.equal(source.includes('20260712.pretty_v5_parent_lock_actions'), true);
   assert.equal(source.includes('telegram_notify_build_final_message'), true);
   assert.equal(source.includes('telegram_notify_log_payload'), true);
   assert.equal(source.includes('console.log(token)'), false);
@@ -53,7 +53,7 @@ cat ${shellQuote(statusFile)}
       .length;
 
     assert.equal(notificationLineCount, 1);
-    assert.match(output, /telegram_notification=dry_run parse_mode=HTML message_version=20260712\.pretty_v4_lock_actions/);
+    assert.match(output, /telegram_notification=dry_run parse_mode=HTML message_version=20260712\.pretty_v5_parent_lock_actions/);
     assert.match(output, /telegram_notification_text_start/);
     assert.match(output, /<b>🧪 telegram-test finished<\/b>/);
     assert.match(output, /<b>📦 Repo<\/b>\s+<code>betting-win-surebet<\/code>/);

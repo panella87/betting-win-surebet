@@ -32,7 +32,7 @@ test('standard automation root scripts and shared helpers are installed', () => 
   assert.match(read('.automation/lib/telegram_notify.sh'), /telegram_notify_send_final\(\)/);
   assert.match(read('.automation/lib/telegram_notify.sh'), /telegram_notify_build_final_message\(\)/);
   assert.match(read('.automation/lib/telegram_notify.sh'), /telegram_notify_message_version\(\)/);
-  assert.match(read('.automation/lib/telegram_notify.sh'), /20260712\.pretty_v4_lock_actions/);
+  assert.match(read('.automation/lib/telegram_notify.sh'), /20260712\.pretty_v5_parent_lock_actions/);
   assert.match(read('.automation/lib/telegram_notify.sh'), /parse_mode: 'HTML'/);
 });
 
@@ -207,6 +207,10 @@ test('paper autopilot controller exposes no-service parent supervisor contract',
     'parent_child_cleanup_failure_classification=enabled',
     'parent_lock_release_failure_classification=enabled',
     'lock_preservation_on_child_identity_failure=enabled',
+    'verified_kill_escalation=enabled',
+    'responsive_parent_heartbeat=enabled',
+    'heartbeat_update_mode=file_mtime_no_state_rewrite',
+    'HEARTBEAT_SOURCE=file_mtime',
     'PAPER_AUTOPILOT_BLOCKED_CHILD_IDENTITY',
     'PAPER_AUTOPILOT_BLOCKED_LOCK_RELEASE',
     "printf 'lock_release_status=%s\\n'",
@@ -241,6 +245,8 @@ test('status docs record the hardened controller surface', () => {
   assertContains(status, 'run_autonomous_implementation=standardized_with_canonical_flags_and_telegram');
   assertContains(status, 'run_autonomous_bugfix=strict_four_state_read_only_audit_handoff');
   assertContains(status, 'run_bugfix_autopilot=bounded_eight_area_audit_implementation_reaudit_parent');
+  assertContains(status, 'Both parent controllers use atomic full-file lock claims');
+  assertContains(status, 'BUGFIX_AUTOPILOT_BLOCKED_LOCK_RELEASE');
   assertContains(status, 'run_paper_evaluation_standardization=standardized_with_telegram_no_service_private_fixture_pinned_bundle');
   assertContains(status, 'run_paper_evaluation=canonical_repo_local_private_fixture_and_pinned_bundle_only');
   assertContains(status, 'run_paper_autopilot=standardized_no_service_parent_supervisor');

@@ -193,11 +193,11 @@ Private fixture success remains blocked on Federico's pinned `betting-win` bundl
 
 ### Bugfix autopilot
 
-Use `run-bugfix-autopilot.sh` for an unattended eight-area read-only audit campaign. Confirmed defects move through a strict fingerprinted handoff to autonomous implementation, then the exact same area is re-audited before it can close. The parent rejects incompatible live root-controller locks before creating a campaign directory.
+Use `run-bugfix-autopilot.sh` for an unattended eight-area read-only audit campaign. Confirmed defects move through a strict fingerprinted handoff to autonomous implementation, then the exact same area is re-audited before it can close. The parent rejects incompatible live root-controller locks, atomically claims a complete lock before campaign artifacts, and exposes truthful child-cleanup and lock-release state at finalization.
 
 
 ## Standalone controller lock finalization
 
 All three standalone controllers, `run-autonomous-implementation.sh`, `run-autonomous-bugfix.sh`, and `run-paper-evaluation.sh`, acquire their repo-scoped locks before creating run directories. The shared lock claim is a full-file atomic hard-link operation, so concurrent starts cannot both pass a check-then-write race. Each controller exposes `lock_release_status`, `lock_release_exit_code`, and `lock_preserved` at termination. An unverifiable or unterminated managed child changes the result to a blocked state, preserves the lock for operator inspection, and updates final evidence before Telegram notification instead of reporting false success.
 
-`run-paper-autopilot.sh` now applies the same atomic full-file claim to its parent lock. Active-child identity/termination failure or strict parent-lock release failure is terminal, preserves the lock when present, and is reported through machine-readable output before Telegram.
+Both `run-paper-autopilot.sh` and `run-bugfix-autopilot.sh` apply atomic full-file claims to their parent locks. Active-child identity/termination failure or strict parent-lock release failure is terminal, preserves the lock when present, and is reported through machine-readable output before Telegram. Their responsive heartbeats update only lock mtime, never rewrite active-child fields from a background snapshot, and verified TERM/KILL escalation must prove the target PID exited before lock removal.

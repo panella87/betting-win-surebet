@@ -1,3 +1,17 @@
+# 2026-07-12 - Run-script hardening wave 9: parent lock finalization and heartbeat safety
+
+- Hardened `run-bugfix-autopilot.sh` with a complete atomic parent-lock claim, removing the short-lived empty-lock window during concurrent starts.
+- Added strict parent-lock ownership checks, verified TERM/KILL completion during `--force-unlock`, and explicit refusal to remove a lock while the verified controller remains alive.
+- Replaced suppressed bugfix-parent cleanup/release failures with `BUGFIX_AUTOPILOT_BLOCKED_CHILD_IDENTITY` and `BUGFIX_AUTOPILOT_BLOCKED_LOCK_RELEASE`, preserved-lock evidence, corrected summaries/archives, and machine-readable child-cleanup/lock-release fields.
+- Delayed Telegram notification until child cleanup and parent-lock release are fully classified.
+- Hardened `.automation/lib/controller_hardening_v2.sh` so TERM/KILL process-group escalation succeeds only after the target PID is verified dead.
+- Changed both parent heartbeat workers to poll for shutdown every second while refreshing liveness at the configured cadence, preventing finalization from stalling for the full heartbeat interval.
+- Changed both parent heartbeat updates to touch the lock mtime instead of rewriting the full env record, preventing a background heartbeat from restoring stale `ACTIVE_CHILD_*` metadata over a newer parent update.
+- Updated `run-paper-autopilot.sh` to require the same non-symlink lock, mtime-heartbeat, strict ownership-release, and verified force-unlock invariants.
+- Updated `.automation/lib/telegram_notify.sh` to `20260712.pretty_v5_parent_lock_actions` with dedicated bugfix-parent lock-release guidance.
+- Added executable regression coverage for atomic claims, child-identity failure, release failure, successful cleanup, verified force-unlock escalation, non-rewriting parent heartbeats, responsive shutdown, and lock-mtime validation.
+- Preserved the no-service, no-provider, no-direct-DB, no-execution, private-paper-only boundary.
+
 # 2026-07-12 - Run-script hardening wave 8: paper lock lifecycle and atomic parent finalization
 
 - Hardened `run-paper-evaluation.sh` so it acquires the repo-scoped lock before run-directory creation or stale-handoff rotation, rewrites the lock with the exact run path, and starts the heartbeat only after that rewrite.

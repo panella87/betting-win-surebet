@@ -26,7 +26,7 @@ The shared standalone lock contract rejects incompatible live root controllers b
 
 Standalone implementation, bug-audit, and paper-evaluation controllers now acquire an atomically claimed full lock before creating their run directories. Their terminal output includes lock-release status and preserved-lock state. A failed active-child cleanup can no longer be hidden behind a successful final status: the controller blocks, preserves the lock, rewrites terminal evidence, and notifies only after the failure is classified.
 
-The paper parent atomically claims a complete parent lock before campaign artifacts and reports child-cleanup plus lock-release state at finalization. It no longer accepts or rewrites legacy paper handoffs. It requires the canonical schema-v1 producer contract, verifies source/evidence integrity and exact child-result correlation, validates the implementation return through an exact allowlist, and forwards `--zip-timeout` to both child controllers.
+Both parent supervisors atomically claim complete parent locks before campaign artifacts and report child-cleanup plus lock-release state at finalization. Their heartbeat workers use lock mtime without rewriting the complete lock env, poll for shutdown every second, and therefore cannot overwrite newer active-child metadata or delay finalization for the full heartbeat interval. The paper parent additionally requires the canonical schema-v1 producer contract, verifies source/evidence integrity and exact child-result correlation, validates the implementation return through an exact allowlist, and forwards `--zip-timeout` to both child controllers.
 
 The root `run-*` controllers inherit the active Node runtime from the parent shell.
 Before launching long controllers, activate the repo runtime explicitly:
@@ -66,7 +66,7 @@ remote host.
 
 `check_progress.sh`, `watch_progress.sh`, and `open_log.sh` are read-only artifact
 viewers for `artifacts/autonomous_implementation_*`, `artifacts/autonomous_bugfix_*`,
-`artifacts/paper_evaluation_*`, and `artifacts/paper_autopilot_*`. `watch_progress.sh --base-url` is accepted for
+`artifacts/paper_evaluation_*`, `artifacts/paper_autopilot_*`, and `artifacts/bugfix_autopilot_*`. `watch_progress.sh --base-url` is accepted for
 workflow compatibility, but this repo has no service, so local artifacts are the
 source of truth.
 
@@ -96,7 +96,7 @@ profitability claims, and no execution-readiness claims.
 
 ## Bugfix autopilot
 
-`run-bugfix-autopilot.sh` is the unattended bounded source-audit campaign parent. It calls only `run-autonomous-bugfix.sh` and `run-autonomous-implementation.sh --handover-bugfix-audit`, requires a clean re-audit of the same campaign area after each implementation, and never calls paper evaluation or service lifecycle commands. Before acquiring its lock or creating campaign artifacts, it applies the same shared cross-controller incompatibility guard as the paper parent.
+`run-bugfix-autopilot.sh` is the unattended bounded source-audit campaign parent. It calls only `run-autonomous-bugfix.sh` and `run-autonomous-implementation.sh --handover-bugfix-audit`, requires a clean re-audit of the same campaign area after each implementation, and never calls paper evaluation or service lifecycle commands. Before creating campaign artifacts it applies the shared cross-controller incompatibility guard, atomically claims a complete parent lock, and reports preserved-lock child-cleanup or release failures before Telegram notification.
 
 
 Paper handoffs are written atomically as schema-v1 data with stable fingerprints and hashed source evidence. The standalone implementation consumer preserves an immutable copy in its run directory and rejects evidence tampering or unknown schema keys before Codex execution.

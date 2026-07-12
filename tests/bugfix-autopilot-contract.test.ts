@@ -70,8 +70,13 @@ test('bugfix autopilot exposes the bounded audit implementation re-audit campaig
     'next_same_area_bugfix_reaudit', 'validate_bugfix_completion_contract()',
     'semantic_bug_signature_repeat_guard=enabled', 'parent_budget_clamping=enabled',
     'child_aware_lock=enabled', 'cross_controller_lock_guard=enabled',
+    'atomic_parent_lock_acquisition=enabled', 'parent_child_cleanup_failure_classification=enabled',
+    'parent_lock_release_failure_classification=enabled', 'lock_preservation_on_child_identity_failure=enabled',
+    'verified_kill_escalation=enabled', 'responsive_parent_heartbeat=enabled',
+    'heartbeat_update_mode=file_mtime_no_state_rewrite', 'HEARTBEAT_SOURCE=file_mtime',
+    'BUGFIX_AUTOPILOT_BLOCKED_LOCK_RELEASE', "printf 'lock_release_status=%s\\n'", "printf 'lock_preserved=%s\\n'",
     'automation_assert_no_incompatible_locks', 'refresh_parent_lock_heartbeat()', 'bugfix_child_mutated_source',
-    'unsupported handoff key for schema v1', 'active_child_identity_verification_failed', 'parent_budget_exhausted',
+    'unsupported handoff key for schema v1', 'active_child_identity_or_termination_failed', 'parent_budget_exhausted',
   ]) assert.match(script, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   assert.doesNotMatch(script, /run-paper-evaluation\.sh|run-paper-autopilot\.sh|bash \.\/start\.sh|bash \.\/stop\.sh|forever|MongoDB/);
 });

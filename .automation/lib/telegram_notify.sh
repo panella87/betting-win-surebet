@@ -3,7 +3,7 @@
 # Source this file and call telegram_notify_send_final. No polling is performed.
 
 telegram_notify_message_version() {
-  printf '%s\n' '20260712.pretty_v4_lock_actions'
+  printf '%s\n' '20260712.pretty_v5_parent_lock_actions'
 }
 
 telegram_notify_env_file() {
@@ -138,7 +138,8 @@ telegram_notify_next_action() {
     BUGFIX_AUTOPILOT_BLOCKED_IMPLEMENTATION_NOOP) printf 'Do not mark the confirmed bug fixed; inspect the implementation handoff, source-change claim, and validation evidence.' ;;
     BUGFIX_AUTOPILOT_BLOCKED_HANDOFF_MISMATCH) printf 'Compare the round child_result.env with the input and return handoffs; correct the schema, fingerprint, or evidence mismatch first.' ;;
     BUGFIX_AUTOPILOT_BLOCKED_REPEATED_HANDOFF) printf 'Review the repeated bug signature manually and change the implementation approach before restarting the campaign.' ;;
-    BUGFIX_AUTOPILOT_BLOCKED_CHILD_IDENTITY) printf 'Inspect the preserved controller lock and active-child process identity before using force-unlock.' ;;
+    BUGFIX_AUTOPILOT_BLOCKED_CHILD_IDENTITY) printf 'Inspect the preserved bugfix-parent lock and active-child process identity before using force-unlock.' ;;
+    BUGFIX_AUTOPILOT_BLOCKED_LOCK_RELEASE) printf 'Inspect the bugfix-parent lock ownership and release evidence; do not start another controller until the preserved lock is resolved.' ;;
     BUGFIX_AUTOPILOT_BLOCKED_ARTIFACT_PACKAGING) printf 'The run evidence remains in its run directory; inspect the packaging log and repair artifacts.zip creation.' ;;
     PAPER_AUTOPILOT_BLOCKED_CHILD_IDENTITY) printf 'Inspect the preserved paper-parent lock and verify the active child process identity before using force-unlock.' ;;
     PAPER_AUTOPILOT_BLOCKED_LOCK_RELEASE) printf 'Inspect the paper-parent lock ownership and release evidence; do not start another controller until the preserved lock is resolved.' ;;

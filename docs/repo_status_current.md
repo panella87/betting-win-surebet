@@ -188,7 +188,7 @@ run_autonomous_bugfix=strict_four_state_read_only_audit_handoff
 run_bugfix_autopilot=bounded_eight_area_audit_implementation_reaudit_parent
 ```
 
-An area is never closed from implementation output alone. The parent requires a clean source re-audit of the exact same area.
+An area is never closed from implementation output alone. The parent requires a clean source re-audit of the exact same area. It atomically claims a complete parent lock and exposes child-cleanup plus lock-release state before final notification.
 
 
 ## Canonical standalone handoff verification
@@ -210,4 +210,4 @@ lock_release_failure_lock=preserved_for_operator_inspection
 
 All standalone finalizers now report lock-release state explicitly. A failed managed-child identity or termination check cannot be hidden by `|| true`; terminal evidence, machine output, return handoffs, and Telegram state are corrected before exit.
 
-The paper parent also uses an atomic full-file lock claim. `PAPER_AUTOPILOT_BLOCKED_CHILD_IDENTITY` and `PAPER_AUTOPILOT_BLOCKED_LOCK_RELEASE` preserve operator evidence and prevent false success. Parent campaign resume and parent-lock schema convergence with the bugfix parent remain separate future work.
+Both parent controllers use atomic full-file lock claims. `PAPER_AUTOPILOT_BLOCKED_CHILD_IDENTITY`, `PAPER_AUTOPILOT_BLOCKED_LOCK_RELEASE`, `BUGFIX_AUTOPILOT_BLOCKED_CHILD_IDENTITY`, and `BUGFIX_AUTOPILOT_BLOCKED_LOCK_RELEASE` preserve operator evidence and prevent false success. Parent heartbeats use lock mtime without rewriting active-child state, poll for shutdown every second, and verified KILL escalation must prove the PID exited before lock removal. Explicit campaign resume and optional parent/standalone lock-schema convergence remain separate future work.
