@@ -1,6 +1,6 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-07-14T12:26:50Z",
+  "generated": "2026-07-14T11:54:55Z",
   "overlay": "bws100-executable-mode-index-wave13",
   "files": [
     {
@@ -955,8 +955,8 @@
     },
     {
       "path": "src/upstream/betting-win-upstream-lock.ts",
-      "sha256": "4639e6da2ea853700553ec599112f77398f08fd22b7300c27a8e17689d46c5c1",
-      "size": 25780
+      "sha256": "f52a1d4ce73c29619dbde7b72140900a16ecc9472a7d769cd3549f7a1fac2b7e",
+      "size": 25334
     },
     {
       "path": "start.sh",
@@ -1000,8 +1000,8 @@
     },
     {
       "path": "tests/betting-win-upstream-contract.test.ts",
-      "sha256": "54a9ac99f432aa324a40f930bd71af63c5197e1bf41a5057127a507f547df5dd",
-      "size": 17502
+      "sha256": "67b8b303d118dc56db2380204cccdc474c5044cd04f0f51dcabd9c7b728069e4",
+      "size": 13727
     },
     {
       "path": "tests/blocker-report.test.ts",
