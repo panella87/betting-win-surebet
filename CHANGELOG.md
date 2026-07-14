@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-07-14 - BWS-100 validation idempotency hardening
+
+- Excluded the generated `config/betting-win.upstream.lock.json` runtime pin from `SOURCE_MANIFEST.json` inclusion so repeated `npm run validate` calls remain stable after upstream-lock generation.
+- Added validator and regeneration regressions proving the runtime lock is ignored while source-owned configuration remains tracked.
+- Bound the betting-win upstream contract validator to the source-manifest exclusion to prevent the non-idempotent validation defect from returning.
+- Serialized Node test-file execution with `--test-concurrency=1` so controller regressions cannot interfere through shared repository locks, artifacts, or handoff state.
+- Bound the deterministic test command in `scripts/validate_repo.py` and its contract test.
+- Preserved `BWS-100` as pending until a clean real betting-win checkout passes exact lock generation and verification.
+
 ## 2026-07-13 - BWS full-platform documentation and implementation rebaseline
 
 - Reframed BWS as the complete downstream surebet application built on betting-win.

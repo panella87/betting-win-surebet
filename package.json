@@ -11,7 +11,7 @@
     "clean": "node -e \"import('node:fs').then(fs=>fs.rmSync('dist',{recursive:true,force:true}))\"",
     "build": "npm run clean && tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "npm run build && node --test dist/tests/*.test.js",
+    "test": "npm run build && node --test --test-concurrency=1 dist/tests/*.test.js",
     "generate:upstream-lock": "node scripts/run_betting_win_upstream_lock.mjs generate",
     "verify:upstream-lock": "node scripts/run_betting_win_upstream_lock.mjs verify",
     "restore:executables": "node scripts/restore-required-executable-bits.js",

@@ -1,7 +1,7 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-07-14T09:25:17Z",
-  "overlay": "bws-full-platform-documentation-rebaseline-wave11",
+  "generated": "2026-07-14T09:57:57Z",
+  "overlay": "bws100-validation-idempotency-wave12",
   "files": [
     {
       "path": ".automation/README.md",
@@ -50,8 +50,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "534b167509fff3eed2953d90b9e472e3a43300a1d84758f0f503cd2361ca26e3",
-      "size": 43175
+      "sha256": "5dfc2e7d20ebe34b5468a5c1529e597bd812bc3d7037aa401df7b5699ec2cac9",
+      "size": 44097
     },
     {
       "path": "DOCUMENTATION_CHECK_REPORT.md",
@@ -440,8 +440,8 @@
     },
     {
       "path": "package.json",
-      "sha256": "81be354fafca920bc612513c4d1a3d753b92ee5fbc8793d6fe84cfb2c67d00d2",
-      "size": 3924
+      "sha256": "204346035fd77942fc859a2bb24a3818a9b4df82358b664777e7d4ba0bc77390",
+      "size": 3945
     },
     {
       "path": "pull_artifacts_and_zip_codebase.sh",
@@ -745,8 +745,8 @@
     },
     {
       "path": "scripts/validate_betting_win_upstream_contract.py",
-      "sha256": "af57659f91278cab097edd3082b82c18081e8ba52be6d7c45f77e361ccbd887f",
-      "size": 8765
+      "sha256": "8d9c9f5abf18f0f561067b0007a9055c19281055b9dc0ed523ffa47d1b12a79a",
+      "size": 8994
     },
     {
       "path": "scripts/validate_contract_boundary.py",
@@ -800,8 +800,8 @@
     },
     {
       "path": "scripts/validate_repo.py",
-      "sha256": "a556c00e1d12a66b7bc762b388e08ca22cda80695e1c54b31b94fd8fe3eb632b",
-      "size": 12442
+      "sha256": "896618f840b8b4a7592b66fb3906b5679c31b646515bf800d235283bcbe4d939",
+      "size": 12658
     },
     {
       "path": "scripts/validate_shell_local_assignments.py",
@@ -810,8 +810,8 @@
     },
     {
       "path": "scripts/validate_source_manifest.py",
-      "sha256": "1cca3ba6ac8696b50876054ff0172df0d6ad7dfcfb3bfe27129ba1e590dd25f2",
-      "size": 3544
+      "sha256": "b98c9f2e8782108788ec1ca12a27beaf3b4bec1bc6c34ec3168838c12743fb09",
+      "size": 3589
     },
     {
       "path": "scripts/validate_three_repo_surebet_boundary.py",
@@ -1245,8 +1245,8 @@
     },
     {
       "path": "tests/validate-repo-contract.test.ts",
-      "sha256": "b04ef41285dcac68222834f37ad1777899f35e18009882209080cb10fc7ee8bd",
-      "size": 1406
+      "sha256": "4712043072e79200305f18dcfbb6203573fbbfa5d03a539d6a59f20b178a92f6",
+      "size": 1467
     },
     {
       "path": "tests/validate-shell-local-assignments.test.ts",
@@ -1255,8 +1255,8 @@
     },
     {
       "path": "tests/validate-source-manifest.test.ts",
-      "sha256": "9875e90dec8bf01f560763c10c6aa974c8f50b3c742925c6f73664e537afe5de",
-      "size": 12754
+      "sha256": "1be280549509009f46f41e099fbe70bf6946f5d4fef1aa35c94f0534ea4f9129",
+      "size": 13197
     },
     {
       "path": "tests/validation-matrix-contract.test.ts",

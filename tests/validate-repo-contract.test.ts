@@ -16,6 +16,7 @@ test('validate_repo requires the full implementation and upstream contract surfa
     'tests/full-implementation-program-contract.test.ts',
     'tests/betting-win-upstream-contract.test.ts',
     'tests/three-repo-surebet-boundary.test.ts',
+    'node --test --test-concurrency=1 dist/tests/*.test.js',
   ]) {
     assert.match(validator, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }

@@ -13,6 +13,7 @@ SKIP_EXACT = {
     '.env',
     'SOURCE_MANIFEST.json',
     'OVERLAY_MANIFEST.json',
+    'config/betting-win.upstream.lock.json',
     '.automation/locks',
     '.automation/corrupt',
     '.automation/autonomous-implementation-handover.env',

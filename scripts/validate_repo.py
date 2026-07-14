@@ -171,6 +171,8 @@ def main() -> None:
     for script in required_scripts:
         if script not in package.get('scripts', {}):
             fail(f'package.json missing script: {script}')
+    if package.get('scripts', {}).get('test') != 'npm run build && node --test --test-concurrency=1 dist/tests/*.test.js':
+        fail('package.json test script must serialize test files with --test-concurrency=1')
     if package.get('bin', {}).get('betting-win-surebet') != './cli.js':
         fail('package.json bin must expose ./cli.js')
 

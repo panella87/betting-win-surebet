@@ -116,6 +116,8 @@ test('source manifest validator ignores runtime automation locks and handoff fil
     mkdirSync(join(dir, '.automation', 'consumed-handoffs'), { recursive: true });
     writeFileSync(join(dir, '.automation', 'consumed-handoffs', 'abc.env'), 'HANDOVER_FINGERPRINT=abc\n', { encoding: 'utf-8' });
     writeFileSync(join(dir, 'OVERLAY_MANIFEST.json'), '{"generated":true}\n', { encoding: 'utf-8' });
+    mkdirSync(join(dir, 'config'), { recursive: true });
+    writeFileSync(join(dir, 'config', 'betting-win.upstream.lock.json'), '{"schema":"runtime-lock"}\n', { encoding: 'utf-8' });
 
     const output = execFileSync('python3', ['scripts/validate_source_manifest.py'], { cwd: dir, encoding: 'utf-8', stdio: 'pipe' });
     assert.match(output, /validate_source_manifest: ok/);
@@ -138,6 +140,8 @@ test('source manifest regeneration helper reuses validator inclusion rules and e
     writeFileSync(join(dir, '.env'), 'SECRET=1\n', { encoding: 'utf-8' });
     writeFileSync(join(dir, 'repo.zip'), 'zip bytes\n', { encoding: 'utf-8' });
     writeFileSync(join(dir, 'OVERLAY_MANIFEST.json'), '{"generated":true}\n', { encoding: 'utf-8' });
+    mkdirSync(join(dir, 'config'), { recursive: true });
+    writeFileSync(join(dir, 'config', 'betting-win.upstream.lock.json'), '{"schema":"runtime-lock"}\n', { encoding: 'utf-8' });
     writeFileSync(join(dir, 'run.log'), 'log bytes\n', { encoding: 'utf-8' });
     writeFileSync(join(dir, 'scratch.tmp'), 'tmp bytes\n', { encoding: 'utf-8' });
     writeFileSync(join(dir, 'module.pyc'), 'pyc bytes\n', { encoding: 'utf-8' });
@@ -169,6 +173,7 @@ test('source manifest regeneration helper reuses validator inclusion rules and e
       'scripts/validate_source_manifest.py',
     ]);
     assert.ok(!paths.includes('OVERLAY_MANIFEST.json'));
+    assert.ok(!paths.includes('config/betting-win.upstream.lock.json'));
 
     const output = execFileSync('python3', ['scripts/validate_source_manifest.py'], { cwd: dir, encoding: 'utf-8', stdio: 'pipe' });
     assert.match(output, /validate_source_manifest: ok/);

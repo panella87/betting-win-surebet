@@ -164,6 +164,13 @@ def main() -> None:
         for marker in markers:
             require(text, marker, rel)
 
+    source_manifest_validator = read('scripts/validate_source_manifest.py')
+    require(
+        source_manifest_validator,
+        "'config/betting-win.upstream.lock.json'",
+        'scripts/validate_source_manifest.py',
+    )
+
     repo_validator = read('scripts/validate_repo.py')
     for marker in [
         'config/betting-win.upstream-baseline.json',
