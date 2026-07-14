@@ -84,6 +84,16 @@ def manifest_document(*, generated: str, overlay: str) -> dict[str, object]:
     }
 
 
+def validate_runtime_upstream_lock_entries(files: object) -> None:
+    if not isinstance(files, list):
+        fail('SOURCE_MANIFEST.json files must be an array')
+    for entry in files:
+        if not isinstance(entry, dict):
+            continue
+        if entry.get('path') == 'config/betting-win.upstream.lock.json' and not (ROOT / 'config' / 'betting-win.upstream.lock.json').is_file():
+            fail('Source manifest must not include config/betting-win.upstream.lock.json until the runtime lock file exists.')
+
+
 def main() -> None:
     if not MANIFEST.is_file():
         fail('missing SOURCE_MANIFEST.json')
@@ -94,8 +104,7 @@ def main() -> None:
     overlay = require_non_empty_string(actual.get('overlay'), 'overlay')
     if not UTC_TIMESTAMP.match(generated):
         fail('SOURCE_MANIFEST.json generated must be an ISO-8601 UTC timestamp like 2026-07-01T21:32:15Z')
-    if not isinstance(actual.get('files'), list):
-        fail('SOURCE_MANIFEST.json files must be an array')
+    validate_runtime_upstream_lock_entries(actual.get('files'))
     if actual != manifest_document(generated=generated, overlay=overlay):
         fail('SOURCE_MANIFEST.json is stale; regenerate it from the current source tree')
     print('validate_source_manifest: ok')

@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { chmodSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -45,6 +46,10 @@ function runGit(cwd: string, args: readonly string[]): string {
 
 function runGitBuffer(cwd: string, args: readonly string[]): Buffer {
   return execFileSync('git', ['-C', cwd, ...args], { encoding: 'buffer', stdio: 'pipe' });
+}
+
+function sha256Hex(value: Buffer | string): string {
+  return createHash('sha256').update(value).digest('hex');
 }
 
 function createBettingWinFixture(options: { readonly packageName?: string } = {}) {
@@ -168,11 +173,7 @@ test('upstream lock generation captures exact Git evidence, package versions, an
     assert.equal(lock.gitTreeSha, runGit(fixture.upstreamRoot, ['rev-parse', 'HEAD^{tree}']).trim());
     assert.equal(
       lock.trackedTreeListingSha256,
-      execFileSync(
-        'sha256sum',
-        [],
-        { input: runGitBuffer(fixture.upstreamRoot, ['ls-tree', '-r', '--full-tree', 'HEAD']), encoding: 'utf-8' },
-      ).split(/\s+/)[0],
+      sha256Hex(runGitBuffer(fixture.upstreamRoot, ['ls-tree', '-r', '--full-tree', 'HEAD'])),
     );
 
     const written = writeBettingWinUpstreamLock({

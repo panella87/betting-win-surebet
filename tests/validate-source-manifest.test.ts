@@ -126,6 +126,37 @@ test('source manifest validator ignores runtime automation locks and handoff fil
   }
 });
 
+test('source manifest validator rejects a runtime upstream lock manifest entry before the lock exists', () => {
+  const seedDir = makeFixture();
+  const seedManifest = JSON.parse(readFileSync(join(seedDir, 'SOURCE_MANIFEST.json'), 'utf-8')) as { files: ManifestEntry[] };
+  const dir = makeFixture({
+    files: [
+      ...seedManifest.files,
+      {
+        path: 'config/betting-win.upstream.lock.json',
+        sha256: '0'.repeat(64),
+        size: 26,
+      },
+    ],
+  });
+  try {
+    assert.throws(
+      () => execFileSync('python3', ['scripts/validate_source_manifest.py'], { cwd: dir, encoding: 'utf-8', stdio: 'pipe' }),
+      (error: unknown) => {
+        assert.ok(error instanceof Error);
+        assert.match(
+          error.message,
+          /Source manifest must not include config\/betting-win\.upstream\.lock\.json until the runtime lock file exists\./,
+        );
+        return true;
+      },
+    );
+  } finally {
+    rmSync(seedDir, { recursive: true, force: true });
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test('source manifest regeneration helper reuses validator inclusion rules and excludes generated junk', () => {
   const dir = makeFixture();
   try {
