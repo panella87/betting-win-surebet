@@ -1,4 +1,4 @@
-import { accessSync, existsSync, mkdirSync, readFileSync, readdirSync, realpathSync, statSync, writeFileSync } from 'node:fs';
+import { accessSync, existsSync, mkdirSync, readFileSync, realpathSync, statSync, writeFileSync } from 'node:fs';
 import { constants as fsConstants } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
@@ -9,6 +9,7 @@ const BETTING_WIN_UPSTREAM_LOCK_SCHEMA = 'betting-win-surebet-upstream-lock-v1';
 const BETTING_WIN_UPSTREAM_LOCK_PATH = 'config/betting-win.upstream.lock.json';
 const BETTING_WIN_UPSTREAM_LOCK_SCHEMA_PATH = 'schemas/betting-win-upstream-lock.v1.schema.json';
 const SOURCE_FINGERPRINT_ALGORITHM = 'sha256_git_ls_tree_r_full_tree_head_v1';
+const SOURCE_VIEW = 'committed_git_head' as const;
 const REQUIRED_WORKSPACE_PATTERNS = ['packages/*', 'apps/*'] as const;
 const REQUIRED_WORKSPACE_ROOTS = ['packages', 'apps'] as const;
 const REQUIRED_COMPATIBILITY_PACKAGES = [
@@ -38,7 +39,7 @@ export interface BettingWinUpstreamLock {
   readonly repositoryPath: string;
   readonly commitSha: string;
   readonly gitTreeSha: string;
-  readonly worktreeClean: true;
+  readonly sourceView: typeof SOURCE_VIEW;
   readonly packageVersion: string;
   readonly trackedTreeListingSha256: string;
   readonly sourceFingerprintAlgorithm: typeof SOURCE_FINGERPRINT_ALGORITHM;
@@ -74,7 +75,6 @@ interface CheckoutSnapshot {
   readonly commitSha: string;
   readonly gitTreeSha: string;
   readonly trackedTreeListingSha256: string;
-  readonly worktreeStatus: string;
   readonly rootPackage: Readonly<Record<string, unknown>>;
   readonly packageVersions: Readonly<Record<string, string>>;
   readonly capabilities: readonly string[];
@@ -122,7 +122,7 @@ export function generateBettingWinUpstreamLock(
     repositoryPath: checkout.repositoryPath,
     commitSha: checkout.commitSha,
     gitTreeSha: checkout.gitTreeSha,
-    worktreeClean: true,
+    sourceView: SOURCE_VIEW,
     packageVersion: requireString(checkout.rootPackage.version, 'BETTING_WIN_PACKAGE_VERSION_INVALID'),
     trackedTreeListingSha256: checkout.trackedTreeListingSha256,
     sourceFingerprintAlgorithm: SOURCE_FINGERPRINT_ALGORITHM,
@@ -230,7 +230,13 @@ function inspectBettingWinCheckout(options: {
       `BETTING_WIN_REPO_PATH must point to a directory: ${resolvedRepoPath}`,
     );
   }
-  safeAccessSync(resolvedRepoPath, fsConstants.R_OK, 'BETTING_WIN_REPO_PATH_UNREADABLE');
+  if ((stats.mode & 0o444) === 0 || (stats.mode & 0o111) === 0) {
+    throw new UpstreamVerificationError(
+      'BETTING_WIN_REPO_PATH_UNREADABLE',
+      `BETTING_WIN_REPO_PATH must have readable and searchable directory permissions: ${resolvedRepoPath}`,
+    );
+  }
+  safeAccessSync(resolvedRepoPath, fsConstants.R_OK | fsConstants.X_OK, 'BETTING_WIN_REPO_PATH_UNREADABLE');
   const repositoryPath = safeRealpathSync(resolvedRepoPath, 'BETTING_WIN_REPO_PATH_UNREADABLE');
   const allowedBoundaryCandidate = options.allowedBoundaryRoot !== undefined
     ? options.allowedBoundaryRoot
@@ -249,56 +255,12 @@ function inspectBettingWinCheckout(options: {
     );
   }
 
-  const rootPackagePath = join(repositoryPath, 'package.json');
-  const rootPackage = parseJsonFile(rootPackagePath, 'BETTING_WIN_PACKAGE_JSON_INVALID');
-  if (requireString(rootPackage.name, 'BETTING_WIN_PACKAGE_NAME_INVALID') !== BETTING_WIN_REPOSITORY_NAME) {
-    throw new UpstreamVerificationError(
-      'BETTING_WIN_NOT_A_BETTING_WIN_CHECKOUT',
-      `BETTING_WIN_REPO_PATH package.json name must be ${BETTING_WIN_REPOSITORY_NAME}.`,
-    );
-  }
-  const workspaces = rootPackage.workspaces;
-  if (!Array.isArray(workspaces) || JSON.stringify(workspaces) !== JSON.stringify([...REQUIRED_WORKSPACE_PATTERNS])) {
-    throw new UpstreamVerificationError(
-      'BETTING_WIN_WORKSPACES_INVALID',
-      'betting-win package.json must expose the expected workspaces patterns.',
-    );
-  }
-
   const gitTopLevel = runGitText(repositoryPath, ['rev-parse', '--show-toplevel'], 'BETTING_WIN_GIT_TOPLEVEL_UNAVAILABLE').trim();
-  if (realpathSync(gitTopLevel) !== repositoryPath) {
+  if (safeRealpathSync(gitTopLevel, 'BETTING_WIN_GIT_TOPLEVEL_UNAVAILABLE') !== repositoryPath) {
     throw new UpstreamVerificationError(
       'BETTING_WIN_GIT_TOPLEVEL_MISMATCH',
       'BETTING_WIN_REPO_PATH must resolve to the betting-win Git toplevel directory.',
     );
-  }
-  const worktreeStatus = runGitText(
-    repositoryPath,
-    ['status', '--porcelain', '--untracked-files=all'],
-    'BETTING_WIN_GIT_STATUS_UNAVAILABLE',
-  );
-  if (worktreeStatus.trim().length > 0) {
-    throw new UpstreamVerificationError(
-      'BETTING_WIN_WORKTREE_DIRTY',
-      `betting-win checkout must be clean before generating the upstream lock. Found:\n${worktreeStatus.trimEnd()}`,
-    );
-  }
-
-  const packageVersions = collectWorkspacePackageVersions(repositoryPath);
-  const providerCollectionIndexPath = join(repositoryPath, 'packages', 'provider-collection', 'src', 'index.ts');
-  const providerCollectionIndex = readRequiredText(providerCollectionIndexPath, 'BETTING_WIN_PROVIDER_COLLECTION_INDEX_MISSING');
-  for (const marker of [
-    'betting-win.strategy-export.v1',
-    'betting-win-strategy-export.v1',
-    'surebet_standard_binary_v0',
-    ...REQUIRED_CAPABILITIES,
-  ]) {
-    if (!providerCollectionIndex.includes(marker)) {
-      throw new UpstreamVerificationError(
-        'BETTING_WIN_REQUIRED_CAPABILITY_MISSING',
-        `betting-win provider collection surface is missing required marker: ${marker}`,
-      );
-    }
   }
 
   const commitSha = runGitText(repositoryPath, ['rev-parse', 'HEAD'], 'BETTING_WIN_COMMIT_SHA_UNAVAILABLE').trim();
@@ -308,45 +270,103 @@ function inspectBettingWinCheckout(options: {
     ['ls-tree', '-r', '--full-tree', 'HEAD'],
     'BETTING_WIN_TRACKED_TREE_LISTING_UNAVAILABLE',
   );
+
+  const rootPackage = parseJsonText(
+    runGitText(repositoryPath, ['show', 'HEAD:package.json'], 'BETTING_WIN_PACKAGE_JSON_INVALID'),
+    'HEAD:package.json',
+    'BETTING_WIN_PACKAGE_JSON_INVALID',
+  );
+  if (requireString(rootPackage.name, 'BETTING_WIN_PACKAGE_NAME_INVALID') !== BETTING_WIN_REPOSITORY_NAME) {
+    throw new UpstreamVerificationError(
+      'BETTING_WIN_NOT_A_BETTING_WIN_CHECKOUT',
+      `BETTING_WIN_REPO_PATH committed package.json name must be ${BETTING_WIN_REPOSITORY_NAME}.`,
+    );
+  }
+  const workspaces = rootPackage.workspaces;
+  if (!Array.isArray(workspaces) || JSON.stringify(workspaces) !== JSON.stringify([...REQUIRED_WORKSPACE_PATTERNS])) {
+    throw new UpstreamVerificationError(
+      'BETTING_WIN_WORKSPACES_INVALID',
+      'betting-win committed package.json must expose the expected workspaces patterns.',
+    );
+  }
+
+  const packageVersions = collectCommittedWorkspacePackageVersions(repositoryPath);
+  const providerCollectionIndex = runGitText(
+    repositoryPath,
+    ['show', 'HEAD:packages/provider-collection/src/index.ts'],
+    'BETTING_WIN_PROVIDER_COLLECTION_INDEX_MISSING',
+  );
+  for (const marker of [
+    'betting-win.strategy-export.v1',
+    'betting-win-strategy-export.v1',
+    'surebet_standard_binary_v0',
+    ...REQUIRED_CAPABILITIES,
+  ]) {
+    if (!providerCollectionIndex.includes(marker)) {
+      throw new UpstreamVerificationError(
+        'BETTING_WIN_REQUIRED_CAPABILITY_MISSING',
+        `betting-win committed provider collection surface is missing required marker: ${marker}`,
+      );
+    }
+  }
+
   return Object.freeze({
     repositoryPath,
     commitSha,
     gitTreeSha,
     trackedTreeListingSha256: sha256Hex(trackedTreeListing),
-    worktreeStatus,
-    rootPackage: rootPackage,
+    rootPackage,
     packageVersions,
     capabilities: Object.freeze([...REQUIRED_CAPABILITIES]),
   });
 }
 
-function collectWorkspacePackageVersions(repositoryPath: string): Readonly<Record<string, string>> {
+function collectCommittedWorkspacePackageVersions(repositoryPath: string): Readonly<Record<string, string>> {
   const packageVersions: Record<string, string> = {};
+  const packageJsonPaths = runGitText(
+    repositoryPath,
+    ['ls-tree', '-r', '--name-only', 'HEAD', '--', ...REQUIRED_WORKSPACE_ROOTS],
+    'BETTING_WIN_WORKSPACE_TREE_UNAVAILABLE',
+  )
+    .split('\n')
+    .filter((path) => /^(?:packages|apps)\/[^/]+\/package\.json$/.test(path))
+    .sort();
+
   for (const workspaceRoot of REQUIRED_WORKSPACE_ROOTS) {
-    const workspaceDirectory = join(repositoryPath, workspaceRoot);
-    if (!existsSync(workspaceDirectory)) {
+    if (!packageJsonPaths.some((path) => path.startsWith(`${workspaceRoot}/`))) {
       throw new UpstreamVerificationError(
         'BETTING_WIN_WORKSPACE_DIRECTORY_MISSING',
-        `betting-win workspace directory is missing: ${workspaceDirectory}`,
+        `betting-win committed tree is missing workspace root: ${workspaceRoot}`,
       );
     }
-    for (const entry of readdirSync(workspaceDirectory, { withFileTypes: true })) {
-      if (!entry.isDirectory()) {
-        continue;
-      }
-      const packageJsonPath = join(workspaceDirectory, entry.name, 'package.json');
-      const packageJson = parseJsonFile(packageJsonPath, 'BETTING_WIN_WORKSPACE_PACKAGE_JSON_INVALID');
-      const packageName = requireString(packageJson.name, 'BETTING_WIN_WORKSPACE_PACKAGE_NAME_INVALID');
-      const packageVersion = requireString(packageJson.version, 'BETTING_WIN_WORKSPACE_PACKAGE_VERSION_INVALID');
-      packageVersions[packageName] = packageVersion;
+  }
+
+  for (const packageJsonPath of packageJsonPaths) {
+    const packageJson = parseJsonText(
+      runGitText(
+        repositoryPath,
+        ['show', `HEAD:${packageJsonPath}`],
+        'BETTING_WIN_WORKSPACE_PACKAGE_JSON_INVALID',
+      ),
+      `HEAD:${packageJsonPath}`,
+      'BETTING_WIN_WORKSPACE_PACKAGE_JSON_INVALID',
+    );
+    const packageName = requireString(packageJson.name, 'BETTING_WIN_WORKSPACE_PACKAGE_NAME_INVALID');
+    const packageVersion = requireString(packageJson.version, 'BETTING_WIN_WORKSPACE_PACKAGE_VERSION_INVALID');
+    if (packageName in packageVersions) {
+      throw new UpstreamVerificationError(
+        'BETTING_WIN_WORKSPACE_PACKAGE_DUPLICATE',
+        `betting-win committed tree contains duplicate package name: ${packageName}`,
+      );
     }
+    packageVersions[packageName] = packageVersion;
   }
 
   for (const packageName of REQUIRED_COMPATIBILITY_PACKAGES) {
     if (!(packageName in packageVersions)) {
       throw new UpstreamVerificationError(
         'BETTING_WIN_REQUIRED_PACKAGE_MISSING',
-        `betting-win checkout is missing required compatibility package: ${packageName}`,
+        `betting-win committed tree is missing required compatibility package: ${packageName}`,
       );
     }
   }
@@ -497,40 +517,37 @@ function validateSchemaProperty(value: unknown, schema: JsonSchemaProperty, fiel
 function verifyCheckoutUnchanged(repositoryPath: string, initialSnapshot: CheckoutSnapshot): void {
   const finalCommitSha = runGitText(repositoryPath, ['rev-parse', 'HEAD'], 'BETTING_WIN_COMMIT_SHA_UNAVAILABLE').trim();
   const finalGitTreeSha = runGitText(repositoryPath, ['rev-parse', 'HEAD^{tree}'], 'BETTING_WIN_TREE_SHA_UNAVAILABLE').trim();
-  const finalWorktreeStatus = runGitText(
-    repositoryPath,
-    ['status', '--porcelain', '--untracked-files=all'],
-    'BETTING_WIN_GIT_STATUS_UNAVAILABLE',
-  );
   const finalTrackedTreeListingSha256 = sha256Hex(
     runGitBuffer(repositoryPath, ['ls-tree', '-r', '--full-tree', 'HEAD'], 'BETTING_WIN_TRACKED_TREE_LISTING_UNAVAILABLE'),
   );
   if (
     finalCommitSha !== initialSnapshot.commitSha
     || finalGitTreeSha !== initialSnapshot.gitTreeSha
-    || finalWorktreeStatus !== initialSnapshot.worktreeStatus
     || finalTrackedTreeListingSha256 !== initialSnapshot.trackedTreeListingSha256
   ) {
     throw new UpstreamVerificationError(
       'BETTING_WIN_CHECKOUT_CHANGED_DURING_VERIFICATION',
-      'betting-win checkout changed while the upstream lock was being verified.',
+      'betting-win committed HEAD changed while the upstream lock was being verified.',
     );
   }
 }
 
 function parseJsonFile(path: string, errorCode: string): Record<string, unknown> {
-  const text = readRequiredText(path, errorCode);
+  return parseJsonText(readRequiredText(path, errorCode), path, errorCode);
+}
+
+function parseJsonText(text: string, sourceName: string, errorCode: string): Record<string, unknown> {
   try {
     const value = JSON.parse(text);
     if (!isRecord(value)) {
-      throw new UpstreamVerificationError(errorCode, `JSON file must contain an object: ${path}`);
+      throw new UpstreamVerificationError(errorCode, `JSON source must contain an object: ${sourceName}`);
     }
     return value;
   } catch (error) {
     if (error instanceof UpstreamVerificationError) {
       throw error;
     }
-    throw new UpstreamVerificationError(errorCode, `Invalid JSON in ${path}: ${(error as Error).message}`);
+    throw new UpstreamVerificationError(errorCode, `Invalid JSON in ${sourceName}: ${(error as Error).message}`);
   }
 }
 

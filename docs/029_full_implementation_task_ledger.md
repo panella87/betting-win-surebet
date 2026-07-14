@@ -22,5 +22,5 @@ A row becomes `BLOCKED` only after all safe local work in that row is exhausted 
 ```text
 current_task=BWS-100
 current_task_status=PENDING
-reason=exact server betting-win lock and compatibility verifier do not yet exist
+reason=exact existing-checkout committed-HEAD lock proof has not yet been accepted
 ```

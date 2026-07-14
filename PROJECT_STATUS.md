@@ -36,7 +36,7 @@ read_only_query_api=present
 apps_api_web_workers=present
 ```
 
-The uploaded archive has no Git metadata and no BW source manifest. `BWS-100` must generate the runtime lock from the actual server checkout. No commit SHA is invented in this documentation wave.
+The uploaded archive has no Git metadata and no BW source manifest. `BWS-100` must generate the runtime lock from the actual server checkout's committed `HEAD`. The existing checkout is inspected in place and read-only; no clone, temporary worktree, cleanup, reset, or invented commit SHA is allowed.
 
 ## Completed
 

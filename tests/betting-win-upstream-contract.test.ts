@@ -135,11 +135,12 @@ function expectVerificationError(
 }
 
 test('upstream lock schema and static repository validator remain wired', () => {
-  const schema = JSON.parse(readFileSync(join(ROOT, 'schemas/betting-win-upstream-lock.v1.schema.json'), 'utf-8')) as Record<string, unknown>;
+  const schema = JSON.parse(readFileSync(join(ROOT, 'schemas', 'betting-win-upstream-lock.v1.schema.json'), 'utf-8')) as Record<string, unknown>;
   const properties = schema.properties as Record<string, Record<string, unknown>>;
   assert.equal(schema.additionalProperties, false);
   assert.equal(properties.commitSha!.pattern, '^[0-9a-f]{40}$');
   assert.equal(properties.gitTreeSha!.pattern, '^[0-9a-f]{40}$');
+  assert.equal(properties.sourceView!.const, 'committed_git_head');
   assert.equal(properties.trackedTreeListingSha256!.pattern, '^[0-9a-f]{64}$');
   assert.equal(properties.sourceFingerprintAlgorithm!.const, 'sha256_git_ls_tree_r_full_tree_head_v1');
   assert.equal(properties.contractSchema!.const, 'betting-win.strategy-export.v1');
@@ -153,7 +154,7 @@ test('upstream lock schema and static repository validator remain wired', () => 
   assert.match(output, /validate_betting_win_upstream_contract: ok/);
 });
 
-test('upstream lock generation captures exact Git evidence, package versions, and write-read verification', () => {
+test('upstream lock generation captures exact committed Git evidence, package versions, and write-read verification', () => {
   const fixture = createBettingWinFixture();
   try {
     const lock = generateBettingWinUpstreamLock({
@@ -166,7 +167,7 @@ test('upstream lock generation captures exact Git evidence, package versions, an
 
     assert.equal(lock.repository, 'betting-win');
     assert.equal(lock.repositoryPath, fixture.upstreamRoot);
-    assert.equal(lock.worktreeClean, true);
+    assert.equal(lock.sourceView, 'committed_git_head');
     assert.equal(lock.packageVersion, '0.48.0');
     assert.equal(lock.verifiedAt, FIXED_VERIFIED_AT);
     assert.deepEqual(lock.capabilities, [
@@ -218,6 +219,7 @@ test('upstream lock generation fails fast when BETTING_WIN_REPO_PATH is missing 
         bettingWinRepoPath: '',
         repositoryRoot: fixture.bwsRoot,
         allowedBoundaryRoot: fixture.tempRoot,
+        schemaPath: SCHEMA_PATH,
         verifiedAt: FIXED_VERIFIED_AT,
       }),
       'BETTING_WIN_REPO_PATH_MISSING',
@@ -229,6 +231,7 @@ test('upstream lock generation fails fast when BETTING_WIN_REPO_PATH is missing 
         bettingWinRepoPath: fixture.upstreamRoot,
         repositoryRoot: fixture.bwsRoot,
         allowedBoundaryRoot: outsideBoundaryRoot,
+        schemaPath: SCHEMA_PATH,
         verifiedAt: FIXED_VERIFIED_AT,
       }),
       'BETTING_WIN_REPO_PATH_OUTSIDE_ALLOWED_BOUNDARY',
@@ -239,19 +242,40 @@ test('upstream lock generation fails fast when BETTING_WIN_REPO_PATH is missing 
   }
 });
 
-test('upstream lock generation rejects dirty and invalid betting-win checkouts', () => {
+test('upstream lock reads committed HEAD from a dirty worktree and rejects unreadable or invalid checkouts', () => {
   const dirtyFixture = createBettingWinFixture();
   try {
-    writeFileSync(join(dirtyFixture.upstreamRoot, 'UNTRACKED.txt'), 'dirty\n', 'utf-8');
-    expectVerificationError(
-      () => generateBettingWinUpstreamLock({
+    const expectedCommit = runGit(dirtyFixture.upstreamRoot, ['rev-parse', 'HEAD']).trim();
+    writeJson(join(dirtyFixture.upstreamRoot, 'package.json'), {
+      name: 'not-the-committed-package',
+      version: '99.0.0',
+      workspaces: [],
+    });
+    writeFileSync(
+      join(dirtyFixture.upstreamRoot, 'packages', 'provider-collection', 'src', 'index.ts'),
+      'uncommitted incompatible worktree content\n',
+      'utf-8',
+    );
+    writeFileSync(join(dirtyFixture.upstreamRoot, 'UNTRACKED.txt'), 'untracked runtime state\n', 'utf-8');
+
+    const lock = generateBettingWinUpstreamLock({
+      bettingWinRepoPath: dirtyFixture.upstreamRoot,
+      repositoryRoot: dirtyFixture.bwsRoot,
+      allowedBoundaryRoot: dirtyFixture.tempRoot,
+      schemaPath: SCHEMA_PATH,
+      verifiedAt: FIXED_VERIFIED_AT,
+    });
+    assert.equal(lock.commitSha, expectedCommit);
+    assert.equal(lock.packageVersion, '0.48.0');
+    assert.equal(lock.sourceView, 'committed_git_head');
+    assert.deepEqual(
+      verifyBettingWinUpstreamLock(lock, {
         bettingWinRepoPath: dirtyFixture.upstreamRoot,
         repositoryRoot: dirtyFixture.bwsRoot,
         allowedBoundaryRoot: dirtyFixture.tempRoot,
-        verifiedAt: FIXED_VERIFIED_AT,
+        schemaPath: SCHEMA_PATH,
       }),
-      'BETTING_WIN_WORKTREE_DIRTY',
-      /UNTRACKED\.txt/,
+      lock,
     );
   } finally {
     rmSync(dirtyFixture.tempRoot, { recursive: true, force: true });
@@ -265,10 +289,11 @@ test('upstream lock generation rejects dirty and invalid betting-win checkouts',
         bettingWinRepoPath: unreadableFixture.upstreamRoot,
         repositoryRoot: unreadableFixture.bwsRoot,
         allowedBoundaryRoot: unreadableFixture.tempRoot,
+        schemaPath: SCHEMA_PATH,
         verifiedAt: FIXED_VERIFIED_AT,
       }),
       'BETTING_WIN_REPO_PATH_UNREADABLE',
-      /unreadable/,
+      /readable and searchable/,
     );
   } finally {
     chmodSync(unreadableFixture.upstreamRoot, 0o755);
@@ -282,29 +307,32 @@ test('upstream lock generation rejects dirty and invalid betting-win checkouts',
         bettingWinRepoPath: invalidFixture.upstreamRoot,
         repositoryRoot: invalidFixture.bwsRoot,
         allowedBoundaryRoot: invalidFixture.tempRoot,
+        schemaPath: SCHEMA_PATH,
         verifiedAt: FIXED_VERIFIED_AT,
       }),
       'BETTING_WIN_NOT_A_BETTING_WIN_CHECKOUT',
-      /package\.json name must be betting-win/,
+      /committed package\.json name must be betting-win/,
     );
   } finally {
     rmSync(invalidFixture.tempRoot, { recursive: true, force: true });
   }
 });
 
-test('upstream lock generation rejects missing package evidence and missing Git evidence', () => {
+test('upstream lock generation rejects missing committed package evidence and missing Git evidence', () => {
   const missingPackageFixture = createBettingWinFixture();
   try {
-    rmSync(join(missingPackageFixture.upstreamRoot, 'package.json'));
+    runGit(missingPackageFixture.upstreamRoot, ['rm', '-q', 'package.json']);
+    runGit(missingPackageFixture.upstreamRoot, ['commit', '-q', '-m', 'remove package evidence']);
     expectVerificationError(
       () => generateBettingWinUpstreamLock({
         bettingWinRepoPath: missingPackageFixture.upstreamRoot,
         repositoryRoot: missingPackageFixture.bwsRoot,
         allowedBoundaryRoot: missingPackageFixture.tempRoot,
+        schemaPath: SCHEMA_PATH,
         verifiedAt: FIXED_VERIFIED_AT,
       }),
       'BETTING_WIN_PACKAGE_JSON_INVALID',
-      /Required file is missing/,
+      /git show HEAD:package\.json failed/,
     );
   } finally {
     rmSync(missingPackageFixture.tempRoot, { recursive: true, force: true });
@@ -318,6 +346,7 @@ test('upstream lock generation rejects missing package evidence and missing Git 
         bettingWinRepoPath: missingGitFixture.upstreamRoot,
         repositoryRoot: missingGitFixture.bwsRoot,
         allowedBoundaryRoot: missingGitFixture.tempRoot,
+        schemaPath: SCHEMA_PATH,
         verifiedAt: FIXED_VERIFIED_AT,
       }),
       'BETTING_WIN_GIT_TOPLEVEL_UNAVAILABLE',
@@ -328,7 +357,7 @@ test('upstream lock generation rejects missing package evidence and missing Git 
   }
 });
 
-test('upstream lock verification fails closed on mismatch and tamper after lock generation', () => {
+test('upstream lock verification fails closed on committed mismatch and committed capability tamper', () => {
   const fixture = createBettingWinFixture();
   try {
     const lock = generateBettingWinUpstreamLock({
@@ -359,16 +388,19 @@ test('upstream lock verification fails closed on mismatch and tamper after lock 
       /does not match the current verified checkout/,
     );
 
-    writeFileSync(join(fixture.upstreamRoot, 'packages', 'provider-collection', 'src', 'index.ts'), 'tampered\n', 'utf-8');
+    writeFileSync(join(fixture.upstreamRoot, 'packages', 'provider-collection', 'src', 'index.ts'), 'committed incompatible content\n', 'utf-8');
+    runGit(fixture.upstreamRoot, ['add', 'packages/provider-collection/src/index.ts']);
+    runGit(fixture.upstreamRoot, ['commit', '-q', '-m', 'remove downstream capability markers']);
     expectVerificationError(
       () => generateBettingWinUpstreamLock({
         bettingWinRepoPath: fixture.upstreamRoot,
         repositoryRoot: fixture.bwsRoot,
         allowedBoundaryRoot: fixture.tempRoot,
+        schemaPath: SCHEMA_PATH,
         verifiedAt: FIXED_VERIFIED_AT,
       }),
-      'BETTING_WIN_WORKTREE_DIRTY',
-      /provider-collection\/src\/index\.ts/,
+      'BETTING_WIN_REQUIRED_CAPABILITY_MISSING',
+      /committed provider collection surface/,
     );
   } finally {
     rmSync(fixture.tempRoot, { recursive: true, force: true });
@@ -398,7 +430,7 @@ test('upstream lock verification accepts semantically identical locks with reord
       sourceFingerprintAlgorithm: lock.sourceFingerprintAlgorithm,
       trackedTreeListingSha256: lock.trackedTreeListingSha256,
       packageVersion: lock.packageVersion,
-      worktreeClean: lock.worktreeClean,
+      sourceView: lock.sourceView,
       gitTreeSha: lock.gitTreeSha,
       commitSha: lock.commitSha,
       repositoryPath: lock.repositoryPath,
@@ -420,7 +452,7 @@ test('upstream lock verification accepts semantically identical locks with reord
   }
 });
 
-test('upstream lock generation proves the betting-win checkout remains unchanged during verification', () => {
+test('upstream lock generation proves committed HEAD remains unchanged during verification', () => {
   const fixture = createBettingWinFixture();
   const originalPath = process.env.PATH;
   try {
@@ -436,6 +468,7 @@ test('upstream lock generation proves the betting-win checkout remains unchanged
         'set -euo pipefail',
         `REAL_GIT=${JSON.stringify(gitBinary)}`,
         `STATE_FILE=${JSON.stringify(stateFile)}`,
+        `REPO_PATH=${JSON.stringify(fixture.upstreamRoot)}`,
         `TARGET_FILE=${JSON.stringify(targetFile)}`,
         '"$REAL_GIT" "$@"',
         'if [ "$#" -ge 6 ] && [ "$1" = "-C" ] && [ "$3" = "ls-tree" ] && [ "$4" = "-r" ] && [ "$5" = "--full-tree" ] && [ "$6" = "HEAD" ]; then',
@@ -445,7 +478,9 @@ test('upstream lock generation proves the betting-win checkout remains unchanged
         '  fi',
         '  if [ "$count" = "0" ]; then',
         '    printf \'1\' > "$STATE_FILE"',
-        '    printf \'\\n// tampered during verification\\n\' >> "$TARGET_FILE"',
+        '    printf \'\\n// committed during verification\\n\' >> "$TARGET_FILE"',
+        '    "$REAL_GIT" -C "$REPO_PATH" add packages/provider-collection/src/index.ts',
+        '    "$REAL_GIT" -C "$REPO_PATH" -c user.name="BWS Test" -c user.email="bws-test@example.com" commit -q -m "mutate HEAD during verification"',
         '  fi',
         'fi',
       ].join('\n'),
@@ -463,7 +498,7 @@ test('upstream lock generation proves the betting-win checkout remains unchanged
         verifiedAt: FIXED_VERIFIED_AT,
       }),
       'BETTING_WIN_CHECKOUT_CHANGED_DURING_VERIFICATION',
-      /checkout changed while the upstream lock was being verified/,
+      /committed HEAD changed while the upstream lock was being verified/,
     );
   } finally {
     if (originalPath === undefined) {

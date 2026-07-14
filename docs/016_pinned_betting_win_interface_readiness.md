@@ -20,4 +20,4 @@ getProviderGenerations
 inspectSourceLineage
 ```
 
-The remaining first requirement is `BWS-100`: verify the actual server checkout, generate an exact upstream lock, prove package/capability compatibility, prove the checkout remains unchanged, and fail closed on mismatch. The uploaded archive is design evidence only because it has no Git metadata.
+The remaining first requirement is `BWS-100`: verify the existing server checkout's committed `HEAD`, generate an exact upstream lock, prove package/capability compatibility from Git objects, prove committed `HEAD` remains unchanged during verification, and fail closed on mismatch. The uploaded archive is design evidence only because it has no Git metadata. No clone or temporary worktree is required.

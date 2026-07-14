@@ -42,7 +42,7 @@ contract_alias=betting-win-strategy-export.v1
 surebet_profile=surebet_standard_binary_v0
 ```
 
-`config/betting-win.upstream-baseline.json` records the inspected design baseline. It is not a runtime pin. `BWS-100` must generate `config/betting-win.upstream.lock.json` from the actual server Git checkout and fail closed when commit, Git tree, tracked-tree fingerprint, worktree, package, or capability evidence is missing or mismatched.
+`config/betting-win.upstream-baseline.json` records the inspected design baseline. It is not a runtime pin. `BWS-100` generates `config/betting-win.upstream.lock.json` from the existing server checkout's committed `HEAD`. Package and capability evidence is read with `git show HEAD:` and the fingerprint is derived from the committed Git tree, so uncommitted working-tree changes are excluded rather than copied, cleaned, reset, or cloned. The verifier fails closed when commit, Git tree, tracked-tree fingerprint, package, or capability evidence is missing or mismatched.
 
 ## Target repository shape
 

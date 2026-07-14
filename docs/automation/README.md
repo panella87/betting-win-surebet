@@ -8,6 +8,8 @@ selected_controller=run-autonomous-implementation.sh
 
 The implementation controller reads `docs/automation/current-implementation-task.md`. It must not stop on historical fixture-complete claims.
 
+For `BWS-100`, `BETTING_WIN_REPO_PATH` points to the existing upstream checkout. Validation reads committed `HEAD` through Git objects and must not clone, create a temporary worktree, or modify upstream working-tree state.
+
 The hardened controller surface remains:
 
 ```text

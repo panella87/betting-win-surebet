@@ -10,7 +10,7 @@
     "repositoryPath",
     "commitSha",
     "gitTreeSha",
-    "worktreeClean",
+    "sourceView",
     "packageVersion",
     "trackedTreeListingSha256",
     "sourceFingerprintAlgorithm",
@@ -40,8 +40,8 @@
       "type": "string",
       "pattern": "^[0-9a-f]{40}$"
     },
-    "worktreeClean": {
-      "const": true
+    "sourceView": {
+      "const": "committed_git_head"
     },
     "packageVersion": {
       "type": "string",

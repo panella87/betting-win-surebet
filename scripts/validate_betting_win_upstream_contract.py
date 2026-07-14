@@ -99,7 +99,7 @@ def main() -> None:
         fail('upstream lock schema must reject additional properties')
     required = set(schema.get('required', []))
     for field in [
-        'schema', 'repository', 'repositoryPath', 'commitSha', 'worktreeClean',
+        'schema', 'repository', 'repositoryPath', 'commitSha', 'sourceView',
         'packageVersion', 'gitTreeSha', 'trackedTreeListingSha256',
         'sourceFingerprintAlgorithm', 'contractSchema', 'contractAlias',
         'surebetProfile', 'verifiedAt', 'packageVersions', 'capabilities',
@@ -112,7 +112,7 @@ def main() -> None:
     consts = {
         'schema': 'betting-win-surebet-upstream-lock-v1',
         'repository': 'betting-win',
-        'worktreeClean': True,
+        'sourceView': 'committed_git_head',
         'contractSchema': 'betting-win.strategy-export.v1',
         'contractAlias': 'betting-win-strategy-export.v1',
         'surebetProfile': 'surebet_standard_binary_v0',
@@ -156,13 +156,29 @@ def main() -> None:
         'README.md': [EXPECTED_ARCHIVE_SHA256, 'BWS-100', 'betting-win.strategy-export.v1', 'surebet_standard_binary_v0'],
         'docs/002_dependency_contract_with_betting_win.md': ['workspace', 'export', 'api', 'There is no automatic fallback'],
         'docs/016_pinned_betting_win_interface_readiness.md': ['The upstream interface is no longer hypothetical', 'BWS-100'],
-        'docs/030_upstream_compatibility_and_pin_contract.md': ['BETTING_WIN_REPO_PATH', '40-character commit SHA', '40-character Git tree SHA', 'git ls-tree -r --full-tree HEAD', 'No fallback'],
-        'docs/automation/current-implementation-task.md': ['prove the betting-win checkout remains unchanged', 'no placeholder fields'],
+        'docs/030_upstream_compatibility_and_pin_contract.md': ['BETTING_WIN_REPO_PATH', 'committed `HEAD`', 'git show HEAD:', 'git ls-tree -r --full-tree HEAD', 'No fallback'],
+        'docs/automation/current-implementation-task.md': ['prove the betting-win committed HEAD remains unchanged', 'no placeholder fields', 'no clone or temporary worktree'],
     }
     for rel, markers in docs.items():
         text = read(rel)
         for marker in markers:
             require(text, marker, rel)
+
+    implementation = read('src/upstream/betting-win-upstream-lock.ts')
+    for marker in [
+        "const SOURCE_VIEW = 'committed_git_head'",
+        "['show', 'HEAD:package.json']",
+        "['show', 'HEAD:packages/provider-collection/src/index.ts']",
+        "['ls-tree', '-r', '--name-only', 'HEAD'",
+    ]:
+        require(implementation, marker, 'src/upstream/betting-win-upstream-lock.ts')
+    for forbidden in [
+        "['status', '--porcelain'",
+        'BETTING_WIN_WORKTREE_DIRTY',
+        'checkout must be clean before generating the upstream lock',
+    ]:
+        if forbidden in implementation:
+            fail(f'src/upstream/betting-win-upstream-lock.ts contains forbidden worktree-coupled marker: {forbidden}')
 
     source_manifest_validator = read('scripts/validate_source_manifest.py')
     require(

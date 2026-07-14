@@ -1,3 +1,12 @@
+## 2026-07-14 - BWS-100 existing-checkout committed-HEAD pinning
+
+- Replaced the clean-working-tree prerequisite with an exact `sourceView=committed_git_head` contract.
+- Read root/workspace package manifests and provider capability markers from Git objects using `git show HEAD:` instead of working-tree files.
+- Allowed the existing `~/app_testing/betting-win` checkout to contain unrelated uncommitted or untracked state without cloning, cleaning, resetting, committing, or copying it.
+- Preserved fail-closed commit, Git-tree, tracked-tree fingerprint, schema, package, capability, mismatch, and mid-verification committed-HEAD mutation checks.
+- Added deterministic dirty-worktree isolation and root-user unreadable-path coverage.
+- Kept `BWS-100` pending until the autonomous controller generates and verifies the runtime lock and passes canonical validation.
+
 # Changelog
 
 ## 2026-07-14 - Git executable-mode persistence hardening

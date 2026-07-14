@@ -31,7 +31,7 @@ The first dependency-ready `PENDING` row in the binding CSV is the implementatio
 
 ## Read-only upstream authority
 
-The betting-win development checkout is supplied through `BETTING_WIN_REPO_PATH`. It may be inspected to generate and verify an exact upstream lock, but it must not be modified from a BWS implementation cycle.
+The betting-win development checkout is supplied through `BETTING_WIN_REPO_PATH`. BWS may inspect only its committed `HEAD` to generate and verify an exact upstream lock. All package and capability reads come from Git objects, not working-tree files. Uncommitted upstream changes and runtime artifacts are excluded from the pin and must not be cleaned, reset, committed, copied, or cloned by a BWS implementation cycle.
 
 Allowed integration surfaces:
 

@@ -3,7 +3,7 @@
 ## Initial build
 
 1. Apply and validate the rebaseline overlay under Node 20.
-2. Ensure the server has a readable clean betting-win Git checkout.
+2. Ensure the server has a readable betting-win Git checkout. BWS reads only its committed `HEAD`; no clone, temporary worktree, cleanup, or reset is required.
 3. Export `BETTING_WIN_REPO_PATH` explicitly.
 4. Start `run-autonomous-implementation.sh` with canonical duration and model flags.
 5. Inspect the newest `artifacts/autonomous_implementation_*` evidence, not process exit alone.

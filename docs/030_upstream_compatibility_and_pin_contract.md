@@ -2,13 +2,15 @@
 
 ## Development checkout
 
-The autonomous run receives `BETTING_WIN_REPO_PATH`. It resolves a real canonical path, verifies `package.json`, Git identity, current commit, clean tracked worktree, Git tree, deterministic tracked-tree listing fingerprint, package versions, and required capabilities. It must not modify the checkout.
+The autonomous run receives `BETTING_WIN_REPO_PATH` pointing to the existing betting-win Git checkout. It resolves the canonical path and verifies the Git toplevel, current 40-character commit, Git tree, deterministic tracked-tree listing fingerprint, package versions, and required capabilities from committed `HEAD`.
+
+All source evidence is read through Git objects, including `git show HEAD:package.json`, committed workspace package manifests, and `git show HEAD:packages/provider-collection/src/index.ts`. Uncommitted working-tree modifications, untracked automation files, and runtime locks are outside the pin. BWS must not clone, create a temporary worktree, clean, reset, commit, or otherwise modify the betting-win checkout.
 
 ## Runtime lock
 
-BWS generates `config/betting-win.upstream.lock.json` conforming to `schemas/betting-win-upstream-lock.v1.schema.json` from the actual checkout.
+BWS generates `config/betting-win.upstream.lock.json` conforming to `schemas/betting-win-upstream-lock.v1.schema.json` from the existing checkout's committed `HEAD`.
 
-Required evidence includes repository/path, 40-character commit SHA, 40-character Git tree SHA, clean worktree, root/package versions, SHA-256 of the exact `git ls-tree -r --full-tree HEAD` byte stream, fingerprint algorithm identifier, contract schema/alias/profile, capabilities, and verification timestamp. Placeholders and unknown values are rejected.
+Required evidence includes repository/path, `sourceView=committed_git_head`, 40-character commit SHA, 40-character Git tree SHA, root/package versions, SHA-256 of the exact `git ls-tree -r --full-tree HEAD` byte stream, fingerprint algorithm identifier, contract schema/alias/profile, capabilities, and verification timestamp. Placeholders and unknown values are rejected. Generation fails if committed `HEAD` changes during verification.
 
 ## Mode contracts
 

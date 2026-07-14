@@ -36,7 +36,7 @@ read_only_query_api=present
 api_web_workers=present
 ```
 
-The archive has no Git commit metadata and no BW source manifest. `BWS-100` must verify the actual server checkout read-only and generate the exact runtime lock.
+The archive has no Git commit metadata and no BW source manifest. `BWS-100` must verify the existing server checkout's committed `HEAD` read-only and generate the exact runtime lock. Dirty or untracked working-tree state is excluded from the pin; BWS must not clone, clean, reset, or otherwise modify the upstream checkout.
 
 ## Existing source
 
