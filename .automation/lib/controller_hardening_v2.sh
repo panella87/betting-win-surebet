@@ -172,63 +172,6 @@ automation_v2_write_env_atomic() {
   mv -f -- "$temp" "$file"
 }
 
-automation_v2_claim_env_lock_atomic() {
-  local file=${1:?lock file is required}
-  shift
-  local claim
-  mkdir -p -- "$(dirname -- "$file")"
-  claim="${file}.claim.$$.$RANDOM"
-  rm -f -- "$claim"
-  automation_v2_write_env_atomic "$claim" "$@" || { rm -f -- "$claim"; return 2; }
-  if ln -- "$claim" "$file" 2>/dev/null; then
-    rm -f -- "$claim"
-    return 0
-  fi
-  rm -f -- "$claim"
-  return 1
-}
-
-automation_v2_lock_mtime_epoch() {
-  local file=${1:?lock file is required}
-  [[ -f "$file" && ! -L "$file" ]] || {
-    printf 'ERROR: lock must be a non-symlink regular file: %s\n' "$file" >&2
-    return 2
-  }
-  stat -c '%Y' -- "$file" 2>/dev/null || {
-    printf 'ERROR: unable to read lock modification time: %s\n' "$file" >&2
-    return 2
-  }
-}
-
-automation_v2_release_owned_env_lock() {
-  local file=${1:?lock file is required}
-  local expected_pid=${2:?expected pid is required}
-  local expected_repo=${3:?expected repo realpath is required}
-  local expected_script=${4:?expected script realpath is required}
-  [[ -f "$file" && ! -L "$file" ]] || {
-    printf 'ERROR: owned lock must be a non-symlink regular file: %s\n' "$file" >&2
-    return 2
-  }
-  automation_v2_load_env_strict "$file" || return 2
-  [[ "${AUTOMATION_V2_ENV[CONTROLLER_PID]-}" == "$expected_pid" ]] || {
-    printf 'ERROR: lock controller PID mismatch for %s.\n' "$file" >&2
-    return 2
-  }
-  [[ "${AUTOMATION_V2_ENV[REPO_REALPATH]-}" == "$expected_repo" ]] || {
-    printf 'ERROR: lock repository mismatch for %s.\n' "$file" >&2
-    return 2
-  }
-  [[ "${AUTOMATION_V2_ENV[SCRIPT_REALPATH]-}" == "$expected_script" ]] || {
-    printf 'ERROR: lock script mismatch for %s.\n' "$file" >&2
-    return 2
-  }
-  rm -f -- "$file" || return 2
-  [[ ! -e "$file" ]] || {
-    printf 'ERROR: lock remains after release: %s\n' "$file" >&2
-    return 2
-  }
-}
-
 automation_v2_add_or_verify_fingerprint() {
   local file=${1:?env file is required}
   local computed existing
@@ -369,6 +312,184 @@ automation_v2_validate_child_script() {
   }
 }
 
+automation_v2_process_state() {
+  local pid=${1:-}
+  local stat_line remainder state
+  [[ "$pid" =~ ^[1-9][0-9]*$ && -r "/proc/$pid/stat" ]] || return 1
+  IFS= read -r stat_line < "/proc/$pid/stat" || return 1
+  [[ "$stat_line" == *') '* ]] || return 1
+  remainder=${stat_line##*) }
+  state=${remainder%% *}
+  [[ -n "$state" ]] || return 1
+  printf '%s\n' "$state"
+}
+
+automation_v2_process_alive() {
+  local pid=${1:-}
+  local state
+  [[ "$pid" =~ ^[1-9][0-9]*$ ]] || return 1
+  kill -0 "$pid" 2>/dev/null || return 1
+  state=$(automation_v2_process_state "$pid" 2>/dev/null || true)
+  case "$state" in
+    Z|X) return 1 ;;
+    *) return 0 ;;
+  esac
+}
+
+automation_v2_wait_for_pid_exit() {
+  local pid=${1:-}
+  local timeout_seconds=${2:-10}
+  local i iterations
+  [[ "$pid" =~ ^[1-9][0-9]*$ ]] || return 0
+  [[ "$timeout_seconds" =~ ^[0-9]+$ ]] || {
+    printf 'ERROR: wait timeout must be a non-negative integer; got %q.\n' "$timeout_seconds" >&2
+    return 2
+  }
+  iterations=$((timeout_seconds * 10))
+  for ((i = 0; i <= iterations; i++)); do
+    automation_v2_process_alive "$pid" || return 0
+    (( i < iterations )) && sleep 0.1
+  done
+  return 1
+}
+
+automation_v2_claim_env_file_atomic() {
+  local file=${1:?env file is required}
+  shift
+  local claim
+  mkdir -p -- "$(dirname -- "$file")"
+  claim="${file}.claim.$$.$RANDOM"
+  rm -f -- "$claim"
+  automation_v2_write_env_atomic "$claim" "$@" || {
+    rm -f -- "$claim"
+    return 2
+  }
+  if ln -- "$claim" "$file" 2>/dev/null; then
+    rm -f -- "$claim"
+    return 0
+  fi
+  rm -f -- "$claim"
+  return 1
+}
+
+automation_v2_validate_parent_lock_loaded() {
+  local expected_controller=${1:?expected controller is required}
+  local expected_repository=${2:?expected repository is required}
+  local expected_repo_real=${3:?expected repository realpath is required}
+  local expected_script_real=${4:?expected script realpath is required}
+  local expected_pid=${5:-}
+  local key run_dir child_pid child_kind child_script child_command
+  local allowed=',LOCK_SCHEMA_VERSION,CONTROLLER,CONTROLLER_PID,REPOSITORY,REPO_REALPATH,SCRIPT_REALPATH,RUN_DIR,HEARTBEAT_SOURCE,HEARTBEAT_EPOCH,HEARTBEAT_AT,ACTIVE_CHILD_PID,ACTIVE_CHILD_KIND,ACTIVE_CHILD_SCRIPT,ACTIVE_CHILD_COMMAND,'
+
+  for key in "${!AUTOMATION_V2_ENV[@]}"; do
+    [[ "$allowed" == *",$key,"* ]] || {
+      printf 'ERROR: unsupported parent-lock key: %s\n' "$key" >&2
+      return 2
+    }
+  done
+  [[ "${AUTOMATION_V2_ENV[LOCK_SCHEMA_VERSION]-}" == 1 ]] || {
+    printf 'ERROR: unsupported parent-lock schema.\n' >&2
+    return 2
+  }
+  [[ "${AUTOMATION_V2_ENV[CONTROLLER]-}" == "$expected_controller" ]] || {
+    printf 'ERROR: parent-lock controller mismatch.\n' >&2
+    return 2
+  }
+  [[ "${AUTOMATION_V2_ENV[REPOSITORY]-}" == "$expected_repository" ]] || {
+    printf 'ERROR: parent-lock repository name mismatch.\n' >&2
+    return 2
+  }
+  [[ "${AUTOMATION_V2_ENV[REPO_REALPATH]-}" == "$expected_repo_real" ]] || {
+    printf 'ERROR: parent-lock repository realpath mismatch.\n' >&2
+    return 2
+  }
+  [[ "${AUTOMATION_V2_ENV[SCRIPT_REALPATH]-}" == "$expected_script_real" ]] || {
+    printf 'ERROR: parent-lock script realpath mismatch.\n' >&2
+    return 2
+  }
+  [[ "${AUTOMATION_V2_ENV[CONTROLLER_PID]-}" =~ ^[1-9][0-9]*$ ]] || {
+    printf 'ERROR: parent-lock controller PID is invalid.\n' >&2
+    return 2
+  }
+  if [[ -n "$expected_pid" && "${AUTOMATION_V2_ENV[CONTROLLER_PID]}" != "$expected_pid" ]]; then
+    printf 'ERROR: parent-lock owner PID mismatch.\n' >&2
+    return 2
+  fi
+  [[ "${AUTOMATION_V2_ENV[HEARTBEAT_SOURCE]-}" == file_mtime ]] || {
+    printf 'ERROR: parent-lock heartbeat source must be file_mtime.\n' >&2
+    return 2
+  }
+  [[ "${AUTOMATION_V2_ENV[HEARTBEAT_EPOCH]-}" =~ ^[0-9]+$ ]] || {
+    printf 'ERROR: parent-lock heartbeat epoch is invalid.\n' >&2
+    return 2
+  }
+  [[ -n "${AUTOMATION_V2_ENV[HEARTBEAT_AT]-}" ]] || {
+    printf 'ERROR: parent-lock heartbeat timestamp is missing.\n' >&2
+    return 2
+  }
+
+  run_dir=${AUTOMATION_V2_ENV[RUN_DIR]-}
+  if [[ -n "$run_dir" ]]; then
+    automation_v2_safe_repo_path "$expected_repo_real" "$run_dir" no >/dev/null || return 2
+  fi
+
+  child_pid=${AUTOMATION_V2_ENV[ACTIVE_CHILD_PID]-}
+  child_kind=${AUTOMATION_V2_ENV[ACTIVE_CHILD_KIND]-}
+  child_script=${AUTOMATION_V2_ENV[ACTIVE_CHILD_SCRIPT]-}
+  child_command=${AUTOMATION_V2_ENV[ACTIVE_CHILD_COMMAND]-}
+  if [[ -z "$child_pid" ]]; then
+    [[ "$child_kind" == none && -z "$child_script" && -z "$child_command" ]] || {
+      printf 'ERROR: parent-lock empty child PID has inconsistent child metadata.\n' >&2
+      return 2
+    }
+  else
+    [[ "$child_pid" =~ ^[1-9][0-9]*$ && -n "$child_kind" && "$child_kind" != none && -n "$child_script" && -n "$child_command" ]] || {
+      printf 'ERROR: parent-lock active child metadata is incomplete.\n' >&2
+      return 2
+    }
+    automation_v2_safe_repo_path "$expected_repo_real" "$child_script" yes >/dev/null || return 2
+  fi
+}
+
+automation_v2_load_parent_lock_owned() {
+  local file=${1:?lock file is required}
+  shift
+  automation_v2_load_env_strict "$file" || return 2
+  automation_v2_validate_parent_lock_loaded "$@"
+}
+
+automation_v2_parent_lock_mtime_epoch() {
+  local file=${1:?lock file is required}
+  [[ -f "$file" && ! -L "$file" ]] || return 2
+  stat -c '%Y' -- "$file"
+}
+
+automation_v2_touch_owned_parent_lock() {
+  local file=${1:?lock file is required}
+  shift
+  local before after
+  automation_v2_load_parent_lock_owned "$file" "$@" || return 2
+  before=$(stat -c '%d:%i' -- "$file") || return 2
+  touch -m -- "$file" || return 2
+  after=$(stat -c '%d:%i' -- "$file") || return 2
+  [[ "$before" == "$after" ]] || {
+    printf 'ERROR: parent lock changed while its heartbeat was refreshed: %s\n' "$file" >&2
+    return 2
+  }
+  automation_v2_load_parent_lock_owned "$file" "$@" || return 2
+}
+
+automation_v2_release_owned_parent_lock() {
+  local file=${1:?lock file is required}
+  shift
+  automation_v2_load_parent_lock_owned "$file" "$@" || return 2
+  rm -f -- "$file" || return 2
+  [[ ! -e "$file" ]] || {
+    printf 'ERROR: parent lock remains after owned release: %s\n' "$file" >&2
+    return 2
+  }
+}
+
 automation_v2_process_matches_script() {
   local pid=${1:?pid is required}
   local expected=${2:?expected script is required}
@@ -402,43 +523,21 @@ automation_v2_process_matches_script() {
   return "$matched"
 }
 
-automation_v2_pid_alive() {
-  local pid=${1:-} state
-  [[ "$pid" =~ ^[1-9][0-9]*$ ]] || return 1
-  kill -0 "$pid" 2>/dev/null || return 1
-  if [[ -r "/proc/$pid/stat" ]]; then
-    state=$(awk '{print $3}' "/proc/$pid/stat" 2>/dev/null || true)
-    [[ "$state" != Z && "$state" != X ]] || return 1
-  fi
-  return 0
-}
-
-automation_v2_wait_for_pid_exit() {
-  local pid=${1:-}
-  local wait_seconds=${2:-10}
-  local i
-  [[ "$pid" =~ ^[1-9][0-9]*$ ]] || return 0
-  for ((i = 0; i < wait_seconds * 10; i++)); do
-    automation_v2_pid_alive "$pid" || return 0
-    sleep 0.1
-  done
-  automation_v2_pid_alive "$pid" && return 2
-  return 0
-}
-
 automation_v2_terminate_process_group() {
   local pid=${1:-}
   local grace=${2:-10}
-  local kill_grace=${3:-10}
   [[ "$pid" =~ ^[1-9][0-9]*$ ]] || return 0
-  automation_v2_pid_alive "$pid" || return 0
+  [[ "$grace" =~ ^[0-9]+$ ]] || {
+    printf 'ERROR: termination grace must be a non-negative integer; got %q.\n' "$grace" >&2
+    return 2
+  }
+  automation_v2_process_alive "$pid" || return 0
   kill -TERM -- "-$pid" 2>/dev/null || kill -TERM "$pid" 2>/dev/null || true
   automation_v2_wait_for_pid_exit "$pid" "$grace" && return 0
   kill -KILL -- "-$pid" 2>/dev/null || kill -KILL "$pid" 2>/dev/null || true
-  automation_v2_wait_for_pid_exit "$pid" "$kill_grace" || {
-    printf 'ERROR: process remains alive after verified KILL escalation: %s\n' "$pid" >&2
-    return 2
-  }
+  automation_v2_wait_for_pid_exit "$pid" 10 && return 0
+  printf 'ERROR: verified process remains alive after TERM and KILL: %s\n' "$pid" >&2
+  return 2
 }
 
 automation_v2_zip_with_timeout() {

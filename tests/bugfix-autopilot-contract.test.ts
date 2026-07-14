@@ -70,13 +70,14 @@ test('bugfix autopilot exposes the bounded audit implementation re-audit campaig
     'next_same_area_bugfix_reaudit', 'validate_bugfix_completion_contract()',
     'semantic_bug_signature_repeat_guard=enabled', 'parent_budget_clamping=enabled',
     'child_aware_lock=enabled', 'cross_controller_lock_guard=enabled',
-    'atomic_parent_lock_acquisition=enabled', 'parent_child_cleanup_failure_classification=enabled',
-    'parent_lock_release_failure_classification=enabled', 'lock_preservation_on_child_identity_failure=enabled',
-    'verified_kill_escalation=enabled', 'responsive_parent_heartbeat=enabled',
-    'heartbeat_update_mode=file_mtime_no_state_rewrite', 'HEARTBEAT_SOURCE=file_mtime',
-    'BUGFIX_AUTOPILOT_BLOCKED_LOCK_RELEASE', "printf 'lock_release_status=%s\\n'", "printf 'lock_preserved=%s\\n'",
-    'automation_assert_no_incompatible_locks', 'refresh_parent_lock_heartbeat()', 'bugfix_child_mutated_source',
+    'atomic_parent_lock_acquisition=enabled', 'parent_lock_mtime_heartbeat=enabled',
+    'parent_child_cleanup_failure_classification=enabled', 'parent_lock_release_failure_classification=enabled',
+    'lock_preservation_on_child_identity_failure=enabled', 'verified_force_unlock_termination=enabled',
+    'child_telegram_notifications=suppressed_by_parent', 'parent_telegram_notification=final_only',
+    '"TELEGRAM_NOTIFY=0"', 'automation_assert_no_incompatible_locks', 'automation_v2_claim_env_file_atomic',
+    'automation_v2_touch_owned_parent_lock', 'refresh_parent_lock_heartbeat()', 'bugfix_child_mutated_source',
     'unsupported handoff key for schema v1', 'active_child_identity_or_termination_failed', 'parent_budget_exhausted',
+    'BUGFIX_AUTOPILOT_BLOCKED_LOCK_RELEASE', "printf 'lock_release_status=%s\\n'", "printf 'lock_preserved=%s\\n'",
   ]) assert.match(script, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   assert.doesNotMatch(script, /run-paper-evaluation\.sh|run-paper-autopilot\.sh|bash \.\/start\.sh|bash \.\/stop\.sh|forever|MongoDB/);
 });
@@ -154,6 +155,7 @@ test('bugfix autopilot requires implementation and then re-audits the same area 
     writeExecutable(join(repo, 'run-autonomous-bugfix.sh'), `#!/usr/bin/env bash
 set -Eeuo pipefail
 repo=""; area=""; while [[ $# -gt 0 ]]; do case "$1" in --repo-dir) repo="$2"; shift 2;; --campaign-area) area="$2"; shift 2;; *) shift;; esac; done
+printf '%s\n' "\${TELEGRAM_NOTIFY:-unset}" >> "$repo/artifacts/stub-child-telegram-values"
 . "$repo/.automation/lib/controller_hardening_v2.sh"
 mkdir -p "$repo/.automation/runtime"
 count_file="$repo/.automation/runtime/stub-bugfix-count"
@@ -186,6 +188,7 @@ exit "$rc"
     writeExecutable(join(repo, 'run-autonomous-implementation.sh'), `#!/usr/bin/env bash
 set -Eeuo pipefail
 repo=""; while [[ $# -gt 0 ]]; do case "$1" in --repo-dir) repo="$2"; shift 2;; *) shift;; esac; done
+printf '%s\n' "\${TELEGRAM_NOTIFY:-unset}" >> "$repo/artifacts/stub-child-telegram-values"
 . "$repo/.automation/lib/controller_hardening_v2.sh"
 automation_v2_load_env_strict "$repo/.automation/autonomous-implementation-handover.env"
 source_fp="\${AUTOMATION_V2_ENV[HANDOVER_FINGERPRINT]}"; area="\${AUTOMATION_V2_ENV[AUDIT_AREA]}"; bugs="\${AUTOMATION_V2_ENV[BUG_IDS]}"
@@ -203,7 +206,14 @@ printf 'run_dir=%s\nfinal_status=AUTONOMOUS_GOAL_COMPLETE=yes\nstop_reason=stub_
 `);
     const result = spawnSync('bash', ['./run-bugfix-autopilot.sh', '--duration', '120', '--bugfix-duration', '30', '--implementation-duration', '30', '--max-rounds', '3', '--max-same-handoff', '2', '--model', 'cli-default', '--fallback-model', 'none', '--no-stream'], {
       cwd: repo,
-      env: { ...process.env, TELEGRAM_NOTIFY: '0' },
+      env: {
+        ...process.env,
+        TELEGRAM_NOTIFY: '1',
+        TELEGRAM_NOTIFY_DRY_RUN: '1',
+        TELEGRAM_NOTIFICATION_SENT: '0',
+        TELEGRAM_BOT_TOKEN: 'dummy-token',
+        TELEGRAM_CHAT_ID: 'dummy-chat',
+      },
       encoding: 'utf8',
       timeout: 30000,
     });
@@ -218,6 +228,10 @@ printf 'run_dir=%s\nfinal_status=AUTONOMOUS_GOAL_COMPLETE=yes\nstop_reason=stub_
     assert.match(rounds, /next_same_area_bugfix_reaudit/);
     assert.match(rounds, /campaign_area_closed\tnone\tboundary_and_input_contracts\tclosed/);
     assert.equal(existsSync(join(repo, 'fixed.txt')), true);
+    const childTelegramValues = readFileSync(join(repo, 'artifacts', 'stub-child-telegram-values'), 'utf8')
+      .trim().split(/\r?\n/);
+    assert.deepEqual(childTelegramValues, ['0', '0', '0']);
+    assert.match(readFileSync(join(runDir, 'telegram_notification_status.txt'), 'utf8'), /telegram_notification=dry_run/);
   } finally {
     rmSync(repo, { recursive: true, force: true });
   }

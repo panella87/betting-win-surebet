@@ -3,26 +3,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-const REPO_ROOT = process.cwd();
-function read(rel: string): string { return readFileSync(join(REPO_ROOT, rel), 'utf-8'); }
+const ROOT = process.cwd();
+const read = (rel: string): string => readFileSync(join(ROOT, rel), 'utf-8');
 
-test('automation implementation docs treat retained backlogs as complete ledgers', () => {
+test('autonomous authority continues the BWS full-platform queue', () => {
   const doc = read('docs/automation/autonomous-implementation.md');
-  assert.match(doc, /docs\/014_sure_001_remaining_hardening_backlog\.md/);
-  assert.match(doc, /docs\/015_local_engine_implementation_backlog\.md/);
-  assert.match(doc, /docs\/017_private_paper_mode_implementation_backlog\.md/);
-  assert.match(doc, /repo-local backlogs are complete/);
-  assert.match(doc, /full product blueprint is not complete/);
-  assert.match(doc, /BLOCKED=yes/);
-});
-
-test('current implementation task allows only confirmed safe defect repair', () => {
   const task = read('docs/automation/current-implementation-task.md');
-  assert.match(task, /Fix only confirmed repo-local validation\/tooling defects/);
-  assert.match(task, /provider_connections=prohibited/);
-  assert.match(task, /execution=prohibited/);
-  assert.match(task, /blocked_until_federico_pinned_betting_win_interface/);
-  assert.match(task, /BLOCKED=yes/);
-  assert.match(task, /AUTONOMOUS_GOAL_COMPLETE=yes/);
-  assert.match(task, /full product blueprint/);
+  const status = read('docs/repo_status_current.md');
+  for (const marker of ['BWS_FULL_PLATFORM_IMPLEMENTATION_V1', 'backlog/bws_full_implementation.csv', 'BWS-100', 'BWS-510', 'CONTINUE_REQUIRED=yes', 'AUTONOMOUS_GOAL_COMPLETE=yes']) {
+    assert.match(doc + task, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  }
+  assert.match(task, /BETTING_WIN_REPO_PATH/);
+  assert.match(status, /selected_controller=run-autonomous-implementation\.sh/);
+  assert.doesNotMatch(doc + task + status, /repo-local backlogs are complete/);
 });

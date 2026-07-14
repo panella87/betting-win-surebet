@@ -1,10 +1,10 @@
 {
-  "schema": "betting-win-surebet-pinned-interface-placeholder-v1",
+  "schema": "betting-win-surebet-bootstrap-placeholder-v1",
   "generatedBy": "betting-win-surebet",
-  "fixtureKind": "pinned_interface_placeholder",
-  "mode": "paper_only",
+  "fixtureKind": "historical_bootstrap_placeholder",
+  "mode": "local_fixture_regression_only",
   "providerConnection": "prohibited",
-  "status": "blocked_until_federico_provides_pinned_betting_win_interface",
-  "notes": "Local fake fixture for validator smoke tests only. Not a betting-win export bundle and not SURE-002 readiness evidence.",
+  "status": "superseded_by_bws_full_platform_program",
+  "notes": "Historical local fake fixture for validator regression only. Not a betting-win export, upstream lock, BWS-100 proof, or BWS-130 intake evidence.",
   "records": []
 }

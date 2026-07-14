@@ -3,44 +3,29 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-const REPO_ROOT = process.cwd();
-const VALIDATE_REPO = join(REPO_ROOT, 'scripts', 'validate_repo.py');
+const validator = readFileSync(join(process.cwd(), 'scripts/validate_repo.py'), 'utf-8');
 
-function read(path: string): string {
-  return readFileSync(path, 'utf-8');
-}
-
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-test('validate_repo requires critical validator tests as repo assets', () => {
-  const validator = read(VALIDATE_REPO);
-
+test('validate_repo requires the full implementation and upstream contract surface', () => {
   for (const marker of [
-    'tests/validate-artifact-hygiene.test.ts',
-    'tests/validate-shell-local-assignments.test.ts',
-    'tests/validate-source-manifest.test.ts',
-    'tests/packaging-helpers.test.ts',
-    'tests/local-engine-backlog-contract.test.ts',
+    'backlog/bws_full_implementation.csv',
+    'config/betting-win.upstream-baseline.json',
+    'schemas/betting-win-upstream-lock.v1.schema.json',
+    'scripts/validate_full_implementation_program.py',
+    'scripts/validate_betting_win_upstream_contract.py',
+    'tests/full-implementation-program-contract.test.ts',
+    'tests/betting-win-upstream-contract.test.ts',
     'tests/three-repo-surebet-boundary.test.ts',
-    'scripts/validate_three_repo_surebet_boundary.py',
   ]) {
-    assert.match(validator, new RegExp(escapeRegExp(marker)));
+    assert.match(validator, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
 });
 
-test('validate_repo rejects unresolved merge conflict markers', () => {
-  const validator = read(VALIDATE_REPO);
-
+test('validate_repo rejects conflict markers and premature runtime lock evidence', () => {
   for (const marker of [
-    'validate_no_conflict_markers',
-    'CONFLICT_MARKER_PREFIXES',
-    "'<<<<<<<'",
-    "'>>>>>>>'",
-    "CONFLICT_SEPARATOR = '======='",
-    'unresolved merge conflict markers found',
+    'validate_no_conflict_markers', 'CONFLICT_MARKER_PREFIXES', "'<<<<<<<'", "'>>>>>>>'",
+    "CONFLICT_SEPARATOR = '======='", 'unresolved merge conflict markers found',
+    'config/betting-win.upstream.lock.json', 'docs/imported-from-betting-win',
   ]) {
-    assert.match(validator, new RegExp(escapeRegExp(marker)));
+    assert.match(validator, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
 });

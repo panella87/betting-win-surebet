@@ -24,12 +24,15 @@ test('paper autopilot is a surebet no-service parent supervisor', () => {
     'PAPER_AUTOPILOT_BLOCKED_CHILD_IDENTITY',
     'PAPER_AUTOPILOT_BLOCKED_LOCK_RELEASE',
     'atomic_parent_lock_acquisition=enabled',
+    'parent_lock_mtime_heartbeat=enabled',
+    'verified_force_unlock_termination=enabled',
+    'automation_v2_claim_env_file_atomic',
+    'automation_v2_touch_owned_parent_lock',
     'parent_child_cleanup_failure_classification=enabled',
     'parent_lock_release_failure_classification=enabled',
-    'verified_kill_escalation=enabled',
-    'responsive_parent_heartbeat=enabled',
-    'heartbeat_update_mode=file_mtime_no_state_rewrite',
-    'HEARTBEAT_SOURCE=file_mtime',
+    'child_telegram_notifications=suppressed_by_parent',
+    'parent_telegram_notification=final_only',
+    '"TELEGRAM_NOTIFY=0"',
     'telegram_notify_send_final "run-paper-autopilot.sh"',
   ]) contains(script, marker);
   assert.doesNotMatch(script, /scripts\/load-node-runtime\.sh/);
@@ -78,7 +81,7 @@ test('automation config and docs register paper autopilot as the unattended pape
   contains(config, 'AUTOMATION_PAPER_AUTOPILOT_COMMAND');
   contains(config, 'AUTOMATION_PAPER_COMMAND="$AUTOMATION_PAPER_AUTOPILOT_COMMAND"');
   contains(config, 'run-paper-autopilot.sh');
-  contains(status, 'run_paper_autopilot=standardized_no_service_parent_supervisor');
+  contains(status, 'run_paper_autopilot=standardized_parent_for_post_implementation_runtime_convergence');
   contains(read('docs/automation/paper-autopilot.md'), 'PAPER_AUTOPILOT_BLOCKED_ON_PINNED_BUNDLE');
 });
 

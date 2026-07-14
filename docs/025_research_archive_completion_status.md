@@ -20,3 +20,8 @@ strategy_owner=betting-win-surebet
 - Cross-sport surebet bridge decision for historical context.
 
 These archives are historical support material only. Current surebet implementation authority remains local complete-set, cashflow, solver, paper-mode, and validation contracts.
+
+```text
+active_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
+archive_is_active_product_authority=no
+```

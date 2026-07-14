@@ -1,12 +1,16 @@
 from __future__ import annotations
+
 from pathlib import Path
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
+PROGRAM = 'BWS_FULL_PLATFORM_IMPLEMENTATION_V1'
+
 
 def fail(message: str) -> None:
     print(f'ERROR: {message}', file=sys.stderr)
     raise SystemExit(1)
+
 
 def read(rel: str) -> str:
     path = ROOT / rel
@@ -14,86 +18,60 @@ def read(rel: str) -> str:
         fail(f'missing required file: {rel}')
     return path.read_text(encoding='utf-8')
 
-def require(text: str, needle: str, rel: str) -> None:
-    if needle not in text:
-        fail(f'{rel} missing required marker: {needle}')
+
+def require(text: str, marker: str, rel: str) -> None:
+    if marker not in text:
+        fail(f'{rel} missing required marker: {marker}')
+
 
 def main() -> None:
-    master = read('docs/MASTER_PLAN.md')
-    status = read('docs/repo_status_current.md')
-    backlog = read('docs/015_local_engine_implementation_backlog.md')
-    handoff = read('docs/016_pinned_betting_win_interface_readiness.md')
-    paper_backlog = read('docs/017_private_paper_mode_implementation_backlog.md')
-    paper_runbook = read('docs/018_private_paper_mode_runbook.md')
+    required = {
+        'docs/MASTER_PLAN.md': [
+            PROGRAM, 'repo_role=surebet_strategy_application', 'upstream_platform=betting-win',
+            'current_task=BWS-100', 'safe_local_terminal_gate=BWS-510',
+            'continuous_runtime_gate=BWS-600', 'execution_gate=BWS-900',
+            'backlog/bws_full_implementation.csv', 'run-autonomous-implementation.sh',
+            'run-bugfix-autopilot.sh', 'run-paper-autopilot.sh',
+        ],
+        'docs/repo_status_current.md': [
+            PROGRAM, 'status=IMPLEMENTATION_READY', 'current_task=BWS-100',
+            'safe_local_terminal_gate=BWS-510',
+            'selected_controller=run-autonomous-implementation.sh',
+        ],
+        'docs/028_full_implementation_program.md': [
+            PROGRAM, 'BWS-100', 'BWS-510', 'BWS-600', 'BWS-900',
+        ],
+        'docs/029_full_implementation_task_ledger.md': [
+            PROGRAM, 'backlog/bws_full_implementation.csv',
+            'current_task=BWS-100', 'current_task_status=PENDING',
+        ],
+        'docs/030_upstream_compatibility_and_pin_contract.md': [
+            'BETTING_WIN_REPO_PATH', 'config/betting-win.upstream.lock.json',
+            'workspace', 'export', 'api', 'No fallback',
+        ],
+        'docs/012_runbook.md': [
+            'run-autonomous-implementation.sh', 'BWS-510', 'run-paper-autopilot.sh',
+        ],
+        'docs/018_private_paper_mode_runbook.md': [
+            'current_stage=implementation_before_runtime', 'BWS-510', 'BWS-600',
+        ],
+    }
+    for rel, markers in required.items():
+        text = read(rel)
+        for marker in markers:
+            require(text, marker, rel)
 
-    for needle in [
-        'SURE-001', 'SURE-002', 'SURE-003', 'SURE-004', 'SURE-005', 'SURE-006', 'SURE-007',
-        'retained SURE-002A local implementation ledger',
+    for rel in [
+        'docs/014_sure_001_remaining_hardening_backlog.md',
         'docs/015_local_engine_implementation_backlog.md',
-        'polymarket_standard_binary_complete_set_v0',
-        'provider_connection=prohibited',
-        'execution=prohibited',
-        'pinned_betting_win_interface=missing',
-        'local_fixture_only_complete',
-        'SURE-002B_PRIVATE_PAPER_MODE_INTAKE',
         'docs/017_private_paper_mode_implementation_backlog.md',
-        'private_paper_mode=repo_local_complete',
-        'docs/018_private_paper_mode_runbook.md',
     ]:
-        require(master, needle, 'docs/MASTER_PLAN.md')
-
-    for needle in [
-        'current_task=SURE-002B_PRIVATE_PAPER_MODE_INTAKE',
-        'current_task_status=repo_local_private_paper_mode_baseline_complete_full_blueprint_blocked_on_pinned_interface',
-        'provider_connections=prohibited',
-        'execution=prohibited',
-        'docs/015_local_engine_implementation_backlog.md',
-        'docs/016_pinned_betting_win_interface_readiness.md',
-        'Real upstream evaluation remains blocked',
-        'SURE-002B_PRIVATE_PAPER_MODE_INTAKE',
-        'docs/017_private_paper_mode_implementation_backlog.md',
-        'docs/018_private_paper_mode_runbook.md',
-        'No unchecked repo-local item remains in `docs/017_private_paper_mode_implementation_backlog.md`.',
-    ]:
-        require(status, needle, 'docs/repo_status_current.md')
-
-    for needle in [
-        'SURE-002A_LOCAL_INTERFACE_AND_ENGINE_BOOTSTRAP',
-        'Local implementation backlog',
-        'CONTINUE_REQUIRED=yes',
-        'AUTONOMOUS_GOAL_COMPLETE=yes',
-        'provider SDK/client imports',
-        'stake-vector math',
-        'settlement replay consumption',
-        'profitability claims',
-    ]:
-        require(backlog, needle, 'docs/015_local_engine_implementation_backlog.md')
-
-    for needle in [
-        'Required pinned interface from betting-win',
-        'provider connections = prohibited',
-        'node cli.js local-report',
-    ]:
-        require(handoff, needle, 'docs/016_pinned_betting_win_interface_readiness.md')
-
-    for needle in [
-        'SURE-002B_PRIVATE_PAPER_MODE_INTAKE',
-        'pinned-interface smoke command',
-        'paper-mode batch runner',
-        'accepted = false',
-    ]:
-        require(paper_backlog, needle, 'docs/017_private_paper_mode_implementation_backlog.md')
-
-    for needle in [
-        'SURE-002B_PRIVATE_PAPER_MODE_INTAKE',
-        'SUREBET_PINNED_BUNDLE',
-        'artifacts/private-paper-mode',
-        'Freeze gate',
-        'npm run validate',
-    ]:
-        require(paper_runbook, needle, 'docs/018_private_paper_mode_runbook.md')
+        text = read(rel)
+        require(text, 'status=SUPERSEDED_BOOTSTRAP_LEDGER', rel)
+        require(text, f'active_program={PROGRAM}', rel)
 
     print('validate_master_plan: ok')
+
 
 if __name__ == '__main__':
     main()

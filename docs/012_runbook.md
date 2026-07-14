@@ -1,72 +1,19 @@
-# 012 — Runbook
+# 012 - Implementation and operator runbook
 
-## Bootstrap
+## Initial build
 
-Activate the repo Node runtime before package installation or validation:
+1. Apply and validate the rebaseline overlay under Node 20.
+2. Ensure the server has a readable clean betting-win Git checkout.
+3. Export `BETTING_WIN_REPO_PATH` explicitly.
+4. Start `run-autonomous-implementation.sh` with canonical duration and model flags.
+5. Inspect the newest `artifacts/autonomous_implementation_*` evidence, not process exit alone.
 
-```bash
-. "$HOME/.nvm/nvm.sh" && nvm use 20
-npm install
-npm run validate
-```
+The implementation controller reads `docs/automation/current-implementation-task.md` and `backlog/bws_full_implementation.csv`. It continues while safe dependency-ready work remains through `BWS-510`.
 
-## Expected state after SURE-002A local bootstrap
+## Failure handling
 
-```text
-repo skeleton = present
-no-provider validator = passing
-no-execution validator = passing
-contract boundary validator = passing
-local export bundle parser = implemented
-local bundle reader = implemented
-resource record contracts = implemented
-standard-binary complete-set assembler = implemented
-scenario cash-flow builder = implemented
-stake-vector solver = implemented for local fixtures
-completion and residual-exposure simulation = implemented for local fixtures
-settlement replay consumer = implemented for local fixtures
-private paper report assembler = implemented
-offline local-report CLI = implemented
-real upstream evaluation = blocked
-```
+Stop with `BLOCKED=yes` only for a concrete unrecoverable repo state or exact missing external evidence. Preserve locks and artifacts. Use owning-controller `--force-unlock` only with evidence; never delete locks or kill processes manually.
 
-## Local smoke command
+## Post-implementation
 
-```bash
-node cli.js local-report --bundle tests/fixtures/local-only-export-bundles/solver-ready-resource-export.json --output artifacts/local-paper-reports/smoke.report.json
-```
-
-## Next required input
-
-Provide Federico's pinned `betting-win` contract/export interface before real upstream evaluation or any later SURE phase. See `docs/016_pinned_betting_win_interface_readiness.md`. Use the three-repo boundary docs before planning backtest, paper, or future live-gate work: `docs/019_three_repo_surebet_strategy_boundary.md`, `docs/020_strategy_data_and_state_ownership.md`, `docs/021_backtest_paper_live_mode_roadmap.md`, and `docs/022_separate_account_policy.md`.
-
-## Standard automation runbook
-
-```bash
-./zip_codebase.sh
-./zip_codebase.sh --artifacts-only
-./pull_artifacts_and_zip_codebase.sh
-./update_git.sh --acp
-. "$HOME/.nvm/nvm.sh" && nvm use 20
-./run-autonomous-implementation.sh --check-only --model cli-default --fallback-model none
-./run-paper-evaluation.sh --duration 72h --interval 5m --adaptive --keep-monitoring-when-ready --model cli-default --fallback-model none
-./run-autonomous-bugfix.sh --duration 72h --model cli-default --fallback-model none --handover-autonomous-implementation
-```
-
-`run-paper-evaluation.sh` runs only the local private fixture paper path in the
-current gate. The `SUREBET_PINNED_BUNDLE` branch is reserved until the known
-Federico provides a repo-local pinned `betting-win` bundle. It is still not real upstream acceptance or live evidence. All `run-*`
-scripts write root `artifacts.zip` before stopping. Historical
-`commands/run-sure-*` wrappers are compatibility wrappers only; active
-docs should point operators to the root scripts above.
-
-
-## Unattended paper autopilot
-
-After activating Node 20 in the parent shell, run:
-
-```bash
-bash ./run-paper-autopilot.sh --duration 7d --paper-duration 72h --implementation-duration 72h --interval 5m --adaptive --max-rounds 0 --max-same-handoff 2 --model cli-default --fallback-model none
-```
-
-This is no-service/private-paper only.
+Use `run-paper-autopilot.sh` for runtime/database convergence only after `BWS-510`, or when a retained bugfix campaign explicitly requests runtime evidence. `BWS-600` still requires accepted continuous betting-win runtime input.

@@ -1,18 +1,13 @@
-# ADR-0003 — Paper-only and no real-money execution
-
-Superseding note: ADR-0004 clarifies that this is the current safety gate, not a permanent ban on this repo owning future gated surebet execution decisions after explicit authorization.
-
+# ADR-0003 - Current no-execution gate
 
 ## Status
 
-Accepted.
+Accepted as the current safety gate.
 
 ## Decision
 
-This repo is paper-only. It must not contain wallet, signer, transaction, order, cashout,
-redemption, split, merge, or real-money execution paths.
+The active program may implement backtest and private-paper behavior only. It must not contain enabled wallet, signer, approval, order, cancellation, redemption, cashout, or transaction paths.
 
 ## Consequences
 
-All reports are private paper research reports and must not claim profitability or live
-readiness.
+Reports remain private/evidence-oriented and do not claim profitability or live readiness. Any real-money path requires `BWS-900`, a new ADR, legal/compliance review, risk limits, kill switch, account policy, and explicit operator approval.

@@ -1,51 +1,11 @@
-# 014 — SURE-001 remaining hardening backlog
-
-This document prevents short autonomous runs from stopping after one tiny SURE-001 slice while safe repo-local hardening work still exists.
-
-The controller still performs one bounded change per cycle. The cycle must write `CONTINUE_REQUIRED=yes` when a safe unchecked item below remains after the current slice. It may write `AUTONOMOUS_GOAL_COMPLETE=yes` only when the SURE-001 backlog is exhausted or the only remaining work is SURE-002+ blocked on Federico's pinned `betting-win` contract/export interface.
-
-## Current stop diagnosis
-
-The 2026-07-01 run stopped cleanly because cycle 2 wrote:
+# 014 - Historical SURE-001 hardening ledger
 
 ```text
-AUTONOMOUS_GOAL_COMPLETE=yes
+status=SUPERSEDED_BOOTSTRAP_LEDGER
+legacy_stage=SURE-001
+active_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 ```
 
-That was not a crash. The run obeyed the older prompt wording that said to implement one bounded SURE-001 hardening slice and stop after that slice.
+The earlier hardening work established strict cycle artifacts, status/request flags, source-manifest validation, archive hygiene, shell safety, and controller fail-closed behavior. Those controls remain binding regression contracts.
 
-## Safe SURE-001 backlog
-
-Work down this list in order. Re-check current code before editing; skip an item only if it is already fully implemented and covered by validation.
-
-1. Add a repo-local SOURCE_MANIFEST.json regeneration helper that uses exactly the same inclusion and ordering rules as `scripts/validate_source_manifest.py`. Add a package script and focused test. The helper must not include `.env`, generated archives, `node_modules`, `dist`, `artifacts`, locks, logs, temp files, or Python caches.
-2. Require critical validator tests as repo assets in `scripts/validate_repo.py`, starting with `tests/validate-artifact-hygiene.test.ts`, `tests/validate-shell-local-assignments.test.ts`, `tests/validate-source-manifest.test.ts`, and `tests/packaging-helpers.test.ts`.
-3. Remove duplicate entries from the controller `REQUIRED_CYCLE_ARTIFACTS` list and add validator/test coverage so duplicate required artifact names cannot silently return.
-4. Add focused archive-contract coverage showing `zip_codebase.sh` excludes `.env`, root zips, artifacts, `node_modules`, `dist`, `.locks`, logs, and temporary files from generated source archives.
-5. Add focused documentation that maps each SURE-001 validator to the exact risk it controls, so future agents do not weaken validators as a shortcut.
-6. Add a non-provider fixture integrity smoke fixture for the pinned-interface placeholder path. It must remain fake/local and must not imply SURE-002 readiness.
-
-## Current code status
-
-As of 2026-07-02, all six SURE-001 hardening items above are implemented and covered by `npm run validate`.
-
-The safe SURE-001 backlog is exhausted. Autonomous cycles should now write `AUTONOMOUS_GOAL_COMPLETE=yes` unless a repo-local validation/tooling defect reopens one of these items.
-
-## Still blocked
-
-SURE-002+ remains blocked pending Federico's pinned upstream interface. Do not implement these until Federico explicitly provides the pinned upstream interface and asks for SURE-002+ work:
-
-```text
-provider connections
-provider SDK/client imports
-wallet/signer/order/transaction paths
-direct betting-win DB access
-core.* migrations
-generated-contract vendoring
-real provider-backed solver implementation
-real upstream stake-vector acceptance
-real leg-completion simulation against pinned upstream evidence
-real residual-exposure evaluation against pinned upstream evidence
-real settlement replay acceptance
-profitability or execution-readiness claims
-```
+This ledger no longer routes product implementation and does not authorize `AUTONOMOUS_GOAL_COMPLETE=yes`. Active work is selected from `backlog/bws_full_implementation.csv`.

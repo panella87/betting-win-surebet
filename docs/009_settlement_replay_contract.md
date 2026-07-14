@@ -1,19 +1,7 @@
-# 009 — Settlement replay contract
+# 009 - Settlement replay contract
 
-`betting-win-surebet` must not infer settlement finality. It consumes accepted settlement
-and finality replay outputs from `betting-win`.
+BWS consumes betting-win settlement/finality evidence and replays strategy-owned outcomes into backtest and paper ledgers.
 
-Current local-only settlement replay consumption must require:
+Replay is idempotent and provenance-bound. It handles final outcomes, voids, refunds, corrections, conflicting evidence, generation changes, and finality progression. Conflicts block acceptance rather than selecting a convenient outcome.
 
-- Canonical market identity.
-- Rule profile version.
-- Terminal result state.
-- Finality timestamp.
-- Finality authority id.
-- Replay manifest hash.
-- Replay acceptance status.
-
-In SURE-002A, the replay consumer may map an accepted local fixture outcome to a validated
-terminal scenario for deterministic paper-only analysis. It must still fail closed on
-missing finality authority, missing replay manifest hash, or mismatched complete-set context,
-and it must not infer finality beyond the accepted replay fixture.
+BWS stores reconciliation state under `surebet.*` and never rewrites upstream settlement truth. `BWS-240` owns the integrated proof.

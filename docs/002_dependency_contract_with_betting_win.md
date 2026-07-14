@@ -1,36 +1,31 @@
-# 002 — Dependency contract with betting-win
-
-This repo depends on `betting-win` for canonical truth. The dependency must be explicit,
-pinned, read-only, and reproducible.
+# 002 - Dependency contract with betting-win
 
 ```text
+repo_role=surebet_strategy_application
+upstream_platform=betting-win
 provider_truth_owner=betting-win
 canonical_history_owner=betting-win
 strategy_state_owner=betting-win-surebet
-predictive_strategy_owner=betting-win-betting
 ```
 
-## Accepted dependency forms
+A process selects exactly one explicit upstream mode:
 
-- A pinned generated contract package.
-- A pinned export bundle with manifest hash.
-- A read-only query response fixture exported by `betting-win`.
+```text
+workspace  development-time read-only compatibility inspection
+export     immutable pinned betting-win.strategy-export.v1 input
+api        typed read-only betting-win query/API input
+```
 
-## Required pinned inputs
+There is no automatic fallback. Each mode has distinct required configuration and validation.
 
-- Contract package version.
-- Export bundle path and manifest hash.
-- Canonical market identity shape.
-- Rule profile shape.
-- Quote/depth shape.
-- Settlement replay shape.
-- Paper ledger shape.
+Canonical family:
 
-## Forbidden dependency forms
+```text
+schema=betting-win.strategy-export.v1
+alias=betting-win-strategy-export.v1
+profile=surebet_standard_binary_v0
+```
 
-- Direct `betting-win` PostgreSQL access.
-- `core.*` migrations or schema ownership.
-- Provider credentials or provider API calls.
-- Manually vendored generated contracts without a pinned source manifest.
+Pinned exports bind source commit or source-manifest hash, provider generation, canonical IDs, rule/finality references, time range, files, and SHA-256. API mode negotiates the expected contract and applies bounded pagination, timeout, and retry behavior.
 
-SURE-002A/SURE-002B repo-local work is complete. The next non-local step is a real pinned import contract or export/query interface from `betting-win`. This repo consumes that interface for surebet strategy, backtest, and paper-mode work only; it does not duplicate provider adapters or canonical history.
+BWS may persist immutable upstream snapshots and derived `surebet.*` state. It must not mutate upstream data or treat a snapshot as canonical provider history.

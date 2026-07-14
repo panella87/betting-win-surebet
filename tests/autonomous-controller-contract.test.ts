@@ -207,12 +207,11 @@ test('paper autopilot controller exposes no-service parent supervisor contract',
     'parent_child_cleanup_failure_classification=enabled',
     'parent_lock_release_failure_classification=enabled',
     'lock_preservation_on_child_identity_failure=enabled',
-    'verified_kill_escalation=enabled',
-    'responsive_parent_heartbeat=enabled',
-    'heartbeat_update_mode=file_mtime_no_state_rewrite',
-    'HEARTBEAT_SOURCE=file_mtime',
     'PAPER_AUTOPILOT_BLOCKED_CHILD_IDENTITY',
     'PAPER_AUTOPILOT_BLOCKED_LOCK_RELEASE',
+    'child_telegram_notifications=suppressed_by_parent',
+    'parent_telegram_notification=final_only',
+    '"TELEGRAM_NOTIFY=0"',
     "printf 'lock_release_status=%s\\n'",
     'paper_service_lifecycle=none',
     'telegram_notify_send_final "run-paper-autopilot.sh"',
@@ -242,14 +241,12 @@ test('paper smoke and compatibility wrappers do not pre-create artifact outputs'
 
 test('status docs record the hardened controller surface', () => {
   const status = read('docs/repo_status_current.md');
-  assertContains(status, 'run_autonomous_implementation=standardized_with_canonical_flags_and_telegram');
-  assertContains(status, 'run_autonomous_bugfix=strict_four_state_read_only_audit_handoff');
-  assertContains(status, 'run_bugfix_autopilot=bounded_eight_area_audit_implementation_reaudit_parent');
-  assertContains(status, 'Both parent controllers use atomic full-file lock claims');
-  assertContains(status, 'BUGFIX_AUTOPILOT_BLOCKED_LOCK_RELEASE');
-  assertContains(status, 'run_paper_evaluation_standardization=standardized_with_telegram_no_service_private_fixture_pinned_bundle');
-  assertContains(status, 'run_paper_evaluation=canonical_repo_local_private_fixture_and_pinned_bundle_only');
-  assertContains(status, 'run_paper_autopilot=standardized_no_service_parent_supervisor');
+  assertContains(status, 'run_autonomous_implementation=standardized_and_selected');
+  assertContains(status, 'run_autonomous_bugfix=standardized_standalone_audit');
+  assertContains(status, 'run_bugfix_autopilot=standardized_parent_for_broad_audit_and_repair');
+  assertContains(status, 'run_paper_evaluation=retained_fixture_evaluator_not_initial_router');
+  assertContains(status, 'run_paper_evaluation=retained_fixture_evaluator_not_initial_router');
+  assertContains(status, 'run_paper_autopilot=standardized_parent_for_post_implementation_runtime_convergence');
 });
 
 test('obsolete stop and paper-12h helpers are not present', () => {

@@ -1,150 +1,32 @@
 # Autonomous implementation rules: betting-win-surebet
 
-`run-autonomous-implementation.sh` is the root source implementation controller.
-It is for bounded repo-local implementation work only. It does not run a service,
-prove runtime readiness, connect to providers, or execute orders.
+`run-autonomous-implementation.sh` is selected for `BWS_FULL_PLATFORM_IMPLEMENTATION_V1`.
 
-Default command, after activating Node 20 in the parent shell:
+Authority comes from `docs/automation/current-implementation-task.md` and `backlog/bws_full_implementation.csv`. There is no `--task` flag. A separate `--prompt-file` is unnecessary.
 
-```bash
-. "$HOME/.nvm/nvm.sh" && nvm use 20
-bash ./run-autonomous-implementation.sh \
-  --duration 72h \
-  --model cli-default \
-  --fallback-model none
-```
+The controller validates the baseline, selects the first dependency-ready `PENDING` row, inspects BWS and the betting-win checkout read-only when required, implements a bounded coherent slice, adds tests, validates, updates evidence/ledger, and continues.
 
-Do not use `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` for normal source implementation. It is only for explicit automation maintenance or repo standardization work approved by Federico.
+The current first task is `BWS-100`; after it is validated, selection advances strictly through the binding dependency ledger.
 
-Common command after paper-mode handoff, after the same Node activation:
+Historical SURE-001/SURE-002A/SURE-002B files are bootstrap ledgers only. They do not authorize a no-op or goal-complete result.
 
-```bash
-bash ./run-autonomous-implementation.sh \
-  --duration 72h \
-  --model cli-default \
-  --fallback-model none \
-  --handover-paper-mode
-```
+Allowed work includes exact upstream lock tooling, typed read-only betting-win client, npm workspace migration, `surebet.*` PostgreSQL, backtest/private-paper engines, BWS API, workers, UI, and loopback process contracts.
 
-Useful flags now supported:
+Forbidden work includes direct provider clients/URLs/credentials, betting-win `core.*` writes, modifying the betting-win checkout, execution paths, public signals, and profitability claims.
+
+Use `CONTINUE_REQUIRED=yes` until every safe row through `BWS-510` is validated. Use `AUTONOMOUS_GOAL_COMPLETE=yes` only after every safe local row is `VALIDATED`. `BWS-600` may remain blocked and `BWS-900` parked.
+
+Canonical flags include:
 
 ```text
---prompt-file PATH
---repo-dir PATH
---cycle-timeout VALUE
---validation-timeout VALUE
---install-timeout VALUE
---zip-timeout VALUE
---max-cycles N
---sandbox MODE
---auto-install
---check-only
---status
---force-unlock
---allow-parallel
---handover-paper-mode
---handover-bugfix-audit
---print-config
---stream / --no-stream
+--model cli-default
+--fallback-model none
+--cycle-timeout 2h
+--validation-timeout 20m
 ```
 
-There is no `--task` flag. Use `--prompt-file` or
-`docs/automation/current-implementation-task.md`.
+The check-only must fail contract is binding. `--handover-paper-mode` remains reserved for an explicit direct handoff; normal paper convergence is owned by the parent.
 
-`--check-only` must fail when validation fails; in plain operator terms, check-only must fail when validation fails. It must not hide failed validation
-with `|| true` or treat a failed validation as a successful no-op.
+Standalone implementation sends its final Telegram result. A parent suppresses the child notification and sends the final campaign notification.
 
-Each Codex cycle must write real required artifacts, including
-`continue_status.txt`. Missing, empty, placeholder, malformed, multiple-line, or
-unknown status artifacts fail closed. Valid status lines are:
-
-```text
-CONTINUE_REQUIRED=yes
-AUTONOMOUS_GOAL_COMPLETE=yes
-BLOCKED=yes
-```
-
-Exit codes:
-
-```text
-0 = check-only passed or AUTONOMOUS_GOAL_COMPLETE=yes
-1 = setup/controller/local validation failure before classified implementation state
-2 = blocked by Codex, validation, tooling, malformed artifacts, or safety gate
-3 = duration/max-cycle budget elapsed while CONTINUE_REQUIRED=yes remains
-130 = interrupted
-```
-
-Telegram is wired through `.automation/lib/telegram_notify.sh`. It sends one final
-message per run and can be disabled with `TELEGRAM_NOTIFY=0`.
-
-For the current repo state, normal autonomous implementation should not open new
-feature work. Do not invent additional local backlog work. The repo-local backlogs are complete, but the full product blueprint is not complete until the pinned `betting-win` interface exists. The completed ledgers are:
-
-```text
-docs/014_sure_001_remaining_hardening_backlog.md
-docs/015_local_engine_implementation_backlog.md
-docs/017_private_paper_mode_implementation_backlog.md
-```
-
-The controller may only:
-
-```text
-repair a concrete repo-local validation/tooling defect
-repair documentation drift that contradicts the current safety gate
-repair deterministic local fixture/private paper-mode bugs
-repair pinned-bundle path preflight/reporting defects
-stop with BLOCKED=yes when no safe defect exists and the only remaining product blocker is Federico's missing pinned `betting-win` interface
-```
-
-Use `AUTONOMOUS_GOAL_COMPLETE=yes` only for a bounded repo-local task that is genuinely complete; do not use it to imply the full surebet blueprint is done while real upstream evaluation is blocked.
-
-It must not connect to providers, read live upstream services, implement execution,
-add predictive/value-betting scope, share bankroll/account state with
-`betting-win-betting`, or mark real upstream evaluation ready without Federico's
-pinned `betting-win` bundle.
-
-Before finishing each cycle, validation must include the configured repo command
-from `automation.config.sh`, currently `npm run validate`.
-
-Protected automation files must not change unless the explicit task is automation
-maintenance.
-
-
-## Paper autopilot handoff metadata
-
-When launched with `--handover-paper-mode`, implementation writes `.automation/paper-mode-handover.env` with `IMPLEMENTATION_SOURCE_CHANGED`, `IMPLEMENTATION_SOURCE_VALIDATION_PASSED`, and `PRIVATE_PAPER_REEVALUATION_REQUIRED`. The paper autopilot uses those fields to decide whether a new private paper evaluation is justified.
-
-
-## Hardened validation and handoff contract
-
-Before the first Codex cycle, the controller runs the configured validation and preserves its exact artifacts under `preflight/baseline-validation`. A red baseline is implementation evidence, not a silent success and not an automatic reason to skip the bounded task. `--check-only` still fails when that baseline is red.
-
-The controller tracks source change and validation across the whole run. Runtime handoff files, locks, logs, archives, dependencies, and generated artifacts do not count as implementation progress. A later model or capacity failure does not erase evidence that an earlier cycle made and validated a real source change.
-
-Paper and bugfix handoffs are parsed as strict `KEY=VALUE` data. Schema v1 uses exact key allowlists: unknown or duplicate keys, repository/controller mismatch, unsupported schema, invalid booleans, stale/consumed fingerprints, missing evidence, or an unauthorized protected-file change fail closed. Before a standalone handoff is accepted, the controller recomputes the evidence SHA-256, requires the evidence to be a non-symlink file contained under the declared repo-local `RUN_DIR`, and reconciles the producer source fingerprint against the current repository state. Autopilot handoffs may authorize only an exact comma-separated protected-file allowlist. The broad `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` override remains manual-only.
-
-The bugfix consumer entrypoint is:
-
-```bash
-bash ./run-autonomous-implementation.sh   --duration 72h   --model cli-default   --fallback-model none   --handover-bugfix-audit
-```
-
-It consumes `.automation/autonomous-implementation-handover.env` and writes the verified return handoff `.automation/bugfix-mode-handover.env`. The producer is `run-autonomous-bugfix.sh`; unattended campaigns are coordinated by `run-bugfix-autopilot.sh`. Do not fabricate the handoff manually.
-
-Every terminal run prints exactly one machine-readable record for `run_dir`, `final_status`, `stop_reason`, `final_exit_code`, and `cycles_completed`. Final `artifacts.zip` creation is bounded by `--zip-timeout`.
-
-
-## Standalone handoff evidence verification
-
-Both `--handover-paper-mode` and `--handover-bugfix-audit` enforce the same producer-proof boundary used by the parent controllers. A valid input handoff must provide an exact schema-v1 key set, producer controller identity, source-run directory, source fingerprint, evidence path, evidence SHA-256, and semantic handoff fingerprint. The validated handoff is copied byte-for-byte into the new implementation run as `input-paper-implementation-handoff.env` or `input-bugfix-implementation-handoff.env` before baseline validation begins.
-
-Any evidence mutation, source-tree drift, unknown schema key, repo escape, symlink component, or fingerprint mismatch blocks the run before Codex can execute. This means a manually launched handoff command is held to the same integrity standard as an autopilot-launched implementation.
-
-
-## Standalone lock lifecycle
-
-The standalone controller acquires and verifies its repo-scoped lock before creating `artifacts/autonomous_implementation_*`. An active same-controller or incompatible-controller lock therefore fails before a new run directory is created. After the run directory exists, the lock is refreshed with that exact artifact path and the managed-child heartbeat starts.
-
-Finalization no longer suppresses lock-release failures. Machine-readable output now also contains `lock_release_status`, `lock_release_exit_code`, and `lock_preserved`. If active-child identity cannot be verified or the child process group cannot be terminated, the controller changes the result to `BLOCKED=yes`, uses `stop_reason=lock_release_failed_lock_preserved`, exits `2`, preserves the lock for inspection, rewrites its return handoff and final summary, and refreshes `artifacts.zip` with the blocked result before Telegram notification.
-
-A paper or bugfix input handoff is marked consumed only after its terminal return handoff and final artifacts have been written. If final lock release fails, the consumed marker is removed and the return handoff is rewritten as blocked, so a parent or later manual run cannot treat unsafe finalization as completed implementation.
+Protected automation files remain read-only during this product campaign.

@@ -1,144 +1,65 @@
 from __future__ import annotations
+
 from pathlib import Path
 import json
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
-AUTOMATION_IMPLEMENTATION = ROOT / 'docs' / 'automation' / 'autonomous-implementation.md'
-AUTOMATION_PAPER = ROOT / 'docs' / 'automation' / 'paper-evaluation.md'
-BACKLOG = ROOT / 'docs' / '017_private_paper_mode_implementation_backlog.md'
-RUNBOOK = ROOT / 'docs' / '018_private_paper_mode_runbook.md'
-AGENTS = ROOT / 'AGENTS.md'
-README = ROOT / 'README.md'
-STATUS = ROOT / 'docs' / 'repo_status_current.md'
-MASTER_PLAN = ROOT / 'docs' / 'MASTER_PLAN.md'
-PACKAGE = ROOT / 'package.json'
-VALIDATE_REPO = ROOT / 'scripts' / 'validate_repo.py'
-COMMAND = ROOT / 'commands' / 'run-sure-paper-mode-autonomous.sh'
-SMOKE_COMMAND = ROOT / 'commands' / 'run-pinned-interface-smoke.sh'
-EXECUTABLES = ROOT / 'tools' / 'required_executable_paths.js'
+
 
 def fail(message: str) -> None:
     print(f'ERROR: {message}', file=sys.stderr)
     raise SystemExit(1)
 
-def read(path: Path) -> str:
+
+def read(rel: str) -> str:
+    path = ROOT / rel
     if not path.is_file():
-        fail(f'missing required file: {path.relative_to(ROOT)}')
+        fail(f'missing required file: {rel}')
     return path.read_text(encoding='utf-8')
+
 
 def require(text: str, marker: str, rel: str) -> None:
     if marker not in text:
         fail(f'{rel} missing required marker: {marker}')
 
-def forbid(text: str, marker: str, rel: str) -> None:
-    if marker in text:
-        fail(f'{rel} contains forbidden marker: {marker}')
 
 def main() -> None:
-    automation_impl = read(AUTOMATION_IMPLEMENTATION)
-    automation_paper = read(AUTOMATION_PAPER)
-    backlog = read(BACKLOG)
-    runbook = read(RUNBOOK)
-    agents = read(AGENTS)
-    readme = read(README)
-    status = read(STATUS)
-    master_plan = read(MASTER_PLAN)
-    command = read(COMMAND)
-    smoke_command = read(SMOKE_COMMAND)
-    validate_repo = read(VALIDATE_REPO)
-    executables = read(EXECUTABLES)
-    package = json.loads(read(PACKAGE))
-
+    historical = read('docs/017_private_paper_mode_implementation_backlog.md')
     for marker in [
-        'docs/017_private_paper_mode_implementation_backlog.md',
-        'repo-local backlogs are complete',
-        'Federico',
+        'status=SUPERSEDED_BOOTSTRAP_LEDGER',
+        'legacy_stage=SURE-002B_PRIVATE_PAPER_MODE_INTAKE',
+        'active_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1',
+        'do not constitute the final BWS paper platform',
+        'BWS-310', 'BWS-320', 'BWS-410', 'BWS-500', 'BWS-510', 'BWS-600',
     ]:
-        require(automation_impl, marker, 'docs/automation/autonomous-implementation.md')
+        require(historical, marker, 'docs/017_private_paper_mode_implementation_backlog.md')
 
-    for marker in [
-        'run-paper-evaluation.sh',
-        'no-service private paper',
-        'SUREBET_PINNED_BUNDLE',
-        'blocked until Federico supplies a pinned `betting-win`',
-    ]:
-        require(automation_paper, marker, 'docs/automation/paper-evaluation.md')
+    for rel, markers in {
+        'docs/018_private_paper_mode_runbook.md': ['current_stage=implementation_before_runtime', 'export', 'api', 'BWS-600'],
+        'docs/automation/paper-evaluation.md': ['retained fixture/pinned-bundle evaluator', 'not the initial implementation controller', 'SUREBET_PINNED_BUNDLE'],
+        'docs/automation/paper-autopilot.md': ['post-implementation runtime/database convergence', 'BWS-510', 'PAPER_AUTOPILOT_BLOCKED_ON_PINNED_BUNDLE'],
+        'docs/repo_status_current.md': ['paper_autopilot=not_selected_until_local_platform_complete'],
+    }.items():
+        text = read(rel)
+        for marker in markers:
+            require(text, marker, rel)
 
-    for marker in [
-        'SURE-002B_PRIVATE_PAPER_MODE_INTAKE',
-        'provider_connection = prohibited',
-        'execution = prohibited',
-        'accepted = false',
-        'pinned-interface smoke command',
-        'paper-mode report artifact contract',
-        'pinned-bundle intake validation',
-        'paper-mode batch runner',
-        'paper-mode runbook and freeze gate',
-        'items 1 through 8 are implemented',
-        'safe repo-local private paper-mode backlog is exhausted',
-        'CONTINUE_REQUIRED=yes',
-        'AUTONOMOUS_GOAL_COMPLETE=yes',
-    ]:
-        require(backlog, marker, 'docs/017_private_paper_mode_implementation_backlog.md')
-
-    for marker in [
-        'SURE-002B_PRIVATE_PAPER_MODE_INTAKE',
-        'SUREBET_PINNED_BUNDLE',
-        'node cli.js local-report',
-        'accepted=false',
-        'npm run validate',
-        'Freeze gate',
-        'status=blocked',
-        'Stop conditions',
-        'run-paper-evaluation.sh',
-    ]:
-        require(runbook, marker, 'docs/018_private_paper_mode_runbook.md')
-
-    for marker in [
-        'commands/run-pinned-interface-smoke.sh',
-        'commands/run-sure-paper-mode-autonomous.sh',
-        'SURE-002B private paper-mode intake backlog',
-        'private paper-mode backlog is complete',
-    ]:
-        require(agents, marker, 'AGENTS.md')
-        require(readme, marker, 'README.md')
-
-    for marker in [
-        'current_task=SURE-002B_PRIVATE_PAPER_MODE_INTAKE',
-        'current_task_status=repo_local_private_paper_mode_baseline_complete_full_blueprint_blocked_on_pinned_interface',
-        'docs/017_private_paper_mode_implementation_backlog.md',
-        'docs/018_private_paper_mode_runbook.md',
-        'No unchecked repo-local item remains in `docs/017_private_paper_mode_implementation_backlog.md`.',
-        'run_paper_evaluation=canonical_repo_local_private_fixture_and_pinned_bundle_only',
-    ]:
-        require(status, marker, 'docs/repo_status_current.md')
-
-    require(master_plan, 'docs/017_private_paper_mode_implementation_backlog.md', 'docs/MASTER_PLAN.md')
-    require(master_plan, 'SURE-002B_PRIVATE_PAPER_MODE_INTAKE', 'docs/MASTER_PLAN.md')
-    require(master_plan, 'private_paper_mode=repo_local_complete', 'docs/MASTER_PLAN.md')
-
-    for marker in ['run-paper-autopilot.sh', '--paper-duration 72h', '--interval 5m', '--max-same-handoff']:
+    command = read('commands/run-sure-paper-mode-autonomous.sh')
+    for marker in ['run-paper-autopilot.sh', '--max-same-handoff']:
         require(command, marker, 'commands/run-sure-paper-mode-autonomous.sh')
+    if 'DATABASE' + '_URL' in command or 'DB' + '_URL' in command:
+        fail('paper wrapper must not accept direct database connection variables')
 
-    for marker in ['SUREBET_PINNED_BUNDLE', 'remote URLs are prohibited', 'artifacts/private-paper-mode', 'node cli.js local-report']:
-        require(smoke_command, marker, 'commands/run-pinned-interface-smoke.sh')
-    for forbidden in ['curl ', 'wget ', 'psql ', 'DATABASE_URL', 'DB_URL']:
-        forbid(smoke_command, forbidden, 'commands/run-pinned-interface-smoke.sh')
-
-    validate_ops = package.get('scripts', {}).get('validate:ops', '')
-    if 'scripts/validate_private_paper_mode_backlog_contract.py' not in validate_ops:
+    package = json.loads(read('package.json'))
+    if 'scripts/validate_private_paper_mode_backlog_contract.py' not in package.get('scripts', {}).get('validate:ops', ''):
         fail('package.json validate:ops must include validate_private_paper_mode_backlog_contract.py')
-    for required in [
-        'scripts/validate_private_paper_mode_backlog_contract.py',
-        'tests/private-paper-mode-backlog-contract.test.ts',
-        'commands/run-sure-paper-mode-autonomous.sh',
-        'commands/run-pinned-interface-smoke.sh',
-    ]:
-        require(validate_repo, required, 'scripts/validate_repo.py')
-        require(executables, required if required.startswith('commands/') else required, 'tools/required_executable_paths.js') if required.startswith('commands/') else None
+    validator = read('scripts/validate_repo.py')
+    for marker in ['scripts/validate_private_paper_mode_backlog_contract.py', 'tests/private-paper-mode-backlog-contract.test.ts']:
+        require(validator, marker, 'scripts/validate_repo.py')
 
     print('validate_private_paper_mode_backlog_contract: ok')
+
 
 if __name__ == '__main__':
     main()

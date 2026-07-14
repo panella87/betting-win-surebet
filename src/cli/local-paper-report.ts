@@ -130,7 +130,7 @@ export function printHelp(stream: NodeJS.WriteStream = process.stdout): void {
       'Usage: node dist/src/cli/local-paper-report.js --bundle <repo-local-export.json> [--output <artifacts/report.json>] [--pinned-intake]',
       '',
       'Reads a repo-local betting-win export bundle, runs the local paper-only fixture pipeline, and writes a private JSON report under artifacts/.',
-      'Use --pinned-intake for Federico-provided pinned bundles so repo-local intake validation fails closed on forbidden text and missing record coverage.',
+      'Use --pinned-intake for operator-provided immutable betting-win bundles so repo-local intake validation fails closed on forbidden text and missing record coverage.',
       `Quote freshness is evaluated against the bundle exportedAt timestamp with a ${DEFAULT_MAX_QUOTE_AGE_MS}ms local freshness window.`,
     ].join('\n'),
   );

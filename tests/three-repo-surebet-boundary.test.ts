@@ -3,54 +3,27 @@ import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-const REPO_ROOT = process.cwd();
+const ROOT = process.cwd();
+const read = (rel: string): string => readFileSync(join(ROOT, rel), 'utf-8');
 
-function read(relativePath: string): string {
-  return readFileSync(join(REPO_ROOT, relativePath), 'utf-8');
-}
-
-test('active docs state the accepted surebet three-repo boundary', () => {
-  const readme = read('README.md');
-  const agents = read('AGENTS.md');
-  const status = read('docs/repo_status_current.md');
-  const boundary = read('docs/019_three_repo_surebet_strategy_boundary.md');
-
-  for (const doc of [readme, agents, status, boundary]) {
-    assert.match(doc, /repo_role=surebet_strategy_execution_repo/);
-    assert.match(doc, /backtesting_owner=betting-win-surebet/);
-    assert.match(doc, /paper_mode_owner=betting-win-surebet/);
-    assert.match(doc, /future_live_decision_owner=betting-win-surebet_after_explicit_gate/);
+test('active docs state BWS is the separate surebet application built on betting-win', () => {
+  for (const rel of ['README.md', 'AGENTS.md', 'PROJECT_STATUS.md', 'docs/repo_status_current.md']) {
+    const doc = read(rel);
+    assert.match(doc, /repo_role=surebet_strategy_application/);
+    assert.match(doc, /provider_truth_owner=betting-win/);
+    assert.match(doc, /strategy_state_owner=betting-win-surebet/);
   }
-
+  const boundary = read('docs/019_three_repo_surebet_strategy_boundary.md');
   assert.match(boundary, /betting-win\s+= shared provider\/data\/history platform/);
   assert.match(boundary, /betting-win-betting\s+= predictive\/value-betting strategy and execution repo/);
-  assert.match(boundary, /betting-win-surebet\s+= surebet\/complete-set strategy and execution repo/);
+  assert.match(boundary, /betting-win-surebet\s+= surebet\/complete-set strategy application repo/);
 });
 
-test('separate account policy is explicit and not delegated to betting-win', () => {
+test('separate strategy state and legacy archive boundaries remain explicit', () => {
   const policy = read('docs/022_separate_account_policy.md');
-  const readme = read('README.md');
-  const status = read('PROJECT_STATUS.md');
-
-  for (const doc of [policy, readme, status]) {
-    assert.match(doc, /account_policy=separate_from_betting-win-betting/);
-  }
-
+  assert.match(policy, /account_policy=separate_from_betting-win-betting/);
   assert.match(policy, /shared_bankroll_with_betting-win-betting=no/);
-  assert.match(policy, /betting-win_account_coordination=not_owned_here/);
-});
-
-test('legacy import manifest confirms imported surebet material is re-homed', () => {
-  const manifest = read('docs/023_legacy_betting_win_surebet_import_manifest.md');
-
-  assert.match(manifest, /legacy_surebet_import_status=imported_and_rehomed/);
-  assert.match(manifest, /operator_move_status=complete/);
-  assert.match(manifest, /source_import_path_removed=yes/);
-  assert.match(manifest, /active_authority=no/);
-
-  assert.equal(existsSync(join(REPO_ROOT, 'docs/imported-from-betting-win')), false);
-  assert.equal(existsSync(join(REPO_ROOT, 'docs/legacy/surebet-research/README.md')), true);
-  assert.equal(existsSync(join(REPO_ROOT, 'research/imported-from-betting-win/legacy/surebet/README.md')), true);
-  assert.equal(existsSync(join(REPO_ROOT, 'schemas/imported-from-betting-win/legacy/surebet/README.md')), true);
-  assert.equal(existsSync(join(REPO_ROOT, 'templates/imported-from-betting-win/legacy/surebet/README.md')), true);
+  assert.equal(existsSync(join(ROOT, 'docs/imported-from-betting-win')), false);
+  assert.equal(existsSync(join(ROOT, 'docs/legacy/surebet-research/README.md')), true);
+  assert.match(read('docs/023_legacy_betting_win_surebet_import_manifest.md'), /active_authority=no/);
 });

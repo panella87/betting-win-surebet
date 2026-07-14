@@ -1,3 +1,7 @@
+# Current product routing
+
+`BWS_FULL_PLATFORM_IMPLEMENTATION_V1` is implemented through `run-autonomous-implementation.sh`; hardened controller internals below remain unchanged.
+
 # `.automation/`
 
 Repo-local automation support files for `betting-win-surebet`.
@@ -17,9 +21,12 @@ fingerprints that exclude generated runtime evidence. The shared lock layer now 
 
 `run-autonomous-implementation.sh`, `run-autonomous-bugfix.sh`, and `run-paper-evaluation.sh` acquire this shared lock before creating run artifacts. Their finalizers expose release status, preserve unverifiable active-child locks, convert release failures into blocked results, and refresh terminal evidence instead of suppressing cleanup errors.
 
-`telegram_notify.sh` is wired into all five root controllers for one final
-completion notification per run. Parent notifications are sent only after active-child
-cleanup and strict parent-lock release have been classified.
+`telegram_notify.sh` is wired into all five root controllers. Direct standalone
+runs of `run-autonomous-implementation.sh`, `run-autonomous-bugfix.sh`, and
+`run-paper-evaluation.sh` send their own final completion notification unless the
+operator explicitly sets `TELEGRAM_NOTIFY=0`. Both parent autopilots launch every
+child with `TELEGRAM_NOTIFY=0` and send only the parent campaign-final Telegram
+notification after child cleanup and lock finalization.
 
 This repo has no service-owned paper lifecycle. `run-paper-evaluation.sh` is the
 standard no-service private paper controller: it validates source, runs a private
@@ -36,18 +43,16 @@ is still private paper evidence, not live readiness.
 
 `run-paper-autopilot.sh` writes parent-supervisor artifacts under `artifacts/paper_autopilot_*`. Runtime locks and handoff files remain generated state and are not source authority.
 
-`.automation/lib/controller_hardening_v2.sh` contains protected fail-closed helpers for semantic handoff fingerprints, repo-local path checks, source fingerprints, strict child result extraction, process identity verification, and bounded ZIP creation.
+`.automation/lib/controller_hardening_v2.sh` contains protected fail-closed helpers for semantic handoff fingerprints, repo-local path checks, source fingerprints, strict child result extraction, process identity verification, bounded ZIP creation, complete-file atomic parent-lock claims, strict parent-lock ownership, file-mtime heartbeat inspection, zombie-aware PID checks, and verified TERM/KILL termination.
 
 
 ## Bugfix autopilot
 
-`run-bugfix-autopilot.sh` is the unattended bounded source-audit campaign parent. It calls only `run-autonomous-bugfix.sh` and `run-autonomous-implementation.sh --handover-bugfix-audit`, requires a clean re-audit of the same campaign area after each implementation, and never calls paper evaluation or service lifecycle commands. It runs the shared cross-controller incompatibility preflight before lock acquisition or campaign artifact creation, atomically claims a complete parent lock, and treats child-identity or strict lock-release failure as a blocked preserved-lock terminal state.
-
-Both parent controllers use responsive file-mtime heartbeats. Their background workers never rewrite the full lock record, so active-child state cannot be rolled back by a stale heartbeat snapshot. Shared process-group termination verifies that the target PID is gone after any KILL escalation before a parent lock may be released.
+`run-bugfix-autopilot.sh` is the unattended bounded source-audit campaign parent. It calls only `run-autonomous-bugfix.sh` and `run-autonomous-implementation.sh --handover-bugfix-audit`, requires a clean re-audit of the same campaign area after each implementation, and never calls paper evaluation or service lifecycle commands. It now runs the shared cross-controller incompatibility preflight, atomically claims a complete parent lock before campaign artifact creation, uses `HEARTBEAT_SOURCE=file_mtime` without rewriting lock contents, and classifies child-cleanup or lock-release failure as a preserved-lock blocker before Telegram notification.
 
 
 `run-paper-evaluation.sh` now creates canonical schema-v1 paper handoffs with atomic writes, source/evidence hashes, and semantic fingerprints. `run-autonomous-implementation.sh` independently verifies the exact schema, producer identity, source fingerprint, run containment, and evidence SHA before accepting either a paper or bugfix handoff.
 
 `run-paper-autopilot.sh` now consumes only canonical schema-v1 paper handoffs. It verifies the producer controller, exact key allowlist, child result, source fingerprint, producer run containment, evidence SHA-256, and semantic fingerprint without rewriting the handoff. Its implementation return contract is validated independently and its paper child receives the configured ZIP timeout.
 
-`run-paper-autopilot.sh` now uses a full-file atomic parent-lock claim. Its finalizer treats active-child identity/termination failure and strict lock-release failure as blocked terminal states, preserves the lock when present, refreshes evidence, and sends Telegram only after final classification.
+`run-paper-autopilot.sh` and `run-bugfix-autopilot.sh` now share complete-file atomic parent-lock claims, strict ownership checks, file-mtime-only heartbeats, one-second heartbeat shutdown polling, zombie-aware liveness, and verified TERM/KILL completion. Their finalizers treat active-child identity/termination failure and strict lock-release failure as blocked terminal states, preserve the lock when present, refresh evidence, and send Telegram only after final classification.

@@ -72,9 +72,8 @@ test('telegram helper gives bugfix campaign statuses specific next actions', () 
   assert.match(mismatch, /<b>📊 Status<\/b> <b>🛑 BLOCKED<\/b>/);
   assert.match(mismatch, /child_result\.env/);
 
-  const lockRelease = runBash(`. .automation/lib/telegram_notify.sh && telegram_notify_build_final_message 'run-bugfix-autopilot.sh' 'betting-win-surebet' 'BUGFIX_AUTOPILOT_BLOCKED_LOCK_RELEASE' 'lock_release_failed_lock_preserved' '2' '2' '${REPO_ROOT}/artifacts/bugfix_autopilot_lock' '${REPO_ROOT}'`);
-  assert.match(lockRelease, /<b>📊 Status<\/b> <b>🛑 BLOCKED<\/b>/);
-  assert.match(lockRelease, /bugfix-parent lock ownership and release evidence/);
+  const lockRelease = runBash(`. .automation/lib/telegram_notify.sh && telegram_notify_build_final_message 'run-bugfix-autopilot.sh' 'betting-win-surebet' 'BUGFIX_AUTOPILOT_BLOCKED_LOCK_RELEASE' 'lock_release_failed_lock_preserved' '4' '2' '${REPO_ROOT}/artifacts/bugfix_autopilot_lock' '${REPO_ROOT}'`);
+  assert.match(lockRelease, /preserved bugfix-parent lock/);
 });
 
 test('telegram helper distinguishes accepted private reports from paper controller blockers', () => {

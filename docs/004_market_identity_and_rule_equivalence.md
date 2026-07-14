@@ -1,23 +1,9 @@
-# 004 — Market identity and rule equivalence
+# 004 - Market identity and rule equivalence
 
-A candidate group must not be accepted unless it has exact event and market identity from
-`betting-win`, a compatible rule profile, and a resolved generation/result-source policy.
+BWS consumes canonical identity, provider-generation, rule, finality, and lineage references from betting-win. It does not create a competing canonical identity system.
 
-## Required evidence
+A candidate group is eligible only when event, market family, outcome space, denomination, resolution source, void/refund behavior, finality policy, provider generation, and terminal-scenario mapping are explicitly compatible.
 
-- Canonical event identity.
-- Canonical market identity.
-- Provider generation.
-- Rule profile version.
-- Result-source authority.
-- Finality policy.
+False friends fail closed. Text similarity, reciprocal odds, or matching labels never prove equivalence. Every rejection records a stable reason and upstream provenance.
 
-## Blockers
-
-- Unknown generation.
-- Missing canonical identity.
-- Unresolved terminal scenarios.
-- Ambiguous result source.
-- Rule-profile mismatch.
-
-The SURE-001 code only models the shape and blockers. It does not infer identity. Canonical identity remains owned by `betting-win`; this repo only decides whether the normalized identity/rules are sufficient for a surebet candidate.
+This contract is implemented and integrated under `BWS-200`.

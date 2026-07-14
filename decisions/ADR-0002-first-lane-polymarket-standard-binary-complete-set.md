@@ -1,16 +1,13 @@
-# ADR-0002 — First lane: Polymarket standard-binary complete-set
+# ADR-0002 - Initial standard-binary complete-set lane
 
 ## Status
 
-Accepted.
+Accepted as the first validated family, generalized through provider-neutral betting-win contracts.
 
 ## Decision
 
-The first lane is Polymarket standard-binary same-venue complete-set paper research.
-Cross-venue, back/lay, synthetic equivalence, smart routing, market making, copy trading,
-and live use are parked for v0.
+The initial lane is same-venue standard-binary complete-set analysis using the betting-win `surebet_standard_binary_v0` profile. Provider-specific labels never replace identity/rule/scenario equivalence.
 
 ## Consequences
 
-The skeleton models complete-set concepts but does not implement the solver until upstream
-contracts are pinned.
+Cross-venue, back/lay, synthetic equivalence, market making, routing, and execution remain outside the initial safe local program unless explicitly added by a validated task.

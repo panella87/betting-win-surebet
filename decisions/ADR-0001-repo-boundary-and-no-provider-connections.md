@@ -1,19 +1,13 @@
-# ADR-0001 — Repo boundary and no provider connections
-
-Superseding note: ADR-0004 is now the accepted three-repo surebet strategy boundary. This ADR remains the current no-direct-provider safety gate.
-
+# ADR-0001 - Repository boundary and no direct provider connections
 
 ## Status
 
-Accepted.
+Accepted and retained as a permanent integration boundary.
 
 ## Decision
 
-`betting-win-surebet` is a downstream consumer of `betting-win` contracts and exports. It
-must not implement provider connections, provider credentials, provider SDK imports, or
-provider adapters.
+BWS is a downstream application on betting-win. It consumes exact contracts, immutable exports, and typed read-only query/API surfaces. It does not implement or copy provider adapters, direct provider SDK clients, provider credentials, or provider URLs.
 
 ## Consequences
 
-All provider truth remains upstream in `betting-win`. This repo can only analyze pinned
-read-only evidence once the interface is provided.
+Provider truth and canonical history remain in betting-win. BWS owns only surebet-specific derived state and references upstream evidence by exact provenance.

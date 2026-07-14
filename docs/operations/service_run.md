@@ -1,45 +1,12 @@
-# Service Run
+# BWS service run contract
 
-`betting-win-surebet` has no long-running service under the current private paper-only gate.
+The current repo does not yet have the final BWS service stack. `BWS-400` through `BWS-500` implement API, workers, UI, configuration, security, observability, and process definitions.
 
-`start.sh` is intentionally a safe validation wrapper. `stop.sh` is intentionally a no-service wrapper. It does not kill provider, trading, database, or production processes.
+Until those tasks are validated:
 
-No provider collector, wallet, signer, order executor, public signal service, or service refresh lifecycle is allowed under the current gate. Future live surebet execution decisions require a separate ADR, new validators, and explicit operator approval.
+- retained paper evaluation is no-service and fixture/pinned-bundle only;
+- no provider endpoint or provider credential is accepted;
+- no direct betting-win database access is allowed;
+- no execution path is enabled.
 
-## Canonical controllers
-
-Use the root scripts as the active command surface:
-
-```bash
-./run-autonomous-implementation.sh --status
-./run-paper-evaluation.sh --status
-./run-autonomous-bugfix.sh --status
-```
-
-Before launching long controllers, activate Node in the parent shell:
-
-```bash
-. "$HOME/.nvm/nvm.sh" && nvm use 20
-```
-
-The root controllers inherit the active Node runtime, assert Node/NPM versions, and never source `nvm.sh` themselves.
-
-## Compatibility wrappers
-
-Historical wrappers remain under `commands/` for old phase-specific entrypoints, but they are not the canonical daily command surface:
-
-```text
-commands/run-sure-001-autonomous.sh
-commands/run-sure-local-engine-autonomous.sh
-commands/run-sure-paper-mode-autonomous.sh
-commands/run-pinned-interface-smoke.sh
-```
-
-Use `commands/run-pinned-interface-smoke.sh` only when Federico provides a repo-local pinned `betting-win` export bundle. Use the other wrappers only for compatibility or explicit historical reproduction.
-
-There is no standalone stop helper. Only use `--force-unlock` after confirming the lock belongs to the same repo and script. The current paper controller is `./run-paper-evaluation.sh`, configured for repo-local private fixture paper mode only with fail-fast pinned-bundle path preflight, direct-argv report execution, source immutability checks, and strict `SUREBET_REQUIRE_PINNED_BUNDLE` validation. Real pinned-bundle smoke remains reserved until Federico provides a repo-local pinned `betting-win` export bundle.
-
-
-## No service autopilot
-
-`run-paper-autopilot.sh` is not a service controller. It reads and writes local artifacts only and never starts or stops a provider, database, worker, or HTTP service.
+After `BWS-510`, service processes remain loopback/read-only by default. Continuous external paper observation still requires `BWS-600` evidence and operator configuration.

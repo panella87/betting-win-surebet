@@ -2,212 +2,72 @@
 
 ```text
 repo=betting-win-surebet
-current_task=SURE-002B_PRIVATE_PAPER_MODE_INTAKE
-current_task_status=repo_local_private_paper_mode_baseline_complete_full_blueprint_blocked_on_pinned_interface
-next_allowed_task=wait_for_federico_pinned_betting_win_contract_export_interface_before_real_upstream_evaluation_or_continue_with_approved_autopilot_alignment
-repo_role=surebet_strategy_execution_repo
-strategy_family=surebet_complete_set_only
+program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
+status=IMPLEMENTATION_READY
+repo_role=surebet_strategy_application
+upstream_platform=betting-win
+current_task=BWS-100
+current_task_status=PENDING
+safe_local_terminal_gate=BWS-510
 provider_truth_owner=betting-win
 canonical_history_owner=betting-win
-predictive_strategy_owner=betting-win-betting
-backtesting_owner=betting-win-surebet
-paper_mode_owner=betting-win-surebet
-future_live_decision_owner=betting-win-surebet_after_explicit_gate
+strategy_state_owner=betting-win-surebet
 account_policy=separate_from_betting-win-betting
-provider_connections=prohibited
-execution=prohibited
-runtime_service=none
+execution_gate=closed
 ```
 
-## Active queue
+## Binding state
 
-- [x] Establish skeleton files from the handoff.
-- [x] Add no-provider/no-execution/no-direct-DB validators.
-- [x] Add empty typed stubs and fixture directories.
-- [x] Add master plan and current-status docs.
-- [x] Add adapted Git, artifact, validation, progress, and autonomous shell helpers.
-- [x] Harden autonomous controller status parsing so malformed cycle status fails closed.
-- [x] Wait for an explicit user request before moving beyond SURE-001.
-- [x] Implement the maximum safe local engine backlog in `docs/015_local_engine_implementation_backlog.md`.
-- [x] Implement the maximum safe private paper-mode backlog in `docs/017_private_paper_mode_implementation_backlog.md`.
-- [ ] Wait for Federico to provide the pinned `betting-win` contract/export interface before real upstream evaluation. See `docs/016_pinned_betting_win_interface_readiness.md`.
+The old local-fixture-complete stop state is superseded. The repo contains a deterministic bootstrap, not the complete BWS platform. The supplied betting-win repo provides concrete upstream contracts and application patterns, so a substantial safe local implementation queue exists.
 
-## Current safe work
+The binding queue is `backlog/bws_full_implementation.csv`. The first dependency-ready task is `BWS-100`.
 
-The accepted three-repo boundary is documented in `docs/019_three_repo_surebet_strategy_boundary.md`, `docs/020_strategy_data_and_state_ownership.md`, `docs/021_backtest_paper_live_mode_roadmap.md`, and `docs/022_separate_account_policy.md`.
-
-SURE-001 hardening is complete. The documented SURE-002A local implementation backlog is also complete: contracts, parsers, local fixture readers, deterministic paper math, state machines, private reports, and CLI/reporting over local fixtures are implemented. The documented SURE-002B private paper-mode backlog is also complete: pinned-intake validation, private artifact contracts, batch summaries, smoke fixtures, and the operator freeze gate are implemented. Real upstream evaluation remains blocked.
-
-## Blocked work
-
-The following remain blocked under the current gate: provider integration, live execution, public reporting, profitability claims, direct upstream database access, generated-contract vendoring, and real upstream readiness claims. Local deterministic stake-vector, completion, residual exposure, and settlement replay consumption may now be implemented only against fake/local fixtures and must remain blocked from real acceptance.
-
-## Operational commands
-
-Canonical daily entrypoints are root scripts, not historical phase wrappers:
-
-```bash
-cd ~/app_testing/betting-win-surebet && . "$HOME/.nvm/nvm.sh" && nvm use 20 && bash ./run-paper-evaluation.sh --duration 72h --interval 5m --adaptive --keep-monitoring-when-ready --model cli-default --fallback-model none
-```
-
-For ordinary repo-local validation/tooling/source defects, use `bash ./run-autonomous-implementation.sh --duration 72h --model cli-default --fallback-model none` after parent-shell Node activation. Use `bash ./run-autonomous-bugfix.sh --duration 72h --model cli-default --fallback-model none --handover-autonomous-implementation` when the task is source bug audit and handoff. Use `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` only for a newly approved automation-maintenance task touching protected root automation files.
-
+## Verified upstream facts
 
 ```text
-local_env_policy=ignored_local_only
-archive_env_policy=forbidden
+upstream_archive_sha256=9a9eee490918ff69182acdaa302d216859a5009b0943adb41e56171c1ee9ef8f
+upstream_package_version=0.48.0
+strategy_export_schema=betting-win.strategy-export.v1
+strategy_export_alias=betting-win-strategy-export.v1
+surebet_profile=surebet_standard_binary_v0
+provider_history_export_kind=pinned_provider_history_bundle
+downstream_consumption_proof=present
+read_only_query_api=present
+api_web_workers=present
 ```
 
-A repo-root `.env` may exist locally for helper configuration if Git ignores it. It must not be included in source handoff archives or codebase zips.
+The archive has no Git commit metadata and no BW source manifest. `BWS-100` must verify the actual server checkout read-only and generate the exact runtime lock.
 
-## Packaging helpers
+## Existing source
 
-`zip_codebase.sh` is the repo-local clean codebase packager. `pull_artifacts_and_zip_codebase.sh` now uses it instead of maintaining a separate packaging implementation.
+The current `src/` tree supplies bootstrap behavior for local bundle parsing, identity/rule prechecks, terminal cash flows, quote capacity/fees/freshness, fixed-point stake vectors, partial completion, residual exposure, settlement replay, and private report assembly. Compatibility tests must preserve it during migration.
 
-## Post-wave controller audit
+## Implementation queue
 
-The latest SURE-001 loop exposed one controller safety gap: malformed `continue_status.txt` content could be treated as continue. The controller now validates the status file strictly and fails closed on malformed, missing, combined, unknown, nonzero-Codex, or post-cycle-validation-failed states.
-
-## SURE-001 artifact quality hardening
-
-Required autonomous cycle artifacts are audit evidence. Missing, placeholder, or empty required report files fail closed before cycle status is accepted. `SOURCE_MANIFEST.json` is validated against the current source tree during `npm run validate`.
-
-## Continuation status
-
-The repo-local SURE-001 hardening backlog, the safe SURE-002A local implementation backlog, and the safe SURE-002B private paper-mode backlog are exhausted. Autonomous cycles should now write `AUTONOMOUS_GOAL_COMPLETE=yes` unless a repo-local validation/tooling defect reopens safe work. The remaining blocker is Federico's pinned `betting-win` contract/export interface for real upstream evaluation.
-
-
-## Private paper-mode intake backlog
+Safe local work remains through `BWS-510`. Historical SURE-002A and SURE-002B completion does not stop the active program.
 
 ```text
-current_task=SURE-002B_PRIVATE_PAPER_MODE_INTAKE
-current_task_status=repo_local_private_paper_mode_baseline_complete_full_blueprint_blocked_on_pinned_interface
-provider_connections=prohibited
-execution=prohibited
-real_upstream_evaluation=blocked_until_federico_pinned_betting_win_interface
+selected_controller=run-autonomous-implementation.sh
+selected_task_source=docs/automation/current-implementation-task.md
+force_unlock=no_evidence
+paper_autopilot=not_selected_until_local_platform_complete
 ```
 
-`docs/017_private_paper_mode_implementation_backlog.md` is now a completed safe backlog. `docs/018_private_paper_mode_runbook.md` is the operator runbook and freeze gate. No unchecked repo-local item remains in `docs/017_private_paper_mode_implementation_backlog.md`.
+## Safety
 
-Private paper-mode work may create repo-local validators, commands, fake fixtures, artifact contracts, and batch summaries. It may not connect to providers, read `betting-win` databases, vendor generated contracts, execute orders, publish reports, or make profitability/live-readiness claims. The freeze gate remains: `npm run validate` passes, local fixture smoke passes, and real upstream evaluation still requires Federico's pinned bundle.
-
-
-## Legacy surebet import archive
-
-Surebet-specific legacy material imported from the original `betting-win` repo has been rehomed under dedicated legacy archive paths and is not active authority.
-
-```text
-legacy_surebet_import_status=imported_and_rehomed
-source_import_path_removed=yes
-active_authority=no
-```
-
-The active authority remains the three-repo surebet boundary docs.
-
-`docs/imported-from-betting-win/` must remain absent after legacy surebet material is rehomed.
+Direct provider connections, provider credentials, betting-win `core.*` writes, public signals, profitability claims, and execution paths remain prohibited. A typed read-only betting-win client and exact upstream compatibility tooling are required and allowed.
 
 ## Standard automation status
 
 ```text
-automation_contract=standard_root_scripts_v1
-run_autonomous_implementation=standardized_with_canonical_flags_and_telegram
-run_autonomous_bugfix=strict_four_state_read_only_audit_handoff
-run_autonomous_bugfix_mutation_guard=content_fingerprint_detects_already_dirty_file_edits
-run_autonomous_bugfix_artifact_hint=resolved_before_current_run_directory_creation
-run_paper_evaluation=canonical_repo_local_private_fixture_and_pinned_bundle_only
-run_paper_evaluation_standardization=standardized_with_telegram_no_service_private_fixture_pinned_bundle
-run_paper_evaluation_input_preflight=existing_regular_non_symlink_repo_local_json_before_run_creation
-run_paper_evaluation_command_execution=direct_argv_for_known_local_report_commands
-run_paper_evaluation_source_mutation_guard=enabled
-run_paper_evaluation_handoff=schema_v1_atomic_source_and_evidence_fingerprinted
-run_paper_evaluation_artifacts_zip=timeout_bounded
-run_paper_autopilot_handoff_consumer=canonical_schema_v1_exact_keys_source_evidence_and_child_result_verified
-run_paper_autopilot_legacy_normalization=disabled
-run_paper_autopilot_paper_child_zip_timeout=forwarded
-shared_controller_lock_protocol=managed_child_process_groups_graceful_force_unlock_and_cross_controller_guard
-bugfix_parent_cross_controller_preflight=enabled
-telegram_controller_action_guidance=enabled
-run_autonomous_implementation_standalone_handoff=exact_schema_source_fingerprint_and_evidence_sha_verified
-paper_interval_behavior=no_service_single_cycle_accepts_interval_for_workflow_compatibility
-lock_dir=.automation/locks
-root_artifacts_zip=required_before_run_script_exit
-stop_autonomous_run_helper=removed
+run_autonomous_implementation=standardized_and_selected
+run_autonomous_bugfix=standardized_standalone_audit
+run_paper_evaluation=retained_fixture_evaluator_not_initial_router
+run_paper_autopilot=standardized_parent_for_post_implementation_runtime_convergence
+run_bugfix_autopilot=standardized_parent_for_broad_audit_and_repair
+autopilot_child_telegram=disabled
+autopilot_parent_telegram=final_only
+standalone_controller_telegram=enabled_by_default
 ```
 
-For ordinary source implementation, omit `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`; use it only for a newly approved automation-maintenance task touching protected root automation files. The current safe paper command, after parent-shell Node activation, is
-`./run-paper-evaluation.sh --duration 72h --interval 5m --adaptive --keep-monitoring-when-ready --model cli-default --fallback-model none`. It is limited to private fixture smoke unless Federico provides a repo-local pinned `betting-win` bundle. The pinned-bundle branch now validates an existing regular, non-symlink, repo-local JSON path before creating a run or starting repo validation; known local-report commands use direct argv and `SUREBET_REQUIRE_PINNED_BUNDLE` remains strict. Real upstream private paper evaluation remains blocked until the required upstream export exists.
-
-
-## Automation helper standardization
-
-```text
-update_git_pull=git_pull_ff_only_autostash
-zip_codebase_artifacts_only=supported
-pull_artifacts_remote_artifact_override=supported
-progress_helpers=current_artifact_layout
-start_stop=no_service_validation_and_noop
-shared_telegram_helper=.automation/lib/telegram_notify.sh
-run_autonomous_implementation=standardized_with_canonical_flags_and_telegram
-run_autonomous_bugfix=strict_four_state_read_only_audit_handoff
-run_autonomous_bugfix_mutation_guard=content_fingerprint
-run_paper_evaluation_standardization=standardized_with_telegram_no_service_private_fixture_pinned_bundle
-run_paper_evaluation_input_preflight=fail_fast_before_expensive_validation
-run_paper_evaluation_handoff=schema_v1_atomic
-run_autonomous_implementation_handoff_evidence=sha256_verified_and_immutable_copy_retained
-```
-
-
-## Automation runtime artifact policy
-
-```text
-source_manifest_runtime_artifacts=ignored_fail_safe
-source_manifest_automation_source_helpers=tracked
-paper_controller_final_exit_status=actual_process_status
-```
-
-Controller-created runtime locks and handoff files are operational state, not source authority. `SOURCE_MANIFEST.json` validation and regeneration ignore `.automation/locks/`, `.automation/corrupt/`, and exact paper/bugfix/implementation handoff files while still tracking source-owned files such as `.automation/README.md` and `.automation/lib/*.sh`. `run-paper-evaluation.sh` final summaries and Telegram notifications must report the actual process exit code.
-
-
-## Paper autopilot
-
-run_paper_autopilot=standardized_no_service_parent_supervisor
-
-Default unattended command:
-
-```bash
-bash ./run-paper-autopilot.sh --duration 7d --paper-duration 72h --implementation-duration 72h --interval 5m --adaptive --max-rounds 0 --max-same-handoff 2 --model cli-default --fallback-model none
-```
-
-The controller is no-service/private-paper only. Missing pinned bundle is an external-input blocker, not a source implementation task.
-
-
-## Bugfix autopilot
-
-```text
-run_autonomous_bugfix=strict_four_state_read_only_audit_handoff
-run_bugfix_autopilot=bounded_eight_area_audit_implementation_reaudit_parent
-```
-
-An area is never closed from implementation output alone. The parent requires a clean source re-audit of the exact same area. It atomically claims a complete parent lock and exposes child-cleanup plus lock-release state before final notification.
-
-
-## Canonical standalone handoff verification
-
-The paper producer and implementation consumer now share one schema-v1 integrity boundary. Actionable paper handoffs are atomic and bind the paper status, exit code, source fingerprint, source-run directory, evidence SHA-256, and semantic fingerprint. Standalone `--handover-paper-mode` and `--handover-bugfix-audit` runs reject unknown keys, evidence tampering, source drift, symlinks, repo escapes, stale fingerprints, and mismatched producer identity before Codex is allowed to run.
-
-
-## Standalone controller lock lifecycle
-
-```text
-run_autonomous_implementation_lock=atomic_claim_before_run_directory
-run_autonomous_bugfix_lock=atomic_claim_before_run_directory
-run_paper_evaluation_lock=atomic_claim_before_run_directory
-standalone_lock_claim=full_file_hard_link_no_check_then_write_race
-lock_release_failure_reason=lock_release_failed_lock_preserved
-lock_release_failure_exit=2
-lock_release_failure_lock=preserved_for_operator_inspection
-```
-
-All standalone finalizers now report lock-release state explicitly. A failed managed-child identity or termination check cannot be hidden by `|| true`; terminal evidence, machine output, return handoffs, and Telegram state are corrected before exit.
-
-Both parent controllers use atomic full-file lock claims. `PAPER_AUTOPILOT_BLOCKED_CHILD_IDENTITY`, `PAPER_AUTOPILOT_BLOCKED_LOCK_RELEASE`, `BUGFIX_AUTOPILOT_BLOCKED_CHILD_IDENTITY`, and `BUGFIX_AUTOPILOT_BLOCKED_LOCK_RELEASE` preserve operator evidence and prevent false success. Parent heartbeats use lock mtime without rewriting active-child state, poll for shutdown every second, and verified KILL escalation must prove the PID exited before lock removal. Explicit campaign resume and optional parent/standalone lock-schema convergence remain separate future work.
+`docs/imported-from-betting-win/` must remain absent. Historical research stays under dedicated legacy archive paths.

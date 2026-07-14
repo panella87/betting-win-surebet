@@ -1,17 +1,7 @@
-# 005 — Terminal scenario cash-flow model
+# 005 - Terminal scenario cash-flow model
 
-A paper surebet requires complete terminal-scenario payoff coverage. Reciprocal odds alone
-are only a candidate signal and never acceptance evidence.
+For every candidate, BWS constructs the complete terminal scenario set and computes integer cash flows per leg and scenario after price, fees, denomination, rounding, void/refund, and settlement rules.
 
-For the first lane, the minimum terminal states are:
+No opportunity is accepted when terminal coverage is incomplete, a payoff is ambiguous, currencies differ without an explicit approved conversion contract, or a rule/finality reference is missing.
 
-```text
-yes_wins
-no_wins
-```
-
-Void, correction, cancellation, or incomplete finality must block acceptance until the
-upstream `betting-win` settlement replay contract explicitly models them.
-
-The cash-flow model must include stake amount, payout amount, fees, costs, and residual
-exposure per terminal scenario. This is surebet strategy state and belongs in this repo; provider settlement truth remains upstream in `betting-win`.
+The model uses fixed-point integer units only. It is part of `BWS-200` through `BWS-220` and must preserve deterministic bootstrap behavior during migration.

@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chainwanderer.local/schemas/betting-win-upstream-lock.v1.schema.json",
+  "title": "betting-win-surebet upstream betting-win lock",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "repository",
+    "repositoryPath",
+    "commitSha",
+    "gitTreeSha",
+    "worktreeClean",
+    "packageVersion",
+    "trackedTreeListingSha256",
+    "sourceFingerprintAlgorithm",
+    "contractSchema",
+    "contractAlias",
+    "surebetProfile",
+    "verifiedAt",
+    "packageVersions",
+    "capabilities"
+  ],
+  "properties": {
+    "schema": {
+      "const": "betting-win-surebet-upstream-lock-v1"
+    },
+    "repository": {
+      "const": "betting-win"
+    },
+    "repositoryPath": {
+      "type": "string",
+      "pattern": "^/"
+    },
+    "commitSha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "gitTreeSha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "worktreeClean": {
+      "const": true
+    },
+    "packageVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "trackedTreeListingSha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "sourceFingerprintAlgorithm": {
+      "const": "sha256_git_ls_tree_r_full_tree_head_v1"
+    },
+    "contractSchema": {
+      "const": "betting-win.strategy-export.v1"
+    },
+    "contractAlias": {
+      "const": "betting-win-strategy-export.v1"
+    },
+    "surebetProfile": {
+      "const": "surebet_standard_binary_v0"
+    },
+    "verifiedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "packageVersions": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    }
+  }
+}

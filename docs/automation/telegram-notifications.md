@@ -26,16 +26,29 @@ TELEGRAM_CHAT_ID=...
 
 Set `TELEGRAM_NOTIFY=0` to disable final notifications.
 
+## Parent and standalone routing
+
+```text
+direct run-autonomous-implementation.sh = one standalone final notification
+direct run-autonomous-bugfix.sh = one standalone final notification
+direct run-paper-evaluation.sh = one standalone final notification
+run-paper-autopilot.sh = child notifications suppressed; one parent-final notification
+run-bugfix-autopilot.sh = child notifications suppressed; one parent-final notification
+```
+
+The parent controllers pass `TELEGRAM_NOTIFY=0` only in each child process environment. The parent shell keeps its own configured value, so it can send the final campaign result after child cleanup and lock classification. An operator-supplied `TELEGRAM_NOTIFY=0` on the parent command disables the parent message as well.
+
 Current message contract:
 
 ```text
 message_version=20260712.pretty_v5_parent_lock_actions
 parse_mode=HTML
-one final message per controller run
+one final message per direct standalone run or parent campaign
 status-file dry-run payloads are overwritten, not appended
 no polling
 no webhook
 no token printed
+parent-launched child steps never deliver Telegram messages
 Telegram failure does not fail the controller
 ```
 
@@ -66,6 +79,6 @@ PAPER_EVALUATION_READY_PRIVATE_FIXTURE_ONLY_BLOCKED_ON_PINNED_BUNDLE
 renders as blocked, not success. A passing private fixture smoke is not real upstream readiness and not a profitability or live-execution signal.
 
 
-Controller-specific action routing is enabled for the two parent supervisors. The helper distinguishes successful bugfix campaign closure from budget exhaustion, and gives targeted next actions for audit-child failure, implementation-child failure, no-op implementation, handoff mismatch, repeated handoff, child-identity failure, parent-lock release failure, partial source change, and artifact-packaging failure. Accepted pinned-bundle private reports render as success with an explicit reminder that they are not profitability, live-readiness, or execution approval.
+Controller-specific action routing is enabled for the two parent supervisors. The helper distinguishes successful bugfix campaign closure from budget exhaustion, and gives targeted next actions for audit-child failure, implementation-child failure, no-op implementation, handoff mismatch, repeated handoff, child-identity failure, partial source change, and artifact-packaging failure. Accepted pinned-bundle private reports render as success with an explicit reminder that they are not profitability, live-readiness, or execution approval.
 
-Lock-finalization actions are explicit in message version `20260712.pretty_v5_parent_lock_actions`. `PAPER_EVALUATION_BLOCKED_LOCK_RELEASE`, both paper-parent lock blockers, and both bugfix-parent lock blockers direct the operator to inspect the preserved repo-scoped lock and verified child identity before any force-unlock or new controller start.
+Lock-finalization actions are explicit in message version `20260712.pretty_v5_parent_lock_actions`. `PAPER_EVALUATION_BLOCKED_LOCK_RELEASE`, `PAPER_AUTOPILOT_BLOCKED_CHILD_IDENTITY`, `PAPER_AUTOPILOT_BLOCKED_LOCK_RELEASE`, and `BUGFIX_AUTOPILOT_BLOCKED_LOCK_RELEASE` direct the operator to inspect the preserved repo-scoped lock and verified child identity before any force-unlock or new controller start.

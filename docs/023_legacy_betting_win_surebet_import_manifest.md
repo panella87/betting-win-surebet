@@ -76,7 +76,7 @@ Do not import provider adapters, canonical history, raw provider capture, or sou
 Current authority remains:
 
 ```text
-repo_role=surebet_strategy_execution_repo
+repo_role=surebet_strategy_application
 provider_truth_owner=betting-win
 predictive_strategy_owner=betting-win-betting
 backtesting_owner=betting-win-surebet

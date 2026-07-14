@@ -1,20 +1,7 @@
-# 008 — Leg completion and residual exposure
+# 008 - Leg completion and residual exposure
 
-A paper candidate must not assume every leg completes. Future phases must model partial
-completion and bounded residual exposure.
+Paper and future gated execution are non-atomic across legs. BWS models reservation, submitted/simulated, partial, complete, rejected, expired, voided, rolled back, and reconciled states.
 
-Required states:
+After every transition it recomputes worst-case terminal exposure and records the controlling scenario. Restart must reconstruct the same state from durable `surebet.*` evidence.
 
-```text
-leg_open
-leg_reserved
-leg_filled
-leg_failed
-leg_stale
-leg_settlement_pending
-group_complete
-group_incomplete
-manual_kill
-```
-
-`src/simulation/leg-completion.ts` now implements the local paper completion state machine from SURE-005. Residual exposure remains a separate follow-up slice.
+The current program implements simulation and private-paper state only. It does not authorize order placement. `BWS-230` owns this state machine.

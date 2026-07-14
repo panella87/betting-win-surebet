@@ -1,17 +1,15 @@
-# 007 — Stake-vector solver contract
+# 007 - Stake-vector solver contract
 
-SURE-004 may solve a local paper-only standard-binary stake vector from validated terminal
-scenario cash-flow rows.
+The solver receives an approved terminal-scenario cash-flow matrix plus quote/depth/fee/rounding constraints. It returns a deterministic fixed-point stake vector or a typed infeasibility result.
 
-The local solver contract must:
+Requirements:
 
-- Use fixed-point integer amounts only.
-- Require exactly two complete-set legs and two terminal scenarios.
-- Enforce one local min/max capacity constraint and one local rounding step per leg.
-- Keep per-leg stake, fee, and cost terms consistent across terminal scenarios.
-- Output blockers instead of acceptance when capacity, rounding, or payoff terms cannot
-  cover both standard-binary terminal scenarios.
-- Avoid profitability or execution-readiness claims.
+- no floating-point money;
+- bounded integer arithmetic with overflow checks;
+- complete terminal-scenario coverage;
+- per-leg min/max/increment/depth constraints;
+- fees and costs included before acceptance;
+- deterministic tie-breaking;
+- no NaN, Infinity, silent clipping, or optimistic missing values.
 
-A solver result is not accepted without quote freshness, capacity evidence, leg completion
-simulation, and settlement replay.
+`BWS-220` owns the integrated solver proof.

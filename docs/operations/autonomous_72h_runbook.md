@@ -1,79 +1,18 @@
-# Autonomous 72h Runbook
+# Autonomous 72-hour implementation runbook
 
-## Preflight
+## Selected campaign
 
-```bash
-cd ~/app_testing/betting-win-surebet
-. "$HOME/.nvm/nvm.sh" && nvm use 20
-npm install
-npm run validate
-./run-autonomous-implementation.sh --check-only --model cli-default --fallback-model none
+```text
+program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
+controller=run-autonomous-implementation.sh
+current_task=BWS-100
+canonical_duration=72h
 ```
 
-## Start default model run
+Activate Node 20 in the same shell, pull the BWS repo, verify a readable betting-win checkout at `BETTING_WIN_REPO_PATH`, and launch the root implementation controller. Do not invent task/prompt flags.
 
-```bash
-cd ~/app_testing/betting-win-surebet && . "$HOME/.nvm/nvm.sh" && nvm use 20 && PYTHONDONTWRITEBYTECODE=1 bash run-autonomous-implementation.sh --duration 72h --model cli-default --fallback-model none --cycle-timeout 2h --validation-timeout 20m
-```
+The controller must maximize cumulative safe implementation through `BWS-510`, validating and updating the dependency ledger after each coherent slice.
 
-Use `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` only for a newly approved automation-maintenance task touching protected root automation files. Omit that environment variable for normal source implementation.
+Do not run paper autopilot as the initial build. Do not enable protected automation changes unless an explicit automation-maintenance task exists.
 
-Use `--model cli-default --fallback-model none` unless Federico explicitly asks for another model. Do not use autonomous runs to invent provider integrations, predictive/value-betting work, shared account coordination, or live execution. Surebet backtest/paper/live-gate changes must follow `docs/019_three_repo_surebet_strategy_boundary.md`.
-
-## Observe progress
-
-```bash
-./check_progress.sh
-./watch_progress.sh --once
-./open_log.sh
-```
-
-## Pull artifacts and codebase
-
-Configure `.env` with `SSH_HOST`, `SSH_USER`, `SSH_PASSWORD`, and `REMOTE_REPO=/home/dev/app_testing/betting-win-surebet`, then run:
-
-```bash
-./pull_artifacts_and_zip_codebase.sh
-```
-
-For a local codebase archive only, without SSH/artifact pull:
-
-```bash
-./zip_codebase.sh
-```
-
-The helpers number files using the highest existing local suffix, including browser duplicate names like `betting-win-surebet1(2).zip`, to avoid recreating stale lower-numbered archives.
-
-
-## Launcher note
-
-Use the root controller directly after activating Node in the parent shell. Compatibility wrappers under `commands/` still exist, but the daily entrypoint is `bash ./run-autonomous-implementation.sh`.
-
-## Launcher runtime note
-
-Root controllers inherit the active Node runtime from the parent shell and never source `nvm.sh` themselves. Compatibility wrappers under `commands/` may still use `scripts/load-node-runtime.sh`; that helper also must not source `nvm.sh` directly. This keeps startup visible and avoids NVM shell-context failures before the controller log is created.
-
-## Standardized automation commands
-
-Use canonical root scripts:
-
-```bash
-. "$HOME/.nvm/nvm.sh" && nvm use 20
-./run-autonomous-implementation.sh --check-only --model cli-default --fallback-model none
-./run-autonomous-implementation.sh --duration 72h --model cli-default --fallback-model none
-./run-autonomous-bugfix.sh --duration 72h --model cli-default --fallback-model none --handover-autonomous-implementation
-./run-paper-evaluation.sh --duration 72h --interval 5m --adaptive --keep-monitoring-when-ready --model cli-default --fallback-model none
-```
-
-`run-paper-evaluation.sh` replaces `run-paper-evaluation-12h.sh`. There is no
-`stop-autonomous-run.sh`; use each controller's `--status` and `--force-unlock`
-only when needed. All `run-*` scripts create root `artifacts.zip` before exit.
-
-
-## Paper autopilot command
-
-For unattended paper/implementation handoff supervision, run after Node 20 activation:
-
-```bash
-bash ./run-paper-autopilot.sh --duration 7d --paper-duration 72h --implementation-duration 72h --interval 5m --adaptive --max-rounds 0 --max-same-handoff 2 --model cli-default --fallback-model none
-```
+Inspect retained artifacts and machine status. Preserve a verified lock on unsafe finalization. Do not kill/delete locks manually.

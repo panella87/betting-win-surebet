@@ -73,6 +73,8 @@ test('controllers expose corrected wave-two defaults and handoff entrypoints', (
   assert.match(autopilot, /canonical_paper_handoff_required=enabled/);
   assert.match(autopilot, /legacy_paper_handoff_normalization=disabled/);
   assert.match(autopilot, /cross_controller_lock_guard=enabled/);
+  assert.match(autopilot, /child_telegram_notifications=suppressed_by_parent/);
+  assert.match(autopilot, /parent_telegram_notification=final_only/);
 });
 
 function writeExecutable(path: string, content: string): void {
@@ -111,6 +113,7 @@ function makeStubRepo(noop: boolean): string {
   writeExecutable(join(repo, 'run-paper-evaluation.sh'), `#!/usr/bin/env bash
 set -Eeuo pipefail
 root="$(cd "$(dirname "$0")" && pwd -P)"
+printf '%s\n' "\${TELEGRAM_NOTIFY:-unset}" >> "$root/artifacts/stub-child-telegram-values"
 . "$root/.automation/lib/run_common.sh"
 . "$root/.automation/lib/controller_hardening_v2.sh"
 mkdir -p "$root/artifacts"
@@ -167,6 +170,7 @@ exit "$rc"
   writeExecutable(join(repo, 'run-autonomous-implementation.sh'), `#!/usr/bin/env bash
 set -Eeuo pipefail
 root="$(cd "$(dirname "$0")" && pwd -P)"
+printf '%s\n' "\${TELEGRAM_NOTIFY:-unset}" >> "$root/artifacts/stub-child-telegram-values"
 . "$root/.automation/lib/controller_hardening_v2.sh"
 run_dir="$root/artifacts/autonomous_implementation_stub"; mkdir -p "$run_dir"
 source_fp="$(awk -F= '$1 == "HANDOVER_FINGERPRINT" {print $2}' "$root/.automation/paper-mode-to-autonomous-implementation.env")"
@@ -211,7 +215,17 @@ function runStubAutopilot(repo: string): ReturnType<typeof spawnSync> {
     '--no-stream',
     '--model', 'cli-default',
     '--fallback-model', 'none',
-  ], { encoding: 'utf-8', env: { ...process.env, TELEGRAM_NOTIFY: '0' } });
+  ], {
+    encoding: 'utf-8',
+    env: {
+      ...process.env,
+      TELEGRAM_NOTIFY: '1',
+      TELEGRAM_NOTIFY_DRY_RUN: '1',
+      TELEGRAM_NOTIFICATION_SENT: '0',
+      TELEGRAM_BOT_TOKEN: 'dummy-token',
+      TELEGRAM_CHAT_ID: 'dummy-chat',
+    },
+  });
 }
 
 test('paper autopilot consumes a verified implementation handoff and re-evaluates paper', () => {
@@ -224,6 +238,12 @@ test('paper autopilot consumes a verified implementation handoff and re-evaluate
     assert.equal(existsSync(join(repo, '.automation', 'paper-mode-to-autonomous-implementation.env')), false);
     assert.equal(existsSync(join(repo, '.automation', 'paper-mode-handover.env')), false);
     assert.match(readFileSync(join(repo, 'source.txt'), 'utf-8'), /implemented/);
+    const childTelegramValues = readFileSync(join(repo, 'artifacts', 'stub-child-telegram-values'), 'utf-8')
+      .trim().split(/\r?\n/);
+    assert.deepEqual(childTelegramValues, ['0', '0', '0']);
+    const parentRunDir = String(result.stdout).split(/\r?\n/)
+      .find((line) => line.startsWith('run_dir='))!.slice('run_dir='.length);
+    assert.match(readFileSync(join(parentRunDir, 'telegram_notification_status.txt'), 'utf-8'), /telegram_notification=dry_run/);
   } finally {
     rmSync(repo, { recursive: true, force: true });
   }

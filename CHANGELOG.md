@@ -1,15 +1,30 @@
-# 2026-07-12 - Run-script hardening wave 9: parent lock finalization and heartbeat safety
+# Changelog
 
-- Hardened `run-bugfix-autopilot.sh` with a complete atomic parent-lock claim, removing the short-lived empty-lock window during concurrent starts.
-- Added strict parent-lock ownership checks, verified TERM/KILL completion during `--force-unlock`, and explicit refusal to remove a lock while the verified controller remains alive.
-- Replaced suppressed bugfix-parent cleanup/release failures with `BUGFIX_AUTOPILOT_BLOCKED_CHILD_IDENTITY` and `BUGFIX_AUTOPILOT_BLOCKED_LOCK_RELEASE`, preserved-lock evidence, corrected summaries/archives, and machine-readable child-cleanup/lock-release fields.
-- Delayed Telegram notification until child cleanup and parent-lock release are fully classified.
-- Hardened `.automation/lib/controller_hardening_v2.sh` so TERM/KILL process-group escalation succeeds only after the target PID is verified dead.
-- Changed both parent heartbeat workers to poll for shutdown every second while refreshing liveness at the configured cadence, preventing finalization from stalling for the full heartbeat interval.
-- Changed both parent heartbeat updates to touch the lock mtime instead of rewriting the full env record, preventing a background heartbeat from restoring stale `ACTIVE_CHILD_*` metadata over a newer parent update.
-- Updated `run-paper-autopilot.sh` to require the same non-symlink lock, mtime-heartbeat, strict ownership-release, and verified force-unlock invariants.
-- Updated `.automation/lib/telegram_notify.sh` to `20260712.pretty_v5_parent_lock_actions` with dedicated bugfix-parent lock-release guidance.
-- Added executable regression coverage for atomic claims, child-identity failure, release failure, successful cleanup, verified force-unlock escalation, non-rewriting parent heartbeats, responsive shutdown, and lock-mtime validation.
+## 2026-07-13 - BWS full-platform documentation and implementation rebaseline
+
+- Reframed BWS as the complete downstream surebet application built on betting-win.
+- Added the inspected betting-win 0.48.0 capability baseline and runtime lock schema.
+- Added the BWS-000 through BWS-900 dependency program and selected BWS-100.
+- Replaced historical fixture-complete stop conditions with continuation through BWS-510.
+- Preserved provider, betting-win core-write, and execution prohibitions.
+
+# 2026-07-13 - Run-script hardening wave 10: parent-only Telegram routing
+
+- Updated `run-paper-autopilot.sh` so every `run-paper-evaluation.sh` and `run-autonomous-implementation.sh` child is launched with `TELEGRAM_NOTIFY=0`; only the paper parent sends the campaign-final Telegram notification.
+- Updated `run-bugfix-autopilot.sh` so every `run-autonomous-bugfix.sh` and `run-autonomous-implementation.sh` child is launched with `TELEGRAM_NOTIFY=0`; only the bugfix parent sends the campaign-final Telegram notification.
+- Kept direct standalone runs unchanged: `run-paper-evaluation.sh`, `run-autonomous-implementation.sh`, and `run-autonomous-bugfix.sh` continue to send their own final notification unless the operator explicitly sets `TELEGRAM_NOTIFY=0`.
+- Recorded the exact child launch environment in `child_command.txt` and parent lock metadata, including the notification suppression setting and verified parent identity.
+- Added executable regression coverage proving child notifications are suppressed while the parent dry-run notification is still emitted once at finalization.
+- Preserved the no-service, no-provider, no-direct-DB, no-execution, private-paper-only boundary.
+
+# 2026-07-12 - Run-script hardening wave 9: parent lock and heartbeat safety
+
+- Hardened `run-bugfix-autopilot.sh` with a complete-file atomic parent-lock claim, strict schema/controller/repository/script/PID ownership checks, and no empty or partially formed live lock.
+- Replaced full-record parent heartbeat rewrites in both parent controllers with `HEARTBEAT_SOURCE=file_mtime`; heartbeats now touch only lock mtime and poll shutdown once per second without erasing newer `ACTIVE_CHILD_*` metadata.
+- Added zombie-aware PID liveness plus verified TERM-first process-group termination, bounded KILL escalation, and post-KILL exit verification in `.automation/lib/controller_hardening_v2.sh`.
+- Added truthful bugfix-parent child-cleanup and lock-release finalization. Unsafe release now produces `BUGFIX_AUTOPILOT_BLOCKED_LOCK_RELEASE`, exit code `2`, corrected terminal evidence, and a preserved lock before Telegram notification.
+- Hardened both parent `--force-unlock` paths so a lock is removed only after controller and child identity plus process termination are proven.
+- Added parent-lock and heartbeat regression coverage and upgraded Telegram actions to `20260712.pretty_v5_parent_lock_actions`.
 - Preserved the no-service, no-provider, no-direct-DB, no-execution, private-paper-only boundary.
 
 # 2026-07-12 - Run-script hardening wave 8: paper lock lifecycle and atomic parent finalization

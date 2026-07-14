@@ -220,7 +220,8 @@ test('paper evaluation successful lock release remains visible without changing 
 test('paper autopilot uses an atomic full parent-lock claim before campaign artifact creation', () => {
   const script = readFileSync(join(ROOT, 'run-paper-autopilot.sh'), 'utf-8');
   assert.match(script, /claim_parent_lock\(\)/);
-  assert.match(script, /automation_v2_claim_env_lock_atomic "\$LOCK_FILE"/);
+  assert.match(script, /automation_v2_claim_env_file_atomic/);
+  assert.match(readFileSync(join(ROOT, '.automation', 'lib', 'controller_hardening_v2.sh'), 'utf-8'), /ln -- "\$claim" "\$file"/);
   assert.match(script, /paper autopilot lock was acquired concurrently/);
   const main = script.slice(script.indexOf('parse_args "$@"'));
   const acquire = main.indexOf('acquire_parent_lock');
