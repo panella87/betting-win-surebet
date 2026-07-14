@@ -9,7 +9,7 @@ Default laptop flow:
   1. Read .env for SSH_HOST, SSH_USER, SSH_PASSWORD, and REMOTE_REPO.
   2. Pull remote repo-root artifacts.zip from the server.
   3. Save it locally as next numbered artifacts zip, e.g. artifacts12.zip.
-  4. Calls bash ./zip_codebase.sh to create the local numbered codebase zip.
+  4. Create a local numbered codebase zip by calling ./zip_codebase.sh.
 
 Required .env keys:
   SSH_HOST=88.99.165.82
@@ -114,7 +114,7 @@ pa_stream_remote_file() {
 }
 
 pa_main() {
-  local remote_codebase=0 SCRIPT_DIR LOCAL_ROOT ENV_FILE repo_name remote_artifact artifact_number local_artifact tmp_artifact latest remote_codebase_path local_remote tmp_remote quoted
+  local remote_codebase=0 SCRIPT_DIR LOCAL_ROOT ENV_FILE repo_name remote_repo_name remote_artifact artifact_number local_artifact tmp_artifact latest remote_codebase_path local_remote tmp_remote quoted
   while [ "$#" -gt 0 ]; do
     case "$1" in
       --remote-codebase) remote_codebase=1; shift ;;
@@ -140,6 +140,11 @@ pa_main() {
   SSH_PASSWORD="$(pa_get_config SSH_PASSWORD "$ENV_FILE")" || { pa_fail "Missing SSH_PASSWORD in .env"; return 2; }
   REMOTE_REPO="$(pa_get_config REMOTE_REPO "$ENV_FILE")" || { pa_fail "Missing REMOTE_REPO in .env"; return 2; }
   REMOTE_REPO="${REMOTE_REPO%/}"
+  remote_repo_name="${REMOTE_REPO##*/}"
+  if [ "$remote_repo_name" != "$repo_name" ]; then
+    pa_fail "REMOTE_REPO basename mismatch: local repo is $repo_name but REMOTE_REPO points to $remote_repo_name ($REMOTE_REPO)"
+    return 2
+  fi
   REMOTE_ARTIFACT="$(pa_get_config REMOTE_ARTIFACT "$ENV_FILE" 2>/dev/null)" || REMOTE_ARTIFACT="${REMOTE_REPO}/artifacts.zip"
 
   quoted="$(pa_shell_quote "$REMOTE_ARTIFACT")" || return 1
@@ -186,8 +191,8 @@ pa_main() {
     printf 'downloaded_remote_codebase=%s\n' "$LOCAL_ROOT/$local_remote"
   fi
 
-  printf 'creating_local_codebase_zip=bash ./zip_codebase.sh\n'
-  bash ./zip_codebase.sh
+  printf 'creating_local_codebase_zip=./zip_codebase.sh\n'
+  "$LOCAL_ROOT/zip_codebase.sh"
   return $?
 }
 

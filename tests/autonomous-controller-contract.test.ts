@@ -26,6 +26,7 @@ test('standard automation root scripts and shared helpers are installed', () => 
   assert.match(read('.automation/lib/run_common.sh'), /automation_assert_no_incompatible_locks\(\)/);
   assert.match(read('.automation/lib/run_common.sh'), /automation_run_managed_argv\(\)/);
   assert.match(read('.automation/lib/run_common.sh'), /automation_terminate_process_group\(\)/);
+  assert.match(read('.automation/lib/run_common.sh'), /zip -q -r "\$zip_tmp" artifacts/);
   assert.match(read('.automation/lib/controller_hardening_v2.sh'), /automation_v2_load_env_strict\(\)/);
   assert.match(read('.automation/lib/controller_hardening_v2.sh'), /automation_v2_semantic_env_fingerprint_loaded\(\)/);
   assert.match(read('.automation/lib/controller_hardening_v2.sh'), /automation_v2_extract_unique_machine_value\(\)/);
@@ -50,10 +51,32 @@ test('daily git and packaging helpers match the standardized contract', () => {
   assert.match(zipCodebase, /--artifacts-only/);
   assert.match(zipCodebase, /created_zip=%s/);
   assert.match(zipCodebase, /sha256=%s/);
-  assert.match(zipCodebase, /zc_is_artifacts_excluded_path\(\)/);
+  assert.match(zipCodebase, /zip -q -r "\$tmp_zip" artifacts/);
+  assert.match(zipCodebase, /\.zip-codebase-list\.tmp\.XXXXXXXXXX/);
   assert.match(pullAndZip, /REMOTE_ARTIFACT/);
-  assert.match(pullAndZip, /bash \.\/zip_codebase\.sh/);
+  assert.match(pullAndZip, /REMOTE_REPO basename mismatch/);
+  assert.match(pullAndZip, /"\$LOCAL_ROOT\/zip_codebase\.sh"/);
+  assert.doesNotMatch(pullAndZip, /bash \.\/zip_codebase\.sh/);
   assert.doesNotMatch(pullAndZip, /source .*automation\.config\.sh|\. automation\.config\.sh/);
+});
+
+
+test('all root controllers package the complete repo artifacts directory', () => {
+  for (const rel of [
+    'run-autonomous-implementation.sh',
+    'run-autonomous-bugfix.sh',
+    'run-paper-evaluation.sh',
+    'run-paper-autopilot.sh',
+    'run-bugfix-autopilot.sh',
+  ]) {
+    const script = read(rel);
+    assertContains(script, 'artifacts_zip_scope=full_artifacts_directory');
+    assertContains(
+      script,
+      'automation_v2_zip_with_timeout "$ZIP_TIMEOUT_SECONDS" "$tmp" "$AUTOMATION_REPO_ROOT" "artifacts"',
+    );
+    assert.doesNotMatch(script, /rel="\$\{AUTOMATION_RUN_DIR#/);
+  }
 });
 
 test('progress, start, and stop helpers match the no-service artifact contract', () => {

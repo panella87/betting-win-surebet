@@ -871,14 +871,14 @@ automation_require_cycle_artifacts() {
 }
 
 automation_build_artifacts_zip() {
-  local run_dir="$1" root="$2" zip_tmp rel timeout_seconds
+  local run_dir="$1" root="$2" zip_tmp timeout_seconds
   [[ -d "$run_dir" ]] || return 0
+  [[ -d "$root/artifacts" ]] || return 0
   automation_require_command zip
-  rel="${run_dir#$root/}"
   timeout_seconds="$(automation_parse_duration_seconds "${AUTOMATION_ZIP_TIMEOUT:-10m}")" || return 2
   zip_tmp="$root/.artifacts.zip.tmp.$$.zip"
   rm -f "$zip_tmp"
-  (cd "$root" && timeout --signal=TERM --kill-after=10s "${timeout_seconds}s" zip -q -r "$zip_tmp" "$rel") || {
+  (cd "$root" && timeout --signal=TERM --kill-after=10s "${timeout_seconds}s" zip -q -r "$zip_tmp" artifacts) || {
     local rc=$?
     rm -f -- "$zip_tmp"
     return "$rc"

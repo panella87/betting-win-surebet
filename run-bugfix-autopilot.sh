@@ -11,7 +11,7 @@ AUTOMATION_REPO_ROOT="$SCRIPT_DIR"
 # shellcheck source=.automation/lib/telegram_notify.sh
 . "$SCRIPT_DIR/.automation/lib/telegram_notify.sh"
 
-SCRIPT_VERSION="2026-07-13.surebet-bugfix-autopilot-v5-parent-only-telegram"
+SCRIPT_VERSION="2026-07-14.surebet-bugfix-autopilot-v6-full-artifacts-archive"
 SCRIPT_NAME="run-bugfix-autopilot.sh"
 DURATION_SECONDS="$(automation_parse_duration_seconds 7d)"
 BUGFIX_DURATION_SECONDS="$(automation_parse_duration_seconds 72h)"
@@ -243,6 +243,7 @@ stream_logs=$CODEX_STREAM_LOGS
 validation_timeout_seconds=$VALIDATION_TIMEOUT_SECONDS
 install_timeout_seconds=$INSTALL_TIMEOUT_SECONDS
 zip_timeout_seconds=$ZIP_TIMEOUT_SECONDS
+artifacts_zip_scope=full_artifacts_directory
 campaign_total_areas=${#CAMPAIGN_AREAS[@]}
 mandatory_same_area_reaudit=enabled
 strict_handoff_parser=enabled
@@ -739,12 +740,11 @@ update_bug_signature_repeat_guard() {
 }
 
 build_artifacts_zip_bounded() {
-  local tmp rel
-  [[ -d "${AUTOMATION_RUN_DIR:-}" ]] || return 0
-  rel="${AUTOMATION_RUN_DIR#$AUTOMATION_REPO_ROOT/}"
+  local tmp
+  [[ -d "$AUTOMATION_REPO_ROOT/artifacts" ]] || return 0
   tmp="$AUTOMATION_REPO_ROOT/.artifacts.zip.tmp.$$.zip"
   rm -f -- "$tmp"
-  automation_v2_zip_with_timeout "$ZIP_TIMEOUT_SECONDS" "$tmp" "$AUTOMATION_REPO_ROOT" "$rel" || { local rc=$?; rm -f -- "$tmp"; return "$rc"; }
+  automation_v2_zip_with_timeout "$ZIP_TIMEOUT_SECONDS" "$tmp" "$AUTOMATION_REPO_ROOT" "artifacts" || { local rc=$?; rm -f -- "$tmp"; return "$rc"; }
   mv -f -- "$tmp" "$AUTOMATION_REPO_ROOT/artifacts.zip"
 }
 

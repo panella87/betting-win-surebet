@@ -45,7 +45,7 @@ PAPER_LOCAL_REPORT_PATH=""
 PAPER_PINNED_REPORT_PATH=""
 INITIAL_SOURCE_FINGERPRINT=""
 FINAL_SOURCE_FINGERPRINT=""
-SCRIPT_VERSION="2026-07-12.surebet-v5-standalone-lock-lifecycle"
+SCRIPT_VERSION="2026-07-14.surebet-v6-full-artifacts-archive"
 SCRIPT_NAME="run-paper-evaluation.sh"
 ZIP_TIMEOUT_SECONDS=""
 PAPER_HANDOFF_FILE=""
@@ -275,6 +275,7 @@ keep_monitoring_when_ready=$KEEP_MONITORING_WHEN_READY
 validation_timeout_seconds=$VALIDATION_TIMEOUT_SECONDS
 install_timeout_seconds=$INSTALL_TIMEOUT_SECONDS
 zip_timeout_seconds=$ZIP_TIMEOUT_SECONDS
+artifacts_zip_scope=full_artifacts_directory
 codex_phase_timeout_seconds=$CODEX_PHASE_TIMEOUT_SECONDS
 paper_command_timeout_seconds=$PAPER_COMMAND_TIMEOUT_SECONDS
 max_cycles=$MAX_CYCLES
@@ -463,12 +464,11 @@ attempt_final_lock_release() {
 }
 
 build_artifacts_zip_bounded() {
-  local tmp rel
-  [[ -d "${AUTOMATION_RUN_DIR:-}" ]] || return 0
-  rel="${AUTOMATION_RUN_DIR#$AUTOMATION_REPO_ROOT/}"
+  local tmp
+  [[ -d "$AUTOMATION_REPO_ROOT/artifacts" ]] || return 0
   tmp="$AUTOMATION_REPO_ROOT/.artifacts.zip.tmp.$$.zip"
   rm -f "$tmp"
-  if automation_v2_zip_with_timeout "$ZIP_TIMEOUT_SECONDS" "$tmp" "$AUTOMATION_REPO_ROOT" "$rel"; then
+  if automation_v2_zip_with_timeout "$ZIP_TIMEOUT_SECONDS" "$tmp" "$AUTOMATION_REPO_ROOT" "artifacts"; then
     mv -f "$tmp" "$AUTOMATION_REPO_ROOT/artifacts.zip"
     automation_log "artifacts_zip_created path=$AUTOMATION_REPO_ROOT/artifacts.zip"
   else

@@ -1,12 +1,12 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-07-14T15:39:26Z",
+  "generated": "2026-07-14T16:26:53Z",
   "overlay": "bws100-existing-checkout-head-pin-wave14",
   "files": [
     {
       "path": ".automation/README.md",
-      "sha256": "b592bc112ae24d73d126b6c1c698346393c228dbf45bfc0a18ad0c6fda626b12",
-      "size": 5030
+      "sha256": "6900d48486fcdd17d4ccfcbdf3e4e0be727f0c553bda3fc28ba28b474a01bea8",
+      "size": 5324
     },
     {
       "path": ".automation/lib/controller_hardening_v2.sh",
@@ -15,8 +15,8 @@
     },
     {
       "path": ".automation/lib/run_common.sh",
-      "sha256": "f51772941bd86116a5e6366c4d095dbcfd08610c86658355cd25f4772d778a76",
-      "size": 32982
+      "sha256": "d521a230d71f3b497b17e1636204a336478320207c9273a6ac0b6ecf43dff222",
+      "size": 32996
     },
     {
       "path": ".automation/lib/telegram_notify.sh",
@@ -50,8 +50,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "5082b9200207506d167758aef0dd3d0886537c3490056b12673ab40a915e3568",
-      "size": 45615
+      "sha256": "9a00f5d8ce03dc317429b14b81ea1309759ce3cce2eb9b2a8eb011d7faa2c164",
+      "size": 46651
     },
     {
       "path": "DOCUMENTATION_CHECK_REPORT.md",
@@ -330,8 +330,8 @@
     },
     {
       "path": "docs/automation/README.md",
-      "sha256": "1fcc3c94f1ff84183557773ccbfaead4a96a9cad4ecbc80ce256f45ba3970cbe",
-      "size": 1949
+      "sha256": "88bb25edac86230c348eed6c1668c50ad938cbc2abcf22ad740b2f9985b5f307",
+      "size": 2635
     },
     {
       "path": "docs/automation/SSH_KEY_SETUP.md",
@@ -655,8 +655,8 @@
     },
     {
       "path": "pull_artifacts_and_zip_codebase.sh",
-      "sha256": "f507d616770c42e5a0fbeeef9990dda148240634b47bfeefb3bdd03212bffbb1",
-      "size": 7136
+      "sha256": "999572f2c83ee33c4b405a2b3498e821ab55a7918f8ee7f8d19c661561b72fb6",
+      "size": 7388
     },
     {
       "path": "research/imported-from-betting-win/legacy/surebet/README.md",
@@ -870,28 +870,28 @@
     },
     {
       "path": "run-autonomous-bugfix.sh",
-      "sha256": "cf2f5797ba04a35fb3ea7367331c841016b0fc2537017aae53612d72ce27c267",
-      "size": 41972
+      "sha256": "5da0181e402d5ad83f2ab337c69c731a5354607a569821b4fa327655e3877a13",
+      "size": 41970
     },
     {
       "path": "run-autonomous-implementation.sh",
-      "sha256": "5705ef2fffd93ddb64e88458bf3704716b8d519157728de30bda1ba7aeefdc74",
-      "size": 55882
+      "sha256": "4988bf5278cb5de32d0ca14d0127b116abd1b6fc5f778a11c4fc097e8238f94a",
+      "size": 55880
     },
     {
       "path": "run-bugfix-autopilot.sh",
-      "sha256": "a4dd22b3d174de7d6cfe39de7b826d51799ae1bf004459fa1920857f23895c87",
-      "size": 54615
+      "sha256": "6bf1496c3e5bdbf27d75ddaa66d2f85390a32ca09c77cf0b7ec5692b659fd1a0",
+      "size": 54618
     },
     {
       "path": "run-paper-autopilot.sh",
-      "sha256": "10b27e6d22c0fa941f46fce04d241fad39301d6d2a4c6c20e5bb3399ee1d6f0d",
-      "size": 61523
+      "sha256": "fcd5ac0a0c9b6ca5a20eb2cfab5c5ffc4832c92ce22aeb2ee86003529d78f676",
+      "size": 61526
     },
     {
       "path": "run-paper-evaluation.sh",
-      "sha256": "5473f3d41ba9d6848968df11a8a6edf7a901e42ee2a675ef1ee794295d55219c",
-      "size": 37280
+      "sha256": "7db3f43f89e6717c6b084b9283549501973fa4749ce4ba0ea39d8b242dd6b198",
+      "size": 37278
     },
     {
       "path": "schemas/betting-win-upstream-lock.v1.schema.json",
@@ -950,8 +950,8 @@
     },
     {
       "path": "scripts/validate_autonomous_controller_contract.py",
-      "sha256": "4eff84db01698809358d5015b34a1ab4e3523e619ca2d1ecfd4a11747d4d27b0",
-      "size": 22019
+      "sha256": "b36a721257cfd1b61527abd6f45301923183d50b987444deab3d6b37cbb11c36",
+      "size": 23119
     },
     {
       "path": "scripts/validate_betting_win_upstream_contract.py",
@@ -1200,8 +1200,8 @@
     },
     {
       "path": "tests/autonomous-controller-contract.test.ts",
-      "sha256": "595fbffaf89b4d20b8905f34dac9cdeab0ca6d894d748f5e4ee9c247f3f8caec",
-      "size": 15839
+      "sha256": "9fc61c005e426619c02047e15b243f10d7467b827f713f3980d3b451e11059f4",
+      "size": 16732
     },
     {
       "path": "tests/betting-win-adapters.test.ts",
@@ -1350,8 +1350,8 @@
     },
     {
       "path": "tests/packaging-helpers.test.ts",
-      "sha256": "1598b246ee1881e94855f60381a8b03111d32b4861a92298bbe8f3cecefb528d",
-      "size": 16961
+      "sha256": "6dc509762e703e4ab3f381d666f74f01bf7fb28454103661389f71e9125974d1",
+      "size": 19378
     },
     {
       "path": "tests/paper-autopilot-contract.test.ts",
@@ -1510,8 +1510,8 @@
     },
     {
       "path": "zip_codebase.sh",
-      "sha256": "f40940d3716fed825d849ab8f3cbcc57d80e8e39ab48e33bbea136d1558b7ef0",
-      "size": 7479
+      "sha256": "2446af8cff61abc457efb0026245d289e2a0d00c330e0ea50b82a139e4d0ef82",
+      "size": 6811
     }
   ]
 }

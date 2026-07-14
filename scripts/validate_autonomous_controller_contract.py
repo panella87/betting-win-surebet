@@ -30,12 +30,14 @@ REQUIRED_FRAGMENTS = {
         'created_zip=%s',
         'file_count=%s',
         'sha256=%s',
-        'zc_is_artifacts_excluded_path()',
+        'zip -q -r "$tmp_zip" artifacts',
+        '.zip-codebase-list.tmp.XXXXXXXXXX',
     ],
     'pull_artifacts_and_zip_codebase.sh': [
         'REMOTE_ARTIFACT',
         'sshpass',
-        'bash ./zip_codebase.sh',
+        'REMOTE_REPO basename mismatch',
+        '"$LOCAL_ROOT/zip_codebase.sh"',
         '--remote-codebase',
         'No automation.config.sh',
     ],
@@ -116,6 +118,7 @@ REQUIRED_FRAGMENTS = {
         'lock was acquired concurrently',
         'automation_force_unlock()',
         'automation_build_artifacts_zip()',
+        'zip -q -r "$zip_tmp" artifacts',
         'automation_run_validations()',
         'automation_require_cycle_artifacts()',
         'automation_read_continue_status()',
@@ -131,6 +134,8 @@ REQUIRED_FRAGMENTS = {
         'unknown continue status',
     ],
     'run-autonomous-implementation.sh': [
+        'artifacts_zip_scope=full_artifacts_directory',
+        'automation_v2_zip_with_timeout "$ZIP_TIMEOUT_SECONDS" "$tmp" "$AUTOMATION_REPO_ROOT" "artifacts"',
         '--model MODEL',
         '--fallback-model MODEL',
         '--repo-dir PATH',
@@ -175,6 +180,8 @@ REQUIRED_FRAGMENTS = {
         'remove_consumed_handoff_marker',
     ],
     'run-autonomous-bugfix.sh': [
+        'artifacts_zip_scope=full_artifacts_directory',
+        'automation_v2_zip_with_timeout "$ZIP_TIMEOUT_SECONDS" "$tmp" "$AUTOMATION_REPO_ROOT" "artifacts"',
         '--from-artifacts PATH',
         '--bugfix-focus-file PATH',
         '--campaign-area SLUG',
@@ -227,6 +234,8 @@ REQUIRED_FRAGMENTS = {
         "printf 'lock_preserved=%s\\n'",
     ],
     'run-paper-evaluation.sh': [
+        'artifacts_zip_scope=full_artifacts_directory',
+        'automation_v2_zip_with_timeout "$ZIP_TIMEOUT_SECONDS" "$tmp" "$AUTOMATION_REPO_ROOT" "artifacts"',
         'Default duration: 72h.',
         '--adaptive',
         '--keep-monitoring-when-ready',
@@ -277,6 +286,8 @@ REQUIRED_FRAGMENTS = {
     ],
 
     'run-bugfix-autopilot.sh': [
+        'artifacts_zip_scope=full_artifacts_directory',
+        'automation_v2_zip_with_timeout "$ZIP_TIMEOUT_SECONDS" "$tmp" "$AUTOMATION_REPO_ROOT" "artifacts"',
         'Parent bug-audit -> implementation -> same-area re-audit supervisor',
         '--bugfix-duration VALUE',
         '--implementation-duration VALUE',
@@ -331,6 +342,8 @@ REQUIRED_FRAGMENTS = {
         'never sources nvm.sh',
     ],
     'run-paper-autopilot.sh': [
+        'artifacts_zip_scope=full_artifacts_directory',
+        'automation_v2_zip_with_timeout "$ZIP_TIMEOUT_SECONDS" "$tmp" "$AUTOMATION_REPO_ROOT" "artifacts"',
         'Parent no-service paper/autonomous supervisor for betting-win-surebet',
         '--paper-duration VALUE',
         '--implementation-duration VALUE',
@@ -397,6 +410,9 @@ REQUIRED_FRAGMENTS = {
         'run-bugfix-autopilot.sh',
         'TELEGRAM_NOTIFY=0',
         'one final campaign message',
+        'complete `artifacts/` directory',
+        'writable `/tmp`',
+        'REMOTE_REPO` basename',
     ],
     'docs/automation/autonomous-implementation.md': [
         '--model cli-default',
@@ -454,6 +470,7 @@ REQUIRED_FRAGMENTS = {
         'run-bugfix-autopilot.sh',
         'TELEGRAM_NOTIFY=0',
         'parent campaign-final Telegram',
+        'complete `artifacts/` directory',
     ],
     'docs/repo_status_current.md': [
         'run_autonomous_implementation=standardized_and_selected',

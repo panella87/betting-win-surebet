@@ -32,6 +32,10 @@ Standard evidence packaging:
 ./zip_codebase.sh --artifacts-only
 ```
 
+Every root controller publishes repo-root `artifacts.zip` from the complete `artifacts/` directory, equivalent to a bounded `zip -q -r artifacts.zip artifacts` operation. It must not package only the latest run directory. The numbered `--artifacts-only` helper follows the same complete-tree contract without filtering nested logs, archives, locks, temporary evidence, or empty directories.
+
+`zip_codebase.sh` creates its transient codebase file list inside the repository, so laptop packaging does not depend on writable `/tmp` or `TMPDIR`. `pull_artifacts_and_zip_codebase.sh` rejects a `REMOTE_REPO` basename that differs from the local repository name before downloading anything.
+
 Server update semantics remain equivalent to:
 
 ```text

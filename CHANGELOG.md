@@ -1,3 +1,11 @@
+## 2026-07-14 - Complete artifact archive and repo-local packaging hardening
+
+- Changed all five root controllers and the shared archive helper so repo-root `artifacts.zip` recursively contains the complete `artifacts/` directory, rather than only the latest controller run directory.
+- Aligned `zip_codebase.sh --artifacts-only` with `zip -q -r <archive> artifacts`, preserving every artifact file and directory without extension-based filtering.
+- Removed the codebase zipper's dependency on writable system `/tmp` by creating its transient file list inside the repository and excluding that transient path from the archive.
+- Hardened `pull_artifacts_and_zip_codebase.sh` to reject a `REMOTE_REPO` whose basename does not match the local repository, preventing cross-repo artifact downloads, and to invoke the verified executable zipper directly.
+- Added regression coverage for full artifact-tree preservation, repo-local `mktemp` use, cross-repo remote rejection, and complete-artifact packaging markers in every root controller.
+
 ## 2026-07-14 - BWS-100 existing-checkout committed-HEAD pinning
 
 - Replaced the clean-working-tree prerequisite with an exact `sourceView=committed_git_head` contract.

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { chmodSync, copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { chmodSync, copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -89,6 +89,11 @@ function makeZipCodebaseFixture(): { dir: string; repoDir: string; zipPath: stri
   writeFileSync(join(repoDir, 'run.log'), 'log bytes\n', { encoding: 'utf-8' });
   writeFileSync(join(repoDir, 'scratch.tmp'), 'tmp bytes\n', { encoding: 'utf-8' });
   writeFileSync(join(repoDir, 'artifacts', 'cycle_1', 'notes.md'), 'artifact report\n', { encoding: 'utf-8' });
+  writeFileSync(join(repoDir, 'artifacts', 'cycle_1', 'controller.log'), 'controller log\n', { encoding: 'utf-8' });
+  writeFileSync(join(repoDir, 'artifacts', 'cycle_1', 'nested.zip'), 'nested archive evidence\n', { encoding: 'utf-8' });
+  writeFileSync(join(repoDir, 'artifacts', 'cycle_1', 'runtime.lock'), 'runtime lock evidence\n', { encoding: 'utf-8' });
+  writeFileSync(join(repoDir, 'artifacts', 'cycle_1', 'scratch.tmp'), 'temporary evidence\n', { encoding: 'utf-8' });
+  mkdirSync(join(repoDir, 'artifacts', 'empty-directory'), { recursive: true });
   writeFileSync(join(repoDir, 'node_modules', 'left-pad', 'index.js'), 'module.exports = "nope";\n', { encoding: 'utf-8' });
   writeFileSync(join(repoDir, 'dist', 'bundle.js'), 'console.log("dist");\n', { encoding: 'utf-8' });
   writeFileSync(join(repoDir, '.locks', 'repo.lock'), 'lock\n', { encoding: 'utf-8' });
@@ -278,11 +283,12 @@ test('zip_codebase uses the Hyperliquid-style numbered archive and exclusion con
   assert.match(script, /\*\.zip\|\*\.tar\|\*\.tar\.gz\|\*\.tgz\|\*\.7z\|\*\.rar/);
   assert.match(script, /created_zip=%s/);
   assert.match(script, /sha256=%s/);
-  assert.match(script, /zc_is_artifacts_excluded_path\(\)/);
+  assert.match(script, /zip -q -r "\$tmp_zip" artifacts/);
+  assert.match(script, /\.zip-codebase-list\.tmp\.XXXXXXXXXX/);
   assert.doesNotMatch(script, /CODEBASE_OUTPUT/);
 });
 
-test('pull_artifacts_and_zip_codebase delegates codebase creation and supports remote artifact override', () => {
+test('pull_artifacts_and_zip_codebase delegates codebase creation and rejects a cross-repo REMOTE_REPO', () => {
   const help = execFileSync('bash', [PULL_AND_ZIP, '--help'], {
     cwd: REPO_ROOT,
     encoding: 'utf-8',
@@ -290,10 +296,12 @@ test('pull_artifacts_and_zip_codebase delegates codebase creation and supports r
   });
   const script = read(PULL_AND_ZIP);
 
-  assert.match(help, /Calls bash \.\/zip_codebase\.sh/);
+  assert.match(help, /Create a local numbered codebase zip by calling \.\/zip_codebase\.sh/);
   assert.match(help, /REMOTE_ARTIFACT/);
-  assert.match(script, /bash \.\/zip_codebase\.sh/);
+  assert.match(script, /REMOTE_REPO basename mismatch/);
+  assert.match(script, /"\$LOCAL_ROOT\/zip_codebase\.sh"/);
   assert.match(script, /REMOTE_ARTIFACT/);
+  assert.doesNotMatch(script, /bash \.\/zip_codebase\.sh/);
   assert.doesNotMatch(script, /source .*automation\.config\.sh|\. automation\.config\.sh/);
 });
 
@@ -330,7 +338,7 @@ test('zip_codebase excludes local secrets, archives, artifacts, dependencies, lo
   }
 });
 
-test('zip_codebase artifact-only mode zips artifacts while excluding nested archives and secrets', () => {
+test('zip_codebase artifact-only mode recursively preserves the complete artifacts directory', () => {
   const fixture = makeZipCodebaseFixture();
   try {
     execFileSync('bash', ['zip_codebase.sh', '--artifacts-only'], {
@@ -340,9 +348,58 @@ test('zip_codebase artifact-only mode zips artifacts while excluding nested arch
     });
     const entries = listZipEntries(join(fixture.repoDir, 'artifacts1.zip'));
 
-    assert.deepEqual(entries, ['artifacts/cycle_1/notes.md']);
-    assert.ok(!entries.includes('.env'));
-    assert.ok(!entries.some((entry) => entry.endsWith('.zip')));
+    for (const entry of [
+      'artifacts',
+      'artifacts/cycle_1',
+      'artifacts/cycle_1/notes.md',
+      'artifacts/cycle_1/controller.log',
+      'artifacts/cycle_1/nested.zip',
+      'artifacts/cycle_1/runtime.lock',
+      'artifacts/cycle_1/scratch.tmp',
+      'artifacts/empty-directory',
+    ]) {
+      assert.ok(entries.includes(entry), `missing complete artifact entry: ${entry}`);
+    }
+  } finally {
+    rmSync(fixture.dir, { recursive: true, force: true });
+  }
+});
+
+test('zip_codebase creates its codebase file list inside the repo instead of system temporary storage', () => {
+  const fixture = makeZipCodebaseFixture();
+  const fakeBin = join(fixture.dir, 'fake-bin');
+  try {
+    mkdirSync(fakeBin, { recursive: true });
+    const realMktemp = execFileSync('bash', ['-lc', 'command -v mktemp'], {
+      cwd: fixture.repoDir,
+      encoding: 'utf-8',
+      stdio: 'pipe',
+    }).trim();
+    const expectedPrefix = `${fixture.repoDir}/.zip-codebase-list.tmp.`;
+    const fakeMktemp = join(fakeBin, 'mktemp');
+    writeFileSync(
+      fakeMktemp,
+      [
+        '#!/usr/bin/env bash',
+        `expected_prefix=${JSON.stringify(expectedPrefix)}`,
+        'case "${1:-}" in',
+        `  "$expected_prefix"*) exec ${JSON.stringify(realMktemp)} "$@" ;;`,
+        `  *) printf 'unexpected mktemp invocation: %q\\n' "\${1:-<none>}" >&2; exit 91 ;;`,
+        'esac',
+        '',
+      ].join('\n'),
+      { encoding: 'utf-8' },
+    );
+    chmodSync(fakeMktemp, 0o755);
+
+    execFileSync('bash', ['zip_codebase.sh'], {
+      cwd: fixture.repoDir,
+      encoding: 'utf-8',
+      stdio: 'pipe',
+      env: { ...process.env, PATH: `${fakeBin}:${process.env.PATH ?? ''}`, TMPDIR: '/read-only-system-tmp' },
+    });
+
+    assert.equal(existsSync(join(fixture.repoDir, 'repo2.zip')), true);
   } finally {
     rmSync(fixture.dir, { recursive: true, force: true });
   }
