@@ -182,8 +182,8 @@ export function verifyBettingWinUpstreamLock(
     Object.assign(generationOptions, { allowedBoundaryRoot: options.allowedBoundaryRoot });
   }
   const actual = generateBettingWinUpstreamLock(generationOptions);
-  const actualJson = JSON.stringify(actual);
-  const expectedJson = JSON.stringify(lock);
+  const actualJson = JSON.stringify(canonicalizeJsonValue(actual));
+  const expectedJson = JSON.stringify(canonicalizeJsonValue(lock));
   if (actualJson !== expectedJson) {
     throw new UpstreamVerificationError(
       'BETTING_WIN_UPSTREAM_LOCK_MISMATCH',
@@ -617,6 +617,20 @@ function sortObject(value: Record<string, string>): Record<string, string> {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function canonicalizeJsonValue(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map((entry) => canonicalizeJsonValue(entry));
+  }
+  if (isRecord(value)) {
+    return Object.fromEntries(
+      Object.entries(value)
+        .sort(([left], [right]) => left.localeCompare(right))
+        .map(([key, entry]) => [key, canonicalizeJsonValue(entry)]),
+    );
+  }
+  return value;
 }
 
 function schemaTypeError(field: string, type: string): UpstreamVerificationError {

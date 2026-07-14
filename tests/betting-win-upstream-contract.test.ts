@@ -108,6 +108,14 @@ function createBettingWinFixture(options: { readonly packageName?: string } = {}
   return { tempRoot, bwsRoot, upstreamRoot };
 }
 
+function resolveGitBinary(): string {
+  return execFileSync('bash', ['-lc', 'command -v git'], {
+    cwd: ROOT,
+    encoding: 'utf-8',
+    stdio: 'pipe',
+  }).trim();
+}
+
 function expectVerificationError(
   callback: () => unknown,
   code: string,
@@ -363,6 +371,106 @@ test('upstream lock verification fails closed on mismatch and tamper after lock 
       /provider-collection\/src\/index\.ts/,
     );
   } finally {
+    rmSync(fixture.tempRoot, { recursive: true, force: true });
+  }
+});
+
+test('upstream lock verification accepts semantically identical locks with reordered keys', () => {
+  const fixture = createBettingWinFixture();
+  try {
+    const lock = generateBettingWinUpstreamLock({
+      bettingWinRepoPath: fixture.upstreamRoot,
+      repositoryRoot: fixture.bwsRoot,
+      allowedBoundaryRoot: fixture.tempRoot,
+      schemaPath: SCHEMA_PATH,
+      verifiedAt: FIXED_VERIFIED_AT,
+    });
+
+    const reorderedLock = {
+      capabilities: [...lock.capabilities],
+      packageVersions: Object.fromEntries(
+        Object.entries(lock.packageVersions).reverse(),
+      ),
+      verifiedAt: lock.verifiedAt,
+      surebetProfile: lock.surebetProfile,
+      contractAlias: lock.contractAlias,
+      contractSchema: lock.contractSchema,
+      sourceFingerprintAlgorithm: lock.sourceFingerprintAlgorithm,
+      trackedTreeListingSha256: lock.trackedTreeListingSha256,
+      packageVersion: lock.packageVersion,
+      worktreeClean: lock.worktreeClean,
+      gitTreeSha: lock.gitTreeSha,
+      commitSha: lock.commitSha,
+      repositoryPath: lock.repositoryPath,
+      repository: lock.repository,
+      schema: lock.schema,
+    };
+
+    assert.deepEqual(
+      verifyBettingWinUpstreamLock(reorderedLock, {
+        bettingWinRepoPath: fixture.upstreamRoot,
+        repositoryRoot: fixture.bwsRoot,
+        allowedBoundaryRoot: fixture.tempRoot,
+        schemaPath: SCHEMA_PATH,
+      }),
+      lock,
+    );
+  } finally {
+    rmSync(fixture.tempRoot, { recursive: true, force: true });
+  }
+});
+
+test('upstream lock generation proves the betting-win checkout remains unchanged during verification', () => {
+  const fixture = createBettingWinFixture();
+  const originalPath = process.env.PATH;
+  try {
+    const gitBinary = resolveGitBinary();
+    const binDirectory = join(fixture.tempRoot, 'bin');
+    const stateFile = join(fixture.tempRoot, 'git-wrapper-state.txt');
+    const targetFile = join(fixture.upstreamRoot, 'packages', 'provider-collection', 'src', 'index.ts');
+    mkdirSync(binDirectory, { recursive: true });
+    writeFileSync(
+      join(binDirectory, 'git'),
+      [
+        '#!/usr/bin/env bash',
+        'set -euo pipefail',
+        `REAL_GIT=${JSON.stringify(gitBinary)}`,
+        `STATE_FILE=${JSON.stringify(stateFile)}`,
+        `TARGET_FILE=${JSON.stringify(targetFile)}`,
+        '"$REAL_GIT" "$@"',
+        'if [ "$#" -ge 6 ] && [ "$1" = "-C" ] && [ "$3" = "ls-tree" ] && [ "$4" = "-r" ] && [ "$5" = "--full-tree" ] && [ "$6" = "HEAD" ]; then',
+        '  count=0',
+        '  if [ -f "$STATE_FILE" ]; then',
+        '    count="$(cat "$STATE_FILE")"',
+        '  fi',
+        '  if [ "$count" = "0" ]; then',
+        '    printf \'1\' > "$STATE_FILE"',
+        '    printf \'\\n// tampered during verification\\n\' >> "$TARGET_FILE"',
+        '  fi',
+        'fi',
+      ].join('\n'),
+      'utf-8',
+    );
+    chmodSync(join(binDirectory, 'git'), 0o755);
+    process.env.PATH = `${binDirectory}:${originalPath ?? ''}`;
+
+    expectVerificationError(
+      () => generateBettingWinUpstreamLock({
+        bettingWinRepoPath: fixture.upstreamRoot,
+        repositoryRoot: fixture.bwsRoot,
+        allowedBoundaryRoot: fixture.tempRoot,
+        schemaPath: SCHEMA_PATH,
+        verifiedAt: FIXED_VERIFIED_AT,
+      }),
+      'BETTING_WIN_CHECKOUT_CHANGED_DURING_VERIFICATION',
+      /checkout changed while the upstream lock was being verified/,
+    );
+  } finally {
+    if (originalPath === undefined) {
+      delete process.env.PATH;
+    } else {
+      process.env.PATH = originalPath;
+    }
     rmSync(fixture.tempRoot, { recursive: true, force: true });
   }
 });
