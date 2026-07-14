@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { chmodSync, copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -12,6 +12,7 @@ const CREATE_SOURCE_HANDOFF = join(REPO_ROOT, 'scripts', 'create-source-handoff-
 const ARTIFACT_HYGIENE_VALIDATOR = join(REPO_ROOT, 'scripts', 'validate_artifact_hygiene.py');
 const RESTORE_EXECUTABLE_BITS = join(REPO_ROOT, 'scripts', 'restore-required-executable-bits.js');
 const REQUIRED_EXECUTABLE_PATHS = join(REPO_ROOT, 'tools', 'required_executable_paths.js');
+const UPDATE_GIT = join(REPO_ROOT, 'update_git.sh');
 
 function read(path: string): string {
   return readFileSync(path, 'utf-8');
@@ -196,6 +197,66 @@ function makeSourceHandoffFixture(): { dir: string; repoDir: string; archivePath
 
   return { dir, repoDir, archivePath };
 }
+
+
+test('update_git ACP records required executable modes even when core.fileMode is false', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'surebet-update-git-modes-'));
+  const repoDir = join(dir, 'repo');
+  const remoteDir = join(dir, 'remote.git');
+  const cloneDir = join(dir, 'fresh-clone');
+  try {
+    mkdirSync(join(repoDir, 'tools'), { recursive: true });
+    copyFileSync(UPDATE_GIT, join(repoDir, 'update_git.sh'));
+    writeFileSync(
+      join(repoDir, 'tools', 'required_executable_paths.js'),
+      [
+        'export const REQUIRED_EXECUTABLE_PATHS = Object.freeze([',
+        "  'update_git.sh',",
+        "  'run-bugfix-autopilot.sh',",
+        ']);',
+        '',
+      ].join('\n'),
+      { encoding: 'utf-8' },
+    );
+    writeFileSync(join(repoDir, 'run-bugfix-autopilot.sh'), '#!/usr/bin/env bash\nexit 0\n', { encoding: 'utf-8' });
+    writeFileSync(join(repoDir, 'README.md'), '# fixture\n', { encoding: 'utf-8' });
+    chmodSync(join(repoDir, 'update_git.sh'), 0o644);
+    chmodSync(join(repoDir, 'run-bugfix-autopilot.sh'), 0o644);
+
+    execFileSync('git', ['init', '-q', '-b', 'main'], { cwd: repoDir, encoding: 'utf-8', stdio: 'pipe' });
+    execFileSync('git', ['config', 'user.name', 'BWS Test'], { cwd: repoDir, encoding: 'utf-8', stdio: 'pipe' });
+    execFileSync('git', ['config', 'user.email', 'bws-test@example.com'], { cwd: repoDir, encoding: 'utf-8', stdio: 'pipe' });
+    execFileSync('git', ['config', 'core.fileMode', 'false'], { cwd: repoDir, encoding: 'utf-8', stdio: 'pipe' });
+    execFileSync('git', ['add', '.'], { cwd: repoDir, encoding: 'utf-8', stdio: 'pipe' });
+    execFileSync('git', ['commit', '-q', '-m', 'fixture'], { cwd: repoDir, encoding: 'utf-8', stdio: 'pipe' });
+
+    execFileSync('git', ['init', '--bare', '-q', remoteDir], { cwd: dir, encoding: 'utf-8', stdio: 'pipe' });
+    execFileSync('git', ['--git-dir', remoteDir, 'symbolic-ref', 'HEAD', 'refs/heads/main'], { cwd: dir, encoding: 'utf-8', stdio: 'pipe' });
+    execFileSync('git', ['remote', 'add', 'origin', remoteDir], { cwd: repoDir, encoding: 'utf-8', stdio: 'pipe' });
+    execFileSync('git', ['push', '-q', '-u', 'origin', 'main'], { cwd: repoDir, encoding: 'utf-8', stdio: 'pipe' });
+
+    writeFileSync(join(repoDir, 'README.md'), '# fixture updated\n', { encoding: 'utf-8' });
+    execFileSync('bash', ['update_git.sh', '--acp', '--message', 'test: persist executable modes'], {
+      cwd: repoDir,
+      encoding: 'utf-8',
+      stdio: 'pipe',
+    });
+
+    const tree = execFileSync(
+      'git',
+      ['ls-tree', 'HEAD', 'update_git.sh', 'run-bugfix-autopilot.sh'],
+      { cwd: repoDir, encoding: 'utf-8', stdio: 'pipe' },
+    );
+    assert.match(tree, /^100755 blob [0-9a-f]+\tupdate_git\.sh$/m);
+    assert.match(tree, /^100755 blob [0-9a-f]+\trun-bugfix-autopilot\.sh$/m);
+
+    execFileSync('git', ['clone', '-q', remoteDir, cloneDir], { cwd: dir, encoding: 'utf-8', stdio: 'pipe' });
+    assert.notEqual(statSync(join(cloneDir, 'update_git.sh')).mode & 0o100, 0);
+    assert.notEqual(statSync(join(cloneDir, 'run-bugfix-autopilot.sh')).mode & 0o100, 0);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
 
 test('zip_codebase help documents the numbered repo-root and artifact-only packaging contract', () => {
   const output = execFileSync('bash', [ZIP_CODEBASE, '--help'], {

@@ -21,6 +21,9 @@ REQUIRED_FRAGMENTS = {
         'clear_local_extraheaders_quietly',
         'detached HEAD is not supported',
         'refusing to commit secret-like path',
+        'stage_required_executable_modes()',
+        'tools/required_executable_paths.js',
+        'git update-index --chmod=+x',
     ],
     'zip_codebase.sh': [
         '--artifacts-only',

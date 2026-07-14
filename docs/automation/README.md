@@ -35,3 +35,5 @@ Server update semantics remain equivalent to:
 ```text
 git pull --ff-only --autostash
 ```
+
+For `--acp`, `update_git.sh` loads `tools/required_executable_paths.js`, restores the owner executable bit, and forces each listed path to Git mode `100755` with `git update-index --chmod=+x` after staging. This is required for Windows/WSL worktrees where `core.fileMode=false`; a fresh Linux clone must still receive executable controller and helper files.

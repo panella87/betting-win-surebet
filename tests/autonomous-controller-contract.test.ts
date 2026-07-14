@@ -42,6 +42,10 @@ test('daily git and packaging helpers match the standardized contract', () => {
   const pullAndZip = read('pull_artifacts_and_zip_codebase.sh');
   assert.match(updateGit, /git pull --ff-only --autostash/);
   assert.match(updateGit, /GIT_ASKPASS/);
+  assert.match(updateGit, /stage_required_executable_modes\(\)/);
+  assert.match(updateGit, /tools\/required_executable_paths\.js/);
+  assert.match(updateGit, /git update-index --chmod=\+x/);
+  assert.match(updateGit, /git add -A[\s\S]*stage_required_executable_modes/);
   assert.doesNotMatch(updateGit, /require_clean_tree_for_sync/);
   assert.match(zipCodebase, /--artifacts-only/);
   assert.match(zipCodebase, /created_zip=%s/);

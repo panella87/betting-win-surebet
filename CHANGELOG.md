@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-07-14 - Git executable-mode persistence hardening
+
+- Hardened `update_git.sh --acp` to load the canonical required-executable list, restore owner execute permissions, and force Git index mode `100755` after content staging.
+- Prevented Windows/WSL `core.fileMode=false` worktrees from pushing controller scripts as non-executable and blocking Linux server validation.
+- Added a local-bare-remote regression proving a fresh clone preserves executable modes even when the source worktree ignores filesystem mode changes.
+- Preserved token handling, secret-path refusal, fast-forward pull behavior, and the current BWS-100 implementation queue.
+
 ## 2026-07-14 - BWS-100 validation idempotency hardening
 
 - Excluded the generated `config/betting-win.upstream.lock.json` runtime pin from `SOURCE_MANIFEST.json` inclusion so repeated `npm run validate` calls remain stable after upstream-lock generation.

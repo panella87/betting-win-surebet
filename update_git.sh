@@ -21,6 +21,8 @@ Commands:
   --pull --push
   --add-commit-push [-m|--message MESSAGE]
   --acp [-m|--message MESSAGE]
+      Stages required executable modes from tools/required_executable_paths.js
+      before committing, including when core.fileMode=false.
   --clone OWNER/REPO TARGET_DIR
   -h, --help
 
@@ -223,6 +225,84 @@ EOF
   return 0
 }
 
+stage_required_executable_modes() {
+  local manifest_path="tools/required_executable_paths.js" list_file relative_path
+  [ -f "$manifest_path" ] || {
+    say_error "missing required executable path manifest: $manifest_path"
+    return 2
+  }
+  command -v node >/dev/null 2>&1 || {
+    say_error "node is required to stage executable modes"
+    return 127
+  }
+
+  list_file="$(mktemp 2>/dev/null)" || {
+    say_error "mktemp failed while loading required executable paths"
+    return 1
+  }
+  if ! node --input-type=module - "$manifest_path" >"$list_file" <<'NODE'
+import path from 'node:path';
+import { pathToFileURL } from 'node:url';
+
+const manifestPath = path.resolve(process.argv[2] ?? '');
+const loaded = await import(pathToFileURL(manifestPath).href);
+const executablePaths = loaded.REQUIRED_EXECUTABLE_PATHS;
+if (!Array.isArray(executablePaths) || executablePaths.length === 0) {
+  throw new Error('REQUIRED_EXECUTABLE_PATHS must be a non-empty array');
+}
+
+const seen = new Set();
+for (const value of executablePaths) {
+  if (
+    typeof value !== 'string'
+    || value.length === 0
+    || value.startsWith('/')
+    || value.includes('\\')
+    || value.includes('\n')
+    || value.split('/').includes('..')
+  ) {
+    throw new Error(`invalid required executable path: ${JSON.stringify(value)}`);
+  }
+  if (seen.has(value)) {
+    throw new Error(`duplicate required executable path: ${value}`);
+  }
+  seen.add(value);
+  process.stdout.write(`${value}\n`);
+}
+NODE
+  then
+    rm -f "$list_file"
+    say_error "could not load required executable paths from $manifest_path"
+    return 2
+  fi
+
+  while IFS= read -r relative_path; do
+    [ -n "$relative_path" ] || continue
+    [ -f "$relative_path" ] || {
+      rm -f "$list_file"
+      say_error "missing required executable file: $relative_path"
+      return 2
+    }
+    git ls-files --error-unmatch -- "$relative_path" >/dev/null 2>&1 || {
+      rm -f "$list_file"
+      say_error "required executable file is not tracked: $relative_path"
+      return 2
+    }
+    chmod u+x -- "$relative_path" || {
+      rm -f "$list_file"
+      say_error "could not restore executable bit: $relative_path"
+      return 1
+    }
+    git update-index --chmod=+x -- "$relative_path" || {
+      rm -f "$list_file"
+      say_error "could not stage executable mode: $relative_path"
+      return 1
+    }
+  done < "$list_file"
+  rm -f "$list_file"
+  return 0
+}
+
 clone_repo() {
   local spec="$1" target="$2" token user askpass_file rc
   [ -n "$spec" ] && [ -n "$target" ] || { say_error "--clone requires OWNER/REPO and TARGET_DIR"; return 2; }
@@ -290,6 +370,7 @@ main() {
 
   if [ "$do_acp" = "1" ]; then
     git add -A || return $?
+    stage_required_executable_modes || return $?
     refuse_secret_commit || return $?
     status_out="$(git status --porcelain 2>/dev/null)" || return $?
     if [ -z "$status_out" ]; then

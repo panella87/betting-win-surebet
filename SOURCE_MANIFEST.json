@@ -1,7 +1,7 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-07-14T10:42:00Z",
-  "overlay": "bws100-validation-idempotency-wave12",
+  "generated": "2026-07-14T11:54:55Z",
+  "overlay": "bws100-executable-mode-index-wave13",
   "files": [
     {
       "path": ".automation/README.md",
@@ -50,8 +50,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "5dfc2e7d20ebe34b5468a5c1529e597bd812bc3d7037aa401df7b5699ec2cac9",
-      "size": 44097
+      "sha256": "daf1a2e4660064040824a3cb106d43b4238e03e7682310df9200c1dfc77b3b9a",
+      "size": 44748
     },
     {
       "path": "DOCUMENTATION_CHECK_REPORT.md",
@@ -325,8 +325,8 @@
     },
     {
       "path": "docs/automation/README.md",
-      "sha256": "a976e51c21238a283e9f49e3aac92458c67e136d8f641b6460982089d19d39d9",
-      "size": 1285
+      "sha256": "6bb7b85c6efc6f22d6a47fb57208bd84f1e26e2b231d349bb8834eb31755720c",
+      "size": 1644
     },
     {
       "path": "docs/automation/SSH_KEY_SETUP.md",
@@ -740,8 +740,8 @@
     },
     {
       "path": "scripts/validate_autonomous_controller_contract.py",
-      "sha256": "cdbbf4b010181280be456689c769068a28abe1d1b6b883b08866ba10d2071c94",
-      "size": 21889
+      "sha256": "4eff84db01698809358d5015b34a1ab4e3523e619ca2d1ecfd4a11747d4d27b0",
+      "size": 22019
     },
     {
       "path": "scripts/validate_betting_win_upstream_contract.py",
@@ -985,8 +985,8 @@
     },
     {
       "path": "tests/autonomous-controller-contract.test.ts",
-      "sha256": "3fc23eb955089ef35c74bf575a842b6a13b1f646a0731506af4d8d060944c01c",
-      "size": 15568
+      "sha256": "595fbffaf89b4d20b8905f34dac9cdeab0ca6d894d748f5e4ee9c247f3f8caec",
+      "size": 15839
     },
     {
       "path": "tests/betting-win-adapters.test.ts",
@@ -1135,8 +1135,8 @@
     },
     {
       "path": "tests/packaging-helpers.test.ts",
-      "sha256": "97bdb519e7d871b28b7991d139e6926af7a30d85a1bd668fa2f795e62c08e5b7",
-      "size": 13722
+      "sha256": "1598b246ee1881e94855f60381a8b03111d32b4861a92298bbe8f3cecefb528d",
+      "size": 16961
     },
     {
       "path": "tests/paper-autopilot-contract.test.ts",
@@ -1275,8 +1275,8 @@
     },
     {
       "path": "update_git.sh",
-      "sha256": "4307db95ca6bdc66a956df80afdbb5a5755db298fc9b04c96583d48375801ebf",
-      "size": 8651
+      "sha256": "3dc84bbfe27c10e476eec3de1e05af2e98456754e6c0a708e21d0d2fb460623d",
+      "size": 11229
     },
     {
       "path": "watch_progress.sh",
