@@ -36,9 +36,9 @@ def main() -> None:
         require(historical, marker, 'docs/015_local_engine_implementation_backlog.md')
 
     for rel, markers in {
-        'README.md': ['current_task=BWS-100', 'The current `src/` implementation is a tested bootstrap'],
+        'README.md': ['current_task=BWS-120', 'workspace migration now keeps the tested bootstrap implementations'],
         'AGENTS.md': ['backlog/bws_full_implementation.csv', 'Preserve existing solver, completion, exposure, settlement, and report behavior'],
-        'docs/repo_status_current.md': ['The current `src/` tree supplies bootstrap behavior', 'Safe local work remains through `BWS-510`'],
+        'docs/repo_status_current.md': ['packages/bootstrap', 'packages/upstream', 'Safe local work remains through `BWS-510`'],
         'docs/028_full_implementation_program.md': ['workspace migration', 'backtests', 'private-paper'],
     }.items():
         text = read(rel)

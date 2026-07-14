@@ -4,36 +4,35 @@ Repository: `betting-win-surebet`.
 
 ```text
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-current_task=BWS-100
+current_task=BWS-120
 ```
 
-Objective: implement the complete safe local BWS application on top of the read-only betting-win platform. Use `backlog/bws_full_implementation.csv` as the binding dependency ledger. Start with the first dependency-ready `PENDING` row, currently `BWS-100`, and continue across validated cycles while safe local work remains through `BWS-510`.
+Objective: implement the complete safe local BWS application on top of the read-only betting-win platform. Use `backlog/bws_full_implementation.csv` as the binding dependency ledger. Start with the first dependency-ready `PENDING` row, currently `BWS-120`, and continue across validated cycles while safe local work remains through `BWS-510`.
 
 Before editing:
 
 1. Read `AGENTS.md`, `docs/repo_status_current.md`, `docs/MASTER_PLAN.md`, `docs/028_full_implementation_program.md`, `docs/029_full_implementation_task_ledger.md`, and `docs/030_upstream_compatibility_and_pin_contract.md`.
 2. Inspect current BWS source/tests.
-3. Resolve `BETTING_WIN_REPO_PATH` from the inherited environment and inspect the existing checkout read-only.
-4. Verify the actual betting-win committed `HEAD`, Git tree, package version, and required capabilities from Git objects. Do not clone or create a temporary worktree.
+3. Verify the validated `BWS-100` upstream lock contract remains intact, including `BETTING_WIN_REPO_PATH`, the committed-`HEAD` lock file, and the no-fallback boundary.
+4. Inspect the validated workspace/package layout and plan the smallest persistence slice that preserves tested bootstrap behavior.
 
 Current first task:
 
 ```text
-id=BWS-100
-objective=implement exact betting-win upstream lock and compatibility verification
+id=BWS-120
+objective=create surebet-owned PostgreSQL schema, migrations and repositories
 ```
 
-Required BWS-100 outcomes:
+Required BWS-120 outcomes:
 
-- fail fast when `BETTING_WIN_REPO_PATH` is missing, outside the allowed development boundary, unreadable, not a betting-win Git checkout, or lacks committed Git-tree/package evidence;
-- generate `config/betting-win.upstream.lock.json` from the existing checkout's committed `HEAD` with no placeholder fields;
-- record `sourceView=committed_git_head`, `commitSha`, `gitTreeSha`, and `trackedTreeListingSha256`, where the tracked-tree hash is SHA-256 over the exact bytes emitted by `git ls-tree -r --full-tree HEAD`;
-- validate it against `schemas/betting-win-upstream-lock.v1.schema.json`;
-- read package manifests and capability markers through `git show HEAD:` and verify `betting-win.strategy-export.v1`, `betting-win-strategy-export.v1`, `surebet_standard_binary_v0`, and required packages/capabilities;
-- exclude uncommitted and untracked working-tree state from the pin without cleaning, resetting, committing, cloning, or copying it;
-- prove the betting-win committed HEAD remains unchanged during verification;
-- add focused success, mismatch, invalid/unreadable checkout, dirty-worktree isolation, and committed-HEAD tamper tests;
+- create only `surebet.*` PostgreSQL persistence owned by BWS with no writes to betting-win `core.*`;
+- add migrations and repositories that fail closed on missing or invalid required persistence configuration;
+- prove disposable PostgreSQL migration, restart, and idempotency coverage for the migrated `surebet.*` state;
+- preserve the validated `BWS-110` workspace packages and compatibility coverage while introducing persistence;
+- keep the `BWS-100` committed-`HEAD` upstream lock contract intact with no workspace fallback or silent dependency shortcuts;
 - update the task ledger only after all required proof passes.
+
+Validated `BWS-100` and `BWS-110` carry-forward requirements remain binding during `BWS-120`: prove the betting-win committed HEAD remains unchanged during verification, allow no placeholder fields in the upstream lock output, preserve the workspace/package migration, and use no clone or temporary worktree.
 
 Continuation rules:
 

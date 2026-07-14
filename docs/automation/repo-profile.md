@@ -4,7 +4,7 @@
 repo_role=surebet_strategy_application
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 upstream_platform=betting-win
-current_task=BWS-100
+current_task=BWS-120
 node_runtime=20
 package_manager=npm
 language=typescript

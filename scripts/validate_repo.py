@@ -177,14 +177,14 @@ def main() -> None:
         fail('package.json bin must expose ./cli.js')
 
     required_doc_markers = {
-        'README.md': ['program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1', 'repo_role=surebet_strategy_application', 'current_task=BWS-100', 'run-autonomous-implementation.sh'],
+        'README.md': ['program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1', 'repo_role=surebet_strategy_application', 'current_task=BWS-120', 'run-autonomous-implementation.sh'],
         'AGENTS.md': ['Source-of-truth order', 'BETTING_WIN_REPO_PATH', 'backlog/bws_full_implementation.csv', 'BWS-510'],
         'docs/automation/repo-profile.md': ['repo_role=surebet_strategy_application', 'program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1', 'Standard helper scripts'],
         'docs/automation/paper-evaluation.md': ['run-paper-evaluation.sh', 'retained fixture/pinned-bundle evaluator', 'SUREBET_PINNED_BUNDLE'],
         'docs/automation/paper-autopilot.md': ['run-paper-autopilot.sh', 'post-implementation runtime/database convergence', 'PAPER_AUTOPILOT_BLOCKED_ON_PINNED_BUNDLE'],
         'docs/automation/autonomous-bugfix.md': ['strict implementation-handoff controller', 'BUGFIX_AUDIT_COMPLETE=yes', 'request_flags.txt'],
         'docs/automation/bugfix-autopilot.md': ['run-bugfix-autopilot.sh', 'same-area re-audit', 'campaign_coverage.tsv'],
-        'PROJECT_STATUS.md': ['program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1', 'status=IMPLEMENTATION_READY', 'current_task=BWS-100'],
+        'PROJECT_STATUS.md': ['program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1', 'status=IMPLEMENTATION_READY', 'current_task=BWS-120'],
         'docs/repo_status_current.md': ['Standard automation status', 'run_autonomous_implementation=standardized_and_selected', 'run_paper_autopilot=standardized_parent_for_post_implementation_runtime_convergence', 'run_bugfix_autopilot=standardized_parent_for_broad_audit_and_repair'],
         'docs/MASTER_PLAN.md': ['program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1', 'backlog/bws_full_implementation.csv', 'Automation operating model'],
     }

@@ -3,6 +3,10 @@
   "version": "0.1.0-bws-full-platform",
   "private": true,
   "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
   "description": "Downstream surebet and complete-set application built on betting-win provider, data, history, export, and read-only query contracts.",
   "engines": {
     "node": ">=20 <21"

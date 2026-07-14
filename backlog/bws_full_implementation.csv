@@ -1,7 +1,7 @@
 id,status,depends_on,objective,required_proof
 BWS-000,VALIDATED,none,Rebaseline BWS as a downstream application built on betting-win,"Active authority docs, baseline inventory, task ledger, validators and controller task agree"
-BWS-100,PENDING,BWS-000,Implement exact betting-win upstream lock and compatibility verification,"Existing sibling checkout committed HEAD is verified read-only, dirty worktree state is excluded without cloning or mutation, lock uses deterministic tracked-tree proof, mismatch tests fail closed"
-BWS-110,PENDING,BWS-100,Create the BWS TypeScript workspace and migrate existing local modules into stable packages,"Workspace builds under Node 20, legacy src behavior is preserved by compatibility tests, no provider code is copied"
+BWS-100,VALIDATED,BWS-000,Implement exact betting-win upstream lock and compatibility verification,"Existing sibling checkout committed HEAD is verified read-only, dirty worktree state is excluded without cloning or mutation, lock uses deterministic tracked-tree proof, mismatch tests fail closed"
+BWS-110,VALIDATED,BWS-100,Create the BWS TypeScript workspace and migrate existing local modules into stable packages,"Workspace builds under Node 20, legacy src behavior is preserved by compatibility tests, no provider code is copied"
 BWS-120,PENDING,BWS-110,"Create surebet-owned PostgreSQL schema, migrations and repositories","Only surebet.* is migrated, disposable PostgreSQL proof passes, restart and idempotency tests pass"
 BWS-130,PENDING,"BWS-100,BWS-110,BWS-120",Implement immutable pinned-export intake for betting-win.strategy-export.v1,"SHA, schema, profile, generation and lineage validation pass; duplicate and mismatch cases fail closed"
 BWS-140,PENDING,"BWS-100,BWS-110",Implement the read-only betting-win query/API client boundary,"Typed pagination, timeout, retry, provenance and contract negotiation tests pass against loopback fixtures"

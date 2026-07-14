@@ -6,7 +6,7 @@ program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 status=IMPLEMENTATION_READY
 repo_role=surebet_strategy_application
 upstream_platform=betting-win
-current_task=BWS-100
+current_task=BWS-120
 current_task_status=PENDING
 safe_local_terminal_gate=BWS-510
 provider_truth_owner=betting-win
@@ -20,7 +20,7 @@ execution_gate=closed
 
 The old local-fixture-complete stop state is superseded. The repo contains a deterministic bootstrap, not the complete BWS platform. The supplied betting-win repo provides concrete upstream contracts and application patterns, so a substantial safe local implementation queue exists.
 
-The binding queue is `backlog/bws_full_implementation.csv`. The first dependency-ready task is `BWS-100`.
+The binding queue is `backlog/bws_full_implementation.csv`. `BWS-100` and `BWS-110` are validated and the first dependency-ready pending task is `BWS-120`.
 
 ## Verified upstream facts
 
@@ -36,11 +36,11 @@ read_only_query_api=present
 api_web_workers=present
 ```
 
-The archive has no Git commit metadata and no BW source manifest. `BWS-100` must verify the existing server checkout's committed `HEAD` read-only and generate the exact runtime lock. Dirty or untracked working-tree state is excluded from the pin; BWS must not clone, clean, reset, or otherwise modify the upstream checkout.
+The archive has no Git commit metadata and no BW source manifest. `BWS-100` verifies the existing server checkout's committed `HEAD` read-only and generates the exact runtime lock. Dirty or untracked working-tree state is excluded from the pin; BWS must not clone, clean, reset, or otherwise modify the upstream checkout.
 
 ## Existing source
 
-The current `src/` tree supplies bootstrap behavior for local bundle parsing, identity/rule prechecks, terminal cash flows, quote capacity/fees/freshness, fixed-point stake vectors, partial completion, residual exposure, settlement replay, and private report assembly. Compatibility tests must preserve it during migration.
+The bootstrap behavior now lives under `packages/bootstrap` and `packages/upstream`, with `src/` retained as compatibility shims for local bundle parsing, identity/rule prechecks, terminal cash flows, quote capacity/fees/freshness, fixed-point stake vectors, partial completion, residual exposure, settlement replay, reporting, and upstream lock tooling.
 
 ## Implementation queue
 

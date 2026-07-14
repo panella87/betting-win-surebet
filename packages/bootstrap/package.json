@@ -1,0 +1,7 @@
+{
+  "name": "@betting-win-surebet/bootstrap",
+  "version": "0.1.0-bws-full-platform",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts"
+}

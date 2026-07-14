@@ -2,13 +2,13 @@
 
 ```text
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-current_task=BWS-100
+current_task=BWS-120
 selected_controller=run-autonomous-implementation.sh
 ```
 
 The implementation controller reads `docs/automation/current-implementation-task.md`. It must not stop on historical fixture-complete claims.
 
-For `BWS-100`, `BETTING_WIN_REPO_PATH` points to the existing upstream checkout. Validation reads committed `HEAD` through Git objects and must not clone, create a temporary worktree, or modify upstream working-tree state.
+`BWS-100` validates the committed-`HEAD` upstream lock through `BETTING_WIN_REPO_PATH`. Ongoing implementation must continue to preserve that read-only contract: validation reads committed `HEAD` through Git objects and must not clone, create a temporary worktree, or modify upstream working-tree state.
 
 The hardened controller surface remains:
 

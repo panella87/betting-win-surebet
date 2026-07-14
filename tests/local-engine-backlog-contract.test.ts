@@ -12,6 +12,6 @@ test('historical local-engine ledger is retained as bootstrap evidence, not acti
   assert.match(historical, /legacy_stage=SURE-002A_LOCAL_INTERFACE_AND_ENGINE_BOOTSTRAP/);
   assert.match(historical, /active_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1/);
   assert.match(historical, /bootstrap, not the complete application/);
-  assert.match(read('README.md'), /The current `src\/` implementation is a tested bootstrap/);
+  assert.match(read('README.md'), /workspace migration now keeps the tested bootstrap implementations/);
   assert.match(read('docs/repo_status_current.md'), /Safe local work remains through `BWS-510`/);
 });

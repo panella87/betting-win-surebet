@@ -5,7 +5,7 @@
 ```text
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 controller=run-autonomous-implementation.sh
-current_task=BWS-100
+current_task=BWS-120
 canonical_duration=72h
 ```
 

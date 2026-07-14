@@ -39,7 +39,7 @@ def main() -> None:
         require(implementation, marker, 'docs/automation/autonomous-implementation.md')
 
     for marker in [
-        'current_task=BWS-100', 'BETTING_WIN_REPO_PATH',
+        'current_task=BWS-120', 'BETTING_WIN_REPO_PATH',
         'first dependency-ready `PENDING` row',
         'safe local row through BWS-510',
         'provider_connections=prohibited', 'execution=prohibited',
@@ -47,7 +47,7 @@ def main() -> None:
         require(task, marker, 'docs/automation/current-implementation-task.md')
 
     for marker in [
-        'status=IMPLEMENTATION_READY', 'current_task=BWS-100',
+        'status=IMPLEMENTATION_READY', 'current_task=BWS-120',
         'Safe local work remains through `BWS-510`',
         'selected_controller=run-autonomous-implementation.sh',
     ]:
