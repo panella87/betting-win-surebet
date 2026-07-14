@@ -1,6 +1,6 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-07-13T21:23:45Z",
+  "generated": "2026-07-14T09:25:17Z",
   "overlay": "bws-full-platform-documentation-rebaseline-wave11",
   "files": [
     {
@@ -35,8 +35,8 @@
     },
     {
       "path": ".gitignore",
-      "sha256": "e8f15880a81677a19aed334bb51416dc1a54df28f5c6a81b0ec2c16892c05d6f",
-      "size": 1319
+      "sha256": "4bc4a2f1606772cc4a7f613ea5878f603e3a3bed33a3b9123a9c9756990791cc",
+      "size": 1357
     },
     {
       "path": ".nvmrc",
@@ -440,8 +440,8 @@
     },
     {
       "path": "package.json",
-      "sha256": "3aa0fadba151915121ab9bd112265c58ee36e3f71dde8ac4b79601cd8be0ef44",
-      "size": 3733
+      "sha256": "81be354fafca920bc612513c4d1a3d753b92ee5fbc8793d6fe84cfb2c67d00d2",
+      "size": 3924
     },
     {
       "path": "pull_artifacts_and_zip_codebase.sh",
@@ -724,6 +724,11 @@
       "size": 1238
     },
     {
+      "path": "scripts/run_betting_win_upstream_lock.mjs",
+      "sha256": "25637a7836621ad268a28f30d5f32c75ae3f73ee960a54291fd0b81006d24b33",
+      "size": 1370
+    },
+    {
       "path": "scripts/validate_artifact_hygiene.py",
       "sha256": "ff6d44b90e1299de3bcca729125c121089a8c1293153ac67d3f6e7baf8a2f705",
       "size": 7779
@@ -740,8 +745,8 @@
     },
     {
       "path": "scripts/validate_betting_win_upstream_contract.py",
-      "sha256": "08d6fbe79f31399b61a5c49e296b7f49b2f92df89fa4ec89df8c793694a1d250",
-      "size": 8491
+      "sha256": "af57659f91278cab097edd3082b82c18081e8ba52be6d7c45f77e361ccbd887f",
+      "size": 8765
     },
     {
       "path": "scripts/validate_contract_boundary.py",
@@ -795,8 +800,8 @@
     },
     {
       "path": "scripts/validate_repo.py",
-      "sha256": "4fbf384785ac6acf1ee01affbcb7e51e8e8d4ac9c838a3cfd7f3b812db59eb7f",
-      "size": 12327
+      "sha256": "a556c00e1d12a66b7bc762b388e08ca22cda80695e1c54b31b94fd8fe3eb632b",
+      "size": 12442
     },
     {
       "path": "scripts/validate_shell_local_assignments.py",
@@ -949,6 +954,11 @@
       "size": 14502
     },
     {
+      "path": "src/upstream/betting-win-upstream-lock.ts",
+      "sha256": "f52a1d4ce73c29619dbde7b72140900a16ecc9472a7d769cd3549f7a1fac2b7e",
+      "size": 25334
+    },
+    {
       "path": "start.sh",
       "sha256": "15eb4187565a54f922e9b74effb940e6a6b82f746d9f05882d47acf39e193faf",
       "size": 990
@@ -990,8 +1000,8 @@
     },
     {
       "path": "tests/betting-win-upstream-contract.test.ts",
-      "sha256": "b2e9b9ad62a5b388944b63d5dce2ef228b232753579256ec842496c231437e99",
-      "size": 2200
+      "sha256": "9f09bd9a9c1b41de3490e9a427406747155f5843848642be8f7bec098a63eacc",
+      "size": 13669
     },
     {
       "path": "tests/blocker-report.test.ts",
@@ -1235,8 +1245,8 @@
     },
     {
       "path": "tests/validate-repo-contract.test.ts",
-      "sha256": "fe253b6c25e7d22479cf47d17cb3f870800c3c7c5dfbe79e77fdab7294aac332",
-      "size": 1346
+      "sha256": "b04ef41285dcac68222834f37ad1777899f35e18009882209080cb10fc7ee8bd",
+      "size": 1406
     },
     {
       "path": "tests/validate-shell-local-assignments.test.ts",

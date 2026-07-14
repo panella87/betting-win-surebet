@@ -12,11 +12,13 @@
     "build": "npm run clean && tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "npm run build && node --test dist/tests/*.test.js",
+    "generate:upstream-lock": "node scripts/run_betting_win_upstream_lock.mjs generate",
+    "verify:upstream-lock": "node scripts/run_betting_win_upstream_lock.mjs verify",
     "restore:executables": "node scripts/restore-required-executable-bits.js",
     "regen:source-manifest": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/regenerate_source_manifest.py",
     "validate:repo": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_repo.py",
     "validate:boundary": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_contract_boundary.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_no_provider_connections.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_no_execution_paths.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_fixture_integrity.py",
-    "validate:ops": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_master_plan.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_executable_bits.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_artifact_hygiene.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_node_runtime_loader.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_shell_local_assignments.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_autonomous_controller_contract.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_source_manifest.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_autonomous_continuation_contract.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_local_engine_backlog_contract.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_private_paper_mode_backlog_contract.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_three_repo_surebet_boundary.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_full_implementation_program.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_betting_win_upstream_contract.py",
+    "validate:ops": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_master_plan.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_executable_bits.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_artifact_hygiene.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_node_runtime_loader.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_shell_local_assignments.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_autonomous_controller_contract.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_source_manifest.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_autonomous_continuation_contract.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_local_engine_backlog_contract.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_private_paper_mode_backlog_contract.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_three_repo_surebet_boundary.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_full_implementation_program.py && npm run validate:upstream-boundary",
     "validate:starter": "npm run typecheck && npm test && npm run validate:repo && npm run validate:boundary && npm run validate:ops",
     "validate": "npm run validate:starter",
     "archive:source": "bash scripts/create-source-handoff-archive.sh",
@@ -31,7 +33,7 @@
     "paper:autopilot": "bash run-paper-autopilot.sh",
     "bugfix:autopilot": "bash run-bugfix-autopilot.sh",
     "validate:implementation-program": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_full_implementation_program.py",
-    "validate:upstream-boundary": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_betting_win_upstream_contract.py"
+    "validate:upstream-boundary": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_betting_win_upstream_contract.py && npm run generate:upstream-lock && npm run verify:upstream-lock"
   },
   "devDependencies": {
     "@types/node": "20.12.11",

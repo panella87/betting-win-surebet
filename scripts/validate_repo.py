@@ -88,6 +88,7 @@ REQUIRED = [
     'scripts/validate_three_repo_surebet_boundary.py',
     'scripts/validate_full_implementation_program.py',
     'scripts/validate_betting_win_upstream_contract.py',
+    'scripts/run_betting_win_upstream_lock.mjs',
     'scripts/load-node-runtime.sh', 'scripts/create-source-handoff-archive.sh',
     'scripts/restore-required-executable-bits.js',
     'tests/autonomous-controller-contract.test.ts', 'tests/paper-autopilot-contract.test.ts',
@@ -114,7 +115,7 @@ REQUIRED = [
 ]
 FORBIDDEN = [
     'run-paper-evaluation-12h.sh', 'stop-autonomous-run.sh', 'scripts/stop-autonomous-run.sh',
-    'config/betting-win.upstream.lock.json', 'docs/imported-from-betting-win',
+    'docs/imported-from-betting-win',
 ]
 CONFLICT_MARKER_PREFIXES = ('<<<<<<<', '>>>>>>>')
 CONFLICT_SEPARATOR = '======='
@@ -162,6 +163,7 @@ def main() -> None:
     required_scripts = [
         'typecheck', 'test', 'validate', 'validate:starter', 'validate:ops',
         'validate:implementation-program', 'validate:upstream-boundary',
+        'generate:upstream-lock', 'verify:upstream-lock',
         'validate:three-repo-boundary', 'restore:executables', 'regen:source-manifest',
         'zip:codebase', 'autonomous:check', 'autonomous:start', 'autonomous:bugfix',
         'paper:evaluation', 'paper:autopilot', 'bugfix', 'bugfix:autopilot', 'automation:status',
@@ -193,6 +195,7 @@ def main() -> None:
     gitignore = read(ROOT / '.gitignore')
     for marker in [
         'node_modules/', '.env', 'artifacts/*', '*.zip', '.codex_current_artifact_dir',
+        'config/betting-win.upstream.lock.json',
         '.automation/locks/', '.automation/corrupt/',
         '.automation/paper-mode-to-autonomous-implementation.env',
         '.automation/autonomous-implementation-handover.env', 'zi??????',

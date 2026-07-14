@@ -130,9 +130,6 @@ def main() -> None:
     if properties.get('sourceFingerprintAlgorithm', {}).get('const') != 'sha256_git_ls_tree_r_full_tree_head_v1':
         fail('upstream lock sourceFingerprintAlgorithm must identify the canonical Git tree listing algorithm')
 
-    if (ROOT / 'config' / 'betting-win.upstream.lock.json').exists():
-        fail('runtime upstream lock must not be committed before BWS-100 generates it from the real checkout')
-
     env = read('.env.example')
     for marker in ['BETTING_WIN_REPO_PATH', 'BWS_UPSTREAM_MODE', 'BWS_UPSTREAM_LOCK']:
         require(env, marker, '.env.example')
@@ -146,9 +143,13 @@ def main() -> None:
     scripts = package.get('scripts')
     if not isinstance(scripts, dict):
         fail('package.json scripts must be an object')
-    if 'scripts/validate_betting_win_upstream_contract.py' not in scripts.get('validate:ops', ''):
-        fail('package.json validate:ops must include validate_betting_win_upstream_contract.py')
-    if scripts.get('validate:upstream-boundary') != 'PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_betting_win_upstream_contract.py':
+    if 'npm run validate:upstream-boundary' not in scripts.get('validate:ops', ''):
+        fail('package.json validate:ops must invoke validate:upstream-boundary')
+    if scripts.get('generate:upstream-lock') != 'node scripts/run_betting_win_upstream_lock.mjs generate':
+        fail('package.json generate:upstream-lock is missing or non-canonical')
+    if scripts.get('verify:upstream-lock') != 'node scripts/run_betting_win_upstream_lock.mjs verify':
+        fail('package.json verify:upstream-lock is missing or non-canonical')
+    if scripts.get('validate:upstream-boundary') != 'PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_betting_win_upstream_contract.py && npm run generate:upstream-lock && npm run verify:upstream-lock':
         fail('package.json validate:upstream-boundary is missing or non-canonical')
 
     docs = {
@@ -168,6 +169,7 @@ def main() -> None:
         'config/betting-win.upstream-baseline.json',
         'schemas/betting-win-upstream-lock.v1.schema.json',
         'scripts/validate_betting_win_upstream_contract.py',
+        'scripts/run_betting_win_upstream_lock.mjs',
         'tests/betting-win-upstream-contract.test.ts',
     ]:
         require(repo_validator, marker, 'scripts/validate_repo.py')

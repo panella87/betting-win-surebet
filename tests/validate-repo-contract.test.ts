@@ -12,6 +12,7 @@ test('validate_repo requires the full implementation and upstream contract surfa
     'schemas/betting-win-upstream-lock.v1.schema.json',
     'scripts/validate_full_implementation_program.py',
     'scripts/validate_betting_win_upstream_contract.py',
+    'scripts/run_betting_win_upstream_lock.mjs',
     'tests/full-implementation-program-contract.test.ts',
     'tests/betting-win-upstream-contract.test.ts',
     'tests/three-repo-surebet-boundary.test.ts',
@@ -20,7 +21,7 @@ test('validate_repo requires the full implementation and upstream contract surfa
   }
 });
 
-test('validate_repo rejects conflict markers and premature runtime lock evidence', () => {
+test('validate_repo rejects conflict markers and keeps the runtime upstream lock repo-local', () => {
   for (const marker of [
     'validate_no_conflict_markers', 'CONFLICT_MARKER_PREFIXES', "'<<<<<<<'", "'>>>>>>>'",
     "CONFLICT_SEPARATOR = '======='", 'unresolved merge conflict markers found',

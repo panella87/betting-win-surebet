@@ -58,6 +58,7 @@ __pycache__/
 /true
 
 artifacts.zip.tmp.*
+config/betting-win.upstream.lock.json
 # Runtime automation state and handoff files
 .automation/locks/
 .automation/corrupt/
