@@ -1,22 +1,22 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-07-15T12:06:40Z",
+  "generated": "2026-07-15T12:33:09Z",
   "overlay": "bws100-existing-checkout-head-pin-wave14",
   "files": [
     {
       "path": ".automation/README.md",
-      "sha256": "6900d48486fcdd17d4ccfcbdf3e4e0be727f0c553bda3fc28ba28b474a01bea8",
-      "size": 5324
+      "sha256": "85f34cbda334ce2cd7aba6b9788c201f33e5ce40e73321856c2e776c2d4345e2",
+      "size": 5399
     },
     {
       "path": ".automation/lib/controller_hardening_v2.sh",
-      "sha256": "198b63aea0a2d4314778852a042a6c72d92c99245b7e77c1eb30e6844ed260f6",
-      "size": 18155
+      "sha256": "fe566f62d5a3ddf8227de29e1eb22dd378d44adf9066787716976c0f9a4d0e7d",
+      "size": 18161
     },
     {
       "path": ".automation/lib/run_common.sh",
-      "sha256": "d521a230d71f3b497b17e1636204a336478320207c9273a6ac0b6ecf43dff222",
-      "size": 32996
+      "sha256": "7e50c61a3afecd9587eb947d02bce0ee53eaf73abab2cd4942c84e96da60d5eb",
+      "size": 32999
     },
     {
       "path": ".automation/lib/telegram_notify.sh",
@@ -25,8 +25,8 @@
     },
     {
       "path": ".env.example",
-      "sha256": "631b850102e87334950b30221554eb188574e332405a05c093f67d7c652071ac",
-      "size": 1816
+      "sha256": "1531cbe9f666b95b1eac25e3d2ea93f0add20edbd4e5251286a4b88e7baf8ea5",
+      "size": 2217
     },
     {
       "path": ".gitattributes",
@@ -50,8 +50,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "9a00f5d8ce03dc317429b14b81ea1309759ce3cce2eb9b2a8eb011d7faa2c164",
-      "size": 46651
+      "sha256": "b6de89fb7ed368b8d4d23be0126da99715fcbcd020fa19446761d9292953d7e4",
+      "size": 47978
     },
     {
       "path": "DOCUMENTATION_CHECK_REPORT.md",
@@ -77,186 +77,6 @@
       "path": "apps/web/index.html",
       "sha256": "af5fe0ede1db4d5d1dbb7a33cb083637717c222c68ccfab9a1df3d55ac5da45b",
       "size": 325
-    },
-    {
-      "path": "apps/web/node_modules/.bin/vite",
-      "sha256": "fa03478846d229651a3c6aa64833ba2c6cbf580a798b92bd8f47c7480bafb5d8",
-      "size": 2574
-    },
-    {
-      "path": "apps/web/node_modules/vite/LICENSE.md",
-      "sha256": "b1d741c26b53de1bbc0d4d7d3365b79888f9fe511527544a8a7b8e24dec43147",
-      "size": 110976
-    },
-    {
-      "path": "apps/web/node_modules/vite/README.md",
-      "sha256": "01cebf4365cd21396688c4dcb0dc8d360ccbafb3a36735d3849c5d8efd3cd060",
-      "size": 1179
-    },
-    {
-      "path": "apps/web/node_modules/vite/bin/openChrome.js",
-      "sha256": "d72bfcc4e6fc7b3dd81338704895402b2b54fe725662eb82f09669aa93f36b92",
-      "size": 1839
-    },
-    {
-      "path": "apps/web/node_modules/vite/bin/vite.js",
-      "sha256": "fa03478846d229651a3c6aa64833ba2c6cbf580a798b92bd8f47c7480bafb5d8",
-      "size": 2574
-    },
-    {
-      "path": "apps/web/node_modules/vite/client.d.ts",
-      "sha256": "74b98be6ab7723114273526706070ff9885fdf990d5c4e722801addca4d264e1",
-      "size": 5231
-    },
-    {
-      "path": "apps/web/node_modules/vite/dist/client/client.mjs",
-      "sha256": "d1c44698a37a140bcc4ce1863dee62aa45cd3228b8fdce6f7a94f97f7db74d14",
-      "size": 39573
-    },
-    {
-      "path": "apps/web/node_modules/vite/dist/client/env.mjs",
-      "sha256": "599a7191be77f077087cde291f7906fa751a794617f42d914f54991fe7bf434f",
-      "size": 612
-    },
-    {
-      "path": "apps/web/node_modules/vite/dist/node/chunks/build.js",
-      "sha256": "62dbd52269c60f616756047cd593f95fbf638d0cd65d3b1bf6099ce721cb380c",
-      "size": 205613
-    },
-    {
-      "path": "apps/web/node_modules/vite/dist/node/chunks/dist.js",
-      "sha256": "fab5ee13e4f52aa8a81d0570a88529546a313cf9cd2925971afbf6a4774960c8",
-      "size": 247103
-    },
-    {
-      "path": "apps/web/node_modules/vite/dist/node/chunks/lib.js",
-      "sha256": "c854873f947dcb83074adadc962a6f1bf975c86e66d46cc563016be4ef8cac2c",
-      "size": 11710
-    },
-    {
-      "path": "apps/web/node_modules/vite/dist/node/chunks/moduleRunnerTransport.d.ts",
-      "sha256": "16fe60bb544cfedfd2b5bb2f7d0b3957be7978706d57d9f06edc9c0c8dbdba23",
-      "size": 3064
-    },
-    {
-      "path": "apps/web/node_modules/vite/dist/node/chunks/node.js",
-      "sha256": "8ce527bb1ba9e31b3ddf63c8361d4703606ccd4a0174befdb7bc16d3bcd5c375",
-      "size": 1317879
-    },
-    {
-      "path": "apps/web/node_modules/vite/dist/node/chunks/postcss-import.js",
-      "sha256": "c231374847d81652bc9bfb988f382a8a3ee0564e245c65b97d3fb64a98338b8c",
-      "size": 18432
-    },
-    {
-      "path": "apps/web/node_modules/vite/dist/node/cli.js",
-      "sha256": "fd745b95a376305469b25f47f5e49a60829a90444d9a466b7fcaf3bca806f4b4",
-      "size": 29852
-    },
-    {
-      "path": "apps/web/node_modules/vite/dist/node/index.d.ts",
-      "sha256": "775c04c36f13c8006a98b7448932620996ff1ee43fec52c65253e5ac4e0a9228",
-      "size": 161728
-    },
-    {
-      "path": "apps/web/node_modules/vite/dist/node/index.js",
-      "sha256": "c7ea52906f843318d7971209ce62bd24bab60590275e8f415c5564fa35cb82dc",
-      "size": 2670
-    },
-    {
-      "path": "apps/web/node_modules/vite/dist/node/internal.d.ts",
-      "sha256": "fe8e1632d4da52d384026fcb1f3fcf4c04f8fdfe6be4328712a09d470ed6c59d",
-      "size": 137
-    },
-    {
-      "path": "apps/web/node_modules/vite/dist/node/internal.js",
-      "sha256": "3409ae5e59e273bc35ca96c78438717736c0f6d32eb4d8ac7ac78fdd12871530",
-      "size": 138
-    },
-    {
-      "path": "apps/web/node_modules/vite/dist/node/module-runner.d.ts",
-      "sha256": "8887e70871f697fa42ad7cdf32168db60ec2d6760c173c97973e35377fe5d83b",
-      "size": 11432
-    },
-    {
-      "path": "apps/web/node_modules/vite/dist/node/module-runner.js",
-      "sha256": "116583d79e593e7a42df949b1b6979ea45392a7daf8f0d5cad3748d39732468d",
-      "size": 54256
-    },
-    {
-      "path": "apps/web/node_modules/vite/misc/false.js",
-      "sha256": "3f405f8c82812b5fd5a6ca325a1b9039479bf9de3ee1ef51d76ea80fba7d486c",
-      "size": 21
-    },
-    {
-      "path": "apps/web/node_modules/vite/misc/true.js",
-      "sha256": "1ca1ff5b531880de960715f4622cb4bfe61620ad0ab56764a00f3afe2bf2981a",
-      "size": 20
-    },
-    {
-      "path": "apps/web/node_modules/vite/package.json",
-      "sha256": "d26ea2d65c50959b1b5dcd0d1c52eba22eb6c3f4dc335f618053b15970bb63d6",
-      "size": 5083
-    },
-    {
-      "path": "apps/web/node_modules/vite/types/customEvent.d.ts",
-      "sha256": "de4a612aa8f1704af486f701e21993c786ba7d8cfed55fffa6684026aea2346e",
-      "size": 1970
-    },
-    {
-      "path": "apps/web/node_modules/vite/types/hmrPayload.d.ts",
-      "sha256": "3b89216a7e38a454985ad17bb2ff85792837dc812f2a89fa5f60ad0a2e216fa7",
-      "size": 1398
-    },
-    {
-      "path": "apps/web/node_modules/vite/types/hot.d.ts",
-      "sha256": "4e003c868b0d8f8ad200b96cbc653e18e513fa23e1c19c4fe3cc25d4394efc47",
-      "size": 1063
-    },
-    {
-      "path": "apps/web/node_modules/vite/types/import-meta.d.ts",
-      "sha256": "28a9d5c4741fdd62a94faea49ef7585d825e8379e5d23a2d773f723ce56d6b50",
-      "size": 249
-    },
-    {
-      "path": "apps/web/node_modules/vite/types/importGlob.d.ts",
-      "sha256": "e50d04d261120f8f9d07e85698735d5b88f3a66bc395c08ce26c3d817d141a73",
-      "size": 3477
-    },
-    {
-      "path": "apps/web/node_modules/vite/types/importMeta.d.ts",
-      "sha256": "72429cda84a47f092a3bf777bbc4ece9dda492fe0f02324aa7f197f3800089c6",
-      "size": 884
-    },
-    {
-      "path": "apps/web/node_modules/vite/types/internal/cssPreprocessorOptions.d.ts",
-      "sha256": "960bd764c62ac43edc24eaa2af958a4b4f1fa5d27df5237e176d0143b36a39c6",
-      "size": 1420
-    },
-    {
-      "path": "apps/web/node_modules/vite/types/internal/esbuildOptions.d.ts",
-      "sha256": "e0864480ea083087d705f9405bd6bf59b795e8474c3447f0d6413b2bce535a09",
-      "size": 672
-    },
-    {
-      "path": "apps/web/node_modules/vite/types/internal/lightningcssOptions.d.ts",
-      "sha256": "4ec16d7a4e366c06a4573d299e15fe6207fc080f41beac5da06f4af33ea9761e",
-      "size": 520
-    },
-    {
-      "path": "apps/web/node_modules/vite/types/internal/rollupTypeCompat.d.ts",
-      "sha256": "7d3e062a778b8f5ea4f0cac7e925e31f88e6739812ebc5f827474324a4048f14",
-      "size": 791
-    },
-    {
-      "path": "apps/web/node_modules/vite/types/internal/terserOptions.d.ts",
-      "sha256": "f582b0fcbf1eea9b318ab92fb89ea9ab2ebb84f9b60af89328a91155e1afce72",
-      "size": 384
-    },
-    {
-      "path": "apps/web/node_modules/vite/types/metadata.d.ts",
-      "sha256": "e67cbea16f1994af89efd700542dbf3828a46a52b29e4d67e801bd7869dc103c",
-      "size": 1133
     },
     {
       "path": "apps/web/package.json",
@@ -505,8 +325,8 @@
     },
     {
       "path": "docs/012_runbook.md",
-      "sha256": "a2aacad903e9bdcb3ad8915e1dfb7d6e2caf77e9d5894ea9edc6360ce3bf5280",
-      "size": 1229
+      "sha256": "44750a8a772109a894c4bb455b3b413706b41126068520990ee8a14aedfa54b5",
+      "size": 1389
     },
     {
       "path": "docs/013_autonomous_controller_status_contract.md",
@@ -605,8 +425,8 @@
     },
     {
       "path": "docs/032_database_and_data_lifecycle.md",
-      "sha256": "462f356906910ddcb878b6bd0e7b7e2462c40093cae44359fb6c7d9f0637a7bc",
-      "size": 817
+      "sha256": "4fee7149a0fe1e128594bff2a218ba1e92625a5253926057478bbc7b6e695ccf",
+      "size": 1522
     },
     {
       "path": "docs/MASTER_PLAN.md",
@@ -625,8 +445,8 @@
     },
     {
       "path": "docs/automation/README.md",
-      "sha256": "4f1db15f091f75d8ca96df2d6ba6575affed0261aa7be55c53e17e2070739001",
-      "size": 2635
+      "sha256": "f7480119154df7b8f1db18462159598aa14e1e86ab4acb8178d0e5b84bcb4d93",
+      "size": 3482
     },
     {
       "path": "docs/automation/SSH_KEY_SETUP.md",
@@ -1320,8 +1140,8 @@
     },
     {
       "path": "scripts/validate_autonomous_controller_contract.py",
-      "sha256": "b36a721257cfd1b61527abd6f45301923183d50b987444deab3d6b37cbb11c36",
-      "size": 23119
+      "sha256": "1836f7d0e0a12b5ac275832d2c2e1a37f9b8c9cc8651c7328b4486a5bee5db39",
+      "size": 23261
     },
     {
       "path": "scripts/validate_betting_win_upstream_contract.py",
@@ -1330,8 +1150,8 @@
     },
     {
       "path": "scripts/validate_bws_loopback_acceptance.mjs",
-      "sha256": "6b4bf27cac03594544850ca9fcc8c138d1bf3c51d2b38371e230392c220ecb05",
-      "size": 3539
+      "sha256": "972e5cb859ae0f0d7399028a37efbf55044fe0ca4e708635bc31de7366198365",
+      "size": 9764
     },
     {
       "path": "scripts/validate_contract_boundary.py",
@@ -1350,8 +1170,8 @@
     },
     {
       "path": "scripts/validate_full_implementation_program.py",
-      "sha256": "a7cba1ff98a9de6a30b2b362babd27833a5ae139c1fb7e4826b19c6b19f1c3fa",
-      "size": 7260
+      "sha256": "18cf9ba3391e4b4c3242566625402f892fadbdec32985d71205bed570caf1281",
+      "size": 7859
     },
     {
       "path": "scripts/validate_local_engine_backlog_contract.py",
@@ -1385,8 +1205,8 @@
     },
     {
       "path": "scripts/validate_repo.py",
-      "sha256": "1421a486d13c00f4d8e225b04f0199914e7b5e5e95b9017733599c55abe2d9ff",
-      "size": 12886
+      "sha256": "9883259c327cbb140fa231335923a5330f83ec0493b70eea746bf43be0cc6455",
+      "size": 13350
     },
     {
       "path": "scripts/validate_shell_local_assignments.py",
@@ -1395,8 +1215,8 @@
     },
     {
       "path": "scripts/validate_source_manifest.py",
-      "sha256": "547c37954bae562a0599a855322a8a0341566f9a58a06c9dd44b8bf88773e628",
-      "size": 4064
+      "sha256": "7869e7f052e54897ce2cdbbe88e89a36df7a405bbbf4f517baa05e819cb4b996",
+      "size": 4098
     },
     {
       "path": "scripts/validate_three_repo_surebet_boundary.py",
@@ -1635,8 +1455,8 @@
     },
     {
       "path": "tests/autonomous-controller-contract.test.ts",
-      "sha256": "9fc61c005e426619c02047e15b243f10d7467b827f713f3980d3b451e11059f4",
-      "size": 16732
+      "sha256": "9b6bf0f9f0ab8a8232d5685adc8b57ab6a7284269d74a29d49cff2f8f02d2729",
+      "size": 16895
     },
     {
       "path": "tests/betting-win-adapters.test.ts",
@@ -1680,8 +1500,8 @@
     },
     {
       "path": "tests/bws-loopback-acceptance-command.test.ts",
-      "sha256": "baa3e5bedfa75c4be4affcec46fadf094aa5811578d938b70e1d7a742859b3fa",
-      "size": 3546
+      "sha256": "f0e543e0c72a97e2c2478068386278f9723fdb94a7165299a977aa50a2a69b15",
+      "size": 7356
     },
     {
       "path": "tests/bws-loopback-acceptance.test.ts",
@@ -1845,8 +1665,8 @@
     },
     {
       "path": "tests/packaging-helpers.test.ts",
-      "sha256": "6dc509762e703e4ab3f381d666f74f01bf7fb28454103661389f71e9125974d1",
-      "size": 19378
+      "sha256": "18200e04e245de77c16f814bb39704c26c4d8aee1c3395bef873cb61c852f7d2",
+      "size": 20046
     },
     {
       "path": "tests/paper-autopilot-contract.test.ts",
@@ -1990,8 +1810,8 @@
     },
     {
       "path": "tests/validate-source-manifest.test.ts",
-      "sha256": "9b3bfb21439ed3ea6dfd8d3a6c804843471e8a6a8352ba928f0da9ce7da87484",
-      "size": 14247
+      "sha256": "f0aa14f8d84ee33e588f53d9a388a12f0c4bcf3c3df399214cc7d313487b632f",
+      "size": 15163
     },
     {
       "path": "tests/validation-matrix-contract.test.ts",
@@ -2025,8 +1845,8 @@
     },
     {
       "path": "zip_codebase.sh",
-      "sha256": "2446af8cff61abc457efb0026245d289e2a0d00c330e0ea50b82a139e4d0ef82",
-      "size": 6811
+      "sha256": "c48b29e0b9a5b8b3c14b77fd779c508438875589f5a7bba2cc5e23c60a6a3e14",
+      "size": 6906
     }
   ]
 }

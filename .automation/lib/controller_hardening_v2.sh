@@ -292,7 +292,7 @@ automation_v2_archive_run_dirs() {
   (( ${#rels[@]} > 0 )) || return 0
   (
     cd "$repo"
-    zip -q -r "$temp" "${rels[@]}"
+    zip -q -1 -r "$temp" "${rels[@]}"
   ) || { rm -f -- "$temp"; return 2; }
   mv -f -- "$temp" "$archive"
 }
@@ -548,6 +548,6 @@ automation_v2_zip_with_timeout() {
   command -v zip >/dev/null 2>&1 || return 127
   (
     cd "$working_dir"
-    timeout --signal=TERM --kill-after=10s "$timeout_seconds" zip -q -r "$destination" "$@"
+    timeout --signal=TERM --kill-after=10s "$timeout_seconds" zip -q -1 -r "$destination" "$@"
   )
 }

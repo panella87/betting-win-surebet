@@ -88,6 +88,7 @@ REQUIRED = [
     'scripts/validate_three_repo_surebet_boundary.py',
     'scripts/validate_full_implementation_program.py',
     'scripts/validate_betting_win_upstream_contract.py',
+    'scripts/validate_bws_loopback_acceptance.mjs',
     'scripts/run_betting_win_upstream_lock.mjs',
     'scripts/load-node-runtime.sh', 'scripts/create-source-handoff-archive.sh',
     'scripts/restore-required-executable-bits.js',
@@ -98,7 +99,8 @@ REQUIRED = [
     'tests/run-script-hardening-wave9.test.ts', 'tests/autonomous-continuation-contract.test.ts',
     'tests/local-engine-backlog-contract.test.ts', 'tests/private-paper-mode-backlog-contract.test.ts',
     'tests/three-repo-surebet-boundary.test.ts', 'tests/full-implementation-program-contract.test.ts',
-    'tests/betting-win-upstream-contract.test.ts', 'tests/validate-artifact-hygiene.test.ts',
+    'tests/betting-win-upstream-contract.test.ts', 'tests/bws-loopback-acceptance-command.test.ts',
+    'tests/bws-loopback-acceptance.test.ts', 'tests/validate-artifact-hygiene.test.ts',
     'tests/validate-fixture-integrity.test.ts', 'tests/validate-shell-local-assignments.test.ts',
     'tests/validate-source-manifest.test.ts', 'tests/packaging-helpers.test.ts',
     'tests/validate-repo-contract.test.ts', 'tests/validation-matrix-contract.test.ts',
@@ -189,12 +191,18 @@ def main() -> None:
         'PROJECT_STATUS.md': ['program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1', 'status=IMPLEMENTATION_READY', 'current_task=BWS-510'],
         'docs/repo_status_current.md': ['Standard automation status', 'run_autonomous_implementation=standardized_and_selected', 'run_paper_autopilot=standardized_parent_for_post_implementation_runtime_convergence', 'run_bugfix_autopilot=standardized_parent_for_broad_audit_and_repair'],
         'docs/MASTER_PLAN.md': ['program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1', 'backlog/bws_full_implementation.csv', 'Automation operating model'],
+        'docs/032_database_and_data_lifecycle.md': ['DB_URL_TEST', 'SUREBET_TEST_*', 'CREATEDB'],
     }
     for rel, markers in required_doc_markers.items():
         text = read(ROOT / rel)
         for marker in markers:
             if marker not in text:
                 fail(f'{rel} missing required marker: {marker}')
+
+    env_example = read(ROOT / '.env.example')
+    for marker in ['DB_URL=', 'DB_URL_TEST=', 'CREATEDB']:
+        if marker not in env_example:
+            fail(f'.env.example missing BWS-510 database marker: {marker}')
 
     gitignore = read(ROOT / '.gitignore')
     for marker in [

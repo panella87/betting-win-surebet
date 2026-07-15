@@ -26,7 +26,8 @@ test('standard automation root scripts and shared helpers are installed', () => 
   assert.match(read('.automation/lib/run_common.sh'), /automation_assert_no_incompatible_locks\(\)/);
   assert.match(read('.automation/lib/run_common.sh'), /automation_run_managed_argv\(\)/);
   assert.match(read('.automation/lib/run_common.sh'), /automation_terminate_process_group\(\)/);
-  assert.match(read('.automation/lib/run_common.sh'), /zip -q -r "\$zip_tmp" artifacts/);
+  assert.match(read('.automation/lib/run_common.sh'), /zip -q -1 -r "\$zip_tmp" artifacts/);
+  assert.match(read('.automation/lib/controller_hardening_v2.sh'), /zip -q -1 -r/);
   assert.match(read('.automation/lib/controller_hardening_v2.sh'), /automation_v2_load_env_strict\(\)/);
   assert.match(read('.automation/lib/controller_hardening_v2.sh'), /automation_v2_semantic_env_fingerprint_loaded\(\)/);
   assert.match(read('.automation/lib/controller_hardening_v2.sh'), /automation_v2_extract_unique_machine_value\(\)/);
@@ -51,7 +52,8 @@ test('daily git and packaging helpers match the standardized contract', () => {
   assert.match(zipCodebase, /--artifacts-only/);
   assert.match(zipCodebase, /created_zip=%s/);
   assert.match(zipCodebase, /sha256=%s/);
-  assert.match(zipCodebase, /zip -q -r "\$tmp_zip" artifacts/);
+  assert.match(zipCodebase, /zip -q -1 -r "\$tmp_zip" artifacts/);
+  assert.match(zipCodebase, /zip -q -1 -@ "\$tmp_zip" < "\$list_file"/);
   assert.match(zipCodebase, /\.zip-codebase-list\.tmp\.XXXXXXXXXX/);
   assert.match(pullAndZip, /REMOTE_ARTIFACT/);
   assert.match(pullAndZip, /REMOTE_REPO basename mismatch/);

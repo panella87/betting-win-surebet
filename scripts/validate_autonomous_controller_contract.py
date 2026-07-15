@@ -30,8 +30,10 @@ REQUIRED_FRAGMENTS = {
         'created_zip=%s',
         'file_count=%s',
         'sha256=%s',
-        'zip -q -r "$tmp_zip" artifacts',
+        'zip -q -1 -r "$tmp_zip" artifacts',
+        'zip -q -1 -@ "$tmp_zip" < "$list_file"',
         '.zip-codebase-list.tmp.XXXXXXXXXX',
+        '/runtime/*',
     ],
     'pull_artifacts_and_zip_codebase.sh': [
         'REMOTE_ARTIFACT',
@@ -110,6 +112,7 @@ REQUIRED_FRAGMENTS = {
         'verified process remains alive after TERM and KILL',
         'HEARTBEAT_SOURCE',
         'file_mtime',
+        'zip -q -1 -r',
     ],
     '.automation/lib/run_common.sh': [
         'automation_acquire_lock()',
@@ -118,7 +121,7 @@ REQUIRED_FRAGMENTS = {
         'lock was acquired concurrently',
         'automation_force_unlock()',
         'automation_build_artifacts_zip()',
-        'zip -q -r "$zip_tmp" artifacts',
+        'zip -q -1 -r "$zip_tmp" artifacts',
         'automation_run_validations()',
         'automation_require_cycle_artifacts()',
         'automation_read_continue_status()',
@@ -491,6 +494,7 @@ FORBIDDEN = [
 ]
 
 FORBIDDEN_FRAGMENTS = {
+    'zip_codebase.sh': ['*/runtime/*'],
     'start.sh': ['. scripts/load-node-runtime.sh', 'source "$HOME/.nvm/nvm.sh"', 'source "$NVM_DIR/nvm.sh"'],
     'run-autonomous-implementation.sh': [
         'scripts/load-node-runtime.sh',

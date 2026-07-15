@@ -175,6 +175,17 @@ def main() -> None:
     if scripts.get('validate:implementation-program') != 'PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_full_implementation_program.py':
         fail('package.json validate:implementation-program is missing or non-canonical')
 
+    loopback_validator = read('scripts/validate_bws_loopback_acceptance.mjs')
+    for marker in [
+        'DB_URL_TEST', 'repo-local .env', 'Do not mix a partial SUREBET_TEST_* tuple with DB_URL_TEST',
+        'SUREBET_TEST_ADMIN_DATABASE', 'SUREBET_TEST_USER', 'SUREBET_TEST_PORT',
+    ]:
+        require(loopback_validator, marker, 'scripts/validate_bws_loopback_acceptance.mjs')
+
+    database_docs = read('docs/032_database_and_data_lifecycle.md')
+    for marker in ['DB_URL_TEST', 'SUREBET_TEST_*', 'CREATEDB']:
+        require(database_docs, marker, 'docs/032_database_and_data_lifecycle.md')
+
     repo_validator = read('scripts/validate_repo.py')
     for marker in [
         'backlog/bws_full_implementation.csv',

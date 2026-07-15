@@ -1,3 +1,13 @@
+## 2026-07-15 - Fast ZIP packaging and BWS-510 database URL wiring
+
+- Switched controller artifact archives, numbered artifact archives, and numbered codebase archives to Info-ZIP fast Deflate level 1 while preserving the complete artifact-tree and filtered codebase contracts.
+- Corrected the codebase exclusion boundary so only repo-root generated `runtime/` evidence is omitted; legitimate `src/runtime/` package source is preserved, and restored the two runtime source files omitted by the prior archive.
+- Aligned `SOURCE_MANIFEST.json` generation with packaging by excluding `node_modules`, `dist`, and other generated directories at any depth while retaining nested source-owned runtime modules.
+- Kept atomic temporary archives, bounded controller timeouts, SHA-256 output, and standard ZIP compatibility unchanged.
+- Allowed the BWS-510 loopback acceptance validator to derive its exact disposable PostgreSQL tuple from `DB_URL_TEST` in the process environment or repo-local `.env` when no explicit `SUREBET_TEST_*` tuple is supplied.
+- Rejected partial `SUREBET_TEST_*` tuples, malformed or ambiguous URLs, duplicate `.env` keys, and credential-bearing error output.
+- Preserved `BWS-510` as pending until the autonomous controller executes the non-skipped database-backed acceptance proof and canonical validation.
+
 ## 2026-07-14 - Complete artifact archive and repo-local packaging hardening
 
 - Changed all five root controllers and the shared archive helper so repo-root `artifacts.zip` recursively contains the complete `artifacts/` directory, rather than only the latest controller run directory.

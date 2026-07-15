@@ -5,8 +5,9 @@
 1. Apply and validate the rebaseline overlay under Node 20.
 2. Ensure the server has a readable betting-win Git checkout. BWS reads only its committed `HEAD`; no clone, temporary worktree, cleanup, or reset is required.
 3. Export `BETTING_WIN_REPO_PATH` explicitly.
-4. Start `run-autonomous-implementation.sh` with canonical duration and model flags.
-5. Inspect the newest `artifacts/autonomous_implementation_*` evidence, not process exit alone.
+4. For `BWS-510`, provide either a complete `SUREBET_TEST_*` tuple or `DB_URL_TEST` in the repo-local `.env`; the PostgreSQL role must already have `CREATEDB`.
+5. Start `run-autonomous-implementation.sh` with canonical duration and model flags.
+6. Inspect the newest `artifacts/autonomous_implementation_*` evidence, not process exit alone.
 
 The implementation controller reads `docs/automation/current-implementation-task.md` and `backlog/bws_full_implementation.csv`. It continues while safe dependency-ready work remains through `BWS-510`.
 

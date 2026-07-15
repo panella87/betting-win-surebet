@@ -878,7 +878,7 @@ automation_build_artifacts_zip() {
   timeout_seconds="$(automation_parse_duration_seconds "${AUTOMATION_ZIP_TIMEOUT:-10m}")" || return 2
   zip_tmp="$root/.artifacts.zip.tmp.$$.zip"
   rm -f "$zip_tmp"
-  (cd "$root" && timeout --signal=TERM --kill-after=10s "${timeout_seconds}s" zip -q -r "$zip_tmp" artifacts) || {
+  (cd "$root" && timeout --signal=TERM --kill-after=10s "${timeout_seconds}s" zip -q -1 -r "$zip_tmp" artifacts) || {
     local rc=$?
     rm -f -- "$zip_tmp"
     return "$rc"

@@ -162,6 +162,9 @@ test('source manifest regeneration helper reuses validator inclusion rules and e
   try {
     mkdirSync(join(dir, 'node_modules', 'left-pad'), { recursive: true });
     mkdirSync(join(dir, 'dist'), { recursive: true });
+    mkdirSync(join(dir, 'apps', 'web', 'node_modules', 'vite'), { recursive: true });
+    mkdirSync(join(dir, 'apps', 'web', 'dist'), { recursive: true });
+    mkdirSync(join(dir, 'packages', 'bootstrap', 'src', 'runtime'), { recursive: true });
     mkdirSync(join(dir, 'artifacts', 'cycle_1'), { recursive: true });
     mkdirSync(join(dir, '.locks'), { recursive: true });
     mkdirSync(join(dir, '.automation', 'locks'), { recursive: true });
@@ -178,6 +181,9 @@ test('source manifest regeneration helper reuses validator inclusion rules and e
     writeFileSync(join(dir, 'module.pyc'), 'pyc bytes\n', { encoding: 'utf-8' });
     writeFileSync(join(dir, 'node_modules', 'left-pad', 'index.js'), 'module.exports = "nope";\n', { encoding: 'utf-8' });
     writeFileSync(join(dir, 'dist', 'bundle.js'), 'console.log("dist");\n', { encoding: 'utf-8' });
+    writeFileSync(join(dir, 'apps', 'web', 'node_modules', 'vite', 'index.js'), 'export const generatedDependency = true;\n', { encoding: 'utf-8' });
+    writeFileSync(join(dir, 'apps', 'web', 'dist', 'bundle.js'), 'console.log("nested dist");\n', { encoding: 'utf-8' });
+    writeFileSync(join(dir, 'packages', 'bootstrap', 'src', 'runtime', 'keep.ts'), 'export const runtimeSource = true;\n', { encoding: 'utf-8' });
     writeFileSync(join(dir, 'artifacts', 'cycle_1', 'notes.md'), 'artifact\n', { encoding: 'utf-8' });
     writeFileSync(join(dir, '.locks', 'repo.lock'), 'lock\n', { encoding: 'utf-8' });
     writeFileSync(join(dir, '.automation', 'locks', 'run-paper-evaluation.lock'), 'lock\n', { encoding: 'utf-8' });
@@ -200,11 +206,15 @@ test('source manifest regeneration helper reuses validator inclusion rules and e
     assert.deepEqual(paths, [
       'README.md',
       'notes.txt',
+      'packages/bootstrap/src/runtime/keep.ts',
       'scripts/regenerate_source_manifest.py',
       'scripts/validate_source_manifest.py',
     ]);
     assert.ok(!paths.includes('OVERLAY_MANIFEST.json'));
     assert.ok(!paths.includes('config/betting-win.upstream.lock.json'));
+    assert.ok(!paths.includes('apps/web/node_modules/vite/index.js'));
+    assert.ok(!paths.includes('apps/web/dist/bundle.js'));
+    assert.ok(paths.includes('packages/bootstrap/src/runtime/keep.ts'));
 
     const output = execFileSync('python3', ['scripts/validate_source_manifest.py'], { cwd: dir, encoding: 'utf-8', stdio: 'pipe' });
     assert.match(output, /validate_source_manifest: ok/);

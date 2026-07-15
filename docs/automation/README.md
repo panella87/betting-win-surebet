@@ -26,15 +26,17 @@ The product campaign does not authorize changes to protected automation files. P
 
 For status, inspect the newest retained artifact directory and required cycle files. Do not infer success from process exit alone.
 
+For `BWS-510`, the loopback validator accepts either a complete `SUREBET_TEST_*` tuple or `DB_URL_TEST` from the process environment or repo-local `.env`. Partial tuples fail closed, credentials are not printed, and the selected PostgreSQL role must already have `CREATEDB`.
+
 Standard evidence packaging:
 
 ```text
 ./zip_codebase.sh --artifacts-only
 ```
 
-Every root controller publishes repo-root `artifacts.zip` from the complete `artifacts/` directory, equivalent to a bounded `zip -q -r artifacts.zip artifacts` operation. It must not package only the latest run directory. The numbered `--artifacts-only` helper follows the same complete-tree contract without filtering nested logs, archives, locks, temporary evidence, or empty directories.
+Every root controller publishes repo-root `artifacts.zip` from the complete `artifacts/` directory, equivalent to a bounded `zip -q -1 -r artifacts.zip artifacts` operation using fast Deflate level 1. It must not package only the latest run directory. The numbered `--artifacts-only` helper follows the same complete-tree contract without filtering nested logs, archives, locks, temporary evidence, or empty directories.
 
-`zip_codebase.sh` creates its transient codebase file list inside the repository, so laptop packaging does not depend on writable `/tmp` or `TMPDIR`. `pull_artifacts_and_zip_codebase.sh` rejects a `REMOTE_REPO` basename that differs from the local repository name before downloading anything.
+`zip_codebase.sh` creates its transient codebase file list inside the repository, so laptop packaging does not depend on writable `/tmp` or `TMPDIR`. Both numbered codebase archives and complete artifact archives use fast Deflate level 1 to reduce packaging latency without switching to an incompatible archive format or uncompressed output. The codebase exclusion is root-scoped for generated `runtime/` evidence, so legitimate source trees such as `src/runtime/` and `packages/*/src/runtime/` remain in the archive. Source-manifest generation uses the same generated-directory boundary at every depth, excluding nested dependency/build trees without dropping source-owned runtime modules. `pull_artifacts_and_zip_codebase.sh` rejects a `REMOTE_REPO` basename that differs from the local repository name before downloading anything.
 
 Server update semantics remain equivalent to:
 

@@ -7,6 +7,7 @@ Usage: ./zip_codebase.sh [--artifacts-only]
 
 Creates the next numbered codebase zip in the repo root, for example repo12.zip -> repo13.zip.
 Includes git-tracked files plus untracked non-ignored files by default.
+Uses fast Deflate level 1 for lower packaging latency while preserving ZIP compatibility.
 Excludes archives, secrets, logs, databases, generated folders, artifacts, and runtime evidence.
 
 Options:
@@ -40,7 +41,7 @@ zc_is_excluded_path() {
   esac
 
   case "/$path/" in
-    */.git/*|*/.github/*|*/.locks/*|*/.automation/locks/*|*/node_modules/*|*/.pnpm-store/*|*/.npm/*|*/.yarn/*|*/.cache/*|*/.next/*|*/.nuxt/*|*/.turbo/*|*/.parcel-cache/*|*/dist/*|*/build/*|*/out/*|*/coverage/*|*/.nyc_output/*|*/artifacts/*|/reports/*|*/runtime/*|*/logs/*|*/log/*|*/tmp/*|*/.tmp/*|*/temp/*|*/output/*|*/backup/*|*/backups/*|*/cache/*|*/__pycache__/*|*/.pytest_cache/*|*/.mypy_cache/*|*/.ruff_cache/*|*/.venv/*|*/venv/*|*/secrets/*|*/.secrets/*|*/credentials/*)
+    */.git/*|*/.github/*|*/.locks/*|*/.automation/locks/*|*/node_modules/*|*/.pnpm-store/*|*/.npm/*|*/.yarn/*|*/.cache/*|*/.next/*|*/.nuxt/*|*/.turbo/*|*/.parcel-cache/*|*/dist/*|*/build/*|*/out/*|*/coverage/*|*/.nyc_output/*|*/artifacts/*|/reports/*|/runtime/*|*/logs/*|*/log/*|*/tmp/*|*/.tmp/*|*/temp/*|*/output/*|*/backup/*|*/backups/*|*/cache/*|*/__pycache__/*|*/.pytest_cache/*|*/.mypy_cache/*|*/.ruff_cache/*|*/.venv/*|*/venv/*|*/secrets/*|*/.secrets/*|*/credentials/*)
       return 0
       ;;
   esac
@@ -169,13 +170,13 @@ zc_main() {
 
   rm -f "$tmp_zip"
   if [ "$artifacts_only" = "1" ]; then
-    if ! zip -q -r "$tmp_zip" artifacts; then
+    if ! zip -q -1 -r "$tmp_zip" artifacts; then
       rm -f "$tmp_zip"
       zc_fail "zip command failed"
       return 1
     fi
   else
-    if ! zip -q -@ "$tmp_zip" < "$list_file"; then
+    if ! zip -q -1 -@ "$tmp_zip" < "$list_file"; then
       rm -f "$list_file" "$tmp_zip"
       zc_fail "zip command failed"
       return 1

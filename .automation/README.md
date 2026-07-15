@@ -19,7 +19,7 @@ execution, artifact packaging, fail-closed cycle status parsing, required cycle
 artifact checks, direct-argv command execution, and content-based source-tree
 fingerprints that exclude generated runtime evidence. The shared lock layer now atomically claims a complete lock file, records managed child process groups, preserves active-child metadata across heartbeats, checks incompatible root-controller locks, permits only verified parent-launched children, and uses TERM-with-grace before any KILL escalation.
 
-Artifact publication is repository-wide: all five root controllers and `automation_build_artifacts_zip` rebuild repo-root `artifacts.zip` from the complete `artifacts/` directory. The archive intentionally preserves the full evidence tree rather than selecting only the current run directory.
+Artifact publication is repository-wide: all five root controllers and `automation_build_artifacts_zip` rebuild repo-root `artifacts.zip` from the complete `artifacts/` directory. The archive intentionally preserves the full evidence tree rather than selecting only the current run directory, and uses standard ZIP fast Deflate level 1 to reduce finalization latency.
 
 `run-autonomous-implementation.sh`, `run-autonomous-bugfix.sh`, and `run-paper-evaluation.sh` acquire this shared lock before creating run artifacts. Their finalizers expose release status, preserve unverifiable active-child locks, convert release failures into blocked results, and refresh terminal evidence instead of suppressing cleanup errors.
 

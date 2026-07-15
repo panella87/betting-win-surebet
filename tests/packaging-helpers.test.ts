@@ -65,6 +65,8 @@ function makeZipCodebaseFixture(): { dir: string; repoDir: string; zipPath: stri
 
   mkdirSync(join(repoDir, 'scripts'), { recursive: true });
   mkdirSync(join(repoDir, 'src', 'reports'), { recursive: true });
+  mkdirSync(join(repoDir, 'src', 'runtime'), { recursive: true });
+  mkdirSync(join(repoDir, 'runtime'), { recursive: true });
   copyFileSync(ZIP_CODEBASE, join(repoDir, 'zip_codebase.sh'));
   copyFileSync(ARTIFACT_HYGIENE_VALIDATOR, join(repoDir, 'scripts', 'validate_artifact_hygiene.py'));
   writeFileSync(join(repoDir, 'README.md'), '# packaging fixture\n', { encoding: 'utf-8' });
@@ -74,6 +76,8 @@ function makeZipCodebaseFixture(): { dir: string; repoDir: string; zipPath: stri
   writeFileSync(join(repoDir, 'scripts', 'validate_repo.py'), 'print("fixture validate_repo")\n', { encoding: 'utf-8' });
   writeFileSync(join(repoDir, 'notes.txt'), 'safe untracked note\n', { encoding: 'utf-8' });
   writeFileSync(join(repoDir, 'src', 'reports', 'keep.ts'), 'export const reportSource = true;\n', { encoding: 'utf-8' });
+  writeFileSync(join(repoDir, 'src', 'runtime', 'keep.ts'), 'export const runtimeSource = true;\n', { encoding: 'utf-8' });
+  writeFileSync(join(repoDir, 'runtime', 'generated.txt'), 'root runtime evidence\n', { encoding: 'utf-8' });
 
   mkdirSync(join(repoDir, 'artifacts', 'cycle_1'), { recursive: true });
   mkdirSync(join(repoDir, 'node_modules', 'left-pad'), { recursive: true });
@@ -272,6 +276,7 @@ test('zip_codebase help documents the numbered repo-root and artifact-only packa
 
   assert.match(output, /Creates the next numbered codebase zip in the repo root/);
   assert.match(output, /Includes git-tracked files plus untracked non-ignored files by default/);
+  assert.match(output, /Uses fast Deflate level 1/);
   assert.match(output, /--artifacts-only/);
 });
 
@@ -283,8 +288,11 @@ test('zip_codebase uses the Hyperliquid-style numbered archive and exclusion con
   assert.match(script, /\*\.zip\|\*\.tar\|\*\.tar\.gz\|\*\.tgz\|\*\.7z\|\*\.rar/);
   assert.match(script, /created_zip=%s/);
   assert.match(script, /sha256=%s/);
-  assert.match(script, /zip -q -r "\$tmp_zip" artifacts/);
+  assert.match(script, /zip -q -1 -r "\$tmp_zip" artifacts/);
+  assert.match(script, /zip -q -1 -@ "\$tmp_zip" < "\$list_file"/);
   assert.match(script, /\.zip-codebase-list\.tmp\.XXXXXXXXXX/);
+  assert.match(script, /\|\/runtime\/\*\|/);
+  assert.doesNotMatch(script, /\*\/runtime\/\*/);
   assert.doesNotMatch(script, /CODEBASE_OUTPUT/);
 });
 
@@ -319,6 +327,7 @@ test('zip_codebase excludes local secrets, archives, artifacts, dependencies, lo
       'scripts/validate_artifact_hygiene.py',
       'scripts/validate_repo.py',
       'src/reports/keep.ts',
+      'src/runtime/keep.ts',
       'zip_codebase.sh',
     ]);
     assert.ok(!entries.includes('.env'));
@@ -333,6 +342,7 @@ test('zip_codebase excludes local secrets, archives, artifacts, dependencies, lo
     assert.ok(!entries.includes('scratch.tmp'));
     assert.ok(!entries.includes('tmp/scratch.txt'));
     assert.ok(!entries.includes('.tmp/scratch.txt'));
+    assert.ok(!entries.includes('runtime/generated.txt'));
   } finally {
     rmSync(fixture.dir, { recursive: true, force: true });
   }

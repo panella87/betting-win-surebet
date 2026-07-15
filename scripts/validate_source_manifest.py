@@ -8,7 +8,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / 'SOURCE_MANIFEST.json'
 SCHEMA = 'betting-win-surebet-source-manifest-v1'
-SKIP_ROOTS = {'.git', '.locks', 'artifacts', 'node_modules', 'dist', 'coverage', 'tmp', '.tmp'}
+SKIP_DIRECTORY_NAMES = {'.git', '.locks', 'artifacts', 'node_modules', 'dist', 'coverage', 'tmp', '.tmp'}
 SKIP_EXACT = {
     '.env',
     'SOURCE_MANIFEST.json',
@@ -48,7 +48,7 @@ def should_include(path: Path) -> bool:
         return False
     if rel.startswith(SKIP_PREFIXES):
         return False
-    if parts and parts[0] in SKIP_ROOTS:
+    if any(part in SKIP_DIRECTORY_NAMES for part in parts[:-1]):
         return False
     lowered = rel.lower()
     return not lowered.endswith(SKIP_SUFFIXES)
