@@ -21,6 +21,15 @@ function shellQuote(value: string): string {
   return `'${value.replaceAll("'", `'"'"'`)}'`;
 }
 
+function standaloneControllerEnv(): NodeJS.ProcessEnv {
+  const env: NodeJS.ProcessEnv = { ...process.env };
+  delete env.AUTOMATION_CHILD_RESULT_FILE;
+  delete env.AUTOMATION_PARENT_CONTROLLER;
+  delete env.AUTOMATION_PARENT_PID;
+  delete env.AUTOMATION_PARENT_LOCK_FILE;
+  return env;
+}
+
 interface HarnessResult {
   status: number | null;
   stdout: string;
@@ -74,7 +83,7 @@ finish 0
     const scriptPath = join(repo, 'run-paper-evaluation.sh');
     writeFileSync(scriptPath, `${prefix}${harness}`, 'utf-8');
     chmodSync(scriptPath, 0o755);
-    const result = spawnSync('bash', [scriptPath], { encoding: 'utf-8' });
+    const result = spawnSync('bash', [scriptPath], { encoding: 'utf-8', env: standaloneControllerEnv() });
     return {
       status: result.status,
       stdout: result.stdout,
@@ -132,7 +141,7 @@ finish 0
     const scriptPath = join(repo, 'run-paper-autopilot.sh');
     writeFileSync(scriptPath, `${prefix}${harness}`, 'utf-8');
     chmodSync(scriptPath, 0o755);
-    const result = spawnSync('bash', [scriptPath], { encoding: 'utf-8' });
+    const result = spawnSync('bash', [scriptPath], { encoding: 'utf-8', env: standaloneControllerEnv() });
     return {
       status: result.status,
       stdout: result.stdout,

@@ -27,6 +27,15 @@ function combinedOutput(result: ReturnType<typeof spawnSync>): string {
   return `${result.stdout ?? ''}${result.stderr ?? ''}`;
 }
 
+function standaloneControllerEnv(overrides: NodeJS.ProcessEnv = {}): NodeJS.ProcessEnv {
+  const env: NodeJS.ProcessEnv = { ...process.env, ...overrides };
+  delete env.AUTOMATION_CHILD_RESULT_FILE;
+  delete env.AUTOMATION_PARENT_CONTROLLER;
+  delete env.AUTOMATION_PARENT_PID;
+  delete env.AUTOMATION_PARENT_LOCK_FILE;
+  return env;
+}
+
 function machineValue(output: string, key: string): string {
   const values = output
     .split(/\r?\n/)
@@ -128,7 +137,7 @@ test('paper failure emits an atomic canonical handoff that implementation verifi
       cwd: repo,
       encoding: 'utf8',
       timeout: 30000,
-      env: { ...process.env, TELEGRAM_NOTIFY: '0' },
+      env: standaloneControllerEnv({ TELEGRAM_NOTIFY: '0' }),
     });
     assert.equal(paper.status, 2, combinedOutput(paper));
     const paperOutput = combinedOutput(paper);
@@ -168,7 +177,7 @@ test('paper failure emits an atomic canonical handoff that implementation verifi
       cwd: repo,
       encoding: 'utf8',
       timeout: 30000,
-      env: { ...process.env, TELEGRAM_NOTIFY: '0' },
+      env: standaloneControllerEnv({ TELEGRAM_NOTIFY: '0' }),
     });
     assert.equal(implementation.status, 0, combinedOutput(implementation));
     const implementationOutput = combinedOutput(implementation);
@@ -191,7 +200,7 @@ test('paper failure emits an atomic canonical handoff that implementation verifi
       cwd: repo,
       encoding: 'utf8',
       timeout: 30000,
-      env: { ...process.env, TELEGRAM_NOTIFY: '0' },
+      env: standaloneControllerEnv({ TELEGRAM_NOTIFY: '0' }),
     });
     assert.equal(tampered.status, 2, combinedOutput(tampered));
     assert.match(combinedOutput(tampered), /source evidence SHA-256 mismatch/);
@@ -224,7 +233,7 @@ test('standalone implementation rejects unknown schema-v1 handoff keys before fi
       cwd: repo,
       encoding: 'utf8',
       timeout: 30000,
-      env: { ...process.env, TELEGRAM_NOTIFY: '0' },
+      env: standaloneControllerEnv({ TELEGRAM_NOTIFY: '0' }),
     });
     assert.equal(result.status, 2, combinedOutput(result));
     assert.match(combinedOutput(result), /unsupported handoff key for schema v1: UNSUPPORTED_SCHEMA_FIELD/);

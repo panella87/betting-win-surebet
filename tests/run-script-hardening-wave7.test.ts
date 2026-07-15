@@ -19,6 +19,15 @@ function shellQuote(value: string): string {
   return `'${value.replaceAll("'", `'"'"'`)}'`;
 }
 
+function standaloneControllerEnv(): NodeJS.ProcessEnv {
+  const env: NodeJS.ProcessEnv = { ...process.env };
+  delete env.AUTOMATION_CHILD_RESULT_FILE;
+  delete env.AUTOMATION_PARENT_CONTROLLER;
+  delete env.AUTOMATION_PARENT_PID;
+  delete env.AUTOMATION_PARENT_LOCK_FILE;
+  return env;
+}
+
 interface FinalizerOptions {
   script: 'run-autonomous-implementation.sh' | 'run-autonomous-bugfix.sh';
   finalStatus: string;
@@ -78,7 +87,7 @@ finish ${options.finishRc}
     writeFileSync(scriptPath, `${prefix}${harness}`, 'utf-8');
     chmodSync(scriptPath, 0o755);
 
-    const result = spawnSync('bash', [scriptPath], { encoding: 'utf-8' });
+    const result = spawnSync('bash', [scriptPath], { encoding: 'utf-8', env: standaloneControllerEnv() });
     return {
       status: result.status,
       stdout: result.stdout,
