@@ -1,17 +1,17 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-07-15T14:38:04Z",
+  "generated": "2026-07-15T15:08:08Z",
   "overlay": "bws100-existing-checkout-head-pin-wave14",
   "files": [
     {
       "path": ".automation/README.md",
-      "sha256": "bb0c8ff91667b147cf6298c67b08bedbd97a0e5916d07be04860222c1a31390d",
-      "size": 5659
+      "sha256": "e97a400009b6dda80fc790844309af5e8178354615032a1d0753a379539444a6",
+      "size": 6216
     },
     {
       "path": ".automation/lib/controller_hardening_v2.sh",
-      "sha256": "fe566f62d5a3ddf8227de29e1eb22dd378d44adf9066787716976c0f9a4d0e7d",
-      "size": 18161
+      "sha256": "8eff820d46c41ca7a70c802bee3e9ec402f8014d8c7961a0ebf181631682d89c",
+      "size": 26660
     },
     {
       "path": ".automation/lib/run_common.sh",
@@ -50,8 +50,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "cb454cd3e832aa1b88c584323acd32f76fadfa12b58be4a82ee90bbc02c68fba",
-      "size": 48966
+      "sha256": "f67230c272492aff7199ac6a4282ec36360489da50026477dce7f0bced160757",
+      "size": 49979
     },
     {
       "path": "DOCUMENTATION_CHECK_REPORT.md",
@@ -445,8 +445,8 @@
     },
     {
       "path": "docs/automation/README.md",
-      "sha256": "383655664f6b857ddda5f21be2c77b2f8bbbbfc586c62bf0b4109c6e22a5e800",
-      "size": 4040
+      "sha256": "e96bfb8a7182bdfe02f364d3eefcfac6d87386046f29a2a137829fc06aca3998",
+      "size": 4466
     },
     {
       "path": "docs/automation/SSH_KEY_SETUP.md",
@@ -465,8 +465,8 @@
     },
     {
       "path": "docs/automation/bugfix-autopilot.md",
-      "sha256": "57cd981b72c94c3b8491b515f88697665b99a76edc6b9733d61c0b7a6f17d42d",
-      "size": 3874
+      "sha256": "38d86c1fdd383e332afffdf4e9370479c3932d7681d7a5abca988f6c750aec35",
+      "size": 4146
     },
     {
       "path": "docs/automation/current-implementation-task.md",
@@ -475,8 +475,8 @@
     },
     {
       "path": "docs/automation/paper-autopilot.md",
-      "sha256": "0a2655bfd2c1e1ee63cda55d4f0021f82282fc3eba527eca631dfb1fbe193fee",
-      "size": 963
+      "sha256": "44c57b0bfbb903f6309ab30874350c36f192f502df9bde64796b5614c28f4c5a",
+      "size": 1749
     },
     {
       "path": "docs/automation/paper-evaluation.md",
@@ -1060,28 +1060,28 @@
     },
     {
       "path": "run-autonomous-bugfix.sh",
-      "sha256": "fb9b7146aeb122e92293ac433e29b5ba039b14fd902dbc4c8e393d051fb8a5b9",
-      "size": 42702
+      "sha256": "88d02550216d5a5fdc14b112d5963bfb530c79223d318e0687ced7aa9b7a6891",
+      "size": 44297
     },
     {
       "path": "run-autonomous-implementation.sh",
-      "sha256": "643c2cff555c7dbe2214f45bcb86b9678d7f7d9f1a535b9de00b618ff5268280",
-      "size": 56612
+      "sha256": "f0bcb712537e2963b331f69a0d3e83642376467b76966058e10b1d1b06c2523b",
+      "size": 58207
     },
     {
       "path": "run-bugfix-autopilot.sh",
-      "sha256": "bf275112afdb0354d60081d0dde720f1bd4b021e3bd84321266689db5a238e99",
-      "size": 55412
+      "sha256": "0da288fd55508375f92783f2b2d6aba612f3ccfc432f9334365e3d3beed40d1d",
+      "size": 57225
     },
     {
       "path": "run-paper-autopilot.sh",
-      "sha256": "d9232901bb4f22734313a6288939c81e25741d68cf4cffa2c928ddcdd9c5dc53",
-      "size": 62327
+      "sha256": "9b11af3a99567fd310f79d59adf2c2acf543da539c1df7ee4442a5580a2c490b",
+      "size": 63894
     },
     {
       "path": "run-paper-evaluation.sh",
-      "sha256": "241eadb3ba0bfe059e0782d79ef3c2aaa9661f1b10ac5230a4ded4729d277a82",
-      "size": 38100
+      "sha256": "b7058c73d0413b5f9bcf52d4b0e4a1eb6adb32a5dd1b40600c31569b210580a3",
+      "size": 39733
     },
     {
       "path": "schemas/betting-win-upstream-lock.v1.schema.json",
@@ -1140,8 +1140,8 @@
     },
     {
       "path": "scripts/validate_autonomous_controller_contract.py",
-      "sha256": "e3f8cae6449f0f4bca83e287892f6f8427040f77466b05f9095d8849987eca68",
-      "size": 24338
+      "sha256": "632c49eea8207eb57789296a6457d1cc1f8fe139e94f819d868c142264844c4b",
+      "size": 25290
     },
     {
       "path": "scripts/validate_betting_win_upstream_contract.py",
@@ -1455,8 +1455,8 @@
     },
     {
       "path": "tests/autonomous-controller-contract.test.ts",
-      "sha256": "4028d79fbec5496eee162e671d54a3227272a54aa1293486d92be1bb8344b7fe",
-      "size": 17155
+      "sha256": "65053e1501df2a263a50bbb0b19061dd6e8a3d8bd304a7f2920782361acaceb6",
+      "size": 17633
     },
     {
       "path": "tests/betting-win-adapters.test.ts",
@@ -1495,8 +1495,8 @@
     },
     {
       "path": "tests/bugfix-autopilot-contract.test.ts",
-      "sha256": "43416e0ea2841ea719a591e3f993f1cdd2b58690383bb9d80371f070f870305c",
-      "size": 16008
+      "sha256": "2fcd76793e5da3289fb6265b3058eac9efe7a8f689f4ae0cda7b69ef66292494",
+      "size": 16988
     },
     {
       "path": "tests/bws-loopback-acceptance-command.test.ts",
@@ -1670,8 +1670,8 @@
     },
     {
       "path": "tests/paper-autopilot-contract.test.ts",
-      "sha256": "70ec5cc4088bc9e620fbeae6f1e89dd16594307b5b52949a4054a76af06f2103",
-      "size": 4920
+      "sha256": "45f11b54a59bedc7fac00dc54c8563c8d60ec9f312efd38f40a0499634014ee5",
+      "size": 5044
     },
     {
       "path": "tests/paper-evaluation-shell-hardening.test.ts",
@@ -1710,8 +1710,8 @@
     },
     {
       "path": "tests/run-script-hardening-wave2.test.ts",
-      "sha256": "405975dcfd42abdcaae7695badba31836228e0ee2d46e1173b65907f5da519d0",
-      "size": 12323
+      "sha256": "43dd2ba8eb866fb1c809fa5cd02d2e851fa073a3da1d76354d5e95c6e5ede85b",
+      "size": 12942
     },
     {
       "path": "tests/run-script-hardening-wave4.test.ts",

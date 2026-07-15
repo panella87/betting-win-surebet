@@ -259,6 +259,169 @@ automation_v2_extract_unique_machine_value() {
   printf '%s\n' "${line#*=}"
 }
 
+
+automation_v2_publish_child_result() {
+  local repository_root=${1:?repository root is required}
+  local controller=${2:?controller is required}
+  local script_version=${3:?script version is required}
+  local run_dir=${4:?run directory is required}
+  local final_status=${5:?final status is required}
+  local stop_reason=${6:?stop reason is required}
+  local final_exit_code=${7:?final exit code is required}
+  local cycles_completed=${8:?cycles completed are required}
+  local lock_release_status=${9:?lock release status is required}
+  local lock_release_exit_code=${10:?lock release exit code is required}
+  local lock_preserved=${11:?lock preserved value is required}
+  local target=${AUTOMATION_CHILD_RESULT_FILE:-}
+  local parent_controller=${AUTOMATION_PARENT_CONTROLLER:-}
+  local parent_pid=${AUTOMATION_PARENT_PID:-}
+  local repo_real target_real target_parent_real run_real relative_target relative_run
+
+  [[ -n "$target" ]] || return 0
+  repo_real=$(realpath -e -- "$repository_root") || return 2
+  [[ "$parent_pid" =~ ^[1-9][0-9]*$ ]] || {
+    printf 'ERROR: AUTOMATION_PARENT_PID is required for child result publication.\n' >&2
+    return 2
+  }
+  kill -0 "$parent_pid" 2>/dev/null || {
+    printf 'ERROR: parent controller is not alive for child result publication: %s\n' "$parent_pid" >&2
+    return 2
+  }
+  target_real=$(automation_v2_safe_repo_path "$repo_real" "$target" no) || return 2
+  target_parent_real=$(realpath -e -- "$(dirname -- "$target_real")") || return 2
+  [[ "$target_parent_real" == "$(dirname -- "$target_real")" && ! -L "$target_real" ]] || {
+    printf 'ERROR: child result target must have a canonical non-symlink parent: %s\n' "$target" >&2
+    return 2
+  }
+  relative_target=${target_real#"$repo_real"/}
+  case "$parent_controller" in
+    run-paper-autopilot.sh)
+      [[ "$relative_target" =~ ^artifacts/paper_autopilot_[0-9]{8}T[0-9]{6}Z/round_[0-9]{3}_(paper|implementation)/child_terminal_result\.env$ ]] || {
+        printf 'ERROR: paper-autopilot child result target is non-canonical: %s\n' "$relative_target" >&2
+        return 2
+      }
+      case "$controller" in run-paper-evaluation.sh|run-autonomous-implementation.sh) ;; *) return 2 ;; esac
+      ;;
+    run-bugfix-autopilot.sh)
+      [[ "$relative_target" =~ ^artifacts/bugfix_autopilot_[0-9]{8}T[0-9]{6}Z/round_[0-9]{3}_(bugfix|implementation)/child_terminal_result\.env$ ]] || {
+        printf 'ERROR: bugfix-autopilot child result target is non-canonical: %s\n' "$relative_target" >&2
+        return 2
+      }
+      case "$controller" in run-autonomous-bugfix.sh|run-autonomous-implementation.sh) ;; *) return 2 ;; esac
+      ;;
+    *)
+      printf 'ERROR: unsupported parent controller for child result publication: %s\n' "$parent_controller" >&2
+      return 2
+      ;;
+  esac
+
+  run_real=$(automation_v2_safe_repo_path "$repo_real" "$run_dir" yes) || return 2
+  relative_run=${run_real#"$repo_real"/}
+  case "$controller" in
+    run-autonomous-implementation.sh)
+      [[ "$relative_run" =~ ^artifacts/autonomous_implementation_[0-9]{8}T[0-9]{6}Z$ ]] || return 2
+      ;;
+    run-paper-evaluation.sh)
+      [[ "$relative_run" =~ ^artifacts/paper_evaluation_[0-9]{8}T[0-9]{6}Z$ ]] || return 2
+      ;;
+    run-autonomous-bugfix.sh)
+      [[ "$relative_run" =~ ^artifacts/autonomous_bugfix_[0-9]{8}T[0-9]{6}Z$ ]] || return 2
+      ;;
+    *) return 2 ;;
+  esac
+
+  [[ "$controller" =~ ^[A-Za-z0-9._-]+$ ]] || return 2
+  [[ "$script_version" =~ ^[A-Za-z0-9._:+-]+$ ]] || return 2
+  [[ "${AUTOMATION_REPO_NAME:-betting-win-surebet}" =~ ^[A-Za-z0-9._-]+$ ]] || return 2
+  [[ "$final_status" =~ ^[A-Za-z0-9._:=+-]+$ ]] || return 2
+  [[ "$stop_reason" =~ ^[A-Za-z0-9._:=+-]+$ ]] || return 2
+  [[ "$final_exit_code" =~ ^[0-9]+$ && "$cycles_completed" =~ ^[0-9]+$ ]] || return 2
+  case "$lock_release_status" in released|preserved|not_acquired) ;; *) return 2 ;; esac
+  [[ "$lock_release_exit_code" =~ ^[0-9]+$ ]] || return 2
+  automation_v2_validate_yes_no_value LOCK_PRESERVED "$lock_preserved" || return 2
+  case "$lock_release_status:$lock_preserved:$lock_release_exit_code" in
+    released:no:0|not_acquired:no:0) ;;
+    preserved:yes:*) [[ "$lock_release_exit_code" != 0 ]] || return 2 ;;
+    *) return 2 ;;
+  esac
+
+  automation_v2_write_env_atomic "$target_real" \
+    'CHILD_RESULT_SCHEMA_VERSION=1' \
+    'RESULT_KIND=controller_terminal_result' \
+    "PARENT_CONTROLLER=$parent_controller" \
+    "PARENT_PID=$parent_pid" \
+    "CONTROLLER=$controller" \
+    "SCRIPT_VERSION=$script_version" \
+    "REPOSITORY=${AUTOMATION_REPO_NAME:-betting-win-surebet}" \
+    "RUN_DIR=$run_real" \
+    "FINAL_STATUS=$final_status" \
+    "STOP_REASON=$stop_reason" \
+    "FINAL_EXIT_CODE=$final_exit_code" \
+    "CYCLES_COMPLETED=$cycles_completed" \
+    "LOCK_RELEASE_STATUS=$lock_release_status" \
+    "LOCK_RELEASE_EXIT_CODE=$lock_release_exit_code" \
+    "LOCK_PRESERVED=$lock_preserved" \
+    "WRITTEN_AT=$(automation_v2_now_utc)"
+}
+
+automation_v2_validate_child_result_file() {
+  local file=${1:?result file is required}
+  local expected_parent=${2:?expected parent controller is required}
+  local expected_parent_pid=${3:?expected parent PID is required}
+  local expected_controller=${4:?expected child controller is required}
+  local expected_repository=${5:?expected repository is required}
+  local expected_exit_code=${6:?expected exit code is required}
+  local repository_root=${7:?repository root is required}
+  local key run_dir relative_run
+  local -a expected_keys=(
+    CHILD_RESULT_SCHEMA_VERSION RESULT_KIND PARENT_CONTROLLER PARENT_PID CONTROLLER
+    SCRIPT_VERSION REPOSITORY RUN_DIR FINAL_STATUS STOP_REASON FINAL_EXIT_CODE
+    CYCLES_COMPLETED LOCK_RELEASE_STATUS LOCK_RELEASE_EXIT_CODE LOCK_PRESERVED WRITTEN_AT
+  )
+
+  automation_v2_load_env_strict "$file" || return 2
+  [[ "${#AUTOMATION_V2_ENV[@]}" == "${#expected_keys[@]}" ]] || {
+    printf 'ERROR: child terminal result has an unexpected key count: %s\n' "$file" >&2
+    return 2
+  }
+  for key in "${expected_keys[@]}"; do
+    [[ -n "${AUTOMATION_V2_ENV[$key]+present}" && -n "${AUTOMATION_V2_ENV[$key]}" ]] || {
+      printf 'ERROR: child terminal result is missing required key %s.\n' "$key" >&2
+      return 2
+    }
+  done
+  [[ "${AUTOMATION_V2_ENV[CHILD_RESULT_SCHEMA_VERSION]}" == 1 ]] || return 2
+  [[ "${AUTOMATION_V2_ENV[RESULT_KIND]}" == controller_terminal_result ]] || return 2
+  [[ "${AUTOMATION_V2_ENV[PARENT_CONTROLLER]}" == "$expected_parent" ]] || return 2
+  [[ "${AUTOMATION_V2_ENV[PARENT_PID]}" == "$expected_parent_pid" ]] || return 2
+  [[ "${AUTOMATION_V2_ENV[CONTROLLER]}" == "$expected_controller" ]] || return 2
+  [[ "${AUTOMATION_V2_ENV[REPOSITORY]}" == "$expected_repository" ]] || return 2
+  [[ "${AUTOMATION_V2_ENV[SCRIPT_VERSION]}" =~ ^[A-Za-z0-9._:+-]+$ ]] || return 2
+  [[ "${AUTOMATION_V2_ENV[FINAL_STATUS]}" =~ ^[A-Za-z0-9._:=+-]+$ ]] || return 2
+  [[ "${AUTOMATION_V2_ENV[STOP_REASON]}" =~ ^[A-Za-z0-9._:=+-]+$ ]] || return 2
+  [[ "${AUTOMATION_V2_ENV[FINAL_EXIT_CODE]}" =~ ^[0-9]+$ && "${AUTOMATION_V2_ENV[FINAL_EXIT_CODE]}" == "$expected_exit_code" ]] || return 2
+  [[ "${AUTOMATION_V2_ENV[CYCLES_COMPLETED]}" =~ ^[0-9]+$ ]] || return 2
+  case "${AUTOMATION_V2_ENV[LOCK_RELEASE_STATUS]}" in released|preserved|not_acquired) ;; *) return 2 ;; esac
+  [[ "${AUTOMATION_V2_ENV[LOCK_RELEASE_EXIT_CODE]}" =~ ^[0-9]+$ ]] || return 2
+  automation_v2_validate_yes_no_value LOCK_PRESERVED "${AUTOMATION_V2_ENV[LOCK_PRESERVED]}" || return 2
+  case "${AUTOMATION_V2_ENV[LOCK_RELEASE_STATUS]}:${AUTOMATION_V2_ENV[LOCK_PRESERVED]}:${AUTOMATION_V2_ENV[LOCK_RELEASE_EXIT_CODE]}" in
+    released:no:0|not_acquired:no:0) ;;
+    preserved:yes:*) [[ "${AUTOMATION_V2_ENV[LOCK_RELEASE_EXIT_CODE]}" != 0 ]] || return 2 ;;
+    *) return 2 ;;
+  esac
+  [[ "${AUTOMATION_V2_ENV[WRITTEN_AT]}" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$ ]] || return 2
+
+  run_dir=$(automation_v2_safe_repo_path "$repository_root" "${AUTOMATION_V2_ENV[RUN_DIR]}" yes) || return 2
+  relative_run=${run_dir#"$(realpath -e -- "$repository_root")"/}
+  case "$expected_controller" in
+    run-autonomous-implementation.sh) [[ "$relative_run" =~ ^artifacts/autonomous_implementation_[0-9]{8}T[0-9]{6}Z$ ]] || return 2 ;;
+    run-paper-evaluation.sh) [[ "$relative_run" =~ ^artifacts/paper_evaluation_[0-9]{8}T[0-9]{6}Z$ ]] || return 2 ;;
+    run-autonomous-bugfix.sh) [[ "$relative_run" =~ ^artifacts/autonomous_bugfix_[0-9]{8}T[0-9]{6}Z$ ]] || return 2 ;;
+    *) return 2 ;;
+  esac
+  AUTOMATION_V2_ENV[RUN_DIR]="$run_dir"
+}
+
 automation_v2_atomic_copy() {
   local source=${1:?source is required}
   local destination=${2:?destination is required}

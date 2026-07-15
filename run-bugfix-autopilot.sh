@@ -11,7 +11,7 @@ AUTOMATION_REPO_ROOT="$SCRIPT_DIR"
 # shellcheck source=.automation/lib/telegram_notify.sh
 . "$SCRIPT_DIR/.automation/lib/telegram_notify.sh"
 
-SCRIPT_VERSION="2026-07-15.surebet-bugfix-autopilot-v7-final-artifacts-refresh"
+SCRIPT_VERSION="2026-07-15.surebet-bugfix-autopilot-v8-atomic-child-result"
 SCRIPT_NAME="run-bugfix-autopilot.sh"
 DURATION_SECONDS="$(automation_parse_duration_seconds 7d)"
 BUGFIX_DURATION_SECONDS="$(automation_parse_duration_seconds 72h)"
@@ -50,6 +50,7 @@ LAST_CHILD_RUN_DIR=""
 LAST_CHILD_SOURCE_BEFORE=""
 LAST_CHILD_SOURCE_AFTER=""
 LAST_CHILD_SOURCE_CHANGED="no"
+LAST_CHILD_RESULT_VALID="no"
 ACTIVE_CHILD_PID=""
 ACTIVE_CHILD_KIND="none"
 ACTIVE_CHILD_SCRIPT=""
@@ -250,6 +251,8 @@ mandatory_same_area_reaudit=enabled
 strict_handoff_parser=enabled
 semantic_bug_signature_repeat_guard=enabled
 explicit_child_result_contract=enabled
+child_terminal_result_transport=atomic_side_channel_v1
+child_stdout_machine_parsing=disabled
 parent_budget_clamping=enabled
 child_aware_lock=enabled
 cross_controller_lock_guard=enabled
@@ -684,7 +687,7 @@ append_round() {
 }
 
 run_child_controller() {
-  local kind="$1" round_dir="$2" focus_file="${3:-}" configured budget script output rc declared_rc child_source_before child_source_after
+  local kind="$1" round_dir="$2" focus_file="${3:-}" configured budget script output terminal_result rc child_source_before child_source_after
   local -a cmd=() launch_cmd=()
   [[ "$kind" == bugfix ]] && configured="$BUGFIX_DURATION_SECONDS" || configured="$IMPLEMENTATION_DURATION_SECONDS"
   budget="$(clamped_child_budget "$configured")" || return 124
@@ -698,10 +701,13 @@ run_child_controller() {
   fi
   [[ "$AUTO_INSTALL" == 1 ]] && cmd+=(--auto-install)
   [[ "$CODEX_STREAM_LOGS" == 1 ]] && cmd+=(--stream) || cmd+=(--no-stream)
+  terminal_result="$round_dir/child_terminal_result.env"
+  rm -f -- "$terminal_result" "$round_dir/child_result.env"
   launch_cmd=(env \
     "AUTOMATION_PARENT_CONTROLLER=$SCRIPT_NAME" \
     "AUTOMATION_PARENT_PID=$$" \
     "AUTOMATION_PARENT_LOCK_FILE=$LOCK_FILE" \
+    "AUTOMATION_CHILD_RESULT_FILE=$terminal_result" \
     "TELEGRAM_NOTIFY=0" \
     "${cmd[@]}")
   printf '%q ' "${launch_cmd[@]}" > "$round_dir/child_command.txt"; printf '\n' >> "$round_dir/child_command.txt"
@@ -715,21 +721,41 @@ run_child_controller() {
   set +e; wait "$ACTIVE_CHILD_PID"; rc=$?; set -e
   [[ -n "$ACTIVE_CHILD_TAIL_PID" ]] && { wait "$ACTIVE_CHILD_TAIL_PID" 2>/dev/null || true; ACTIVE_CHILD_TAIL_PID=""; }
   ACTIVE_CHILD_PID=""; ACTIVE_CHILD_KIND=none; ACTIVE_CHILD_SCRIPT=""; ACTIVE_CHILD_COMMAND=""; write_parent_lock
+
   LAST_CHILD="$kind"; LAST_CHILD_RC="$rc"
-  LAST_CHILD_RUN_DIR="$(automation_v2_extract_unique_machine_value "$output" run_dir)" || return 2
-  LAST_CHILD_STATUS="$(automation_v2_extract_unique_machine_value "$output" final_status)" || return 2
-  LAST_CHILD_STOP_REASON="$(automation_v2_extract_unique_machine_value "$output" stop_reason)" || return 2
-  declared_rc="$(automation_v2_extract_unique_machine_value "$output" final_exit_code)" || return 2
-  [[ "$declared_rc" =~ ^[0-9]+$ && "$declared_rc" == "$rc" ]] || return 2
-  LAST_CHILD_RUN_DIR="$(automation_v2_safe_repo_path "$AUTOMATION_REPO_ROOT" "$LAST_CHILD_RUN_DIR" yes)" || return 2
-  case "$LAST_CHILD_RUN_DIR" in "$AUTOMATION_REPO_ROOT/artifacts/"*) ;; *) return 2 ;; esac
   child_source_after="$(automation_v2_source_tree_fingerprint "$AUTOMATION_REPO_ROOT")" || return 2
   LAST_CHILD_SOURCE_BEFORE="$child_source_before"
   LAST_CHILD_SOURCE_AFTER="$child_source_after"
   [[ "$child_source_before" == "$child_source_after" ]] && LAST_CHILD_SOURCE_CHANGED=no || LAST_CHILD_SOURCE_CHANGED=yes
+  LAST_CHILD_RESULT_VALID="no"
+  LAST_CHILD_RUN_DIR=""
+  LAST_CHILD_STATUS="CHILD_TERMINAL_RESULT_INVALID"
+  LAST_CHILD_STOP_REASON="child_terminal_result_invalid"
+
+  if ! automation_v2_validate_child_result_file \
+    "$terminal_result" "$SCRIPT_NAME" "$$" "$(basename -- "$script")" \
+    "${AUTOMATION_REPO_NAME:-betting-win-surebet}" "$rc" "$AUTOMATION_REPO_ROOT"; then
+    automation_v2_write_env_atomic "$round_dir/child_result.env" \
+      'CHILD_RESULT_SCHEMA_VERSION=2' 'CHILD_RESULT_TRANSPORT=atomic_side_channel_v1' \
+      'CHILD_RESULT_VALID=no' "CHILD_KIND=$kind" "CHILD_EXIT_CODE=$rc" \
+      "CHILD_FINAL_STATUS=$LAST_CHILD_STATUS" "CHILD_STOP_REASON=$LAST_CHILD_STOP_REASON" \
+      'CHILD_RUN_DIR=' "CHILD_SOURCE_BEFORE=$child_source_before" \
+      "CHILD_SOURCE_AFTER=$child_source_after" "CHILD_SOURCE_CHANGED=$LAST_CHILD_SOURCE_CHANGED"
+    return 2
+  fi
+
+  LAST_CHILD_RESULT_VALID="yes"
+  LAST_CHILD_RUN_DIR="${AUTOMATION_V2_ENV[RUN_DIR]}"
+  LAST_CHILD_STATUS="${AUTOMATION_V2_ENV[FINAL_STATUS]}"
+  LAST_CHILD_STOP_REASON="${AUTOMATION_V2_ENV[STOP_REASON]}"
   automation_v2_write_env_atomic "$round_dir/child_result.env" \
-    "CHILD_KIND=$kind" "CHILD_EXIT_CODE=$rc" "CHILD_FINAL_STATUS=$LAST_CHILD_STATUS" \
-    "CHILD_STOP_REASON=$LAST_CHILD_STOP_REASON" "CHILD_RUN_DIR=$LAST_CHILD_RUN_DIR" \
+    'CHILD_RESULT_SCHEMA_VERSION=2' 'CHILD_RESULT_TRANSPORT=atomic_side_channel_v1' \
+    'CHILD_RESULT_VALID=yes' "CHILD_KIND=$kind" "CHILD_EXIT_CODE=$rc" \
+    "CHILD_FINAL_STATUS=$LAST_CHILD_STATUS" "CHILD_STOP_REASON=$LAST_CHILD_STOP_REASON" \
+    "CHILD_RUN_DIR=$LAST_CHILD_RUN_DIR" \
+    "CHILD_LOCK_RELEASE_STATUS=${AUTOMATION_V2_ENV[LOCK_RELEASE_STATUS]}" \
+    "CHILD_LOCK_RELEASE_EXIT_CODE=${AUTOMATION_V2_ENV[LOCK_RELEASE_EXIT_CODE]}" \
+    "CHILD_LOCK_PRESERVED=${AUTOMATION_V2_ENV[LOCK_PRESERVED]}" \
     "CHILD_SOURCE_BEFORE=$child_source_before" "CHILD_SOURCE_AFTER=$child_source_after" \
     "CHILD_SOURCE_CHANGED=$LAST_CHILD_SOURCE_CHANGED"
   return "$rc"
@@ -764,6 +790,7 @@ write_final_summary() {
     printf 'last_child_stop_reason=%s\n' "$LAST_CHILD_STOP_REASON"
     printf 'last_child_run_dir=%s\n' "$LAST_CHILD_RUN_DIR"
     printf 'last_child_source_changed=%s\n' "$LAST_CHILD_SOURCE_CHANGED"
+    printf 'last_child_result_valid=%s\n' "$LAST_CHILD_RESULT_VALID"
     printf 'campaign_active_area=%s\n' "${CAMPAIGN_ACTIVE_AREA:-none}"
     printf 'campaign_closed_areas=%s\n' "$(awk -F '\t' 'NR>1 && $3=="closed" {n++} END{print n+0}' "$CAMPAIGN_LEDGER" 2>/dev/null || echo 0)"
     printf 'campaign_total_areas=%s\n' "${#CAMPAIGN_AREAS[@]}"
@@ -942,6 +969,12 @@ main_loop() {
       campaign_update_area "$CAMPAIGN_ACTIVE_AREA" audit_in_progress bugfix "${CURRENT_AUDIT_HANDOFF_FINGERPRINT:-none}" "$phase"
       CAMPAIGN_ACTIVE_STATUS=audit_in_progress
       if run_child_controller bugfix "$round_dir" "$focus"; then rc=0; else rc=$?; fi
+      if [[ "$LAST_CHILD_RESULT_VALID" != yes ]]; then
+        append_round "$ROUNDS_COMPLETED" bugfix "$rc" "$LAST_CHILD_STATUS" "$LAST_CHILD_STOP_REASON" "$LAST_CHILD_RUN_DIR" blocked_child_terminal_result none
+        FINAL_STATUS=BUGFIX_AUTOPILOT_BLOCKED_CHILD_RESULT
+        STOP_REASON=child_terminal_result_invalid
+        exit 2
+      fi
       if [[ "$rc" == 124 && "$(remaining_parent_seconds)" == 0 ]]; then
         append_round "$ROUNDS_COMPLETED" bugfix "$rc" "$LAST_CHILD_STATUS" "$LAST_CHILD_STOP_REASON" "$LAST_CHILD_RUN_DIR" parent_budget_exhausted none
         FINAL_STATUS=BUGFIX_AUTOPILOT_BUDGET_EXHAUSTED; STOP_REASON=parent_duration_elapsed; exit 3
@@ -986,6 +1019,12 @@ main_loop() {
     source_before="$(automation_v2_source_tree_fingerprint "$AUTOMATION_REPO_ROOT")" || exit 2
     rm -f -- "$IMPLEMENTATION_HANDOFF_FILE"
     if run_child_controller implementation "$round_dir"; then rc=0; else rc=$?; fi
+    if [[ "$LAST_CHILD_RESULT_VALID" != yes ]]; then
+      append_round "$ROUNDS_COMPLETED" implementation "$rc" "$LAST_CHILD_STATUS" "$LAST_CHILD_STOP_REASON" "$LAST_CHILD_RUN_DIR" blocked_child_terminal_result "$CURRENT_AUDIT_HANDOFF_FINGERPRINT"
+      FINAL_STATUS=BUGFIX_AUTOPILOT_BLOCKED_CHILD_RESULT
+      STOP_REASON=child_terminal_result_invalid
+      exit 2
+    fi
     if [[ "$rc" == 124 && "$(remaining_parent_seconds)" == 0 ]]; then
       append_round "$ROUNDS_COMPLETED" implementation "$rc" "$LAST_CHILD_STATUS" "$LAST_CHILD_STOP_REASON" "$LAST_CHILD_RUN_DIR" parent_budget_exhausted "$CURRENT_AUDIT_HANDOFF_FINGERPRINT"
       FINAL_STATUS=BUGFIX_AUTOPILOT_BUDGET_EXHAUSTED; STOP_REASON=parent_duration_elapsed; exit 3

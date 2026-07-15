@@ -77,7 +77,10 @@ test('bugfix autopilot exposes the bounded audit implementation re-audit campaig
     '"TELEGRAM_NOTIFY=0"', 'automation_assert_no_incompatible_locks', 'automation_v2_claim_env_file_atomic',
     'automation_v2_touch_owned_parent_lock', 'refresh_parent_lock_heartbeat()', 'bugfix_child_mutated_source',
     'unsupported handoff key for schema v1', 'active_child_identity_or_termination_failed', 'parent_budget_exhausted',
-    'BUGFIX_AUTOPILOT_BLOCKED_LOCK_RELEASE', "printf 'lock_release_status=%s\\n'", "printf 'lock_preserved=%s\\n'",
+    'BUGFIX_AUTOPILOT_BLOCKED_LOCK_RELEASE', 'BUGFIX_AUTOPILOT_BLOCKED_CHILD_RESULT',
+    'child_terminal_result_transport=atomic_side_channel_v1', 'child_stdout_machine_parsing=disabled',
+    'AUTOMATION_CHILD_RESULT_FILE=$terminal_result', 'automation_v2_validate_child_result_file',
+    "printf 'lock_release_status=%s\\n'", "printf 'lock_preserved=%s\\n'",
   ]) assert.match(script, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   assert.doesNotMatch(script, /run-paper-evaluation\.sh|run-paper-autopilot\.sh|bash \.\/start\.sh|bash \.\/stop\.sh|forever|MongoDB/);
 });
@@ -160,7 +163,7 @@ printf '%s\n' "\${TELEGRAM_NOTIFY:-unset}" >> "$repo/artifacts/stub-child-telegr
 mkdir -p "$repo/.automation/runtime"
 count_file="$repo/.automation/runtime/stub-bugfix-count"
 count=0; [[ -f "$count_file" ]] && count="$(cat "$count_file")"; count=$((count+1)); echo "$count" > "$count_file"
-run="$repo/artifacts/autonomous_bugfix_stub_$count"; cycle="$run/cycles/cycle_1"; mkdir -p "$cycle"
+run="$repo/artifacts/autonomous_bugfix_20260101T00000\${count}Z"; cycle="$run/cycles/cycle_1"; mkdir -p "$cycle"
 if [[ "$count" == 1 ]]; then
   echo 'confirmed bug' > "$cycle/evidence.md"
   hash="$(sha256sum "$cycle/evidence.md" | awk '{print $1}')"
@@ -170,7 +173,7 @@ if [[ "$count" == 1 ]]; then
     'HANDOVER_SCHEMA_VERSION=1' 'HANDOVER_KIND=autonomous-bugfix-to-autonomous-implementation' 'REPOSITORY=betting-win-surebet' 'CONTROLLER=stub' \
     'RUN_AUTONOMOUS_IMPLEMENTATION_NEXT=yes' 'AUTONOMOUS_IMPLEMENTATION_EXPECTED_FLAG=--handover-bugfix-audit' 'HANDOVER_AUTONOMOUS_IMPLEMENTATION=yes' \
     "AUDIT_AREA=$area" "AUDIT_SOURCE_FINGERPRINT=$source_fp" 'BUG_IDS=STUB-1' "BUG_SIGNATURE=$bug_sig" 'IMPLEMENTATION_SCOPE=fix_stub' \
-    "SOURCE_EVIDENCE_PATH=artifacts/autonomous_bugfix_stub_$count/cycles/cycle_1/evidence.md" "SOURCE_EVIDENCE_SHA256=$hash" \
+    "SOURCE_EVIDENCE_PATH=artifacts/autonomous_bugfix_20260101T00000\${count}Z/cycles/cycle_1/evidence.md" "SOURCE_EVIDENCE_SHA256=$hash" \
     'VALIDATION_REQUIRED=npm_run_validate' 'BUGFIX_MODE_NOOP_SUCCESS_ALLOWED=no' 'BUGFIX_MODE_AUTOMATION_MAINTENANCE_ALLOWED=no' 'ALLOWED_PROTECTED_FILES=none' \
     "RUN_DIR=$run" 'WRITTEN_AT=2026-01-01T00:00:00Z'
   automation_v2_add_or_verify_fingerprint "$repo/.automation/autonomous-implementation-handover.env" >/dev/null
@@ -182,6 +185,8 @@ else
   printf 'BUGS_FOUND=no\nHANDOVER_AUTONOMOUS_IMPLEMENTATION_REQUIRED=no\nNEXT_AUDIT_AREA=none\nCAMPAIGN_AREA=%s\nCAMPAIGN_AREA_COMPLETE=yes\nSOURCE_EVIDENCE_COMPLETE=yes\nBUG_IDS=none\nIMPLEMENTATION_SCOPE=none\nBUGFIX_MODE_AUTOMATION_MAINTENANCE_ALLOWED=no\nALLOWED_PROTECTED_FILES=none\n' "$area" > "$cycle/request_flags.txt"
   rc=0; status='BUGFIX_AUDIT_COMPLETE=yes'; reason=stub_clean
 fi
+printf 'final_status=STALE_AUDIT_STATUS\nstop_reason=stale_audit_reason\n'
+automation_v2_publish_child_result "$repo" 'run-autonomous-bugfix.sh' 'stub-bugfix-v1' "$run" "$status" "$reason" "$rc" 1 not_acquired 0 no
 printf 'run_dir=%s\nfinal_status=%s\nstop_reason=%s\nfinal_exit_code=%s\ncycles_completed=1\n' "$run" "$status" "$reason" "$rc"
 exit "$rc"
 `);
@@ -193,7 +198,7 @@ printf '%s\n' "\${TELEGRAM_NOTIFY:-unset}" >> "$repo/artifacts/stub-child-telegr
 automation_v2_load_env_strict "$repo/.automation/autonomous-implementation-handover.env"
 source_fp="\${AUTOMATION_V2_ENV[HANDOVER_FINGERPRINT]}"; area="\${AUTOMATION_V2_ENV[AUDIT_AREA]}"; bugs="\${AUTOMATION_V2_ENV[BUG_IDS]}"
 echo fixed > "$repo/fixed.txt"
-run="$repo/artifacts/autonomous_implementation_stub"; mkdir -p "$run"
+run="$repo/artifacts/autonomous_implementation_20260101T000003Z"; mkdir -p "$run"
 automation_v2_write_env_atomic "$repo/.automation/bugfix-mode-handover.env" \
   'HANDOVER_SCHEMA_VERSION=1' 'HANDOVER_KIND=bugfix-mode-after-autonomous-implementation' 'REPOSITORY=betting-win-surebet' 'CONTROLLER=stub' \
   "SOURCE_HANDOFF_FINGERPRINT=$source_fp" 'RUN_BUGFIX_AUDIT_NEXT=yes' 'AUTONOMOUS_FINAL_STATUS=AUTONOMOUS_GOAL_COMPLETE=yes' \
@@ -202,6 +207,8 @@ automation_v2_write_env_atomic "$repo/.automation/bugfix-mode-handover.env" \
   'PAPER_SERVICE_SUPPORTED=0' 'SERVICE_REFRESH_REQUIRED=0' 'RUNTIME_EVIDENCE_REQUIRED=0' 'REAL_UPSTREAM_EVALUATION=blocked_on_required_upstream_input' \
   "RUN_DIR=$run" 'WRITTEN_AT=2026-01-01T00:00:00Z'
 automation_v2_add_or_verify_fingerprint "$repo/.automation/bugfix-mode-handover.env" >/dev/null
+printf 'final_status=STALE_IMPLEMENTATION_STATUS\nstop_reason=stale_implementation_reason\n'
+automation_v2_publish_child_result "$repo" 'run-autonomous-implementation.sh' 'stub-implementation-v1' "$run" 'AUTONOMOUS_GOAL_COMPLETE=yes' 'stub_fixed' 0 1 not_acquired 0 no
 printf 'run_dir=%s\nfinal_status=AUTONOMOUS_GOAL_COMPLETE=yes\nstop_reason=stub_fixed\nfinal_exit_code=0\ncycles_completed=1\n' "$run"
 `);
     const result = spawnSync('bash', ['./run-bugfix-autopilot.sh', '--duration', '120', '--bugfix-duration', '30', '--implementation-duration', '30', '--max-rounds', '3', '--max-same-handoff', '2', '--model', 'cli-default', '--fallback-model', 'none', '--no-stream'], {
@@ -243,8 +250,10 @@ test('bugfix autopilot blocks an audit child that mutates source', () => {
     writeExecutable(join(repo, 'run-autonomous-bugfix.sh'), `#!/usr/bin/env bash
 set -Eeuo pipefail
 repo=""; while [[ $# -gt 0 ]]; do case "$1" in --repo-dir) repo="$2"; shift 2;; *) shift;; esac; done
+. "$repo/.automation/lib/controller_hardening_v2.sh"
 echo unsafe > "$repo/unexpected-source-change.txt"
-run="$repo/artifacts/autonomous_bugfix_mutating_stub"; mkdir -p "$run"
+run="$repo/artifacts/autonomous_bugfix_20260101T000004Z"; mkdir -p "$run"
+automation_v2_publish_child_result "$repo" 'run-autonomous-bugfix.sh' 'stub-bugfix-v1' "$run" 'BUGFIX_AUDIT_COMPLETE=yes' 'stub_clean' 0 1 not_acquired 0 no
 printf 'run_dir=%s\nfinal_status=BUGFIX_AUDIT_COMPLETE=yes\nstop_reason=stub_clean\nfinal_exit_code=0\ncycles_completed=1\n' "$run"
 `);
     writeExecutable(join(repo, 'run-autonomous-implementation.sh'), `#!/usr/bin/env bash

@@ -1,3 +1,12 @@
+# 2026-07-15 - Parent child-result side-channel hardening
+
+- Replaced paper and bugfix parent parsing of streamed `child_output.log` machine-like lines with a strict atomic `child_terminal_result.env` side channel.
+- Added child finalizer publication after lock-release classification for implementation, paper-evaluation, and bug-audit controllers.
+- Bound parent PID, parent/child controller identity, repository, canonical run-directory containment, process exit code, cycle count, and lock-release state before any handoff can advance.
+- Added explicit `PAPER_AUTOPILOT_BLOCKED_CHILD_RESULT` and `BUGFIX_AUTOPILOT_BLOCKED_CHILD_RESULT` fail-closed classifications.
+- Added regression coverage proving repeated `final_status=` and `stop_reason=` text in streamed child output no longer truncates a valid multi-round campaign.
+- Preserved 7-day parent and 72-hour child budgets, child Telegram suppression, post-lock artifact refresh, no-provider/no-execution boundaries, and standalone notification behavior.
+
 ## 2026-07-15 - Post-lock artifact finalization and runtime routing
 
 - Corrected all five root-controller finalizers so the published repo-root `artifacts.zip` is atomically refreshed after successful lock release and therefore contains the authoritative final lock-release fields.

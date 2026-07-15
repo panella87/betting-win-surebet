@@ -23,6 +23,8 @@ run-paper-autopilot.sh
 
 Parent autopilots launch children with `TELEGRAM_NOTIFY=0` and emit one final campaign message. Standalone controllers retain their own final notification through `.automation/lib/telegram_notify.sh`. Root `run-*` controllers are the notification owners.
 
+Parent/child terminal state uses an atomic child-result side channel under the parent round directory. Streamed Codex and controller logs remain human evidence only and are never parsed as the authoritative result. The parent validates the side-channel schema, parent and child identities, process exit code, repo-contained run directory, and lock-release classification before accepting a handoff or advancing the campaign.
+
 The product campaign does not authorize changes to protected automation files. Product source, tests, migrations, configuration schemas, task ledger, and active non-protected status docs may change according to the task.
 
 For status, inspect the newest retained artifact directory and required cycle files. Do not infer success from process exit alone.

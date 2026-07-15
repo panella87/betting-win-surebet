@@ -31,6 +31,8 @@ test('standard automation root scripts and shared helpers are installed', () => 
   assert.match(read('.automation/lib/controller_hardening_v2.sh'), /automation_v2_load_env_strict\(\)/);
   assert.match(read('.automation/lib/controller_hardening_v2.sh'), /automation_v2_semantic_env_fingerprint_loaded\(\)/);
   assert.match(read('.automation/lib/controller_hardening_v2.sh'), /automation_v2_extract_unique_machine_value\(\)/);
+  assert.match(read('.automation/lib/controller_hardening_v2.sh'), /automation_v2_publish_child_result\(\)/);
+  assert.match(read('.automation/lib/controller_hardening_v2.sh'), /automation_v2_validate_child_result_file\(\)/);
   assert.match(read('.automation/lib/telegram_notify.sh'), /telegram_notify_send_final\(\)/);
   assert.match(read('.automation/lib/telegram_notify.sh'), /telegram_notify_build_final_message\(\)/);
   assert.match(read('.automation/lib/telegram_notify.sh'), /telegram_notify_message_version\(\)/);
@@ -242,6 +244,11 @@ test('paper autopilot controller exposes no-service parent supervisor contract',
     'parent_lock_release_failure_classification=enabled',
     'lock_preservation_on_child_identity_failure=enabled',
     'PAPER_AUTOPILOT_BLOCKED_CHILD_IDENTITY',
+    'PAPER_AUTOPILOT_BLOCKED_CHILD_RESULT',
+    'child_terminal_result_transport=atomic_side_channel_v1',
+    'child_stdout_machine_parsing=disabled',
+    'AUTOMATION_CHILD_RESULT_FILE=$terminal_result',
+    'automation_v2_validate_child_result_file',
     'PAPER_AUTOPILOT_BLOCKED_LOCK_RELEASE',
     'child_telegram_notifications=suppressed_by_parent',
     'parent_telegram_notification=final_only',

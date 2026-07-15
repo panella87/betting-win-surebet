@@ -18,10 +18,12 @@ test('paper autopilot is a surebet no-service parent supervisor', () => {
     'child_command.txt',
     'child_output.log',
     'child_result.env',
+    'child_terminal_result.env',
     'PAPER_AUTOPILOT_BLOCKED_ON_PINNED_BUNDLE',
     'PAPER_AUTOPILOT_BLOCKED_IMPLEMENTATION_NOOP',
     'PAPER_AUTOPILOT_BLOCKED_IMPLEMENTATION_HANDOVER_NOT_REFRESHABLE',
     'PAPER_AUTOPILOT_BLOCKED_CHILD_IDENTITY',
+    'PAPER_AUTOPILOT_BLOCKED_CHILD_RESULT',
     'PAPER_AUTOPILOT_BLOCKED_LOCK_RELEASE',
     'atomic_parent_lock_acquisition=enabled',
     'parent_lock_mtime_heartbeat=enabled',
@@ -91,13 +93,15 @@ test('paper autopilot reconciles nonzero child exits through explicit machine-re
   for (const marker of [
     'if run_child_controller paper "$round_dir"; then rc=0; else rc=$?; fi',
     'if run_child_controller implementation "$round_dir"; then rc=0; else rc=$?; fi',
-    'automation_v2_extract_unique_machine_value "$output" run_dir',
-    'automation_v2_extract_unique_machine_value "$output" final_status',
-    'automation_v2_extract_unique_machine_value "$output" final_exit_code',
-    'child declared exit $declared_rc but process exited $rc',
+    'AUTOMATION_CHILD_RESULT_FILE=$terminal_result',
+    'automation_v2_validate_child_result_file',
+    'child_terminal_result_transport=atomic_side_channel_v1',
+    'child_stdout_machine_parsing=disabled',
+    'LAST_CHILD_RESULT_VALID',
     'setsid "${launch_cmd[@]}"',
     'ACTIVE_CHILD_PID=$!',
     'parent_budget_clamping=enabled',
   ]) contains(script, marker);
   assert.doesNotMatch(script, /latest artifact|latest_artifact|resolve_child_run_dir/);
+  assert.doesNotMatch(script, /automation_v2_extract_unique_machine_value "\$output"/);
 });

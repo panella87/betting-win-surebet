@@ -121,7 +121,7 @@ count_file="$root/artifacts/stub-paper-count"
 count=0
 [[ -f "$count_file" ]] && count="$(cat "$count_file")"
 count=$((count + 1)); printf '%s\n' "$count" > "$count_file"
-run_dir="$root/artifacts/paper_evaluation_stub_$count"; mkdir -p "$run_dir"
+run_dir="$root/artifacts/paper_evaluation_20260711T00000\${count}Z"; mkdir -p "$run_dir"
 if [[ "$count" == "1" ]]; then
   evidence="$run_dir/paper-implementation-handoff-evidence.md"
   printf 'stub source implementation evidence\n' > "$evidence"
@@ -163,6 +163,8 @@ if [[ "$count" == "1" ]]; then
 else
   status=PAPER_EVALUATION_PINNED_BUNDLE_ACCEPTED_PRIVATE_REPORT_WRITTEN; reason=stub_paper_accepted; rc=0
 fi
+printf 'final_status=STALE_NESTED_STATUS\nstop_reason=stale_nested_reason\n'
+automation_v2_publish_child_result "$root" 'run-paper-evaluation.sh' 'stub-paper-v1' "$run_dir" "$status" "$reason" "$rc" 1 not_acquired 0 no
 printf 'run_dir=%s\nfinal_status=%s\nstop_reason=%s\nfinal_exit_code=%s\ncycles_completed=1\n' "$run_dir" "$status" "$reason" "$rc"
 exit "$rc"
 `);
@@ -172,7 +174,7 @@ set -Eeuo pipefail
 root="$(cd "$(dirname "$0")" && pwd -P)"
 printf '%s\n' "\${TELEGRAM_NOTIFY:-unset}" >> "$root/artifacts/stub-child-telegram-values"
 . "$root/.automation/lib/controller_hardening_v2.sh"
-run_dir="$root/artifacts/autonomous_implementation_stub"; mkdir -p "$run_dir"
+run_dir="$root/artifacts/autonomous_implementation_20260711T000003Z"; mkdir -p "$run_dir"
 source_fp="$(awk -F= '$1 == "HANDOVER_FINGERPRINT" {print $2}' "$root/.automation/paper-mode-to-autonomous-implementation.env")"
 changed=yes
 if [[ "${noop ? '1' : '0'}" == "1" ]]; then changed=no; else printf 'implemented\n' >> "$root/source.txt"; fi
@@ -199,6 +201,8 @@ automation_v2_write_env_atomic "$root/.automation/paper-mode-handover.env" \\
   "RUN_DIR=$run_dir" \\
   "WRITTEN_AT=2026-07-11T00:00:00Z"
 automation_v2_add_or_verify_fingerprint "$root/.automation/paper-mode-handover.env" >/dev/null
+printf 'final_status=PAPER_EVALUATION_BLOCKED_SOURCE_FIX_REQUIRED\nstop_reason=stale_prompt_evidence\n'
+automation_v2_publish_child_result "$root" 'run-autonomous-implementation.sh' 'stub-implementation-v1' "$run_dir" 'AUTONOMOUS_GOAL_COMPLETE=yes' 'goal_complete' 0 1 not_acquired 0 no
 printf 'run_dir=%s\nfinal_status=AUTONOMOUS_GOAL_COMPLETE=yes\nstop_reason=goal_complete\nfinal_exit_code=0\ncycles_completed=1\n' "$run_dir"
 `);
   return repo;
@@ -235,6 +239,7 @@ test('paper autopilot consumes a verified implementation handoff and re-evaluate
     assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
     assert.match(String(result.stdout), /final_status=PAPER_AUTOPILOT_PINNED_BUNDLE_ACCEPTED_PRIVATE_REPORT_WRITTEN/);
     assert.match(String(result.stdout), /rounds_completed=3/);
+    assert.doesNotMatch(String(result.stdout), /PAPER_AUTOPILOT_BLOCKED_CHILD_RESULT/);
     assert.equal(existsSync(join(repo, '.automation', 'paper-mode-to-autonomous-implementation.env')), false);
     assert.equal(existsSync(join(repo, '.automation', 'paper-mode-handover.env')), false);
     assert.match(readFileSync(join(repo, 'source.txt'), 'utf-8'), /implemented/);

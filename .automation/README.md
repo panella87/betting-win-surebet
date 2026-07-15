@@ -30,6 +30,8 @@ operator explicitly sets `TELEGRAM_NOTIFY=0`. Both parent autopilots launch ever
 child with `TELEGRAM_NOTIFY=0` and send only the parent campaign-final Telegram
 notification after child cleanup and lock finalization.
 
+Parent controllers no longer infer terminal state by grepping streamed child output. Each parent gives its child a repo-contained `child_terminal_result.env` target; the standalone child publishes one strict atomic result only after final lock classification, and the parent validates controller identity, parent PID, repository, run containment, process exit code, and lock-release fields before consuming any handoff. Codex output may contain repeated `final_status=` or `stop_reason=` text without terminating the campaign.
+
 This repo has no service-owned paper lifecycle. `run-paper-evaluation.sh` is the
 standard no-service private paper controller: it validates source, runs a private
 fixture smoke, writes local artifacts, and never starts/stops services or calls
@@ -45,7 +47,7 @@ is still private paper evidence, not live readiness.
 
 `run-paper-autopilot.sh` writes parent-supervisor artifacts under `artifacts/paper_autopilot_*`. Runtime locks and handoff files remain generated state and are not source authority.
 
-`.automation/lib/controller_hardening_v2.sh` contains protected fail-closed helpers for semantic handoff fingerprints, repo-local path checks, source fingerprints, strict child result extraction, process identity verification, bounded ZIP creation, complete-file atomic parent-lock claims, strict parent-lock ownership, file-mtime heartbeat inspection, zombie-aware PID checks, and verified TERM/KILL termination.
+`.automation/lib/controller_hardening_v2.sh` contains protected fail-closed helpers for semantic handoff fingerprints, repo-local path checks, source fingerprints, atomic child-result side-channel publication and validation, process identity verification, bounded ZIP creation, complete-file atomic parent-lock claims, strict parent-lock ownership, file-mtime heartbeat inspection, zombie-aware PID checks, and verified TERM/KILL termination.
 
 
 ## Bugfix autopilot

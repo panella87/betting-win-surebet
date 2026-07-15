@@ -10,7 +10,7 @@ AUTOMATION_REPO_ROOT="$SCRIPT_DIR"
 # shellcheck source=.automation/lib/telegram_notify.sh
 . "$AUTOMATION_REPO_ROOT/.automation/lib/telegram_notify.sh"
 
-SCRIPT_VERSION="2026-07-15.surebet-v7-final-artifacts-refresh"
+SCRIPT_VERSION="2026-07-15.surebet-v8-atomic-child-result"
 SCRIPT_NAME="run-autonomous-implementation.sh"
 DURATION_SECONDS="$(automation_parse_duration_seconds 72h)"
 PROMPT_FILE=""
@@ -835,6 +835,50 @@ write_final_summary() {
   } > "$AUTOMATION_RUN_DIR/final-summary.md"
 }
 
+
+publish_parent_child_result() {
+  local publish_rc=0 refresh_rc=0
+  [[ -n "${AUTOMATION_CHILD_RESULT_FILE:-}" ]] || return 0
+
+  set +e
+  automation_v2_publish_child_result \
+    "$AUTOMATION_REPO_ROOT" "$SCRIPT_NAME" "$SCRIPT_VERSION" "${AUTOMATION_RUN_DIR:-}" \
+    "$FINAL_STATUS" "$STOP_REASON" "$EXIT_STATUS" "$CYCLES_ATTEMPTED" \
+    "$LOCK_RELEASE_STATUS" "$LOCK_RELEASE_EXIT_CODE" "$LOCK_PRESERVED"
+  publish_rc=$?
+  set -e
+  if [[ "$publish_rc" == "0" ]]; then
+    return 0
+  fi
+
+  automation_log "child_result_publication_failed exit=$publish_rc path=${AUTOMATION_CHILD_RESULT_FILE:-}"
+  FINAL_STATUS="BLOCKED=yes"
+  STOP_REASON="child_result_publication_failed"
+  EXIT_STATUS=2
+  if [[ -n "${AUTOMATION_RUN_DIR:-}" ]]; then
+    write_final_summary || true
+    set +e
+    automation_refresh_final_artifacts_zip "$ZIP_TIMEOUT_SECONDS" "$AUTOMATION_REPO_ROOT" "$AUTOMATION_RUN_DIR"
+    refresh_rc=$?
+    if [[ "$refresh_rc" != "0" ]]; then
+      build_artifacts_zip_bounded
+      refresh_rc=$?
+    fi
+    set -e
+    [[ "$refresh_rc" == "0" ]] || automation_log "child_result_failure_artifacts_refresh_failed exit=$refresh_rc"
+  fi
+
+  set +e
+  automation_v2_publish_child_result \
+    "$AUTOMATION_REPO_ROOT" "$SCRIPT_NAME" "$SCRIPT_VERSION" "${AUTOMATION_RUN_DIR:-}" \
+    "$FINAL_STATUS" "$STOP_REASON" "$EXIT_STATUS" "$CYCLES_ATTEMPTED" \
+    "$LOCK_RELEASE_STATUS" "$LOCK_RELEASE_EXIT_CODE" "$LOCK_PRESERVED"
+  publish_rc=$?
+  set -e
+  [[ "$publish_rc" == "0" ]] || automation_log "corrective_child_result_publication_failed exit=$publish_rc"
+  return 0
+}
+
 finish() {
   local rc="${1:-$?}" handoff_rc=0 marker_rc=0 zip_rc=0 lock_rc=0 corrective_zip_rc=0
   [[ "$FINISHED" == "1" ]] && return 0
@@ -949,6 +993,8 @@ finish() {
       write_final_summary || true
     fi
   fi
+
+  publish_parent_child_result
 
   if [[ -n "${AUTOMATION_RUN_DIR:-}" ]]; then
     telegram_notify_send_final "run-autonomous-implementation.sh" "${AUTOMATION_REPO_NAME:-betting-win-surebet}" "$FINAL_STATUS" "$STOP_REASON" "$CYCLES_ATTEMPTED" "$EXIT_STATUS" "$AUTOMATION_RUN_DIR" "$AUTOMATION_CONTROLLER_LOG" "$AUTOMATION_REPO_ROOT" || true
