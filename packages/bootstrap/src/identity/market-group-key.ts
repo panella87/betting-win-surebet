@@ -10,6 +10,9 @@ export function buildMarketGroupKey(legs: readonly CompleteSetLeg[]): string {
     leg.market.canonicalMarketId,
     leg.market.providerGeneration,
     leg.rules.ruleProfileId,
+    leg.rules.resultSourceId,
+    leg.rules.finalityPolicyId,
+    'standard_binary_terminal_scenarios_v0',
   ].map(cleanPart).join('|'));
   return [...new Set(parts)].sort().join('::');
 }

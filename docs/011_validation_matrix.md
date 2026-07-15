@@ -8,6 +8,7 @@
 | `npm run validate:boundary` | Provider imports/URLs, direct DB/core ownership violations, execution paths, or fixture corruption |
 | `npm run validate:ops` | Master-plan, controller, task-ledger, upstream-baseline, source-manifest, and automation drift |
 | `npm run validate:implementation-program` | Missing or inconsistent BWS task IDs, dependencies, statuses, and current task |
+| `npm run validate:loopback-acceptance` | Silent skips or missing disposable-PostgreSQL/upstream configuration for the DB-backed BWS-510 proof |
 | `npm run validate:upstream-boundary` | Invented betting-win capabilities, unpinned modes, fallback semantics, or malformed upstream lock schema |
 | `scripts/validate_three_repo_surebet_boundary.py` | Three-repo ownership drift, provider duplication, or legacy import regression |
 | `scripts/validate_source_manifest.py` | Stale or incomplete source inventory |

@@ -11,6 +11,7 @@ test('validate_repo requires the full implementation and upstream contract surfa
     'config/betting-win.upstream-baseline.json',
     'schemas/betting-win-upstream-lock.v1.schema.json',
     'scripts/validate_full_implementation_program.py',
+    'validate:loopback-acceptance',
     'scripts/validate_betting_win_upstream_contract.py',
     'scripts/run_betting_win_upstream_lock.mjs',
     'tests/full-implementation-program-contract.test.ts',

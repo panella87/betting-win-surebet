@@ -28,13 +28,13 @@ def main() -> None:
     required = {
         'docs/MASTER_PLAN.md': [
             PROGRAM, 'repo_role=surebet_strategy_application', 'upstream_platform=betting-win',
-            'current_task=BWS-120', 'safe_local_terminal_gate=BWS-510',
+            'current_task=BWS-510', 'safe_local_terminal_gate=BWS-510',
             'continuous_runtime_gate=BWS-600', 'execution_gate=BWS-900',
             'backlog/bws_full_implementation.csv', 'run-autonomous-implementation.sh',
             'run-bugfix-autopilot.sh', 'run-paper-autopilot.sh',
         ],
         'docs/repo_status_current.md': [
-            PROGRAM, 'status=IMPLEMENTATION_READY', 'current_task=BWS-120',
+            PROGRAM, 'status=IMPLEMENTATION_READY', 'current_task=BWS-510',
             'safe_local_terminal_gate=BWS-510',
             'selected_controller=run-autonomous-implementation.sh',
         ],
@@ -43,7 +43,7 @@ def main() -> None:
         ],
         'docs/029_full_implementation_task_ledger.md': [
             PROGRAM, 'backlog/bws_full_implementation.csv',
-            'current_task=BWS-120', 'current_task_status=PENDING',
+            'current_task=BWS-510', 'current_task_status=PENDING',
         ],
         'docs/030_upstream_compatibility_and_pin_contract.md': [
             'BETTING_WIN_REPO_PATH', 'config/betting-win.upstream.lock.json',

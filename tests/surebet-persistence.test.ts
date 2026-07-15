@@ -6,7 +6,9 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
   SurebetImportRunRepository,
+  SurebetPinnedStrategyExportRepository,
   SurebetPersistenceError,
+  SurebetStrategyLedgerRepository,
   SurebetUpstreamLockRepository,
   applySurebetMigrations,
   loadSurebetMigrationFiles,
@@ -14,9 +16,14 @@ import {
   resolveSurebetPersistenceConfig,
   type SurebetPersistenceConfig,
 } from '../packages/persistence/src/index.js';
+import { validatePinnedBettingWinBundleIntake } from '../src/adapters/betting-win-pinned-bundle-intake.js';
+import { runDeterministicStandardBinaryBacktest } from '../src/backtest/standard-binary-backtest.js';
+import { createBacktestStrategyLedgerEntry } from '../src/strategy/strategy-ledger.js';
 import type { BettingWinUpstreamLock } from '../packages/upstream/src/upstream/betting-win-upstream-lock.js';
 
 const TEST_TIMESTAMP = '2026-07-14T10:00:00.000Z';
+const REPO_ROOT = process.cwd();
+const SOLVER_READY_BUNDLE = 'tests/fixtures/local-only-export-bundles/solver-ready-resource-export.json';
 
 test('surebet persistence config fails closed on missing or ambiguous required settings', () => {
   assert.throws(
@@ -76,6 +83,22 @@ test('surebet migration loader rejects empty or transaction-managed migration fi
       () => loadSurebetMigrationFiles(invalidRoot, '.'),
       (error: unknown) => error instanceof SurebetPersistenceError && error.code === 'SUREBET_MIGRATION_TRANSACTION_CONTROL_FORBIDDEN',
     );
+
+    const wrongSchemaRoot = join(tempRoot, 'wrong-schema');
+    mkdirSync(wrongSchemaRoot, { recursive: true });
+    writeFileSync(join(wrongSchemaRoot, '001_bad_scope.sql'), 'CREATE TABLE public.import_runs (id bigint PRIMARY KEY);\n', 'utf-8');
+    assert.throws(
+      () => loadSurebetMigrationFiles(wrongSchemaRoot, '.'),
+      (error: unknown) => error instanceof SurebetPersistenceError && error.code === 'SUREBET_MIGRATION_SCOPE_INVALID',
+    );
+
+    const unqualifiedRoot = join(tempRoot, 'unqualified');
+    mkdirSync(unqualifiedRoot, { recursive: true });
+    writeFileSync(join(unqualifiedRoot, '001_bad_unqualified.sql'), 'CREATE TABLE import_runs (id bigint PRIMARY KEY);\n', 'utf-8');
+    assert.throws(
+      () => loadSurebetMigrationFiles(unqualifiedRoot, '.'),
+      (error: unknown) => error instanceof SurebetPersistenceError && error.code === 'SUREBET_MIGRATION_SCOPE_INVALID',
+    );
   } finally {
     rmSync(tempRoot, { recursive: true, force: true });
   }
@@ -94,17 +117,19 @@ test('surebet migrations and repositories pass disposable PostgreSQL idempotency
   createDisposableDatabase(adminConfig, databaseName);
   try {
     const firstApply = applySurebetMigrations(databaseConfig);
-    assert.equal(firstApply.applied.length, 1);
+    assert.equal(firstApply.applied.length, 3);
     assert.equal(firstApply.skipped.length, 0);
 
     const secondApply = applySurebetMigrations(databaseConfig);
     assert.equal(secondApply.applied.length, 0);
-    assert.equal(secondApply.skipped.length, 1);
+    assert.equal(secondApply.skipped.length, 3);
 
     const migratedTables = listUserTables(databaseConfig);
     assert.deepEqual(migratedTables, [
       'surebet.import_runs',
+      'surebet.pinned_strategy_exports',
       'surebet.schema_migrations',
+      'surebet.strategy_ledger_entries',
       'surebet.upstream_locks',
     ]);
 
@@ -147,9 +172,113 @@ test('surebet migrations and repositories pass disposable PostgreSQL idempotency
       'succeeded',
     );
 
+    const pinnedExports = new SurebetPinnedStrategyExportRepository(databaseConfig);
+    const persistedPinnedExport = pinnedExports.create({
+      intakeRecordId: 'intake-001',
+      importRunId: 'import-001',
+      upstreamLockRecordId: persistedLock.lockRecordId,
+      sourceSha256: '4'.repeat(64),
+      sourceLocator: '/tmp/pinned-export.json',
+      contractSchema: 'betting-win.strategy-export.v1',
+      contractAlias: 'betting-win-strategy-export.v1',
+      surebetProfile: 'surebet_standard_binary_v0',
+      exportId: 'provider-history-export.fixture-001.20260714t100000000z.fixture',
+      exportKind: 'pinned_provider_history_bundle',
+      exportProfile: 'provider_history_fixture_bundle_v1',
+      exportedAt: TEST_TIMESTAMP,
+      providerId: 'polymarket',
+      endpointId: 'endpoint-001',
+      payloadSha256: '5'.repeat(64),
+      providerGenerationIds: ['generation-id-001'],
+      sourceLineageRecordIds: ['record-001'],
+      normalizedEvidenceIds: ['normalized-001'],
+      importedAt: TEST_TIMESTAMP,
+    });
+    assert.equal(persistedPinnedExport.intakeRecordId, 'intake-001');
+    assert.equal(pinnedExports.getBySourceSha256('4'.repeat(64))?.intakeRecordId, 'intake-001');
+    assert.equal(pinnedExports.getByExportId('provider-history-export.fixture-001.20260714t100000000z.fixture')?.intakeRecordId, 'intake-001');
+    assert.throws(
+      () =>
+        pinnedExports.create({
+          intakeRecordId: 'intake-002',
+          importRunId: 'import-001',
+          upstreamLockRecordId: persistedLock.lockRecordId,
+          sourceSha256: '4'.repeat(64),
+          sourceLocator: '/tmp/other-export.json',
+          contractSchema: 'betting-win.strategy-export.v1',
+          contractAlias: 'betting-win-strategy-export.v1',
+          surebetProfile: 'surebet_standard_binary_v0',
+          exportId: 'provider-history-export.fixture-002.20260714t100000000z.fixture',
+          exportKind: 'pinned_provider_history_bundle',
+          exportProfile: 'provider_history_fixture_bundle_v1',
+          exportedAt: TEST_TIMESTAMP,
+          providerId: 'polymarket',
+          endpointId: 'endpoint-002',
+          payloadSha256: '6'.repeat(64),
+          providerGenerationIds: ['generation-id-001'],
+          sourceLineageRecordIds: ['record-001'],
+          normalizedEvidenceIds: ['normalized-001'],
+          importedAt: TEST_TIMESTAMP,
+        }),
+      (error: unknown) =>
+        error instanceof SurebetPersistenceError && error.code === 'SUREBET_PINNED_STRATEGY_EXPORT_DUPLICATE_SHA256',
+    );
+
+    const intake = validatePinnedBettingWinBundleIntake(SOLVER_READY_BUNDLE, REPO_ROOT);
+    assert.equal(intake.ok, true);
+    const backtest = runDeterministicStandardBinaryBacktest({
+      bundle: intake.value.bundle,
+      records: intake.value.records,
+      executionPlans: [
+        {
+          canonicalMarketId: 'market-002',
+          decisionTimestamp: '2026-07-01T00:00:02.500Z',
+          maxQuoteAgeMs: 2_000,
+          manualKill: false,
+          completionEvents: [
+            { legId: 'market-002:yes', type: 'reserve', stakeMinor: 100n, occurredAt: '2026-07-01T00:00:02.600Z' },
+            { legId: 'market-002:no', type: 'reserve', stakeMinor: 100n, occurredAt: '2026-07-01T00:00:02.700Z' },
+            { legId: 'market-002:yes', type: 'fill', stakeMinor: 100n, occurredAt: '2026-07-01T00:00:02.800Z' },
+            { legId: 'market-002:no', type: 'fill', stakeMinor: 100n, occurredAt: '2026-07-01T00:00:02.900Z' },
+          ],
+        },
+      ],
+    });
+    assert.equal(backtest.ok, true);
+
+    const ledgerEntry = createBacktestStrategyLedgerEntry({
+      upstreamLock: sampleUpstreamLock(),
+      run: backtest.value,
+    });
+    assert.equal(ledgerEntry.ok, true);
+
+    const strategyLedger = new SurebetStrategyLedgerRepository(databaseConfig);
+    const persistedLedgerEntry = strategyLedger.create({
+      upstreamLockRecordId: persistedLock.lockRecordId,
+      pinnedStrategyExportRecordId: persistedPinnedExport.intakeRecordId,
+      entry: ledgerEntry.value,
+    });
+    assert.equal(persistedLedgerEntry.ledgerEntryId, ledgerEntry.value.ledgerEntryId);
+    assert.equal(
+      strategyLedger.create({
+        upstreamLockRecordId: persistedLock.lockRecordId,
+        pinnedStrategyExportRecordId: persistedPinnedExport.intakeRecordId,
+        entry: ledgerEntry.value,
+      }).ledgerEntryId,
+      ledgerEntry.value.ledgerEntryId,
+    );
+    assert.equal(
+      strategyLedger.getByRunFingerprintSha256(ledgerEntry.value.runFingerprintSha256)?.ledgerEntryId,
+      ledgerEntry.value.ledgerEntryId,
+    );
+
     assert.deepEqual(
       listAppliedSurebetMigrations(databaseConfig).map((migration) => migration.migrationName),
-      ['001_create_upstream_locks_and_import_runs.sql'],
+      [
+        '001_create_upstream_locks_and_import_runs.sql',
+        '002_create_pinned_strategy_exports.sql',
+        '003_create_strategy_ledger_entries.sql',
+      ],
     );
   } finally {
     dropDisposableDatabase(adminConfig, databaseName);

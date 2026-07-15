@@ -18,7 +18,22 @@ EXPECTED_STATUS = {
     'BWS-000': 'VALIDATED',
     'BWS-100': 'VALIDATED',
     'BWS-110': 'VALIDATED',
-    **{task_id: 'PENDING' for task_id in EXPECTED_IDS[3:19]},
+    'BWS-120': 'VALIDATED',
+    'BWS-130': 'VALIDATED',
+    'BWS-140': 'VALIDATED',
+    'BWS-200': 'VALIDATED',
+    'BWS-210': 'VALIDATED',
+    'BWS-220': 'VALIDATED',
+    'BWS-230': 'VALIDATED',
+    'BWS-240': 'VALIDATED',
+    'BWS-300': 'VALIDATED',
+    'BWS-310': 'VALIDATED',
+    'BWS-320': 'VALIDATED',
+    'BWS-400': 'VALIDATED',
+    'BWS-410': 'VALIDATED',
+    'BWS-420': 'VALIDATED',
+    'BWS-500': 'VALIDATED',
+    'BWS-510': 'PENDING',
     'BWS-600': 'BLOCKED',
     'BWS-900': 'PARKED',
 }
@@ -117,8 +132,8 @@ def main() -> None:
         if row['status'] == 'PENDING'
         and all(dep in validated for dep in parse_dependencies(row['depends_on']))
     ]
-    if not ready or ready[0] != 'BWS-120':
-        fail(f'first dependency-ready implementation task must be BWS-120, found {ready!r}')
+    if not ready or ready[0] != 'BWS-510':
+        fail(f'first dependency-ready implementation task must be BWS-510, found {ready!r}')
 
     for rel in ACTIVE_AUTHORITY:
         text = read(rel)
@@ -128,7 +143,7 @@ def main() -> None:
 
     task = read('docs/automation/current-implementation-task.md')
     for marker in [
-        'current_task=BWS-120', 'backlog/bws_full_implementation.csv',
+        'current_task=BWS-510', 'backlog/bws_full_implementation.csv',
         'BETTING_WIN_REPO_PATH', 'CONTINUE_REQUIRED=yes',
         'AUTONOMOUS_GOAL_COMPLETE=yes', 'safe local row through BWS-510',
         'protected_automation_files=read_only',
@@ -137,7 +152,7 @@ def main() -> None:
 
     status = read('docs/repo_status_current.md')
     for marker in [
-        'status=IMPLEMENTATION_READY', 'current_task=BWS-120',
+        'status=IMPLEMENTATION_READY', 'current_task=BWS-510',
         'selected_controller=run-autonomous-implementation.sh',
         'paper_autopilot=not_selected_until_local_platform_complete',
         'run_autonomous_implementation=standardized_and_selected',

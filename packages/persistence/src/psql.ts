@@ -6,6 +6,41 @@ import { SurebetPersistenceError } from './errors.js';
 import type { JsonValue, SurebetPersistenceConfig } from './types.js';
 
 const PSQL_BASE_ARGS = ['-X', '--set=ON_ERROR_STOP=1', '--no-psqlrc'] as const;
+const SQL_COMMENT_PATTERN = /--.*$/gm;
+const SQL_BLOCK_COMMENT_PATTERN = /\/\*[\s\S]*?\*\//g;
+const SQL_IDENTIFIER = '(?:"[^"]+"|[a-z_][a-z0-9_$]*)';
+const SQL_QUALIFIED_IDENTIFIER = `(${SQL_IDENTIFIER}(?:\\s*\\.\\s*${SQL_IDENTIFIER})?)`;
+const SUREBET_SCHEMA_PREFIX = /^"?surebet"?\s*\./i;
+const SUREBET_MIGRATION_TARGET_PATTERNS = Object.freeze([
+  {
+    type: 'write target',
+    pattern: new RegExp(`\\b(?:INSERT\\s+INTO|UPDATE|DELETE\\s+FROM|TRUNCATE(?:\\s+TABLE)?)\\s+${SQL_QUALIFIED_IDENTIFIER}`, 'gi'),
+  },
+  {
+    type: 'table target',
+    pattern: new RegExp(`\\b(?:CREATE\\s+TABLE(?:\\s+IF\\s+NOT\\s+EXISTS)?|ALTER\\s+TABLE(?:\\s+ONLY)?|DROP\\s+TABLE(?:\\s+IF\\s+EXISTS)?)\\s+${SQL_QUALIFIED_IDENTIFIER}`, 'gi'),
+  },
+  {
+    type: 'schema target',
+    pattern: new RegExp(`\\b(?:CREATE\\s+SCHEMA(?:\\s+IF\\s+NOT\\s+EXISTS)?|DROP\\s+SCHEMA(?:\\s+IF\\s+EXISTS)?)\\s+${SQL_QUALIFIED_IDENTIFIER}`, 'gi'),
+  },
+  {
+    type: 'index target',
+    pattern: new RegExp(`\\bCREATE\\s+INDEX(?:\\s+IF\\s+NOT\\s+EXISTS)?\\s+${SQL_IDENTIFIER}\\s+ON\\s+${SQL_QUALIFIED_IDENTIFIER}`, 'gi'),
+  },
+  {
+    type: 'reference target',
+    pattern: new RegExp(`\\bREFERENCES\\s+${SQL_QUALIFIED_IDENTIFIER}`, 'gi'),
+  },
+  {
+    type: 'sequence target',
+    pattern: new RegExp(`\\b(?:CREATE\\s+SEQUENCE(?:\\s+IF\\s+NOT\\s+EXISTS)?|ALTER\\s+SEQUENCE|DROP\\s+SEQUENCE(?:\\s+IF\\s+EXISTS)?)\\s+${SQL_QUALIFIED_IDENTIFIER}`, 'gi'),
+  },
+  {
+    type: 'view target',
+    pattern: new RegExp(`\\b(?:CREATE(?:\\s+OR\\s+REPLACE)?\\s+VIEW|DROP\\s+VIEW(?:\\s+IF\\s+EXISTS)?|CREATE\\s+MATERIALIZED\\s+VIEW|DROP\\s+MATERIALIZED\\s+VIEW(?:\\s+IF\\s+EXISTS)?)\\s+${SQL_QUALIFIED_IDENTIFIER}`, 'gi'),
+  },
+]);
 
 export interface SurebetMigrationFile {
   readonly migrationName: string;
@@ -98,6 +133,7 @@ export function loadSurebetMigrationFiles(
         `Surebet migration file must not declare its own transaction control: ${path}`,
       );
     }
+    assertSurebetOnlyMigrationSql(sql, path);
     return Object.freeze({
       migrationName: fileName,
       path,
@@ -177,5 +213,53 @@ function runPsql(
         ? error.message
         : String(error);
     throw new SurebetPersistenceError(errorCode, `psql command failed: ${message}`);
+  }
+}
+
+function assertSurebetOnlyMigrationSql(sql: string, path: string): void {
+  const normalizedSql = normalizeMigrationSql(sql);
+
+  for (const { type, pattern } of SUREBET_MIGRATION_TARGET_PATTERNS) {
+    pattern.lastIndex = 0;
+    let match = pattern.exec(normalizedSql);
+    while (match !== null) {
+      const identifier = match[1];
+      if (identifier === undefined) {
+        throw new SurebetPersistenceError(
+          'SUREBET_MIGRATION_SCOPE_INVALID',
+          `Surebet migration ${path} contains an unreadable ${type} reference.`,
+        );
+      }
+      assertSurebetTarget(type, identifier, path);
+      match = pattern.exec(normalizedSql);
+    }
+  }
+}
+
+function normalizeMigrationSql(sql: string): string {
+  return sql
+    .replace(SQL_BLOCK_COMMENT_PATTERN, ' ')
+    .replace(SQL_COMMENT_PATTERN, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function assertSurebetTarget(type: string, identifier: string, path: string): void {
+  const normalizedIdentifier = identifier.replace(/\s+/g, '');
+  if (type === 'schema target') {
+    if (!/^"?surebet"?$/i.test(normalizedIdentifier)) {
+      throw new SurebetPersistenceError(
+        'SUREBET_MIGRATION_SCOPE_INVALID',
+        `Surebet migration file must keep every ${type} inside the surebet schema: ${path}`,
+      );
+    }
+    return;
+  }
+
+  if (!SUREBET_SCHEMA_PREFIX.test(normalizedIdentifier)) {
+    throw new SurebetPersistenceError(
+      'SUREBET_MIGRATION_SCOPE_INVALID',
+      `Surebet migration file must keep every ${type} inside surebet.*: ${path}`,
+    );
   }
 }

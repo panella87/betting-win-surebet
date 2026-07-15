@@ -159,7 +159,7 @@ test('read-only query contract request rejects an unpinned contract version', ()
   assert.deepEqual(result.blockers, [
     {
       code: 'QUERY_CONTRACT_NOT_PINNED',
-      message: 'A pinned betting-win read-only query contract is required before SURE-002.',
+      message: 'A pinned betting-win read-only query contract is required before BWS-140.',
       evidenceRequired: 'Pinned betting-win query contract version.',
     },
   ]);

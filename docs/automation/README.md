@@ -2,7 +2,7 @@
 
 ```text
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-current_task=BWS-120
+current_task=BWS-510
 selected_controller=run-autonomous-implementation.sh
 ```
 

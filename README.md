@@ -15,7 +15,7 @@ backtesting_owner=betting-win-surebet
 paper_mode_owner=betting-win-surebet
 future_live_decision_owner=betting-win-surebet_after_explicit_gate
 account_policy=separate_from_betting-win-betting
-current_task=BWS-120
+current_task=BWS-510
 execution_gate=closed
 ```
 
@@ -42,7 +42,7 @@ contract_alias=betting-win-strategy-export.v1
 surebet_profile=surebet_standard_binary_v0
 ```
 
-`config/betting-win.upstream-baseline.json` records the inspected design baseline. It is not a runtime pin. `BWS-100` generates `config/betting-win.upstream.lock.json` from the existing server checkout's committed `HEAD`. Package and capability evidence is read with `git show HEAD:` and the fingerprint is derived from the committed Git tree, so uncommitted working-tree changes are excluded rather than copied, cleaned, reset, or cloned. The verifier fails closed when commit, Git tree, tracked-tree fingerprint, package, or capability evidence is missing or mismatched. The next dependency-ready implementation task is `BWS-120`.
+`config/betting-win.upstream-baseline.json` records the inspected design baseline. It is not a runtime pin. `BWS-100` generates `config/betting-win.upstream.lock.json` from the existing server checkout's committed `HEAD`. Package and capability evidence is read with `git show HEAD:` and the fingerprint is derived from the committed Git tree, so uncommitted working-tree changes are excluded rather than copied, cleaned, reset, or cloned. The verifier fails closed when commit, Git tree, tracked-tree fingerprint, package, or capability evidence is missing or mismatched. `BWS-500` is validated and the next dependency-ready implementation task is `BWS-510`.
 
 ## Target repository shape
 

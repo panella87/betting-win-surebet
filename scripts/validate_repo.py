@@ -162,7 +162,7 @@ def main() -> None:
         fail('package.json version must be 0.1.0-bws-full-platform')
     required_scripts = [
         'typecheck', 'test', 'validate', 'validate:starter', 'validate:ops',
-        'validate:implementation-program', 'validate:upstream-boundary',
+        'validate:implementation-program', 'validate:loopback-acceptance', 'validate:upstream-boundary',
         'generate:upstream-lock', 'verify:upstream-lock',
         'validate:three-repo-boundary', 'restore:executables', 'regen:source-manifest',
         'zip:codebase', 'autonomous:check', 'autonomous:start', 'autonomous:bugfix',
@@ -173,18 +173,20 @@ def main() -> None:
             fail(f'package.json missing script: {script}')
     if package.get('scripts', {}).get('test') != 'npm run build && node --test --test-concurrency=1 dist/tests/*.test.js':
         fail('package.json test script must serialize test files with --test-concurrency=1')
+    if 'npm run validate:loopback-acceptance' not in package.get('scripts', {}).get('validate:starter', ''):
+        fail('package.json validate:starter must invoke validate:loopback-acceptance')
     if package.get('bin', {}).get('betting-win-surebet') != './cli.js':
         fail('package.json bin must expose ./cli.js')
 
     required_doc_markers = {
-        'README.md': ['program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1', 'repo_role=surebet_strategy_application', 'current_task=BWS-120', 'run-autonomous-implementation.sh'],
+        'README.md': ['program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1', 'repo_role=surebet_strategy_application', 'current_task=BWS-510', 'run-autonomous-implementation.sh'],
         'AGENTS.md': ['Source-of-truth order', 'BETTING_WIN_REPO_PATH', 'backlog/bws_full_implementation.csv', 'BWS-510'],
         'docs/automation/repo-profile.md': ['repo_role=surebet_strategy_application', 'program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1', 'Standard helper scripts'],
         'docs/automation/paper-evaluation.md': ['run-paper-evaluation.sh', 'retained fixture/pinned-bundle evaluator', 'SUREBET_PINNED_BUNDLE'],
         'docs/automation/paper-autopilot.md': ['run-paper-autopilot.sh', 'post-implementation runtime/database convergence', 'PAPER_AUTOPILOT_BLOCKED_ON_PINNED_BUNDLE'],
         'docs/automation/autonomous-bugfix.md': ['strict implementation-handoff controller', 'BUGFIX_AUDIT_COMPLETE=yes', 'request_flags.txt'],
         'docs/automation/bugfix-autopilot.md': ['run-bugfix-autopilot.sh', 'same-area re-audit', 'campaign_coverage.tsv'],
-        'PROJECT_STATUS.md': ['program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1', 'status=IMPLEMENTATION_READY', 'current_task=BWS-120'],
+        'PROJECT_STATUS.md': ['program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1', 'status=IMPLEMENTATION_READY', 'current_task=BWS-510'],
         'docs/repo_status_current.md': ['Standard automation status', 'run_autonomous_implementation=standardized_and_selected', 'run_paper_autopilot=standardized_parent_for_post_implementation_runtime_convergence', 'run_bugfix_autopilot=standardized_parent_for_broad_audit_and_repair'],
         'docs/MASTER_PLAN.md': ['program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1', 'backlog/bws_full_implementation.csv', 'Automation operating model'],
     }

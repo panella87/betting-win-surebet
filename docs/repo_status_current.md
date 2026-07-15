@@ -6,7 +6,7 @@ program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 status=IMPLEMENTATION_READY
 repo_role=surebet_strategy_application
 upstream_platform=betting-win
-current_task=BWS-120
+current_task=BWS-510
 current_task_status=PENDING
 safe_local_terminal_gate=BWS-510
 provider_truth_owner=betting-win
@@ -20,7 +20,7 @@ execution_gate=closed
 
 The old local-fixture-complete stop state is superseded. The repo contains a deterministic bootstrap, not the complete BWS platform. The supplied betting-win repo provides concrete upstream contracts and application patterns, so a substantial safe local implementation queue exists.
 
-The binding queue is `backlog/bws_full_implementation.csv`. `BWS-100` and `BWS-110` are validated and the first dependency-ready pending task is `BWS-120`.
+The binding queue is `backlog/bws_full_implementation.csv`. `BWS-100`, `BWS-110`, `BWS-120`, `BWS-130`, `BWS-140`, `BWS-200`, `BWS-210`, `BWS-220`, `BWS-230`, `BWS-240`, `BWS-300`, `BWS-310`, `BWS-320`, `BWS-400`, `BWS-410`, `BWS-420`, and `BWS-500` are validated and the first dependency-ready pending task is `BWS-510`.
 
 ## Verified upstream facts
 
@@ -40,7 +40,7 @@ The archive has no Git commit metadata and no BW source manifest. `BWS-100` veri
 
 ## Existing source
 
-The bootstrap behavior now lives under `packages/bootstrap` and `packages/upstream`, with `src/` retained as compatibility shims for local bundle parsing, identity/rule prechecks, terminal cash flows, quote capacity/fees/freshness, fixed-point stake vectors, partial completion, residual exposure, settlement replay, reporting, and upstream lock tooling.
+The bootstrap behavior now lives under `packages/bootstrap` and `packages/upstream`, `apps/web` now provides the validated operator cockpit surface, and `src/` remains as compatibility shims for local bundle parsing, identity/rule prechecks, terminal cash flows, quote capacity/fees/freshness, fixed-point stake vectors, partial completion, residual exposure, settlement replay, reporting, and upstream lock tooling.
 
 ## Implementation queue
 

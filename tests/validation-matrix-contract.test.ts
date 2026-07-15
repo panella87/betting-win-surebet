@@ -9,6 +9,7 @@ test('validation matrix covers BWS implementation, upstream, repository and owne
   for (const marker of [
     'npm run typecheck', 'npm test', 'npm run validate:repo', 'npm run validate:boundary',
     'npm run validate:ops', 'npm run validate:implementation-program',
+    'npm run validate:loopback-acceptance',
     'npm run validate:upstream-boundary', 'scripts/validate_three_repo_surebet_boundary.py',
     'scripts/validate_source_manifest.py', 'tests/full-implementation-program-contract.test.ts',
     'tests/betting-win-upstream-contract.test.ts', 'tests/validate-repo-contract.test.ts',

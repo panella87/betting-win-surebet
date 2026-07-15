@@ -10,22 +10,24 @@ import {
   parseBettingWinResourceRecords,
 } from '../contracts/betting-win-resource-records.js';
 import { accepted, blocked, type Blocker, type BoundaryResult } from '../contracts/local-types.js';
-import { toCapacityConstraint } from '../quotes/quote-capacity.js';
-import { checkQuoteFreshness } from '../quotes/quote-freshness.js';
+import { deriveStandardBinaryOpportunityCandidates } from '../opportunity/standard-binary-derivation.js';
+import {
+  DEFAULT_STANDARD_BINARY_MAX_QUOTE_AGE_MS,
+  solveStandardBinaryCompleteSetStakeVector,
+} from '../opportunity/standard-binary-stake-solver.js';
 import { createBlockedOpportunityReport, createPrivateOpportunityReport } from '../reporting/opportunity-report.js';
 import {
   createPrivateRunReport,
   type PrivateRunReport,
   validatePrivateRunReportArtifact,
 } from '../reporting/private-run-report.js';
-import { assembleStandardBinaryCompleteSet, type StandardBinaryCompleteSet } from '../scenarios/complete-set.js';
-import { buildStandardBinaryScenarioCashflowMatrix, type ScenarioCashflowLegTerms } from '../scenarios/scenario-cashflow.js';
-import { consumeStandardBinarySettlementReplay, type ConsumedSettlementReplay } from '../simulation/settlement-replay.js';
-import { solveStandardBinaryStakeVector } from '../solver/stake-vector.js';
+import type { StandardBinaryCompleteSet } from '../scenarios/complete-set.js';
+import {
+  consumeStandardBinarySettlementReplaySequence,
+  type ConsumedSettlementReplay,
+} from '../simulation/settlement-replay.js';
 
 const URL_SCHEME_PREFIX = /^[a-z][a-z0-9+.-]*:\/\//i;
-const PRICE_SCALE_MINOR = 1_000_000n;
-const DEFAULT_MAX_QUOTE_AGE_MS = 60_000;
 
 export interface WriteLocalPaperReportOptions {
   readonly bundlePath: string;
@@ -131,7 +133,7 @@ export function printHelp(stream: NodeJS.WriteStream = process.stdout): void {
       '',
       'Reads a repo-local betting-win export bundle, runs the local paper-only fixture pipeline, and writes a private JSON report under artifacts/.',
       'Use --pinned-intake for operator-provided immutable betting-win bundles so repo-local intake validation fails closed on forbidden text and missing record coverage.',
-      `Quote freshness is evaluated against the bundle exportedAt timestamp with a ${DEFAULT_MAX_QUOTE_AGE_MS}ms local freshness window.`,
+      `Quote freshness is evaluated against the bundle exportedAt timestamp with a ${DEFAULT_STANDARD_BINARY_MAX_QUOTE_AGE_MS}ms local freshness window.`,
     ].join('\n'),
   );
 }
@@ -165,8 +167,8 @@ function buildPrivateRunReportFromParsedRecords(
     ]);
   }
 
-  const recordsByMarket = groupRecordsByMarket(parsedRecords);
-  if (recordsByMarket.length === 0) {
+  const candidates = deriveStandardBinaryOpportunityCandidates(parsedRecords);
+  if (candidates.length === 0) {
     return createPrivateRunReport(createRunId(manifestHash), manifestHash, [
       createBlockedOpportunityReport(
         createBundleCandidateId(manifestHash),
@@ -194,53 +196,26 @@ function buildPrivateRunReportFromParsedRecords(
   }
 
   const settlements: ConsumedSettlementReplay[] = [];
-  const candidateReports = recordsByMarket.map(([canonicalMarketId, marketRecords]) => {
-    const completeSet = assembleStandardBinaryCompleteSet(marketRecords);
-    if (!completeSet.ok) {
-      return createBlockedOpportunityReport(canonicalMarketId, completeSet.blockers);
+  const candidateReports = candidates.map((candidate) => {
+    if (!candidate.ok) {
+      return createBlockedOpportunityReport(candidate.candidateId, candidate.blockers);
     }
 
-    const consumedSettlement = consumeRequiredSettlementReplay(marketRecords, completeSet.value);
+    const consumedSettlement = consumeRequiredSettlementReplay(candidate.records, candidate.completeSet);
     if (!consumedSettlement.ok) {
-      return createBlockedOpportunityReport(canonicalMarketId, consumedSettlement.blockers);
+      return createBlockedOpportunityReport(candidate.candidateId, consumedSettlement.blockers);
     }
     settlements.push(consumedSettlement.value);
 
-    const freshness = validateCompleteSetQuoteFreshness(completeSet.value, exportedAtMs);
-    if (!freshness.ok) {
-      return createBlockedOpportunityReport(canonicalMarketId, freshness.blockers);
-    }
-
-    const legTerms = deriveScenarioCashflowLegTerms(completeSet.value);
-    if (!legTerms.ok) {
-      return createBlockedOpportunityReport(canonicalMarketId, legTerms.blockers);
-    }
-
-    const matrix = buildStandardBinaryScenarioCashflowMatrix(completeSet.value, legTerms.value);
-    if (!matrix.ok) {
-      return createBlockedOpportunityReport(canonicalMarketId, matrix.blockers);
-    }
-
-    const capacityConstraints = deriveCapacityConstraints(completeSet.value);
-    if (!capacityConstraints.ok) {
-      return createBlockedOpportunityReport(canonicalMarketId, capacityConstraints.blockers);
-    }
-
-    const roundingConstraints = deriveRoundingConstraints(completeSet.value);
-    if (!roundingConstraints.ok) {
-      return createBlockedOpportunityReport(canonicalMarketId, roundingConstraints.blockers);
-    }
-
-    const solvedStakeVector = solveStandardBinaryStakeVector({
-      matrix: matrix.value,
-      capacityConstraints: capacityConstraints.value,
-      roundingConstraints: roundingConstraints.value,
+    const solvedStakeVector = solveStandardBinaryCompleteSetStakeVector(candidate.completeSet, {
+      observedNowMs: exportedAtMs,
+      maxQuoteAgeMs: DEFAULT_STANDARD_BINARY_MAX_QUOTE_AGE_MS,
     });
     if (!solvedStakeVector.ok) {
-      return createBlockedOpportunityReport(canonicalMarketId, solvedStakeVector.blockers);
+      return createBlockedOpportunityReport(candidate.candidateId, solvedStakeVector.blockers);
     }
 
-    return createPrivateOpportunityReport(canonicalMarketId, solvedStakeVector.value);
+    return createPrivateOpportunityReport(candidate.candidateId, solvedStakeVector.value);
   });
 
   return createPrivateRunReport(createRunId(manifestHash), manifestHash, candidateReports, settlements);
@@ -258,147 +233,15 @@ function consumeRequiredSettlementReplay(
       'Exactly one accepted local settlement replay record for the complete-set candidate.',
     );
   }
-  if (settlementRecords.length !== 1) {
-    return blocked(
-      'LOCAL_REPORT_SETTLEMENT_REPLAY_AMBIGUOUS',
-      'Local paper reporting requires exactly one settlement replay record per complete-set candidate.',
-      'Exactly one accepted local settlement replay record for the complete-set candidate.',
-    );
-  }
-
-  return consumeStandardBinarySettlementReplay(completeSet, settlementRecords[0] as BettingWinSettlementRecord);
-}
-
-function validateCompleteSetQuoteFreshness(
-  completeSet: StandardBinaryCompleteSet,
-  exportedAtMs: number,
-): BoundaryResult<undefined> {
-  const quotes = Object.freeze([completeSet.quotesByOutcome.yes, completeSet.quotesByOutcome.no]);
-  for (const quoteRecord of quotes) {
-    const freshness = checkQuoteFreshness(quoteRecord.evidence, exportedAtMs, DEFAULT_MAX_QUOTE_AGE_MS);
-    if (!freshness.ok) {
-      return freshness;
-    }
-  }
-
-  return accepted(undefined);
-}
-
-function groupRecordsByMarket(
-  records: readonly BettingWinResourceRecord[],
-): readonly (readonly [string, readonly BettingWinResourceRecord[]])[] {
-  const recordsByMarket = new Map<string, BettingWinResourceRecord[]>();
-  for (const record of records) {
-    const currentRecords = recordsByMarket.get(record.canonicalMarketId) ?? [];
-    currentRecords.push(record);
-    recordsByMarket.set(record.canonicalMarketId, currentRecords);
-  }
-
-  return Object.freeze(
-    [...recordsByMarket.entries()]
-      .sort(([left], [right]) => left.localeCompare(right))
-      .map(([canonicalMarketId, marketRecords]) => Object.freeze([canonicalMarketId, Object.freeze([...marketRecords])] as const)),
+  const resolvedSettlementReplay = consumeStandardBinarySettlementReplaySequence(
+    completeSet,
+    settlementRecords as readonly BettingWinSettlementRecord[],
   );
-}
-
-function deriveScenarioCashflowLegTerms(
-  completeSet: StandardBinaryCompleteSet,
-): BoundaryResult<readonly ScenarioCashflowLegTerms[]> {
-  const terms: ScenarioCashflowLegTerms[] = [];
-  for (const leg of completeSet.legs) {
-    const quoteRecord = completeSet.quotesByOutcome[leg.outcome];
-    if (quoteRecord.minStakeMinor <= 0n) {
-      return blocked(
-        'LOCAL_REPORT_MIN_STAKE_INVALID',
-        'Local paper reporting requires positive minStakeMinor values for every complete-set leg.',
-        'Positive local quote minStakeMinor values.',
-      );
-    }
-
-    terms.push(
-      Object.freeze({
-        legId: leg.legId,
-        stakeMinor: quoteRecord.minStakeMinor,
-        payoutMinor: quoteRecord.minStakeMinor + (quoteRecord.minStakeMinor * quoteRecord.evidence.priceMinor) / PRICE_SCALE_MINOR,
-      }),
-    );
+  if (!resolvedSettlementReplay.ok) {
+    return resolvedSettlementReplay;
   }
 
-  return accepted(Object.freeze(terms));
-}
-
-function deriveCapacityConstraints(
-  completeSet: StandardBinaryCompleteSet,
-): BoundaryResult<
-  readonly {
-    readonly legId: string;
-    readonly minStakeMinor: bigint;
-    readonly maxStakeMinor: bigint;
-  }[]
-> {
-  const constraints: {
-    readonly legId: string;
-    readonly minStakeMinor: bigint;
-    readonly maxStakeMinor: bigint;
-  }[] = [];
-  for (const leg of completeSet.legs) {
-    const quoteRecord = completeSet.quotesByOutcome[leg.outcome];
-    if (quoteRecord.minStakeMinor <= 0n) {
-      return blocked(
-        'LOCAL_REPORT_MIN_STAKE_INVALID',
-        'Local paper reporting requires positive minStakeMinor values for every complete-set leg.',
-        'Positive local quote minStakeMinor values.',
-      );
-    }
-
-    const capacityConstraint = toCapacityConstraint(leg.legId, quoteRecord.evidence);
-    if (!capacityConstraint.ok) {
-      return capacityConstraint;
-    }
-
-    constraints.push(
-      Object.freeze({
-        legId: leg.legId,
-        minStakeMinor: quoteRecord.minStakeMinor,
-        maxStakeMinor: capacityConstraint.value.maxStakeMinor,
-      }),
-    );
-  }
-
-  return accepted(Object.freeze(constraints));
-}
-
-function deriveRoundingConstraints(
-  completeSet: StandardBinaryCompleteSet,
-): BoundaryResult<
-  readonly {
-    readonly legId: string;
-    readonly stepMinor: bigint;
-  }[]
-> {
-  const constraints: {
-    readonly legId: string;
-    readonly stepMinor: bigint;
-  }[] = [];
-  for (const leg of completeSet.legs) {
-    const quoteRecord = completeSet.quotesByOutcome[leg.outcome];
-    if (quoteRecord.minStakeMinor <= 0n) {
-      return blocked(
-        'LOCAL_REPORT_ROUNDING_STEP_INVALID',
-        'Local paper reporting requires a positive rounding step for every complete-set leg.',
-        'Positive local quote minStakeMinor values for each complete-set leg.',
-      );
-    }
-
-    constraints.push(
-      Object.freeze({
-        legId: leg.legId,
-        stepMinor: quoteRecord.minStakeMinor,
-      }),
-    );
-  }
-
-  return accepted(Object.freeze(constraints));
+  return accepted(resolvedSettlementReplay.value.settlement);
 }
 
 function parseCliArgs(

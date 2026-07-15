@@ -1,0 +1,71 @@
+{
+  "schema": "betting-win.export-bundle.v1",
+  "fixtureKind": "private_paper_mode_smoke",
+  "fixtureScenario": "blocked-insufficient-capacity",
+  "mode": "paper_only",
+  "providerConnection": "prohibited",
+  "notes": "Local fake fixture for private paper-mode smoke only. Not upstream evidence.",
+  "reference": {
+    "source": "betting-win",
+    "contractVersion": "0.0.0-test",
+    "manifestHash": "3333333333333333333333333333333333333333333333333333333333333333"
+  },
+  "bundleKind": "resource_export",
+  "exportedAt": "2026-07-01T00:00:03.000Z",
+  "records": [
+    {
+      "recordType": "identity",
+      "canonicalEventId": "event-002",
+      "canonicalMarketId": "market-002",
+      "providerMarketId": "provider-market-002",
+      "providerGeneration": "generation-002"
+    },
+    {
+      "recordType": "rules",
+      "canonicalMarketId": "market-002",
+      "ruleProfileId": "rules-002",
+      "resultSourceId": "result-source-002",
+      "finalityPolicyId": "finality-002"
+    },
+    {
+      "recordType": "quotes",
+      "canonicalMarketId": "market-002",
+      "outcome": "yes",
+      "quoteSourceManifestHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "evidenceId": "quote-101",
+      "observedAt": "2026-07-01T00:00:01.000Z",
+      "priceMinor": "1150000",
+      "availableSizeMinor": "99",
+      "minStakeMinor": "100",
+      "feeMinor": "5",
+      "costMinor": "0",
+      "currency": "USDC"
+    },
+    {
+      "recordType": "quotes",
+      "canonicalMarketId": "market-002",
+      "outcome": "no",
+      "quoteSourceManifestHash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "evidenceId": "quote-102",
+      "observedAt": "2026-07-01T00:00:02.000Z",
+      "priceMinor": "1250000",
+      "availableSizeMinor": "600",
+      "minStakeMinor": "100",
+      "feeMinor": "5",
+      "costMinor": "0",
+      "currency": "USDC"
+    },
+    {
+      "recordType": "settlement",
+      "canonicalMarketId": "market-002",
+      "ruleProfileId": "rules-002",
+      "resultSourceId": "result-source-002",
+      "finalityPolicyId": "finality-002",
+      "finalityAuthorityId": "authority-002",
+      "replayManifestHash": "9999999999999999999999999999999999999999999999999999999999999999",
+      "replayAcceptedAt": "2026-07-01T00:05:00.000Z",
+      "acceptanceStatus": "accepted",
+      "finalOutcome": "yes"
+    }
+  ]
+}

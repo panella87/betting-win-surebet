@@ -12,6 +12,34 @@ test('standard binary complete set requires yes and no legs', () => {
   assert.equal(validateStandardBinaryCompleteSet([sampleLeg('yes')]).ok, false);
 });
 
+test('standard binary complete set validation rejects false-friend and rule-mismatched legs', () => {
+  const falseFriend = validateStandardBinaryCompleteSet([
+    sampleLeg('yes'),
+    {
+      ...sampleLeg('no'),
+      market: {
+        ...sampleLeg('no').market,
+        canonicalMarketId: 'market-002',
+      },
+    },
+  ]);
+  assert.equal(falseFriend.ok, false);
+  assert.equal(falseFriend.blockers[0]?.code, 'STANDARD_BINARY_FALSE_FRIEND_MISMATCH');
+
+  const ruleMismatch = validateStandardBinaryCompleteSet([
+    sampleLeg('yes'),
+    {
+      ...sampleLeg('no'),
+      rules: {
+        ...sampleLeg('no').rules,
+        ruleProfileId: 'rules-002',
+      },
+    },
+  ]);
+  assert.equal(ruleMismatch.ok, false);
+  assert.equal(ruleMismatch.blockers[0]?.code, 'STANDARD_BINARY_RULE_MISMATCH');
+});
+
 test('standard binary complete-set assembly accepts validated local records', () => {
   const result = assembleStandardBinaryCompleteSet(loadCompleteResourceRecords());
 

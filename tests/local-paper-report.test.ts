@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { tmpdir } from 'node:os';
 import { runLocalPaperReportCli, writeLocalPaperReport } from '../src/cli/local-paper-report.js';
@@ -10,6 +10,7 @@ const PRIVATE_PAPER_MODE_SMOKE_FIXTURE_DIR = 'tests/fixtures/private-paper-mode-
 const ACCEPTED_LOCAL_BUNDLE = `${PRIVATE_PAPER_MODE_SMOKE_FIXTURE_DIR}/accepted-local-bundle.json`;
 const BLOCKED_MISSING_SETTLEMENT_BUNDLE = `${PRIVATE_PAPER_MODE_SMOKE_FIXTURE_DIR}/blocked-missing-settlement-bundle.json`;
 const BLOCKED_STALE_QUOTES_BUNDLE = `${PRIVATE_PAPER_MODE_SMOKE_FIXTURE_DIR}/blocked-stale-quotes-bundle.json`;
+const BLOCKED_INSUFFICIENT_CAPACITY_BUNDLE = `${PRIVATE_PAPER_MODE_SMOKE_FIXTURE_DIR}/blocked-insufficient-capacity-bundle.json`;
 const BLOCKED_MIXED_CURRENCY_BUNDLE = `${PRIVATE_PAPER_MODE_SMOKE_FIXTURE_DIR}/blocked-mixed-currency-bundle.json`;
 const MULTI_CANDIDATE_BUNDLE = `${PRIVATE_PAPER_MODE_SMOKE_FIXTURE_DIR}/multi-candidate-bundle.json`;
 
@@ -171,6 +172,7 @@ test('private paper-mode smoke fixtures stay marked as local fake bundles', () =
     [ACCEPTED_LOCAL_BUNDLE, 'accepted-local'],
     [BLOCKED_MISSING_SETTLEMENT_BUNDLE, 'blocked-missing-settlement'],
     [BLOCKED_STALE_QUOTES_BUNDLE, 'blocked-stale-quotes'],
+    [BLOCKED_INSUFFICIENT_CAPACITY_BUNDLE, 'blocked-insufficient-capacity'],
     [BLOCKED_MIXED_CURRENCY_BUNDLE, 'blocked-mixed-currency'],
     [MULTI_CANDIDATE_BUNDLE, 'multi-candidate'],
   ] as const) {
@@ -213,6 +215,63 @@ test('local paper report blocks complete-set candidates without settlement repla
   }
 });
 
+test('local paper report resolves corrected settlement replay sequences to the latest accepted outcome', () => {
+  mkdirSync(join(REPO_ROOT, 'artifacts'), { recursive: true });
+  const tempDir = mkdtempSync(join(REPO_ROOT, 'artifacts', 'corrected-settlement-input-'));
+  const bundlePath = join(tempDir, 'corrected-settlement-bundle.json');
+  const outputPath = createArtifactOutputPath('corrected-settlement-report');
+  const bundle = JSON.parse(readFileSync(ACCEPTED_LOCAL_BUNDLE, 'utf-8')) as {
+    records: Array<Record<string, unknown>>;
+  };
+
+  bundle.records.push({
+    recordType: 'settlement',
+    canonicalMarketId: 'market-002',
+    ruleProfileId: 'rules-002',
+    resultSourceId: 'result-source-002',
+    finalityPolicyId: 'finality-002',
+    finalityAuthorityId: 'authority-002',
+    replayManifestHash: '8'.repeat(64),
+    replayAcceptedAt: '2026-07-01T00:06:00.000Z',
+    acceptanceStatus: 'accepted',
+    finalOutcome: 'no',
+  });
+  writeFileSync(bundlePath, `${JSON.stringify(bundle, null, 2)}\n`, 'utf-8');
+
+  try {
+    const result = writeLocalPaperReport({
+      bundlePath,
+      outputPath: relative(REPO_ROOT, outputPath),
+      repoRoot: REPO_ROOT,
+    });
+
+    assert.equal(result.ok, true);
+    const report = JSON.parse(readFileSync(outputPath, 'utf-8')) as {
+      settlement?: { scenarioId: string; finalOutcome: string };
+      settlementSummaries?: Array<{ replayManifestHash: string; scenarioId: string; finalOutcome: string }>;
+    };
+    assert.equal(report.settlement?.scenarioId, 'no_wins');
+    assert.equal(report.settlement?.finalOutcome, 'no');
+    assert.deepEqual(report.settlementSummaries, [
+      {
+        candidateId: 'market-002',
+        canonicalMarketId: 'market-002',
+        ruleProfileId: 'rules-002',
+        resultSourceId: 'result-source-002',
+        finalityPolicyId: 'finality-002',
+        finalityAuthorityId: 'authority-002',
+        replayManifestHash: '8'.repeat(64),
+        replayAcceptedAt: '2026-07-01T00:06:00.000Z',
+        scenarioId: 'no_wins',
+        finalOutcome: 'no',
+      },
+    ]);
+  } finally {
+    rmSync(tempDir, { recursive: true, force: true });
+    rmSync(dirnameForCleanup(outputPath), { recursive: true, force: true });
+  }
+});
+
 test('local paper report blocks stale quote evidence before writing an opportunity', () => {
   const outputPath = createArtifactOutputPath('stale-quotes-report');
 
@@ -231,6 +290,29 @@ test('local paper report blocks stale quote evidence before writing an opportuni
     assert.equal(report.blockerCount, 1);
     assert.equal(report.candidateReports[0]?.reportKind, 'private_paper_blocked');
     assert.equal(report.candidateReports[0]?.blockers[0]?.code, 'QUOTE_EVIDENCE_STALE');
+  } finally {
+    rmSync(dirnameForCleanup(outputPath), { recursive: true, force: true });
+  }
+});
+
+test('local paper report blocks retained depth below the minimum stake before solving', () => {
+  const outputPath = createArtifactOutputPath('insufficient-capacity-report');
+
+  try {
+    const result = writeLocalPaperReport({
+      bundlePath: BLOCKED_INSUFFICIENT_CAPACITY_BUNDLE,
+      outputPath: relative(REPO_ROOT, outputPath),
+      repoRoot: REPO_ROOT,
+    });
+
+    assert.equal(result.ok, true);
+    const report = JSON.parse(readFileSync(outputPath, 'utf-8')) as {
+      blockerCount: number;
+      candidateReports: Array<{ reportKind: string; blockers: Array<{ code: string }> }>;
+    };
+    assert.equal(report.blockerCount, 1);
+    assert.equal(report.candidateReports[0]?.reportKind, 'private_paper_blocked');
+    assert.equal(report.candidateReports[0]?.blockers[0]?.code, 'CAPACITY_EVIDENCE_BELOW_MIN_STAKE');
   } finally {
     rmSync(dirnameForCleanup(outputPath), { recursive: true, force: true });
   }

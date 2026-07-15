@@ -8,7 +8,7 @@ Build the complete surebet application on top of the betting-win provider/data/h
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 repo_role=surebet_strategy_application
 upstream_platform=betting-win
-current_task=BWS-120
+current_task=BWS-510
 safe_local_terminal_gate=BWS-510
 continuous_runtime_gate=BWS-600
 execution_gate=BWS-900

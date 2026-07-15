@@ -1,0 +1,22 @@
+:root {
+  color-scheme: dark;
+  --color-page: #061016;
+  --color-page-glow: #0d1b2a;
+  --color-panel: #111d2b;
+  --color-panel-strong: #182637;
+  --color-panel-muted: #0c1724;
+  --color-border: #2d4259;
+  --color-border-strong: #4d6987;
+  --color-ink: #e1e8f4;
+  --color-ink-muted: #a9b7ca;
+  --color-accent: #a5d8ff;
+  --color-accent-strong: #5ba8ff;
+  --color-warning: #ffb59b;
+  --color-badge: rgba(91, 168, 255, 0.14);
+  --color-badge-warning: rgba(255, 181, 155, 0.14);
+  --font-sans: Geist, "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --radius-panel: 4px;
+  --radius-control: 4px;
+  --layout-max: 1500px;
+}

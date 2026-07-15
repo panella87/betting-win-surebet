@@ -12,7 +12,7 @@ strategy_state_owner=betting-win-surebet
 backtesting_owner=betting-win-surebet
 paper_mode_owner=betting-win-surebet
 account_policy=separate_from_betting-win-betting
-current_task=BWS-120
+current_task=BWS-510
 current_task_status=PENDING
 safe_local_completion_gate=BWS-510
 continuous_private_paper=BWS-600_BLOCKED_ON_ACCEPTED_BETTING_WIN_RUNTIME
@@ -40,8 +40,11 @@ The uploaded archive has no Git metadata and no BW source manifest. `BWS-100` is
 
 ## Completed
 
-- Deterministic bootstrap logic for identity/equivalence, cash flows, stake vectors, capacity, completion, exposure, settlement replay, and private reporting.
+- Deterministic bootstrap logic for identity/equivalence, cash flows, stake vectors, capacity, completion, exposure, settlement replay, deterministic backtesting, and private reporting.
 - `BWS-110` workspace migration: bootstrap modules live in stable workspace packages with `src/` compatibility shims and package-surface tests.
+- `BWS-320` strategy ledger: immutable private reports, explicit acceptance-state handling, and persistence coverage over validated backtest, private-paper, and settlement flows.
+- `BWS-410` bounded worker stack: surebet-owned job persistence, bounded leases, checkpoints, retries, dead letters, and private-paper runtime job handling.
+- `BWS-420` operator cockpit: typed React routes, bounded mock/API reads, explicit pinned-export scope filters, committed-HEAD provenance rendering, and fail-closed browser config for the read-only UI.
 - Legacy surebet research rehome.
 - Hardened implementation, bugfix, paper, and autopilot controllers.
 - Parent-only Telegram routing for autopilot campaigns.
@@ -49,7 +52,7 @@ The uploaded archive has no Git metadata and no BW source manifest. `BWS-100` is
 
 ## Pending
 
-The binding sequence is `backlog/bws_full_implementation.csv`. The first dependency-ready pending task is `BWS-120`. Safe local implementation continues through `BWS-510`.
+The binding sequence is `backlog/bws_full_implementation.csv`. `BWS-100` through `BWS-500` are validated and the first dependency-ready pending task is `BWS-510`. Safe local implementation continues through `BWS-510`.
 
 ## Blocked or parked
 

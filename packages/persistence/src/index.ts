@@ -4,4 +4,7 @@ export * from './migrations.js';
 export * from './psql.js';
 export * from './types.js';
 export * from './repositories/import-run-repository.js';
+export * from './repositories/pinned-strategy-export-repository.js';
+export * from './repositories/strategy-ledger-repository.js';
 export * from './repositories/upstream-lock-repository.js';
+export * from './repositories/worker-job-repository.js';

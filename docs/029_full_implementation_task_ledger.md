@@ -20,7 +20,7 @@ A row becomes `BLOCKED` only after all safe local work in that row is exhausted 
 ## Current selection
 
 ```text
-current_task=BWS-120
+current_task=BWS-510
 current_task_status=PENDING
-reason=BWS-110 workspace migration proof is validated; BWS-120 is now the first dependency-ready PENDING row
+reason=BWS-500 configuration, security, observability, and process definitions are validated; BWS-510 is now the first dependency-ready PENDING row
 ```

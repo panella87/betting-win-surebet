@@ -1,6 +1,6 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-07-14T16:26:53Z",
+  "generated": "2026-07-15T12:06:40Z",
   "overlay": "bws100-existing-checkout-head-pin-wave14",
   "files": [
     {
@@ -25,8 +25,8 @@
     },
     {
       "path": ".env.example",
-      "sha256": "f56c57493d0d9547e7d47dc82e45602deb139234e809b2208f452ed82b151547",
-      "size": 1394
+      "sha256": "631b850102e87334950b30221554eb188574e332405a05c093f67d7c652071ac",
+      "size": 1816
     },
     {
       "path": ".gitattributes",
@@ -60,18 +60,298 @@
     },
     {
       "path": "PROJECT_STATUS.md",
-      "sha256": "3622d9706b803035173cf00cb2b69c99c9237e9b1c0a00b38b2fd32499d6155d",
-      "size": 2713
+      "sha256": "c7a6ac2e9c37ea1a3d996ea508d5aec13bf6876fbb13c7268d3aaf5fd0607b6d",
+      "size": 3324
     },
     {
       "path": "README.md",
-      "sha256": "fbb27bc2f9a246946708eff3bc6564fb6c4ce0adc0a0231d2d484f0a12fb50d3",
-      "size": 4889
+      "sha256": "3938d4ac82876512b8a7ae675ec1c91c85c0bb75e9566e1a95f40773bda2dcc7",
+      "size": 4916
     },
     {
       "path": "STARTER_PACK.md",
       "sha256": "298eae7a88b95c63ade1bf8ad4a5adcd348c71127c4002c39a8aa243dd03c6cf",
       "size": 739
+    },
+    {
+      "path": "apps/web/index.html",
+      "sha256": "af5fe0ede1db4d5d1dbb7a33cb083637717c222c68ccfab9a1df3d55ac5da45b",
+      "size": 325
+    },
+    {
+      "path": "apps/web/node_modules/.bin/vite",
+      "sha256": "fa03478846d229651a3c6aa64833ba2c6cbf580a798b92bd8f47c7480bafb5d8",
+      "size": 2574
+    },
+    {
+      "path": "apps/web/node_modules/vite/LICENSE.md",
+      "sha256": "b1d741c26b53de1bbc0d4d7d3365b79888f9fe511527544a8a7b8e24dec43147",
+      "size": 110976
+    },
+    {
+      "path": "apps/web/node_modules/vite/README.md",
+      "sha256": "01cebf4365cd21396688c4dcb0dc8d360ccbafb3a36735d3849c5d8efd3cd060",
+      "size": 1179
+    },
+    {
+      "path": "apps/web/node_modules/vite/bin/openChrome.js",
+      "sha256": "d72bfcc4e6fc7b3dd81338704895402b2b54fe725662eb82f09669aa93f36b92",
+      "size": 1839
+    },
+    {
+      "path": "apps/web/node_modules/vite/bin/vite.js",
+      "sha256": "fa03478846d229651a3c6aa64833ba2c6cbf580a798b92bd8f47c7480bafb5d8",
+      "size": 2574
+    },
+    {
+      "path": "apps/web/node_modules/vite/client.d.ts",
+      "sha256": "74b98be6ab7723114273526706070ff9885fdf990d5c4e722801addca4d264e1",
+      "size": 5231
+    },
+    {
+      "path": "apps/web/node_modules/vite/dist/client/client.mjs",
+      "sha256": "d1c44698a37a140bcc4ce1863dee62aa45cd3228b8fdce6f7a94f97f7db74d14",
+      "size": 39573
+    },
+    {
+      "path": "apps/web/node_modules/vite/dist/client/env.mjs",
+      "sha256": "599a7191be77f077087cde291f7906fa751a794617f42d914f54991fe7bf434f",
+      "size": 612
+    },
+    {
+      "path": "apps/web/node_modules/vite/dist/node/chunks/build.js",
+      "sha256": "62dbd52269c60f616756047cd593f95fbf638d0cd65d3b1bf6099ce721cb380c",
+      "size": 205613
+    },
+    {
+      "path": "apps/web/node_modules/vite/dist/node/chunks/dist.js",
+      "sha256": "fab5ee13e4f52aa8a81d0570a88529546a313cf9cd2925971afbf6a4774960c8",
+      "size": 247103
+    },
+    {
+      "path": "apps/web/node_modules/vite/dist/node/chunks/lib.js",
+      "sha256": "c854873f947dcb83074adadc962a6f1bf975c86e66d46cc563016be4ef8cac2c",
+      "size": 11710
+    },
+    {
+      "path": "apps/web/node_modules/vite/dist/node/chunks/moduleRunnerTransport.d.ts",
+      "sha256": "16fe60bb544cfedfd2b5bb2f7d0b3957be7978706d57d9f06edc9c0c8dbdba23",
+      "size": 3064
+    },
+    {
+      "path": "apps/web/node_modules/vite/dist/node/chunks/node.js",
+      "sha256": "8ce527bb1ba9e31b3ddf63c8361d4703606ccd4a0174befdb7bc16d3bcd5c375",
+      "size": 1317879
+    },
+    {
+      "path": "apps/web/node_modules/vite/dist/node/chunks/postcss-import.js",
+      "sha256": "c231374847d81652bc9bfb988f382a8a3ee0564e245c65b97d3fb64a98338b8c",
+      "size": 18432
+    },
+    {
+      "path": "apps/web/node_modules/vite/dist/node/cli.js",
+      "sha256": "fd745b95a376305469b25f47f5e49a60829a90444d9a466b7fcaf3bca806f4b4",
+      "size": 29852
+    },
+    {
+      "path": "apps/web/node_modules/vite/dist/node/index.d.ts",
+      "sha256": "775c04c36f13c8006a98b7448932620996ff1ee43fec52c65253e5ac4e0a9228",
+      "size": 161728
+    },
+    {
+      "path": "apps/web/node_modules/vite/dist/node/index.js",
+      "sha256": "c7ea52906f843318d7971209ce62bd24bab60590275e8f415c5564fa35cb82dc",
+      "size": 2670
+    },
+    {
+      "path": "apps/web/node_modules/vite/dist/node/internal.d.ts",
+      "sha256": "fe8e1632d4da52d384026fcb1f3fcf4c04f8fdfe6be4328712a09d470ed6c59d",
+      "size": 137
+    },
+    {
+      "path": "apps/web/node_modules/vite/dist/node/internal.js",
+      "sha256": "3409ae5e59e273bc35ca96c78438717736c0f6d32eb4d8ac7ac78fdd12871530",
+      "size": 138
+    },
+    {
+      "path": "apps/web/node_modules/vite/dist/node/module-runner.d.ts",
+      "sha256": "8887e70871f697fa42ad7cdf32168db60ec2d6760c173c97973e35377fe5d83b",
+      "size": 11432
+    },
+    {
+      "path": "apps/web/node_modules/vite/dist/node/module-runner.js",
+      "sha256": "116583d79e593e7a42df949b1b6979ea45392a7daf8f0d5cad3748d39732468d",
+      "size": 54256
+    },
+    {
+      "path": "apps/web/node_modules/vite/misc/false.js",
+      "sha256": "3f405f8c82812b5fd5a6ca325a1b9039479bf9de3ee1ef51d76ea80fba7d486c",
+      "size": 21
+    },
+    {
+      "path": "apps/web/node_modules/vite/misc/true.js",
+      "sha256": "1ca1ff5b531880de960715f4622cb4bfe61620ad0ab56764a00f3afe2bf2981a",
+      "size": 20
+    },
+    {
+      "path": "apps/web/node_modules/vite/package.json",
+      "sha256": "d26ea2d65c50959b1b5dcd0d1c52eba22eb6c3f4dc335f618053b15970bb63d6",
+      "size": 5083
+    },
+    {
+      "path": "apps/web/node_modules/vite/types/customEvent.d.ts",
+      "sha256": "de4a612aa8f1704af486f701e21993c786ba7d8cfed55fffa6684026aea2346e",
+      "size": 1970
+    },
+    {
+      "path": "apps/web/node_modules/vite/types/hmrPayload.d.ts",
+      "sha256": "3b89216a7e38a454985ad17bb2ff85792837dc812f2a89fa5f60ad0a2e216fa7",
+      "size": 1398
+    },
+    {
+      "path": "apps/web/node_modules/vite/types/hot.d.ts",
+      "sha256": "4e003c868b0d8f8ad200b96cbc653e18e513fa23e1c19c4fe3cc25d4394efc47",
+      "size": 1063
+    },
+    {
+      "path": "apps/web/node_modules/vite/types/import-meta.d.ts",
+      "sha256": "28a9d5c4741fdd62a94faea49ef7585d825e8379e5d23a2d773f723ce56d6b50",
+      "size": 249
+    },
+    {
+      "path": "apps/web/node_modules/vite/types/importGlob.d.ts",
+      "sha256": "e50d04d261120f8f9d07e85698735d5b88f3a66bc395c08ce26c3d817d141a73",
+      "size": 3477
+    },
+    {
+      "path": "apps/web/node_modules/vite/types/importMeta.d.ts",
+      "sha256": "72429cda84a47f092a3bf777bbc4ece9dda492fe0f02324aa7f197f3800089c6",
+      "size": 884
+    },
+    {
+      "path": "apps/web/node_modules/vite/types/internal/cssPreprocessorOptions.d.ts",
+      "sha256": "960bd764c62ac43edc24eaa2af958a4b4f1fa5d27df5237e176d0143b36a39c6",
+      "size": 1420
+    },
+    {
+      "path": "apps/web/node_modules/vite/types/internal/esbuildOptions.d.ts",
+      "sha256": "e0864480ea083087d705f9405bd6bf59b795e8474c3447f0d6413b2bce535a09",
+      "size": 672
+    },
+    {
+      "path": "apps/web/node_modules/vite/types/internal/lightningcssOptions.d.ts",
+      "sha256": "4ec16d7a4e366c06a4573d299e15fe6207fc080f41beac5da06f4af33ea9761e",
+      "size": 520
+    },
+    {
+      "path": "apps/web/node_modules/vite/types/internal/rollupTypeCompat.d.ts",
+      "sha256": "7d3e062a778b8f5ea4f0cac7e925e31f88e6739812ebc5f827474324a4048f14",
+      "size": 791
+    },
+    {
+      "path": "apps/web/node_modules/vite/types/internal/terserOptions.d.ts",
+      "sha256": "f582b0fcbf1eea9b318ab92fb89ea9ab2ebb84f9b60af89328a91155e1afce72",
+      "size": 384
+    },
+    {
+      "path": "apps/web/node_modules/vite/types/metadata.d.ts",
+      "sha256": "e67cbea16f1994af89efd700542dbf3828a46a52b29e4d67e801bd7869dc103c",
+      "size": 1133
+    },
+    {
+      "path": "apps/web/package.json",
+      "sha256": "8f94da67c60ce9ef59f05c2a5f3848220bd04f74164574668155ae2e7926a437",
+      "size": 722
+    },
+    {
+      "path": "apps/web/src/api/client.ts",
+      "sha256": "3ea08d115898e4583dc3d9f36133f68613c1ba7d0f266510adade218672c0ea9",
+      "size": 37810
+    },
+    {
+      "path": "apps/web/src/api/contracts.ts",
+      "sha256": "8a57ddddd8b7867f9d2c33317690a313da411f5d480e3f1af6b7eb1eff2e0aed",
+      "size": 3829
+    },
+    {
+      "path": "apps/web/src/api/mock-data.ts",
+      "sha256": "762df022c3eb4cae40f50108e256434b7dc8c64a8dcd9538edc1962fb707fc2b",
+      "size": 15515
+    },
+    {
+      "path": "apps/web/src/api/models.ts",
+      "sha256": "b1dfd9b6f0c25d5d83aecbb11bb66981d42d6af1e4791d4a465243cc36012b26",
+      "size": 25488
+    },
+    {
+      "path": "apps/web/src/app/data-mode.ts",
+      "sha256": "9614de266d9f2c2519b735f43807c16dbcf22e64beb2528c4eee196983453d68",
+      "size": 2689
+    },
+    {
+      "path": "apps/web/src/app/page-chrome.ts",
+      "sha256": "a290237f279a99d9ad21e3987fe18a0bb84cbe9ca9beddf12b27e566e70d4917",
+      "size": 4414
+    },
+    {
+      "path": "apps/web/src/app/process-contract.ts",
+      "sha256": "f0a25b659bdfa6202797505d67371faa11e234431c4ab33de37e349d50055f9c",
+      "size": 1356
+    },
+    {
+      "path": "apps/web/src/app/router.tsx",
+      "sha256": "3be4c086ff9898a0a204f064563277712077ada5eff621644ba55aed9d892b92",
+      "size": 1186
+    },
+    {
+      "path": "apps/web/src/app/shell.tsx",
+      "sha256": "9dda27b998b53ad70bee56db94cbd253be1b644a302d69e693e6c371eb66f5cc",
+      "size": 22543
+    },
+    {
+      "path": "apps/web/src/app/url-state.ts",
+      "sha256": "072edfea914d385b1cdb51d46903443cf52ea551abecea23f704453b6f182a2d",
+      "size": 2070
+    },
+    {
+      "path": "apps/web/src/index.ts",
+      "sha256": "bd900fbc3f1470aba84043cdd354d73f3d6507553661e39bb029414bf1261f8f",
+      "size": 2186
+    },
+    {
+      "path": "apps/web/src/main.tsx",
+      "sha256": "eee8f4d6f3d9bfd028a2fd1ae52c58a3439919f08ed004b10c2bc144450de075",
+      "size": 708
+    },
+    {
+      "path": "apps/web/src/styles/app.css",
+      "sha256": "1c73c7a7734f56267d532581719d51e91e081034cff3f8f836b3621ebf912ab5",
+      "size": 7247
+    },
+    {
+      "path": "apps/web/src/styles/tokens.css",
+      "sha256": "a7b1c813bf3b0350dd7ac0bd516eb6c16e2d534c94d8419e1074c68edddcd98e",
+      "size": 717
+    },
+    {
+      "path": "apps/web/src/types/css.d.ts",
+      "sha256": "da5bf71d48cf909584a01c80b445f730507068f5b34c920f352e2bfcf0315e4c",
+      "size": 24
+    },
+    {
+      "path": "apps/web/src/types/import-meta.d.ts",
+      "sha256": "6a643cefd551bc6af93c5d0a1ae5c819e5ed8e5d6c2fd71c44a2574ac666d555",
+      "size": 137
+    },
+    {
+      "path": "apps/web/tsconfig.json",
+      "sha256": "08d14185e9ef726ff624d50ad3acbfa4b833bbbf68d1977f809639b23545440b",
+      "size": 280
+    },
+    {
+      "path": "apps/web/vite.config.ts",
+      "sha256": "65b54296ff7020264c1a88e8c9137b79a9d19db255238d069529f3b759bce90b",
+      "size": 146
     },
     {
       "path": "automation.config.sh",
@@ -85,8 +365,8 @@
     },
     {
       "path": "backlog/bws_full_implementation.csv",
-      "sha256": "8cad8a545048ff88cdc39d364abc44c8dcbaf36e6dc81f919482e37fdafd6282",
-      "size": 4541
+      "sha256": "9181ea023ef7bfd6f62f51933b9958cdc1c134a5e2707cc4e325f0696afa2618",
+      "size": 4591
     },
     {
       "path": "check_progress.sh",
@@ -127,6 +407,21 @@
       "path": "database/migrations/surebet/001_create_upstream_locks_and_import_runs.sql",
       "sha256": "9e42a36b06adc858c25e72c4fd6ab41500cdfdcbbb3e0a7ae556efd2ec771584",
       "size": 2004
+    },
+    {
+      "path": "database/migrations/surebet/002_create_pinned_strategy_exports.sql",
+      "sha256": "ade03b500f36cfc1bd1b85aaa551db6945918e25a64f6934b3d85f6eec245e3d",
+      "size": 1503
+    },
+    {
+      "path": "database/migrations/surebet/003_create_strategy_ledger_entries.sql",
+      "sha256": "b3a7695bfba8fedaa0bb3fccefdde9ae11d893e63a67b493647f0818ce507071",
+      "size": 2530
+    },
+    {
+      "path": "database/migrations/surebet/004_create_worker_jobs.sql",
+      "sha256": "9756445dbfbdac6226413098d1253527578d9420543287842c30d034df162b9c",
+      "size": 5389
     },
     {
       "path": "decisions/ADR-0001-repo-boundary-and-no-provider-connections.md",
@@ -205,8 +500,8 @@
     },
     {
       "path": "docs/011_validation_matrix.md",
-      "sha256": "8d7f97f233791bd39826c8902aedff8d16d7f064b0e716df1fbf9613df3c7360",
-      "size": 1606
+      "sha256": "a096e7c1a26dc47a561374cf3b5e2ec538eb2a1b93ae0634a02a6fa371cf3d84",
+      "size": 1752
     },
     {
       "path": "docs/012_runbook.md",
@@ -295,8 +590,8 @@
     },
     {
       "path": "docs/029_full_implementation_task_ledger.md",
-      "sha256": "be6cceaaf6ddd6dc5087e8ce522fdb6837dce983e04b5ad4b2d9a39335f85e86",
-      "size": 1045
+      "sha256": "519bbd01d79a362eeeba495ee0fb696ab4100a2279febb7ebb33c307f07845ff",
+      "size": 1084
     },
     {
       "path": "docs/030_upstream_compatibility_and_pin_contract.md",
@@ -315,7 +610,7 @@
     },
     {
       "path": "docs/MASTER_PLAN.md",
-      "sha256": "cf77095bc22234979d2059833effad36956e1541d310946f30bd81ad4ac26a88",
+      "sha256": "753c1b6b7332b16a54d85897e80a6a713d1f7f15a5a3a6615b909853197d28a1",
       "size": 3108
     },
     {
@@ -330,7 +625,7 @@
     },
     {
       "path": "docs/automation/README.md",
-      "sha256": "88bb25edac86230c348eed6c1668c50ad938cbc2abcf22ad740b2f9985b5f307",
+      "sha256": "4f1db15f091f75d8ca96df2d6ba6575affed0261aa7be55c53e17e2070739001",
       "size": 2635
     },
     {
@@ -345,8 +640,8 @@
     },
     {
       "path": "docs/automation/autonomous-implementation.md",
-      "sha256": "a223160e675866ce85e216c55cab4f4c85d870891d73889a2f20d81577d34d6d",
-      "size": 2173
+      "sha256": "072717a28c7727806fe86651f4a0b69bcfab9b940f531c1cc727056f2567fb47",
+      "size": 2311
     },
     {
       "path": "docs/automation/bugfix-autopilot.md",
@@ -355,8 +650,8 @@
     },
     {
       "path": "docs/automation/current-implementation-task.md",
-      "sha256": "ce7d51daede65cff9e51087dbcd7dc5822795b0f8bcb79028772d744268353b6",
-      "size": 3160
+      "sha256": "2a2c03e62bbcebdd9132bc75e66f348eb5e808f121865ef466f70dd507301dd3",
+      "size": 5289
     },
     {
       "path": "docs/automation/paper-autopilot.md",
@@ -370,7 +665,7 @@
     },
     {
       "path": "docs/automation/repo-profile.md",
-      "sha256": "4e50825d3317ddc5be8d26d4d9d66c6894c398bdaad8d827b6d35905016b32c8",
+      "sha256": "e74e1d798fd7cff722cd50e91acbdff5ba44c2260b15217dd376647c1fd40208",
       "size": 1054
     },
     {
@@ -420,18 +715,18 @@
     },
     {
       "path": "docs/operations/autonomous_72h_runbook.md",
-      "sha256": "0de1d6faa10f0d737e82c6c7a116fc1c76b72e71f083fdbb4d122a72ebcaffa5",
+      "sha256": "f24b32b37014a8e81c7c14f6f6a072779030ac6688cc0394e5eb59ffe7807e32",
       "size": 847
     },
     {
       "path": "docs/operations/service_run.md",
-      "sha256": "67a3316430acb682e3c781e1a8930485c2ecff17bfd463aceb144202d0c2ed39",
-      "size": 639
+      "sha256": "34e2b9f7dce76b32196056a23a9d576458d9c6c2a4c96d42d440098d09f4b0e7",
+      "size": 1610
     },
     {
       "path": "docs/repo_status_current.md",
-      "sha256": "82784a1f0738e8fd843963a66c9049840d925becfcf21df59df40d5e3b2d313b",
-      "size": 3340
+      "sha256": "d87a8ba3c72b71e16c179e34d97842fb4e9d13df93e8cd62fdd873b8edd323da",
+      "size": 3568
     },
     {
       "path": "open_log.sh",
@@ -440,13 +735,13 @@
     },
     {
       "path": "package-lock.json",
-      "sha256": "debddf69f9996feefd6545046a369441065ed5c41efd4a442019ccc9a1b544f0",
-      "size": 2382
+      "sha256": "a184bd12b31fe127067b63a3171e545e469c2f86268477565fc14aeca102365c",
+      "size": 34655
     },
     {
       "path": "package.json",
-      "sha256": "c1f245929fd487bb2a4f616e2f6a31fb8753b1a39e97406cb0bdeaceb83245e1",
-      "size": 3999
+      "sha256": "e429ffe283fe3d7810d865fc08902cfa10b5fb2b505360e19d21b98318378019",
+      "size": 4284
     },
     {
       "path": "packages/bootstrap/package.json",
@@ -470,8 +765,28 @@
     },
     {
       "path": "packages/bootstrap/src/adapters/betting-win-query-client.ts",
-      "sha256": "a7de7e654ed9eb37023ba8a113f0b7fff8d377a262fca02801b638901ee187cd",
-      "size": 1301
+      "sha256": "4ec9454ef95cb5ac5e59839f8a0c65ba328a21fd00c62f317a72074bc1146c5c",
+      "size": 33546
+    },
+    {
+      "path": "packages/bootstrap/src/adapters/betting-win-strategy-export-intake.ts",
+      "sha256": "8b0c306a729ad4ef7175e37a6e0a68d59af39a483f66098f9c34f9de4b2d2780",
+      "size": 34898
+    },
+    {
+      "path": "packages/bootstrap/src/api/bws-read-only-query-http.ts",
+      "sha256": "e401756d6efed50e78b800eadf54bbc1fe0a63999bcacd72212527ce62edf11b",
+      "size": 10558
+    },
+    {
+      "path": "packages/bootstrap/src/api/bws-read-only-query-service.ts",
+      "sha256": "167e3b50fadd2afbe5d24c3af3da973b19fc1ffdb76b4d996cb9f4d29401c30d",
+      "size": 30517
+    },
+    {
+      "path": "packages/bootstrap/src/backtest/standard-binary-backtest.ts",
+      "sha256": "f3730d6988175b80a5834b5883077253f5fb3ee2561cb21f305f4d05a20730ca",
+      "size": 33271
     },
     {
       "path": "packages/bootstrap/src/cli/local-paper-batch-report.ts",
@@ -480,8 +795,8 @@
     },
     {
       "path": "packages/bootstrap/src/cli/local-paper-report.ts",
-      "sha256": "f23d9a73ec5cfc68b654d06125c9899dad65255b5821943ecc00d7531e6c93f8",
-      "size": 24352
+      "sha256": "fc4076c8cb1aa7cfe4b254f0d1605a904240793879699fad7b132510a23c6cfc",
+      "size": 18880
     },
     {
       "path": "packages/bootstrap/src/contracts/betting-win-contract-imports.ts",
@@ -500,18 +815,33 @@
     },
     {
       "path": "packages/bootstrap/src/identity/equivalence-precheck.ts",
-      "sha256": "0b64559851b60f014b10b989c2889531e651f7f1a8086b5b337a89df49b4235c",
-      "size": 1148
+      "sha256": "2b1671eb9da1f5a5dfc01b3120bac1c48197f6a6cf07b347f399cc83cf127045",
+      "size": 6086
     },
     {
       "path": "packages/bootstrap/src/identity/market-group-key.ts",
-      "sha256": "e104d47d68d7c379626d0d5010034ba31a6385f07a8eece385d27e3bd05f2d14",
-      "size": 511
+      "sha256": "0f0a8cf9229c90e6c70e7adf1df0ed8e0e386fd0df2dc3cf1338a78ffbd19620",
+      "size": 618
     },
     {
       "path": "packages/bootstrap/src/index.ts",
-      "sha256": "c7893c9c66d9769c85cebc98267366cd3b930c4d7baf35e97c500f7b3beec99a",
-      "size": 1844
+      "sha256": "3a64f69e4ef4bfae77662588acd1d601e5d8ec170a7666b0dab1d173fd4c824b",
+      "size": 2504
+    },
+    {
+      "path": "packages/bootstrap/src/operations/service-runtime.ts",
+      "sha256": "965f475944ae752b800b43b21bee0b497f2d3f3ea430cf702543e534dbb1ab79",
+      "size": 22124
+    },
+    {
+      "path": "packages/bootstrap/src/opportunity/standard-binary-derivation.ts",
+      "sha256": "04059b7cd11e946fd8f997d215732e514b5d03cf9faaf9ba86bb42910f25d653",
+      "size": 2563
+    },
+    {
+      "path": "packages/bootstrap/src/opportunity/standard-binary-stake-solver.ts",
+      "sha256": "f485585ca582e0761520f47925b4caf96908c5032dbcadfa9ee266c12595c12d",
+      "size": 6536
     },
     {
       "path": "packages/bootstrap/src/quotes/fee-cost-model.ts",
@@ -520,13 +850,13 @@
     },
     {
       "path": "packages/bootstrap/src/quotes/quote-capacity.ts",
-      "sha256": "b72b822a2010ad98d97aaddf917c0ee1008a090fcc27006f01b819d8ae5a4f1a",
-      "size": 540
+      "sha256": "d2b4440f5d9846f2d75acefc7e48de4d22ad50a8120e29960ec4f7bf1bf9d47f",
+      "size": 1127
     },
     {
       "path": "packages/bootstrap/src/quotes/quote-freshness.ts",
-      "sha256": "0ffeeb11212fbf31f2f2fb57d9e256341d2f8549ee29e4f7ef7cc37da6e3ade1",
-      "size": 870
+      "sha256": "bbb20546aca4dd8c243bf73a49e7a7b62f702509e421680a011e9542100b49c9",
+      "size": 1382
     },
     {
       "path": "packages/bootstrap/src/reporting/blocker-report.ts",
@@ -544,9 +874,14 @@
       "size": 10929
     },
     {
+      "path": "packages/bootstrap/src/runtime/private-paper-runtime.ts",
+      "sha256": "a23a87f9d7d938f3c41d37f339ebf09bb4235e1cbd61af5496d6c7d641e1d96d",
+      "size": 49734
+    },
+    {
       "path": "packages/bootstrap/src/scenarios/complete-set.ts",
-      "sha256": "ac267c3cc9051febf24110b359a597bf557189f6e1ee3f40a0718d7e18689846",
-      "size": 9242
+      "sha256": "bdea2ee4db048e553d69f379ab4599c28bae68e372b2821bacb2a64611c98bac",
+      "size": 9072
     },
     {
       "path": "packages/bootstrap/src/scenarios/scenario-cashflow.ts",
@@ -564,6 +899,11 @@
       "size": 6034
     },
     {
+      "path": "packages/bootstrap/src/simulation/non-atomic-completion.ts",
+      "sha256": "36ea37ef252c475b365b6058b5403f4562e805ee2e5fe182ea6c7ccd0436953c",
+      "size": 24536
+    },
+    {
       "path": "packages/bootstrap/src/simulation/partial-fill.ts",
       "sha256": "84ea147e7d449e3ffdfcfcd662f29803dc5905f4d207b556ed04ab6b39071a93",
       "size": 826
@@ -575,8 +915,8 @@
     },
     {
       "path": "packages/bootstrap/src/simulation/settlement-replay.ts",
-      "sha256": "87845f91426dae12c2ed17177f54ba4508e0951af69bc9b4dd56f155a9be8245",
-      "size": 4295
+      "sha256": "b0341e3f502cf08b3f9d4483109ad3a8aa4332f8a636f14a1c83322466a0d73e",
+      "size": 21245
     },
     {
       "path": "packages/bootstrap/src/solver/constraints.ts",
@@ -592,6 +932,21 @@
       "path": "packages/bootstrap/src/solver/stake-vector.ts",
       "sha256": "5012ca0516ee663507ca35996d9a7decdf68222e8f87612d892979a92db0adfe",
       "size": 14502
+    },
+    {
+      "path": "packages/bootstrap/src/strategy/strategy-ledger.ts",
+      "sha256": "d05e339a5692a9218f2146c153570ee7d9c8d79ae88282e162b7ece0c0cb5dbc",
+      "size": 37932
+    },
+    {
+      "path": "packages/bootstrap/src/workers/bounded-job-worker.ts",
+      "sha256": "12cd077ed59032287fcfc5af22693aa994db78e4af14c428a9e23f2e9017740c",
+      "size": 10502
+    },
+    {
+      "path": "packages/bootstrap/src/workers/private-paper-runtime-jobs.ts",
+      "sha256": "730655e7aec81825d88473e2b10271a1d09a76a0ae4583b5cf9430a3b6e738f6",
+      "size": 20076
     },
     {
       "path": "packages/persistence/package.json",
@@ -610,8 +965,8 @@
     },
     {
       "path": "packages/persistence/src/index.ts",
-      "sha256": "d1225cb2d567d267cc75b06320c350fd0de05e35caae4f5fb8d0644c4f50c6ec",
-      "size": 263
+      "sha256": "a531fe4485cbe4bf1b90851e2b079cdfb6e2f96643c40c3bf862e3921b69ed7a",
+      "size": 451
     },
     {
       "path": "packages/persistence/src/migrations.ts",
@@ -620,8 +975,8 @@
     },
     {
       "path": "packages/persistence/src/psql.ts",
-      "sha256": "134cdb583f8b3e44811412627760bd28933753ce7107ade1ffc01605705891f1",
-      "size": 5794
+      "sha256": "86053cd5690b15a2ba6ea210e3073c3324017d12fb36ec1fe815c84edab50343",
+      "size": 9068
     },
     {
       "path": "packages/persistence/src/repositories/import-run-repository.ts",
@@ -629,9 +984,24 @@
       "size": 10218
     },
     {
+      "path": "packages/persistence/src/repositories/pinned-strategy-export-repository.ts",
+      "sha256": "27fd604721837f2e6452c00509ba9b7acece5367911df87b4919587b50251355",
+      "size": 20452
+    },
+    {
+      "path": "packages/persistence/src/repositories/strategy-ledger-repository.ts",
+      "sha256": "a3874447d9cf6334eafd4eaf1e7a45c3cd95b48fe865fcc68ba1f5583ca32528",
+      "size": 16625
+    },
+    {
       "path": "packages/persistence/src/repositories/upstream-lock-repository.ts",
       "sha256": "c77663c55b41255a4c1f455012d5427b55f8a5cf1c733e7b800cc334f407a8bc",
       "size": 4935
+    },
+    {
+      "path": "packages/persistence/src/repositories/worker-job-repository.ts",
+      "sha256": "bdd197be4c92313898763d8daa14e84c47ffd6a45f60c38ef62b1183380a9049",
+      "size": 43774
     },
     {
       "path": "packages/persistence/src/types.ts",
@@ -945,7 +1315,7 @@
     },
     {
       "path": "scripts/validate_autonomous_continuation_contract.py",
-      "sha256": "a307f0d6e8874840185bc17bb12a5a69848032418c5ebb6ab76f173c90c7a6a9",
+      "sha256": "32b7ddbffa037520e09ec957b8726edb0257618a27a7b080cafbbb88e798d577",
       "size": 2679
     },
     {
@@ -957,6 +1327,11 @@
       "path": "scripts/validate_betting_win_upstream_contract.py",
       "sha256": "0a0258c6f8bd982dca6e3d40c722e4281a0b3e4f668586b6eb8703220fbb03ea",
       "size": 9757
+    },
+    {
+      "path": "scripts/validate_bws_loopback_acceptance.mjs",
+      "sha256": "6b4bf27cac03594544850ca9fcc8c138d1bf3c51d2b38371e230392c220ecb05",
+      "size": 3539
     },
     {
       "path": "scripts/validate_contract_boundary.py",
@@ -975,17 +1350,17 @@
     },
     {
       "path": "scripts/validate_full_implementation_program.py",
-      "sha256": "b76c1ae4508327f6c0a9c3af495a49bb009e95f92befcf701cb8b2d2ee66f30f",
-      "size": 6876
+      "sha256": "a7cba1ff98a9de6a30b2b362babd27833a5ae139c1fb7e4826b19c6b19f1c3fa",
+      "size": 7260
     },
     {
       "path": "scripts/validate_local_engine_backlog_contract.py",
-      "sha256": "6c65464bff76308c0fc5c37a889f8c7866b3dd44010b55ed90c252a98654491c",
+      "sha256": "7a2cd3bc59274a67eac0366298330384809bd96dc602e3dd25d1ab146db15701",
       "size": 2271
     },
     {
       "path": "scripts/validate_master_plan.py",
-      "sha256": "a868d0a9960d154dd1118b95386b12b350a6ee0d6273bec269d2e7ff224b0d2f",
+      "sha256": "8b6233ad726d899bd987a4e7509bba6af226a9084cfe345a5da82b53f4fdd637",
       "size": 2684
     },
     {
@@ -1010,8 +1385,8 @@
     },
     {
       "path": "scripts/validate_repo.py",
-      "sha256": "48b3604e6130f7cc9da84e1da1d703a6abbf96c810bbb0dd6d28adb751764aea",
-      "size": 12658
+      "sha256": "1421a486d13c00f4d8e225b04f0199914e7b5e5e95b9017733599c55abe2d9ff",
+      "size": 12886
     },
     {
       "path": "scripts/validate_shell_local_assignments.py",
@@ -1046,6 +1421,26 @@
     {
       "path": "src/adapters/betting-win-query-client.ts",
       "sha256": "d0be639f2d5449a110592d0505c650d64335590cb2d86de51a22aa7e92f59803",
+      "size": 83
+    },
+    {
+      "path": "src/adapters/betting-win-strategy-export-intake.ts",
+      "sha256": "7554602cf3b3ab5b553c07f904dd4029111df5f4c4bc2fb9e29ef687942f2876",
+      "size": 93
+    },
+    {
+      "path": "src/api/bws-read-only-query-http.ts",
+      "sha256": "5b0c6ba1d552bb3f44368ea21bcc894a49f6cd01fb94a81637e068ae8a886cf8",
+      "size": 78
+    },
+    {
+      "path": "src/api/bws-read-only-query-service.ts",
+      "sha256": "7844834a44e07db032f9fad357755e5d939931a6cabb176ed7e52bcba12c46b9",
+      "size": 81
+    },
+    {
+      "path": "src/backtest/standard-binary-backtest.ts",
+      "sha256": "bb6e335ac68114beeafd03edc8f7840c8ce8b874b04e7470743f8ec9b68abef4",
       "size": 83
     },
     {
@@ -1084,6 +1479,21 @@
       "size": 75
     },
     {
+      "path": "src/operations/service-runtime.ts",
+      "sha256": "0875e59c64aab8c0f840e3e6c8642e7b8ce08ca340e054bb4f6db53b892b629e",
+      "size": 76
+    },
+    {
+      "path": "src/opportunity/standard-binary-derivation.ts",
+      "sha256": "68e30478957274111ae43aadbbd3b8e20e46ced35687f90ef596b7d19ac6c472",
+      "size": 88
+    },
+    {
+      "path": "src/opportunity/standard-binary-stake-solver.ts",
+      "sha256": "0dddae578a40b577c32a7d930644432af7ea251a8efe81ab9bc5a797a77406db",
+      "size": 90
+    },
+    {
       "path": "src/persistence/surebet-persistence.ts",
       "sha256": "7ff6366cccab5b31e4db88657b1e0435b801c1104345265f7f0b1e3ba9198571",
       "size": 57
@@ -1119,6 +1529,11 @@
       "size": 78
     },
     {
+      "path": "src/runtime/private-paper-runtime.ts",
+      "sha256": "e51cbfee3c32a96d4c3998e513f88575cb86c12fb04d074d326c22dd76dcefc7",
+      "size": 79
+    },
+    {
       "path": "src/scenarios/complete-set.ts",
       "sha256": "9e861f9bc194f2edddbb253c2917f9849752fc0af72c6e83ed18c64a2a333792",
       "size": 72
@@ -1137,6 +1552,11 @@
       "path": "src/simulation/leg-completion.ts",
       "sha256": "c2eb6c1edb3398e6fb5fbb101a3657324024eb525a5f56411abd4f8cb44b75b6",
       "size": 75
+    },
+    {
+      "path": "src/simulation/non-atomic-completion.ts",
+      "sha256": "c59b045e0072a045de0b7b364269dd7c79b4d0f84ad8da6ebce6b805f2b76a69",
+      "size": 82
     },
     {
       "path": "src/simulation/partial-fill.ts",
@@ -1169,9 +1589,24 @@
       "size": 69
     },
     {
+      "path": "src/strategy/strategy-ledger.ts",
+      "sha256": "7ed33648bd5a4fe87eecfa3a9040f32d42bc7e5726960142c949e74967f68f19",
+      "size": 74
+    },
+    {
       "path": "src/upstream/betting-win-upstream-lock.ts",
       "sha256": "01fb9b916a76ce63729eab7426720573fc497c9f88cd296a467a9683ca58807d",
       "size": 356
+    },
+    {
+      "path": "src/workers/bounded-job-worker.ts",
+      "sha256": "c3fb70978f6152f7f658b651555b1062a8703fa7297e60e4576a689b53b5ccfe",
+      "size": 76
+    },
+    {
+      "path": "src/workers/private-paper-runtime-jobs.ts",
+      "sha256": "4b3927fc7bd408dcb4ce0e220445c37bcffc72b473fd193b4116722ad03bc2e6",
+      "size": 84
     },
     {
       "path": "start.sh",
@@ -1205,13 +1640,23 @@
     },
     {
       "path": "tests/betting-win-adapters.test.ts",
-      "sha256": "1563c84b9e97318505ff41a244925a201751784b3aae222fc9f90afa403596ac",
-      "size": 14082
+      "sha256": "e1e41403136a23fe492087475f0f174f0e615750a555afe3794424a0283a6a2a",
+      "size": 14081
+    },
+    {
+      "path": "tests/betting-win-query-client.test.ts",
+      "sha256": "7d095736f5e30ab70967357a8b6ff2bed0351fa412c89aade5ac7987c3fc3833",
+      "size": 12915
     },
     {
       "path": "tests/betting-win-resource-records.test.ts",
       "sha256": "4f618bc61e5fc37da4b36a1204f7cb5c31908be7e4e232f299de8e16df8172a3",
       "size": 4952
+    },
+    {
+      "path": "tests/betting-win-strategy-export-intake.test.ts",
+      "sha256": "df60108603c307f616bee0f639098bd38d073d29a252f47976c0727796e3a3db",
+      "size": 11155
     },
     {
       "path": "tests/betting-win-upstream-contract.test.ts",
@@ -1224,19 +1669,54 @@
       "size": 8471
     },
     {
+      "path": "tests/bounded-worker-jobs.test.ts",
+      "sha256": "aabfe2a253af562310e371b304653f04fbb042f400ec5123aae05306e16b84d6",
+      "size": 24931
+    },
+    {
       "path": "tests/bugfix-autopilot-contract.test.ts",
       "sha256": "43416e0ea2841ea719a591e3f993f1cdd2b58690383bb9d80371f070f870305c",
       "size": 16008
     },
     {
+      "path": "tests/bws-loopback-acceptance-command.test.ts",
+      "sha256": "baa3e5bedfa75c4be4affcec46fadf094aa5811578d938b70e1d7a742859b3fa",
+      "size": 3546
+    },
+    {
+      "path": "tests/bws-loopback-acceptance.test.ts",
+      "sha256": "2117ddde97d21b900e0e3429b0792c0e68a2602ae7f5412d5ef908d284344a67",
+      "size": 19950
+    },
+    {
+      "path": "tests/bws-operator-cockpit.test.ts",
+      "sha256": "5558d117a51c01b00575a58d3c77fd49259f78d15e1d099f90bc9143b3ca0e76",
+      "size": 17709
+    },
+    {
+      "path": "tests/bws-read-only-query-api.test.ts",
+      "sha256": "e48af8414dc66f3b775f6c0f4585dc1e262d7a8e9853aceee8288561cc7a487a",
+      "size": 16736
+    },
+    {
+      "path": "tests/bws-service-runtime.test.ts",
+      "sha256": "51726af7d6c75cd8a23ca932f18a5de565f2876a6aa944512256050bb885395d",
+      "size": 12932
+    },
+    {
       "path": "tests/complete-set.test.ts",
-      "sha256": "78c399607e06cc1e246d521382c909668af4b419d9f68df16ff87d47b6632c14",
-      "size": 8209
+      "sha256": "0c82fd01c33b8c3bff9e44e6127c43ce9166d3771aef101261243f6b318f6cd6",
+      "size": 9011
     },
     {
       "path": "tests/contract-boundary.test.ts",
       "sha256": "c60d759a656e4bc09039ff2680dbc05c4921293e29b95d421967a77e6ef19916",
       "size": 840
+    },
+    {
+      "path": "tests/equivalence-precheck.test.ts",
+      "sha256": "5d10c93f956ee2efa6fc7b9c78c84de607190dd4191fdbfb7c0579c186149bbc",
+      "size": 4511
     },
     {
       "path": "tests/fixtures/betting-win-exports/.gitkeep",
@@ -1289,6 +1769,11 @@
       "size": 2369
     },
     {
+      "path": "tests/fixtures/private-paper-mode-smoke/blocked-insufficient-capacity-bundle.json",
+      "sha256": "2d27e001c87fee4e8b7390737105bf9924de56bd903320b8b9c47acb1a2607e3",
+      "size": 2383
+    },
+    {
       "path": "tests/fixtures/private-paper-mode-smoke/blocked-missing-settlement-bundle.json",
       "sha256": "8c0244387d55e451ab705a42962c6afb34696c837bd9418b7d3344ea1302805b",
       "size": 1908
@@ -1315,8 +1800,8 @@
     },
     {
       "path": "tests/full-implementation-program-contract.test.ts",
-      "sha256": "8e77697e11f739759c07a1e2d87ee8c0d7b21b758a16fa65130fb5a111d0db22",
-      "size": 1545
+      "sha256": "c500eee1397a5e0237cc38bb6bf9825677a93e33fc0c7f365e8c21b81085b256",
+      "size": 1841
     },
     {
       "path": "tests/helpers.ts",
@@ -1340,13 +1825,23 @@
     },
     {
       "path": "tests/local-paper-report.test.ts",
-      "sha256": "9f51a9f6b03547e5b8a864c297caa24a1135739b9083e644341d6f8031315066",
-      "size": 16894
+      "sha256": "ffa27917bbde285520869817071edbd37d416464733705fa2ad837da8213857f",
+      "size": 20261
     },
     {
       "path": "tests/market-group-key.test.ts",
       "sha256": "bf18bc8538713375a331691bdcdb71be259d02da70cfea64c4fbe1764139c21c",
       "size": 472
+    },
+    {
+      "path": "tests/non-atomic-completion.test.ts",
+      "sha256": "6f150619a310dfda6413dfa0414c025f890d978d2ee6f1ec277802b7d4de9f3f",
+      "size": 7295
+    },
+    {
+      "path": "tests/opportunity-derivation.test.ts",
+      "sha256": "0a1649cd4e2d89e794591ede1a790b1554bd70c33a1a7a35dd08048c02e0f2fe",
+      "size": 5936
     },
     {
       "path": "tests/packaging-helpers.test.ts",
@@ -1374,9 +1869,14 @@
       "size": 2640
     },
     {
+      "path": "tests/private-paper-runtime.test.ts",
+      "sha256": "77a7c17391bf8c02e76d5a89ddfeca61e333c80df0c7938e6f45520f6046cdaf",
+      "size": 31944
+    },
+    {
       "path": "tests/quote-capacity.test.ts",
-      "sha256": "5c0ba02e5624d62d131b459988721e43d08c6385abce36df48c7a68fd3af9a26",
-      "size": 786
+      "sha256": "dfef074ae3cb8cf5886c86934af623271baee3770c61382e69e65e250cf4e30f",
+      "size": 3041
     },
     {
       "path": "tests/residual-exposure.test.ts",
@@ -1425,8 +1925,8 @@
     },
     {
       "path": "tests/settlement-replay.test.ts",
-      "sha256": "2e368e1fd886b8f44c478ccca769e4fdf2064716db1b9e708ff5c29e2809c5f8",
-      "size": 5304
+      "sha256": "d5da388ca4ddca924a19a7af108a0158fa30d0309613d2e9540498c09b08d989",
+      "size": 13515
     },
     {
       "path": "tests/stake-vector.test.ts",
@@ -1434,9 +1934,24 @@
       "size": 11252
     },
     {
+      "path": "tests/standard-binary-backtest.test.ts",
+      "sha256": "48619961cc7394b8e521aa804bfb41d98bf5790d55df12669efcf2c149e71fdd",
+      "size": 14683
+    },
+    {
+      "path": "tests/standard-binary-stake-solver.test.ts",
+      "sha256": "f4b8cc2766ed57f0749c86550d18b5c53350d6ff3de35e5c5b88371f2bbd07d2",
+      "size": 4042
+    },
+    {
+      "path": "tests/strategy-ledger.test.ts",
+      "sha256": "d56ee981efc67677ca00473965c84f9821423629b6c58514d128202a6c11a976",
+      "size": 11877
+    },
+    {
       "path": "tests/surebet-persistence.test.ts",
-      "sha256": "c6ac6a3c2fbbe53432c40c17defa0e74acee1c7d85e62c56f395e75a60c33275",
-      "size": 10409
+      "sha256": "2c34df8b43a888b6cae651e2ef843e190f9e3da6496aa4ec801df96421988ab6",
+      "size": 16603
     },
     {
       "path": "tests/telegram-notify-format.test.ts",
@@ -1465,8 +1980,8 @@
     },
     {
       "path": "tests/validate-repo-contract.test.ts",
-      "sha256": "4712043072e79200305f18dcfbb6203573fbbfa5d03a539d6a59f20b178a92f6",
-      "size": 1467
+      "sha256": "482117d39236506f2891e5eed387650880b5ec81ac94dfb0fa5ce5ac125b9f7b",
+      "size": 1503
     },
     {
       "path": "tests/validate-shell-local-assignments.test.ts",
@@ -1480,13 +1995,13 @@
     },
     {
       "path": "tests/validation-matrix-contract.test.ts",
-      "sha256": "13fed3ba969487ccc1abedc63503cc91064756028f05c213b71a562e294ecd4a",
-      "size": 953
+      "sha256": "0ea65f5830c56d26ad7d8f37aaa0c19f467a24de15b1f717b04eac5f94e5b08e",
+      "size": 997
     },
     {
       "path": "tests/workspace-migration-compat.test.ts",
-      "sha256": "68d88c1352319331804beb6c4922286805c619d9997022b55d83729d72247997",
-      "size": 4163
+      "sha256": "32e8bbbc3ef077feb45d12e19e93b7512e919bc60a27b4106d10ce17dbb2f5f9",
+      "size": 6333
     },
     {
       "path": "tools/required_executable_paths.js",
@@ -1495,8 +2010,8 @@
     },
     {
       "path": "tsconfig.json",
-      "sha256": "c8058683fe204f4e53cb06482e17661e1212bbe2922477bc38a41eb940365f09",
-      "size": 497
+      "sha256": "74d9974568c23ab3d5c86f7a6783d39e6a5456c34581fdd44de8a2653bfda979",
+      "size": 547
     },
     {
       "path": "update_git.sh",

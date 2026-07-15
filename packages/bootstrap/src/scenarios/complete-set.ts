@@ -6,6 +6,7 @@ import type {
   BettingWinSettlementRecord,
 } from '../contracts/betting-win-resource-records.js';
 import { accepted, blocked, type BoundaryResult, type CompleteSetLeg, type OutcomeSide } from '../contracts/local-types.js';
+import { precheckCompleteSetEquivalence } from '../identity/equivalence-precheck.js';
 import { standardBinaryTerminalScenarios } from './terminal-scenario.js';
 
 export interface StandardBinaryCompleteSet {
@@ -184,13 +185,14 @@ export function assembleStandardBinaryCompleteSet(
 }
 
 export function validateStandardBinaryCompleteSet(legs: readonly CompleteSetLeg[]): BoundaryResult<StandardBinaryCompleteSetLegs> {
-  const outcomeSet = new Set(legs.map((leg) => leg.outcome));
-  if (legs.length !== 2 || outcomeSet.size !== 2 || !outcomeSet.has('yes') || !outcomeSet.has('no')) {
-    return blocked('NOT_STANDARD_BINARY_COMPLETE_SET', 'The first lane requires exactly one yes leg and one no leg.', 'Canonical yes/no complete-set legs.');
+  const equivalence = precheckCompleteSetEquivalence(legs);
+  if (!equivalence.ok) {
+    return equivalence;
   }
+
   return accepted({
     legs: Object.freeze([...legs]),
-    scenarioIds: standardBinaryTerminalScenarios().map((scenario) => scenario.scenarioId),
+    scenarioIds: equivalence.value.scenarioIds,
   });
 }
 
