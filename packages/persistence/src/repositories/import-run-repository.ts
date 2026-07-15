@@ -40,6 +40,16 @@ export interface SurebetImportRunRecord {
   readonly updatedAt: string;
 }
 
+interface RawSurebetImportRunRecord extends Omit<
+  SurebetImportRunRecord,
+  'completedAt' | 'failureCode' | 'failureDetails' | 'importedRecordCount'
+> {
+  readonly completedAt?: string | null;
+  readonly failureCode?: string | null;
+  readonly failureDetails?: JsonValue | null;
+  readonly importedRecordCount?: number | null;
+}
+
 export class SurebetImportRunRepository {
   readonly #config: SurebetPersistenceConfig;
 
@@ -148,7 +158,7 @@ WHERE import_run_id = ${quoteSqlLiteral(record.importRunId)};
   }
 
   get(importRunId: string): SurebetImportRunRecord | undefined {
-    const rows = queryPsqlJsonRows<SurebetImportRunRecord>(
+    const rows = queryPsqlJsonRows<RawSurebetImportRunRecord>(
       this.#config,
       `
 SELECT row_to_json(t)::text
@@ -176,7 +186,8 @@ FROM (
 ) AS t;
 `,
     );
-    return rows[0];
+    const record = rows[0];
+    return record === undefined ? undefined : normalizeImportRunRecord(record);
   }
 }
 
@@ -296,5 +307,22 @@ function toComparableFinalizedRecord(
     sourceLocator: existing.sourceLocator,
     startedAt: existing.startedAt,
     upstreamLockRecordId: existing.upstreamLockRecordId,
+  });
+}
+
+function normalizeImportRunRecord(record: RawSurebetImportRunRecord): SurebetImportRunRecord {
+  const {
+    completedAt,
+    failureCode,
+    failureDetails,
+    importedRecordCount,
+    ...requiredFields
+  } = record;
+  return Object.freeze({
+    ...requiredFields,
+    ...(completedAt == null ? {} : { completedAt }),
+    ...(failureCode == null ? {} : { failureCode }),
+    ...(failureDetails == null ? {} : { failureDetails }),
+    ...(importedRecordCount == null ? {} : { importedRecordCount }),
   });
 }

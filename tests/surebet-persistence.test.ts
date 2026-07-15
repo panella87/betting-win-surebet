@@ -152,6 +152,10 @@ test('surebet migrations and repositories pass disposable PostgreSQL idempotency
       metadata: { expectedSchema: 'betting-win.strategy-export.v1' },
     });
     assert.equal(createdRun.outcome, 'running');
+    assert.equal(createdRun.completedAt, undefined);
+    assert.equal(createdRun.importedRecordCount, undefined);
+    assert.equal(createdRun.failureCode, undefined);
+    assert.equal(createdRun.failureDetails, undefined);
 
     const restartedImportRuns = new SurebetImportRunRepository(databaseConfig);
     const finalizedRun = restartedImportRuns.finalize({
@@ -161,7 +165,10 @@ test('surebet migrations and repositories pass disposable PostgreSQL idempotency
       importedRecordCount: 42,
     });
     assert.equal(finalizedRun.outcome, 'succeeded');
+    assert.equal(finalizedRun.completedAt, '2026-07-14T10:05:00.000Z');
     assert.equal(finalizedRun.importedRecordCount, 42);
+    assert.equal(finalizedRun.failureCode, undefined);
+    assert.equal(finalizedRun.failureDetails, undefined);
     assert.equal(
       restartedImportRuns.finalize({
         importRunId: 'import-001',

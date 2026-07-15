@@ -13,7 +13,7 @@ backtesting_owner=betting-win-surebet
 paper_mode_owner=betting-win-surebet
 account_policy=separate_from_betting-win-betting
 current_task=BWS-510
-current_task_status=PENDING
+current_task_status=VALIDATED
 safe_local_completion_gate=BWS-510
 continuous_private_paper=BWS-600_BLOCKED_ON_ACCEPTED_BETTING_WIN_RUNTIME
 real_money_execution=BWS-900_PARKED
@@ -52,7 +52,7 @@ The uploaded archive has no Git metadata and no BW source manifest. `BWS-100` is
 
 ## Pending
 
-The binding sequence is `backlog/bws_full_implementation.csv`. `BWS-100` through `BWS-500` are validated and the first dependency-ready pending task is `BWS-510`. Safe local implementation continues through `BWS-510`.
+The binding sequence is `backlog/bws_full_implementation.csv`. `BWS-100` through `BWS-510` are validated. Safe local implementation is complete through `BWS-510`, and `BWS-600` remains externally blocked on accepted betting-win continuous read-only runtime evidence.
 
 ## Blocked or parked
 

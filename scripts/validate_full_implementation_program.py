@@ -33,7 +33,7 @@ EXPECTED_STATUS = {
     'BWS-410': 'VALIDATED',
     'BWS-420': 'VALIDATED',
     'BWS-500': 'VALIDATED',
-    'BWS-510': 'PENDING',
+    'BWS-510': 'VALIDATED',
     'BWS-600': 'BLOCKED',
     'BWS-900': 'PARKED',
 }
@@ -132,8 +132,8 @@ def main() -> None:
         if row['status'] == 'PENDING'
         and all(dep in validated for dep in parse_dependencies(row['depends_on']))
     ]
-    if not ready or ready[0] != 'BWS-510':
-        fail(f'first dependency-ready implementation task must be BWS-510, found {ready!r}')
+    if ready:
+        fail(f'no dependency-ready safe local implementation task should remain after BWS-510 validation, found {ready!r}')
 
     for rel in ACTIVE_AUTHORITY:
         text = read(rel)
@@ -145,7 +145,7 @@ def main() -> None:
     for marker in [
         'current_task=BWS-510', 'backlog/bws_full_implementation.csv',
         'BETTING_WIN_REPO_PATH', 'CONTINUE_REQUIRED=yes',
-        'AUTONOMOUS_GOAL_COMPLETE=yes', 'safe local row through BWS-510',
+        'AUTONOMOUS_GOAL_COMPLETE=yes', 'Safe local implementation is complete through `BWS-510`',
         'protected_automation_files=read_only',
     ]:
         require(task, marker, 'docs/automation/current-implementation-task.md')
@@ -153,6 +153,7 @@ def main() -> None:
     status = read('docs/repo_status_current.md')
     for marker in [
         'status=IMPLEMENTATION_READY', 'current_task=BWS-510',
+        'current_task_status=VALIDATED',
         'selected_controller=run-autonomous-implementation.sh',
         'paper_autopilot=not_selected_until_local_platform_complete',
         'run_autonomous_implementation=standardized_and_selected',

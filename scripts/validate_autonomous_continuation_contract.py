@@ -40,15 +40,15 @@ def main() -> None:
 
     for marker in [
         'current_task=BWS-510', 'BETTING_WIN_REPO_PATH',
-        'first dependency-ready `PENDING` row',
-        'safe local row through BWS-510',
+        'Safe local implementation is complete through `BWS-510`',
         'provider_connections=prohibited', 'execution=prohibited',
     ]:
         require(task, marker, 'docs/automation/current-implementation-task.md')
 
     for marker in [
         'status=IMPLEMENTATION_READY', 'current_task=BWS-510',
-        'Safe local work remains through `BWS-510`',
+        'current_task_status=VALIDATED',
+        'Safe local implementation is complete through `BWS-510`',
         'selected_controller=run-autonomous-implementation.sh',
     ]:
         require(status, marker, 'docs/repo_status_current.md')

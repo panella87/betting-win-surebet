@@ -6,7 +6,7 @@ Authority comes from `docs/automation/current-implementation-task.md` and `backl
 
 The controller validates the baseline, selects the first dependency-ready `PENDING` row, and inspects the existing betting-win checkout's committed `HEAD` read-only when required. It must not clone, create a temporary worktree, or consume uncommitted upstream files. It then implements a bounded coherent slice, adds tests, validates, updates evidence/ledger, and continues.
 
-`BWS-100`, `BWS-110`, `BWS-120`, `BWS-130`, `BWS-140`, `BWS-200`, `BWS-210`, `BWS-220`, `BWS-230`, `BWS-240`, `BWS-300`, `BWS-310`, `BWS-320`, `BWS-400`, `BWS-410`, `BWS-420`, and `BWS-500` are validated. The current first dependency-ready pending task is `BWS-510`; after it is validated, safe local implementation is complete.
+`BWS-100`, `BWS-110`, `BWS-120`, `BWS-130`, `BWS-140`, `BWS-200`, `BWS-210`, `BWS-220`, `BWS-230`, `BWS-240`, `BWS-300`, `BWS-310`, `BWS-320`, `BWS-400`, `BWS-410`, `BWS-420`, `BWS-500`, and `BWS-510` are validated. No dependency-ready safe local implementation row remains through `BWS-510`; `BWS-600` is blocked on accepted betting-win continuous read-only runtime evidence.
 
 Historical SURE-001/SURE-002A/SURE-002B files are bootstrap ledgers only. They do not authorize a no-op or goal-complete result.
 

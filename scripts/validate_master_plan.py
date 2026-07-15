@@ -43,7 +43,7 @@ def main() -> None:
         ],
         'docs/029_full_implementation_task_ledger.md': [
             PROGRAM, 'backlog/bws_full_implementation.csv',
-            'current_task=BWS-510', 'current_task_status=PENDING',
+            'current_task=BWS-510', 'current_task_status=VALIDATED',
         ],
         'docs/030_upstream_compatibility_and_pin_contract.md': [
             'BETTING_WIN_REPO_PATH', 'config/betting-win.upstream.lock.json',

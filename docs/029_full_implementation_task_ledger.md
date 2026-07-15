@@ -21,6 +21,6 @@ A row becomes `BLOCKED` only after all safe local work in that row is exhausted 
 
 ```text
 current_task=BWS-510
-current_task_status=PENDING
-reason=BWS-500 configuration, security, observability, and process definitions are validated; BWS-510 is now the first dependency-ready PENDING row
+current_task_status=VALIDATED
+reason=BWS-510 integrated clean-install and loopback acceptance is validated; safe local implementation is complete through BWS-510 and BWS-600 remains externally blocked on accepted betting-win live read-only runtime evidence
 ```

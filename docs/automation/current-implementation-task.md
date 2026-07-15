@@ -5,18 +5,19 @@ Repository: `betting-win-surebet`.
 ```text
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 current_task=BWS-510
+current_task_status=VALIDATED
 ```
 
-Objective: implement the complete safe local BWS application on top of the read-only betting-win platform. Use `backlog/bws_full_implementation.csv` as the binding dependency ledger. Start with the first dependency-ready `PENDING` row, currently `BWS-510`, and continue across validated cycles while safe local work remains through `BWS-510`.
+Completion record: `BWS-510` is validated. Safe local implementation is complete through `BWS-510`, and `BWS-600` remains blocked on accepted betting-win live read-only runtime evidence. `backlog/bws_full_implementation.csv` remains the binding dependency ledger.
 
-Before editing:
+Validated BWS-510 proof:
 
-1. Read `AGENTS.md`, `docs/repo_status_current.md`, `docs/MASTER_PLAN.md`, `docs/028_full_implementation_program.md`, `docs/029_full_implementation_task_ledger.md`, and `docs/030_upstream_compatibility_and_pin_contract.md`.
-2. Inspect current BWS source/tests.
-3. Verify the validated `BWS-100` upstream lock contract remains intact, including `BETTING_WIN_REPO_PATH`, the committed-`HEAD` lock file, and the no-fallback boundary.
-4. Inspect the validated workspace/package layout, the validated `BWS-120` persistence path, the validated `BWS-320` strategy ledger/report outputs, the validated `BWS-400` query/API surface, the validated `BWS-410` jobs/workers/checkpoint surface, the validated `BWS-420` cockpit surface, and the validated `BWS-500` configuration/security/observability/process surface, then plan the smallest integrated clean-install and loopback acceptance slice that preserves deterministic provenance, blocker visibility, and closed-execution behavior.
+1. `AGENTS.md`, `docs/repo_status_current.md`, `docs/MASTER_PLAN.md`, `docs/028_full_implementation_program.md`, `docs/029_full_implementation_task_ledger.md`, and `docs/030_upstream_compatibility_and_pin_contract.md` were used as the binding authority stack.
+2. The validated `BWS-100` upstream lock contract remained intact through `BETTING_WIN_REPO_PATH`, the committed-`HEAD` lock file, and the no-fallback boundary.
+3. The integrated loopback acceptance proof covered migration, pinned-export intake, deterministic backtest, bounded private-paper worker execution, read-only API, cockpit snapshot loading, and health/readiness surfacing under the closed local stack.
+4. `npm run validate` passed after regenerating `SOURCE_MANIFEST.json`, so the ledger and status surfaces were updated consistently with the proof.
 
-Current first task:
+Validated terminal safe-local task:
 
 ```text
 id=BWS-510

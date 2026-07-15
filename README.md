@@ -42,7 +42,7 @@ contract_alias=betting-win-strategy-export.v1
 surebet_profile=surebet_standard_binary_v0
 ```
 
-`config/betting-win.upstream-baseline.json` records the inspected design baseline. It is not a runtime pin. `BWS-100` generates `config/betting-win.upstream.lock.json` from the existing server checkout's committed `HEAD`. Package and capability evidence is read with `git show HEAD:` and the fingerprint is derived from the committed Git tree, so uncommitted working-tree changes are excluded rather than copied, cleaned, reset, or cloned. The verifier fails closed when commit, Git tree, tracked-tree fingerprint, package, or capability evidence is missing or mismatched. `BWS-500` is validated and the next dependency-ready implementation task is `BWS-510`.
+`config/betting-win.upstream-baseline.json` records the inspected design baseline. It is not a runtime pin. `BWS-100` generates `config/betting-win.upstream.lock.json` from the existing server checkout's committed `HEAD`. Package and capability evidence is read with `git show HEAD:` and the fingerprint is derived from the committed Git tree, so uncommitted working-tree changes are excluded rather than copied, cleaned, reset, or cloned. The verifier fails closed when commit, Git tree, tracked-tree fingerprint, package, or capability evidence is missing or mismatched. `BWS-510` is validated and safe local implementation is complete through that terminal gate.
 
 ## Target repository shape
 
@@ -80,7 +80,7 @@ Read in this order:
 
 Historical SURE-001, SURE-002A, and SURE-002B ledgers remain regression evidence only. They do not authorize implementation to stop.
 
-Safe local implementation continues through `BWS-510`. Continuous upstream paper observation is gated by `BWS-600`. Real-money execution remains parked at `BWS-900`.
+Safe local implementation is complete through `BWS-510`. Continuous upstream paper observation remains gated by `BWS-600`. Real-money execution remains parked at `BWS-900`.
 
 ## Validation
 
