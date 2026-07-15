@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -264,6 +265,41 @@ test('local paper batch report cli prints the batch summary path on success', ()
     assert.equal(exitCode, 0);
     assert.equal(capturedStderr, '');
     assert.equal(capturedStdout.trim(), summaryOutputPath);
+  } finally {
+    rmSync(bundleDir, { recursive: true, force: true });
+    rmSync(dirname(summaryOutputPath), { recursive: true, force: true });
+  }
+});
+
+test('built dist local paper batch report entrypoint writes the batch summary path on success', () => {
+  const bundleDir = createBundleDirectory('dist-batch-cli-success', [
+    {
+      fileName: 'solver-ready.json',
+      sourcePath: 'tests/fixtures/local-only-export-bundles/solver-ready-resource-export.json',
+    },
+  ]);
+  const summaryOutputPath = createArtifactOutputPath('dist-batch-cli-summary');
+
+  try {
+    const result = spawnSync(
+      process.execPath,
+      [
+        'dist/src/cli/local-paper-batch-report.js',
+        '--bundle-dir',
+        relative(REPO_ROOT, bundleDir),
+        '--output',
+        relative(REPO_ROOT, summaryOutputPath),
+      ],
+      {
+        cwd: REPO_ROOT,
+        encoding: 'utf-8',
+      },
+    );
+
+    assert.equal(result.status, 0);
+    assert.equal(result.stderr, '');
+    assert.equal(result.stdout.trim(), summaryOutputPath);
+    assert.equal(existsSync(summaryOutputPath), true);
   } finally {
     rmSync(bundleDir, { recursive: true, force: true });
     rmSync(dirname(summaryOutputPath), { recursive: true, force: true });

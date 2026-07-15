@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -455,6 +456,34 @@ test('local paper report cli prints the artifact path on success', () => {
     assert.equal(exitCode, 0);
     assert.equal(capturedStderr, '');
     assert.equal(capturedStdout.trim(), outputPath);
+  } finally {
+    rmSync(dirnameForCleanup(outputPath), { recursive: true, force: true });
+  }
+});
+
+test('built dist local paper report entrypoint writes the artifact path on success', () => {
+  const outputPath = createArtifactOutputPath('dist-cli-report');
+
+  try {
+    const result = spawnSync(
+      process.execPath,
+      [
+        'dist/src/cli/local-paper-report.js',
+        '--bundle',
+        ACCEPTED_LOCAL_BUNDLE,
+        '--output',
+        relative(REPO_ROOT, outputPath),
+      ],
+      {
+        cwd: REPO_ROOT,
+        encoding: 'utf-8',
+      },
+    );
+
+    assert.equal(result.status, 0);
+    assert.equal(result.stderr, '');
+    assert.equal(result.stdout.trim(), outputPath);
+    assert.equal(existsSync(outputPath), true);
   } finally {
     rmSync(dirnameForCleanup(outputPath), { recursive: true, force: true });
   }

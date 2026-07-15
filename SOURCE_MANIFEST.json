@@ -1,6 +1,6 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-07-15T13:47:38Z",
+  "generated": "2026-07-15T14:38:04Z",
   "overlay": "bws100-existing-checkout-head-pin-wave14",
   "files": [
     {
@@ -1265,13 +1265,13 @@
     },
     {
       "path": "src/cli/local-paper-batch-report.ts",
-      "sha256": "0c976ed91a73a01dd6cf6eda691b05aa828af5b9149bc93fd1a6e4e42d3d1102",
-      "size": 78
+      "sha256": "1a4afb468310f2cd96d7129cb80ecac4f589a0e84a2d99133dd8d9cb5e616b1a",
+      "size": 471
     },
     {
       "path": "src/cli/local-paper-report.ts",
-      "sha256": "02af20e61acfc9065fa69d188f06ba2ca52e88d46fb06b12bc8a1230eabc7320",
-      "size": 72
+      "sha256": "800539892359d9c98b93cd89c6233ed88f6544658cea1ddd9a65d67a11507944",
+      "size": 449
     },
     {
       "path": "src/contracts/betting-win-contract-imports.ts",
@@ -1640,13 +1640,13 @@
     },
     {
       "path": "tests/local-paper-batch-report.test.ts",
-      "sha256": "86b24604af3025c742f6d8691b8403a1e5b5079eee94a6e67cbd80fb083be56b",
-      "size": 13849
+      "sha256": "7e848e8ce6999eab1ed41e641f2e1877df3261e9ff0d7b866c47a7b7d8d54c85",
+      "size": 14984
     },
     {
       "path": "tests/local-paper-report.test.ts",
-      "sha256": "ffa27917bbde285520869817071edbd37d416464733705fa2ad837da8213857f",
-      "size": 20261
+      "sha256": "074197aad6eb558af4669e860671fc9e05a822006fbe7233b02b25194738c420",
+      "size": 21055
     },
     {
       "path": "tests/market-group-key.test.ts",
