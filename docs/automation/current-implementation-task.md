@@ -4,41 +4,46 @@ Repository: `betting-win-surebet`.
 
 ```text
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-current_task=BWS-510
-current_task_status=VALIDATED
+current_task=BWS-520
+current_task_status=PENDING
+safe_local_terminal_gate=BWS-580
 ```
 
-Completion record: `BWS-510` is validated. Safe local implementation is complete through `BWS-510`, and `BWS-600` remains blocked on accepted betting-win live read-only runtime evidence. `backlog/bws_full_implementation.csv` remains the binding dependency ledger. This file is no longer an active implementation queue; the post-implementation router selects `run-paper-autopilot.sh`.
+Objective: implement the complete operator-runnable continuous private-paper BWS application on top of the validated read-only betting-win boundary. Use `backlog/bws_full_implementation.csv` as the binding dependency ledger. Start with the first dependency-ready `PENDING` row, currently `BWS-520`, and continue across validated cycles while safe local work remains through `BWS-580`.
 
-Validated BWS-510 proof:
+The previous `BWS-510` loopback acceptance remains valid. It proved the domain engine, persistence, read-only query surfaces, bounded worker behavior, cockpit and configuration in tests. It did not create an executable long-running API/worker service or a continuous upstream ingestion and scheduling lifecycle. The current no-service paper evaluator therefore cannot be used as proof that only external evidence remains.
 
-1. `AGENTS.md`, `docs/repo_status_current.md`, `docs/MASTER_PLAN.md`, `docs/028_full_implementation_program.md`, `docs/029_full_implementation_task_ledger.md`, and `docs/030_upstream_compatibility_and_pin_contract.md` were used as the binding authority stack.
-2. The validated `BWS-100` upstream lock contract remained intact through `BETTING_WIN_REPO_PATH`, the committed-`HEAD` lock file, and the no-fallback boundary.
-3. The integrated loopback acceptance proof covered migration, pinned-export intake, deterministic backtest, bounded private-paper worker execution, read-only API, cockpit snapshot loading, and health/readiness surfacing under the closed local stack.
-4. `npm run validate` passed after regenerating `SOURCE_MANIFEST.json`, so the ledger and status surfaces were updated consistently with the proof.
+Before editing:
 
-Validated terminal safe-local task:
+1. Read `AGENTS.md`, `docs/repo_status_current.md`, `docs/MASTER_PLAN.md`, `docs/028_full_implementation_program.md`, `docs/029_full_implementation_task_ledger.md`, `docs/030_upstream_compatibility_and_pin_contract.md`, and `docs/033_continuous_private_paper_runtime_program.md`.
+2. Inspect the current runtime configuration, persistence repositories, read-only API, bounded workers, cockpit, loopback acceptance and no-service helper/controller surfaces.
+3. Preserve the validated `BWS-100` committed-`HEAD` upstream lock and no-fallback boundary through the explicit `BETTING_WIN_REPO_PATH` input. Carry-forward proof must prove the betting-win committed HEAD remains unchanged, allow no placeholder fields, and use no clone or temporary worktree.
+4. Implement one coherent dependency-ready row or bounded sub-slice per cycle, validate it, update the ledger only after proof, and continue while safe work remains through `BWS-580`. Product runtime entrypoints, CLI commands and package scripts must be implemented without editing protected root wrappers or controllers; their integration is a separate router decision after `BWS-580`.
+
+Current first task:
 
 ```text
-id=BWS-510
-objective=complete integrated local and loopback acceptance
+id=BWS-520
+objective=create executable loopback-only BWS API and worker applications
 ```
 
-Required BWS-510 outcomes:
+Required BWS-520 outcomes:
 
-- prove clean install, migration, pinned-export import, deterministic backtest, bounded private-paper runtime, read-only API, bounded workers, cockpit, and health/readiness surfaces together under the loopback-safe closed stack;
-- fail closed on missing required configuration, ambiguous readiness or health state, missing provenance, non-deterministic acceptance evidence, provider/execution/public-signal implications, and any path that would weaken the no-fallback or closed-execution boundary;
-- preserve the validated `BWS-500` fail-fast configuration, redaction, loopback-safe defaults, observability, health/readiness surfacing, and process definitions together with the validated `BWS-420` cockpit behavior, the validated `BWS-410` bounded jobs/workers/checkpoints/dead-letter behavior, the validated `BWS-400` read-only query service and API behavior, `BWS-320` strategy ledger/report/acceptance-state behavior, `BWS-310` private paper runtime behavior, `BWS-300` deterministic backtesting behavior, `BWS-240` settlement reconciliation behavior, `BWS-230` completion/exposure behavior, `BWS-220` quote/depth/fee/cost/rounding stake-solving behavior, `BWS-210` opportunity derivation behavior, `BWS-200` canonical equivalence guards, `BWS-140` read-only query/API client boundary, `BWS-130` pinned-export intake, `BWS-120` `surebet.*` persistence behavior, and `BWS-110` workspace compatibility coverage;
-- keep the `BWS-100` committed-`HEAD` upstream lock contract intact with no workspace fallback or silent dependency shortcuts;
-- update the task ledger only after all required proof passes.
-
-Validated `BWS-100`, `BWS-110`, `BWS-120`, `BWS-130`, `BWS-140`, `BWS-200`, `BWS-210`, `BWS-220`, `BWS-230`, `BWS-240`, `BWS-300`, `BWS-310`, `BWS-320`, `BWS-400`, `BWS-410`, `BWS-420`, and `BWS-500` carry-forward requirements remain binding during `BWS-510`: prove the betting-win committed HEAD remains unchanged during verification, allow no placeholder fields in the upstream lock output, preserve the workspace/package migration, surebet persistence, pinned-export intake, read-only query client behavior, canonical equivalence guards, deterministic complete-set detection, integrated stake solving, non-atomic completion/residual exposure, settlement replay reconciliation, deterministic pinned-export backtesting, bounded private paper runtime behavior, immutable strategy ledger/report evidence, explicit acceptance-state handling, the validated BWS read-only query service/API contract, the validated BWS bounded worker surface, the validated BWS cockpit boundary, the validated BWS-500 runtime/configuration surface, and use no clone or temporary worktree.
+- add canonical Node 20 executable entrypoints for the BWS read-only API and bounded worker process;
+- resolve only explicit fail-fast runtime configuration and the validated upstream lock;
+- run only BWS-owned `surebet.*` migrations and repositories;
+- bind network listeners only to `127.0.0.1`;
+- preserve health, readiness, redaction, blocker visibility and closed-execution policy;
+- implement graceful termination and process identity without killing unrelated processes or sessions;
+- add focused success, invalid-configuration, startup, shutdown, restart and no-provider/no-execution coverage;
+- preserve all validated behavior through `BWS-510`;
+- update the task ledger only after focused proof and `npm run validate` pass.
 
 Continuation rules:
 
 ```text
-CONTINUE_REQUIRED=yes  while any dependency-ready safe local row through BWS-510 remains PENDING
-AUTONOMOUS_GOAL_COMPLETE=yes  only after every safe local row through BWS-510 is VALIDATED
+CONTINUE_REQUIRED=yes  while any dependency-ready safe local row through BWS-580 remains PENDING
+AUTONOMOUS_GOAL_COMPLETE=yes  only after every safe local row through BWS-580 is VALIDATED
 BLOCKED=yes  only for a concrete unrecoverable repository state or exact missing external evidence
 ```
 
@@ -57,4 +62,4 @@ floating_point_money=prohibited
 protected_automation_files=read_only
 ```
 
-Do not modify the betting-win checkout. Use no clone or temporary worktree. Do not copy provider adapters. Do not invent a commit, schema, endpoint, package, provider capability, or acceptance result. Build all safe local code, database, API, worker, and UI layers permitted by the ledger before declaring an external blocker.
+Do not modify the betting-win checkout. Use no clone or temporary worktree. Do not copy provider adapters. Do not invent a commit, schema, endpoint, package, provider capability, runtime result or acceptance evidence. Build all safe local executable service, upstream convergence, scheduler, lifecycle, API/cockpit convergence and continuous-runtime acceptance work permitted by `BWS-520` through `BWS-580` before declaring the external `BWS-600` gate.

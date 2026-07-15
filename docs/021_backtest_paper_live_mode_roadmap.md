@@ -6,6 +6,7 @@ Backtesting belongs in this repo for surebet strategies and uses immutable betti
 BWS-300 deterministic backtest
 BWS-310 bounded private paper
 BWS-510 integrated local acceptance
+BWS-520 through BWS-580 executable continuous private-paper runtime
 BWS-600 accepted continuous read-only runtime
 BWS-900 separately authorized execution
 ```

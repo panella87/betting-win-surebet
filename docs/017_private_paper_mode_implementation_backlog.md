@@ -17,6 +17,7 @@ BWS-320 strategy ledger and reports
 BWS-410 workers and checkpoints
 BWS-500 operations and readiness
 BWS-510 integrated local acceptance
+BWS-520 through BWS-580 executable continuous runtime
 BWS-600 accepted continuous upstream runtime
 ```
 

@@ -3,28 +3,36 @@
 ```text
 paper_mode_owner=betting-win-surebet
 account_policy=separate_from_betting-win-betting
-current_stage=post_implementation_runtime_convergence
+current_stage=continuous_runtime_implementation
+current_task=BWS-520
+safe_local_terminal_gate=BWS-580
 ```
 
-## Before BWS-510
+## Validated foundation
 
-Use the implementation controller, not paper autopilot, to build the platform. The current paper controller may run retained local fixtures for regression checks, but that is not final runtime evidence.
+`BWS-310` proves bounded private-paper domain behavior and `BWS-510` proves integrated loopback behavior. Those proofs remain binding.
 
-## After BWS-510
+## Remaining source work
 
-Paper mode selects exactly one explicit upstream mode:
+Use `run-autonomous-implementation.sh` for `BWS-520` through `BWS-580` to create executable API/worker applications, explicit export and API convergence, persisted scheduling, operator lifecycle, runtime/API/cockpit convergence and integrated continuous-runtime acceptance.
+
+Paper mode must select exactly one explicit upstream mode:
 
 ```text
 export  immutable pinned betting-win export
 api     typed read-only betting-win query/API
 ```
 
-Evidence includes upstream lock, source fingerprints, BWS config, quote freshness/depth, opportunity decisions, reservations, completions, residual exposure, settlement reconciliation, worker checkpoints, health/readiness, and immutable artifacts.
+There is no automatic fallback between modes, fixtures or local mocks.
+
+## Evidence
+
+Evidence includes upstream lock, source fingerprints, BWS config, selected mode, intake checkpoints, quote freshness/depth, opportunity decisions, reservations, completions, residual exposure, settlement reconciliation, worker checkpoints, process identity, health/readiness and immutable artifacts.
 
 ## Continuous runtime gate
 
-`BWS-600` remains blocked until accepted betting-win continuous read-only runtime evidence and operator configuration exist. Loopback or fixture success cannot remove this blocker.
+`BWS-600` remains blocked until `BWS-580` is validated and accepted operator-approved betting-win continuous read-only runtime evidence and configuration exist. Loopback or fixture success cannot remove this external gate.
 
 ## Prohibited
 
-No direct provider connection, provider account mutation, wallet, signer, order, public signal, profitability claim, or real-money execution is allowed by this runbook.
+No direct provider connection, provider account mutation, wallet, signer, order, public signal, profitability claim or real-money execution is allowed by this runbook.

@@ -14,4 +14,4 @@ BWS owns upstream compatibility, `surebet.*`, opportunity derivation, scenario c
 
 BWS does not own provider adapters, raw provider truth, canonical history, provider identity/rule normalization, or betting-win `core.*` migrations. It consumes exact contracts, immutable exports, and read-only API/client surfaces.
 
-Current authorization reaches safe local/loopback/backtest/private-paper implementation through `BWS-510`. `BWS-600` remains blocked on accepted continuous betting-win runtime evidence. `BWS-900` remains parked.
+Current authorization reaches executable loopback/read-only continuous private-paper implementation through `BWS-580`. `BWS-600` remains blocked on accepted continuous betting-win runtime evidence. `BWS-900` remains parked.

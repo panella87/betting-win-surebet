@@ -1,17 +1,15 @@
 # Paper autopilot controller
 
-`run-paper-autopilot.sh` is the parent workflow for post-implementation runtime/database convergence:
+`run-paper-autopilot.sh` is the parent workflow for runtime evidence and source-fix handoffs:
 
 ```text
 paper evaluation -> runtime evidence -> implementation handoff -> paper re-evaluation
 ```
 
-It was not selected for the initial `BWS_FULL_PLATFORM_IMPLEMENTATION_V1` build. Safe local tasks through `BWS-510` are now validated, so it is the active controller for post-implementation runtime/database convergence. It is also selected when a retained bugfix campaign explicitly requests runtime evidence.
+It is not the active router while `BWS-520` through `BWS-580` remain pending. The current paper child is intentionally `single_pass_no_service` and can validate only a local fixture or explicit repo-local pinned bundle. It cannot create the executable API/worker lifecycle, continuous upstream convergence or scheduler required by the remaining source queue.
 
-The parent keeps one final Telegram notification and suppresses child notifications. It preserves strict lock, child identity, handoff, source-fingerprint, and finalization behavior.
+After `BWS-580` is validated, the router must verify that the paper controller is integrated with the new machine-readable runtime handoff before selecting it for the external `BWS-600` evidence campaign. Until then, `PAPER_AUTOPILOT_BLOCKED_ON_PINNED_BUNDLE` is a truthful bounded result but not proof that all source work is complete.
 
-Child terminal state is delivered through a strict atomic `child_terminal_result.env` side channel. `child_output.log` remains unrestricted human/Codex output; repeated machine-like lines inside prompts, diffs, or summaries cannot be mistaken for the child result. A missing, malformed, mismatched, or wrong-exit side channel stops with `PAPER_AUTOPILOT_BLOCKED_CHILD_RESULT` before any handoff is consumed.
+The parent keeps one final Telegram notification and suppresses child notifications. It preserves strict lock, child identity, atomic terminal result, handoff, source-fingerprint, artifact and finalization behavior.
 
-The seven-day parent and 72-hour child durations are maximum budgets, not mandatory idle time. A bounded source handoff may complete quickly, after which the parent must continue to paper re-evaluation. It stops early only on an accepted terminal paper result, an explicit external/runtime evidence gate, a validated blocker, repeated-handoff protection, or exhausted budget.
-
-Current retained fixture behavior may classify missing required bundle evidence as `PAPER_AUTOPILOT_BLOCKED_ON_PINNED_BUNDLE`. That is truthful runtime-evidence routing and does not reopen the completed safe-local implementation queue.
+The seven-day parent and 72-hour child durations are maximum budgets, not mandatory idle time. A bounded source handoff may complete quickly. The parent stops only on a terminal result, explicit gate, validated blocker, repeat guard or exhausted budget.

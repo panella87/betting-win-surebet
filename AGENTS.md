@@ -58,8 +58,10 @@ invented commit, schema, endpoint, package, or acceptance evidence
 
 ## Implementation discipline
 
+`BWS-100` through `BWS-510` are validated carry-forward foundations. The active safe local queue begins at `BWS-520` and ends at `BWS-580`.
+
 - Work through `backlog/bws_full_implementation.csv` in dependency order.
-- Implement one coherent row or bounded sub-slice per cycle, then continue while safe work remains through `BWS-510`.
+- Implement one coherent row or bounded sub-slice per cycle, then continue while safe work remains through `BWS-580`.
 - Preserve existing solver, completion, exposure, settlement, and report behavior during workspace migration.
 - Use fixed-point integer arithmetic for money, probability, fees, size, and exposure.
 - Missing configuration, unknown schema/profile/generation, stale quote, incomplete scenario, insufficient depth, and conflicting settlement evidence fail closed.
@@ -86,4 +88,4 @@ npm run validate
 
 ## Automation
 
-The canonical entrypoint for the full build is `run-autonomous-implementation.sh`. Paper and bugfix controllers retain their existing roles. The initial build is complete only when every safe local row through `BWS-510` is `VALIDATED` or a concrete unrecoverable blocker is proven.
+The canonical entrypoint for the full build is `run-autonomous-implementation.sh`. Paper and bugfix controllers retain their existing roles. The safe local build is complete only when every row through `BWS-580` is `VALIDATED` or a concrete unrecoverable blocker is proven.

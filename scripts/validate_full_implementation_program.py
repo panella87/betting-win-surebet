@@ -12,7 +12,8 @@ EXPECTED_IDS = [
     'BWS-000', 'BWS-100', 'BWS-110', 'BWS-120', 'BWS-130', 'BWS-140',
     'BWS-200', 'BWS-210', 'BWS-220', 'BWS-230', 'BWS-240',
     'BWS-300', 'BWS-310', 'BWS-320', 'BWS-400', 'BWS-410', 'BWS-420',
-    'BWS-500', 'BWS-510', 'BWS-600', 'BWS-900',
+    'BWS-500', 'BWS-510', 'BWS-520', 'BWS-530', 'BWS-540', 'BWS-550',
+    'BWS-560', 'BWS-570', 'BWS-580', 'BWS-600', 'BWS-900',
 ]
 EXPECTED_STATUS = {
     'BWS-000': 'VALIDATED',
@@ -34,6 +35,13 @@ EXPECTED_STATUS = {
     'BWS-420': 'VALIDATED',
     'BWS-500': 'VALIDATED',
     'BWS-510': 'VALIDATED',
+    'BWS-520': 'PENDING',
+    'BWS-530': 'PENDING',
+    'BWS-540': 'PENDING',
+    'BWS-550': 'PENDING',
+    'BWS-560': 'PENDING',
+    'BWS-570': 'PENDING',
+    'BWS-580': 'PENDING',
     'BWS-600': 'BLOCKED',
     'BWS-900': 'PARKED',
 }
@@ -57,7 +65,14 @@ EXPECTED_DEPS = {
     'BWS-420': ['BWS-400'],
     'BWS-500': ['BWS-410', 'BWS-420'],
     'BWS-510': ['BWS-300', 'BWS-320', 'BWS-400', 'BWS-410', 'BWS-420', 'BWS-500'],
-    'BWS-600': ['BWS-510', 'accepted_betting_win_live_read_only_runtime'],
+    'BWS-520': ['BWS-510'],
+    'BWS-530': ['BWS-520', 'BWS-130'],
+    'BWS-540': ['BWS-520', 'BWS-140'],
+    'BWS-550': ['BWS-530', 'BWS-540', 'BWS-410'],
+    'BWS-560': ['BWS-550', 'BWS-500'],
+    'BWS-570': ['BWS-560', 'BWS-420'],
+    'BWS-580': ['BWS-570'],
+    'BWS-600': ['BWS-580', 'accepted_betting_win_live_read_only_runtime'],
     'BWS-900': ['explicit_execution_authorization'],
 }
 ALLOWED_STATUS = {'PENDING', 'IN_PROGRESS', 'VALIDATED', 'BLOCKED', 'PARKED'}
@@ -65,6 +80,7 @@ ACTIVE_AUTHORITY = [
     'README.md', 'AGENTS.md', 'PROJECT_STATUS.md', 'docs/MASTER_PLAN.md',
     'docs/repo_status_current.md', 'docs/028_full_implementation_program.md',
     'docs/029_full_implementation_task_ledger.md',
+    'docs/033_continuous_private_paper_runtime_program.md',
     'docs/automation/current-implementation-task.md',
 ]
 
@@ -132,8 +148,8 @@ def main() -> None:
         if row['status'] == 'PENDING'
         and all(dep in validated for dep in parse_dependencies(row['depends_on']))
     ]
-    if ready:
-        fail(f'no dependency-ready safe local implementation task should remain after BWS-510 validation, found {ready!r}')
+    if ready != ['BWS-520']:
+        fail(f'first dependency-ready continuous-runtime task must be BWS-520, found {ready!r}')
 
     for rel in ACTIVE_AUTHORITY:
         text = read(rel)
@@ -143,23 +159,35 @@ def main() -> None:
 
     task = read('docs/automation/current-implementation-task.md')
     for marker in [
-        'current_task=BWS-510', 'backlog/bws_full_implementation.csv',
+        'current_task=BWS-520', 'current_task_status=PENDING',
+        'safe_local_terminal_gate=BWS-580', 'backlog/bws_full_implementation.csv',
+        'docs/033_continuous_private_paper_runtime_program.md',
         'BETTING_WIN_REPO_PATH', 'CONTINUE_REQUIRED=yes',
-        'AUTONOMOUS_GOAL_COMPLETE=yes', 'Safe local implementation is complete through `BWS-510`',
+        'AUTONOMOUS_GOAL_COMPLETE=yes',
         'protected_automation_files=read_only',
     ]:
         require(task, marker, 'docs/automation/current-implementation-task.md')
 
     status = read('docs/repo_status_current.md')
     for marker in [
-        'status=SAFE_LOCAL_COMPLETE', 'current_task=BWS-510',
-        'current_task_status=VALIDATED',
-        'selected_controller=run-paper-autopilot.sh',
-        'paper_autopilot=selected_after_bws_510_validation',
-        'run_autonomous_implementation=standardized_safe_local_goal_complete',
-        'run_paper_autopilot=standardized_and_selected_for_post_implementation_runtime_convergence',
+        'status=IMPLEMENTATION_READY', 'current_task=BWS-520',
+        'current_task_status=PENDING', 'safe_local_terminal_gate=BWS-580',
+        'selected_controller=run-autonomous-implementation.sh',
+        'paper_autopilot=not_selected_until_bws_580_validation_and_runtime_controller_review',
+        'run_autonomous_implementation=standardized_and_selected_for_continuous_runtime_build',
     ]:
         require(status, marker, 'docs/repo_status_current.md')
+
+    runtime_program = read('docs/033_continuous_private_paper_runtime_program.md')
+    for marker in [
+        'start.sh', 'stop.sh', 'single-pass no-service',
+        'BWS-520', 'BWS-530', 'BWS-540', 'BWS-550',
+        'BWS-560', 'BWS-570', 'BWS-580', 'BWS-600',
+        'automatic_upstream_mode_fallback=prohibited',
+        'Protected automation sequencing',
+        'without editing protected root controllers',
+    ]:
+        require(runtime_program, marker, 'docs/033_continuous_private_paper_runtime_program.md')
 
     for rel in [
         'docs/014_sure_001_remaining_hardening_backlog.md',
@@ -184,13 +212,10 @@ def main() -> None:
     ]:
         require(loopback_validator, marker, 'scripts/validate_bws_loopback_acceptance.mjs')
 
-    database_docs = read('docs/032_database_and_data_lifecycle.md')
-    for marker in ['DB_URL_TEST', 'SUREBET_TEST_*', 'CREATEDB']:
-        require(database_docs, marker, 'docs/032_database_and_data_lifecycle.md')
-
     repo_validator = read('scripts/validate_repo.py')
     for marker in [
         'backlog/bws_full_implementation.csv',
+        'docs/033_continuous_private_paper_runtime_program.md',
         'scripts/validate_full_implementation_program.py',
         'tests/full-implementation-program-contract.test.ts',
     ]:

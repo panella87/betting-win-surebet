@@ -17,4 +17,4 @@ worker checkpoints and dead letters
 health, readiness, blockers
 ```
 
-The operator cockpit uses typed API contracts and separate mock/API modes during implementation. Workers are bounded, checkpointed, idempotent, and restart-safe. Process definitions remain loopback/read-only until `BWS-600` is authorized.
+The operator cockpit uses typed API contracts and separate mock/API modes during implementation. Workers are bounded, checkpointed, idempotent, and restart-safe. Executable processes remain loopback/read-only through `BWS-580`; `BWS-600` validates accepted external runtime evidence and does not authorize provider or execution access.

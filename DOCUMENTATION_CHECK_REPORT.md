@@ -18,6 +18,6 @@ The rebaseline now:
 - adds a dependency-ordered BWS-000 through BWS-900 implementation program;
 - selects `BWS-100` and `run-autonomous-implementation.sh`;
 - preserves direct-provider, betting-win core-write, and execution prohibitions;
-- keeps `BWS-600` externally gated and `BWS-900` parked.
+- keeps `BWS-520` through `BWS-580` as active safe source work, `BWS-600` externally gated and `BWS-900` parked.
 
 No source implementation is claimed complete by this documentation wave.

@@ -6,4 +6,4 @@ A run is killed or blocked for missing/mismatched upstream lock, stale or insuff
 
 Reports remain private and evidence-oriented. They do not claim profitability or live readiness.
 
-Before `BWS-510`, `run-paper-evaluation.sh` remains a retained no-service fixture/pinned-bundle regression controller. It is not the initial implementation router. After local platform completion, paper/runtime extensions must preserve the same lock, handoff, artifact, validation, and Telegram finalization contracts.
+`run-paper-evaluation.sh` remains a retained no-service fixture/pinned-bundle regression controller while `BWS-520` through `BWS-580` implement the executable runtime. It is not the current implementation router. Later runtime integration must preserve the same lock, handoff, artifact, validation and Telegram finalization contracts.

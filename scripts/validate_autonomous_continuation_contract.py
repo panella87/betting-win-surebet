@@ -32,24 +32,23 @@ def main() -> None:
     for marker in [
         'BWS_FULL_PLATFORM_IMPLEMENTATION_V1',
         'backlog/bws_full_implementation.csv',
-        'BWS-100', 'BWS-510', 'CONTINUE_REQUIRED=yes',
-        'AUTONOMOUS_GOAL_COMPLETE=yes',
+        'BWS-100', 'BWS-510', 'BWS-520', 'BWS-580',
+        'CONTINUE_REQUIRED=yes', 'AUTONOMOUS_GOAL_COMPLETE=yes',
         'Historical SURE-001/SURE-002A/SURE-002B files are bootstrap ledgers only',
     ]:
         require(implementation, marker, 'docs/automation/autonomous-implementation.md')
 
     for marker in [
-        'current_task=BWS-510', 'BETTING_WIN_REPO_PATH',
-        'Safe local implementation is complete through `BWS-510`',
+        'current_task=BWS-520', 'current_task_status=PENDING',
+        'safe_local_terminal_gate=BWS-580', 'BETTING_WIN_REPO_PATH',
         'provider_connections=prohibited', 'execution=prohibited',
     ]:
         require(task, marker, 'docs/automation/current-implementation-task.md')
 
     for marker in [
-        'status=SAFE_LOCAL_COMPLETE', 'current_task=BWS-510',
-        'current_task_status=VALIDATED',
-        'Safe local implementation is complete through `BWS-510`',
-        'selected_controller=run-paper-autopilot.sh',
+        'status=IMPLEMENTATION_READY', 'current_task=BWS-520',
+        'current_task_status=PENDING', 'safe_local_terminal_gate=BWS-580',
+        'selected_controller=run-autonomous-implementation.sh',
     ]:
         require(status, marker, 'docs/repo_status_current.md')
 

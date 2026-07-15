@@ -1,6 +1,6 @@
 # Current product routing
 
-`BWS_FULL_PLATFORM_IMPLEMENTATION_V1` is implemented through `run-autonomous-implementation.sh`; hardened controller internals below remain unchanged.
+`BWS_FULL_PLATFORM_IMPLEMENTATION_V1` has an active safe source queue from `BWS-520` through `BWS-580` under `run-autonomous-implementation.sh`; hardened controller internals below remain unchanged.
 
 # `.automation/`
 
@@ -32,7 +32,7 @@ notification after child cleanup and lock finalization.
 
 Parent controllers no longer infer terminal state by grepping streamed child output. Each parent gives its child a repo-contained `child_terminal_result.env` target; the standalone child publishes one strict atomic result only after final lock classification, and the parent validates controller identity, parent PID, repository, run containment, process exit code, and lock-release fields before consuming any handoff. Codex output may contain repeated `final_status=` or `stop_reason=` text without terminating the campaign.
 
-This repo has no service-owned paper lifecycle. `run-paper-evaluation.sh` is the
+This repo does not yet have an executable service-owned paper lifecycle. `run-paper-evaluation.sh` is the
 standard no-service private paper controller: it validates source, runs a private
 fixture smoke, writes local artifacts, and never starts/stops services or calls
 providers. Pinned-bundle paths now fail preflight before run-directory creation or

@@ -3,12 +3,12 @@
 ```text
 repo=betting-win-surebet
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-status=SAFE_LOCAL_COMPLETE
+status=IMPLEMENTATION_READY
 repo_role=surebet_strategy_application
 upstream_platform=betting-win
-current_task=BWS-510
-current_task_status=VALIDATED
-safe_local_terminal_gate=BWS-510
+current_task=BWS-520
+current_task_status=PENDING
+safe_local_terminal_gate=BWS-580
 provider_truth_owner=betting-win
 canonical_history_owner=betting-win
 strategy_state_owner=betting-win-surebet
@@ -18,9 +18,9 @@ execution_gate=closed
 
 ## Binding state
 
-The old local-fixture-complete stop state is superseded. The repo now contains the validated safe local BWS platform through the BWS-510 terminal gate. Continuous private-paper runtime against an accepted betting-win deployment remains externally blocked at BWS-600.
+`BWS-100` through `BWS-510` are validated. The previous completion classification was premature for an operator-runnable continuous runtime: the repository contains tested runtime libraries and loopback acceptance, but the root lifecycle still starts no API or worker service and paper evaluation remains single-pass fixture/pinned-bundle only.
 
-The binding queue is `backlog/bws_full_implementation.csv`. `BWS-100`, `BWS-110`, `BWS-120`, `BWS-130`, `BWS-140`, `BWS-200`, `BWS-210`, `BWS-220`, `BWS-230`, `BWS-240`, `BWS-300`, `BWS-310`, `BWS-320`, `BWS-400`, `BWS-410`, `BWS-420`, `BWS-500`, and `BWS-510` are validated. `BWS-600` remains blocked on accepted betting-win continuous read-only runtime evidence.
+The binding queue is `backlog/bws_full_implementation.csv`. `BWS-520` is the first dependency-ready `PENDING` task. Safe local runtime implementation continues through `BWS-580`; `BWS-600` remains the separate external accepted-runtime evidence gate.
 
 ## Verified upstream facts
 
@@ -36,34 +36,45 @@ read_only_query_api=present
 api_web_workers=present
 ```
 
-The archive has no Git commit metadata and no BW source manifest. `BWS-100` verifies the existing server checkout's committed `HEAD` read-only and generates the exact runtime lock. Dirty or untracked working-tree state is excluded from the pin; BWS must not clone, clean, reset, or otherwise modify the upstream checkout.
+`BWS-100` verifies the existing betting-win checkout's committed `HEAD` read-only. Uncommitted upstream state is excluded from the pin; BWS must not clone, clean, reset, commit or otherwise modify that checkout.
 
 ## Existing source
 
-The bootstrap behavior now lives under `packages/bootstrap` and `packages/upstream`, `apps/web` now provides the validated operator cockpit surface, and `src/` remains as compatibility shims for local bundle parsing, identity/rule prechecks, terminal cash flows, quote capacity/fees/freshness, fixed-point stake vectors, partial completion, residual exposure, settlement replay, reporting, and upstream lock tooling.
+The validated source under `packages/bootstrap`, `packages/persistence`, `packages/upstream`, `apps/web`, and compatibility `src/` shims already includes the domain engine, `surebet.*` persistence, immutable export intake, typed read-only query client, bounded private-paper runtime, strategy ledger, read-only HTTP handlers, bounded workers, cockpit, runtime configuration and loopback acceptance. It lacks the executable continuous runtime, explicit export/API convergence loops, persistent scheduler, operator lifecycle and integrated long-run evidence required by `BWS-520` through `BWS-580`.
 
 ## Implementation queue
 
-Safe local implementation is complete through `BWS-510`. `BWS-600` remains blocked on accepted betting-win continuous read-only runtime evidence. Historical SURE-002A and SURE-002B completion does not stop the active program.
+```text
+BWS-100..BWS-510=VALIDATED
+BWS-520=PENDING_EXECUTABLE_API_AND_WORKER
+BWS-530=PENDING_CONTINUOUS_EXPORT_CONVERGENCE
+BWS-540=PENDING_CONTINUOUS_API_CONVERGENCE
+BWS-550=PENDING_CONTINUOUS_SCHEDULER_AND_WORKERS
+BWS-560=PENDING_OPERATOR_LIFECYCLE_AND_EVIDENCE
+BWS-570=PENDING_RUNTIME_API_COCKPIT_CONVERGENCE
+BWS-580=PENDING_CLOSED_STACK_CONTINUOUS_RUNTIME_ACCEPTANCE
+BWS-600=BLOCKED_ON_ACCEPTED_BETTING_WIN_RUNTIME
+BWS-900=PARKED
+```
 
 ```text
-selected_controller=run-paper-autopilot.sh
-selected_task_source=docs/012_runbook.md
+selected_controller=run-autonomous-implementation.sh
+selected_task_source=docs/automation/current-implementation-task.md
 force_unlock=no_evidence
-paper_autopilot=selected_after_bws_510_validation
+paper_autopilot=not_selected_until_bws_580_validation_and_runtime_controller_review
 ```
 
 ## Safety
 
-Direct provider connections, provider credentials, betting-win `core.*` writes, public signals, profitability claims, and execution paths remain prohibited. A typed read-only betting-win client and exact upstream compatibility tooling are required and allowed.
+Direct provider connections, provider credentials, betting-win `core.*` writes, public signals, profitability claims and execution paths remain prohibited. Runtime work must stay loopback-only, private, explicit-mode and fail closed.
 
 ## Standard automation status
 
 ```text
-run_autonomous_implementation=standardized_safe_local_goal_complete
+run_autonomous_implementation=standardized_and_selected_for_continuous_runtime_build
 run_autonomous_bugfix=standardized_standalone_audit
-run_paper_evaluation=retained_fixture_evaluator_not_initial_router
-run_paper_autopilot=standardized_and_selected_for_post_implementation_runtime_convergence
+run_paper_evaluation=retained_no_service_fixture_evaluator
+run_paper_autopilot=standardized_parent_not_selected_while_runtime_source_queue_remains
 run_bugfix_autopilot=standardized_parent_for_broad_audit_and_repair
 autopilot_child_telegram=disabled
 autopilot_parent_telegram=final_only

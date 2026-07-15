@@ -1,20 +1,20 @@
 # 012 - Implementation and operator runbook
 
-## Initial build
+## Continuous runtime build
 
-1. Apply and validate the rebaseline overlay under Node 20.
-2. Ensure the server has a readable betting-win Git checkout. BWS reads only its committed `HEAD`; no clone, temporary worktree, cleanup, or reset is required.
-3. Export `BETTING_WIN_REPO_PATH` explicitly.
-4. For `BWS-510`, provide either a complete `SUREBET_TEST_*` tuple or `DB_URL_TEST` in the repo-local `.env`; the PostgreSQL role must already have `CREATEDB`.
-5. Start `run-autonomous-implementation.sh` with canonical duration and model flags.
-6. Inspect the newest `artifacts/autonomous_implementation_*` evidence, not process exit alone.
+1. Use Node 20.
+2. Ensure `BETTING_WIN_REPO_PATH` points to the existing readable betting-win Git checkout. BWS reads committed `HEAD` only and must not clone, clean, reset or modify it.
+3. Keep the validated PostgreSQL URLs private in `.env`.
+4. Start `run-autonomous-implementation.sh` with the canonical 72-hour, 200-cycle campaign.
+5. The controller begins at `BWS-520` and continues through every dependency-ready safe local task up to `BWS-580`.
+6. Inspect the newest `artifacts/autonomous_implementation_*` evidence, not process exit or elapsed time alone.
 
-The implementation controller reads `docs/automation/current-implementation-task.md` and `backlog/bws_full_implementation.csv`. It continues while safe dependency-ready work remains through `BWS-510`.
+`BWS-510` loopback acceptance remains validated. The current queue operationalizes that source into executable continuous services and does not repeat the original build.
 
 ## Failure handling
 
-Stop with `BLOCKED=yes` only for a concrete unrecoverable repo state or exact missing external evidence. Preserve locks and artifacts. Use owning-controller `--force-unlock` only with evidence; never delete locks or kill processes manually.
+Stop with `BLOCKED=yes` only for a concrete unrecoverable repository state or exact missing external evidence. Preserve locks and artifacts. Use owning-controller `--force-unlock` only with evidence; never delete locks or kill processes manually.
 
-## Post-implementation
+## Post-runtime implementation
 
-Use `run-paper-autopilot.sh` for runtime/database convergence only after `BWS-510`, or when a retained bugfix campaign explicitly requests runtime evidence. `BWS-600` still requires accepted continuous betting-win runtime input.
+After `BWS-580`, inspect the runtime handoff and controller integration before selecting `run-paper-autopilot.sh` for `BWS-600`. `BWS-600` still requires accepted operator-approved continuous betting-win read-only input.

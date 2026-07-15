@@ -1,3 +1,12 @@
+# Changelog
+
+## 2026-07-15 - Continuous private-paper runtime implementation rebaseline
+
+- Corrected the premature `SAFE_LOCAL_COMPLETE` classification after fresh paper-autopilot evidence proved the active controller remained `single_pass_no_service`.
+- Preserved validated `BWS-100` through `BWS-510` and added the dependency-ordered `BWS-520` through `BWS-580` executable continuous-runtime source queue.
+- Restored `run-autonomous-implementation.sh` as the selected controller and retained `BWS-600` as the separate accepted external-runtime evidence gate.
+- Added `docs/033_continuous_private_paper_runtime_program.md` and updated validators/tests to fail if the library-only loopback surface is again treated as an operator-runnable continuous service.
+
 # 2026-07-15 - Parent child-result side-channel hardening
 
 - Replaced paper and bugfix parent parsing of streamed `child_output.log` machine-like lines with a strict atomic `child_terminal_result.env` side channel.
