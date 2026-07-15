@@ -73,9 +73,14 @@ test('all root controllers package the complete repo artifacts directory', () =>
   ]) {
     const script = read(rel);
     assertContains(script, 'artifacts_zip_scope=full_artifacts_directory');
+    assertContains(script, 'final_artifacts_zip_refresh=post_lock_release_atomic');
     assertContains(
       script,
       'automation_v2_zip_with_timeout "$ZIP_TIMEOUT_SECONDS" "$tmp" "$AUTOMATION_REPO_ROOT" "artifacts"',
+    );
+    assertContains(
+      script,
+      'automation_refresh_final_artifacts_zip "$ZIP_TIMEOUT_SECONDS" "$AUTOMATION_REPO_ROOT" "$AUTOMATION_RUN_DIR"',
     );
     assert.doesNotMatch(script, /rel="\$\{AUTOMATION_RUN_DIR#/);
   }
@@ -270,12 +275,12 @@ test('paper smoke and compatibility wrappers do not pre-create artifact outputs'
 
 test('status docs record the hardened controller surface', () => {
   const status = read('docs/repo_status_current.md');
-  assertContains(status, 'run_autonomous_implementation=standardized_and_selected');
+  assertContains(status, 'run_autonomous_implementation=standardized_safe_local_goal_complete');
   assertContains(status, 'run_autonomous_bugfix=standardized_standalone_audit');
   assertContains(status, 'run_bugfix_autopilot=standardized_parent_for_broad_audit_and_repair');
   assertContains(status, 'run_paper_evaluation=retained_fixture_evaluator_not_initial_router');
   assertContains(status, 'run_paper_evaluation=retained_fixture_evaluator_not_initial_router');
-  assertContains(status, 'run_paper_autopilot=standardized_parent_for_post_implementation_runtime_convergence');
+  assertContains(status, 'run_paper_autopilot=standardized_and_selected_for_post_implementation_runtime_convergence');
 });
 
 test('obsolete stop and paper-12h helpers are not present', () => {

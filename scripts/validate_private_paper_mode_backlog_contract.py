@@ -36,10 +36,10 @@ def main() -> None:
         require(historical, marker, 'docs/017_private_paper_mode_implementation_backlog.md')
 
     for rel, markers in {
-        'docs/018_private_paper_mode_runbook.md': ['current_stage=implementation_before_runtime', 'export', 'api', 'BWS-600'],
+        'docs/018_private_paper_mode_runbook.md': ['current_stage=post_implementation_runtime_convergence', 'export', 'api', 'BWS-600'],
         'docs/automation/paper-evaluation.md': ['retained fixture/pinned-bundle evaluator', 'not the initial implementation controller', 'SUREBET_PINNED_BUNDLE'],
         'docs/automation/paper-autopilot.md': ['post-implementation runtime/database convergence', 'BWS-510', 'PAPER_AUTOPILOT_BLOCKED_ON_PINNED_BUNDLE'],
-        'docs/repo_status_current.md': ['paper_autopilot=not_selected_until_local_platform_complete'],
+        'docs/repo_status_current.md': ['paper_autopilot=selected_after_bws_510_validation', 'selected_controller=run-paper-autopilot.sh'],
     }.items():
         text = read(rel)
         for marker in markers:

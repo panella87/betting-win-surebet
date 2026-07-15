@@ -19,7 +19,7 @@ test('full implementation ledger and authority record validated BWS-510 completi
   assert.match(task, /current_task_status=VALIDATED/);
   assert.match(task, /AUTONOMOUS_GOAL_COMPLETE=yes/);
   assert.match(task, /Safe local implementation is complete through `BWS-510`/);
-  assert.match(status, /selected_controller=run-autonomous-implementation\.sh/);
+  assert.match(status, /selected_controller=run-paper-autopilot\.sh/);
   assert.doesNotMatch(task, /repo-local backlogs are complete/);
 });
 

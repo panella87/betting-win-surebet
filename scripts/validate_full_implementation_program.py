@@ -152,11 +152,12 @@ def main() -> None:
 
     status = read('docs/repo_status_current.md')
     for marker in [
-        'status=IMPLEMENTATION_READY', 'current_task=BWS-510',
+        'status=SAFE_LOCAL_COMPLETE', 'current_task=BWS-510',
         'current_task_status=VALIDATED',
-        'selected_controller=run-autonomous-implementation.sh',
-        'paper_autopilot=not_selected_until_local_platform_complete',
-        'run_autonomous_implementation=standardized_and_selected',
+        'selected_controller=run-paper-autopilot.sh',
+        'paper_autopilot=selected_after_bws_510_validation',
+        'run_autonomous_implementation=standardized_safe_local_goal_complete',
+        'run_paper_autopilot=standardized_and_selected_for_post_implementation_runtime_convergence',
     ]:
         require(status, marker, 'docs/repo_status_current.md')
 

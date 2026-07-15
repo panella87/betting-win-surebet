@@ -11,7 +11,7 @@ AUTOMATION_REPO_ROOT="$SCRIPT_DIR"
 # shellcheck source=.automation/lib/telegram_notify.sh
 . "$SCRIPT_DIR/.automation/lib/telegram_notify.sh"
 
-SCRIPT_VERSION="2026-07-14.surebet-bugfix-autopilot-v6-full-artifacts-archive"
+SCRIPT_VERSION="2026-07-15.surebet-bugfix-autopilot-v7-final-artifacts-refresh"
 SCRIPT_NAME="run-bugfix-autopilot.sh"
 DURATION_SECONDS="$(automation_parse_duration_seconds 7d)"
 BUGFIX_DURATION_SECONDS="$(automation_parse_duration_seconds 72h)"
@@ -244,6 +244,7 @@ validation_timeout_seconds=$VALIDATION_TIMEOUT_SECONDS
 install_timeout_seconds=$INSTALL_TIMEOUT_SECONDS
 zip_timeout_seconds=$ZIP_TIMEOUT_SECONDS
 artifacts_zip_scope=full_artifacts_directory
+final_artifacts_zip_refresh=post_lock_release_atomic
 campaign_total_areas=${#CAMPAIGN_AREAS[@]}
 mandatory_same_area_reaudit=enabled
 strict_handoff_parser=enabled
@@ -877,6 +878,25 @@ finish() {
       fi
     elif [[ -n "${AUTOMATION_RUN_DIR:-}" ]]; then
       write_final_summary || true
+      set +e
+      if [[ "$zip_rc" == "0" ]]; then
+        automation_refresh_final_artifacts_zip "$ZIP_TIMEOUT_SECONDS" "$AUTOMATION_REPO_ROOT" "$AUTOMATION_RUN_DIR"
+        corrective_zip_rc=$?
+      else
+        corrective_zip_rc="$zip_rc"
+      fi
+      if [[ "$corrective_zip_rc" != "0" ]]; then
+        automation_log "final_artifacts_zip_refresh_failed exit=$corrective_zip_rc; attempting full rebuild"
+        build_artifacts_zip_bounded
+        corrective_zip_rc=$?
+      fi
+      set -e
+      if [[ "$corrective_zip_rc" != 0 && "$EXIT_STATUS" == 0 ]]; then
+        FINAL_STATUS=BUGFIX_AUTOPILOT_BLOCKED_ARTIFACT_PACKAGING
+        STOP_REASON=artifacts_zip_failed
+        EXIT_STATUS=2
+        write_final_summary || true
+      fi
     fi
   fi
 

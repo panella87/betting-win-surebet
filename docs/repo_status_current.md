@@ -3,7 +3,7 @@
 ```text
 repo=betting-win-surebet
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-status=IMPLEMENTATION_READY
+status=SAFE_LOCAL_COMPLETE
 repo_role=surebet_strategy_application
 upstream_platform=betting-win
 current_task=BWS-510
@@ -47,10 +47,10 @@ The bootstrap behavior now lives under `packages/bootstrap` and `packages/upstre
 Safe local implementation is complete through `BWS-510`. `BWS-600` remains blocked on accepted betting-win continuous read-only runtime evidence. Historical SURE-002A and SURE-002B completion does not stop the active program.
 
 ```text
-selected_controller=run-autonomous-implementation.sh
-selected_task_source=docs/automation/current-implementation-task.md
+selected_controller=run-paper-autopilot.sh
+selected_task_source=docs/012_runbook.md
 force_unlock=no_evidence
-paper_autopilot=not_selected_until_local_platform_complete
+paper_autopilot=selected_after_bws_510_validation
 ```
 
 ## Safety
@@ -60,10 +60,10 @@ Direct provider connections, provider credentials, betting-win `core.*` writes, 
 ## Standard automation status
 
 ```text
-run_autonomous_implementation=standardized_and_selected
+run_autonomous_implementation=standardized_safe_local_goal_complete
 run_autonomous_bugfix=standardized_standalone_audit
 run_paper_evaluation=retained_fixture_evaluator_not_initial_router
-run_paper_autopilot=standardized_parent_for_post_implementation_runtime_convergence
+run_paper_autopilot=standardized_and_selected_for_post_implementation_runtime_convergence
 run_bugfix_autopilot=standardized_parent_for_broad_audit_and_repair
 autopilot_child_telegram=disabled
 autopilot_parent_telegram=final_only

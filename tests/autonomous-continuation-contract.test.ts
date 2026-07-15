@@ -14,6 +14,6 @@ test('autonomous authority continues the BWS full-platform queue', () => {
     assert.match(doc + task, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
   assert.match(task, /BETTING_WIN_REPO_PATH/);
-  assert.match(status, /selected_controller=run-autonomous-implementation\.sh/);
+  assert.match(status, /selected_controller=run-paper-autopilot\.sh/);
   assert.doesNotMatch(doc + task + status, /repo-local backlogs are complete/);
 });

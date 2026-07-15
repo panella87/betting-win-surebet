@@ -27,11 +27,11 @@ open_log.sh
 ## Root controllers
 
 ```text
-run-autonomous-implementation.sh  selected for current full build
+run-autonomous-implementation.sh  completed safe local build; runtime-handoff implementation only
 run-autonomous-bugfix.sh          standalone audit
 run-bugfix-autopilot.sh           broad unattended audit and repair
 run-paper-evaluation.sh           retained standalone fixture/paper evaluator
-run-paper-autopilot.sh            post-implementation runtime convergence parent
+run-paper-autopilot.sh            selected post-implementation runtime convergence parent
 ```
 
-The paper scripts retain no-service fixture behavior until product tasks implement the final BWS service stack. That transitional limitation does not block autonomous product implementation.
+The safe local BWS service stack is validated through `BWS-510`. Paper autopilot now owns runtime/database convergence while preserving the no-service, no-provider, no-execution boundary; accepted continuous betting-win runtime evidence is still required for `BWS-600`.

@@ -121,6 +121,8 @@ REQUIRED_FRAGMENTS = {
         'lock was acquired concurrently',
         'automation_force_unlock()',
         'automation_build_artifacts_zip()',
+        'automation_refresh_final_artifacts_zip()',
+        'automation_v2_zip_with_timeout "$timeout_seconds" "$tmp" "$root" "${entries[@]}"',
         'zip -q -1 -r "$zip_tmp" artifacts',
         'automation_run_validations()',
         'automation_require_cycle_artifacts()',
@@ -138,6 +140,8 @@ REQUIRED_FRAGMENTS = {
     ],
     'run-autonomous-implementation.sh': [
         'artifacts_zip_scope=full_artifacts_directory',
+        'final_artifacts_zip_refresh=post_lock_release_atomic',
+        'automation_refresh_final_artifacts_zip "$ZIP_TIMEOUT_SECONDS" "$AUTOMATION_REPO_ROOT" "$AUTOMATION_RUN_DIR"',
         'automation_v2_zip_with_timeout "$ZIP_TIMEOUT_SECONDS" "$tmp" "$AUTOMATION_REPO_ROOT" "artifacts"',
         '--model MODEL',
         '--fallback-model MODEL',
@@ -184,6 +188,8 @@ REQUIRED_FRAGMENTS = {
     ],
     'run-autonomous-bugfix.sh': [
         'artifacts_zip_scope=full_artifacts_directory',
+        'final_artifacts_zip_refresh=post_lock_release_atomic',
+        'automation_refresh_final_artifacts_zip "$ZIP_TIMEOUT_SECONDS" "$AUTOMATION_REPO_ROOT" "$AUTOMATION_RUN_DIR"',
         'automation_v2_zip_with_timeout "$ZIP_TIMEOUT_SECONDS" "$tmp" "$AUTOMATION_REPO_ROOT" "artifacts"',
         '--from-artifacts PATH',
         '--bugfix-focus-file PATH',
@@ -238,6 +244,8 @@ REQUIRED_FRAGMENTS = {
     ],
     'run-paper-evaluation.sh': [
         'artifacts_zip_scope=full_artifacts_directory',
+        'final_artifacts_zip_refresh=post_lock_release_atomic',
+        'automation_refresh_final_artifacts_zip "$ZIP_TIMEOUT_SECONDS" "$AUTOMATION_REPO_ROOT" "$AUTOMATION_RUN_DIR"',
         'automation_v2_zip_with_timeout "$ZIP_TIMEOUT_SECONDS" "$tmp" "$AUTOMATION_REPO_ROOT" "artifacts"',
         'Default duration: 72h.',
         '--adaptive',
@@ -290,6 +298,8 @@ REQUIRED_FRAGMENTS = {
 
     'run-bugfix-autopilot.sh': [
         'artifacts_zip_scope=full_artifacts_directory',
+        'final_artifacts_zip_refresh=post_lock_release_atomic',
+        'automation_refresh_final_artifacts_zip "$ZIP_TIMEOUT_SECONDS" "$AUTOMATION_REPO_ROOT" "$AUTOMATION_RUN_DIR"',
         'automation_v2_zip_with_timeout "$ZIP_TIMEOUT_SECONDS" "$tmp" "$AUTOMATION_REPO_ROOT" "artifacts"',
         'Parent bug-audit -> implementation -> same-area re-audit supervisor',
         '--bugfix-duration VALUE',
@@ -346,6 +356,8 @@ REQUIRED_FRAGMENTS = {
     ],
     'run-paper-autopilot.sh': [
         'artifacts_zip_scope=full_artifacts_directory',
+        'final_artifacts_zip_refresh=post_lock_release_atomic',
+        'automation_refresh_final_artifacts_zip "$ZIP_TIMEOUT_SECONDS" "$AUTOMATION_REPO_ROOT" "$AUTOMATION_RUN_DIR"',
         'automation_v2_zip_with_timeout "$ZIP_TIMEOUT_SECONDS" "$tmp" "$AUTOMATION_REPO_ROOT" "artifacts"',
         'Parent no-service paper/autonomous supervisor for betting-win-surebet',
         '--paper-duration VALUE',
@@ -476,11 +488,11 @@ REQUIRED_FRAGMENTS = {
         'complete `artifacts/` directory',
     ],
     'docs/repo_status_current.md': [
-        'run_autonomous_implementation=standardized_and_selected',
+        'run_autonomous_implementation=standardized_safe_local_goal_complete',
         'run_autonomous_bugfix=standardized_standalone_audit',
         'run_bugfix_autopilot=standardized_parent_for_broad_audit_and_repair',
         'run_paper_evaluation=retained_fixture_evaluator_not_initial_router',
-        'run_paper_autopilot=standardized_parent_for_post_implementation_runtime_convergence',
+        'run_paper_autopilot=standardized_and_selected_for_post_implementation_runtime_convergence',
         'autopilot_child_telegram=disabled',
         'autopilot_parent_telegram=final_only',
         'standalone_controller_telegram=enabled_by_default',

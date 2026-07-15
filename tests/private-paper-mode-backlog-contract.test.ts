@@ -16,10 +16,11 @@ test('historical private-paper ledger is retained while full paper runtime remai
   }
 });
 
-test('paper controllers remain transitional and are not the initial build router', () => {
+test('paper autopilot becomes the active router only after safe local completion', () => {
   assert.match(read('docs/automation/paper-evaluation.md'), /not the initial implementation controller/);
   assert.match(read('docs/automation/paper-autopilot.md'), /post-implementation runtime\/database convergence/);
-  assert.match(read('docs/repo_status_current.md'), /paper_autopilot=not_selected_until_local_platform_complete/);
+  assert.match(read('docs/repo_status_current.md'), /paper_autopilot=selected_after_bws_510_validation/);
+  assert.match(read('docs/repo_status_current.md'), /selected_controller=run-paper-autopilot\.sh/);
   const command = read('commands/run-sure-paper-mode-autonomous.sh');
   assert.match(command, /run-paper-autopilot\.sh/);
   assert.equal(command.includes('DATABASE' + '_URL'), false);

@@ -34,9 +34,9 @@ def main() -> None:
             'run-bugfix-autopilot.sh', 'run-paper-autopilot.sh',
         ],
         'docs/repo_status_current.md': [
-            PROGRAM, 'status=IMPLEMENTATION_READY', 'current_task=BWS-510',
+            PROGRAM, 'status=SAFE_LOCAL_COMPLETE', 'current_task=BWS-510',
             'safe_local_terminal_gate=BWS-510',
-            'selected_controller=run-autonomous-implementation.sh',
+            'selected_controller=run-paper-autopilot.sh',
         ],
         'docs/028_full_implementation_program.md': [
             PROGRAM, 'BWS-100', 'BWS-510', 'BWS-600', 'BWS-900',
@@ -53,7 +53,7 @@ def main() -> None:
             'run-autonomous-implementation.sh', 'BWS-510', 'run-paper-autopilot.sh',
         ],
         'docs/018_private_paper_mode_runbook.md': [
-            'current_stage=implementation_before_runtime', 'BWS-510', 'BWS-600',
+            'current_stage=post_implementation_runtime_convergence', 'BWS-510', 'BWS-600',
         ],
     }
     for rel, markers in required.items():

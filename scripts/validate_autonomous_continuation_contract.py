@@ -46,10 +46,10 @@ def main() -> None:
         require(task, marker, 'docs/automation/current-implementation-task.md')
 
     for marker in [
-        'status=IMPLEMENTATION_READY', 'current_task=BWS-510',
+        'status=SAFE_LOCAL_COMPLETE', 'current_task=BWS-510',
         'current_task_status=VALIDATED',
         'Safe local implementation is complete through `BWS-510`',
-        'selected_controller=run-autonomous-implementation.sh',
+        'selected_controller=run-paper-autopilot.sh',
     ]:
         require(status, marker, 'docs/repo_status_current.md')
 

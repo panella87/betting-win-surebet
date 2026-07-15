@@ -3,7 +3,7 @@
 ```text
 paper_mode_owner=betting-win-surebet
 account_policy=separate_from_betting-win-betting
-current_stage=implementation_before_runtime
+current_stage=post_implementation_runtime_convergence
 ```
 
 ## Before BWS-510

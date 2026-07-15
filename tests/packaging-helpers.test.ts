@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
-import { chmodSync, copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { execFileSync, spawnSync } from 'node:child_process';
+import { chmodSync, copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -13,6 +13,8 @@ const ARTIFACT_HYGIENE_VALIDATOR = join(REPO_ROOT, 'scripts', 'validate_artifact
 const RESTORE_EXECUTABLE_BITS = join(REPO_ROOT, 'scripts', 'restore-required-executable-bits.js');
 const REQUIRED_EXECUTABLE_PATHS = join(REPO_ROOT, 'tools', 'required_executable_paths.js');
 const UPDATE_GIT = join(REPO_ROOT, 'update_git.sh');
+const RUN_COMMON = join(REPO_ROOT, '.automation', 'lib', 'run_common.sh');
+const CONTROLLER_HARDENING = join(REPO_ROOT, '.automation', 'lib', 'controller_hardening_v2.sh');
 
 function read(path: string): string {
   return readFileSync(path, 'utf-8');
@@ -262,6 +264,116 @@ test('update_git ACP records required executable modes even when core.fileMode i
     execFileSync('git', ['clone', '-q', remoteDir, cloneDir], { cwd: dir, encoding: 'utf-8', stdio: 'pipe' });
     assert.notEqual(statSync(join(cloneDir, 'update_git.sh')).mode & 0o100, 0);
     assert.notEqual(statSync(join(cloneDir, 'run-bugfix-autopilot.sh')).mode & 0o100, 0);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('final artifact refresh atomically updates post-lock summaries without recompressing the full artifacts tree', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'surebet-final-artifact-refresh-'));
+  const repoDir = join(dir, 'repo');
+  const runDir = join(repoDir, 'artifacts', 'autonomous_implementation_test');
+  const archivePath = join(repoDir, 'artifacts.zip');
+  try {
+    mkdirSync(runDir, { recursive: true });
+    mkdirSync(join(runDir, 'final'), { recursive: true });
+    writeFileSync(join(runDir, 'final-summary.md'), 'lock_release_status=not_attempted\n', { encoding: 'utf-8' });
+    writeFileSync(join(runDir, 'final', 'final-summary.md'), 'lock_release_status=not_attempted\n', { encoding: 'utf-8' });
+    writeFileSync(join(runDir, 'evidence.txt'), 'preserved evidence\n', { encoding: 'utf-8' });
+    execFileSync('zip', ['-q', '-1', '-r', archivePath, 'artifacts'], {
+      cwd: repoDir,
+      encoding: 'utf-8',
+      stdio: 'pipe',
+    });
+
+    const releasedSummary = 'lock_release_status=released\nlock_release_exit_code=0\nlock_preserved=no\n';
+    writeFileSync(join(runDir, 'final-summary.md'), releasedSummary, { encoding: 'utf-8' });
+    writeFileSync(join(runDir, 'final', 'final-summary.md'), releasedSummary, { encoding: 'utf-8' });
+    execFileSync(
+      'bash',
+      [
+        '-lc',
+        '. "$RUN_COMMON"; . "$CONTROLLER_HARDENING"; automation_refresh_final_artifacts_zip 30 "$REPO_DIR" "$RUN_DIR"',
+      ],
+      {
+        cwd: repoDir,
+        encoding: 'utf-8',
+        env: {
+          ...process.env,
+          CONTROLLER_HARDENING,
+          REPO_DIR: repoDir,
+          RUN_COMMON,
+          RUN_DIR: runDir,
+        },
+        stdio: 'pipe',
+      },
+    );
+
+    const archivedSummary = execFileSync(
+      'unzip',
+      ['-p', archivePath, 'artifacts/autonomous_implementation_test/final-summary.md'],
+      { cwd: repoDir, encoding: 'utf-8', stdio: 'pipe' },
+    );
+    const archivedNestedSummary = execFileSync(
+      'unzip',
+      ['-p', archivePath, 'artifacts/autonomous_implementation_test/final/final-summary.md'],
+      { cwd: repoDir, encoding: 'utf-8', stdio: 'pipe' },
+    );
+    const archivedEvidence = execFileSync(
+      'unzip',
+      ['-p', archivePath, 'artifacts/autonomous_implementation_test/evidence.txt'],
+      { cwd: repoDir, encoding: 'utf-8', stdio: 'pipe' },
+    );
+    assert.match(archivedSummary, /^lock_release_status=released$/m);
+    assert.match(archivedSummary, /^lock_preserved=no$/m);
+    assert.equal(archivedNestedSummary, releasedSummary);
+    assert.equal(archivedEvidence, 'preserved evidence\n');
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('final artifact refresh preserves the published archive when the bounded update fails', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'surebet-final-artifact-refresh-failure-'));
+  const repoDir = join(dir, 'repo');
+  const runDir = join(repoDir, 'artifacts', 'autonomous_implementation_test');
+  const archivePath = join(repoDir, 'artifacts.zip');
+  try {
+    mkdirSync(runDir, { recursive: true });
+    writeFileSync(join(runDir, 'final-summary.md'), 'lock_release_status=not_attempted\n', { encoding: 'utf-8' });
+    execFileSync('zip', ['-q', '-1', '-r', archivePath, 'artifacts'], {
+      cwd: repoDir,
+      encoding: 'utf-8',
+      stdio: 'pipe',
+    });
+    writeFileSync(join(runDir, 'final-summary.md'), 'lock_release_status=released\n', { encoding: 'utf-8' });
+
+    const result = spawnSync(
+      'bash',
+      [
+        '-lc',
+        '. "$RUN_COMMON"; . "$CONTROLLER_HARDENING"; automation_v2_zip_with_timeout() { return 17; }; automation_refresh_final_artifacts_zip 30 "$REPO_DIR" "$RUN_DIR"',
+      ],
+      {
+        cwd: repoDir,
+        encoding: 'utf-8',
+        env: {
+          ...process.env,
+          CONTROLLER_HARDENING,
+          REPO_DIR: repoDir,
+          RUN_COMMON,
+          RUN_DIR: runDir,
+        },
+      },
+    );
+    assert.equal(result.status, 17, `${result.stdout}\n${result.stderr}`);
+    const archivedSummary = execFileSync(
+      'unzip',
+      ['-p', archivePath, 'artifacts/autonomous_implementation_test/final-summary.md'],
+      { cwd: repoDir, encoding: 'utf-8', stdio: 'pipe' },
+    );
+    assert.equal(archivedSummary, 'lock_release_status=not_attempted\n');
+    assert.equal(readdirSync(repoDir).some((entry) => entry.startsWith('.artifacts.zip.refresh.')), false);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

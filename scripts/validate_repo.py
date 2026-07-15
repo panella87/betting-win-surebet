@@ -188,8 +188,8 @@ def main() -> None:
         'docs/automation/paper-autopilot.md': ['run-paper-autopilot.sh', 'post-implementation runtime/database convergence', 'PAPER_AUTOPILOT_BLOCKED_ON_PINNED_BUNDLE'],
         'docs/automation/autonomous-bugfix.md': ['strict implementation-handoff controller', 'BUGFIX_AUDIT_COMPLETE=yes', 'request_flags.txt'],
         'docs/automation/bugfix-autopilot.md': ['run-bugfix-autopilot.sh', 'same-area re-audit', 'campaign_coverage.tsv'],
-        'PROJECT_STATUS.md': ['program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1', 'status=IMPLEMENTATION_READY', 'current_task=BWS-510'],
-        'docs/repo_status_current.md': ['Standard automation status', 'run_autonomous_implementation=standardized_and_selected', 'run_paper_autopilot=standardized_parent_for_post_implementation_runtime_convergence', 'run_bugfix_autopilot=standardized_parent_for_broad_audit_and_repair'],
+        'PROJECT_STATUS.md': ['program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1', 'status=SAFE_LOCAL_COMPLETE', 'current_task=BWS-510'],
+        'docs/repo_status_current.md': ['Standard automation status', 'run_autonomous_implementation=standardized_safe_local_goal_complete', 'run_paper_autopilot=standardized_and_selected_for_post_implementation_runtime_convergence', 'run_bugfix_autopilot=standardized_parent_for_broad_audit_and_repair'],
         'docs/MASTER_PLAN.md': ['program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1', 'backlog/bws_full_implementation.csv', 'Automation operating model'],
         'docs/032_database_and_data_lifecycle.md': ['DB_URL_TEST', 'SUREBET_TEST_*', 'CREATEDB'],
     }

@@ -3,7 +3,7 @@
 ```text
 repo=betting-win-surebet
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-status=IMPLEMENTATION_READY
+status=SAFE_LOCAL_COMPLETE
 repo_role=surebet_strategy_application
 upstream_platform=betting-win
 provider_truth_owner=betting-win
@@ -62,8 +62,8 @@ The binding sequence is `backlog/bws_full_implementation.csv`. `BWS-100` through
 ## Controller selection
 
 ```text
-selected_controller=run-autonomous-implementation.sh
-paper_autopilot_selected=no
+selected_controller=run-paper-autopilot.sh
+paper_autopilot_selected=yes_post_implementation
 bugfix_autopilot_selected=no
 force_unlock_required=no_evidence
 ```

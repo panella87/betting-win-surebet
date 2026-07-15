@@ -81,6 +81,7 @@ terminate_active_child() { return ${childCleanupRc}; }
 release_parent_lock() { printf called > ${shellQuote(join(runDir, 'release-called'))}; return ${releaseRc}; }
 automation_collect_repo_snapshot() { :; }
 build_artifacts_zip_bounded() { printf x >> ${shellQuote(join(runDir, 'zip-count'))}; return 0; }
+automation_refresh_final_artifacts_zip() { printf r >> ${shellQuote(join(runDir, 'zip-count'))}; return 0; }
 telegram_notify_send_final() { printf '%s|%s|%s\\n' "$3" "$4" "$6" > ${shellQuote(join(runDir, 'telegram'))}; }
 finish 0
 `;
@@ -273,5 +274,6 @@ test('bugfix parent successful child cleanup and lock release remain visible', (
   assert.match(result.stdout, /^lock_release_status=released$/m);
   assert.match(result.stdout, /^lock_preserved=no$/m);
   assert.match(result.summary, /^lock_release_status=released$/m);
+  assert.equal(result.zipCount, 'xr', 'successful release must refresh the archived final summary');
   assert.equal(result.telegram, 'BUGFIX_AUTOPILOT_COMPLETE|all_campaign_areas_closed|0\n');
 });

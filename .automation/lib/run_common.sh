@@ -870,6 +870,69 @@ automation_require_cycle_artifacts() {
   [[ "$missing" == "0" ]]
 }
 
+automation_refresh_final_artifacts_zip() {
+  local timeout_seconds="${1:?timeout seconds are required}"
+  local root="${2:?repository root is required}"
+  local run_dir="${3:?run directory is required}"
+  local archive="$root/artifacts.zip" relative_run tmp entry rc=0
+  local -a entries=()
+
+  [[ "$timeout_seconds" =~ ^[1-9][0-9]*$ ]] || {
+    printf 'ERROR: artifact refresh timeout must be a positive integer; got %q.\n' "$timeout_seconds" >&2
+    return 2
+  }
+  [[ -d "$root" && ! -L "$root" ]] || {
+    printf 'ERROR: artifact refresh repository root must be a non-symlink directory: %s\n' "$root" >&2
+    return 2
+  }
+  [[ -d "$run_dir" && ! -L "$run_dir" ]] || {
+    printf 'ERROR: artifact refresh run directory must be a non-symlink directory: %s\n' "$run_dir" >&2
+    return 2
+  }
+  case "$run_dir" in
+    "$root"/artifacts/*) relative_run="${run_dir#"$root"/}" ;;
+    *)
+      printf 'ERROR: artifact refresh run directory must stay under %s/artifacts: %s\n' "$root" "$run_dir" >&2
+      return 2
+      ;;
+  esac
+  [[ -f "$archive" && ! -L "$archive" ]] || {
+    printf 'ERROR: artifact refresh requires an existing non-symlink archive: %s\n' "$archive" >&2
+    return 2
+  }
+
+  for entry in final-summary.md final_summary.txt final/final-summary.md; do
+    if [[ -f "$run_dir/$entry" && ! -L "$run_dir/$entry" ]]; then
+      entries+=("$relative_run/$entry")
+    fi
+  done
+  (( ${#entries[@]} > 0 )) || {
+    printf 'ERROR: artifact refresh found no final summary under: %s\n' "$run_dir" >&2
+    return 2
+  }
+
+  tmp="$root/.artifacts.zip.refresh.$$.zip"
+  rm -f -- "$tmp"
+  if ! cp --reflink=auto -- "$archive" "$tmp" 2>/dev/null; then
+    cp -- "$archive" "$tmp" || {
+      rm -f -- "$tmp"
+      return 1
+    }
+  fi
+  if automation_v2_zip_with_timeout "$timeout_seconds" "$tmp" "$root" "${entries[@]}"; then
+    rc=0
+  else
+    rc=$?
+    rm -f -- "$tmp"
+    return "$rc"
+  fi
+  if ! mv -f -- "$tmp" "$archive"; then
+    rm -f -- "$tmp"
+    return 1
+  fi
+  return 0
+}
+
 automation_build_artifacts_zip() {
   local run_dir="$1" root="$2" zip_tmp timeout_seconds
   [[ -d "$run_dir" ]] || return 0

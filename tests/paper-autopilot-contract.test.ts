@@ -81,7 +81,7 @@ test('automation config and docs register paper autopilot as the unattended pape
   contains(config, 'AUTOMATION_PAPER_AUTOPILOT_COMMAND');
   contains(config, 'AUTOMATION_PAPER_COMMAND="$AUTOMATION_PAPER_AUTOPILOT_COMMAND"');
   contains(config, 'run-paper-autopilot.sh');
-  contains(status, 'run_paper_autopilot=standardized_parent_for_post_implementation_runtime_convergence');
+  contains(status, 'run_paper_autopilot=standardized_and_selected_for_post_implementation_runtime_convergence');
   contains(read('docs/automation/paper-autopilot.md'), 'PAPER_AUTOPILOT_BLOCKED_ON_PINNED_BUNDLE');
 });
 

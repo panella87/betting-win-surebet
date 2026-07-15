@@ -8,7 +8,7 @@ current_task=BWS-510
 current_task_status=VALIDATED
 ```
 
-Completion record: `BWS-510` is validated. Safe local implementation is complete through `BWS-510`, and `BWS-600` remains blocked on accepted betting-win live read-only runtime evidence. `backlog/bws_full_implementation.csv` remains the binding dependency ledger.
+Completion record: `BWS-510` is validated. Safe local implementation is complete through `BWS-510`, and `BWS-600` remains blocked on accepted betting-win live read-only runtime evidence. `backlog/bws_full_implementation.csv` remains the binding dependency ledger. This file is no longer an active implementation queue; the post-implementation router selects `run-paper-autopilot.sh`.
 
 Validated BWS-510 proof:
 

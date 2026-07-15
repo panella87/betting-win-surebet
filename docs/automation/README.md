@@ -3,10 +3,11 @@
 ```text
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 current_task=BWS-510
-selected_controller=run-autonomous-implementation.sh
+current_task_status=VALIDATED
+selected_controller=run-paper-autopilot.sh
 ```
 
-The implementation controller reads `docs/automation/current-implementation-task.md`. It must not stop on historical fixture-complete claims.
+The implementation controller completion record remains in `docs/automation/current-implementation-task.md`. Safe local work through `BWS-510` is validated, so the active post-implementation router selects `run-paper-autopilot.sh`; implementation is invoked again only from a verified runtime handoff or newly confirmed source queue.
 
 `BWS-100` validates the committed-`HEAD` upstream lock through `BETTING_WIN_REPO_PATH`. Ongoing implementation must continue to preserve that read-only contract: validation reads committed `HEAD` through Git objects and must not clone, create a temporary worktree, or modify upstream working-tree state.
 
@@ -34,7 +35,7 @@ Standard evidence packaging:
 ./zip_codebase.sh --artifacts-only
 ```
 
-Every root controller publishes repo-root `artifacts.zip` from the complete `artifacts/` directory, equivalent to a bounded `zip -q -1 -r artifacts.zip artifacts` operation using fast Deflate level 1. It must not package only the latest run directory. The numbered `--artifacts-only` helper follows the same complete-tree contract without filtering nested logs, archives, locks, temporary evidence, or empty directories.
+Every root controller publishes repo-root `artifacts.zip` from the complete `artifacts/` directory, equivalent to a bounded `zip -q -1 -r artifacts.zip artifacts` operation using fast Deflate level 1. It must not package only the latest run directory. After successful strict lock release, the controller atomically refreshes the current run final-summary entries in the existing archive so downloaded evidence includes `lock_release_status`, `lock_release_exit_code`, and `lock_preserved`; if that incremental refresh fails, one bounded full-tree rebuild is attempted before final classification. The numbered `--artifacts-only` helper follows the same complete-tree contract without filtering nested logs, archives, locks, temporary evidence, or empty directories.
 
 `zip_codebase.sh` creates its transient codebase file list inside the repository, so laptop packaging does not depend on writable `/tmp` or `TMPDIR`. Both numbered codebase archives and complete artifact archives use fast Deflate level 1 to reduce packaging latency without switching to an incompatible archive format or uncompressed output. The codebase exclusion is root-scoped for generated `runtime/` evidence, so legitimate source trees such as `src/runtime/` and `packages/*/src/runtime/` remain in the archive. Source-manifest generation uses the same generated-directory boundary at every depth, excluding nested dependency/build trees without dropping source-owned runtime modules. `pull_artifacts_and_zip_codebase.sh` rejects a `REMOTE_REPO` basename that differs from the local repository name before downloading anything.
 

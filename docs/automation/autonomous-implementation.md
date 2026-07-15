@@ -1,6 +1,6 @@
 # Autonomous implementation rules: betting-win-surebet
 
-`run-autonomous-implementation.sh` is selected for `BWS_FULL_PLATFORM_IMPLEMENTATION_V1`.
+`run-autonomous-implementation.sh` completed the safe local `BWS_FULL_PLATFORM_IMPLEMENTATION_V1` queue through `BWS-510`. It remains available for a verified runtime handoff or newly confirmed source queue, but `run-paper-autopilot.sh` is now the active post-implementation controller.
 
 Authority comes from `docs/automation/current-implementation-task.md` and `backlog/bws_full_implementation.csv`. There is no `--task` flag. A separate `--prompt-file` is unnecessary.
 

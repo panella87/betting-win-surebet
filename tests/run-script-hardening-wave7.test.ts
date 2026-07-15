@@ -69,6 +69,7 @@ ACTIVE_HANDOFF_MODE=none
 refresh_source_change_state() { :; }
 automation_collect_repo_snapshot() { :; }
 build_artifacts_zip_bounded() { printf x >> ${shellQuote(join(runDir, 'zip-count'))}; return 0; }
+automation_refresh_final_artifacts_zip() { printf r >> ${shellQuote(join(runDir, 'zip-count'))}; return 0; }
 telegram_notify_send_final() { printf '%s|%s|%s\\n' "$3" "$4" "$6" > ${shellQuote(join(runDir, 'telegram'))}; }
 automation_release_lock() { return ${options.releaseRc}; }
 finish ${options.finishRc}
@@ -166,7 +167,7 @@ test('successful standalone lock release remains visible without changing a succ
     assert.match(result.stdout, /^lock_release_exit_code=0$/m);
     assert.match(result.stdout, /^lock_preserved=no$/m);
     assert.match(result.summary, /^lock_release_status=released$/m);
-    assert.equal(result.zipCount.length, 1);
+    assert.equal(result.zipCount, 'xr', 'successful release must refresh the archived final summary');
   }
 });
 

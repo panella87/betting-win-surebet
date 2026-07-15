@@ -1,3 +1,11 @@
+## 2026-07-15 - Post-lock artifact finalization and runtime routing
+
+- Corrected all five root-controller finalizers so the published repo-root `artifacts.zip` is atomically refreshed after successful lock release and therefore contains the authoritative final lock-release fields.
+- Added an incremental fast-Deflate refresh that updates only the current run's final summary entries, including the paper evaluator's retained nested copy, on an atomic archive copy; a bounded full archive rebuild remains the fail-closed fallback.
+- Preserved corrected full-rebuild behavior for child-cleanup and lock-release failures, and kept Telegram delivery after final lock and artifact classification.
+- Transitioned active routing after validated `BWS-510` completion from autonomous implementation to `run-paper-autopilot.sh` for post-implementation runtime/database convergence.
+- Kept `BWS-600` blocked on accepted betting-win continuous read-only runtime evidence and kept `BWS-900` parked.
+
 ## 2026-07-15 - Fast ZIP packaging and BWS-510 database URL wiring
 
 - Switched controller artifact archives, numbered artifact archives, and numbered codebase archives to Info-ZIP fast Deflate level 1 while preserving the complete artifact-tree and filtered codebase contracts.
