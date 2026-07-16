@@ -27,17 +27,16 @@ All five root controllers archive the complete `artifacts/` tree using fast stan
 
 Parent autopilots pass `TELEGRAM_NOTIFY=0` to children and send one final parent message. Standalone controllers notify by default.
 
-## Current exact maintenance gate
+## Current maintenance gate
 
-The remaining program intentionally includes root-wrapper and paper-controller integration. `run-autonomous-implementation.sh` now accepts task-file maintenance only when:
+The root-wrapper and paper-controller integration phase is complete. The active `BWS-590` through `BWS-599` task contains:
 
 ```text
-AUTOMATION_ALLOW_PROTECTED_CHANGES=1
-automation_maintenance_allowed=yes
-allowed_protected_files=<exact list>
+automation_maintenance_allowed=no
+allowed_protected_files=none
 ```
 
-A blanket manual protected-file override is disabled. Any changed protected file outside the task list blocks the cycle.
+Do not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`. The blanket manual protected-file override is disabled and any protected change blocks the cycle.
 
 ## Current paper limitation
 

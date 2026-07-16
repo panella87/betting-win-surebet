@@ -31,17 +31,18 @@ def main() -> None:
 
     for marker in [
         'BWS_FULL_PLATFORM_IMPLEMENTATION_V1', 'backlog/bws_full_implementation.csv',
-        'BWS-100', 'BWS-582', 'BWS-581', 'BWS-589', 'BWS-599',
+        'backlog/bws_remaining_safe_local_map.csv', 'BWS-100', 'BWS-589', 'BWS-590', 'BWS-599',
         'CONTINUE_REQUIRED=yes', 'AUTONOMOUS_GOAL_COMPLETE=yes',
-        'Historical SURE-001/SURE-002A/SURE-002B files are bootstrap ledgers only',
-        'task-file automation maintenance',
+        'BWS-100` through `BWS-589` are validated carry-forward foundations',
+        'Protected automation policy',
     ]:
         require(implementation, marker, 'docs/automation/autonomous-implementation.md')
 
     for marker in [
         'current_task=BWS-590', 'current_task_status=PENDING',
         'safe_local_terminal_gate=BWS-599', 'BETTING_WIN_REPO_PATH',
-        'automation_maintenance_allowed=yes', 'allowed_protected_files=',
+        'automation_maintenance_allowed=no', 'allowed_protected_files=none',
+        'recommended_cycle_timeout=6h',
         'provider_connections=prohibited', 'execution=prohibited',
     ]:
         require(task, marker, 'docs/automation/current-implementation-task.md')

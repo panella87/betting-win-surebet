@@ -12,9 +12,19 @@ external_runtime_gate=BWS-600
 
 ## Campaign objective
 
-Implement every remaining safe local component required for a real operator-runnable continuous private-paper BWS application. Use `backlog/bws_full_implementation.csv` as the binding dependency ledger. Start with the first dependency-ready `PENDING` row, currently `BWS-590`, and continue across validated cycles through `BWS-599`.
+Implement every remaining safe local component required for a real operator-runnable continuous private-paper BWS application. Use `backlog/bws_full_implementation.csv` as the binding dependency ledger and `backlog/bws_remaining_safe_local_map.csv` as the dependency-ordered implementation map.
 
-Do not stop after one bounded task while another dependency-ready safe row remains.
+Start with the first dependency-ready `PENDING` row, currently `BWS-590`, and continue across validated cycles through `BWS-599`. Do not stop after one bounded task while another dependency-ready safe row remains.
+
+Prefer the largest safe cohesive tranche:
+
+```text
+tranche_1=BWS-590_then_BWS-591_release_and_recovery
+tranche_2=BWS-592_then_BWS-593_soak_and_external_preflight
+tranche_3=BWS-599_final_clean_room_acceptance
+```
+
+Each binding ledger row must still be validated separately. Do not merge unrelated work or mark a dependent row complete before its own proof passes.
 
 ## Required reading
 
@@ -24,27 +34,35 @@ Do not stop after one bounded task while another dependency-ready safe row remai
 4. `docs/028_full_implementation_program.md`
 5. `docs/029_full_implementation_task_ledger.md`
 6. `docs/034_remaining_operator_runtime_implementation_program.md`
-7. `docs/035_continuous_service_supervisor_contract.md`
-8. `docs/036_root_wrappers_and_paper_automation_integration.md`
-9. `docs/037_database_backup_retention_and_recovery.md`
-10. `docs/038_observability_metrics_and_evidence_contract.md`
-11. `docs/039_release_deployment_and_upgrade_contract.md`
-12. `docs/040_soak_failure_injection_and_operator_acceptance.md`
-13. `docs/041_external_runtime_preflight_and_bws600_campaign.md`
-14. `backlog/bws_full_implementation.csv`
+7. `docs/039_release_deployment_and_upgrade_contract.md`
+8. `docs/040_soak_failure_injection_and_operator_acceptance.md`
+9. `docs/041_external_runtime_preflight_and_bws600_campaign.md`
+10. `docs/042_release_packaging_implementation_blueprint.md`
+11. `docs/043_upgrade_rollback_recovery_implementation_blueprint.md`
+12. `docs/044_soak_failure_injection_implementation_blueprint.md`
+13. `docs/045_external_runtime_preflight_implementation_blueprint.md`
+14. `docs/046_final_local_acceptance_implementation_blueprint.md`
+15. `backlog/bws_full_implementation.csv`
+16. `backlog/bws_remaining_safe_local_map.csv`
+
+The validated service, database, observability, wrapper and paper-controller contracts in `docs/035` through `docs/038` remain binding carry-forward requirements.
 
 ## Verified carry-forward state
 
 `BWS-100` through `BWS-589` are validated. Preserve their contracts. Do not reimplement or weaken validated functionality merely to create work.
 
-Carry-forward upstream proof must prove the betting-win committed HEAD remains unchanged during verification, retain no placeholder fields in the lock, and use no clone or temporary worktree.
+The `BWS-589` runtime-evidence paper-autopilot change required a reviewed protected update to `run-autonomous-implementation.sh` so selected mode and campaign identity survive implementation return handoffs. That source is now accepted carry-forward baseline. The protected integration phase is closed.
 
-The current concrete gaps are:
+Carry-forward upstream proof must prove the betting-win committed HEAD remains unchanged during lock verification, retain no placeholder fields, and use no clone or temporary worktree.
+
+The remaining concrete gaps are:
 
 ```text
-no release/upgrade/rollback/recovery package
-no long-running soak/failure-injection acceptance
-no external runtime preflight/campaign manifest
+no reproducible private release and install verification
+no exact-version upgrade, rollback and interrupted-recovery proof
+no retained multi-hour soak and bounded failure-injection campaign
+no accepted-runtime preflight and external campaign manifest
+no integrated clean-room final local acceptance
 ```
 
 ## First task
@@ -52,14 +70,16 @@ no external runtime preflight/campaign manifest
 ```text
 id=BWS-590
 objective=implement reproducible release and deployment packaging
+largest_safe_tranche=complete_BWS-590_release_surface_then_continue_to_BWS-591
 ```
 
 Required outcomes:
 
-- produce a versioned private release package with source/build checksums and exact upstream-lock references;
+- produce a deterministic versioned private release package with source, build, cockpit, migration and exact upstream-lock checksums;
 - add Node 20 and PostgreSQL preflight plus a private environment template without secret output;
-- provide user-service templates and a non-mutating install verification path;
-- preserve execution-disabled, provider-disabled and no-fallback boundaries throughout packaging and verification;
+- provide non-privileged user-service templates and a non-mutating install verification path;
+- prove fresh extraction verification, tamper rejection and secret/runtime/database exclusion;
+- preserve execution-disabled, provider-disabled, loopback-only and no-fallback boundaries;
 - update the task ledger only after complete proof and `npm run validate` pass.
 
 ## Full remaining sequence
@@ -67,33 +87,44 @@ Required outcomes:
 ```text
 BWS-590  release and deployment packaging
 BWS-591  upgrade, rollback and disaster recovery
-BWS-592  soak and failure injection
+BWS-592  multi-hour soak and failure injection
 BWS-593  external runtime preflight and campaign manifest
 BWS-599  integrated final local acceptance
 ```
 
 ## Protected automation authorization
 
-The later integration tasks require an exact protected subset.
+The protected wrapper and paper-controller integration tasks are complete. The current release, recovery, soak, preflight and final-acceptance queue does not authorize protected automation edits.
 
 ```text
-automation_maintenance_allowed=yes
-allowed_protected_files=start.sh,stop.sh,check_progress.sh,watch_progress.sh,open_log.sh,run-paper-evaluation.sh,run-paper-autopilot.sh,automation.config.sh,.automation/lib/run_common.sh,docs/automation/PROTECTED_AUTOMATION_FILES.md
+automation_maintenance_allowed=no
+allowed_protected_files=none
 ```
 
 Rules:
 
-- `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` must be set for this campaign.
-- The controller must still enforce the exact list above.
-- No protected file outside the list may change.
-- Do not edit protected files before the active dependency-ready row requires them.
-- Do not broaden the list from inside an autonomous cycle.
+- Do not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` for this campaign.
+- Any protected automation change is a blocker unless a later external overlay explicitly updates this task source first.
+- Do not broaden authorization from inside an autonomous cycle.
+
+## Campaign budgets
+
+```text
+campaign_duration=72h
+max_cycles=200
+recommended_cycle_timeout=6h
+validation_timeout=45m
+```
+
+The longer cycle timeout is required so `BWS-592` can retain a real two-hour soak proof with setup, recovery and cleanup inside one bounded cycle. Shorter tasks may finish earlier; the controller must continue to the next dependency-ready row.
 
 ## Process-test authorization
 
 Do not start, stop, restart, kill, detach or replace pre-existing services or user sessions.
 
 Bounded repo-owned child processes launched by tests are allowed when the active task requires lifecycle, crash, restart, shutdown or recovery proof. They must use unique identities and ports, remain loopback-only, and be cleaned up by the creating test.
+
+Disposable PostgreSQL proof may create and drop only uniquely named test databases using the existing private test role.
 
 ## Continuation rules
 

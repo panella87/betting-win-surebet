@@ -18,7 +18,7 @@ def read(path: Path) -> str:
 
 REQUIRED = [
     'README.md', 'AGENTS.md', 'CHANGELOG.md', 'PROJECT_STATUS.md', 'STARTER_PACK.md',
-    'DOCUMENTATION_CHECK_REPORT.md', 'package.json', 'package-lock.json', 'tsconfig.json',
+    'DOCUMENTATION_CHECK_REPORT.md', 'backlog/bws_remaining_safe_local_map.csv', 'package.json', 'package-lock.json', 'tsconfig.json',
     '.gitignore', '.gitattributes', '.env.example', '.nvmrc', 'cli.js',
     'start.sh', 'stop.sh', 'check_progress.sh', 'watch_progress.sh', 'open_log.sh',
     'update_git.sh', 'pull_artifacts_and_zip_codebase.sh', 'zip_codebase.sh',
@@ -70,6 +70,11 @@ REQUIRED = [
         (39, 'release_deployment_and_upgrade_contract.md'),
         (40, 'soak_failure_injection_and_operator_acceptance.md'),
         (41, 'external_runtime_preflight_and_bws600_campaign.md'),
+        (42, 'release_packaging_implementation_blueprint.md'),
+        (43, 'upgrade_rollback_recovery_implementation_blueprint.md'),
+        (44, 'soak_failure_injection_implementation_blueprint.md'),
+        (45, 'external_runtime_preflight_implementation_blueprint.md'),
+        (46, 'final_local_acceptance_implementation_blueprint.md'),
     ]],
     'backlog/README.md', 'backlog/bws_full_implementation.csv',
     'config/betting-win.upstream-baseline.json',
@@ -196,10 +201,10 @@ def main() -> None:
     required_doc_markers = {
         'README.md': ['program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1', 'repo_role=surebet_strategy_application', 'current_task=BWS-590', 'safe_local_terminal_gate=BWS-599', 'run-autonomous-implementation.sh'],
         'AGENTS.md': ['Source-of-truth order', 'BETTING_WIN_REPO_PATH', 'backlog/bws_full_implementation.csv', 'BWS-580', 'BWS-581', 'BWS-599'],
-        'docs/automation/README.md': ['current_task=BWS-590', 'safe_local_terminal_gate=BWS-599', 'Exact protected-file policy', 'blanket manual override is disabled'],
-        'docs/automation/PROTECTED_AUTOMATION_FILES.md': ['Exact authorization contract', 'AUTOMATION_ALLOW_PROTECTED_CHANGES=1', 'allowed_protected_files=<one exact comma-separated list>'],
+        'docs/automation/README.md': ['current_task=BWS-590', 'safe_local_terminal_gate=BWS-599', 'Exact protected-file policy', 'automation_maintenance_allowed=no', 'blanket manual override is disabled'],
+        'docs/automation/PROTECTED_AUTOMATION_FILES.md': ['Exact authorization contract', 'run-autonomous-implementation.sh', 'automation_maintenance_allowed=no', 'allowed_protected_files=none'],
         'docs/automation/repo-profile.md': ['repo_role=surebet_strategy_application', 'current_task=BWS-590', 'safe_local_terminal_gate=BWS-599'],
-        'docs/automation/paper-evaluation.md': ['current_controller_mode=single_pass_fixture_or_runtime_evidence', 'validated_task=BWS-588'],
+        'docs/automation/paper-evaluation.md': ['current_controller_mode=single_pass_fixture_or_runtime_evidence', 'validated_task=BWS-588', 'parent_integration_task=BWS-589_VALIDATED'],
         'docs/automation/paper-autopilot.md': ['integration_task=BWS-589', 'selected_now=yes_for_runtime_evidence_source_fix_loops', 'BWS-599'],
         'PROJECT_STATUS.md': ['program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1', 'status=IMPLEMENTATION_READY', 'current_task=BWS-590', 'current_task_status=PENDING', 'safe_local_completion_gate=BWS-599'],
         'docs/repo_status_current.md': ['Standard automation status', 'run_autonomous_implementation=standardized_and_selected_for_remaining_operator_runtime', 'run_paper_autopilot=runtime_evidence_parent_validated_bws_589_pending_bws_599', 'run_bugfix_autopilot=standardized_parent_for_broad_audit_and_repair'],
@@ -208,6 +213,11 @@ def main() -> None:
         'docs/033_continuous_private_paper_runtime_program.md': ['BWS-520', 'BWS-580', 'BWS-581', 'BWS-599', 'BWS-600'],
         'docs/034_remaining_operator_runtime_implementation_program.md': ['current_task=BWS-590', 'safe_local_terminal_gate=BWS-599', 'paper evaluation=runtime_evidence_mode_validated'],
         'docs/041_external_runtime_preflight_and_bws600_campaign.md': ['BWS-593', 'BWS-600', 'bws.external_runtime_campaign.v1'],
+        'docs/042_release_packaging_implementation_blueprint.md': ['parent_task=BWS-590', 'Non-mutating install verification'],
+        'docs/043_upgrade_rollback_recovery_implementation_blueprint.md': ['parent_task=BWS-591', 'Rollback decision'],
+        'docs/044_soak_failure_injection_implementation_blueprint.md': ['parent_task=BWS-592', 'canonical_server_soak_duration=2h'],
+        'docs/045_external_runtime_preflight_implementation_blueprint.md': ['parent_task=BWS-593', 'Check-only guarantee'],
+        'docs/046_final_local_acceptance_implementation_blueprint.md': ['parent_task=BWS-599', 'Clean-room boundary'],
     }
     for rel, markers in required_doc_markers.items():
         text = read(ROOT / rel)

@@ -2,7 +2,7 @@
 
 ## Current state
 
-The repository has validated executable components, product-owned lifecycle control, protected root wrapper integration, and standalone paper runtime evidence through `BWS-588`, but it does not yet have a complete operator-owned service stack.
+The repository has validated executable components, complete product-owned lifecycle control, protected root wrapper integration, standalone paper runtime evidence and runtime-evidence paper autopilot through `BWS-589`. The remaining local gaps are release, recovery, soak, external preflight and final clean-room acceptance.
 
 ```text
 upstream convergence=continuous_service_validated

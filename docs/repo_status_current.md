@@ -32,7 +32,7 @@ database backup/restore/retention=validated_product_commands_present
 release/upgrade/recovery/soak acceptance=missing
 ```
 
-The binding queue is `backlog/bws_full_implementation.csv`. `BWS-590` is the first dependency-ready `PENDING` row. Safe local implementation continues through `BWS-599`; `BWS-600` remains the external operator-approved runtime evidence gate.
+The binding queue is `backlog/bws_full_implementation.csv`; the supporting detailed map is `backlog/bws_remaining_safe_local_map.csv`. `BWS-590` is the first dependency-ready `PENDING` row. Safe local implementation continues through `BWS-599`; `BWS-600` remains the external operator-approved runtime evidence gate.
 
 ## Validated upstream facts
 
@@ -77,12 +77,14 @@ BWS-900=PARKED_EXECUTION
 
 ## Protected automation authorization
 
+The reviewed `BWS-587` through `BWS-589` integration phase is complete. The current release, recovery, soak, preflight and final-acceptance queue authorizes no protected automation changes.
+
 ```text
-automation_maintenance_allowed=yes
-allowed_protected_files=start.sh,stop.sh,check_progress.sh,watch_progress.sh,open_log.sh,run-paper-evaluation.sh,run-paper-autopilot.sh,automation.config.sh,.automation/lib/run_common.sh,docs/automation/PROTECTED_AUTOMATION_FILES.md
+automation_maintenance_allowed=no
+allowed_protected_files=none
 ```
 
-The exact list is binding. Protected changes outside it are forbidden. Product tasks must not edit protected files before their dependency-ready row requires integration.
+Do not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`. Any protected change is a blocker unless a new external overlay first updates the binding task source.
 
 ## Routing
 

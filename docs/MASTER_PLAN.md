@@ -72,6 +72,6 @@ No task may pass by weakening validators, inventing upstream evidence, accepting
 - Runtime evidence after `BWS-589` and final local acceptance: `run-paper-autopilot.sh`.
 - Standalone audit and paper controllers remain available only for their explicit bounded roles.
 
-The active implementation task authorizes an exact protected-file subset for the later wrapper and paper-controller tasks. The controller must enforce the task-file allowlist even when `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` is set.
+The protected wrapper and paper-controller integration phase is complete. The active `BWS-590` through `BWS-599` campaign authorizes no protected automation changes. Detailed execution blueprints are `docs/042` through `docs/046`, with machine-readable decomposition in `backlog/bws_remaining_safe_local_map.csv`.
 
 Hardened parent controllers suppress child Telegram messages and send one final parent notification.

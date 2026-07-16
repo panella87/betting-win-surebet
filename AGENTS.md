@@ -59,14 +59,14 @@ invented commit, schema, endpoint, package or acceptance evidence
 
 ## Active implementation program
 
-`BWS-100` through `BWS-580` are validated. They provide the domain engine, persistence, bounded convergence passes, bounded scheduling and workers, API, cockpit, an API-only lifecycle owner, loopback acceptance and a runtime handoff.
+`BWS-100` through `BWS-589` are validated. `BWS-580` remains the integrated bounded-runtime handoff milestone. They provide the domain engine, persistence, long-running explicit convergence, scheduler and worker services, API, cockpit, complete product lifecycle, database operations, observability, root wrappers, paper evaluation and runtime-evidence paper autopilot.
 
-They do not yet provide the finished operator service. Safe local work remains through `BWS-599`:
+Safe local release, recovery, soak, preflight and final acceptance work remains through `BWS-599`:
 
 ```text
-BWS-581..BWS-584  real continuous services and complete lifecycle
-BWS-585..BWS-586  database operations, observability and evidence retention
-BWS-587..BWS-589  root wrappers and paper-controller integration
+BWS-581..BWS-584  real continuous services and complete lifecycle (validated)
+BWS-585..BWS-586  database operations, observability and evidence retention (validated)
+BWS-587..BWS-589  root wrappers and paper-controller integration (validated)
 BWS-590..BWS-591  release, deployment, upgrade, rollback and recovery
 BWS-592..BWS-593  soak/failure injection and external campaign preflight
 BWS-599           integrated final local acceptance
@@ -89,11 +89,9 @@ BWS-900           separately authorized execution
 
 ## Protected automation policy
 
-Normal product files remain unprotected. The current task authorizes an exact protected-file subset for the later root-wrapper and paper-controller tasks.
+Normal product files remain unprotected. The root-wrapper and paper-controller integration phase is complete. The active `BWS-590` through `BWS-599` task sets `automation_maintenance_allowed=no` and `allowed_protected_files=none`.
 
-`AUTOMATION_ALLOW_PROTECTED_CHANGES=1` is only an enabling gate. The implementation controller must also read and enforce the exact `allowed_protected_files` marker from `docs/automation/current-implementation-task.md`. Any changed protected file outside that list is a blocker.
-
-Do not edit protected files before the dependency-ready row requires them.
+Do not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`. Any protected automation change is a blocker unless an external overlay first changes the binding task source.
 
 ## Process safety
 

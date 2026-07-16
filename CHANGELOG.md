@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-07-16 - Post-BWS-589 blueprint and protected-policy reconciliation
+
+- Verified that the latest campaign implemented and validated `BWS-581` through `BWS-589`, then ended with `protected_files_changed` because the historical allowlist omitted the required `run-autonomous-implementation.sh` runtime-evidence return-handoff change.
+- Accepted that reviewed source as carry-forward baseline and closed the protected integration phase; the active `BWS-590` through `BWS-599` task now sets `automation_maintenance_allowed=no` and `allowed_protected_files=none`.
+- Reconciled stale status, starter, backlog and automation documentation to `BWS-589=VALIDATED` and `BWS-590=PENDING`.
+- Added detailed release, recovery, soak, external-preflight and final-acceptance blueprints in `docs/042` through `docs/046`.
+- Added `backlog/bws_remaining_safe_local_map.csv` with dependency-ordered subtasks, acceptance criteria, validation, blockers and unchanged areas.
+- Increased the recommended autonomous cycle ceiling to six hours so the required two-hour `BWS-592` soak can include setup, recovery and cleanup while the 72-hour parent campaign continues through `BWS-599`.
+
 ## 2026-07-16 - Remaining operator runtime program and exact task-file maintenance policy
 
 - Reclassified the validated `BWS-520` through `BWS-580` result as a bounded runtime foundation rather than final operator completion.

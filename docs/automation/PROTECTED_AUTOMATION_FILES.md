@@ -27,7 +27,7 @@ docs/automation/PROTECTED_AUTOMATION_FILES.md
 
 Protected changes are permitted only when an explicit handoff or the active task source provides exact authorization.
 
-For the current task-file campaign, all of the following are required:
+When authorization is active, all of the following are required:
 
 ```text
 AUTOMATION_ALLOW_PROTECTED_CHANGES=1
@@ -35,10 +35,37 @@ automation_maintenance_allowed=yes
 allowed_protected_files=<one exact comma-separated list>
 ```
 
-`AUTOMATION_ALLOW_PROTECTED_CHANGES=1` is not blanket permission. The implementation controller rejects missing, duplicate, malformed, empty or out-of-list authorization. It snapshots every protected path before the campaign and blocks a cycle if any changed protected path is outside the exact list.
+`AUTOMATION_ALLOW_PROTECTED_CHANGES=1` is not blanket permission. The implementation controller rejects missing, duplicate, malformed, empty or out-of-list authorization. It snapshots every protected path and blocks a cycle if any changed protected path is outside the exact list.
 
-The current exact list is documented in `docs/automation/current-implementation-task.md` and `docs/036_root_wrappers_and_paper_automation_integration.md`. It does not include `run-autonomous-implementation.sh`, bugfix controllers, `update_git.sh`, packaging helpers, controller hardening, Telegram code or any unrelated automation file.
+## Historical BWS-587 through BWS-589 authorization
 
-Do not broaden the list inside an autonomous cycle. Do not edit an authorized file before the active dependency-ready task requires it.
+The reviewed integration phase required:
+
+```text
+start.sh
+stop.sh
+check_progress.sh
+watch_progress.sh
+open_log.sh
+run-autonomous-implementation.sh
+run-paper-evaluation.sh
+run-paper-autopilot.sh
+automation.config.sh
+.automation/lib/run_common.sh
+docs/automation/PROTECTED_AUTOMATION_FILES.md
+```
+
+`run-autonomous-implementation.sh` was required so a runtime-evidence paper handoff could preserve selected upstream mode and campaign identity through the implementation return handoff.
+
+## Current task state
+
+The integration phase is complete. `docs/automation/current-implementation-task.md` now contains:
+
+```text
+automation_maintenance_allowed=no
+allowed_protected_files=none
+```
+
+Do not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` for `BWS-590` through `BWS-599`. Do not broaden authorization from inside an autonomous cycle.
 
 Executable command lists remain in `automation.config.sh`, `tools/required_executable_paths.js` and `scripts/validate_executable_bits.py`.

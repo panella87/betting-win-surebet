@@ -8,48 +8,40 @@ selected_controller=run-autonomous-implementation.sh
 safe_local_terminal_gate=BWS-599
 ```
 
-`BWS-100` through `BWS-588` are validated carry-forward foundations. They do not finish the operator application: the current runtime now has validated full-stack lifecycle ownership, product-owned database lifecycle operations, structured observability surfaces, integrated root lifecycle wrappers and standalone paper runtime evidence, but paper autopilot remains outside the owned lifecycle.
+`BWS-100` through `BWS-589` are validated carry-forward foundations. The runtime has full product lifecycle ownership, database lifecycle, observability, root wrappers, service-owned paper evaluation and runtime-evidence paper autopilot.
 
-The binding queue continues through `BWS-599`. The detailed contracts are `docs/034_remaining_operator_runtime_implementation_program.md` through `docs/041_external_runtime_preflight_and_bws600_campaign.md`.
+The remaining queue is release, recovery, soak, external preflight and final clean-room acceptance through `BWS-599`. Detailed contracts are `docs/039` through `docs/046`; the dependency-ordered subtask map is `backlog/bws_remaining_safe_local_map.csv`.
 
 `BETTING_WIN_REPO_PATH` remains a read-only pointer to the existing betting-win checkout. BWS reads committed `HEAD` through Git objects and must not clone, clean, reset or modify that checkout.
 
 ## Controller selection
 
 ```text
-run-autonomous-implementation.sh  selected for BWS-589 through BWS-599 after BWS-588 validation
+run-autonomous-implementation.sh  selected for BWS-590 through BWS-599
 run-autonomous-bugfix.sh          standalone audit only
 run-bugfix-autopilot.sh           broad audit and automatic repair after implementation
-run-paper-evaluation.sh           fixture evaluator plus runtime-evidence mode after BWS-588
-run-paper-autopilot.sh            runtime-evidence parent validated at BWS-589; selected for later BWS-599/BWS-600 campaigns
+run-paper-evaluation.sh           fixture evaluator plus validated runtime-evidence mode
+run-paper-autopilot.sh            validated runtime-evidence parent for BWS-599/BWS-600 campaigns
 ```
 
-Do not use paper autopilot as a workaround for missing product lifecycle implementation.
+Do not use paper autopilot as a workaround for remaining local implementation.
 
 ## Exact protected-file policy
 
-The current task file authorizes only the exact protected subset needed by `BWS-587` through `BWS-589`:
+The historical `BWS-587` through `BWS-589` phase used an exact reviewed allowlist that included `run-autonomous-implementation.sh` for runtime-evidence return handoffs.
+
+The current task source contains:
 
 ```text
-start.sh
-stop.sh
-check_progress.sh
-watch_progress.sh
-open_log.sh
-run-paper-evaluation.sh
-run-paper-autopilot.sh
-automation.config.sh
-.automation/lib/run_common.sh
-docs/automation/PROTECTED_AUTOMATION_FILES.md
+automation_maintenance_allowed=no
+allowed_protected_files=none
 ```
 
-The server campaign must set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`, but that environment value is only an enabling gate. `run-autonomous-implementation.sh` also requires the unique task-file markers `automation_maintenance_allowed=yes` and `allowed_protected_files=...`, and rejects any protected change outside the list. A blanket manual override is disabled.
-
-Do not edit protected files before the dependency-ready row requires them.
+Do not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`. Any protected automation change blocks the cycle unless an external overlay first updates the binding task source. The blanket manual override is disabled.
 
 ## Process-test boundary
 
-Autonomous cycles may not mutate pre-existing services or user sessions. Bounded repo-owned loopback child processes are permitted only for task-required lifecycle, crash, restart, shutdown or recovery tests. They must use unique identities and ports, remain attached to the test and be cleaned up by the command that created them.
+Autonomous cycles may not mutate pre-existing services or user sessions. Bounded repo-owned loopback child processes are permitted only for task-required lifecycle, crash, restart, shutdown, recovery or soak tests. They must use unique identities and ports, remain attached to the test and be cleaned up by the command that created them.
 
 ## Notifications and child results
 

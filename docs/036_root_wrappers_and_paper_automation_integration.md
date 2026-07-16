@@ -14,6 +14,7 @@ stop.sh
 check_progress.sh
 watch_progress.sh
 open_log.sh
+run-autonomous-implementation.sh
 run-paper-evaluation.sh
 run-paper-autopilot.sh
 automation.config.sh
@@ -88,3 +89,7 @@ Required properties:
 - repeat guards based on semantic defect fingerprints;
 - no `paper_service_lifecycle=none` result in runtime-evidence mode;
 - final artifacts archive refreshed after lock classification.
+
+## Closure state
+
+`BWS-587`, `BWS-588` and `BWS-589` are validated. The reviewed `BWS-589` return-handoff implementation required `run-autonomous-implementation.sh` in the historical exact allowlist. The current `BWS-590` through `BWS-599` task has `automation_maintenance_allowed=no` and `allowed_protected_files=none`.

@@ -473,9 +473,9 @@ REQUIRED_FRAGMENTS = {
         'check-only must fail',
         'AUTONOMOUS_GOAL_COMPLETE=yes',
         'BWS_FULL_PLATFORM_IMPLEMENTATION_V1',
-        'BWS-581',
+        'BWS-590',
         'BWS-599',
-        'task-file automation maintenance',
+        'Protected automation policy',
     ],
     'docs/automation/autonomous-bugfix.md': [
         'read-only audit and strict implementation-handoff controller',

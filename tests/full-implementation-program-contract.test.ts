@@ -29,8 +29,9 @@ test('full implementation ledger keeps BWS-580 validated and opens the remaining
   assert.match(task, /current_task=BWS-590/);
   assert.match(task, /current_task_status=PENDING/);
   assert.match(task, /safe_local_terminal_gate=BWS-599/);
-  assert.match(task, /automation_maintenance_allowed=yes/);
-  assert.match(task, /allowed_protected_files=start\.sh/);
+  assert.match(task, /automation_maintenance_allowed=no/);
+  assert.match(task, /allowed_protected_files=none/);
+  assert.match(task, /backlog\/bws_remaining_safe_local_map\.csv/);
   assert.match(task, /AUTONOMOUS_GOAL_COMPLETE=yes/);
   assert.match(status, /selected_controller=run-autonomous-implementation\.sh/);
   assert.match(status, /paper_autopilot=runtime_evidence_parent_validated_pending_bws_599/);

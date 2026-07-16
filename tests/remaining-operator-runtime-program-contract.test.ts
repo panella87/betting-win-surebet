@@ -12,7 +12,8 @@ test('remaining operator runtime program documents every safe local stage throug
   for (const marker of [
     'current_task=BWS-590', 'safe_local_terminal_gate=BWS-599',
     'paper evaluation=runtime_evidence_mode_validated',
-    'BWS-581', 'BWS-585', 'BWS-586', 'BWS-589', 'BWS-593', 'BWS-599',
+    'backlog/bws_remaining_safe_local_map.csv',
+    'BWS-581', 'BWS-589', 'BWS-590', 'BWS-593', 'BWS-599',
   ]) assert.match(program, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
 
   for (const rel of [
@@ -23,8 +24,18 @@ test('remaining operator runtime program documents every safe local stage throug
     'docs/039_release_deployment_and_upgrade_contract.md',
     'docs/040_soak_failure_injection_and_operator_acceptance.md',
     'docs/041_external_runtime_preflight_and_bws600_campaign.md',
+    'docs/042_release_packaging_implementation_blueprint.md',
+    'docs/043_upgrade_rollback_recovery_implementation_blueprint.md',
+    'docs/044_soak_failure_injection_implementation_blueprint.md',
+    'docs/045_external_runtime_preflight_implementation_blueprint.md',
+    'docs/046_final_local_acceptance_implementation_blueprint.md',
     'decisions/ADR-0006-full-stack-runtime-and-automation-boundary.md',
   ]) assert.ok(read(rel).length > 100, `${rel} should contain a substantive contract`);
+
+  const map = read('backlog/bws_remaining_safe_local_map.csv');
+  for (const marker of ['BWS-590-A', 'BWS-591-A', 'BWS-592-C', 'BWS-593-C', 'BWS-599-D']) {
+    assert.match(map, new RegExp(marker));
+  }
 });
 
 test('remaining operator runtime validator passes', () => {

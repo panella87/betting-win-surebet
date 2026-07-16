@@ -8,9 +8,12 @@ const validator = readFileSync(join(process.cwd(), 'scripts/validate_repo.py'), 
 test('validate_repo requires the full implementation and upstream contract surface', () => {
   for (const marker of [
     'backlog/bws_full_implementation.csv',
+    'backlog/bws_remaining_safe_local_map.csv',
     'docs/033_continuous_private_paper_runtime_program.md',
     'docs/034_remaining_operator_runtime_implementation_program.md',
     'docs/041_external_runtime_preflight_and_bws600_campaign.md',
+    'docs/042_release_packaging_implementation_blueprint.md',
+    'docs/046_final_local_acceptance_implementation_blueprint.md',
     'decisions/ADR-0006-full-stack-runtime-and-automation-boundary.md',
     'config/betting-win.upstream-baseline.json',
     'schemas/betting-win-upstream-lock.v1.schema.json',

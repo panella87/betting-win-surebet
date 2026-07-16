@@ -3,28 +3,23 @@
 ```text
 review_date=2026-07-16
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-result=REBASELINED_FOR_REMAINING_OPERATOR_RUNTIME_IMPLEMENTATION
-current_task=BWS-581
+result=RECONCILED_AFTER_BWS_589
+current_task=BWS-590
 safe_local_terminal_gate=BWS-599
 ```
 
-Inspection of the current source and the accepted twelve-cycle `BWS-520` through `BWS-580` campaign confirmed a substantial validated runtime foundation, but not a finished operator application.
+The latest implementation campaign completed and validated `BWS-581` through `BWS-589`, but its final controller result was blocked because the `BWS-589` handoff change touched `run-autonomous-implementation.sh` outside the historical exact allowlist.
 
-Concrete remaining gaps are now documented and queued:
+Fresh source review confirms that change is required to preserve selected upstream mode and runtime campaign identity through paper-autopilot implementation return handoffs. The current repository retains the validated source and treats it as accepted carry-forward baseline. The protected integration phase is now closed and the current `BWS-590` through `BWS-599` task source authorizes no protected automation changes.
 
-- long-running explicit-mode convergence instead of one bounded pass;
-- continuous scheduler and worker service loops;
-- managed cockpit serving and complete stack lifecycle ownership;
-- database backup, restore verification and retention commands;
-- structured logs, metrics, diagnostics and immutable evidence indexing;
-- exact root lifecycle/progress/log wrapper integration;
-- service-owned paper evaluation and continuous paper autopilot;
-- release, deployment, upgrade, rollback and recovery proof;
-- bounded soak and failure injection;
-- accepted-runtime preflight and final integrated local acceptance.
+All remaining safe local work is documented in dependency order:
 
-The binding ledger now continues from `BWS-581` through `BWS-599`. `BWS-600` remains the external operator-approved read-only runtime evidence gate, and `BWS-900` remains parked.
+- `BWS-590`: reproducible release, platform preflight, private environment template, user-service templates and install verification;
+- `BWS-591`: exact-version upgrade, rollback decision and interrupted recovery;
+- `BWS-592`: deterministic multi-hour loopback soak and bounded failure injection;
+- `BWS-593`: exactly-one-mode accepted-runtime preflight and `bws.external_runtime_campaign.v1` manifest;
+- `BWS-599`: clean-room integrated release, runtime, automation, recovery and handoff acceptance.
 
-The controller contract also replaces the previous blanket task-file protected override with an exact task-bound allowlist. `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` is only an enabling gate; out-of-list protected changes fail closed.
+Detailed blueprints are `docs/042` through `docs/046`. The machine-readable implementation map is `backlog/bws_remaining_safe_local_map.csv`.
 
-No new product implementation is claimed by this documentation and controller-policy wave. The selected next controller remains `run-autonomous-implementation.sh`.
+`BWS-600` remains the external operator-approved read-only runtime evidence gate. `BWS-900` remains parked.

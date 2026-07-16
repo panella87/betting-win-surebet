@@ -32,6 +32,7 @@ The machine-readable authority is `backlog/bws_full_implementation.csv`. Select 
 
 ### Runtime service construction
 
+- `BWS-581`: validated long-running explicit-mode upstream convergence service.
 - `BWS-582`: long-running scheduler and worker loops with lease, backpressure and graceful-drain semantics.
 - `BWS-583`: validated loopback cockpit serving and full typed API/UI convergence.
 - `BWS-584`: validated complete product-owned lifecycle for API, convergence, scheduler, worker and cockpit processes.
@@ -55,6 +56,18 @@ The machine-readable authority is `backlog/bws_full_implementation.csv`. Select 
 - `BWS-593`: accepted-runtime preflight and `BWS-600` campaign manifest.
 - `BWS-599`: integrated operator/runtime/automation/recovery acceptance.
 
+## Detailed implementation authority
+
+The remaining parent rows are decomposed in `backlog/bws_remaining_safe_local_map.csv`. Detailed implementation and acceptance blueprints are:
+
+- `docs/042_release_packaging_implementation_blueprint.md`
+- `docs/043_upgrade_rollback_recovery_implementation_blueprint.md`
+- `docs/044_soak_failure_injection_implementation_blueprint.md`
+- `docs/045_external_runtime_preflight_implementation_blueprint.md`
+- `docs/046_final_local_acceptance_implementation_blueprint.md`
+
+The controller should complete the largest safe cohesive tranche while preserving separate parent-row validation.
+
 ## Continuation contract
 
 ```text
@@ -62,7 +75,7 @@ CONTINUE_REQUIRED=yes
   while any dependency-ready row through BWS-599 is PENDING
 
 AUTONOMOUS_GOAL_COMPLETE=yes
-  only after BWS-582 through BWS-599 are VALIDATED and BWS-581 remains closed
+  only after BWS-590 through BWS-599 are VALIDATED and BWS-100 through BWS-589 remain closed
 
 BLOCKED=yes
   only for a concrete unrecoverable repository state or exact missing external evidence

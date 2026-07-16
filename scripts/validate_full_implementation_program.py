@@ -98,13 +98,14 @@ REMAINING_DOCS = [
     'docs/039_release_deployment_and_upgrade_contract.md',
     'docs/040_soak_failure_injection_and_operator_acceptance.md',
     'docs/041_external_runtime_preflight_and_bws600_campaign.md',
+    'docs/042_release_packaging_implementation_blueprint.md',
+    'docs/043_upgrade_rollback_recovery_implementation_blueprint.md',
+    'docs/044_soak_failure_injection_implementation_blueprint.md',
+    'docs/045_external_runtime_preflight_implementation_blueprint.md',
+    'docs/046_final_local_acceptance_implementation_blueprint.md',
     'decisions/ADR-0006-full-stack-runtime-and-automation-boundary.md',
 ]
-EXACT_PROTECTED_ALLOWLIST = (
-    'start.sh,stop.sh,check_progress.sh,watch_progress.sh,open_log.sh,'
-    'run-paper-evaluation.sh,run-paper-autopilot.sh,automation.config.sh,'
-    '.automation/lib/run_common.sh,docs/automation/PROTECTED_AUTOMATION_FILES.md'
-)
+SUPPORTING_MAP = 'backlog/bws_remaining_safe_local_map.csv'
 
 
 def fail(message: str) -> None:
@@ -188,8 +189,12 @@ def main() -> None:
         'safe_local_terminal_gate=BWS-599', 'backlog/bws_full_implementation.csv',
         'docs/034_remaining_operator_runtime_implementation_program.md',
         'CONTINUE_REQUIRED=yes', 'AUTONOMOUS_GOAL_COMPLETE=yes',
-        'automation_maintenance_allowed=yes',
-        f'allowed_protected_files={EXACT_PROTECTED_ALLOWLIST}',
+        'automation_maintenance_allowed=no',
+        'allowed_protected_files=none',
+        SUPPORTING_MAP,
+        'docs/042_release_packaging_implementation_blueprint.md',
+        'docs/046_final_local_acceptance_implementation_blueprint.md',
+        'recommended_cycle_timeout=6h',
         'pre_existing_service_mutation=prohibited',
     ]:
         require(task, marker, 'docs/automation/current-implementation-task.md')
@@ -250,6 +255,9 @@ def main() -> None:
     for marker in [
         'docs/034_remaining_operator_runtime_implementation_program.md',
         'docs/041_external_runtime_preflight_and_bws600_campaign.md',
+        'docs/042_release_packaging_implementation_blueprint.md',
+        'docs/046_final_local_acceptance_implementation_blueprint.md',
+        SUPPORTING_MAP,
         'decisions/ADR-0006-full-stack-runtime-and-automation-boundary.md',
         'scripts/validate_remaining_operator_runtime_program.py',
         'tests/remaining-operator-runtime-program-contract.test.ts',
