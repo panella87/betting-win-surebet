@@ -83,7 +83,7 @@ test('automation config and docs register paper autopilot as the unattended pape
   contains(config, 'AUTOMATION_PAPER_AUTOPILOT_COMMAND');
   contains(config, 'AUTOMATION_PAPER_COMMAND="$AUTOMATION_PAPER_AUTOPILOT_COMMAND"');
   contains(config, 'run-paper-autopilot.sh');
-  contains(status, 'run_paper_autopilot=standardized_parent_pending_runtime_handoff_review_for_bws_600');
+  contains(status, 'run_paper_autopilot=standardized_parent_pending_bws_589_and_bws_599');
   contains(read('docs/automation/paper-autopilot.md'), 'PAPER_AUTOPILOT_BLOCKED_ON_PINNED_BUNDLE');
 });
 

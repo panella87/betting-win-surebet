@@ -1,20 +1,38 @@
 # BWS service run contract
 
-The repository now contains validated service-runtime configuration, read-only HTTP handlers, bounded workers, loopback acceptance, repo-owned loopback API lifecycle commands, persisted runtime/API/cockpit convergence, integrated continuous-runtime acceptance, and the strict machine-readable runtime handoff required for the closed local private-paper surface.
+## Current state
 
-Current evidence:
+The repository has validated executable components through `BWS-580`, but it does not yet have a complete operator-owned service stack.
 
 ```text
+upstream convergence=one bounded pass
+scheduler=one bounded pass
+worker=one bounded pass
+product lifecycle=read_only_api_only
+cockpit=buildable_not_managed
 start.sh=install_and_validate_only
 stop.sh=no_long_running_service
-cli.js=includes_product_owned_runtime_lifecycle_commands
 paper_evaluation=single_pass_no_service
+paper_autopilot=paper_service_lifecycle_none
 ```
 
-`BWS-520` through `BWS-580` produced canonical executable API/worker entrypoints, explicit export/API convergence, continuous scheduling, verified lifecycle commands, status/evidence publication, API/cockpit convergence, integrated continuous-runtime acceptance, and strict handoff packaging. `BWS-600` is the remaining external gate.
+## Target state through BWS-599
 
-The closed-stack contract requires explicit runtime configuration, including `BETTING_WIN_REPO_PATH`, the upstream lock, PostgreSQL, loopback API port, worker identity/queue/lease, `SUREBET_RUNTIME_MODE=paper`, provider connections disabled and execution disabled.
+The managed loopback stack must own:
 
-The API must remain loopback-only and surface `/health` and `/readiness`. Missing operational evidence must fail closed. The cockpit must use explicit mock or loopback API mode.
+```text
+explicit-mode upstream convergence
+private-paper scheduler
+bounded worker or worker pool
+read-only API
+served operator cockpit
+full-stack lifecycle and status
+health, readiness, metrics and diagnostics
+database backup, retention and restore verification
+paper evaluation and paper autopilot lifecycle
+release, upgrade, rollback and recovery evidence
+```
 
-After `BWS-580`, service processes remain loopback/read-only by default. Continuous external paper observation still requires `BWS-600` evidence and operator configuration.
+Every process requires exact identity, source/config binding, stale-state protection, graceful shutdown and immutable evidence. No process-name or port-based killing is allowed.
+
+The stack remains read-only, private and loopback-only. `BWS-600` requires separate accepted runtime input after `BWS-599`; `BWS-900` remains the execution gate.

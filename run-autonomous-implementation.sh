@@ -10,7 +10,7 @@ AUTOMATION_REPO_ROOT="$SCRIPT_DIR"
 # shellcheck source=.automation/lib/telegram_notify.sh
 . "$AUTOMATION_REPO_ROOT/.automation/lib/telegram_notify.sh"
 
-SCRIPT_VERSION="2026-07-15.surebet-v8-atomic-child-result"
+SCRIPT_VERSION="2026-07-16.surebet-v9-task-file-exact-protected-policy"
 SCRIPT_NAME="run-autonomous-implementation.sh"
 DURATION_SECONDS="$(automation_parse_duration_seconds 72h)"
 PROMPT_FILE=""
@@ -235,6 +235,8 @@ baseline_validation=enabled
 strict_handoff_parser=enabled
 semantic_handoff_fingerprints=enabled
 exact_handoff_protected_allowlist=enabled
+task_file_exact_protected_allowlist=enabled
+manual_blanket_protected_override=disabled
 strict_schema_v1_key_allowlists=enabled
 source_evidence_sha256_verification=enabled
 source_fingerprint_reconciliation=enabled
@@ -313,6 +315,7 @@ require_handoff_yes_no() {
 validate_allowed_protected_files() {
   local csv="$1" item known found
   local -a items=()
+  local -A seen=()
   [[ -z "$csv" || "$csv" == "none" ]] && return 0
   IFS=',' read -r -a items <<< "$csv"
   for item in "${items[@]}"; do
@@ -320,15 +323,80 @@ validate_allowed_protected_files() {
       echo "ERROR: invalid protected-file allowlist entry: $item" >&2
       return 2
     }
+    [[ -z "${seen[$item]+x}" ]] || {
+      echo "ERROR: duplicate protected-file allowlist entry: $item" >&2
+      return 2
+    }
+    seen["$item"]=1
     found=0
     for known in "${AUTOMATION_PROTECTED_FILES[@]:-}"; do
       [[ "$known" == "$item" ]] && found=1
     done
     [[ "$found" == "1" ]] || {
-      echo "ERROR: handoff allowlist entry is not a protected automation file: $item" >&2
+      echo "ERROR: allowlist entry is not a protected automation file: $item" >&2
       return 2
     }
   done
+}
+
+
+read_optional_task_marker() {
+  local key="$1" file="$2" default_value="$3" count line value
+  count="$(grep -Ec "^[[:space:]]*${key}=" "$file" 2>/dev/null || true)"
+  case "$count" in ''|*[!0-9]*) echo "ERROR: could not count task marker: $key" >&2; return 2 ;; esac
+  (( count <= 1 )) || { echo "ERROR: duplicate task marker in $file: $key" >&2; return 2; }
+  if (( count == 0 )); then
+    printf '%s\n' "$default_value"
+    return 0
+  fi
+  line="$(grep -E "^[[:space:]]*${key}=" "$file")" || return 2
+  if [[ ! "$line" =~ ^[[:space:]]*${key}=([^[:space:]]+)[[:space:]]*$ ]]; then
+    echo "ERROR: malformed task marker in $file: $key" >&2
+    return 2
+  fi
+  value="${BASH_REMATCH[1]}"
+  [[ -n "$value" ]] || { echo "ERROR: empty task marker in $file: $key" >&2; return 2; }
+  printf '%s\n' "$value"
+}
+
+configure_task_file_protected_policy() {
+  local maintenance allowlist gate
+  [[ "$ACTIVE_HANDOFF_MODE" == "none" ]] || return 0
+  maintenance="$(read_optional_task_marker automation_maintenance_allowed "$TASK_SOURCE" no)" || return 2
+  allowlist="$(read_optional_task_marker allowed_protected_files "$TASK_SOURCE" none)" || return 2
+  gate="${AUTOMATION_ALLOW_PROTECTED_CHANGES:-0}"
+  case "$gate" in 0|1) ;; *) echo "ERROR: AUTOMATION_ALLOW_PROTECTED_CHANGES must be exactly 0 or 1" >&2; return 2 ;; esac
+  case "$maintenance" in
+    yes)
+      [[ "$gate" == "1" ]] || {
+        echo "ERROR: task authorizes exact protected-file changes but AUTOMATION_ALLOW_PROTECTED_CHANGES=1 was not supplied" >&2
+        return 2
+      }
+      [[ -n "$allowlist" && "$allowlist" != "none" ]] || {
+        echo "ERROR: task-file automation maintenance requires a non-empty allowed_protected_files list" >&2
+        return 2
+      }
+      validate_allowed_protected_files "$allowlist" || return 2
+      ;;
+    no)
+      [[ -z "$allowlist" || "$allowlist" == "none" ]] || {
+        echo "ERROR: allowed_protected_files is set while task-file automation maintenance is disabled" >&2
+        return 2
+      }
+      [[ "$gate" == "0" ]] || {
+        echo "ERROR: AUTOMATION_ALLOW_PROTECTED_CHANGES=1 is forbidden without task-file or handoff authorization" >&2
+        return 2
+      }
+      allowlist="none"
+      ;;
+    *)
+      echo "ERROR: automation_maintenance_allowed must be exactly yes or no" >&2
+      return 2
+      ;;
+  esac
+  ACTIVE_HANDOFF_AUTOMATION_MAINTENANCE_ALLOWED="$maintenance"
+  ACTIVE_HANDOFF_ALLOWED_PROTECTED_FILES="$allowlist"
+  automation_log "task_file_protected_policy maintenance=$maintenance allowlist=$allowlist"
 }
 
 
@@ -516,6 +584,7 @@ resolve_task_source() {
   fi
   grep -q 'AUTOMATION_TASK_NOT_SET' "$TASK_SOURCE" && automation_die "implementation task is not set in $TASK_SOURCE" 1
   [[ -s "$TASK_SOURCE" ]] || automation_die "implementation task file is empty: $TASK_SOURCE" 1
+  configure_task_file_protected_policy || automation_die "invalid task-file protected automation policy" 2
 }
 
 protected_digest_from_snapshot() {
@@ -549,17 +618,8 @@ check_protected_policy() {
   done
   [[ "$changed" == "1" ]] || return 0
 
-  if [[ "$ACTIVE_HANDOFF_MODE" == "none" ]]; then
-    if [[ "${AUTOMATION_ALLOW_PROTECTED_CHANGES:-0}" == "1" ]]; then
-      automation_log "protected_changes_allowed=manual_explicit_override"
-      return 0
-    fi
-    automation_log "protected_files_changed diff=$diff_out"
-    return 1
-  fi
-
   [[ "$ACTIVE_HANDOFF_AUTOMATION_MAINTENANCE_ALLOWED" == "yes" ]] || {
-    automation_log "protected_files_changed_without_handoff_authorization diff=$diff_out"
+    automation_log "protected_files_changed_without_exact_authorization diff=$diff_out"
     return 1
   }
   while IFS= read -r path; do
@@ -568,7 +628,7 @@ check_protected_policy() {
       return 1
     }
   done < "$changed_out"
-  automation_log "protected_changes_allowed=handoff_exact_allowlist files=$(paste -sd, "$changed_out")"
+  automation_log "protected_changes_allowed=exact_allowlist mode=$ACTIVE_HANDOFF_MODE files=$(paste -sd, "$changed_out")"
 }
 
 run_baseline_validation() {
@@ -1127,10 +1187,11 @@ Active handoff contract:
 Hard constraints:
 - Do not commit, push, pull, reset, clean, stash, or rewrite branches.
 - Do not print or modify secrets or .env files.
-- Do not start, stop, restart, kill, detach, or replace services or user sessions.
+- Do not start, stop, restart, kill, detach, or replace any pre-existing service or user session.
+- Bounded repo-owned loopback child processes may be started only inside task-required tests or validation. Use unique identities, do not detach them, clean them up in the command that created them, and never target unrelated processes.
 - Do not connect to providers, external betting APIs, wallets, signers, orders, transactions, or direct betting-win databases.
 - Do not add public reports, profitability claims, live readiness claims, or execution readiness claims.
-- Protected automation files are read-only unless the active handoff explicitly authorizes exact named files. Do not edit any protected file outside that exact allowlist.
+- Protected automation files are read-only unless the active task source or handoff sets automation_maintenance_allowed=yes and names the exact file in allowed_protected_files. Do not edit any protected file outside that exact allowlist.
 - Do not silently default missing required configuration. Fail fast with clear validation.
 - Preserve existing structure and make surgical changes.
 

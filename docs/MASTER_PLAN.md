@@ -2,14 +2,14 @@
 
 ## Goal
 
-Build the complete surebet application on top of the betting-win provider/data/history platform while preserving strict repository ownership and fail-closed safety.
+Build the complete private surebet application on top of the read-only betting-win platform while preserving strict repository ownership, deterministic evidence and fail-closed safety.
 
 ```text
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 repo_role=surebet_strategy_application
 upstream_platform=betting-win
-current_task=BWS-580
-safe_local_terminal_gate=BWS-580
+current_task=BWS-581
+safe_local_terminal_gate=BWS-599
 continuous_runtime_gate=BWS-600
 execution_gate=BWS-900
 ```
@@ -27,7 +27,8 @@ betting-win
 betting-win-surebet
   upstream compatibility, surebet.* persistence, equivalence/scenario checks,
   opportunity derivation, stake solving, completion/exposure simulation,
-  settlement replay, backtests, continuous private paper, API/workers/cockpit
+  settlement replay, backtests, continuous private paper, API/workers/cockpit,
+  full-stack lifecycle, evidence, backup/recovery and paper automation
 ```
 
 BWS does not duplicate provider collection or canonical history. It may retain immutable upstream snapshots and references for reproducibility.
@@ -44,25 +45,33 @@ Primary phases:
 4. `BWS-300` to `BWS-320`: backtest, bounded private paper, strategy ledger and reports.
 5. `BWS-400` to `BWS-500`: API, workers, cockpit, security, observability and process contracts.
 6. `BWS-510`: integrated clean-install and loopback acceptance.
-7. `BWS-520` to `BWS-580`: executable services, explicit export/API convergence, continuous scheduling, lifecycle, persisted runtime visibility and integrated continuous-runtime acceptance.
-8. `BWS-600`: validation against an accepted operator-approved betting-win runtime, externally gated.
-9. `BWS-900`: real-money execution, parked pending separate authorization.
+7. `BWS-520` to `BWS-580`: executable bounded runtime components, explicit convergence, bounded scheduling, API-only lifecycle, persisted visibility and component-level continuous-runtime acceptance.
+8. `BWS-581` to `BWS-584`: real long-running services, cockpit serving and complete full-stack lifecycle.
+9. `BWS-585` to `BWS-589`: database/evidence operations plus root wrapper and paper-controller integration.
+10. `BWS-590` to `BWS-593`: release, upgrade/recovery, soak/failure injection and accepted-runtime preflight.
+11. `BWS-599`: integrated final local operator/runtime/automation/recovery acceptance.
+12. `BWS-600`: validation against an accepted operator-approved betting-win runtime, externally gated.
+13. `BWS-900`: real-money execution, parked pending separate authorization.
 
 ## Continuation
 
-The implementation controller writes `CONTINUE_REQUIRED=yes` while any dependency-ready safe row through `BWS-580` remains `PENDING`. It may write `AUTONOMOUS_GOAL_COMPLETE=yes` only after every safe local row through `BWS-580` is `VALIDATED` and no dependency-ready safe work remains.
+The implementation controller writes `CONTINUE_REQUIRED=yes` while any dependency-ready safe row through `BWS-599` remains `PENDING`. It may write `AUTONOMOUS_GOAL_COMPLETE=yes` only after `BWS-599` is `VALIDATED` and no dependency-ready safe work remains.
+
+Completing one bounded task quickly is valid. It does not end the campaign when another dependency-ready row exists.
 
 ## Validation model
 
 Every task requires focused success/failure proof, stateful restart/idempotency/cleanup coverage where applicable, `npm run validate`, updated ledger/status evidence and a regenerated `SOURCE_MANIFEST.json`.
 
-No task may pass by weakening validators, inventing upstream evidence, accepting unknown schemas, using floating-point money, silently falling back between upstream modes, or treating a library-only test surface as an operator-runnable service.
+No task may pass by weakening validators, inventing upstream evidence, accepting unknown schemas, using floating-point money, silently falling back between upstream modes or treating a one-shot command as a continuous service.
 
 ## Automation operating model
 
-- Continuous runtime implementation: `run-autonomous-implementation.sh`.
-- Broad audit and repair: `run-bugfix-autopilot.sh`.
-- Runtime evidence after `BWS-580` and controller integration review: `run-paper-autopilot.sh`.
+- Remaining local implementation: `run-autonomous-implementation.sh`.
+- Broad audit and repair after implementation: `run-bugfix-autopilot.sh`.
+- Runtime evidence after `BWS-589` and final local acceptance: `run-paper-autopilot.sh`.
 - Standalone audit and paper controllers remain available only for their explicit bounded roles.
+
+The active implementation task authorizes an exact protected-file subset for the later wrapper and paper-controller tasks. The controller must enforce the task-file allowlist even when `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` is set.
 
 Hardened parent controllers suppress child Telegram messages and send one final parent notification.

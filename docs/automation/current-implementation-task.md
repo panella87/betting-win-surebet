@@ -4,59 +4,139 @@ Repository: `betting-win-surebet`.
 
 ```text
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-current_task=BWS-580
-current_task_status=VALIDATED
-safe_local_terminal_gate=BWS-580
+current_task=BWS-581
+current_task_status=PENDING
+safe_local_terminal_gate=BWS-599
+external_runtime_gate=BWS-600
 ```
 
-Objective: record the validated completion of the safe local `BWS-580` queue for the operator-runnable continuous private-paper BWS application on top of the validated read-only betting-win boundary. `backlog/bws_full_implementation.csv` remains the binding ledger. No dependency-ready safe local row remains through `BWS-580`; `BWS-600` stays externally blocked.
+## Campaign objective
 
-`BWS-580` is now validated. It follows the validated runtime configuration, upstream lock, executable loopback-only BWS API, bounded worker applications, persisted scheduling, repo-owned lifecycle evidence publication, and runtime/API/cockpit convergence by proving clean install, both explicit upstream modes, multi-cycle scheduling, crash/restart, health/readiness, immutable packaging, and the strict machine-readable paper-runtime handoff.
+Implement every remaining safe local component required for a real operator-runnable continuous private-paper BWS application. Use `backlog/bws_full_implementation.csv` as the binding dependency ledger. Start with the first dependency-ready `PENDING` row, currently `BWS-581`, and continue across validated cycles through `BWS-599`.
 
-Before editing:
+Do not stop after one bounded task while another dependency-ready safe row remains.
 
-1. Read `AGENTS.md`, `docs/repo_status_current.md`, `docs/MASTER_PLAN.md`, `docs/028_full_implementation_program.md`, `docs/029_full_implementation_task_ledger.md`, `docs/030_upstream_compatibility_and_pin_contract.md`, and `docs/033_continuous_private_paper_runtime_program.md`.
-2. Inspect the current runtime configuration, persistence repositories, read-only API, bounded workers, cockpit, loopback acceptance and no-service helper/controller surfaces.
-3. Preserve the validated `BWS-100` committed-`HEAD` upstream lock and no-fallback boundary through the explicit `BETTING_WIN_REPO_PATH` input. Carry-forward proof must prove the betting-win committed HEAD remains unchanged, allow no placeholder fields, and use no clone or temporary worktree.
-4. Implement one coherent dependency-ready row or bounded sub-slice per cycle, validate it, update the ledger only after proof, and continue while safe work remains through `BWS-580`. Product runtime entrypoints, CLI commands and package scripts must be implemented without editing protected root wrappers or controllers; their integration is a separate router decision after `BWS-580`.
+## Required reading
 
-The previous task `BWS-570` is now validated. It added canonical read-only runtime cycle visibility across the API and cockpit from persisted `surebet.*` state, including bounded retention, provenance expansion, restart visibility, checkpoint visibility, and blocker visibility, without weakening the closed boundary.
+1. `AGENTS.md`
+2. `docs/repo_status_current.md`
+3. `docs/MASTER_PLAN.md`
+4. `docs/028_full_implementation_program.md`
+5. `docs/029_full_implementation_task_ledger.md`
+6. `docs/034_remaining_operator_runtime_implementation_program.md`
+7. `docs/035_continuous_service_supervisor_contract.md`
+8. `docs/036_root_wrappers_and_paper_automation_integration.md`
+9. `docs/037_database_backup_retention_and_recovery.md`
+10. `docs/038_observability_metrics_and_evidence_contract.md`
+11. `docs/039_release_deployment_and_upgrade_contract.md`
+12. `docs/040_soak_failure_injection_and_operator_acceptance.md`
+13. `docs/041_external_runtime_preflight_and_bws600_campaign.md`
+14. `backlog/bws_full_implementation.csv`
 
-Validated task:
+## Verified carry-forward state
+
+`BWS-100` through `BWS-580` are validated. Preserve their contracts. Do not reimplement or weaken validated functionality merely to create work.
+
+Carry-forward upstream proof must prove the betting-win committed HEAD remains unchanged during verification, retain no placeholder fields in the lock, and use no clone or temporary worktree.
+
+The current concrete gaps are:
 
 ```text
-id=BWS-580
-objective=complete closed-stack continuous-runtime acceptance and automation handoff
+one-shot convergence, scheduler and worker commands
+API-only lifecycle ownership
+cockpit not served by managed runtime
+root start/stop/progress/log helpers not integrated
+paper evaluation and paper autopilot remain no-service
+no product database backup/restore/retention commands
+no complete observability/evidence retention surface
+no release/upgrade/rollback/recovery package
+no long-running soak/failure-injection acceptance
+no external runtime preflight/campaign manifest
 ```
 
-Required BWS-580 outcomes:
-
-- prove clean install, `surebet.*` migrations, and both explicit upstream modes against deterministic loopback inputs;
-- prove multi-cycle scheduling, crash/restart, API, worker, cockpit, health/readiness, immutable artifact packaging, and a strict machine-readable paper-runtime handoff;
-- preserve the validated `BWS-570` runtime/API/cockpit surfaces together with the closed execution/provider prohibitions;
-- preserve fail-closed runtime configuration with no fallback between explicit upstream modes, fixtures or local mocks;
-- add focused success, failure, restart, and integrated acceptance coverage for the closed-stack runtime surfaces;
-- preserve all validated behavior through `BWS-570`;
-- update the task ledger only after focused proof and `npm run validate` pass.
-
-Validated BWS-580 status:
-
-- all safe local rows through `BWS-580` are `VALIDATED`;
-- `AUTONOMOUS_GOAL_COMPLETE=yes` is now the correct implementation-cycle terminal result;
-- `BWS-600` remains blocked on accepted operator-approved betting-win runtime evidence plus post-runtime controller review.
-
-Continuation rules:
+## First task
 
 ```text
-CONTINUE_REQUIRED=yes  while any dependency-ready safe local row through BWS-580 remains PENDING
-AUTONOMOUS_GOAL_COMPLETE=yes  only after every safe local row through BWS-580 is VALIDATED
-BLOCKED=yes  only for a concrete unrecoverable repository state or exact missing external evidence
+id=BWS-581
+objective=implement a real long-running explicit-mode upstream convergence service
 ```
 
-Constraints:
+Required outcomes:
+
+- select exactly one explicit upstream mode: `export` or `api`;
+- preserve exact upstream-lock and no-fallback behavior;
+- run repeated bounded convergence passes at an explicit positive interval;
+- prevent overlapping passes;
+- apply bounded retry/backoff;
+- persist success, no-change, blocker and failure state;
+- resume deterministically after restart;
+- handle `SIGINT` and `SIGTERM` without corrupting checkpoints;
+- expose machine-readable service status and evidence;
+- add success, mismatch, timeout, restart, overlap, signal and cleanup coverage;
+- update the task ledger only after complete proof and `npm run validate` pass.
+
+## Full remaining sequence
 
 ```text
-betting_win_checkout=read_only
+BWS-581  long-running upstream convergence
+BWS-582  long-running scheduler and worker loops
+BWS-583  managed loopback cockpit and full-stack convergence
+BWS-584  complete product-owned lifecycle
+BWS-585  database retention, backup and restore
+BWS-586  structured logs, metrics, diagnostics and evidence index
+BWS-587  root lifecycle/progress/log wrappers
+BWS-588  service-owned paper evaluation
+BWS-589  full lifecycle paper autopilot
+BWS-590  release and deployment packaging
+BWS-591  upgrade, rollback and disaster recovery
+BWS-592  soak and failure injection
+BWS-593  external runtime preflight and campaign manifest
+BWS-599  integrated final local acceptance
+```
+
+## Protected automation authorization
+
+The later integration tasks require an exact protected subset.
+
+```text
+automation_maintenance_allowed=yes
+allowed_protected_files=start.sh,stop.sh,check_progress.sh,watch_progress.sh,open_log.sh,run-paper-evaluation.sh,run-paper-autopilot.sh,automation.config.sh,.automation/lib/run_common.sh,docs/automation/PROTECTED_AUTOMATION_FILES.md
+```
+
+Rules:
+
+- `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` must be set for this campaign.
+- The controller must still enforce the exact list above.
+- No protected file outside the list may change.
+- Do not edit protected files before the active dependency-ready row requires them.
+- Do not broaden the list from inside an autonomous cycle.
+
+## Process-test authorization
+
+Do not start, stop, restart, kill, detach or replace pre-existing services or user sessions.
+
+Bounded repo-owned child processes launched by tests are allowed when the active task requires lifecycle, crash, restart, shutdown or recovery proof. They must use unique identities and ports, remain loopback-only, and be cleaned up by the creating test.
+
+## Continuation rules
+
+```text
+CONTINUE_REQUIRED=yes
+  while any dependency-ready safe local row through BWS-599 remains PENDING
+
+AUTONOMOUS_GOAL_COMPLETE=yes
+  only after BWS-599 is VALIDATED and no dependency-ready safe local work remains
+
+BLOCKED=yes
+  only for a concrete unrecoverable repository state or exact missing external evidence
+```
+
+`BWS-600` may remain blocked after local completion. `BWS-900` remains parked.
+
+## Safety constraints
+
+```text
+BETTING_WIN_REPO_PATH=existing_read_only_checkout
+betting_win_checkout_mutation=prohibited
 provider_connections=prohibited
 provider_credentials=prohibited
 direct_betting_win_core_writes=prohibited
@@ -65,7 +145,8 @@ public_signals=prohibited
 profitability_claims=prohibited
 automatic_upstream_mode_fallback=prohibited
 floating_point_money=prohibited
-protected_automation_files=read_only
+secret_output=prohibited
+pre_existing_service_mutation=prohibited
 ```
 
-Do not modify the betting-win checkout. Use no clone or temporary worktree. Do not copy provider adapters. Do not invent a commit, schema, endpoint, package, provider capability, runtime result or acceptance evidence. `BWS-520` through `BWS-580` are now complete; the remaining gate is the external `BWS-600` runtime evidence requirement.
+Do not clone the betting-win checkout. Do not invent a contract, endpoint, acceptance result or external runtime evidence.

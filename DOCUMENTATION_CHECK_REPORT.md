@@ -1,23 +1,30 @@
 # Documentation check report
 
 ```text
-review_date=2026-07-13
+review_date=2026-07-16
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-result=REBASELINED_FOR_AUTONOMOUS_IMPLEMENTATION
+result=REBASELINED_FOR_REMAINING_OPERATOR_RUNTIME_IMPLEMENTATION
+current_task=BWS-581
+safe_local_terminal_gate=BWS-599
 ```
 
-The prior active documentation described BWS as a fixture-only sidecar with exhausted local work. That was no longer accurate after inspection of betting-win 0.48.0.
+Inspection of the current source and the accepted twelve-cycle `BWS-520` through `BWS-580` campaign confirmed a substantial validated runtime foundation, but not a finished operator application.
 
-The rebaseline now:
+Concrete remaining gaps are now documented and queued:
 
-- defines BWS as the separate downstream surebet application built on betting-win;
-- records the inspected upstream contract/package/application baseline without inventing a Git commit or source manifest;
-- defines exact workspace, export, and read-only API modes with no automatic fallback;
-- assigns BWS ownership of `surebet.*`, opportunities, solver, simulation, backtest, paper, API, workers, and UI;
-- converts SURE-001/SURE-002A/SURE-002B files to historical bootstrap ledgers;
-- adds a dependency-ordered BWS-000 through BWS-900 implementation program;
-- selects `BWS-100` and `run-autonomous-implementation.sh`;
-- preserves direct-provider, betting-win core-write, and execution prohibitions;
-- keeps `BWS-520` through `BWS-580` as active safe source work, `BWS-600` externally gated and `BWS-900` parked.
+- long-running explicit-mode convergence instead of one bounded pass;
+- continuous scheduler and worker service loops;
+- managed cockpit serving and complete stack lifecycle ownership;
+- database backup, restore verification and retention commands;
+- structured logs, metrics, diagnostics and immutable evidence indexing;
+- exact root lifecycle/progress/log wrapper integration;
+- service-owned paper evaluation and continuous paper autopilot;
+- release, deployment, upgrade, rollback and recovery proof;
+- bounded soak and failure injection;
+- accepted-runtime preflight and final integrated local acceptance.
 
-No source implementation is claimed complete by this documentation wave.
+The binding ledger now continues from `BWS-581` through `BWS-599`. `BWS-600` remains the external operator-approved read-only runtime evidence gate, and `BWS-900` remains parked.
+
+The controller contract also replaces the previous blanket task-file protected override with an exact task-bound allowlist. `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` is only an enabling gate; out-of-list protected changes fail closed.
+
+No new product implementation is claimed by this documentation and controller-policy wave. The selected next controller remains `run-autonomous-implementation.sh`.

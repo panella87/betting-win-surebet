@@ -6,9 +6,9 @@ program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 status=IMPLEMENTATION_READY
 repo_role=surebet_strategy_application
 upstream_platform=betting-win
-current_task=BWS-580
-current_task_status=VALIDATED
-safe_local_terminal_gate=BWS-580
+current_task=BWS-581
+current_task_status=PENDING
+safe_local_terminal_gate=BWS-599
 provider_truth_owner=betting-win
 canonical_history_owner=betting-win
 strategy_state_owner=betting-win-surebet
@@ -18,11 +18,28 @@ execution_gate=closed
 
 ## Binding state
 
-`BWS-100` through `BWS-580` are validated. `BWS-510` remains the validated loopback acceptance milestone for the closed local stack. The previous completion classification was premature for an operator-runnable continuous runtime: the repository contained tested runtime libraries and loopback acceptance, but no executable API or worker service. `BWS-520` closed that entrypoint gap while preserving the protected root-controller boundary, `BWS-530` closed the explicit immutable-export convergence gap, `BWS-540` closed explicit typed read-only API convergence without weakening the no-fallback boundary, `BWS-550` added persisted API-mode scheduling plus restart-safe worker orchestration, `BWS-560` added product-owned loopback lifecycle control plus immutable runtime evidence publication, `BWS-570` added persisted runtime/API/cockpit convergence for accepted and blocked continuous paper cycles, and `BWS-580` validated integrated continuous-runtime acceptance plus a strict machine-readable paper-runtime handoff.
+`BWS-100` through `BWS-580` are validated. The latest autonomous campaign completed twelve validated cycles and truthfully closed `BWS-580`.
 
-The binding queue is `backlog/bws_full_implementation.csv`. No dependency-ready safe local task remains through `BWS-580`; `BWS-600` remains the separate external accepted-runtime evidence gate.
+The previous `AUTONOMOUS_GOAL_COMPLETE=yes` conclusion is not the final application boundary. Direct source inspection confirms that the operator runtime is still incomplete:
 
-## Verified upstream facts
+```text
+upstream convergence=one bounded pass
+scheduler=one bounded pass
+worker=one bounded pass
+managed lifecycle=read-only API only
+managed cockpit=not served
+start.sh=install_and_validate_only
+stop.sh=no_long_running_service
+progress/log helpers=automation_artifacts_only
+paper evaluation=single_pass_no_service
+paper autopilot=paper_service_lifecycle=none
+database backup/restore/retention=missing
+release/upgrade/recovery/soak acceptance=missing
+```
+
+The binding queue is `backlog/bws_full_implementation.csv`. `BWS-581` is the first dependency-ready `PENDING` row. Safe local implementation continues through `BWS-599`; `BWS-600` remains the external operator-approved runtime evidence gate.
+
+## Validated upstream facts
 
 ```text
 upstream_archive_sha256=9a9eee490918ff69182acdaa302d216859a5009b0943adb41e56171c1ee9ef8f
@@ -36,49 +53,65 @@ read_only_query_api=present
 api_web_workers=present
 ```
 
-`BWS-100` verifies the existing betting-win checkout's committed `HEAD` read-only. Uncommitted upstream state is excluded from the pin; BWS must not clone, clean, reset, commit or otherwise modify that checkout.
+`BWS-100` verifies the existing betting-win checkout's committed `HEAD` read-only. Uncommitted upstream state is excluded from the pin; BWS must not clone, clean, reset, commit or modify that checkout.
 
 ## Existing source
 
-The validated source under `packages/bootstrap`, `packages/persistence`, `packages/upstream`, `apps/web`, and compatibility `src/` shims already includes the domain engine, `surebet.*` persistence, immutable export intake, explicit export-mode convergence, explicit typed API convergence, typed read-only query client, bounded private-paper runtime, strategy ledger, read-only HTTP handlers, bounded workers, cockpit, runtime configuration, loopback acceptance, executable loopback-only API/worker applications, persistent API-mode scheduler/orchestration, product-owned loopback lifecycle plus immutable runtime evidence publication, persisted runtime/API/cockpit convergence across accepted and blocked continuous paper cycles, integrated continuous-runtime acceptance coverage, and strict machine-readable paper-runtime handoff packaging.
+The validated source under `packages/bootstrap`, `packages/persistence`, `packages/upstream`, `apps/web` and compatibility `src/` shims includes the domain engine, `surebet.*` persistence, immutable export intake, explicit export/API convergence passes, typed read-only client, bounded private-paper runtime, strategy ledger, read-only API, bounded workers, cockpit, runtime configuration, loopback acceptance, API-only lifecycle evidence and runtime handoff packaging.
 
-## Implementation queue
+## Remaining queue
 
 ```text
-BWS-100..BWS-570=VALIDATED
-BWS-520=VALIDATED_EXECUTABLE_API_AND_WORKER
-BWS-530=VALIDATED_CONTINUOUS_EXPORT_CONVERGENCE
-BWS-540=VALIDATED_CONTINUOUS_API_CONVERGENCE
-BWS-550=VALIDATED_CONTINUOUS_SCHEDULER_AND_WORKERS
-BWS-560=VALIDATED_OPERATOR_LIFECYCLE_AND_EVIDENCE
-BWS-570=VALIDATED_RUNTIME_API_COCKPIT_CONVERGENCE
-BWS-580=VALIDATED_CLOSED_STACK_CONTINUOUS_RUNTIME_ACCEPTANCE
-BWS-600=BLOCKED_ON_ACCEPTED_BETTING_WIN_RUNTIME
-BWS-900=PARKED
+BWS-581=PENDING_LONG_RUNNING_UPSTREAM_SERVICE
+BWS-582=PENDING_LONG_RUNNING_SCHEDULER_WORKER_SERVICES
+BWS-583=PENDING_MANAGED_COCKPIT_AND_FULL_STACK_CONVERGENCE
+BWS-584=PENDING_COMPLETE_PRODUCT_LIFECYCLE
+BWS-585=PENDING_DATABASE_BACKUP_RETENTION_RESTORE
+BWS-586=PENDING_OBSERVABILITY_DIAGNOSTICS_EVIDENCE
+BWS-587=PENDING_ROOT_WRAPPER_INTEGRATION
+BWS-588=PENDING_SERVICE_OWNED_PAPER_EVALUATION
+BWS-589=PENDING_FULL_LIFECYCLE_PAPER_AUTOPILOT
+BWS-590=PENDING_RELEASE_DEPLOYMENT
+BWS-591=PENDING_UPGRADE_ROLLBACK_RECOVERY
+BWS-592=PENDING_SOAK_FAILURE_INJECTION
+BWS-593=PENDING_EXTERNAL_RUNTIME_PREFLIGHT
+BWS-599=PENDING_FINAL_LOCAL_ACCEPTANCE
+BWS-600=BLOCKED_EXTERNAL_ACCEPTED_RUNTIME
+BWS-900=PARKED_EXECUTION
 ```
+
+## Protected automation authorization
+
+```text
+automation_maintenance_allowed=yes
+allowed_protected_files=start.sh,stop.sh,check_progress.sh,watch_progress.sh,open_log.sh,run-paper-evaluation.sh,run-paper-autopilot.sh,automation.config.sh,.automation/lib/run_common.sh,docs/automation/PROTECTED_AUTOMATION_FILES.md
+```
+
+The exact list is binding. Protected changes outside it are forbidden. Product tasks must not edit protected files before their dependency-ready row requires integration.
+
+## Routing
 
 ```text
 selected_controller=run-autonomous-implementation.sh
 selected_task_source=docs/automation/current-implementation-task.md
 force_unlock=no_evidence
-paper_autopilot=runtime_handoff_review_required_before_bws_600_selection
+paper_autopilot=not_selected_until_bws_589_and_bws_599_validation
 ```
 
 ## Safety
 
-Direct provider connections, provider credentials, betting-win `core.*` writes, public signals, profitability claims and execution paths remain prohibited. Runtime work must stay loopback-only, private, explicit-mode and fail closed.
+Direct provider connections, provider credentials, betting-win `core.*` writes, public signals, profitability claims and execution paths remain prohibited. Runtime work must stay private, loopback-only where BWS owns listeners, explicit-mode and fail closed.
 
 ## Standard automation status
 
 ```text
-run_autonomous_implementation=standardized_and_selected_for_continuous_runtime_build
+run_autonomous_implementation=standardized_and_selected_for_remaining_operator_runtime
 run_autonomous_bugfix=standardized_standalone_audit
-run_paper_evaluation=retained_no_service_fixture_evaluator
-run_paper_autopilot=standardized_parent_pending_runtime_handoff_review_for_bws_600
 run_bugfix_autopilot=standardized_parent_for_broad_audit_and_repair
+run_paper_evaluation=retained_no_service_until_bws_588
+run_paper_autopilot=standardized_parent_pending_bws_589_and_bws_599
+standalone_controller_telegram=enabled_by_default
 autopilot_child_telegram=disabled
 autopilot_parent_telegram=final_only
-standalone_controller_telegram=enabled_by_default
+task_file_exact_protected_allowlist=enabled
 ```
-
-`docs/imported-from-betting-win/` must remain absent. Historical research stays under dedicated legacy archive paths.

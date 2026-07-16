@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-07-16 - Remaining operator runtime program and exact task-file maintenance policy
+
+- Reclassified the validated `BWS-520` through `BWS-580` result as a bounded runtime foundation rather than final operator completion.
+- Added a dependency-ordered remaining implementation queue from `BWS-581` through `BWS-599` covering continuous services, full-stack lifecycle, cockpit serving, database operations, observability, protected wrapper integration, paper lifecycle, release/recovery, soak proof and external-runtime preflight.
+- Added detailed contracts `docs/034` through `docs/041` and ADR-0006.
+- Selected `BWS-581` under `run-autonomous-implementation.sh`; `BWS-600` remains externally blocked and `BWS-900` parked.
+- Replaced the no-handoff blanket `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` behavior with a unique task-file `automation_maintenance_allowed` marker and exact `allowed_protected_files` enforcement.
+- Allowed only bounded repo-owned loopback child processes in task-required tests while continuing to prohibit mutation of pre-existing services or sessions.
+- Added repository, program, continuation and controller contract validation for the rebaseline.
+
 ## 2026-07-15 - Continuous private-paper runtime implementation rebaseline
 
 - Corrected the premature `SAFE_LOCAL_COMPLETE` classification after fresh paper-autopilot evidence proved the active controller remained `single_pass_no_service`.

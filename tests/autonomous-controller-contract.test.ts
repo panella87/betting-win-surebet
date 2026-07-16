@@ -129,10 +129,13 @@ test('implementation controller exposes canonical flags and telegram wiring', ()
     '--stream','--no-stream','No --task flag is supported','docs/automation/current-implementation-task.md',
     'telegram_notify_send_final "run-autonomous-implementation.sh"','automation_require_cycle_artifacts',
     'automation_read_continue_status','check_only_validation_failed','AUTONOMOUS_GOAL_COMPLETE=yes',
-    'BLOCKED=yes','exit 3','Activate the repo runtime in the parent shell first','never sources nvm.sh','baseline_validation=enabled','strict_handoff_parser=enabled','strict_schema_v1_key_allowlists=enabled','source_evidence_sha256_verification=enabled','source_fingerprint_reconciliation=enabled','input_handoff_immutable=enabled','machine_readable_final_stdout=enabled','lock_acquisition_before_run_dir=enabled','lock_release_failure_classification=enabled','lock_release_failed_lock_preserved',"printf 'lock_release_status=%s\\n'","printf 'lock_preserved=%s\\n'",'write_consumed_handoff_marker','remove_consumed_handoff_marker',
+    'BLOCKED=yes','exit 3','Activate the repo runtime in the parent shell first','never sources nvm.sh','baseline_validation=enabled','strict_handoff_parser=enabled','exact_handoff_protected_allowlist=enabled','task_file_exact_protected_allowlist=enabled','manual_blanket_protected_override=disabled','configure_task_file_protected_policy()','read_optional_task_marker()','strict_schema_v1_key_allowlists=enabled','source_evidence_sha256_verification=enabled','source_fingerprint_reconciliation=enabled','input_handoff_immutable=enabled','machine_readable_final_stdout=enabled','lock_acquisition_before_run_dir=enabled','lock_release_failure_classification=enabled','lock_release_failed_lock_preserved',"printf 'lock_release_status=%s\\n'","printf 'lock_preserved=%s\\n'",'write_consumed_handoff_marker','remove_consumed_handoff_marker',
   ]) assertContains(script, marker);
   assert.doesNotMatch(script, /scripts\/load-node-runtime\.sh/);
   assert.doesNotMatch(script, /source .*nvm/);
+  assert.doesNotMatch(script, /protected_changes_allowed=manual_explicit_override/);
+  assert.match(script, /AUTOMATION_ALLOW_PROTECTED_CHANGES=1 is forbidden without task-file or handoff authorization/);
+  assert.match(script, /Bounded repo-owned loopback child processes may be started only inside task-required tests or validation\./);
 });
 
 test('bugfix controller is strict read-only audit and handoff infrastructure', () => {
@@ -282,16 +285,131 @@ test('paper smoke and compatibility wrappers do not pre-create artifact outputs'
 
 test('status docs record the hardened controller surface', () => {
   const status = read('docs/repo_status_current.md');
-  assertContains(status, 'run_autonomous_implementation=standardized_and_selected_for_continuous_runtime_build');
+  assertContains(status, 'run_autonomous_implementation=standardized_and_selected_for_remaining_operator_runtime');
   assertContains(status, 'run_autonomous_bugfix=standardized_standalone_audit');
   assertContains(status, 'run_bugfix_autopilot=standardized_parent_for_broad_audit_and_repair');
-  assertContains(status, 'run_paper_evaluation=retained_no_service_fixture_evaluator');
-  assertContains(status, 'run_paper_evaluation=retained_no_service_fixture_evaluator');
-  assertContains(status, 'run_paper_autopilot=standardized_parent_pending_runtime_handoff_review_for_bws_600');
+  assertContains(status, 'run_paper_evaluation=retained_no_service_until_bws_588');
+  assertContains(status, 'run_paper_evaluation=retained_no_service_until_bws_588');
+  assertContains(status, 'run_paper_autopilot=standardized_parent_pending_bws_589_and_bws_599');
 });
 
 test('obsolete stop and paper-12h helpers are not present', () => {
   for (const rel of ['run-paper-evaluation-12h.sh', 'stop-autonomous-run.sh', 'scripts/stop-autonomous-run.sh']) {
     assert.equal(existsSync(join(REPO_ROOT, rel)), false, `${rel} should be removed`);
+  }
+});
+
+test('task-file protected maintenance requires both the exact task markers and the explicit environment gate', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'surebet-task-protected-policy-'));
+  const harnessScript = join(tempRoot, 'controller-functions.sh');
+  const taskFile = join(tempRoot, 'task.md');
+  const shell = String.raw`
+set -Eeuo pipefail
+awk '/^parse_args "\$@"/ { exit } { print }' "$REPO_ROOT/run-autonomous-implementation.sh" \
+  | sed "s|^SCRIPT_DIR=.*|SCRIPT_DIR=\"$REPO_ROOT\"|" > "$1"
+. "$1"
+automation_load_config
+TASK_SOURCE="$2"
+ACTIVE_HANDOFF_MODE=none
+configure_task_file_protected_policy
+printf 'maintenance=%s\nallowlist=%s\n' \
+  "$ACTIVE_HANDOFF_AUTOMATION_MAINTENANCE_ALLOWED" \
+  "$ACTIVE_HANDOFF_ALLOWED_PROTECTED_FILES"
+`;
+
+  try {
+    writeFileSync(
+      taskFile,
+      'automation_maintenance_allowed=yes\nallowed_protected_files=start.sh,stop.sh\n',
+      'utf-8',
+    );
+    const success = execFileSync(
+      'bash',
+      ['-lc', shell, 'bash', harnessScript, taskFile],
+      {
+        encoding: 'utf-8',
+        env: {
+          ...process.env,
+          AUTOMATION_ALLOW_PROTECTED_CHANGES: '1',
+          REPO_ROOT,
+        },
+      },
+    );
+    assert.match(success, /maintenance=yes/);
+    assert.match(success, /allowlist=start\.sh,stop\.sh/);
+
+    assert.throws(() => execFileSync(
+      'bash',
+      ['-lc', shell, 'bash', harnessScript, taskFile],
+      {
+        encoding: 'utf-8',
+        env: {
+          ...process.env,
+          AUTOMATION_ALLOW_PROTECTED_CHANGES: '0',
+          REPO_ROOT,
+        },
+        stdio: 'pipe',
+      },
+    ));
+
+    writeFileSync(
+      taskFile,
+      'automation_maintenance_allowed=no\nallowed_protected_files=none\n',
+      'utf-8',
+    );
+    assert.throws(() => execFileSync(
+      'bash',
+      ['-lc', shell, 'bash', harnessScript, taskFile],
+      {
+        encoding: 'utf-8',
+        env: {
+          ...process.env,
+          AUTOMATION_ALLOW_PROTECTED_CHANGES: '1',
+          REPO_ROOT,
+        },
+        stdio: 'pipe',
+      },
+    ));
+
+    writeFileSync(
+      taskFile,
+      'automation_maintenance_allowed=yes\nautomation_maintenance_allowed=yes\nallowed_protected_files=start.sh\n',
+      'utf-8',
+    );
+    assert.throws(() => execFileSync(
+      'bash',
+      ['-lc', shell, 'bash', harnessScript, taskFile],
+      {
+        encoding: 'utf-8',
+        env: {
+          ...process.env,
+          AUTOMATION_ALLOW_PROTECTED_CHANGES: '1',
+          REPO_ROOT,
+        },
+        stdio: 'pipe',
+      },
+    ));
+
+
+    writeFileSync(
+      taskFile,
+      'automation_maintenance_allowed=yes\nallowed_protected_files=start.sh,start.sh\n',
+      'utf-8',
+    );
+    assert.throws(() => execFileSync(
+      'bash',
+      ['-lc', shell, 'bash', harnessScript, taskFile],
+      {
+        encoding: 'utf-8',
+        env: {
+          ...process.env,
+          AUTOMATION_ALLOW_PROTECTED_CHANGES: '1',
+          REPO_ROOT,
+        },
+        stdio: 'pipe',
+      },
+    ));
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
   }
 });

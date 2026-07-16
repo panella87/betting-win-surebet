@@ -6,34 +6,34 @@ import { join } from 'node:path';
 
 const ROOT = process.cwd();
 const read = (rel: string): string => readFileSync(join(ROOT, rel), 'utf-8');
+const esc = (value: string): RegExp => new RegExp(value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
 
-test('full implementation ledger records BWS-580 validation and leaves only the external BWS-600 gate blocked', () => {
+test('full implementation ledger keeps BWS-580 validated and opens the remaining safe-local queue through BWS-599', () => {
   const ledger = read('backlog/bws_full_implementation.csv');
   const task = read('docs/automation/current-implementation-task.md');
   const status = read('docs/repo_status_current.md');
   for (const marker of [
-    'BWS-000,VALIDATED', 'BWS-100,VALIDATED', 'BWS-110,VALIDATED',
-    'BWS-120,VALIDATED', 'BWS-130,VALIDATED', 'BWS-140,VALIDATED',
-    'BWS-200,VALIDATED', 'BWS-210,VALIDATED', 'BWS-220,VALIDATED',
-    'BWS-230,VALIDATED', 'BWS-240,VALIDATED', 'BWS-300,VALIDATED',
-    'BWS-310,VALIDATED', 'BWS-320,VALIDATED', 'BWS-400,VALIDATED',
-    'BWS-410,VALIDATED', 'BWS-420,VALIDATED', 'BWS-500,VALIDATED',
-    'BWS-510,VALIDATED', 'BWS-520,VALIDATED', 'BWS-530,VALIDATED',
-    'BWS-540,VALIDATED', 'BWS-550,VALIDATED', 'BWS-560,VALIDATED',
-    'BWS-570,VALIDATED', 'BWS-580,VALIDATED', 'BWS-600,BLOCKED',
-    'BWS-900,PARKED',
+    'BWS-000,VALIDATED', 'BWS-100,VALIDATED', 'BWS-510,VALIDATED',
+    'BWS-520,VALIDATED', 'BWS-530,VALIDATED', 'BWS-540,VALIDATED',
+    'BWS-550,VALIDATED', 'BWS-560,VALIDATED', 'BWS-570,VALIDATED',
+    'BWS-580,VALIDATED', 'BWS-581,PENDING', 'BWS-582,PENDING',
+    'BWS-583,PENDING', 'BWS-584,PENDING', 'BWS-585,PENDING',
+    'BWS-586,PENDING', 'BWS-587,PENDING', 'BWS-588,PENDING',
+    'BWS-589,PENDING', 'BWS-590,PENDING', 'BWS-591,PENDING',
+    'BWS-592,PENDING', 'BWS-593,PENDING', 'BWS-599,PENDING',
+    'BWS-600,BLOCKED', 'BWS-900,PARKED',
   ]) {
-    assert.match(ledger, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+    assert.match(ledger, esc(marker));
   }
   assert.match(task, /program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1/);
-  assert.match(task, /current_task=BWS-580/);
-  assert.match(task, /current_task_status=VALIDATED/);
-  assert.match(task, /safe_local_terminal_gate=BWS-580/);
+  assert.match(task, /current_task=BWS-581/);
+  assert.match(task, /current_task_status=PENDING/);
+  assert.match(task, /safe_local_terminal_gate=BWS-599/);
+  assert.match(task, /automation_maintenance_allowed=yes/);
+  assert.match(task, /allowed_protected_files=start\.sh/);
   assert.match(task, /AUTONOMOUS_GOAL_COMPLETE=yes/);
-  assert.match(task, /without editing protected root wrappers or controllers/);
   assert.match(status, /selected_controller=run-autonomous-implementation\.sh/);
-  assert.match(status, /paper_autopilot=runtime_handoff_review_required_before_bws_600_selection/);
-  assert.doesNotMatch(task, /repo-local backlogs are complete/);
+  assert.match(status, /paper_autopilot=not_selected_until_bws_589_and_bws_599_validation/);
 });
 
 test('full implementation program validator passes the repository contract', () => {

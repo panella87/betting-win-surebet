@@ -37,10 +37,10 @@ def main() -> None:
         require(historical, marker, 'docs/017_private_paper_mode_implementation_backlog.md')
 
     for rel, markers in {
-        'docs/018_private_paper_mode_runbook.md': ['current_stage=continuous_runtime_implementation', 'export', 'api', 'BWS-520', 'BWS-580', 'BWS-600'],
-        'docs/automation/paper-evaluation.md': ['retained fixture/pinned-bundle evaluator', 'not the current implementation controller', 'SUREBET_PINNED_BUNDLE'],
-        'docs/automation/paper-autopilot.md': ['not the active router', 'BWS-580', 'BWS-600', 'PAPER_AUTOPILOT_BLOCKED_ON_PINNED_BUNDLE'],
-        'docs/repo_status_current.md': ['paper_autopilot=runtime_handoff_review_required_before_bws_600_selection', 'selected_controller=run-autonomous-implementation.sh'],
+        'docs/018_private_paper_mode_runbook.md': ['current_stage=operator_runtime_implementation', 'export', 'api', 'BWS-581', 'BWS-599', 'BWS-600'],
+        'docs/automation/paper-evaluation.md': ['current_controller_mode=single_pass_no_service', 'replacement_task=BWS-588', 'SUREBET_PINNED_BUNDLE'],
+        'docs/automation/paper-autopilot.md': ['integration_task=BWS-589', 'selected_now=no', 'BWS-599', 'BWS-600'],
+        'docs/repo_status_current.md': ['paper_autopilot=not_selected_until_bws_589_and_bws_599_validation', 'selected_controller=run-autonomous-implementation.sh'],
     }.items():
         text = read(rel)
         for marker in markers:

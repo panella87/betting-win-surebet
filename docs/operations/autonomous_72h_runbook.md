@@ -5,16 +5,19 @@
 ```text
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 controller=run-autonomous-implementation.sh
-current_task=BWS-580
-safe_local_terminal_gate=BWS-580
+current_task=BWS-581
+safe_local_terminal_gate=BWS-599
 canonical_duration=72h
 max_cycles=200
+cycle_timeout=2h
 ```
 
-Activate Node 20 in the same shell, pull the BWS repo, verify a readable betting-win checkout at `BETTING_WIN_REPO_PATH`, and launch the root implementation controller. Do not invent task or prompt flags.
+The controller starts with the first dependency-ready `PENDING` row and continues across validated cycles while safe local work remains. A cycle may complete quickly; the campaign must not declare goal complete while another dependency-ready task through `BWS-599` is pending.
 
-The controller completed cumulative safe implementation from `BWS-520` through `BWS-580`, validating and updating the dependency ledger after each coherent slice.
+Launch from `~/app_testing/betting-win-surebet` under Node 20. Point `BETTING_WIN_REPO_PATH` to the existing read-only checkout. Do not clone, reset or clean betting-win.
 
-Do not run paper autopilot until the `BWS-580` runtime handoff review is complete and accepted `BWS-600` inputs exist. Do not enable protected automation changes unless a later explicit automation-maintenance task identifies an exact allowlist.
+Set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` for this campaign. The task file provides an exact protected allowlist for `BWS-587` through `BWS-589`; the controller rejects all other protected changes. Do not manually broaden the list.
 
-Inspect retained artifacts and machine status. Preserve a verified lock on unsafe finalization. Do not kill or delete locks manually.
+Bounded repo-owned loopback child processes may be used only by task-required tests and must be uniquely identified, attached and cleaned up. Pre-existing services and sessions are never mutated.
+
+Inspect `continue_status.txt`, final summaries, validation evidence and the binding CSV. Use owning-controller `--force-unlock` only when fresh evidence proves an abandoned or blocking lock.

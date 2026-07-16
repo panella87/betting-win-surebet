@@ -1,20 +1,28 @@
-# 012 - Implementation and operator runbook
+# 012 - Operator runbook
 
-## Continuous runtime build
+## Current implementation campaign
+
+```text
+program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
+current_task=BWS-581
+safe_local_terminal_gate=BWS-599
+selected_controller=run-autonomous-implementation.sh
+```
 
 1. Use Node 20.
-2. Ensure `BETTING_WIN_REPO_PATH` points to the existing readable betting-win Git checkout. BWS reads committed `HEAD` only and must not clone, clean, reset or modify it.
-3. Keep the validated PostgreSQL URLs private in `.env`.
-4. Start `run-autonomous-implementation.sh` with the canonical 72-hour, 200-cycle campaign.
-5. The validated safe local queue ran from `BWS-520` through `BWS-580`; inspect the retained evidence before advancing any controller-routing decision.
-6. Inspect the newest `artifacts/autonomous_implementation_*` evidence, not process exit or elapsed time alone.
+2. Keep `~/app_testing/betting-win-surebet` as the working repository.
+3. Set `BETTING_WIN_REPO_PATH` to the existing read-only `~/app_testing/betting-win` checkout. Do not clone or mutate it.
+4. Keep the private BWS `.env` configured for PostgreSQL and loopback runtime tests. `DB_URL_TEST` or a complete `SUREBET_TEST_*` tuple must reference an existing role with `CREATEDB` for disposable proof.
+5. Launch the canonical 72-hour implementation controller with `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`. The controller enforces the task-file exact protected allowlist.
+6. Continue through every dependency-ready row to `BWS-599`. Do not route to paper autopilot while source tasks remain.
+7. Inspect the newest retained machine-readable artifacts and ledger, not elapsed time alone.
 
-`BWS-510` loopback acceptance remains validated. The current queue operationalizes that source into executable continuous services and does not repeat the original build.
+## Runtime safety
 
-## Failure handling
+The implementation may launch bounded, uniquely identified, loopback-only child processes inside tests. Tests must keep them attached and clean them up. Do not stop, replace, detach or kill any pre-existing user service or session.
 
-Stop with `BLOCKED=yes` only for a concrete unrecoverable repository state or exact missing external evidence. Preserve locks and artifacts. Use owning-controller `--force-unlock` only with evidence; never delete locks or kill processes manually.
+## After local completion
 
-## Post-runtime implementation
+After `BWS-599` is validated, use the `BWS-593` preflight to create an operator-reviewed `bws.external_runtime_campaign.v1` manifest. Only then may the router select `run-paper-autopilot.sh` for `BWS-600`.
 
-After `BWS-580`, inspect the runtime handoff and controller integration before selecting `run-paper-autopilot.sh` for `BWS-600`. `BWS-600` still requires accepted operator-approved continuous betting-win read-only input.
+`BWS-600` remains private paper. `BWS-900` remains separately parked execution.

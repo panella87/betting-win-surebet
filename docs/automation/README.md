@@ -2,47 +2,61 @@
 
 ```text
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-current_task=BWS-580
-current_task_status=VALIDATED
+current_task=BWS-581
+current_task_status=PENDING
 selected_controller=run-autonomous-implementation.sh
-safe_local_terminal_gate=BWS-580
+safe_local_terminal_gate=BWS-599
 ```
 
-`BWS-100` through `BWS-580` are validated. Fresh paper-autopilot evidence still proves that the paper child is `single_pass_no_service`, `start.sh` starts no service, and `stop.sh` reports no long-running service. The safe local implementation queue is therefore complete, while paper autopilot remains unselected pending runtime-handoff controller review and accepted external `BWS-600` inputs.
+`BWS-100` through `BWS-580` are validated carry-forward foundations. They do not finish the operator application: the current runtime still uses one-shot convergence, scheduler and worker commands, an API-only lifecycle owner, unserved cockpit assets, disconnected root lifecycle wrappers and no-service paper controllers.
 
-`BWS-100` validates the committed-`HEAD` upstream lock through `BETTING_WIN_REPO_PATH`. Ongoing implementation must preserve that read-only contract and must not clone, clean, reset or modify the upstream checkout.
+The binding queue continues through `BWS-599`. The detailed contracts are `docs/034_remaining_operator_runtime_implementation_program.md` through `docs/041_external_runtime_preflight_and_bws600_campaign.md`.
 
-The hardened controller surface remains:
+`BETTING_WIN_REPO_PATH` remains a read-only pointer to the existing betting-win checkout. BWS reads committed `HEAD` through Git objects and must not clone, clean, reset or modify that checkout.
+
+## Controller selection
 
 ```text
-run-autonomous-implementation.sh
-run-autonomous-bugfix.sh
-run-bugfix-autopilot.sh
+run-autonomous-implementation.sh  selected for BWS-581 through BWS-599
+run-autonomous-bugfix.sh          standalone audit only
+run-bugfix-autopilot.sh           broad audit and automatic repair after implementation
+run-paper-evaluation.sh           retained no-service evaluator until BWS-588
+run-paper-autopilot.sh            not selected until BWS-589 and BWS-599 are validated
+```
+
+Do not use paper autopilot as a workaround for missing product lifecycle implementation.
+
+## Exact protected-file policy
+
+The current task file authorizes only the exact protected subset needed by `BWS-587` through `BWS-589`:
+
+```text
+start.sh
+stop.sh
+check_progress.sh
+watch_progress.sh
+open_log.sh
 run-paper-evaluation.sh
 run-paper-autopilot.sh
+automation.config.sh
+.automation/lib/run_common.sh
+docs/automation/PROTECTED_AUTOMATION_FILES.md
 ```
 
-Parent autopilots launch children with `TELEGRAM_NOTIFY=0` and emit one final parent notification. Standalone controllers retain their own final notification through `.automation/lib/telegram_notify.sh`.
+The server campaign must set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`, but that environment value is only an enabling gate. `run-autonomous-implementation.sh` also requires the unique task-file markers `automation_maintenance_allowed=yes` and `allowed_protected_files=...`, and rejects any protected change outside the list. A blanket manual override is disabled.
 
-The product campaign does not authorize changes to protected automation files. Product source, executable application entrypoints, tests, migrations, package scripts, configuration schemas, task ledger and active non-protected status docs changed according to `BWS-520` through `BWS-580`; further routing now depends on the post-`BWS-580` controller review.
+Do not edit protected files before the dependency-ready row requires them.
 
-For `BWS-510`, the loopback validator continues to accept either a complete `SUREBET_TEST_*` tuple or `DB_URL_TEST` from the process environment or repo-local `.env`. Those validated tests remain carry-forward proof, not continuous-runtime completion.
+## Process-test boundary
 
-For status, inspect the newest retained artifact directory and machine status. Do not infer success from process exit or elapsed time alone.
-Standard evidence packaging remains:
+Autonomous cycles may not mutate pre-existing services or user sessions. Bounded repo-owned loopback child processes are permitted only for task-required lifecycle, crash, restart, shutdown or recovery tests. They must use unique identities and ports, remain attached to the test and be cleaned up by the command that created them.
 
-```text
-./zip_codebase.sh --artifacts-only
-```
+## Notifications and child results
 
-Server update semantics remain equivalent to:
+Parent autopilots launch children with `TELEGRAM_NOTIFY=0` and emit one final parent notification. Standalone controllers retain their own final notification. Parent/child terminal state uses the atomic child-result side channel, never streamed human output.
 
-```text
-git pull --ff-only --autostash
-```
+## Evidence packaging
 
-## Preserved automation hardening
+All root controllers archive the complete `artifacts/` directory with fast standard ZIP compression and refresh the current final summary after lock classification. Repo-local temporary files are used instead of relying on writable `/tmp`.
 
-Root `run-*` controllers remain the notification owners. Parent autopilots pass `TELEGRAM_NOTIFY=0` to children and emit one final campaign message through `.automation/lib/telegram_notify.sh`.
-
-Parent/child terminal state remains bound to the atomic child-result side channel rather than streamed stdout. Every controller still archives the complete `artifacts/` directory, uses repo-local temporary files rather than requiring writable `/tmp`, and the pull helper rejects a `REMOTE_REPO` basename that does not match the local repository.
+For status, inspect machine-readable retained evidence. Do not infer success from elapsed time or exit code alone.

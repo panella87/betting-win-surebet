@@ -1,7 +1,6 @@
 # Protected automation files
 
-These files define the repo automation contract and must not be changed during
-normal autonomous implementation, paper evaluation, or bugfix runs:
+These files define repository automation or operator lifecycle contracts and are read-only during ordinary product, paper and bug-audit cycles:
 
 ```text
 update_git.sh
@@ -24,13 +23,22 @@ automation.config.sh
 docs/automation/PROTECTED_AUTOMATION_FILES.md
 ```
 
-Changing protected files is allowed only when the explicit task is automation
-maintenance or repo standardization. For such tasks, launch the implementation
-controller with `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` and keep the change
-bounded to the named automation files required by the task. Do not set this
-environment variable for normal app/source implementation, paper evaluation, or
-bug-audit runs.
+## Exact authorization contract
 
-Executable command lists live in `automation.config.sh`,
-`tools/required_executable_paths.js`, and `scripts/validate_executable_bits.py`.
+Protected changes are permitted only when an explicit handoff or the active task source provides exact authorization.
 
+For the current task-file campaign, all of the following are required:
+
+```text
+AUTOMATION_ALLOW_PROTECTED_CHANGES=1
+automation_maintenance_allowed=yes
+allowed_protected_files=<one exact comma-separated list>
+```
+
+`AUTOMATION_ALLOW_PROTECTED_CHANGES=1` is not blanket permission. The implementation controller rejects missing, duplicate, malformed, empty or out-of-list authorization. It snapshots every protected path before the campaign and blocks a cycle if any changed protected path is outside the exact list.
+
+The current exact list is documented in `docs/automation/current-implementation-task.md` and `docs/036_root_wrappers_and_paper_automation_integration.md`. It does not include `run-autonomous-implementation.sh`, bugfix controllers, `update_git.sh`, packaging helpers, controller hardening, Telegram code or any unrelated automation file.
+
+Do not broaden the list inside an autonomous cycle. Do not edit an authorized file before the active dependency-ready task requires it.
+
+Executable command lists remain in `automation.config.sh`, `tools/required_executable_paths.js` and `scripts/validate_executable_bits.py`.

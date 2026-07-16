@@ -3,36 +3,37 @@
 ```text
 paper_mode_owner=betting-win-surebet
 account_policy=separate_from_betting-win-betting
-current_stage=continuous_runtime_implementation
-current_task=BWS-580
-safe_local_terminal_gate=BWS-580
+current_stage=operator_runtime_implementation
+current_task=BWS-581
+safe_local_terminal_gate=BWS-599
+external_runtime_gate=BWS-600
 ```
 
 ## Validated foundation
 
-`BWS-310` proves bounded private-paper domain behavior and `BWS-510` proves integrated loopback behavior. Those proofs remain binding.
+`BWS-310` validates bounded private-paper domain behavior, `BWS-510` validates integrated loopback behavior and `BWS-520` through `BWS-580` validate executable components, bounded convergence/scheduling, an API-only lifecycle owner and runtime handoff.
 
-## Safe local completion
+## Remaining implementation
 
-`run-autonomous-implementation.sh` validated `BWS-520` through `BWS-580`, creating executable API/worker applications, explicit export and API convergence, persisted scheduling, operator lifecycle, runtime/API/cockpit convergence, integrated continuous-runtime acceptance, and the strict machine-readable runtime handoff.
+`BWS-581` through `BWS-599` convert those components into a continuous operator-owned stack with full lifecycle, cockpit serving, database operations, observability, protected wrapper integration, service-owned paper evaluation, paper autopilot, release/recovery tooling, soak proof and final local acceptance.
 
-Paper mode must select exactly one explicit upstream mode:
+Private paper selects exactly one explicit upstream mode:
 
 ```text
 export  immutable pinned betting-win export
-api     typed read-only betting-win query/API
+api     typed operator-approved read-only betting-win query/API
 ```
 
-There is no automatic fallback between modes, fixtures or local mocks.
+There is no automatic fallback to another mode, fixture or mock.
 
 ## Evidence
 
-Evidence includes upstream lock, source fingerprints, BWS config, selected mode, intake checkpoints, quote freshness/depth, opportunity decisions, reservations, completions, residual exposure, settlement reconciliation, worker checkpoints, process identity, health/readiness and immutable artifacts.
+Evidence includes upstream lock, source/release fingerprints, selected mode, convergence and scheduler checkpoints, worker jobs/checkpoints/dead letters, strategy ledger, lifecycle ownership, database state, health/readiness/metrics, cockpit probes, backups/restores, failure injections and immutable artifact indexes.
 
-## Continuous runtime gate
+## External gate
 
-`BWS-600` remains blocked because accepted operator-approved betting-win continuous read-only runtime evidence and configuration do not yet exist. Loopback or fixture success cannot remove this external gate.
+`BWS-600` remains blocked until `BWS-599` is validated and an operator-approved read-only input plus accepted campaign manifest exist. Loopback or fixture success cannot satisfy this gate.
 
 ## Prohibited
 
-No direct provider connection, provider account mutation, wallet, signer, order, public signal, profitability claim or real-money execution is allowed by this runbook.
+No direct provider connection, provider credentials, account mutation, wallet, signer, order, public signal, profitability claim or real-money execution is authorized.

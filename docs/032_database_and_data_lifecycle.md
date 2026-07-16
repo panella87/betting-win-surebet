@@ -1,45 +1,32 @@
 # 032 - Database and data lifecycle
 
-BWS owns the `surebet.*` schema.
+BWS owns only the `surebet.*` schema.
 
-Minimum domains:
-
-```text
-upstream_locks and import_runs
-upstream_snapshot_records and provenance references
-opportunity_runs, candidates, rejections
-stake_vectors and scenario_cashflows
-completion_groups, leg_states, residual_exposure
-backtest_runs and artifacts
-paper_runs, reservations, completions, metrics
-settlement_replays and reconciliations
-worker_checkpoints and dead_letters
-```
+Core domains include upstream locks/imports/convergence, opportunities and blockers, stake and exposure state, backtests, private-paper cycles, settlement reconciliation, jobs/checkpoints/dead letters, lifecycle evidence and retention indexes.
 
 Requirements:
 
-- append-only/versioned evidence where correction matters;
+- append-only or versioned correction evidence;
 - fixed-point integer units;
-- upstream reference keys without cross-schema writes;
+- upstream references without cross-schema writes;
 - deterministic idempotency keys;
 - optimistic conflict handling;
-- bounded retention and export;
-- disposable PostgreSQL migration proof;
-- no destructive production migration in autonomous runs.
+- bounded retention with preserved accepted references;
+- disposable PostgreSQL migration and restore proof;
+- no destructive production migration or restore in autonomous runs.
+
 ## Disposable acceptance configuration
 
-`BWS-510` accepts exactly one deterministic PostgreSQL test configuration shape:
+Canonical tests accept exactly one deterministic shape:
 
 ```text
 complete SUREBET_TEST_* tuple
 or
-DB_URL_TEST from the process environment or repo-local .env
+DB_URL_TEST from process environment or repo-local .env
 ```
 
-A partial `SUREBET_TEST_*` tuple is rejected and is never mixed with `DB_URL_TEST`.
-`DB_URL_TEST` must be an explicit PostgreSQL URL with user, host, port, and one
-maintenance database. The selected role must already have `CREATEDB`; the acceptance
-proof creates a uniquely named disposable database, runs the integrated migration and
-loopback checks, and drops that database afterward. Credentials are passed only to child
-processes and are not printed in validation output.
+A partial tuple is rejected and never mixed with `DB_URL_TEST`. The selected PostgreSQL role must already have `CREATEDB`. Tests create uniquely named disposable databases and drop only those databases after proof.
 
+## Remaining operations
+
+`BWS-585` implements migration status, BWS-owned backup manifests, disposable restore verification and fingerprinted retention plans. `BWS-591` consumes verified backup evidence during upgrade, rollback and disaster-recovery proof.

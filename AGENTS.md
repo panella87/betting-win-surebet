@@ -2,7 +2,7 @@
 
 ## Repository purpose
 
-`betting-win-surebet` is the downstream surebet application built on the `betting-win` provider/data/history platform.
+`betting-win-surebet` is the downstream surebet application built on the `betting-win` provider, data, history, export and read-only query platform.
 
 ```text
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
@@ -11,6 +11,8 @@ upstream_platform=betting-win
 provider_truth_owner=betting-win
 canonical_history_owner=betting-win
 strategy_state_owner=betting-win-surebet
+safe_local_terminal_gate=BWS-599
+external_runtime_gate=BWS-600
 execution_gate=closed
 ```
 
@@ -22,18 +24,18 @@ execution_gate=closed
 4. `docs/MASTER_PLAN.md`.
 5. `docs/028_full_implementation_program.md`.
 6. `docs/029_full_implementation_task_ledger.md` and `backlog/bws_full_implementation.csv`.
-7. `docs/030_upstream_compatibility_and_pin_contract.md`.
+7. `docs/034_remaining_operator_runtime_implementation_program.md`.
 8. `docs/automation/current-implementation-task.md`.
-9. Domain contracts and runbooks.
+9. Domain, operations and recovery contracts.
 10. Historical SURE ledgers and legacy research.
 
 The first dependency-ready `PENDING` row in the binding CSV is the implementation target.
 
 ## Read-only upstream authority
 
-The betting-win development checkout is supplied through `BETTING_WIN_REPO_PATH`. BWS may inspect only its committed `HEAD` to generate and verify an exact upstream lock. All package and capability reads come from Git objects, not working-tree files. Uncommitted upstream changes and runtime artifacts are excluded from the pin and must not be cleaned, reset, committed, copied, or cloned by a BWS implementation cycle.
+`BETTING_WIN_REPO_PATH` points to the existing betting-win Git checkout. BWS may inspect only committed `HEAD` through Git objects to generate and verify the exact upstream lock. Uncommitted upstream state is outside the pin and must not be cleaned, reset, committed, copied or cloned by BWS automation.
 
-Allowed integration surfaces:
+Allowed surfaces:
 
 ```text
 betting-win.strategy-export.v1
@@ -41,45 +43,73 @@ betting-win-strategy-export.v1
 surebet_standard_binary_v0
 public or generated @betting-win/* contracts
 read-only betting-win query/API/client surfaces
-provider-generation, identity, rule, quote, settlement, and lineage references
+provider-generation, identity, rule, quote, settlement and lineage references
 ```
 
 Forbidden:
 
 ```text
-copying provider adapters into BWS
-direct provider SDK/client implementation
-direct provider URLs or credentials
-direct writes or migrations to betting-win core.*
+provider adapters or direct provider clients in BWS
+provider URLs or credentials
+writes or migrations to betting-win core.*
 silent file:../betting-win production dependencies
-automatic fallback between workspace, export, API, and fixtures
-invented commit, schema, endpoint, package, or acceptance evidence
+automatic fallback between workspace, export, API or fixtures
+invented commit, schema, endpoint, package or acceptance evidence
+```
+
+## Active implementation program
+
+`BWS-100` through `BWS-580` are validated. They provide the domain engine, persistence, bounded convergence passes, bounded scheduling and workers, API, cockpit, an API-only lifecycle owner, loopback acceptance and a runtime handoff.
+
+They do not yet provide the finished operator service. Safe local work remains through `BWS-599`:
+
+```text
+BWS-581..BWS-584  real continuous services and complete lifecycle
+BWS-585..BWS-586  database operations, observability and evidence retention
+BWS-587..BWS-589  root wrappers and paper-controller integration
+BWS-590..BWS-591  release, deployment, upgrade, rollback and recovery
+BWS-592..BWS-593  soak/failure injection and external campaign preflight
+BWS-599           integrated final local acceptance
+BWS-600           external operator-approved runtime evidence
+BWS-900           separately authorized execution
 ```
 
 ## Implementation discipline
 
-`BWS-100` through `BWS-510` are validated carry-forward foundations. The active safe local queue begins at `BWS-520` and ends at `BWS-580`.
-
 - Work through `backlog/bws_full_implementation.csv` in dependency order.
-- Implement one coherent row or bounded sub-slice per cycle, then continue while safe work remains through `BWS-580`.
-- Preserve existing solver, completion, exposure, settlement, and report behavior during workspace migration.
-- Use fixed-point integer arithmetic for money, probability, fees, size, and exposure.
-- Missing configuration, unknown schema/profile/generation, stale quote, incomplete scenario, insufficient depth, and conflicting settlement evidence fail closed.
-- Add success, failure, mismatch, restart, idempotency, and cleanup coverage where applicable.
+- Implement one coherent row or bounded sub-slice per cycle, then continue while safe work remains through `BWS-599`.
+- Preserve validated solver, completion, exposure, settlement, report, API and cockpit behavior.
+- Use fixed-point integer arithmetic for money, probability, fees, size and exposure.
+- Missing configuration, unknown schema/profile/generation, stale evidence, incomplete scenarios, insufficient depth, conflicting settlement or ambiguous process ownership fail closed.
+- Add success, failure, mismatch, restart, idempotency, cleanup and recovery coverage where applicable.
 - Update the ledger only after code and required proof pass.
 - Regenerate `SOURCE_MANIFEST.json` after source changes.
 - Do not weaken validators or create placeholders that pass as evidence.
-- Do not commit, push, pull, reset, clean, stash, switch, merge, or modify remotes inside autonomous cycles.
+- Do not commit, push, pull, reset, clean, stash, switch, merge or modify remotes inside autonomous cycles.
+
+## Protected automation policy
+
+Normal product files remain unprotected. The current task authorizes an exact protected-file subset for the later root-wrapper and paper-controller tasks.
+
+`AUTOMATION_ALLOW_PROTECTED_CHANGES=1` is only an enabling gate. The implementation controller must also read and enforce the exact `allowed_protected_files` marker from `docs/automation/current-implementation-task.md`. Any changed protected file outside that list is a blocker.
+
+Do not edit protected files before the dependency-ready row requires them.
+
+## Process safety
+
+Do not start, stop, restart, kill, detach or replace pre-existing user sessions or services.
+
+Bounded repo-owned child processes launched by focused tests are allowed when a task requires lifecycle or recovery proof. They must be uniquely identified, loopback-only, contained by the test and fully cleaned up by the test that created them.
 
 ## Safety boundaries
 
-Implementation may build read-only BWS clients, local PostgreSQL `surebet.*` state, backtests, private paper state, API, UI, workers, and loopback acceptance.
+Implementation may build loopback-only services, explicit read-only upstream convergence, `surebet.*` persistence, backtests, private paper, API, workers, cockpit, lifecycle, backup/restore tooling, diagnostics, releases and recovery proof.
 
-It may not connect directly to any provider, use provider trading/account credentials, create wallets/signers/approvals/orders/cancellations/redemptions/cashouts/transactions, write betting-win `core.*`, enable public signals or profitability claims, mark continuous live paper ready without accepted betting-win runtime evidence, or enable real-money execution without `BWS-900` authorization.
+It may not connect directly to a provider, use provider account credentials, create wallets/signers/orders/transactions, write betting-win `core.*`, enable public signals, claim profitability or enable real-money execution without `BWS-900` authorization.
 
 ## Validation
 
-Run under Node 20:
+Use Node 20:
 
 ```bash
 . "$HOME/.nvm/nvm.sh" && nvm use 20
@@ -88,4 +118,4 @@ npm run validate
 
 ## Automation
 
-The canonical entrypoint for the full build is `run-autonomous-implementation.sh`. Paper and bugfix controllers retain their existing roles. The safe local build is complete only when every row through `BWS-580` is `VALIDATED` or a concrete unrecoverable blocker is proven.
+The canonical entrypoint remains `run-autonomous-implementation.sh`. Use `CONTINUE_REQUIRED=yes` while any dependency-ready row through `BWS-599` remains pending. Use `AUTONOMOUS_GOAL_COMPLETE=yes` only after `BWS-599` is validated and no safe local row remains.
