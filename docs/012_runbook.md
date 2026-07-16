@@ -4,7 +4,7 @@
 
 ```text
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-current_task=BWS-590
+current_task=BWS-592
 safe_local_terminal_gate=BWS-599
 selected_controller=run-autonomous-implementation.sh
 ```
@@ -13,7 +13,7 @@ selected_controller=run-autonomous-implementation.sh
 2. Keep `~/app_testing/betting-win-surebet` as the working repository.
 3. Set `BETTING_WIN_REPO_PATH` to the existing read-only `~/app_testing/betting-win` checkout. Do not clone or mutate it.
 4. Keep the private BWS `.env` configured for PostgreSQL and loopback runtime tests. `DB_URL_TEST` or a complete `SUREBET_TEST_*` tuple must reference an existing role with `CREATEDB` for disposable proof.
-5. Launch the canonical 72-hour implementation controller with `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`. The controller enforces the task-file exact protected allowlist.
+5. Launch the canonical 72-hour implementation controller without `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`. The active task disallows protected automation changes and the controller enforces that fail-closed policy.
 6. Continue through every dependency-ready row to `BWS-599`. Do not route to paper autopilot while source tasks remain.
 7. Inspect the newest retained machine-readable artifacts and ledger, not elapsed time alone.
 

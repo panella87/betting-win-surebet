@@ -19,14 +19,14 @@ test('full implementation ledger keeps BWS-580 validated and opens the remaining
     'BWS-580,VALIDATED', 'BWS-581,VALIDATED', 'BWS-582,VALIDATED',
     'BWS-583,VALIDATED', 'BWS-584,VALIDATED', 'BWS-585,VALIDATED',
     'BWS-586,VALIDATED', 'BWS-587,VALIDATED', 'BWS-588,VALIDATED',
-    'BWS-589,VALIDATED', 'BWS-590,PENDING', 'BWS-591,PENDING',
+    'BWS-589,VALIDATED', 'BWS-590,VALIDATED', 'BWS-591,VALIDATED',
     'BWS-592,PENDING', 'BWS-593,PENDING', 'BWS-599,PENDING',
     'BWS-600,BLOCKED', 'BWS-900,PARKED',
   ]) {
     assert.match(ledger, esc(marker));
   }
   assert.match(task, /program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1/);
-  assert.match(task, /current_task=BWS-590/);
+  assert.match(task, /current_task=BWS-592/);
   assert.match(task, /current_task_status=PENDING/);
   assert.match(task, /safe_local_terminal_gate=BWS-599/);
   assert.match(task, /automation_maintenance_allowed=no/);

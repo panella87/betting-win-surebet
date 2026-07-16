@@ -1,0 +1,186 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "bws.soak_campaign_result.v1.schema.json",
+  "title": "BWS Soak Campaign Result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "artifactArchiveSha256",
+    "artifactInventory",
+    "campaignSemanticFingerprint",
+    "checkpointFiles",
+    "cleanup",
+    "createdAt",
+    "executedCycles",
+    "failures",
+    "finalCompletedCycleCount",
+    "manifestFile",
+    "resultFile",
+    "schema",
+    "stateFile"
+  ],
+  "properties": {
+    "artifactArchiveSha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "artifactInventory": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "sha256"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      }
+    },
+    "campaignSemanticFingerprint": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "checkpointFiles": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "cleanup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "details",
+        "verified"
+      ],
+      "properties": {
+        "details": {
+          "type": "object"
+        },
+        "verified": {
+          "const": true
+        }
+      }
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "executedCycles": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 1
+      }
+    },
+    "failures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "details",
+          "expectedRecovery",
+          "injectionId",
+          "recovered",
+          "stage",
+          "status",
+          "target",
+          "triggerCycleNumber"
+        ],
+        "properties": {
+          "details": {
+            "type": "object"
+          },
+          "expectedRecovery": {
+            "enum": [
+              "continue",
+              "restart_component",
+              "resume_campaign",
+              "stop_campaign"
+            ]
+          },
+          "injectionId": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:/-]+$"
+          },
+          "recovered": {
+            "type": "boolean"
+          },
+          "stage": {
+            "enum": [
+              "before_cycle",
+              "during_cycle",
+              "after_cycle",
+              "during_recovery"
+            ]
+          },
+          "status": {
+            "enum": [
+              "planned",
+              "running",
+              "recovered",
+              "completed",
+              "failed"
+            ]
+          },
+          "target": {
+            "enum": [
+              "upstream_timeout",
+              "api_malformed_response",
+              "export_sha_replacement",
+              "upstream_contract_profile_mismatch",
+              "database_connection_interruption",
+              "scheduler_crash_before_enqueue",
+              "scheduler_crash_after_enqueue",
+              "worker_crash_before_checkpoint",
+              "worker_crash_after_checkpoint",
+              "lease_expiry_stale_claim_recovery",
+              "api_crash_and_restart",
+              "cockpit_asset_mismatch",
+              "partial_stack_startup",
+              "interrupted_shutdown",
+              "supervisor_crash",
+              "evidence_publication_failure",
+              "backup_interruption",
+              "upgrade_interruption"
+            ]
+          },
+          "triggerCycleNumber": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      }
+    },
+    "finalCompletedCycleCount": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "manifestFile": {
+      "type": "string",
+      "minLength": 1
+    },
+    "resultFile": {
+      "type": "string",
+      "minLength": 1
+    },
+    "schema": {
+      "const": "bws.soak_campaign_result.v1"
+    },
+    "stateFile": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

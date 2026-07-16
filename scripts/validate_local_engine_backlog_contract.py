@@ -36,7 +36,7 @@ def main() -> None:
         require(historical, marker, 'docs/015_local_engine_implementation_backlog.md')
 
     for rel, markers in {
-        'README.md': ['current_task=BWS-590', 'safe_local_terminal_gate=BWS-599', 'packages/bootstrap'],
+        'README.md': ['current_task=BWS-592', 'safe_local_terminal_gate=BWS-599', 'packages/bootstrap'],
         'AGENTS.md': ['backlog/bws_full_implementation.csv', 'Preserve validated solver, completion, exposure, settlement, report, API and cockpit behavior'],
         'docs/repo_status_current.md': ['packages/bootstrap', 'BWS-580', 'BWS-581', 'BWS-599'],
         'docs/028_full_implementation_program.md': ['workspace migration', 'operator-runnable continuous private-paper'],

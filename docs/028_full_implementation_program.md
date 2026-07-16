@@ -2,7 +2,7 @@
 
 ```text
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-current_task=BWS-590
+current_task=BWS-592
 safe_local_terminal_gate=BWS-599
 external_runtime_gate=BWS-600
 execution_gate=BWS-900
@@ -10,13 +10,11 @@ execution_gate=BWS-900
 
 Objective: implement every safe local component required for a private operator-runnable continuous private-paper and surebet backtest application on betting-win.
 
-`BWS-100` through `BWS-589` are validated foundations. `BWS-580` closed the integrated bounded runtime handoff, and `BWS-581` through `BWS-589` closed the continuous service, lifecycle, operations and paper-automation layers. They include exact upstream pinning, the validated workspace migration, domain and persistence layers, immutable export and typed API intake, long-running convergence, scheduler and worker services, read-only API and cockpit, complete product lifecycle, database lifecycle, observability, root wrappers, service-owned paper evaluation and runtime-evidence paper autopilot.
+`BWS-100` through `BWS-591` are validated foundations. `BWS-580` closed the integrated bounded runtime handoff, `BWS-581` through `BWS-589` closed the continuous service, lifecycle, operations and paper-automation layers, `BWS-590` closed deterministic private release packaging, and `BWS-591` closed exact-version upgrade, rollback and disaster-recovery proof. They include exact upstream pinning, the validated workspace migration, domain and persistence layers, immutable export and typed API intake, long-running convergence, scheduler and worker services, read-only API and cockpit, complete product lifecycle, database lifecycle, observability, root wrappers, service-owned paper evaluation, runtime-evidence paper autopilot, deterministic release/install verification and checkpointed upgrade/recovery evidence.
 
 The remaining program is:
 
 ```text
-BWS-590  reproducible release and deployment packaging
-BWS-591  exact-version upgrade, rollback and disaster recovery
 BWS-592  retained multi-hour soak and bounded failure injection
 BWS-593  accepted-runtime preflight and campaign manifest
 BWS-599  integrated clean-room final local acceptance

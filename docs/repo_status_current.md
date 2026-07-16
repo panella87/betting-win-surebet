@@ -6,7 +6,7 @@ program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 status=IMPLEMENTATION_READY
 repo_role=surebet_strategy_application
 upstream_platform=betting-win
-current_task=BWS-590
+current_task=BWS-592
 current_task_status=PENDING
 safe_local_terminal_gate=BWS-599
 provider_truth_owner=betting-win
@@ -18,7 +18,7 @@ execution_gate=closed
 
 ## Binding state
 
-`BWS-100` through `BWS-589` are validated. The previous autonomous campaign truthfully closed `BWS-580`, the latest autonomous campaign closed `BWS-581` by adding a long-running explicit-mode upstream convergence service with durable state, overlap defense, signal-aware shutdown and machine-readable evidence, the follow-on cycle closed `BWS-582` by adding long-running scheduler and worker services with restart-safe state, queue backpressure, lease renewal and graceful drain behavior, the next cycle closed `BWS-583` by serving the built cockpit on loopback through the managed runtime with explicit API-mode build verification, independent readiness reporting and failure-closed asset validation, the following cycle closed `BWS-584` by expanding product-owned lifecycle control to the complete BWS stack with exact multi-role ownership, ordered shutdown, crash recovery and `/proc` identity verification, the next cycle closed `BWS-585` by adding product-owned migration status, backup, restore-verification and bounded retention commands with disposable PostgreSQL proof, the following cycle closed `BWS-586` by adding structured role logs, loopback metrics, read-only diagnostics bundles and an append-only evidence index, the next cycle closed `BWS-587` by wiring the protected root wrappers to the product-owned lifecycle, runtime summary, and structured runtime logs, the following cycle closed `BWS-588` by upgrading paper evaluation to an explicit runtime-evidence controller with exact stack ownership checks and bounded local-only evidence collection, and the current cycle closed `BWS-589` by promoting paper autopilot into a runtime-evidence parent that preserves selected upstream mode, runtime campaign identity and source-fix re-evaluation state through atomic child-result handoffs.
+`BWS-100` through `BWS-591` are validated. The previous autonomous campaign truthfully closed `BWS-580`, the latest autonomous campaign closed `BWS-581` by adding a long-running explicit-mode upstream convergence service with durable state, overlap defense, signal-aware shutdown and machine-readable evidence, the follow-on cycle closed `BWS-582` by adding long-running scheduler and worker services with restart-safe state, queue backpressure, lease renewal and graceful drain behavior, the next cycle closed `BWS-583` by serving the built cockpit on loopback through the managed runtime with explicit API-mode build verification, independent readiness reporting and failure-closed asset validation, the following cycle closed `BWS-584` by expanding product-owned lifecycle control to the complete BWS stack with exact multi-role ownership, ordered shutdown, crash recovery and `/proc` identity verification, the next cycle closed `BWS-585` by adding product-owned migration status, backup, restore-verification and bounded retention commands with disposable PostgreSQL proof, the following cycle closed `BWS-586` by adding structured role logs, loopback metrics, read-only diagnostics bundles and an append-only evidence index, the next cycle closed `BWS-587` by wiring the protected root wrappers to the product-owned lifecycle, runtime summary, and structured runtime logs, the following cycle closed `BWS-588` by upgrading paper evaluation to an explicit runtime-evidence controller with exact stack ownership checks and bounded local-only evidence collection, the next cycle closed `BWS-589` by promoting paper autopilot into a runtime-evidence parent that preserves selected upstream mode, runtime campaign identity and source-fix re-evaluation state through atomic child-result handoffs, the following cycle closed `BWS-590` by adding deterministic private release packaging, Node 20 and PostgreSQL preflight, secret-safe environment templating, non-privileged user-service templates and non-mutating install verification with tamper rejection, and the current cycle closed `BWS-591` by adding deterministic upgrade planning, checkpointed apply/recovery, rollback-decision classification and disposable restore-bound recovery proof.
 
 The previous `AUTONOMOUS_GOAL_COMPLETE=yes` conclusion is not the final application boundary. Direct source inspection confirms that the operator runtime is still incomplete:
 
@@ -29,10 +29,12 @@ progress/log helpers=validated_automation_and_runtime_state
 paper evaluation=runtime_evidence_mode_validated
 paper autopilot=runtime_evidence_parent_validated
 database backup/restore/retention=validated_product_commands_present
-release/upgrade/recovery/soak acceptance=missing
+release packaging=validated
+upgrade/recovery=validated
+soak/preflight/final acceptance=missing
 ```
 
-The binding queue is `backlog/bws_full_implementation.csv`; the supporting detailed map is `backlog/bws_remaining_safe_local_map.csv`. `BWS-590` is the first dependency-ready `PENDING` row. Safe local implementation continues through `BWS-599`; `BWS-600` remains the external operator-approved runtime evidence gate.
+The binding queue is `backlog/bws_full_implementation.csv`; the supporting detailed map is `backlog/bws_remaining_safe_local_map.csv`. `BWS-592` is the first dependency-ready `PENDING` row. Safe local implementation continues through `BWS-599`; `BWS-600` remains the external operator-approved runtime evidence gate.
 
 ## Validated upstream facts
 
@@ -66,8 +68,8 @@ BWS-586=VALIDATED_OBSERVABILITY_DIAGNOSTICS_EVIDENCE
 BWS-587=VALIDATED_ROOT_WRAPPER_INTEGRATION
 BWS-588=VALIDATED_SERVICE_OWNED_PAPER_EVALUATION
 BWS-589=VALIDATED_RUNTIME_EVIDENCE_PAPER_AUTOPILOT
-BWS-590=PENDING_RELEASE_DEPLOYMENT
-BWS-591=PENDING_UPGRADE_ROLLBACK_RECOVERY
+BWS-590=VALIDATED_RELEASE_DEPLOYMENT
+BWS-591=VALIDATED_UPGRADE_ROLLBACK_RECOVERY
 BWS-592=PENDING_SOAK_FAILURE_INJECTION
 BWS-593=PENDING_EXTERNAL_RUNTIME_PREFLIGHT
 BWS-599=PENDING_FINAL_LOCAL_ACCEPTANCE

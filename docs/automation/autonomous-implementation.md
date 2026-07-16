@@ -4,14 +4,13 @@
 
 Authority comes from `docs/automation/current-implementation-task.md`, `backlog/bws_full_implementation.csv` and the supporting `backlog/bws_remaining_safe_local_map.csv`. There is no `--task` flag. A separate `--prompt-file` is unnecessary.
 
-The current first task is `BWS-590`. The controller must continue through the first dependency-ready `PENDING` rows until `BWS-599` is validated, the scheduling budget or cycle ceiling is reached, or a concrete blocker is proven.
+The current first task is `BWS-592`. The controller must continue through the first dependency-ready `PENDING` rows until `BWS-599` is validated, the scheduling budget or cycle ceiling is reached, or a concrete blocker is proven.
 
-`BWS-100` through `BWS-589` are validated carry-forward foundations, not authorization for a no-op goal-complete result.
+`BWS-100` through `BWS-589` are validated carry-forward foundations, and `BWS-590` adds deterministic release packaging on top of them. These are not authorization for a no-op goal-complete result.
 
 Prefer the largest safe cohesive sequence while keeping each parent row independently accepted:
 
 ```text
-BWS-590 -> BWS-591  release and recovery
 BWS-592 -> BWS-593  soak and external preflight
 BWS-599             final clean-room acceptance
 ```

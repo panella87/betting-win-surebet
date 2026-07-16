@@ -11,6 +11,22 @@ export {
   runBwsObservabilityCli,
 } from './cli/bws-observability.js';
 export {
+  printBwsExternalRuntimePreflightHelp,
+  runBwsExternalRuntimePreflightCli,
+} from './cli/bws-external-runtime-preflight.js';
+export {
+  printBwsReleasePackagingHelp,
+  runBwsReleasePackagingCli,
+} from './cli/bws-release-packaging.js';
+export {
+  printBwsReleaseUpgradeHelp,
+  runBwsReleaseUpgradeCli,
+} from './cli/bws-release-upgrade.js';
+export {
+  printBwsSoakCampaignHelp,
+  runBwsSoakCampaignCli,
+} from './cli/bws-soak-campaign.js';
+export {
   printBwsDatabaseLifecycleHelp,
   runBwsDatabaseLifecycleCli,
 } from './cli/bws-database-lifecycle.js';
@@ -86,6 +102,10 @@ export * from './opportunity/standard-binary-stake-solver.js';
 export * from './operations/service-runtime.js';
 export * from './operations/observability.js';
 export * from './operations/database-lifecycle.js';
+export * from './operations/external-runtime-preflight.js';
+export * from './operations/release-packaging.js';
+export * from './operations/release-upgrade.js';
+export * from './operations/soak-campaign.js';
 export * from './operations/operator-lifecycle.js';
 export * from './operations/paper-runtime-handoff.js';
 export * from './operations/paper-runtime-evidence.js';

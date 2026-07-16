@@ -3,7 +3,7 @@
 ```text
 parent_task=BWS-592
 cohesive_tranche=soak_and_preflight
-status=WAITING_FOR_BWS_591
+status=READY
 canonical_server_soak_duration=2h
 ```
 

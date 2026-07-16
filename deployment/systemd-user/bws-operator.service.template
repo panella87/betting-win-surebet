@@ -1,0 +1,20 @@
+[Unit]
+Description=Betting Win Surebet private operator stack
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=__BWS_RELEASE_DIR__
+EnvironmentFile=__BWS_ENV_FILE__
+ExecStart=/usr/bin/env node __BWS_RELEASE_DIR__/dist/packages/bootstrap/src/cli/bws-operator-lifecycle.js start
+ExecStop=/usr/bin/env node __BWS_RELEASE_DIR__/dist/packages/bootstrap/src/cli/bws-operator-lifecycle.js stop
+ExecReload=/usr/bin/env node __BWS_RELEASE_DIR__/dist/packages/bootstrap/src/cli/bws-operator-lifecycle.js status
+StandardOutput=append:__BWS_RELEASE_DIR__/runtime/systemd-user/operator.stdout.log
+StandardError=append:__BWS_RELEASE_DIR__/runtime/systemd-user/operator.stderr.log
+TimeoutStartSec=120
+TimeoutStopSec=120
+
+[Install]
+WantedBy=default.target

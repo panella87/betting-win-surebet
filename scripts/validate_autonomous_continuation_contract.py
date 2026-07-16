@@ -39,7 +39,7 @@ def main() -> None:
         require(implementation, marker, 'docs/automation/autonomous-implementation.md')
 
     for marker in [
-        'current_task=BWS-590', 'current_task_status=PENDING',
+        'current_task=BWS-592', 'current_task_status=PENDING',
         'safe_local_terminal_gate=BWS-599', 'BETTING_WIN_REPO_PATH',
         'automation_maintenance_allowed=no', 'allowed_protected_files=none',
         'recommended_cycle_timeout=6h',
@@ -48,7 +48,7 @@ def main() -> None:
         require(task, marker, 'docs/automation/current-implementation-task.md')
 
     for marker in [
-        'status=IMPLEMENTATION_READY', 'current_task=BWS-590',
+        'status=IMPLEMENTATION_READY', 'current_task=BWS-592',
         'current_task_status=PENDING', 'safe_local_terminal_gate=BWS-599',
         'selected_controller=run-autonomous-implementation.sh',
     ]:

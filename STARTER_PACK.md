@@ -4,7 +4,7 @@
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 repo_role=surebet_strategy_application
 upstream_platform=betting-win
-current_task=BWS-590
+current_task=BWS-592
 safe_local_terminal_gate=BWS-599
 current_live_execution_gate=closed
 ```
@@ -26,6 +26,6 @@ Read:
 13. `docs/046_final_local_acceptance_implementation_blueprint.md`
 14. `docs/automation/current-implementation-task.md`
 
-Use `run-autonomous-implementation.sh` for `BWS-590` through `BWS-599`. The protected integration phase is complete, so the current campaign does not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`.
+Use `run-autonomous-implementation.sh` for `BWS-592` through `BWS-599`. The protected integration phase is complete, so the current campaign does not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`.
 
 Route to paper autopilot only after blueprint reconciliation proves no safe local implementation row remains, or for the later accepted `BWS-600` runtime campaign.

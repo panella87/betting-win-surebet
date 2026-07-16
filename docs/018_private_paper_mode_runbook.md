@@ -4,7 +4,7 @@
 paper_mode_owner=betting-win-surebet
 account_policy=separate_from_betting-win-betting
 current_stage=operator_runtime_implementation
-current_task=BWS-590
+current_task=BWS-592
 safe_local_terminal_gate=BWS-599
 external_runtime_gate=BWS-600
 ```

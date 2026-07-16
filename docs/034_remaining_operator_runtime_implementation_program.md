@@ -2,7 +2,7 @@
 
 ```text
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-current_task=BWS-590
+current_task=BWS-592
 safe_local_terminal_gate=BWS-599
 external_runtime_gate=BWS-600
 execution_gate=BWS-900
@@ -21,7 +21,9 @@ paper evaluation=runtime_evidence_mode_validated
 paper autopilot=runtime_evidence_parent_validated
 database retention/backup/restore=validated product commands with disposable proof
 logs/metrics/diagnostics/evidence index=validated product surface
-release/upgrade/recovery/soak acceptance=not implemented
+release packaging=validated
+upgrade/recovery=validated
+soak/preflight/final acceptance=not implemented
 ```
 
 These are source and automation implementation gaps. They are not external evidence blockers. `BWS-600` remains external only after the local queue through `BWS-599` is validated.
@@ -50,8 +52,8 @@ The machine-readable authority is `backlog/bws_full_implementation.csv`. Select 
 
 ### Release and resilience
 
-- `BWS-590`: reproducible release/deployment packaging and user-service templates.
-- `BWS-591`: upgrade, rollback and disaster-recovery proof.
+- `BWS-590`: validated reproducible release/deployment packaging and user-service templates.
+- `BWS-591`: validated upgrade, rollback and disaster-recovery proof.
 - `BWS-592`: bounded long-running soak and failure-injection acceptance.
 - `BWS-593`: accepted-runtime preflight and `BWS-600` campaign manifest.
 - `BWS-599`: integrated operator/runtime/automation/recovery acceptance.

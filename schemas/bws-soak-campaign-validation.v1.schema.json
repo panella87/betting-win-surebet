@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "bws.soak_campaign_validation.v1.schema.json",
+  "title": "BWS Soak Campaign Validation Result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "artifactArchiveSha256",
+    "checkpointCount",
+    "executedCycleCount",
+    "failuresVerified",
+    "lastCheckpointFile",
+    "ok",
+    "schema"
+  ],
+  "properties": {
+    "artifactArchiveSha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "checkpointCount": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "executedCycleCount": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "failuresVerified": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "lastCheckpointFile": {
+      "type": "string",
+      "minLength": 1
+    },
+    "ok": {
+      "const": true
+    },
+    "schema": {
+      "const": "bws.soak_campaign_validation.v1"
+    }
+  }
+}

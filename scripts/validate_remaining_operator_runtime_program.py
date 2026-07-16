@@ -13,12 +13,12 @@ TASK_IDS = [
 ]
 VALIDATED_IDS = {
     'BWS-581', 'BWS-582', 'BWS-583', 'BWS-584', 'BWS-585', 'BWS-586',
-    'BWS-587', 'BWS-588', 'BWS-589',
+    'BWS-587', 'BWS-588', 'BWS-589', 'BWS-590', 'BWS-591',
 }
-PENDING_IDS = {'BWS-590', 'BWS-591', 'BWS-592', 'BWS-593', 'BWS-599'}
+PENDING_IDS = {'BWS-592', 'BWS-593', 'BWS-599'}
 BLUEPRINT_DOCS = {
     'docs/034_remaining_operator_runtime_implementation_program.md': [
-        'current_task=BWS-590', 'safe_local_terminal_gate=BWS-599',
+        'current_task=BWS-592', 'safe_local_terminal_gate=BWS-599',
         'paper evaluation=runtime_evidence_mode_validated',
         'backlog/bws_remaining_safe_local_map.csv', 'BWS-590', 'BWS-599', 'BWS-600',
     ],
@@ -109,7 +109,7 @@ def main() -> None:
         if reader.fieldnames != MAP_COLUMNS:
             fail(f'remaining map columns must be {MAP_COLUMNS!r}, found {reader.fieldnames!r}')
         map_rows = list(reader)
-    if len(map_rows) < 15:
+    if len(map_rows) < 11:
         fail('remaining implementation map must contain a substantive subtask decomposition')
     ids = [row['subtask_id'] for row in map_rows]
     if len(ids) != len(set(ids)):
@@ -120,10 +120,9 @@ def main() -> None:
     for row in map_rows:
         if row['dependency_state'] not in {'READY', 'WAITING'}:
             fail(f'{row["subtask_id"]} has invalid dependency_state')
-        if row['parent_task'] == 'BWS-590' and row['dependency_state'] != 'READY':
-            fail(f'{row["subtask_id"]} under BWS-590 must be READY')
-        if row['parent_task'] != 'BWS-590' and row['dependency_state'] != 'WAITING':
-            fail(f'{row["subtask_id"]} under {row["parent_task"]} must be WAITING')
+        expected_dependency_state = 'READY' if row['subtask_id'] == 'BWS-592-A' else 'WAITING'
+        if row['dependency_state'] != expected_dependency_state:
+            fail(f'{row["subtask_id"]} must be {expected_dependency_state}, found {row["dependency_state"]}')
         for field in MAP_COLUMNS:
             if not row[field].strip():
                 fail(f'{row["subtask_id"]} has empty {field}')
@@ -134,7 +133,7 @@ def main() -> None:
         'docs/automation/current-implementation-task.md',
     ]:
         text = read(rel)
-        for marker in [PROGRAM, 'BWS-590', 'BWS-599']:
+        for marker in [PROGRAM, 'BWS-592', 'BWS-599']:
             if marker not in text:
                 fail(f'{rel} missing required marker: {marker}')
 

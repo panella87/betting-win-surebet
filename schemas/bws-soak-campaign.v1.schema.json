@@ -1,0 +1,344 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "bws.soak_campaign.v1.schema.json",
+  "title": "BWS Soak Campaign Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "campaignId",
+    "checkpoints",
+    "closedBoundary",
+    "createdAt",
+    "database",
+    "evidenceDirectory",
+    "failureSchedule",
+    "observation",
+    "release",
+    "repositoryRoot",
+    "resumeGuard",
+    "runtimeDirectory",
+    "schema",
+    "seed",
+    "semanticFingerprint",
+    "source",
+    "upstream"
+  ],
+  "properties": {
+    "campaignId": {
+      "type": "string",
+      "pattern": "^bws-soak-[a-f0-9]{16}$"
+    },
+    "checkpoints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "checkpointDirectory",
+        "stateFile"
+      ],
+      "properties": {
+        "checkpointDirectory": {
+          "type": "string",
+          "minLength": 1
+        },
+        "stateFile": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "closedBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "automaticFallback",
+        "executionEnabled",
+        "listenerExposure",
+        "providerConnections"
+      ],
+      "properties": {
+        "automaticFallback": {
+          "const": "forbidden"
+        },
+        "executionEnabled": {
+          "const": false
+        },
+        "listenerExposure": {
+          "const": "loopback_only"
+        },
+        "providerConnections": {
+          "const": "disabled"
+        }
+      }
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "database": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "identity"
+      ],
+      "properties": {
+        "identity": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._:/-]+$"
+        }
+      }
+    },
+    "evidenceDirectory": {
+      "type": "string",
+      "minLength": 1
+    },
+    "failureSchedule": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "expectedRecovery",
+          "injectionId",
+          "stage",
+          "target",
+          "triggerCycleNumber"
+        ],
+        "properties": {
+          "expectedRecovery": {
+            "enum": [
+              "continue",
+              "restart_component",
+              "resume_campaign",
+              "stop_campaign"
+            ]
+          },
+          "injectionId": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:/-]+$"
+          },
+          "notes": {
+            "type": "string",
+            "minLength": 1
+          },
+          "stage": {
+            "enum": [
+              "before_cycle",
+              "during_cycle",
+              "after_cycle",
+              "during_recovery"
+            ]
+          },
+          "target": {
+            "enum": [
+              "upstream_timeout",
+              "api_malformed_response",
+              "export_sha_replacement",
+              "upstream_contract_profile_mismatch",
+              "database_connection_interruption",
+              "scheduler_crash_before_enqueue",
+              "scheduler_crash_after_enqueue",
+              "worker_crash_before_checkpoint",
+              "worker_crash_after_checkpoint",
+              "lease_expiry_stale_claim_recovery",
+              "api_crash_and_restart",
+              "cockpit_asset_mismatch",
+              "partial_stack_startup",
+              "interrupted_shutdown",
+              "supervisor_crash",
+              "evidence_publication_failure",
+              "backup_interruption",
+              "upgrade_interruption"
+            ]
+          },
+          "triggerCycleNumber": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      }
+    },
+    "observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "durationMs",
+        "intervalMs",
+        "maxCycles"
+      ],
+      "properties": {
+        "durationMs": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "intervalMs": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "maxCycles": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "release": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "semanticFingerprint"
+      ],
+      "properties": {
+        "semanticFingerprint": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "repositoryRoot": {
+      "type": "string",
+      "minLength": 1
+    },
+    "resumeGuard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "databaseIdentity",
+        "failureScheduleFingerprint",
+        "releaseSemanticFingerprint",
+        "seed",
+        "selectedUpstreamMode",
+        "sourceManifestSha256",
+        "upstreamLockFingerprint"
+      ],
+      "properties": {
+        "databaseIdentity": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._:/-]+$"
+        },
+        "failureScheduleFingerprint": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "releaseSemanticFingerprint": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "seed": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._:/-]+$"
+        },
+        "selectedUpstreamMode": {
+          "enum": [
+            "api",
+            "export"
+          ]
+        },
+        "sourceManifestSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "upstreamLockFingerprint": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "runtimeDirectory": {
+      "type": "string",
+      "minLength": 1
+    },
+    "schema": {
+      "const": "bws.soak_campaign.v1"
+    },
+    "seed": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._:/-]+$"
+    },
+    "semanticFingerprint": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceManifestGeneratedAt",
+        "sourceManifestOverlay",
+        "sourceManifestSha256"
+      ],
+      "properties": {
+        "sourceManifestGeneratedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "sourceManifestOverlay": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sourceManifestSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "upstream": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "commitSha",
+        "contractAlias",
+        "contractSchema",
+        "fingerprint",
+        "gitTreeSha",
+        "lockPath",
+        "repositoryPath",
+        "selectedMode",
+        "surebetProfile",
+        "trackedTreeListingSha256"
+      ],
+      "properties": {
+        "commitSha": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contractAlias": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contractSchema": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fingerprint": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "gitTreeSha": {
+          "type": "string",
+          "minLength": 1
+        },
+        "lockPath": {
+          "type": "string",
+          "minLength": 1
+        },
+        "repositoryPath": {
+          "type": "string",
+          "minLength": 1
+        },
+        "selectedMode": {
+          "enum": [
+            "api",
+            "export"
+          ]
+        },
+        "surebetProfile": {
+          "type": "string",
+          "minLength": 1
+        },
+        "trackedTreeListingSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    }
+  }
+}

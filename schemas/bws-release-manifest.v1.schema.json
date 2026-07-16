@@ -1,0 +1,370 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "archive": {
+      "additionalProperties": false,
+      "properties": {
+        "fileName": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "payloadFileCount": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "payloadFingerprintSha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "payloadFiles": {
+          "items": {
+            "$ref": "#/$defs/fileEntry"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "rootDirectory": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "fileName",
+        "payloadFileCount",
+        "payloadFingerprintSha256",
+        "payloadFiles",
+        "rootDirectory"
+      ],
+      "type": "object"
+    },
+    "builtRuntime": {
+      "additionalProperties": false,
+      "properties": {
+        "files": {
+          "items": {
+            "$ref": "#/$defs/fileEntry"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "rootDirectory": {
+          "const": "dist/packages",
+          "type": "string"
+        }
+      },
+      "required": [
+        "files",
+        "rootDirectory"
+      ],
+      "type": "object"
+    },
+    "cockpit": {
+      "additionalProperties": false,
+      "properties": {
+        "apiBaseUrl": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "assetFingerprint": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "buildDirectory": {
+          "const": "dist/apps/web",
+          "type": "string"
+        },
+        "dataMode": {
+          "const": "api",
+          "type": "string"
+        },
+        "files": {
+          "items": {
+            "$ref": "#/$defs/fileEntry"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "metadataFile": {
+          "const": "dist/apps/web/bws-cockpit-build.json",
+          "type": "string"
+        }
+      },
+      "required": [
+        "apiBaseUrl",
+        "assetFingerprint",
+        "buildDirectory",
+        "dataMode",
+        "files",
+        "metadataFile"
+      ],
+      "type": "object"
+    },
+    "createdAt": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "executables": {
+      "items": {
+        "$ref": "#/$defs/fileEntry"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "migrationInventory": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "migrationName": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "path": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "migrationName",
+          "path",
+          "sha256"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "packageLock": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "const": "package-lock.json",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "sha256"
+      ],
+      "type": "object"
+    },
+    "packageVersion": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "policy": {
+      "additionalProperties": false,
+      "properties": {
+        "automaticFallback": {
+          "const": "forbidden",
+          "type": "string"
+        },
+        "executionEnabled": {
+          "const": false,
+          "type": "boolean"
+        },
+        "listenerExposure": {
+          "const": "loopback_only",
+          "type": "string"
+        },
+        "providerConnections": {
+          "const": "disabled",
+          "type": "string"
+        },
+        "runtimeMode": {
+          "const": "paper",
+          "type": "string"
+        }
+      },
+      "required": [
+        "automaticFallback",
+        "executionEnabled",
+        "listenerExposure",
+        "providerConnections",
+        "runtimeMode"
+      ],
+      "type": "object"
+    },
+    "postgresqlRequirement": {
+      "additionalProperties": false,
+      "properties": {
+        "minimumClientMajor": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "minimumServerVersionNum": {
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "minimumClientMajor",
+        "minimumServerVersionNum"
+      ],
+      "type": "object"
+    },
+    "releaseId": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "schema": {
+      "const": "bws.release_manifest.v1",
+      "type": "string"
+    },
+    "semanticFingerprint": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "source": {
+      "additionalProperties": false,
+      "properties": {
+        "files": {
+          "items": {
+            "$ref": "#/$defs/fileEntry"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "sourceManifestGeneratedAt": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "sourceManifestPath": {
+          "const": "SOURCE_MANIFEST.json",
+          "type": "string"
+        },
+        "sourceManifestSha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "sourceTreeFingerprint": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "files",
+        "sourceManifestGeneratedAt",
+        "sourceManifestPath",
+        "sourceManifestSha256",
+        "sourceTreeFingerprint"
+      ],
+      "type": "object"
+    },
+    "templates": {
+      "additionalProperties": false,
+      "properties": {
+        "environmentTemplatePath": {
+          "const": "config/bws.private.env.template",
+          "type": "string"
+        },
+        "systemdUserTemplates": {
+          "items": {
+            "$ref": "#/$defs/fileEntry"
+          },
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "environmentTemplatePath",
+        "systemdUserTemplates"
+      ],
+      "type": "object"
+    },
+    "upstreamLock": {
+      "additionalProperties": false,
+      "properties": {
+        "commitSha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        },
+        "fingerprintSha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "gitTreeSha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        },
+        "path": {
+          "const": "config/betting-win.upstream.lock.json",
+          "type": "string"
+        },
+        "repositoryPath": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "trackedTreeListingSha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "commitSha",
+        "fingerprintSha256",
+        "gitTreeSha",
+        "path",
+        "repositoryPath",
+        "trackedTreeListingSha256"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "archive",
+    "builtRuntime",
+    "cockpit",
+    "createdAt",
+    "executables",
+    "migrationInventory",
+    "packageLock",
+    "packageVersion",
+    "policy",
+    "postgresqlRequirement",
+    "releaseId",
+    "schema",
+    "semanticFingerprint",
+    "source",
+    "templates",
+    "upstreamLock"
+  ],
+  "type": "object",
+  "$defs": {
+    "fileEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "pattern": "^[0-7]{3,4}$",
+          "type": "string"
+        },
+        "path": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "size": {
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "mode",
+        "path",
+        "sha256",
+        "size"
+      ],
+      "type": "object"
+    }
+  }

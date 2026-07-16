@@ -2,12 +2,12 @@
 
 ```text
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-current_task=BWS-590
+current_task=BWS-592
 safe_local_terminal_gate=BWS-599
 selected_controller=run-autonomous-implementation.sh
 ```
 
-`BWS-100` through `BWS-589` are validated. The active queue now builds release/deployment tooling, recovery tooling, soak proof and final local acceptance through `BWS-599`.
+`BWS-100` through `BWS-591` are validated. The active queue now builds soak proof, external preflight and final local acceptance through `BWS-599`.
 
 # `.automation/`
 

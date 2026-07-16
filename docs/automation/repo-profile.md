@@ -4,7 +4,7 @@
 repo_role=surebet_strategy_application
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 upstream_platform=betting-win
-current_task=BWS-590
+current_task=BWS-592
 safe_local_terminal_gate=BWS-599
 node_runtime=20
 package_manager=npm
@@ -35,4 +35,4 @@ run-paper-evaluation.sh           fixture evaluator plus runtime-evidence mode a
 run-paper-autopilot.sh            validated runtime-evidence lifecycle integration at BWS-589
 ```
 
-The current product now has long-running explicit-mode upstream convergence, long-running scheduler and worker services, managed loopback cockpit serving, a validated full-stack lifecycle owner, validated product-owned database lifecycle operations, and validated protected root wrapper integration. The active queue now implements service-owned paper evaluation and the remaining paper/runtime operations.
+The current product now has long-running explicit-mode upstream convergence, long-running scheduler and worker services, managed loopback cockpit serving, a validated full-stack lifecycle owner, validated product-owned database lifecycle operations, validated protected root wrapper integration, validated runtime-evidence paper automation, validated release packaging and validated upgrade/recovery proof. The active queue now implements soak, external preflight and final local acceptance.

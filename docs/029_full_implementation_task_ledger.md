@@ -25,15 +25,15 @@ A row becomes `BLOCKED` only after all safe local work in that row is exhausted 
 ## Current selection
 
 ```text
-current_task=BWS-590
+current_task=BWS-592
 current_task_status=PENDING
-reason=BWS-589 runtime-evidence paper autopilot is validated and reproducible release packaging is the next dependency-ready local gap
+reason=BWS-591 upgrade, rollback and disaster-recovery proof is validated and bounded soak/failure injection is the next dependency-ready local gap
 ```
 
 ## Remaining sequence
 
 ```text
-BWS-590..BWS-591  release, deployment, upgrade, rollback and recovery
+BWS-591           release upgrade, rollback and recovery (validated)
 BWS-592..BWS-593  multi-hour soak, failure injection and external preflight
 BWS-599           integrated clean-room final local acceptance
 BWS-600           external accepted-runtime evidence

@@ -16,12 +16,12 @@ test('autonomous authority continues the remaining operator-runtime queue', () =
     'CONTINUE_REQUIRED=yes', 'AUTONOMOUS_GOAL_COMPLETE=yes',
   ]) assert.match(doc + task, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   assert.match(task, /BETTING_WIN_REPO_PATH/);
-  assert.match(task, /current_task=BWS-590/);
+  assert.match(task, /current_task=BWS-592/);
   assert.match(task, /current_task_status=PENDING/);
   assert.match(task, /automation_maintenance_allowed=no/);
   assert.match(task, /allowed_protected_files=none/);
   assert.match(task, /recommended_cycle_timeout=6h/);
   assert.match(status, /selected_controller=run-autonomous-implementation\.sh/);
-  assert.match(status, /current_task=BWS-590/);
+  assert.match(status, /current_task=BWS-592/);
   assert.match(status, /safe_local_terminal_gate=BWS-599/);
 });

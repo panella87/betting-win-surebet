@@ -4,7 +4,7 @@ Repository: `betting-win-surebet`.
 
 ```text
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-current_task=BWS-590
+current_task=BWS-592
 current_task_status=PENDING
 safe_local_terminal_gate=BWS-599
 external_runtime_gate=BWS-600
@@ -14,14 +14,13 @@ external_runtime_gate=BWS-600
 
 Implement every remaining safe local component required for a real operator-runnable continuous private-paper BWS application. Use `backlog/bws_full_implementation.csv` as the binding dependency ledger and `backlog/bws_remaining_safe_local_map.csv` as the dependency-ordered implementation map.
 
-Start with the first dependency-ready `PENDING` row, currently `BWS-590`, and continue across validated cycles through `BWS-599`. Do not stop after one bounded task while another dependency-ready safe row remains.
+Start with the first dependency-ready `PENDING` row, currently `BWS-592`, and continue across validated cycles through `BWS-599`. Do not stop after one bounded task while another dependency-ready safe row remains.
 
 Prefer the largest safe cohesive tranche:
 
 ```text
-tranche_1=BWS-590_then_BWS-591_release_and_recovery
-tranche_2=BWS-592_then_BWS-593_soak_and_external_preflight
-tranche_3=BWS-599_final_clean_room_acceptance
+tranche_1=BWS-592_then_BWS-593_soak_and_external_preflight
+tranche_2=BWS-599_final_clean_room_acceptance
 ```
 
 Each binding ledger row must still be validated separately. Do not merge unrelated work or mark a dependent row complete before its own proof passes.
@@ -49,7 +48,7 @@ The validated service, database, observability, wrapper and paper-controller con
 
 ## Verified carry-forward state
 
-`BWS-100` through `BWS-589` are validated. Preserve their contracts. Do not reimplement or weaken validated functionality merely to create work.
+`BWS-100` through `BWS-591` are validated. Preserve their contracts. Do not reimplement or weaken validated functionality merely to create work.
 
 The `BWS-589` runtime-evidence paper-autopilot change required a reviewed protected update to `run-autonomous-implementation.sh` so selected mode and campaign identity survive implementation return handoffs. That source is now accepted carry-forward baseline. The protected integration phase is closed.
 
@@ -58,8 +57,6 @@ Carry-forward upstream proof must prove the betting-win committed HEAD remains u
 The remaining concrete gaps are:
 
 ```text
-no reproducible private release and install verification
-no exact-version upgrade, rollback and interrupted-recovery proof
 no retained multi-hour soak and bounded failure-injection campaign
 no accepted-runtime preflight and external campaign manifest
 no integrated clean-room final local acceptance
@@ -68,25 +65,23 @@ no integrated clean-room final local acceptance
 ## First task
 
 ```text
-id=BWS-590
-objective=implement reproducible release and deployment packaging
-largest_safe_tranche=complete_BWS-590_release_surface_then_continue_to_BWS-591
+id=BWS-592
+objective=implement retained multi-hour soak and bounded failure-injection acceptance
+largest_safe_tranche=complete_BWS-592_soak_and_external_preflight_then_continue_to_BWS-593
 ```
 
 Required outcomes:
 
-- produce a deterministic versioned private release package with source, build, cockpit, migration and exact upstream-lock checksums;
-- add Node 20 and PostgreSQL preflight plus a private environment template without secret output;
-- provide non-privileged user-service templates and a non-mutating install verification path;
-- prove fresh extraction verification, tamper rejection and secret/runtime/database exclusion;
+- define deterministic soak campaign identities, checkpoints, resume guards and retained evidence;
+- exercise repeated loopback convergence, scheduler and worker activity for a real multi-hour bounded campaign;
+- inject bounded failures across upstream, database, scheduler, worker, API, cockpit, supervisor, backup and upgrade paths with exact ownership and cleanup;
+- retain immutable soak, failure-recovery and cleanup evidence without mutating unrelated services or persistent project databases;
 - preserve execution-disabled, provider-disabled, loopback-only and no-fallback boundaries;
 - update the task ledger only after complete proof and `npm run validate` pass.
 
 ## Full remaining sequence
 
 ```text
-BWS-590  release and deployment packaging
-BWS-591  upgrade, rollback and disaster recovery
 BWS-592  multi-hour soak and failure injection
 BWS-593  external runtime preflight and campaign manifest
 BWS-599  integrated final local acceptance

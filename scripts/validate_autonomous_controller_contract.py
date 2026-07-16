@@ -454,7 +454,7 @@ REQUIRED_FRAGMENTS = {
     ],
     'docs/automation/README.md': [
         'Repo automation contract: betting-win-surebet',
-        'current_task=BWS-590',
+        'current_task=BWS-592',
         'safe_local_terminal_gate=BWS-599',
         'Exact protected-file policy',
         'AUTOMATION_ALLOW_PROTECTED_CHANGES=1',
@@ -514,7 +514,7 @@ REQUIRED_FRAGMENTS = {
         'not blanket permission',
     ],
     '.automation/README.md': [
-        'current_task=BWS-590',
+        'current_task=BWS-592',
         'safe_local_terminal_gate=BWS-599',
         '.automation/lib/run_common.sh',
         '.automation/lib/controller_hardening_v2.sh',

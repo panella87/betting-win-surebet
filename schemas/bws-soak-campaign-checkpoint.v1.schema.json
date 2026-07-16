@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "bws.soak_campaign_checkpoint.v1.schema.json",
+  "title": "BWS Soak Campaign Checkpoint",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "campaignSemanticFingerprint",
+    "checkpointFingerprint",
+    "classification",
+    "createdAt",
+    "details",
+    "schema",
+    "sequence",
+    "status"
+  ],
+  "properties": {
+    "campaignSemanticFingerprint": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "checkpointFingerprint": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "classification": {
+      "enum": [
+        "campaign_initialized",
+        "campaign_resumed",
+        "cycle_observed",
+        "failure_injected",
+        "recovery_verified",
+        "campaign_completed",
+        "cleanup_verified"
+      ]
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "cycleNumber": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "details": {
+      "type": "object"
+    },
+    "schema": {
+      "const": "bws.soak_campaign_checkpoint.v1"
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "status": {
+      "enum": [
+        "planned",
+        "running",
+        "recovered",
+        "completed",
+        "failed"
+      ]
+    }
+  }
+}

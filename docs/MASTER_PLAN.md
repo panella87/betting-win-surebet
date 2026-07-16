@@ -8,7 +8,7 @@ Build the complete private surebet application on top of the read-only betting-w
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 repo_role=surebet_strategy_application
 upstream_platform=betting-win
-current_task=BWS-590
+current_task=BWS-592
 safe_local_terminal_gate=BWS-599
 continuous_runtime_gate=BWS-600
 execution_gate=BWS-900

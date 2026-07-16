@@ -3,7 +3,7 @@
 ```text
 parent_task=BWS-590
 cohesive_tranche=release_and_recovery
-status=PENDING
+status=VALIDATED
 ```
 
 ## Goal

@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "bws.soak_campaign_state.v1.schema.json",
+  "title": "BWS Soak Campaign State",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "campaignSemanticFingerprint",
+    "completedCycleCount",
+    "createdAt",
+    "currentCheckpointSequence",
+    "schema",
+    "updatedAt"
+  ],
+  "properties": {
+    "campaignSemanticFingerprint": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "completedCycleCount": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "currentCheckpointSequence": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "lastCheckpointFile": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lastCheckpointFingerprint": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "schema": {
+      "const": "bws.soak_campaign_state.v1"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

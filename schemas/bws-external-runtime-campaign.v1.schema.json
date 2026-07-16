@@ -1,0 +1,300 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "bws.external_runtime_campaign.v1.schema.json",
+  "title": "BWS External Runtime Campaign Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "createdAt",
+    "database",
+    "evidence",
+    "loopback",
+    "paperAutopilotCampaign",
+    "paths",
+    "policy",
+    "release",
+    "schema",
+    "selectedInput",
+    "semanticFingerprint",
+    "storage",
+    "upstreamLock"
+  ],
+  "properties": {
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "database": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "connectionTarget",
+        "currentDatabase",
+        "currentUser",
+        "requestedDatabase",
+        "requestedUser"
+      ],
+      "properties": {
+        "connectionTarget": { "type": "string", "minLength": 1 },
+        "currentDatabase": { "type": "string", "minLength": 1 },
+        "currentUser": { "type": "string", "minLength": 1 },
+        "requestedDatabase": { "type": "string", "minLength": 1 },
+        "requestedUser": { "type": "string", "minLength": 1 }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "backupManifest",
+        "installVerification",
+        "migrationStatus",
+        "restoreVerification",
+        "soakManifest",
+        "soakState"
+      ],
+      "properties": {
+        "backupManifest": { "$ref": "#/$defs/artifactWithTimestamp" },
+        "installVerification": { "$ref": "#/$defs/artifactReference" },
+        "migrationStatus": { "$ref": "#/$defs/artifactReference" },
+        "restoreVerification": { "$ref": "#/$defs/artifactWithTimestamp" },
+        "soakManifest": { "$ref": "#/$defs/artifactReference" },
+        "soakState": { "$ref": "#/$defs/artifactReference" }
+      }
+    },
+    "loopback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "apiBaseUrl",
+        "cockpitApiBaseUrl",
+        "listenerExposure"
+      ],
+      "properties": {
+        "apiBaseUrl": { "type": "string", "format": "uri" },
+        "cockpitApiBaseUrl": { "type": "string", "format": "uri" },
+        "listenerExposure": { "const": "loopback_only" }
+      }
+    },
+    "paperAutopilotCampaign": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cycleTimeoutMinutes",
+        "durationHours",
+        "maxCycles"
+      ],
+      "properties": {
+        "cycleTimeoutMinutes": { "type": "integer", "minimum": 1 },
+        "durationHours": { "type": "integer", "minimum": 1 },
+        "maxCycles": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "paths": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "envFile",
+        "evidenceDirectory",
+        "releaseDirectory",
+        "runtimeDirectory"
+      ],
+      "properties": {
+        "envFile": { "type": "string", "minLength": 1 },
+        "evidenceDirectory": { "type": "string", "minLength": 1 },
+        "releaseDirectory": { "type": "string", "minLength": 1 },
+        "runtimeDirectory": { "type": "string", "minLength": 1 }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "automaticFallback",
+        "executionEnabled",
+        "providerConnections",
+        "runtimeMode",
+        "selectedMode"
+      ],
+      "properties": {
+        "automaticFallback": { "const": "forbidden" },
+        "executionEnabled": { "const": false },
+        "providerConnections": { "const": "disabled" },
+        "runtimeMode": { "const": "paper" },
+        "selectedMode": { "enum": ["api", "export"] }
+      }
+    },
+    "release": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "releaseId",
+        "semanticFingerprint",
+        "sourceManifestSha256"
+      ],
+      "properties": {
+        "releaseId": { "type": "string", "minLength": 1 },
+        "semanticFingerprint": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "sourceManifestSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    "schema": {
+      "const": "bws.external_runtime_campaign.v1"
+    },
+    "selectedInput": {
+      "oneOf": [
+        { "$ref": "#/$defs/exportInput" },
+        { "$ref": "#/$defs/apiInput" }
+      ]
+    },
+    "semanticFingerprint": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "storage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidenceDirectory",
+        "runtimeDirectory"
+      ],
+      "properties": {
+        "evidenceDirectory": { "$ref": "#/$defs/storageReference" },
+        "runtimeDirectory": { "$ref": "#/$defs/storageReference" }
+      }
+    },
+    "upstreamLock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "commitSha",
+        "contractAlias",
+        "contractSchema",
+        "fingerprintSha256",
+        "gitTreeSha",
+        "path",
+        "repositoryPath",
+        "surebetProfile",
+        "trackedTreeListingSha256"
+      ],
+      "properties": {
+        "commitSha": { "type": "string", "minLength": 1 },
+        "contractAlias": { "type": "string", "minLength": 1 },
+        "contractSchema": { "type": "string", "minLength": 1 },
+        "fingerprintSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "gitTreeSha": { "type": "string", "minLength": 1 },
+        "path": { "type": "string", "minLength": 1 },
+        "repositoryPath": { "type": "string", "minLength": 1 },
+        "surebetProfile": { "type": "string", "minLength": 1 },
+        "trackedTreeListingSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    }
+  },
+  "$defs": {
+    "artifactReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file", "sha256"],
+      "properties": {
+        "file": { "type": "string", "minLength": 1 },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    "artifactWithTimestamp": {
+      "allOf": [
+        { "$ref": "#/$defs/artifactReference" },
+        {
+          "type": "object",
+          "required": ["createdAt"],
+          "properties": {
+            "createdAt": { "type": "string", "format": "date-time" }
+          }
+        }
+      ]
+    },
+    "storageReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "availableBytes",
+        "minimumRequiredBytes",
+        "sufficient"
+      ],
+      "properties": {
+        "availableBytes": { "type": "integer", "minimum": 0 },
+        "minimumRequiredBytes": { "type": "integer", "minimum": 1 },
+        "sufficient": { "type": "boolean" }
+      }
+    },
+    "exportInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contractAlias",
+        "contractSchema",
+        "expectedSha256",
+        "exportPath",
+        "mode",
+        "providerGenerationIds",
+        "sourceLineageRecordIds",
+        "surebetProfile"
+      ],
+      "properties": {
+        "contractAlias": { "type": "string", "minLength": 1 },
+        "contractSchema": { "type": "string", "minLength": 1 },
+        "expectedSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "exportPath": { "type": "string", "minLength": 1 },
+        "mode": { "const": "export" },
+        "providerGenerationIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "pattern": "^[A-Za-z0-9._:/-]+$" }
+        },
+        "sourceLineageRecordIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "pattern": "^[A-Za-z0-9._:/-]+$" }
+        },
+        "surebetProfile": { "type": "string", "minLength": 1 }
+      }
+    },
+    "apiInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "apiBaseUrl",
+        "checkpointId",
+        "contractVersion",
+        "maxPagesPerResource",
+        "mode",
+        "pageSize",
+        "retryBackoffMs",
+        "retryLimit",
+        "timeoutMs"
+      ],
+      "properties": {
+        "apiBaseUrl": { "type": "string", "format": "uri" },
+        "checkpointId": { "type": "string", "pattern": "^[A-Za-z0-9._:/-]+$" },
+        "contractInspection": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "endpoint",
+            "verifiedContractVersion"
+          ],
+          "properties": {
+            "endpoint": { "type": "string", "format": "uri" },
+            "verifiedContractVersion": { "type": "string", "minLength": 1 }
+          }
+        },
+        "contractVersion": { "type": "string", "minLength": 1 },
+        "maxPagesPerResource": { "type": "integer", "minimum": 1 },
+        "mode": { "const": "api" },
+        "pageSize": { "type": "integer", "minimum": 1 },
+        "retryBackoffMs": { "type": "integer", "minimum": 1 },
+        "retryLimit": { "type": "integer", "minimum": 1 },
+        "timeoutMs": { "type": "integer", "minimum": 1 }
+      }
+    }
+  }
+}
