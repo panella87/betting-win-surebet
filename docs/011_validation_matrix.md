@@ -3,7 +3,7 @@
 | Gate | Failure prevented |
 |---|---|
 | `npm run typecheck` | Invalid TypeScript contracts or package boundaries |
-| `npm test` | Broken domain, adapter, controller, or regression behavior |
+| `npm test` | Broken domain, adapter, controller, or regression behavior after generating the exact committed-HEAD upstream lock and creating repo-local ignored test artifacts |
 | `npm run validate:repo` | Missing authority files, scripts, tests, package commands, or conflict markers |
 | `npm run validate:boundary` | Provider imports/URLs, direct DB/core ownership violations, execution paths, or fixture corruption |
 | `npm run validate:ops` | Master-plan, controller, task-ledger, upstream-baseline, source-manifest, and automation drift |
@@ -25,3 +25,16 @@ tests/validate-source-manifest.test.ts
 ```
 
 Stateful rows require disposable PostgreSQL proof, restart/idempotency tests, and cleanup verification. API/UI/worker rows require loopback integration and bounded failure tests. Placeholder evidence cannot satisfy a gate.
+
+
+Clean-checkout validation requirements:
+
+```text
+root TypeScript build first
+exact betting-win committed-HEAD lock generated and verified before tests
+repo-local artifacts directory created explicitly by the test bootstrap
+managed cockpit build and `validate:web` preserve dist/apps/web/src Node modules while replacing static assets
+serialized compiled test files
+```
+
+A prior controller run, retained `artifacts/` tree, generated upstream lock, or stale `dist/` output must never be required for `npm run validate` to pass.

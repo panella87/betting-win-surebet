@@ -573,7 +573,7 @@ test('BWS operator cockpit validation contract includes the web workspace in roo
   );
   assert.match(
     packageJson.scripts?.['validate:web'] ?? '',
-    /npm run --workspace @betting-win-surebet\/web build/,
+    /BWS_API_PORT=4312 npm run build:runtime-cockpit/,
   );
   assert.match(
     packageJson.scripts?.['validate:starter'] ?? '',

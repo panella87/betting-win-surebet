@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { chmodSync, cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import {
@@ -190,34 +190,26 @@ async function getReleaseFixture(): Promise<ReleaseFixture> {
 }
 
 async function ensureRuntimeCockpitBuild(): Promise<void> {
-  if (existsSync(COCKPIT_METADATA_FILE)) {
-    return;
-  }
-  const compiledWebSourceDirectory = join(REPO_ROOT, 'dist', 'apps', 'web', 'src');
-  const backupDirectory = mkdtempSync(join(tmpdir(), 'bws-release-web-src-backup-'));
-  const backupSourceDirectory = join(backupDirectory, 'src');
-  if (existsSync(compiledWebSourceDirectory)) {
-    cpSync(compiledWebSourceDirectory, backupSourceDirectory, { recursive: true });
-  }
-  execFileSync(
-    'npm',
-    ['run', 'build:runtime-cockpit'],
-    {
-      cwd: REPO_ROOT,
-      encoding: 'utf-8',
-      env: {
-        ...process.env,
-        BWS_API_PORT: '4312',
+  const compiledWebEntry = join(REPO_ROOT, 'dist', 'apps', 'web', 'src', 'index.js');
+  if (!existsSync(COCKPIT_METADATA_FILE)) {
+    execFileSync(
+      'npm',
+      ['run', 'build:runtime-cockpit'],
+      {
+        cwd: REPO_ROOT,
+        encoding: 'utf-8',
+        env: {
+          ...process.env,
+          BWS_API_PORT: '4312',
+        },
+        stdio: 'pipe',
       },
-      stdio: 'pipe',
-    },
-  );
-  if (existsSync(backupSourceDirectory)) {
-    mkdirSync(join(REPO_ROOT, 'dist', 'apps', 'web'), { recursive: true });
-    rmSync(compiledWebSourceDirectory, { force: true, recursive: true });
-    cpSync(backupSourceDirectory, compiledWebSourceDirectory, { recursive: true });
+    );
   }
-  rmSync(backupDirectory, { force: true, recursive: true });
+  assert.ok(
+    existsSync(compiledWebEntry),
+    'managed cockpit build must preserve the compiled Node web module entrypoint',
+  );
 }
 
 function extractReleaseArchive(archivePath: string): {

@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-07-16 - Clean-checkout validation and cockpit build isolation
+
+- Made `npm test` bootstrap its ignored repo-local artifacts directory and generate plus verify the exact committed-HEAD betting-win lock before the serialized compiled test suite.
+- Removed the hidden dependency on stale `artifacts/` and `config/betting-win.upstream.lock.json` state from previous controller runs.
+- Hardened the managed Vite cockpit builder and routed `validate:web` through it so browser asset publication cannot delete `dist/apps/web/src`, which is required by the read-only API and operator lifecycle CLIs.
+- Replaced the release-packaging test-only cockpit-source restore workaround with assertions against the production build script and added the same fail-closed assertion to upgrade/recovery tests.
+- Preserved the active `BWS-592` implementation queue, closed provider/execution boundaries, and exact upstream committed-HEAD verification.
+
 ## 2026-07-16 - Post-BWS-589 blueprint and protected-policy reconciliation
 
 - Verified that the latest campaign implemented and validated `BWS-581` through `BWS-589`, then ended with `protected_files_changed` because the historical allowlist omitted the required `run-autonomous-implementation.sh` runtime-evidence return-handoff change.

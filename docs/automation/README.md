@@ -47,6 +47,13 @@ Autonomous cycles may not mutate pre-existing services or user sessions. Bounded
 
 Parent autopilots launch children with `TELEGRAM_NOTIFY=0` and emit one final parent notification. Standalone controllers retain their own final notification. Parent/child terminal state uses the atomic child-result side channel, never streamed human output.
 
+
+## Clean validation bootstrap
+
+`npm test` now builds the root TypeScript graph, generates and verifies the exact committed-HEAD betting-win lock, creates the ignored repo-local `artifacts/` directory, and only then starts the serialized compiled test suite. Validation must not depend on stale generated state from a previous controller run.
+
+The managed cockpit build replaces browser assets but atomically preserves `dist/apps/web/src`, which contains Node-importable modules required by the API and lifecycle CLIs. `validate:web` uses that managed builder with the explicit loopback validation port `4312`; it does not invoke destructive Vite output directly. This keeps `start.sh`, release packaging, and clean-checkout tests deterministic after the browser build.
+
 ## Evidence packaging
 
 All root controllers archive the complete `artifacts/` directory with fast standard ZIP compression and refresh the current final summary after lock classification. Repo-local temporary files are used instead of relying on writable `/tmp`.

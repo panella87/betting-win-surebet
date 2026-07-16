@@ -105,6 +105,7 @@ REQUIRED = [
     'scripts/validate_remaining_operator_runtime_program.py',
     'scripts/validate_betting_win_upstream_contract.py',
     'scripts/validate_bws_loopback_acceptance.mjs',
+    'scripts/build_bws_operator_cockpit.mjs', 'scripts/prepare_bws_test_environment.mjs',
     'scripts/run_betting_win_upstream_lock.mjs',
     'scripts/load-node-runtime.sh', 'scripts/create-source-handoff-archive.sh',
     'scripts/restore-required-executable-bits.js',
@@ -180,7 +181,7 @@ def main() -> None:
     if package.get('version') != '0.1.0-bws-full-platform':
         fail('package.json version must be 0.1.0-bws-full-platform')
     required_scripts = [
-        'typecheck', 'test', 'validate', 'validate:starter', 'validate:ops',
+        'typecheck', 'test', 'prepare:test-runtime', 'build:runtime-cockpit', 'validate', 'validate:starter', 'validate:ops',
         'validate:implementation-program', 'validate:remaining-runtime-program', 'validate:loopback-acceptance', 'validate:upstream-boundary',
         'generate:upstream-lock', 'verify:upstream-lock',
         'runtime:start', 'runtime:status', 'runtime:stop',
@@ -191,8 +192,12 @@ def main() -> None:
     for script in required_scripts:
         if script not in package.get('scripts', {}):
             fail(f'package.json missing script: {script}')
-    if package.get('scripts', {}).get('test') != 'npm run build && node --test --test-concurrency=1 dist/tests/*.test.js':
-        fail('package.json test script must serialize test files with --test-concurrency=1')
+    if package.get('scripts', {}).get('test') != 'npm run build && npm run prepare:test-runtime && node --test --test-concurrency=1 dist/tests/*.test.js':
+        fail('package.json test script must build, prepare deterministic runtime prerequisites, and serialize test files')
+    if package.get('scripts', {}).get('prepare:test-runtime') != 'npm run generate:upstream-lock && npm run verify:upstream-lock && node scripts/prepare_bws_test_environment.mjs':
+        fail('package.json prepare:test-runtime must generate, verify, and inspect the committed-HEAD upstream test lock')
+    if package.get('scripts', {}).get('validate:web') != 'npm run --workspace @betting-win-surebet/web typecheck && BWS_API_PORT=4312 npm run build:runtime-cockpit':
+        fail('package.json validate:web must use the managed cockpit builder with an explicit loopback validation port')
     if 'npm run validate:loopback-acceptance' not in package.get('scripts', {}).get('validate:starter', ''):
         fail('package.json validate:starter must invoke validate:loopback-acceptance')
     if package.get('bin', {}).get('betting-win-surebet') != './cli.js':

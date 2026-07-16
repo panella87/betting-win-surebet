@@ -22,11 +22,15 @@ test('validate_repo requires the full implementation and upstream contract surfa
     'validate:loopback-acceptance',
     'scripts/validate_betting_win_upstream_contract.py',
     'scripts/run_betting_win_upstream_lock.mjs',
+    'scripts/build_bws_operator_cockpit.mjs',
+    'scripts/prepare_bws_test_environment.mjs',
+    'prepare:test-runtime',
+    'npm run --workspace @betting-win-surebet/web typecheck && BWS_API_PORT=4312 npm run build:runtime-cockpit',
     'tests/full-implementation-program-contract.test.ts',
     'tests/remaining-operator-runtime-program-contract.test.ts',
     'tests/betting-win-upstream-contract.test.ts',
     'tests/three-repo-surebet-boundary.test.ts',
-    'node --test --test-concurrency=1 dist/tests/*.test.js',
+    'npm run build && npm run prepare:test-runtime && node --test --test-concurrency=1 dist/tests/*.test.js',
   ]) {
     assert.match(validator, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }

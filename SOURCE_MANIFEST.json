@@ -1,6 +1,6 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-07-16T17:06:25Z",
+  "generated": "2026-07-16T17:55:35Z",
   "overlay": "bws100-existing-checkout-head-pin-wave14",
   "files": [
     {
@@ -50,8 +50,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "79adefda4aa1c00bb8138f8259794a59cb3f38c5106a8a8b825f4b284e6b46b6",
-      "size": 53085
+      "sha256": "8601e949c51356f89cd8b3ed71d42a40f267754fa15350d3c7851565dba524a4",
+      "size": 54024
     },
     {
       "path": "DOCUMENTATION_CHECK_REPORT.md",
@@ -355,8 +355,8 @@
     },
     {
       "path": "docs/011_validation_matrix.md",
-      "sha256": "a096e7c1a26dc47a561374cf3b5e2ec538eb2a1b93ae0634a02a6fa371cf3d84",
-      "size": 1752
+      "sha256": "e19ca7e1a2f84679e83c27ee9b10737538b6a3177093889af2ffa831fff3113d",
+      "size": 2383
     },
     {
       "path": "docs/012_runbook.md",
@@ -550,8 +550,8 @@
     },
     {
       "path": "docs/automation/README.md",
-      "sha256": "21b61fb403faa1da7e3e3b12c252a026004fcb30d384140ff1849da2171d866b",
-      "size": 2993
+      "sha256": "ad71e711ae31b0867510ce1340e010337e5d8575e6f864b2a039967ef39a15bc",
+      "size": 3764
     },
     {
       "path": "docs/automation/SSH_KEY_SETUP.md",
@@ -665,8 +665,8 @@
     },
     {
       "path": "package.json",
-      "sha256": "ebf47c70371f2a777caa15248bece3ff5d3e4d591b36ae988664a052bbabe2b8",
-      "size": 7178
+      "sha256": "17fe3ff884e708e8ec17dc1beb15201a4fccecce393c4a99798a3863279e6814",
+      "size": 7350
     },
     {
       "path": "packages/bootstrap/package.json",
@@ -1425,8 +1425,8 @@
     },
     {
       "path": "scripts/build_bws_operator_cockpit.mjs",
-      "sha256": "af5f6a9c5421eb89f6260cf4afc4998e476f15cc863bf6d9ba49508c5d67e10c",
-      "size": 594
+      "sha256": "1eb11cf613b9731226401e5a0274db76fae47d2a9777dcb95ebdae74f72620d8",
+      "size": 2408
     },
     {
       "path": "scripts/bws-root-wrapper-runtime.mjs",
@@ -1442,6 +1442,11 @@
       "path": "scripts/load-node-runtime.sh",
       "sha256": "ea4bb9bef2995130f632d069dc3c3cbb5c6774047f420ab1a58f6335b3f87abe",
       "size": 4349
+    },
+    {
+      "path": "scripts/prepare_bws_test_environment.mjs",
+      "sha256": "3fa00e995688e0dba40147640bfb70f93a73d69570ee887991e22d17b87bb589",
+      "size": 1584
     },
     {
       "path": "scripts/regenerate_source_manifest.py",
@@ -1540,8 +1545,8 @@
     },
     {
       "path": "scripts/validate_repo.py",
-      "sha256": "2b8b20775594d26ec1709fb353f1624e555a45d773d22d5bb13fe392565e73ae",
-      "size": 15991
+      "sha256": "6d338311372a00410968b64586d7bcf66d57c9d6c0b6846c8f5b0114e89a409b",
+      "size": 16782
     },
     {
       "path": "scripts/validate_shell_local_assignments.py",
@@ -2020,8 +2025,8 @@
     },
     {
       "path": "tests/bws-operator-cockpit.test.ts",
-      "sha256": "4a842fbbcf116ab147661d9eed39d673f7d3c485f5faff782c51c4dbb152f179",
-      "size": 19863
+      "sha256": "00d23da894b800ddb55fdeeb360df5b1aa21b702804c9d4e4c10523f36080564",
+      "size": 19859
     },
     {
       "path": "tests/bws-operator-lifecycle.test.ts",
@@ -2060,13 +2065,13 @@
     },
     {
       "path": "tests/bws-release-packaging.test.ts",
-      "sha256": "735c6a07383e618ea152c105f300dda8955aadb0ab25540c13e66a28adfbc134",
-      "size": 13348
+      "sha256": "ad8868355cbe2be4440cb13aec250c1d25ff3b3f2371236b98983fbe84a051c3",
+      "size": 12866
     },
     {
       "path": "tests/bws-release-upgrade.test.ts",
-      "sha256": "22a345e6065250d3c38f8d56498cfe6d3cebf0fba7a687ea7b32979e86a9b643",
-      "size": 33411
+      "sha256": "d2e03161f0014062895c8a0f0105341763774c27b573cb6bf2607b78ac23396a",
+      "size": 33647
     },
     {
       "path": "tests/bws-runtime-applications.test.ts",
@@ -2385,8 +2390,8 @@
     },
     {
       "path": "tests/validate-repo-contract.test.ts",
-      "sha256": "a4baeaefe2483e70024ca71c7fc5059e65dc298391da849e0479c0db75573e2f",
-      "size": 2074
+      "sha256": "c4bb70ff9ce7b24b287d4c28251dec713b297f7eab9efdba4f3e9f68abcef484",
+      "size": 2358
     },
     {
       "path": "tests/validate-shell-local-assignments.test.ts",
