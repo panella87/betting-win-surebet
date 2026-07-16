@@ -7,6 +7,34 @@ export * from './api/bws-read-only-query-http.js';
 export * from './api/bws-read-only-query-service.js';
 export * from './backtest/standard-binary-backtest.js';
 export {
+  printBwsOperatorLifecycleHelp,
+  runBwsOperatorLifecycleCli,
+} from './cli/bws-operator-lifecycle.js';
+export {
+  printBwsPaperRuntimeHandoffHelp,
+  runBwsPaperRuntimeHandoffCli,
+} from './cli/bws-paper-runtime-handoff.js';
+export {
+  printBwsPrivatePaperWorkerHelp,
+  runBwsPrivatePaperWorkerCli,
+} from './cli/bws-private-paper-worker.js';
+export {
+  printBwsPrivatePaperSchedulerHelp,
+  runBwsPrivatePaperSchedulerCli,
+} from './cli/bws-private-paper-scheduler.js';
+export {
+  printBwsUpstreamExportConvergenceHelp,
+  runBwsUpstreamExportConvergenceCli,
+} from './cli/bws-upstream-export-convergence.js';
+export {
+  printBwsUpstreamApiConvergenceHelp,
+  runBwsUpstreamApiConvergenceCli,
+} from './cli/bws-upstream-api-convergence.js';
+export {
+  printBwsReadOnlyApiHelp,
+  runBwsReadOnlyApiCli,
+} from './cli/bws-read-only-api.js';
+export {
   createPrivatePaperBatchSummary,
   runLocalPaperBatchReportCli,
   validatePrivatePaperBatchSummary,
@@ -32,6 +60,12 @@ export * from './identity/market-group-key.js';
 export * from './opportunity/standard-binary-derivation.js';
 export * from './opportunity/standard-binary-stake-solver.js';
 export * from './operations/service-runtime.js';
+export * from './operations/operator-lifecycle.js';
+export * from './operations/paper-runtime-handoff.js';
+export * from './operations/runtime-applications.js';
+export * from './operations/private-paper-runtime-scheduler.js';
+export * from './operations/upstream-api-convergence.js';
+export * from './operations/upstream-export-convergence.js';
 export * from './quotes/fee-cost-model.js';
 export * from './quotes/quote-capacity.js';
 export * from './quotes/quote-freshness.js';

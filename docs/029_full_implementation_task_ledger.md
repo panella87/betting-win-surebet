@@ -20,9 +20,9 @@ A row becomes `BLOCKED` only after all safe local work in that row is exhausted 
 ## Current selection
 
 ```text
-current_task=BWS-520
-current_task_status=PENDING
-reason=BWS-510 validated library and loopback surfaces, but executable API/worker applications and continuous runtime lifecycle are not implemented
+current_task=BWS-580
+current_task_status=VALIDATED
+reason=BWS-580 validated integrated continuous-runtime acceptance and machine-readable handoff; no dependency-ready safe local row remains through BWS-580 and BWS-600 is externally blocked
 ```
 
-`BWS-520` through `BWS-580` are the remaining safe local runtime implementation queue. `BWS-600` remains blocked on accepted operator-approved betting-win runtime evidence after that queue is complete.
+`BWS-580` closed the remaining safe local runtime implementation queue. `BWS-600` remains blocked on accepted operator-approved betting-win runtime evidence after that safe local queue completed.

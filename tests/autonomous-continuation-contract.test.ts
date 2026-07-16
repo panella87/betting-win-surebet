@@ -12,12 +12,16 @@ test('autonomous authority continues the BWS continuous-runtime queue', () => {
   const status = read('docs/repo_status_current.md');
   for (const marker of [
     'BWS_FULL_PLATFORM_IMPLEMENTATION_V1', 'backlog/bws_full_implementation.csv',
-    'BWS-100', 'BWS-510', 'BWS-520', 'BWS-580',
+    'BWS-100', 'BWS-520', 'BWS-570', 'BWS-580',
     'CONTINUE_REQUIRED=yes', 'AUTONOMOUS_GOAL_COMPLETE=yes',
   ]) {
     assert.match(doc + task, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
   assert.match(task, /BETTING_WIN_REPO_PATH/);
+  assert.match(task, /current_task=BWS-580/);
+  assert.match(task, /current_task_status=VALIDATED/);
   assert.match(status, /selected_controller=run-autonomous-implementation\.sh/);
+  assert.match(status, /current_task=BWS-580/);
+  assert.match(status, /current_task_status=VALIDATED/);
   assert.doesNotMatch(doc + task + status, /repo-local backlogs are complete/);
 });

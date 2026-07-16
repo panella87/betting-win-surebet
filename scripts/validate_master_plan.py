@@ -28,13 +28,13 @@ def main() -> None:
     required = {
         'docs/MASTER_PLAN.md': [
             PROGRAM, 'repo_role=surebet_strategy_application', 'upstream_platform=betting-win',
-            'current_task=BWS-520', 'safe_local_terminal_gate=BWS-580',
+            'current_task=BWS-580', 'safe_local_terminal_gate=BWS-580',
             'continuous_runtime_gate=BWS-600', 'execution_gate=BWS-900',
             'BWS-520', 'BWS-580', 'backlog/bws_full_implementation.csv',
             'run-autonomous-implementation.sh', 'run-bugfix-autopilot.sh', 'run-paper-autopilot.sh',
         ],
         'docs/repo_status_current.md': [
-            PROGRAM, 'status=IMPLEMENTATION_READY', 'current_task=BWS-520',
+            PROGRAM, 'status=IMPLEMENTATION_READY', 'current_task=BWS-580',
             'safe_local_terminal_gate=BWS-580',
             'selected_controller=run-autonomous-implementation.sh',
         ],
@@ -43,14 +43,14 @@ def main() -> None:
         ],
         'docs/029_full_implementation_task_ledger.md': [
             PROGRAM, 'backlog/bws_full_implementation.csv',
-            'current_task=BWS-520', 'current_task_status=PENDING',
+            'current_task=BWS-580', 'current_task_status=VALIDATED',
         ],
         'docs/030_upstream_compatibility_and_pin_contract.md': [
             'BETTING_WIN_REPO_PATH', 'config/betting-win.upstream.lock.json',
             'workspace', 'export', 'api', 'No fallback',
         ],
         'docs/033_continuous_private_paper_runtime_program.md': [
-            'current_task=BWS-520', 'safe_local_terminal_gate=BWS-580',
+            'current_task=BWS-580', 'safe_local_terminal_gate=BWS-580',
             'BWS-520', 'BWS-580', 'BWS-600',
         ],
         'docs/012_runbook.md': [

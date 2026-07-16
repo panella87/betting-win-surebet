@@ -6,8 +6,8 @@ program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 status=IMPLEMENTATION_READY
 repo_role=surebet_strategy_application
 upstream_platform=betting-win
-current_task=BWS-520
-current_task_status=PENDING
+current_task=BWS-580
+current_task_status=VALIDATED
 safe_local_terminal_gate=BWS-580
 provider_truth_owner=betting-win
 canonical_history_owner=betting-win
@@ -18,9 +18,9 @@ execution_gate=closed
 
 ## Binding state
 
-`BWS-100` through `BWS-510` are validated. The previous completion classification was premature for an operator-runnable continuous runtime: the repository contains tested runtime libraries and loopback acceptance, but the root lifecycle still starts no API or worker service and paper evaluation remains single-pass fixture/pinned-bundle only.
+`BWS-100` through `BWS-580` are validated. `BWS-510` remains the validated loopback acceptance milestone for the closed local stack. The previous completion classification was premature for an operator-runnable continuous runtime: the repository contained tested runtime libraries and loopback acceptance, but no executable API or worker service. `BWS-520` closed that entrypoint gap while preserving the protected root-controller boundary, `BWS-530` closed the explicit immutable-export convergence gap, `BWS-540` closed explicit typed read-only API convergence without weakening the no-fallback boundary, `BWS-550` added persisted API-mode scheduling plus restart-safe worker orchestration, `BWS-560` added product-owned loopback lifecycle control plus immutable runtime evidence publication, `BWS-570` added persisted runtime/API/cockpit convergence for accepted and blocked continuous paper cycles, and `BWS-580` validated integrated continuous-runtime acceptance plus a strict machine-readable paper-runtime handoff.
 
-The binding queue is `backlog/bws_full_implementation.csv`. `BWS-520` is the first dependency-ready `PENDING` task. Safe local runtime implementation continues through `BWS-580`; `BWS-600` remains the separate external accepted-runtime evidence gate.
+The binding queue is `backlog/bws_full_implementation.csv`. No dependency-ready safe local task remains through `BWS-580`; `BWS-600` remains the separate external accepted-runtime evidence gate.
 
 ## Verified upstream facts
 
@@ -40,19 +40,19 @@ api_web_workers=present
 
 ## Existing source
 
-The validated source under `packages/bootstrap`, `packages/persistence`, `packages/upstream`, `apps/web`, and compatibility `src/` shims already includes the domain engine, `surebet.*` persistence, immutable export intake, typed read-only query client, bounded private-paper runtime, strategy ledger, read-only HTTP handlers, bounded workers, cockpit, runtime configuration and loopback acceptance. It lacks the executable continuous runtime, explicit export/API convergence loops, persistent scheduler, operator lifecycle and integrated long-run evidence required by `BWS-520` through `BWS-580`.
+The validated source under `packages/bootstrap`, `packages/persistence`, `packages/upstream`, `apps/web`, and compatibility `src/` shims already includes the domain engine, `surebet.*` persistence, immutable export intake, explicit export-mode convergence, explicit typed API convergence, typed read-only query client, bounded private-paper runtime, strategy ledger, read-only HTTP handlers, bounded workers, cockpit, runtime configuration, loopback acceptance, executable loopback-only API/worker applications, persistent API-mode scheduler/orchestration, product-owned loopback lifecycle plus immutable runtime evidence publication, persisted runtime/API/cockpit convergence across accepted and blocked continuous paper cycles, integrated continuous-runtime acceptance coverage, and strict machine-readable paper-runtime handoff packaging.
 
 ## Implementation queue
 
 ```text
-BWS-100..BWS-510=VALIDATED
-BWS-520=PENDING_EXECUTABLE_API_AND_WORKER
-BWS-530=PENDING_CONTINUOUS_EXPORT_CONVERGENCE
-BWS-540=PENDING_CONTINUOUS_API_CONVERGENCE
-BWS-550=PENDING_CONTINUOUS_SCHEDULER_AND_WORKERS
-BWS-560=PENDING_OPERATOR_LIFECYCLE_AND_EVIDENCE
-BWS-570=PENDING_RUNTIME_API_COCKPIT_CONVERGENCE
-BWS-580=PENDING_CLOSED_STACK_CONTINUOUS_RUNTIME_ACCEPTANCE
+BWS-100..BWS-570=VALIDATED
+BWS-520=VALIDATED_EXECUTABLE_API_AND_WORKER
+BWS-530=VALIDATED_CONTINUOUS_EXPORT_CONVERGENCE
+BWS-540=VALIDATED_CONTINUOUS_API_CONVERGENCE
+BWS-550=VALIDATED_CONTINUOUS_SCHEDULER_AND_WORKERS
+BWS-560=VALIDATED_OPERATOR_LIFECYCLE_AND_EVIDENCE
+BWS-570=VALIDATED_RUNTIME_API_COCKPIT_CONVERGENCE
+BWS-580=VALIDATED_CLOSED_STACK_CONTINUOUS_RUNTIME_ACCEPTANCE
 BWS-600=BLOCKED_ON_ACCEPTED_BETTING_WIN_RUNTIME
 BWS-900=PARKED
 ```
@@ -61,7 +61,7 @@ BWS-900=PARKED
 selected_controller=run-autonomous-implementation.sh
 selected_task_source=docs/automation/current-implementation-task.md
 force_unlock=no_evidence
-paper_autopilot=not_selected_until_bws_580_validation_and_runtime_controller_review
+paper_autopilot=runtime_handoff_review_required_before_bws_600_selection
 ```
 
 ## Safety
@@ -74,7 +74,7 @@ Direct provider connections, provider credentials, betting-win `core.*` writes, 
 run_autonomous_implementation=standardized_and_selected_for_continuous_runtime_build
 run_autonomous_bugfix=standardized_standalone_audit
 run_paper_evaluation=retained_no_service_fixture_evaluator
-run_paper_autopilot=standardized_parent_not_selected_while_runtime_source_queue_remains
+run_paper_autopilot=standardized_parent_pending_runtime_handoff_review_for_bws_600
 run_bugfix_autopilot=standardized_parent_for_broad_audit_and_repair
 autopilot_child_telegram=disabled
 autopilot_parent_telegram=final_only

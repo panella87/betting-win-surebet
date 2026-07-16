@@ -1,4 +1,5 @@
 import type {
+  BwsPrivatePaperRuntimeCycleItem,
   BwsPinnedStrategyExportItem,
   BwsStrategyLedgerItem,
 } from '../../../../packages/bootstrap/src/api/bws-read-only-query-service.js';
@@ -140,6 +141,16 @@ function assertSnapshotScopeAlignment(snapshot: BwsOperatorCockpitSnapshot): voi
     'private_paper_runtime_cycle',
     'blockedPaperRuns',
   );
+  for (const item of snapshot.acceptedRuntimeCycles.page.items) {
+    if (item.acceptanceState !== 'accepted_local_evidence') {
+      fail(`acceptedRuntimeCycles item ${item.job.jobId} acceptanceState ${item.acceptanceState} instead of accepted_local_evidence.`);
+    }
+  }
+  for (const item of snapshot.blockedRuntimeCycles.page.items) {
+    if (item.acceptanceState !== 'blocked') {
+      fail(`blockedRuntimeCycles item ${item.job.jobId} acceptanceState ${item.acceptanceState} instead of blocked.`);
+    }
+  }
 }
 
 function summarizePinnedExportScope(scope: BwsOperatorCockpitPinnedExportScope | undefined): string {
@@ -169,16 +180,16 @@ function toScopeSummaryRows(snapshot: BwsOperatorCockpitSnapshot): readonly BwsO
       strategy: snapshot.blockedBacktests,
     },
     {
-      itemCount: snapshot.acceptedPaperRuns.page.returnedCount,
-      nextCursor: snapshot.acceptedPaperRuns.page.nextCursor,
+      itemCount: snapshot.acceptedRuntimeCycles.page.returnedCount,
+      nextCursor: snapshot.acceptedRuntimeCycles.page.nextCursor,
       scope: 'accepted_paper_runs',
-      strategy: snapshot.acceptedPaperRuns,
+      strategy: snapshot.acceptedRuntimeCycles,
     },
     {
-      itemCount: snapshot.blockedPaperRuns.page.returnedCount,
-      nextCursor: snapshot.blockedPaperRuns.page.nextCursor,
+      itemCount: snapshot.blockedRuntimeCycles.page.returnedCount,
+      nextCursor: snapshot.blockedRuntimeCycles.page.nextCursor,
       scope: 'blocked_paper_runs',
-      strategy: snapshot.blockedPaperRuns,
+      strategy: snapshot.blockedRuntimeCycles,
     },
   ];
   return Object.freeze(
@@ -254,6 +265,89 @@ function toStrategyLedgerRows(
   items: readonly BwsStrategyLedgerItem[],
 ): readonly BwsOperatorCockpitTableRow[] {
   return Object.freeze(items.map((item) => createStrategyLedgerRow(item)));
+}
+
+function runtimeCycleColumns(): readonly BwsOperatorCockpitTableColumn[] {
+  return Object.freeze([
+    Object.freeze({ key: 'cycleId', label: 'Cycle Id' }),
+    Object.freeze({ key: 'runtimeId', label: 'Runtime Id' }),
+    Object.freeze({ key: 'acceptanceState', label: 'Acceptance' }),
+    Object.freeze({ key: 'jobStatus', label: 'Job Status' }),
+    Object.freeze({ key: 'attemptCount', label: 'Attempts' }),
+    Object.freeze({ key: 'checkpointCount', label: 'Checkpoints' }),
+    Object.freeze({ key: 'lastCheckpointAt', label: 'Last Checkpoint' }),
+    Object.freeze({ key: 'blockedReasonCode', label: 'Blocked Reason' }),
+  ]);
+}
+
+function toRuntimeCycleRows(
+  items: readonly BwsPrivatePaperRuntimeCycleItem[],
+): readonly BwsOperatorCockpitTableRow[] {
+  return Object.freeze(
+    items.map((item) => createRow(
+      item.job.jobId,
+      item.cycleId,
+      Object.freeze({
+        acceptanceState: item.acceptanceState,
+        attemptCount: renderValue(item.job.attemptCount),
+        blockedReasonCode: item.blockedReasonCode ?? 'none',
+        checkpointCount: renderValue(item.job.checkpointCount),
+        cycleId: item.cycleId,
+        jobStatus: item.job.status,
+        lastCheckpointAt: item.job.lastCheckpointAt ?? 'not_available',
+        runtimeId: item.runtimeId,
+      }),
+      Object.freeze([
+        field('Cycle Id', item.cycleId),
+        field('Cycle Number', item.cycleNumber),
+        field('Runtime Id', item.runtimeId),
+        field('Job Id', item.job.jobId),
+        field('Queue Name', item.job.queueName),
+        field('Job Status', item.job.status),
+        field('Attempt Count', item.job.attemptCount),
+        field('Checkpoint Count', item.job.checkpointCount),
+        field('Last Checkpoint Id', item.job.lastCheckpointId ?? 'not_available'),
+        field('Last Checkpoint At', item.job.lastCheckpointAt ?? 'not_available'),
+        field('Blocked Reason', item.blockedReasonCode ?? 'none'),
+        field('Dead Letter Code', item.deadLetter?.deadLetterReasonCode ?? 'none'),
+        field('Source Kind', item.sourceKind),
+        field('Source Manifest Hash', item.sourceManifestHash),
+        field('Scheduler Checkpoint Id', item.provenance.schedulerCheckpoint.schedulerCheckpointId),
+        field('Upstream API Checkpoint Id', item.provenance.upstreamApiCheckpoint.checkpointId),
+        field('Completed API Cycles', item.provenance.upstreamApiCheckpoint.completedCycleCount),
+        field('Cycle Import Run Id', item.provenance.cycleImportRun?.importRunId ?? 'not_available'),
+      ]),
+      Object.freeze([
+        Object.freeze({
+          records: Object.freeze(
+            item.recentCheckpoints.map((checkpoint) => Object.freeze({
+              checkpointId: checkpoint.checkpointId,
+              checkpointSha256: checkpoint.checkpointSha256,
+              recordedAt: checkpoint.recordedAt,
+              checkpointStage: renderValue(checkpoint.checkpoint['checkpointStage']),
+            })),
+          ),
+          title: 'Recent Worker Checkpoints',
+        }),
+        ...(item.strategyLedger === undefined
+          ? []
+          : [
+              Object.freeze({
+                records: Object.freeze(
+                  item.strategyLedger.entry.report.candidates.map((candidate) => Object.freeze({
+                    blockerCodes: candidate.blockerCodes.join(', '),
+                    blockerCount: renderValue(candidate.blockerCount),
+                    candidateId: candidate.candidateId,
+                    canonicalMarketId: candidate.canonicalMarketId,
+                    resultState: candidate.resultState,
+                  })),
+                ),
+                title: 'Strategy Ledger Candidates',
+              }),
+            ]),
+      ]),
+    )),
+  );
 }
 
 interface CandidateRowContext {
@@ -463,8 +557,8 @@ export function buildBwsOperatorCockpitPageModel(
         cards: Object.freeze([
           createCard('Accepted Backtests', snapshot.acceptedBacktests.page.returnedCount, 'accent'),
           createCard('Blocked Backtests', snapshot.blockedBacktests.page.returnedCount, 'warning'),
-          createCard('Accepted Paper Cycles', snapshot.acceptedPaperRuns.page.returnedCount, 'accent'),
-          createCard('Blocked Paper Cycles', snapshot.blockedPaperRuns.page.returnedCount, 'warning'),
+          createCard('Accepted Paper Cycles', snapshot.acceptedRuntimeCycles.page.returnedCount, 'accent'),
+          createCard('Blocked Paper Cycles', snapshot.blockedRuntimeCycles.page.returnedCount, 'warning'),
         ]),
         columns: Object.freeze([
           Object.freeze({ key: 'scope', label: 'Surface' }),
@@ -474,7 +568,7 @@ export function buildBwsOperatorCockpitPageModel(
           Object.freeze({ key: 'nextCursor', label: 'Next Cursor' }),
         ]),
         emptyLabel: 'No bounded strategy scope rows are available.',
-        note: 'Overview summaries stay bounded to fixed acceptanceState + runKind API scopes.',
+        note: 'Overview summaries stay bounded to fixed acceptance-state runtime and strategy scopes.',
         rows: toScopeSummaryRows(snapshot),
       });
     case '/opportunities':
@@ -544,26 +638,26 @@ export function buildBwsOperatorCockpitPageModel(
     case '/paper-runs':
       return Object.freeze({
         cards: Object.freeze([
-          createCard('Accepted Paper Cycles', snapshot.acceptedPaperRuns.page.returnedCount, 'accent'),
-          createCard('Blocked Paper Cycles', snapshot.blockedPaperRuns.page.returnedCount, 'warning'),
+          createCard('Accepted Paper Cycles', snapshot.acceptedRuntimeCycles.page.returnedCount, 'accent'),
+          createCard('Blocked Paper Cycles', snapshot.blockedRuntimeCycles.page.returnedCount, 'warning'),
           createCard(
             'Kill Triggered Cycles',
             [
-              ...snapshot.acceptedPaperRuns.page.items,
-              ...snapshot.blockedPaperRuns.page.items,
-            ].filter((item) => item.entry.report.stopReason === 'kill_triggered').length,
+              ...snapshot.acceptedRuntimeCycles.page.items,
+              ...snapshot.blockedRuntimeCycles.page.items,
+            ].filter((item) => item.strategyLedger?.entry.report.stopReason === 'kill_triggered').length,
           ),
           createCard(
             'Cycle Rows',
-            snapshot.acceptedPaperRuns.page.returnedCount + snapshot.blockedPaperRuns.page.returnedCount,
+            snapshot.acceptedRuntimeCycles.page.returnedCount + snapshot.blockedRuntimeCycles.page.returnedCount,
           ),
         ]),
-        columns: strategyColumns('Cycle Ledger Entry Id'),
+        columns: runtimeCycleColumns(),
         emptyLabel: 'No private paper cycle rows are available in the bounded strategy scopes.',
-        note: 'Private paper cycles remain bounded, restart-safe report evidence only.',
-        rows: toStrategyLedgerRows([
-          ...snapshot.acceptedPaperRuns.page.items,
-          ...snapshot.blockedPaperRuns.page.items,
+        note: 'Private paper cycles remain bounded and surface persisted worker restart, checkpoint, and blocker state without adding any execution path.',
+        rows: toRuntimeCycleRows([
+          ...snapshot.acceptedRuntimeCycles.page.items,
+          ...snapshot.blockedRuntimeCycles.page.items,
         ]),
       });
     case '/exposure':
@@ -596,7 +690,7 @@ export function buildBwsOperatorCockpitPageModel(
         cards: Object.freeze([
           createCard('Blocked Candidate Rows', toBlockedCandidateRows(snapshot).length, 'warning'),
           createCard('Blocked Backtests', snapshot.blockedBacktests.page.returnedCount, 'warning'),
-          createCard('Blocked Paper Cycles', snapshot.blockedPaperRuns.page.returnedCount, 'warning'),
+          createCard('Blocked Paper Cycles', snapshot.blockedRuntimeCycles.page.returnedCount, 'warning'),
           createCard(
             'Distinct Blocker Codes',
             new Set(

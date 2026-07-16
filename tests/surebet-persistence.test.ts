@@ -104,6 +104,22 @@ test('surebet migration loader rejects empty or transaction-managed migration fi
   }
 });
 
+test('surebet migration loader includes the runtime scheduler checkpoint migration in deterministic order', () => {
+  const migrations = loadSurebetMigrationFiles(REPO_ROOT);
+  assert.deepEqual(
+    migrations.map((migration) => migration.migrationName),
+    [
+      '001_create_upstream_locks_and_import_runs.sql',
+      '002_create_pinned_strategy_exports.sql',
+      '003_create_strategy_ledger_entries.sql',
+      '004_create_worker_jobs.sql',
+      '005_create_upstream_export_convergence_checkpoints.sql',
+      '006_create_upstream_api_convergence_checkpoints.sql',
+      '007_create_private_paper_runtime_scheduler_checkpoints.sql',
+    ],
+  );
+});
+
 test('surebet migrations and repositories pass disposable PostgreSQL idempotency and restart proof when explicit test config is provided', { skip: !hasDisposableDatabaseTestConfig() }, () => {
   const testEnvironment = readDisposableDatabaseTestEnvironment();
   assert.ok(testEnvironment !== undefined);
@@ -117,12 +133,12 @@ test('surebet migrations and repositories pass disposable PostgreSQL idempotency
   createDisposableDatabase(adminConfig, databaseName);
   try {
     const firstApply = applySurebetMigrations(databaseConfig);
-    assert.equal(firstApply.applied.length, 3);
+    assert.equal(firstApply.applied.length, 6);
     assert.equal(firstApply.skipped.length, 0);
 
     const secondApply = applySurebetMigrations(databaseConfig);
     assert.equal(secondApply.applied.length, 0);
-    assert.equal(secondApply.skipped.length, 3);
+    assert.equal(secondApply.skipped.length, 6);
 
     const migratedTables = listUserTables(databaseConfig);
     assert.deepEqual(migratedTables, [
@@ -130,7 +146,12 @@ test('surebet migrations and repositories pass disposable PostgreSQL idempotency
       'surebet.pinned_strategy_exports',
       'surebet.schema_migrations',
       'surebet.strategy_ledger_entries',
+      'surebet.upstream_api_convergence_checkpoints',
+      'surebet.upstream_export_convergence_checkpoints',
       'surebet.upstream_locks',
+      'surebet.worker_job_checkpoints',
+      'surebet.worker_job_dead_letters',
+      'surebet.worker_jobs',
     ]);
 
     const lockRepository = new SurebetUpstreamLockRepository(databaseConfig);
@@ -285,6 +306,9 @@ test('surebet migrations and repositories pass disposable PostgreSQL idempotency
         '001_create_upstream_locks_and_import_runs.sql',
         '002_create_pinned_strategy_exports.sql',
         '003_create_strategy_ledger_entries.sql',
+        '004_create_worker_jobs.sql',
+        '005_create_upstream_export_convergence_checkpoints.sql',
+        '006_create_upstream_api_convergence_checkpoints.sql',
       ],
     );
   } finally {

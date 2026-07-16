@@ -1,4 +1,5 @@
 import type {
+  BwsPrivatePaperRuntimeCycleItem,
   BwsPinnedStrategyExportItem,
   BwsReadOnlyQueryResponse,
   BwsStrategyLedgerItem,
@@ -109,8 +110,10 @@ export interface BwsOperatorCockpitPinnedExportScope {
 export interface BwsOperatorCockpitSnapshot {
   readonly acceptedBacktests: BwsReadOnlyQueryResponse<'strategy_ledger_entries', BwsStrategyLedgerItem>;
   readonly acceptedPaperRuns: BwsReadOnlyQueryResponse<'strategy_ledger_entries', BwsStrategyLedgerItem>;
+  readonly acceptedRuntimeCycles: BwsReadOnlyQueryResponse<'private_paper_runtime_cycles', BwsPrivatePaperRuntimeCycleItem>;
   readonly blockedBacktests: BwsReadOnlyQueryResponse<'strategy_ledger_entries', BwsStrategyLedgerItem>;
   readonly blockedPaperRuns: BwsReadOnlyQueryResponse<'strategy_ledger_entries', BwsStrategyLedgerItem>;
+  readonly blockedRuntimeCycles: BwsReadOnlyQueryResponse<'private_paper_runtime_cycles', BwsPrivatePaperRuntimeCycleItem>;
   readonly pinnedExportScope?: BwsOperatorCockpitPinnedExportScope;
   readonly pinnedStrategyExports?: BwsReadOnlyQueryResponse<'pinned_strategy_exports', BwsPinnedStrategyExportItem>;
 }

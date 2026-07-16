@@ -7,7 +7,9 @@ import type { AddressInfo } from 'node:net';
 import {
   SurebetImportRunRepository,
   SurebetPinnedStrategyExportRepository,
+  SurebetPrivatePaperRuntimeSchedulerCheckpointRepository,
   SurebetStrategyLedgerRepository,
+  SurebetUpstreamApiConvergenceRepository,
   SurebetUpstreamLockRepository,
   SurebetWorkerJobRepository,
   applySurebetMigrations,
@@ -68,12 +70,46 @@ test('loopback acceptance assembles migration, intake, backtest, paper worker, A
     const upstreamLocks = new SurebetUpstreamLockRepository(database.databaseConfig);
     const importRuns = new SurebetImportRunRepository(database.databaseConfig);
     const pinnedExports = new SurebetPinnedStrategyExportRepository(database.databaseConfig);
+    const schedulerCheckpoints = new SurebetPrivatePaperRuntimeSchedulerCheckpointRepository(database.databaseConfig);
     const strategyLedger = new SurebetStrategyLedgerRepository(database.databaseConfig);
+    const upstreamApiCheckpoints = new SurebetUpstreamApiConvergenceRepository(database.databaseConfig);
     const jobs = new SurebetWorkerJobRepository(database.databaseConfig);
 
     const lockRecord = upstreamLocks.put({
       lock: verifiedUpstreamLock,
       lockRecordId: 'lock-510-001',
+    });
+    upstreamApiCheckpoints.create({
+      apiBaseUrl: 'http://127.0.0.1:4312',
+      checkpointId: 'checkpoint-api-510-001',
+      completedCycleCount: 1,
+      contractVersion: 'v1',
+      currentCycleNumber: 2,
+      currentResource: 'identity',
+      currentResourcePageCount: 0,
+      maxPagesPerResource: 4,
+      mode: 'api',
+      pageSize: 2,
+      retryBackoffMs: 250,
+      retryLimit: 1,
+      timeoutMs: 1000,
+      upstreamLockRecordId: lockRecord.lockRecordId,
+    });
+    schedulerCheckpoints.create({
+      configSha256: 'a'.repeat(64),
+      mode: 'api',
+      queueName: 'private-paper',
+      runtimeId: 'runtime-510-001',
+      schedulerCheckpointId: 'scheduler-510-001',
+      upstreamCheckpointId: 'checkpoint-api-510-001',
+      upstreamLockRecordId: lockRecord.lockRecordId,
+    });
+    schedulerCheckpoints.advance({
+      lastScheduledApiCycleNumber: 1,
+      lastScheduledAt: TEST_TIMESTAMP,
+      lastScheduledJobId: 'private-paper:scheduler-510-001:cycle:1',
+      lastScheduledSourceId: 'api-cycle:checkpoint-api-510-001:1',
+      schedulerCheckpointId: 'scheduler-510-001',
     });
 
     importRuns.create({
@@ -155,7 +191,7 @@ test('loopback acceptance assembles migration, intake, backtest, paper worker, A
           maxQuoteAgeMs: 2_000,
         },
       ],
-      cycleId: 'cycle-510-001',
+      cycleId: 'scheduler-510-001:cycle:1',
       maxCandidatesPerCycle: 1,
       pinnedStrategyExportRecordId: pinnedExport.intakeRecordId,
       runtimeId: 'runtime-510-001',
@@ -172,7 +208,7 @@ test('loopback acceptance assembles migration, intake, backtest, paper worker, A
 
     jobs.create({
       availableAt: TEST_TIMESTAMP,
-      jobId: 'private-paper-job-510-001',
+      jobId: 'private-paper:scheduler-510-001:cycle:1',
       jobKind: 'private_paper_runtime_cycle_v1',
       payload: payload as unknown as JsonValue,
       queueName: 'private-paper',
@@ -199,8 +235,11 @@ test('loopback acceptance assembles migration, intake, backtest, paper worker, A
     const service = createBwsReadOnlyQueryService({
       importRuns,
       pinnedStrategyExports: pinnedExports,
+      privatePaperSchedulerCheckpoints: schedulerCheckpoints,
       strategyLedger,
+      upstreamApiCheckpoints,
       upstreamLocks,
+      workerJobs: jobs,
     } satisfies BwsReadOnlyQueryDependencies, {
       generatedAt: () => TEST_TIMESTAMP,
       maxPageSize: 25,
@@ -293,7 +332,8 @@ test('loopback acceptance assembles migration, intake, backtest, paper worker, A
 
       const paperRuns = buildBwsOperatorCockpitPageModel('/paper-runs', cockpitSnapshot);
       assert.equal(paperRuns.rows.length, 1);
-      assert.equal(paperRuns.rows[0]?.values['runKind'], 'private_paper_runtime_cycle');
+      assert.equal(paperRuns.rows[0]?.values['cycleId'], 'scheduler-510-001:cycle:1');
+      assert.equal(paperRuns.rows[0]?.values['jobStatus'], 'succeeded');
     } finally {
       server.close();
       await once(server, 'close');

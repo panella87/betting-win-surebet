@@ -135,6 +135,25 @@ test('BWS operator cockpit page models derive overview, evidence, exposure, and 
   assert.match(blockers.rows[0]?.values['blockerCodes'] ?? '', /QUOTE_FRESHNESS_EXCEEDED|RESIDUAL_EXPOSURE_FLOOR_TRIGGERED/);
 });
 
+test('BWS operator cockpit evidence cards stay bound to strategy-ledger rows instead of dead-lettered runtime-only cycles', () => {
+  const snapshot = createMockBwsOperatorCockpitSnapshot();
+  const mutated = Object.freeze({
+    ...structuredClone(snapshot),
+    blockedPaperRuns: Object.freeze({
+      ...snapshot.blockedPaperRuns,
+      page: Object.freeze({
+        ...snapshot.blockedPaperRuns.page,
+        items: Object.freeze([]),
+        returnedCount: 0,
+      }),
+    }),
+  });
+
+  const evidence = buildBwsOperatorCockpitPageModel('/evidence', mutated);
+  assert.equal(evidence.cards[2]?.value, '2');
+  assert.equal(evidence.cards[3]?.value, '1');
+});
+
 test('BWS operator cockpit page models derive opportunities, backtests, and paper runs from typed snapshot data', () => {
   const snapshot = createMockBwsOperatorCockpitSnapshot();
 
@@ -151,7 +170,7 @@ test('BWS operator cockpit page models derive opportunities, backtests, and pape
   const paperRuns = buildBwsOperatorCockpitPageModel('/paper-runs', snapshot);
   assert.equal(paperRuns.cards[0]?.value, '1');
   assert.equal(paperRuns.rows.length, 2);
-  assert.equal(paperRuns.rows[1]?.values['runKind'], 'private_paper_runtime_cycle');
+  assert.equal(paperRuns.rows[1]?.values['jobStatus'], 'dead_lettered');
 });
 
 test('BWS operator cockpit snapshot loader keeps evidence reads explicitly scoped in mock mode', async () => {
@@ -195,6 +214,19 @@ test('BWS operator cockpit snapshot loader aggregates the bounded API snapshot w
         },
       });
     }
+    if (url.pathname.endsWith('/private-paper-runtime-cycles')) {
+      const acceptanceState = url.searchParams.get('acceptanceState');
+      const payload = acceptanceState === 'accepted_local_evidence'
+        ? snapshot.acceptedRuntimeCycles
+        : snapshot.blockedRuntimeCycles;
+      return Object.freeze({
+        ok: true,
+        status: 200,
+        async text() {
+          return JSON.stringify(payload);
+        },
+      });
+    }
 
     const acceptanceState = url.searchParams.get('acceptanceState');
     const runKind = url.searchParams.get('runKind');
@@ -230,9 +262,13 @@ test('BWS operator cockpit snapshot loader aggregates the bounded API snapshot w
   assert.equal(loaded.blockedBacktests.page.returnedCount, snapshot.blockedBacktests.page.returnedCount);
   assert.equal(loaded.acceptedPaperRuns.page.returnedCount, snapshot.acceptedPaperRuns.page.returnedCount);
   assert.equal(loaded.blockedPaperRuns.page.returnedCount, snapshot.blockedPaperRuns.page.returnedCount);
+  assert.equal(loaded.acceptedRuntimeCycles.page.returnedCount, snapshot.acceptedRuntimeCycles.page.returnedCount);
+  assert.equal(loaded.blockedRuntimeCycles.page.returnedCount, snapshot.blockedRuntimeCycles.page.returnedCount);
   assert.equal(loaded.pinnedStrategyExports?.page.returnedCount, snapshot.pinnedStrategyExports?.page.returnedCount);
-  assert.equal(requestedUrls.length, 5);
-  assert.match(requestedUrls[4] ?? '', /providerId=polymarket/);
+  assert.equal(requestedUrls.length, 7);
+  assert.match(requestedUrls[4] ?? '', /private-paper-runtime-cycles/);
+  assert.match(requestedUrls[5] ?? '', /acceptanceState=blocked/);
+  assert.match(requestedUrls[6] ?? '', /providerId=polymarket/);
 });
 
 test('BWS operator cockpit models fail closed on ambiguous blocked candidate summaries', () => {

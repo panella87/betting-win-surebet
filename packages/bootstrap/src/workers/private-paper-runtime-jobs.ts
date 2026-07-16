@@ -1,11 +1,19 @@
 import type { SurebetStrategyLedgerRepository } from '../../../persistence/src/repositories/strategy-ledger-repository.js';
 import type { SurebetUpstreamLockRepository } from '../../../persistence/src/repositories/upstream-lock-repository.js';
 import type { JsonValue } from '../../../persistence/src/types.js';
+import {
+  createReadOnlyQueryApiClient,
+  type IdentityReadOnlyQueryItem,
+  type NormalizedReadOnlyQueryItem,
+  type RulesReadOnlyQueryItem,
+} from '../adapters/betting-win-query-client.js';
 import { parseBettingWinResourceRecords, type BettingWinResourceRecord } from '../contracts/betting-win-resource-records.js';
+import { accepted, blocked, type BoundaryResult } from '../contracts/local-types.js';
 import { createPrivatePaperStrategyLedgerEntry } from '../strategy/strategy-ledger.js';
 import {
   runBoundedPrivatePaperRuntimeCycle,
   type PrivatePaperCandidateRuntimePlan,
+  type PrivatePaperReadOnlyQueryRecordMappers,
   type PrivatePaperRuntimeRequest,
 } from '../runtime/private-paper-runtime.js';
 import type {
@@ -38,19 +46,38 @@ export interface SerializablePrivatePaperCandidatePlan {
 export interface PersistedPrivatePaperRuntimeJobPayload {
   readonly schema: typeof JOB_PAYLOAD_SCHEMA;
   readonly upstreamLockRecordId: string;
-  readonly pinnedStrategyExportRecordId: string;
+  readonly pinnedStrategyExportRecordId?: string;
   readonly runtimeId: string;
   readonly cycleId: string;
   readonly maxCandidatesPerCycle: number;
-  readonly source: {
-    readonly kind: 'pinned_records';
-    readonly sourceBundleKind: 'resource_export';
-    readonly exportedAt: string;
-    readonly sourceManifestHash: string;
-    readonly records: readonly JsonValue[];
-  };
+  readonly source: PersistedPrivatePaperRuntimeJobSource;
   readonly candidatePlans: readonly SerializablePrivatePaperCandidatePlan[];
 }
+
+export interface PersistedPrivatePaperRuntimePinnedRecordSource {
+  readonly kind: 'pinned_records';
+  readonly sourceBundleKind: 'resource_export';
+  readonly exportedAt: string;
+  readonly sourceManifestHash: string;
+  readonly records: readonly JsonValue[];
+}
+
+export interface PersistedPrivatePaperRuntimeReadOnlyQuerySource {
+  readonly kind: 'read_only_query';
+  readonly exportedAt: string;
+  readonly sourceManifestHash: string;
+  readonly apiBaseUrl: string;
+  readonly contractVersion: string;
+  readonly pageSize: number;
+  readonly maxPagesPerResource: number;
+  readonly retryBackoffMs: number;
+  readonly retryLimit: number;
+  readonly timeoutMs: number;
+}
+
+export type PersistedPrivatePaperRuntimeJobSource =
+  | PersistedPrivatePaperRuntimePinnedRecordSource
+  | PersistedPrivatePaperRuntimeReadOnlyQuerySource;
 
 export interface PrivatePaperRuntimeJobHandlerDependencies {
   readonly runCycle?: typeof runBoundedPrivatePaperRuntimeCycle;
@@ -142,7 +169,9 @@ export function createPrivatePaperRuntimeJobHandler(
 
       const persistedLedger = dependencies.strategyLedger.create({
         entry: ledgerEntry.value,
-        pinnedStrategyExportRecordId: parsedPayload.value.pinnedStrategyExportRecordId,
+        ...(parsedPayload.value.pinnedStrategyExportRecordId === undefined
+          ? {}
+          : { pinnedStrategyExportRecordId: parsedPayload.value.pinnedStrategyExportRecordId }),
         upstreamLockRecordId: parsedPayload.value.upstreamLockRecordId,
       });
 
@@ -203,88 +232,15 @@ function parsePersistedJobPayload(
       ok: false,
     };
   }
-  const source = payload.source;
-  if (typeof source !== 'object' || source === null || Array.isArray(source)) {
-    return {
-      error: deadLetter(
-        failedAt,
-        'BWS_PRIVATE_PAPER_JOB_SOURCE_INVALID',
-        Object.freeze({
-          evidenceRequired: 'A pinned-record private-paper source definition.',
-        }),
-      ),
-      ok: false,
-    };
-  }
-  const sourceRecord = source as Record<string, unknown>;
-  if (
-    sourceRecord.kind !== 'pinned_records'
-    || sourceRecord.sourceBundleKind !== 'resource_export'
-    || !Array.isArray(sourceRecord.records)
-  ) {
-    return {
-      error: deadLetter(
-        failedAt,
-        'BWS_PRIVATE_PAPER_JOB_SOURCE_UNSUPPORTED',
-        Object.freeze({
-          evidenceRequired: 'A pinned_records/resource_export private-paper worker source.',
-        }),
-      ),
-      ok: false,
-    };
-  }
-
-  const records = parseBettingWinResourceRecords(sourceRecord.records);
-  if (!records.ok) {
-    return {
-      error: deadLetter(
-        failedAt,
-        'BWS_PRIVATE_PAPER_JOB_RECORDS_INVALID',
-        Object.freeze({
-          blockers: records.blockers.map((blocker) =>
-            Object.freeze({
-              code: blocker.code,
-              evidenceRequired: blocker.evidenceRequired,
-              message: blocker.message,
-            })),
-        }),
-      ),
-      ok: false,
-    };
+  const source = parsePersistedJobSource(payload.source, failedAt);
+  if (!source.ok) {
+    return source;
   }
 
   const candidatePlans = parseCandidatePlans(payload.candidatePlans);
   if (!candidatePlans.ok) {
     return {
       error: deadLetter(failedAt, candidatePlans.code, candidatePlans.details),
-      ok: false,
-    };
-  }
-
-  const exportedAt = requireIsoTimestamp(sourceRecord.exportedAt, 'source.exportedAt');
-  if (exportedAt === undefined) {
-    return {
-      error: deadLetter(
-        failedAt,
-        'BWS_PRIVATE_PAPER_JOB_EXPORTED_AT_INVALID',
-        Object.freeze({
-          evidenceRequired: 'An ISO-8601 UTC exportedAt timestamp for the pinned-record worker source.',
-        }),
-      ),
-      ok: false,
-    };
-  }
-
-  const sourceManifestHash = requireSha256String(sourceRecord.sourceManifestHash);
-  if (sourceManifestHash === undefined) {
-    return {
-      error: deadLetter(
-        failedAt,
-        'BWS_PRIVATE_PAPER_JOB_SOURCE_MANIFEST_INVALID',
-        Object.freeze({
-          evidenceRequired: 'A 64-character sourceManifestHash for the pinned-record worker source.',
-        }),
-      ),
       ok: false,
     };
   }
@@ -300,14 +256,13 @@ function parsePersistedJobPayload(
     runtimeId === undefined
     || cycleId === undefined
     || upstreamLockRecordId === undefined
-    || pinnedStrategyExportRecordId === undefined
   ) {
     return {
       error: deadLetter(
         failedAt,
         'BWS_PRIVATE_PAPER_JOB_IDENTIFIERS_INVALID',
         Object.freeze({
-          evidenceRequired: 'Non-empty runtime, cycle, upstream-lock, and pinned-export identifiers for the worker job.',
+          evidenceRequired: 'Non-empty runtime, cycle, and upstream-lock identifiers for the worker job.',
         }),
       ),
       ok: false,
@@ -338,18 +293,157 @@ function parsePersistedJobPayload(
       candidatePlans: candidatePlans.value,
       cycleId,
       maxCandidatesPerCycle: boundedMaxCandidatesPerCycle,
-      pinnedStrategyExportRecordId,
+      ...(pinnedStrategyExportRecordId === undefined ? {} : { pinnedStrategyExportRecordId }),
       runtimeId,
       schema: JOB_PAYLOAD_SCHEMA,
-      source: Object.freeze({
+      source: source.value,
+      upstreamLockRecordId,
+    }),
+  };
+}
+
+function parsePersistedJobSource(
+  value: unknown,
+  failedAt: string,
+): { readonly ok: true; readonly value: PersistedPrivatePaperRuntimeJobSource }
+  | { readonly ok: false; readonly error: BoundedWorkerJobHandlerResult } {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return {
+      error: deadLetter(
+        failedAt,
+        'BWS_PRIVATE_PAPER_JOB_SOURCE_INVALID',
+        Object.freeze({
+          evidenceRequired: 'A pinned-record or read_only_query private-paper source definition.',
+        }),
+      ),
+      ok: false,
+    };
+  }
+  const sourceRecord = value as Record<string, unknown>;
+  const exportedAt = requireIsoTimestamp(sourceRecord.exportedAt, 'source.exportedAt');
+  if (exportedAt === undefined) {
+    return {
+      error: deadLetter(
+        failedAt,
+        'BWS_PRIVATE_PAPER_JOB_EXPORTED_AT_INVALID',
+        Object.freeze({
+          evidenceRequired: 'An ISO-8601 UTC exportedAt timestamp for the private-paper worker source.',
+        }),
+      ),
+      ok: false,
+    };
+  }
+  const sourceManifestHash = requireSha256String(sourceRecord.sourceManifestHash);
+  if (sourceManifestHash === undefined) {
+    return {
+      error: deadLetter(
+        failedAt,
+        'BWS_PRIVATE_PAPER_JOB_SOURCE_MANIFEST_INVALID',
+        Object.freeze({
+          evidenceRequired: 'A 64-character sourceManifestHash for the private-paper worker source.',
+        }),
+      ),
+      ok: false,
+    };
+  }
+
+  if (sourceRecord.kind === 'pinned_records') {
+    if (sourceRecord.sourceBundleKind !== 'resource_export' || !Array.isArray(sourceRecord.records)) {
+      return {
+        error: deadLetter(
+          failedAt,
+          'BWS_PRIVATE_PAPER_JOB_SOURCE_UNSUPPORTED',
+          Object.freeze({
+            evidenceRequired: 'A pinned_records/resource_export private-paper worker source.',
+          }),
+        ),
+        ok: false,
+      };
+    }
+    const records = parseBettingWinResourceRecords(sourceRecord.records);
+    if (!records.ok) {
+      return {
+        error: deadLetter(
+          failedAt,
+          'BWS_PRIVATE_PAPER_JOB_RECORDS_INVALID',
+          Object.freeze({
+            blockers: records.blockers.map((blocker) =>
+              Object.freeze({
+                code: blocker.code,
+                evidenceRequired: blocker.evidenceRequired,
+                message: blocker.message,
+              })),
+          }),
+        ),
+        ok: false,
+      };
+    }
+    return {
+      ok: true,
+      value: Object.freeze({
         exportedAt,
         kind: 'pinned_records',
         records: records.value.map((record) => serializeResourceRecord(record)),
         sourceBundleKind: 'resource_export',
         sourceManifestHash,
       }),
-      upstreamLockRecordId,
-    }),
+    };
+  }
+
+  if (sourceRecord.kind === 'read_only_query') {
+    const apiBaseUrl = requireNonEmptyString(sourceRecord.apiBaseUrl);
+    const contractVersion = requireNonEmptyString(sourceRecord.contractVersion);
+    const pageSize = requirePositiveInteger(sourceRecord.pageSize);
+    const maxPagesPerResource = requirePositiveInteger(sourceRecord.maxPagesPerResource);
+    const retryBackoffMs = requirePositiveInteger(sourceRecord.retryBackoffMs);
+    const retryLimit = requireNonNegativeInteger(sourceRecord.retryLimit);
+    const timeoutMs = requirePositiveInteger(sourceRecord.timeoutMs);
+    if (
+      apiBaseUrl === undefined
+      || contractVersion === undefined
+      || pageSize === undefined
+      || maxPagesPerResource === undefined
+      || retryBackoffMs === undefined
+      || retryLimit === undefined
+      || timeoutMs === undefined
+    ) {
+      return {
+        error: deadLetter(
+          failedAt,
+          'BWS_PRIVATE_PAPER_JOB_SOURCE_UNSUPPORTED',
+          Object.freeze({
+            evidenceRequired: 'A read_only_query worker source with apiBaseUrl, contractVersion, bounded page settings, retry settings, and timeout.',
+          }),
+        ),
+        ok: false,
+      };
+    }
+    return {
+      ok: true,
+      value: Object.freeze({
+        apiBaseUrl,
+        contractVersion,
+        exportedAt,
+        kind: 'read_only_query',
+        maxPagesPerResource,
+        pageSize,
+        retryBackoffMs,
+        retryLimit,
+        sourceManifestHash,
+        timeoutMs,
+      }),
+    };
+  }
+
+  return {
+    error: deadLetter(
+      failedAt,
+      'BWS_PRIVATE_PAPER_JOB_SOURCE_UNSUPPORTED',
+      Object.freeze({
+        evidenceRequired: 'A pinned_records/resource_export or read_only_query private-paper worker source.',
+      }),
+    ),
+    ok: false,
   };
 }
 
@@ -472,20 +566,66 @@ function toRuntimeRequest(
   payload: PersistedPrivatePaperRuntimeJobPayload,
   upstreamLock: NonNullable<ReturnType<PrivatePaperRuntimeJobHandlerDependencies['upstreamLocks']['get']>>['lock'],
 ): PrivatePaperRuntimeRequest {
+  const source = payload.source.kind === 'pinned_records'
+    ? accepted(
+      Object.freeze({
+        exportedAt: payload.source.exportedAt,
+        kind: 'pinned_records' as const,
+        records: payload.source.records.map((record) => deserializeResourceRecord(record)),
+        sourceBundleKind: 'resource_export' as const,
+        sourceManifestHash: payload.source.sourceManifestHash,
+      }),
+    )
+    : buildReadOnlyQuerySource(payload.source, upstreamLock);
+  if (!source.ok) {
+    throw new Error(source.blockers.map((blocker) => blocker.message).join(' '));
+  }
   return Object.freeze({
     candidatePlans: payload.candidatePlans.map((plan) => deserializeCandidatePlan(plan)),
     cycleId: payload.cycleId,
     maxCandidatesPerCycle: payload.maxCandidatesPerCycle,
     runtimeId: payload.runtimeId,
-    source: Object.freeze({
-      exportedAt: payload.source.exportedAt,
-      kind: 'pinned_records',
-      records: payload.source.records.map((record) => deserializeResourceRecord(record)),
-      sourceBundleKind: 'resource_export',
-      sourceManifestHash: payload.source.sourceManifestHash,
-    }),
+    source: source.value,
     upstreamLock,
   });
+}
+
+function buildReadOnlyQuerySource(
+  source: PersistedPrivatePaperRuntimeReadOnlyQuerySource,
+  upstreamLock: NonNullable<ReturnType<PrivatePaperRuntimeJobHandlerDependencies['upstreamLocks']['get']>>['lock'],
+): BoundaryResult<Extract<PrivatePaperRuntimeRequest['source'], { readonly kind: 'read_only_query' }>> {
+  const client = createReadOnlyQueryApiClient({
+    baseUrl: source.apiBaseUrl,
+    contractVersion: source.contractVersion,
+    fetchImplementation: globalThis.fetch.bind(globalThis),
+    maxPageSize: source.pageSize,
+    retryBackoffMs: source.retryBackoffMs,
+    retryLimit: source.retryLimit,
+    timeoutMs: source.timeoutMs,
+    upstreamLock,
+  });
+  if (!client.ok) {
+    return client;
+  }
+  return accepted(
+    Object.freeze({
+      client: client.value,
+      exportedAt: source.exportedAt,
+      kind: 'read_only_query',
+      mappers: createReadOnlyQueryRecordMappers(),
+      requests: Object.freeze({
+        identity: Object.freeze({ maxPages: source.maxPagesPerResource, pageSize: source.pageSize }),
+        quotes: Object.freeze({ maxPages: source.maxPagesPerResource, pageSize: source.pageSize }),
+        rules: Object.freeze({ maxPages: source.maxPagesPerResource, pageSize: source.pageSize }),
+        settlement: Object.freeze({
+          filters: Object.freeze({ finalityStatus: 'terminal' }),
+          maxPages: source.maxPagesPerResource,
+          pageSize: source.pageSize,
+        }),
+      }),
+      sourceManifestHash: source.sourceManifestHash,
+    }),
+  );
 }
 
 function deserializeCandidatePlan(plan: SerializablePrivatePaperCandidatePlan): PrivatePaperCandidateRuntimePlan {
@@ -541,6 +681,82 @@ function deserializeResourceRecord(record: JsonValue): BettingWinResourceRecord 
   return parsed.value[0]!;
 }
 
+function createReadOnlyQueryRecordMappers(): PrivatePaperReadOnlyQueryRecordMappers {
+  return Object.freeze({
+    identity: (item: IdentityReadOnlyQueryItem) =>
+      mapReadOnlyQueryRecord(
+        Object.freeze({
+          canonicalEventId: requireString((item.providerReferences?.[0] as Record<string, unknown> | undefined)?.canonicalEventId),
+          canonicalMarketId: requireString(item.canonicalId),
+          providerGeneration: requireString((item.providerReferences?.[0] as Record<string, unknown> | undefined)?.providerGeneration),
+          providerMarketId: requireString((item.providerReferences?.[0] as Record<string, unknown> | undefined)?.providerMarketId),
+          recordType: 'identity',
+        }),
+      ),
+    quotes: (item: NormalizedReadOnlyQueryItem) => {
+      const normalizedEvidence = item.normalizedEvidence as Record<string, unknown> | undefined;
+      return mapReadOnlyQueryRecord(
+        Object.freeze({
+          availableSizeMinor: requireString(normalizedEvidence?.availableSizeMinor),
+          canonicalMarketId: requireString(normalizedEvidence?.canonicalMarketId),
+          costMinor: requireString(normalizedEvidence?.costMinor),
+          currency: requireString(normalizedEvidence?.currency),
+          evidenceId: requireString(normalizedEvidence?.evidenceId),
+          feeMinor: requireString(normalizedEvidence?.feeMinor),
+          minStakeMinor: requireString(normalizedEvidence?.minStakeMinor),
+          observedAt: requireString(normalizedEvidence?.observedAt),
+          outcome: requireString(normalizedEvidence?.outcome),
+          priceMinor: requireString(normalizedEvidence?.priceMinor),
+          quoteSourceManifestHash: requireString(normalizedEvidence?.quoteSourceManifestHash),
+          recordType: 'quotes',
+        }),
+      );
+    },
+    rules: (item: RulesReadOnlyQueryItem) => {
+      const ruleProfile = item.ruleProfile as Record<string, unknown> | undefined;
+      const resultSource = item.resultSource as Record<string, unknown> | undefined;
+      return mapReadOnlyQueryRecord(
+        Object.freeze({
+          canonicalMarketId: requireString(ruleProfile?.canonicalMarketId),
+          finalityPolicyId: requireString(ruleProfile?.finalityPolicyId),
+          recordType: 'rules',
+          resultSourceId: requireString(resultSource?.resultSourceId),
+          ruleProfileId: requireString(ruleProfile?.ruleProfileId),
+        }),
+      );
+    },
+    settlement: (item: NormalizedReadOnlyQueryItem) => {
+      const normalizedEvidence = item.normalizedEvidence as Record<string, unknown> | undefined;
+      return mapReadOnlyQueryRecord(
+        Object.freeze({
+          acceptanceStatus: requireString(normalizedEvidence?.acceptanceStatus),
+          canonicalMarketId: requireString(normalizedEvidence?.canonicalMarketId),
+          finalOutcome: requireString(normalizedEvidence?.finalOutcome),
+          finalityAuthorityId: requireString(normalizedEvidence?.finalityAuthorityId),
+          finalityPolicyId: requireString(normalizedEvidence?.finalityPolicyId),
+          recordType: 'settlement',
+          replayAcceptedAt: requireString(normalizedEvidence?.replayAcceptedAt),
+          replayManifestHash: requireString(normalizedEvidence?.replayManifestHash),
+          resultSourceId: requireString(normalizedEvidence?.resultSourceId),
+          ruleProfileId: requireString(normalizedEvidence?.ruleProfileId),
+        }),
+      );
+    },
+  });
+}
+
+function mapReadOnlyQueryRecord(record: Record<string, unknown>): BoundaryResult<readonly BettingWinResourceRecord[]> {
+  const parsed = parseBettingWinResourceRecords([record]);
+  if (!parsed.ok) {
+    return blocked(
+      'BWS_PRIVATE_PAPER_QUERY_MAPPER_INVALID',
+      parsed.blockers[0]?.message ?? 'Read-only query records must map to canonical BWS resource records.',
+      parsed.blockers[0]?.evidenceRequired ?? 'Canonical BWS read-only query record mapping.',
+    );
+  }
+  return accepted(parsed.value);
+}
+
 function deadLetter(
   failedAt: string,
   errorCode: string,
@@ -558,12 +774,24 @@ function requireNonEmptyString(value: unknown): string | undefined {
   return typeof value === 'string' && value.trim().length > 0 ? value.trim() : undefined;
 }
 
+function requireString(value: unknown): string | undefined {
+  return typeof value === 'string' ? value : undefined;
+}
+
 function requireIsoTimestamp(value: unknown, _field: string): string | undefined {
   return typeof value === 'string' && ISO_UTC_TIMESTAMP.test(value) ? value : undefined;
 }
 
 function requireSha256String(value: unknown): string | undefined {
   return typeof value === 'string' && /^[0-9a-f]{64}$/i.test(value) ? value.toLowerCase() : undefined;
+}
+
+function requirePositiveInteger(value: unknown): number | undefined {
+  return typeof value === 'number' && Number.isSafeInteger(value) && value > 0 ? value : undefined;
+}
+
+function requireNonNegativeInteger(value: unknown): number | undefined {
+  return typeof value === 'number' && Number.isSafeInteger(value) && value >= 0 ? value : undefined;
 }
 
 function isSignedIntegerString(value: unknown): boolean {

@@ -2,6 +2,12 @@ import { createHash } from 'node:crypto';
 import type { BettingWinUpstreamLock } from '../../../upstream/src/upstream/betting-win-upstream-lock.js';
 import type { SurebetImportRunRecord, SurebetImportRunRepository } from '../../../persistence/src/repositories/import-run-repository.js';
 import type {
+  SurebetPrivatePaperRuntimeSchedulerCheckpointListFilters,
+  SurebetPrivatePaperRuntimeSchedulerCheckpointListRequest,
+  SurebetPrivatePaperRuntimeSchedulerCheckpointRecord,
+  SurebetPrivatePaperRuntimeSchedulerCheckpointRepository,
+} from '../../../persistence/src/repositories/private-paper-runtime-scheduler-checkpoint-repository.js';
+import type {
   SurebetPinnedStrategyExportListFilters,
   SurebetPinnedStrategyExportListRequest,
   SurebetPinnedStrategyExportRecord,
@@ -20,13 +26,28 @@ import type {
   SurebetStrategyLedgerRecord,
   SurebetStrategyLedgerRepository,
 } from '../../../persistence/src/repositories/strategy-ledger-repository.js';
+import type {
+  SurebetUpstreamApiConvergenceCheckpointRecord,
+  SurebetUpstreamApiConvergenceRepository,
+} from '../../../persistence/src/repositories/upstream-api-convergence-repository.js';
 import type { SurebetUpstreamLockRepository } from '../../../persistence/src/repositories/upstream-lock-repository.js';
+import type {
+  SurebetWorkerJobCheckpointRecord,
+  SurebetWorkerJobDeadLetterRecord,
+  SurebetWorkerJobRecord,
+  SurebetWorkerJobRepository,
+  SurebetWorkerJobStatus,
+} from '../../../persistence/src/repositories/worker-job-repository.js';
 import { accepted, blocked, type BoundaryResult, type IsoTimestamp } from '../contracts/local-types.js';
 import { describeReadOnlyQueryApiClientBoundary } from '../adapters/betting-win-query-client.js';
 
 const BWS_READ_ONLY_QUERY_SERVICE_PHASE = 'BWS-400';
 const MAX_CURSOR_BYTES = 512;
 const ISO_8601_UTC_MILLISECONDS = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/;
+const PRIVATE_PAPER_RUNTIME_JOB_SCHEMA = 'bws.private_paper_runtime_job.v1';
+const PRIVATE_PAPER_RUNTIME_CYCLE_CHECKPOINT_RETENTION = 3;
+const PRIVATE_PAPER_RUNTIME_CYCLE_SCAN_MULTIPLIER = 4;
+const PRIVATE_PAPER_RUNTIME_CYCLE_SCHEDULER_RETENTION = 8;
 
 export interface BwsReadOnlyQueryBoundary {
   readonly automaticFallback: 'forbidden';
@@ -83,11 +104,28 @@ export interface BwsPinnedStrategyExportQueryRequest {
   readonly pageSize: number;
 }
 
+export interface BwsPrivatePaperRuntimeCycleQueryFilters {
+  readonly acceptanceState?: string;
+  readonly queueName?: string;
+  readonly runtimeId?: string;
+  readonly schedulerCheckpointId?: string;
+  readonly upstreamLockRecordId?: string;
+}
+
+export interface BwsPrivatePaperRuntimeCycleQueryRequest {
+  readonly expand?: string;
+  readonly filters: BwsPrivatePaperRuntimeCycleQueryFilters;
+  readonly pageSize: number;
+}
+
 export interface BwsReadOnlyQueryDependencies {
   readonly importRuns: Pick<SurebetImportRunRepository, 'get'>;
   readonly pinnedStrategyExports: Pick<SurebetPinnedStrategyExportRepository, 'get' | 'list'>;
+  readonly privatePaperSchedulerCheckpoints: Pick<SurebetPrivatePaperRuntimeSchedulerCheckpointRepository, 'list'>;
   readonly strategyLedger: Pick<SurebetStrategyLedgerRepository, 'list'>;
+  readonly upstreamApiCheckpoints: Pick<SurebetUpstreamApiConvergenceRepository, 'get'>;
   readonly upstreamLocks: Pick<SurebetUpstreamLockRepository, 'get'>;
+  readonly workerJobs: Pick<SurebetWorkerJobRepository, 'get' | 'getDeadLetter' | 'listCheckpoints'>;
 }
 
 export interface BwsReadOnlyQueryServiceConfig {
@@ -122,11 +160,66 @@ export interface BwsPinnedStrategyExportItem {
   readonly record: SurebetPinnedStrategyExportRecord;
 }
 
+export interface BwsPrivatePaperRuntimeCycleCheckpointItem {
+  readonly checkpoint: Readonly<Record<string, unknown>>;
+  readonly checkpointId: string;
+  readonly checkpointSha256: string;
+  readonly recordedAt: IsoTimestamp;
+}
+
+export interface BwsPrivatePaperRuntimeCycleDeadLetterItem {
+  readonly checkpointCount: number;
+  readonly deadLetterReasonCode: string;
+  readonly deadLetterReasonDetails: Readonly<Record<string, unknown>>;
+  readonly finalAttemptCount: number;
+  readonly insertedAt: IsoTimestamp;
+}
+
+export interface BwsPrivatePaperRuntimeCycleJobSummary {
+  readonly attemptCount: number;
+  readonly checkpointCount: number;
+  readonly completedAt?: IsoTimestamp;
+  readonly insertedAt: IsoTimestamp;
+  readonly jobId: string;
+  readonly lastCheckpointAt?: IsoTimestamp;
+  readonly lastCheckpointId?: string;
+  readonly lastErrorCode?: string;
+  readonly queueName: string;
+  readonly status: SurebetWorkerJobStatus;
+  readonly updatedAt: IsoTimestamp;
+}
+
+export interface BwsPrivatePaperRuntimeCycleItemProvenance {
+  readonly cycleImportRun?: SurebetImportRunRecord;
+  readonly schedulerCheckpoint: SurebetPrivatePaperRuntimeSchedulerCheckpointRecord;
+  readonly upstreamApiCheckpoint: SurebetUpstreamApiConvergenceCheckpointRecord;
+  readonly upstreamLock: BettingWinUpstreamLock;
+  readonly upstreamLockRecordId: string;
+}
+
+export interface BwsPrivatePaperRuntimeCycleItem {
+  readonly acceptanceState: SurebetStrategyAcceptanceState;
+  readonly blockedReasonCode?: string;
+  readonly cycleId: string;
+  readonly cycleNumber: number;
+  readonly deadLetter?: BwsPrivatePaperRuntimeCycleDeadLetterItem;
+  readonly job: BwsPrivatePaperRuntimeCycleJobSummary;
+  readonly provenance: BwsPrivatePaperRuntimeCycleItemProvenance;
+  readonly recentCheckpoints: readonly BwsPrivatePaperRuntimeCycleCheckpointItem[];
+  readonly runtimeId: string;
+  readonly sourceKind: SurebetStrategySourceKind;
+  readonly sourceManifestHash: string;
+  readonly strategyLedger?: BwsStrategyLedgerItem;
+}
+
 export interface BwsReadOnlyQueryService {
   readonly boundary: BwsReadOnlyQueryBoundary;
   queryPinnedStrategyExports(
     request: BwsPinnedStrategyExportQueryRequest,
   ): BoundaryResult<BwsReadOnlyQueryResponse<'pinned_strategy_exports', BwsPinnedStrategyExportItem>>;
+  queryPrivatePaperRuntimeCycles(
+    request: BwsPrivatePaperRuntimeCycleQueryRequest,
+  ): BoundaryResult<BwsReadOnlyQueryResponse<'private_paper_runtime_cycles', BwsPrivatePaperRuntimeCycleItem>>;
   queryStrategyLedger(
     request: BwsStrategyLedgerQueryRequest,
   ): BoundaryResult<BwsReadOnlyQueryResponse<'strategy_ledger_entries', BwsStrategyLedgerItem>>;
@@ -149,6 +242,18 @@ interface NormalizedPinnedStrategyExportRequest {
   readonly afterIntakeRecordId?: string;
   readonly expand: 'provenance';
   readonly filters: SurebetPinnedStrategyExportListFilters;
+  readonly pageSize: number;
+}
+
+interface NormalizedPrivatePaperRuntimeCycleRequest {
+  readonly expand: 'provenance';
+  readonly filters: Readonly<{
+    readonly acceptanceState: SurebetStrategyAcceptanceState;
+    readonly queueName?: string;
+    readonly runtimeId?: string;
+    readonly schedulerCheckpointId?: string;
+    readonly upstreamLockRecordId?: string;
+  }>;
   readonly pageSize: number;
 }
 
@@ -177,6 +282,9 @@ export function createBwsReadOnlyQueryService(
 
   const service: BwsReadOnlyQueryService = {
     boundary,
+    queryPrivatePaperRuntimeCycles(request) {
+      return queryPrivatePaperRuntimeCycles(validatedDependencies.value, validatedConfig.value, boundary, request);
+    },
     queryPinnedStrategyExports(request) {
       return queryPinnedStrategyExports(validatedDependencies.value, validatedConfig.value, boundary, request);
     },
@@ -281,6 +389,94 @@ function queryPinnedStrategyExports(
         returnedCount: items.length,
       }),
       resource: 'pinned_strategy_exports',
+    }),
+  );
+}
+
+function queryPrivatePaperRuntimeCycles(
+  dependencies: BwsReadOnlyQueryDependencies,
+  config: Readonly<BwsReadOnlyQueryServiceConfig>,
+  boundary: BwsReadOnlyQueryBoundary,
+  request: BwsPrivatePaperRuntimeCycleQueryRequest,
+): BoundaryResult<BwsReadOnlyQueryResponse<'private_paper_runtime_cycles', BwsPrivatePaperRuntimeCycleItem>> {
+  const normalized = validatePrivatePaperRuntimeCycleRequest(config, request);
+  if (!normalized.ok) {
+    return normalized;
+  }
+
+  const schedulerCheckpoints = dependencies.privatePaperSchedulerCheckpoints.list({
+    filters: toRuntimeCycleSchedulerFilters(normalized.value.filters),
+    limit: Math.max(
+      PRIVATE_PAPER_RUNTIME_CYCLE_SCHEDULER_RETENTION,
+      normalized.value.pageSize * PRIVATE_PAPER_RUNTIME_CYCLE_SCAN_MULTIPLIER,
+    ),
+  } satisfies SurebetPrivatePaperRuntimeSchedulerCheckpointListRequest);
+
+  const scannedItems: Array<{
+    readonly item: BwsPrivatePaperRuntimeCycleItem;
+    readonly sortTimestamp: string;
+  }> = [];
+
+  for (const schedulerCheckpoint of schedulerCheckpoints) {
+    if (schedulerCheckpoint.mode !== 'api') {
+      continue;
+    }
+    const upperCycleNumber = schedulerCheckpoint.lastScheduledApiCycleNumber ?? 0;
+    const lowerCycleNumber = Math.max(
+      1,
+      upperCycleNumber - (normalized.value.pageSize * PRIVATE_PAPER_RUNTIME_CYCLE_SCAN_MULTIPLIER) + 1,
+    );
+    for (let cycleNumber = upperCycleNumber; cycleNumber >= lowerCycleNumber; cycleNumber -= 1) {
+      const item = buildPrivatePaperRuntimeCycleItem(
+        dependencies,
+        schedulerCheckpoint,
+        cycleNumber,
+        normalized.value.filters.acceptanceState,
+      );
+      if (!item.ok) {
+        return item;
+      }
+      if (item.value === undefined) {
+        continue;
+      }
+      scannedItems.push(
+        Object.freeze({
+          item: item.value,
+          sortTimestamp: item.value.job.completedAt ?? item.value.job.updatedAt,
+        }),
+      );
+    }
+  }
+
+  const items = Object.freeze(
+    [...scannedItems]
+      .sort((left, right) => {
+        const timeComparison = right.sortTimestamp.localeCompare(left.sortTimestamp);
+        if (timeComparison !== 0) {
+          return timeComparison;
+        }
+        const checkpointComparison = left.item.provenance.schedulerCheckpoint.schedulerCheckpointId.localeCompare(
+          right.item.provenance.schedulerCheckpoint.schedulerCheckpointId,
+        );
+        if (checkpointComparison !== 0) {
+          return checkpointComparison;
+        }
+        return left.item.cycleId.localeCompare(right.item.cycleId);
+      })
+      .slice(0, normalized.value.pageSize)
+      .map((entry) => entry.item),
+  );
+
+  return accepted(
+    Object.freeze({
+      boundary,
+      generatedAt: config.generatedAt(),
+      page: Object.freeze({
+        items,
+        pageSize: normalized.value.pageSize,
+        returnedCount: items.length,
+      }),
+      resource: 'private_paper_runtime_cycles',
     }),
   );
 }
@@ -435,6 +631,478 @@ function expandPinnedStrategyExportRecord(
   );
 }
 
+function buildPrivatePaperRuntimeCycleItem(
+  dependencies: BwsReadOnlyQueryDependencies,
+  schedulerCheckpoint: SurebetPrivatePaperRuntimeSchedulerCheckpointRecord,
+  cycleNumber: number,
+  acceptanceState: SurebetStrategyAcceptanceState,
+): BoundaryResult<BwsPrivatePaperRuntimeCycleItem | undefined> {
+  const upstreamApiCheckpoint = dependencies.upstreamApiCheckpoints.get(schedulerCheckpoint.upstreamCheckpointId);
+  if (upstreamApiCheckpoint === undefined) {
+    return blocked(
+      'BWS_QUERY_RUNTIME_CYCLE_PROVENANCE_MISSING',
+      `BWS private-paper runtime cycle queries require upstream API checkpoint ${schedulerCheckpoint.upstreamCheckpointId}.`,
+      'Persisted upstream API checkpoint provenance for every returned private-paper runtime cycle.',
+    );
+  }
+  if (upstreamApiCheckpoint.upstreamLockRecordId !== schedulerCheckpoint.upstreamLockRecordId) {
+    return blocked(
+      'BWS_QUERY_RUNTIME_CYCLE_PROVENANCE_INVALID',
+      `BWS private-paper scheduler checkpoint ${schedulerCheckpoint.schedulerCheckpointId} must stay on the same upstream lock as API checkpoint ${schedulerCheckpoint.upstreamCheckpointId}.`,
+      'Private-paper scheduler and upstream API checkpoints pinned to the same committed-HEAD upstream lock.',
+    );
+  }
+
+  const upstreamLock = dependencies.upstreamLocks.get(schedulerCheckpoint.upstreamLockRecordId);
+  if (upstreamLock === undefined) {
+    return blocked(
+      'BWS_QUERY_RUNTIME_CYCLE_PROVENANCE_MISSING',
+      `BWS private-paper runtime cycle queries require upstream lock ${schedulerCheckpoint.upstreamLockRecordId}.`,
+      'Persisted committed-HEAD upstream lock provenance for every returned private-paper runtime cycle.',
+    );
+  }
+
+  const jobId = buildPrivatePaperRuntimeJobId(schedulerCheckpoint.schedulerCheckpointId, cycleNumber);
+  const job = dependencies.workerJobs.get(jobId);
+  if (job === undefined) {
+    return blocked(
+      'BWS_QUERY_RUNTIME_CYCLE_JOB_MISSING',
+      `BWS private-paper runtime cycle ${jobId} was scheduled but is missing from surebet.worker_jobs.`,
+      'Persisted worker job state for every scheduled private-paper runtime cycle returned by the read-only API.',
+    );
+  }
+
+  const payload = parsePrivatePaperRuntimeJobPayload(job, schedulerCheckpoint, cycleNumber);
+  if (!payload.ok) {
+    return payload;
+  }
+
+  const strategyLedger = findPrivatePaperRuntimeStrategyLedger(
+    dependencies,
+    payload.value.runtimeId,
+    payload.value.cycleId,
+  );
+  if (!strategyLedger.ok) {
+    return strategyLedger;
+  }
+
+  if (job.status === 'succeeded') {
+    if (strategyLedger.value === undefined) {
+      return blocked(
+        'BWS_QUERY_RUNTIME_CYCLE_LEDGER_MISSING',
+        `BWS succeeded private-paper runtime cycle ${jobId} must expose a persisted strategy-ledger row.`,
+        'A persisted private-paper strategy-ledger row for every succeeded runtime cycle.',
+      );
+    }
+    if (strategyLedger.value.entry.acceptanceState !== acceptanceState) {
+      return accepted(undefined);
+    }
+    const recentCheckpoints = normalizeRuntimeCycleCheckpoints(
+      dependencies.workerJobs.listCheckpoints(job.jobId, {
+        limit: PRIVATE_PAPER_RUNTIME_CYCLE_CHECKPOINT_RETENTION,
+        newestFirst: true,
+      }),
+      job.jobId,
+    );
+    if (!recentCheckpoints.ok) {
+      return recentCheckpoints;
+    }
+    const cycleImportRun = findCompletedCycleImportRun(
+      dependencies,
+      schedulerCheckpoint,
+      upstreamApiCheckpoint,
+      cycleNumber,
+    );
+    if (!cycleImportRun.ok) {
+      return cycleImportRun;
+    }
+    return accepted(
+      Object.freeze({
+        acceptanceState,
+        ...(acceptanceState !== 'blocked' || strategyLedger.value.entry.report.stopReason === undefined
+          ? {}
+          : { blockedReasonCode: strategyLedger.value.entry.report.stopReason }),
+        cycleId: payload.value.cycleId,
+        cycleNumber,
+        job: summarizeRuntimeCycleJob(job),
+        provenance: Object.freeze({
+          ...(cycleImportRun.value === undefined ? {} : { cycleImportRun: cycleImportRun.value }),
+          schedulerCheckpoint,
+          upstreamApiCheckpoint,
+          upstreamLock: upstreamLock.lock,
+          upstreamLockRecordId: upstreamLock.lockRecordId,
+        }),
+        recentCheckpoints: recentCheckpoints.value,
+        runtimeId: payload.value.runtimeId,
+        sourceKind: payload.value.sourceKind,
+        sourceManifestHash: payload.value.sourceManifestHash,
+        strategyLedger: strategyLedger.value,
+      }),
+    );
+  }
+
+  if (job.status !== 'dead_lettered') {
+    return accepted(undefined);
+  }
+
+  if (acceptanceState !== 'blocked') {
+    return accepted(undefined);
+  }
+  if (strategyLedger.value !== undefined) {
+    return blocked(
+      'BWS_QUERY_RUNTIME_CYCLE_PROVENANCE_INVALID',
+      `BWS dead-lettered private-paper runtime cycle ${jobId} must not expose a persisted strategy-ledger row.`,
+      'Dead-lettered private-paper runtime cycles without strategy-ledger success evidence.',
+    );
+  }
+
+  const deadLetter = dependencies.workerJobs.getDeadLetter(job.jobId);
+  if (deadLetter === undefined) {
+    return blocked(
+      'BWS_QUERY_RUNTIME_CYCLE_DEAD_LETTER_MISSING',
+      `BWS blocked private-paper runtime cycle ${jobId} requires a persisted dead-letter record.`,
+      'Persisted dead-letter provenance for blocked runtime cycles without strategy-ledger evidence.',
+    );
+  }
+  const recentCheckpoints = normalizeRuntimeCycleCheckpoints(
+    dependencies.workerJobs.listCheckpoints(job.jobId, {
+      limit: PRIVATE_PAPER_RUNTIME_CYCLE_CHECKPOINT_RETENTION,
+      newestFirst: true,
+    }),
+    job.jobId,
+  );
+  if (!recentCheckpoints.ok) {
+    return recentCheckpoints;
+  }
+  const deadLetterDetails = normalizeRuntimeCycleDeadLetter(deadLetter, job.jobId);
+  if (!deadLetterDetails.ok) {
+    return deadLetterDetails;
+  }
+  const cycleImportRun = findCompletedCycleImportRun(
+    dependencies,
+    schedulerCheckpoint,
+    upstreamApiCheckpoint,
+    cycleNumber,
+  );
+  if (!cycleImportRun.ok) {
+    return cycleImportRun;
+  }
+  return accepted(
+    Object.freeze({
+      acceptanceState: 'blocked',
+      blockedReasonCode: deadLetter.deadLetterReasonCode,
+      cycleId: payload.value.cycleId,
+      cycleNumber,
+      deadLetter: deadLetterDetails.value,
+      job: summarizeRuntimeCycleJob(job),
+      provenance: Object.freeze({
+        ...(cycleImportRun.value === undefined ? {} : { cycleImportRun: cycleImportRun.value }),
+        schedulerCheckpoint,
+        upstreamApiCheckpoint,
+        upstreamLock: upstreamLock.lock,
+        upstreamLockRecordId: upstreamLock.lockRecordId,
+      }),
+      recentCheckpoints: recentCheckpoints.value,
+      runtimeId: payload.value.runtimeId,
+      sourceKind: payload.value.sourceKind,
+      sourceManifestHash: payload.value.sourceManifestHash,
+    }),
+  );
+}
+
+function findPrivatePaperRuntimeStrategyLedger(
+  dependencies: BwsReadOnlyQueryDependencies,
+  runtimeId: string,
+  cycleId: string,
+): BoundaryResult<BwsStrategyLedgerItem | undefined> {
+  const runReferenceId = `${runtimeId}:${cycleId}`;
+  let matched: BwsStrategyLedgerItem | undefined;
+  for (const acceptanceState of ['accepted_local_evidence', 'blocked'] as const) {
+    const records = dependencies.strategyLedger.list({
+      filters: Object.freeze({
+        acceptanceState,
+        runKind: 'private_paper_runtime_cycle',
+        runReferenceId,
+      }),
+      limit: 2,
+    } satisfies SurebetStrategyLedgerListRequest);
+    if (records.length === 0) {
+      continue;
+    }
+    if (records.length > 1) {
+      return blocked(
+        'BWS_QUERY_RUNTIME_CYCLE_LEDGER_CONFLICT',
+        `BWS private-paper runtime cycle ${runReferenceId} must resolve to exactly one strategy-ledger row per acceptance state.`,
+        'Exactly one persisted strategy-ledger row per runtime cycle acceptance state.',
+      );
+    }
+    const expanded = expandStrategyLedgerRecord(dependencies, records[0]!);
+    if (!expanded.ok) {
+      return expanded;
+    }
+    if (matched !== undefined) {
+      return blocked(
+        'BWS_QUERY_RUNTIME_CYCLE_LEDGER_CONFLICT',
+        `BWS private-paper runtime cycle ${runReferenceId} must not resolve to both accepted and blocked strategy-ledger rows.`,
+        'Exactly one persisted private-paper strategy-ledger row for the runtime cycle.',
+      );
+    }
+    matched = expanded.value;
+  }
+  return accepted(matched);
+}
+
+function findCompletedCycleImportRun(
+  dependencies: BwsReadOnlyQueryDependencies,
+  schedulerCheckpoint: SurebetPrivatePaperRuntimeSchedulerCheckpointRecord,
+  upstreamApiCheckpoint: SurebetUpstreamApiConvergenceCheckpointRecord,
+  cycleNumber: number,
+): BoundaryResult<SurebetImportRunRecord | undefined> {
+  for (let pageNumber = 1; pageNumber <= upstreamApiCheckpoint.maxPagesPerResource; pageNumber += 1) {
+    const importRunId = buildPrivatePaperRuntimeImportRunId(
+      schedulerCheckpoint.upstreamCheckpointId,
+      cycleNumber,
+      'settlement',
+      pageNumber,
+    );
+    const importRun = dependencies.importRuns.get(importRunId);
+    if (importRun === undefined) {
+      continue;
+    }
+    const metadata = validateCompletedCycleImportRunMetadata(
+      importRun,
+      schedulerCheckpoint.upstreamCheckpointId,
+      schedulerCheckpoint.upstreamLockRecordId,
+      cycleNumber,
+      pageNumber,
+    );
+    if (!metadata.ok) {
+      return metadata;
+    }
+    if (metadata.value.hasNextCursor === false && importRun.outcome === 'succeeded') {
+      return accepted(importRun);
+    }
+  }
+  return accepted(undefined);
+}
+
+function validateCompletedCycleImportRunMetadata(
+  importRun: SurebetImportRunRecord,
+  checkpointId: string,
+  upstreamLockRecordId: string,
+  cycleNumber: number,
+  pageNumber: number,
+): BoundaryResult<Readonly<{ readonly hasNextCursor: boolean }>> {
+  if (importRun.sourceKind !== 'continuous_read_only_query_page') {
+    return blocked(
+      'BWS_QUERY_RUNTIME_CYCLE_PROVENANCE_INVALID',
+      `BWS runtime cycle import run ${importRun.importRunId} must remain a continuous_read_only_query_page source.`,
+      'Continuous read-only query import runs for private-paper runtime cycle provenance.',
+    );
+  }
+  if (importRun.upstreamLockRecordId !== upstreamLockRecordId) {
+    return blocked(
+      'BWS_QUERY_RUNTIME_CYCLE_PROVENANCE_INVALID',
+      `BWS runtime cycle import run ${importRun.importRunId} must stay on upstream lock ${upstreamLockRecordId}.`,
+      'Cycle import-run provenance pinned to the same committed-HEAD upstream lock as the runtime cycle.',
+    );
+  }
+  const metadata = asRecord(importRun.metadata);
+  const page = asRecord(metadata?.['page']);
+  const provenance = asRecord(page?.['provenance']);
+  if (
+    metadata?.['mode'] !== 'api'
+    || metadata?.['checkpointId'] !== checkpointId
+    || metadata?.['upstreamLockRecordId'] !== upstreamLockRecordId
+    || metadata?.['cycleNumber'] !== cycleNumber
+    || page?.['resource'] !== 'settlement'
+    || page?.['pageNumber'] !== pageNumber
+    || typeof provenance?.['responseReceivedAt'] !== 'string'
+  ) {
+    return blocked(
+      'BWS_QUERY_RUNTIME_CYCLE_PROVENANCE_INVALID',
+      `BWS runtime cycle import run ${importRun.importRunId} must keep settlement-page metadata aligned to checkpoint ${checkpointId} cycle ${cycleNumber}.`,
+      'Cycle import-run settlement metadata aligned to the selected checkpoint, page number, and verified upstream lock.',
+    );
+  }
+  return accepted(
+    Object.freeze({
+      hasNextCursor: typeof page['nextCursor'] === 'string' && page['nextCursor'].length > 0,
+    }),
+  );
+}
+
+function normalizeRuntimeCycleCheckpoints(
+  checkpoints: readonly SurebetWorkerJobCheckpointRecord[],
+  jobId: string,
+): BoundaryResult<readonly BwsPrivatePaperRuntimeCycleCheckpointItem[]> {
+  const items: BwsPrivatePaperRuntimeCycleCheckpointItem[] = [];
+  for (const checkpoint of checkpoints) {
+    const record = asRecord(checkpoint.checkpoint);
+    if (record === undefined) {
+      return blocked(
+        'BWS_QUERY_RUNTIME_CYCLE_CHECKPOINT_INVALID',
+        `BWS worker checkpoint ${jobId}:${checkpoint.checkpointId} must store an object-shaped checkpoint payload.`,
+        'Object-shaped persisted worker checkpoint payloads for runtime cycle visibility.',
+      );
+    }
+    items.push(
+      Object.freeze({
+        checkpoint: Object.freeze({ ...record }),
+        checkpointId: checkpoint.checkpointId,
+        checkpointSha256: checkpoint.checkpointSha256,
+        recordedAt: checkpoint.recordedAt,
+      }),
+    );
+  }
+  return accepted(Object.freeze(items));
+}
+
+function normalizeRuntimeCycleDeadLetter(
+  deadLetter: SurebetWorkerJobDeadLetterRecord,
+  jobId: string,
+): BoundaryResult<BwsPrivatePaperRuntimeCycleDeadLetterItem> {
+  const details = asRecord(deadLetter.deadLetterReasonDetails);
+  if (details === undefined) {
+    return blocked(
+      'BWS_QUERY_RUNTIME_CYCLE_DEAD_LETTER_INVALID',
+      `BWS worker dead-letter ${jobId} must retain object-shaped reason details.`,
+      'Object-shaped dead-letter reason details for blocked runtime cycle visibility.',
+    );
+  }
+  return accepted(
+    Object.freeze({
+      checkpointCount: deadLetter.checkpointCount,
+      deadLetterReasonCode: deadLetter.deadLetterReasonCode,
+      deadLetterReasonDetails: Object.freeze({ ...details }),
+      finalAttemptCount: deadLetter.finalAttemptCount,
+      insertedAt: deadLetter.insertedAt,
+    }),
+  );
+}
+
+function summarizeRuntimeCycleJob(job: SurebetWorkerJobRecord): BwsPrivatePaperRuntimeCycleJobSummary {
+  return Object.freeze({
+    attemptCount: job.attemptCount,
+    checkpointCount: job.checkpointCount,
+    ...(job.completedAt === undefined ? {} : { completedAt: job.completedAt }),
+    insertedAt: job.insertedAt,
+    jobId: job.jobId,
+    ...(job.lastCheckpointAt === undefined ? {} : { lastCheckpointAt: job.lastCheckpointAt }),
+    ...(job.lastCheckpointId === undefined ? {} : { lastCheckpointId: job.lastCheckpointId }),
+    ...(job.lastErrorCode === undefined ? {} : { lastErrorCode: job.lastErrorCode }),
+    queueName: job.queueName,
+    status: job.status,
+    updatedAt: job.updatedAt,
+  });
+}
+
+function parsePrivatePaperRuntimeJobPayload(
+  job: SurebetWorkerJobRecord,
+  schedulerCheckpoint: SurebetPrivatePaperRuntimeSchedulerCheckpointRecord,
+  cycleNumber: number,
+): BoundaryResult<Readonly<{
+  readonly cycleId: string;
+  readonly runtimeId: string;
+  readonly sourceKind: SurebetStrategySourceKind;
+  readonly sourceManifestHash: string;
+}>> {
+  const payload = asRecord(job.payload);
+  const source = asRecord(payload?.['source']);
+  if (
+    payload?.['schema'] !== PRIVATE_PAPER_RUNTIME_JOB_SCHEMA
+    || typeof payload?.['runtimeId'] !== 'string'
+    || typeof payload?.['cycleId'] !== 'string'
+    || typeof payload?.['upstreamLockRecordId'] !== 'string'
+    || !Number.isSafeInteger(payload?.['maxCandidatesPerCycle'])
+    || source === undefined
+  ) {
+    return blocked(
+      'BWS_QUERY_RUNTIME_CYCLE_JOB_INVALID',
+      `BWS private-paper worker job ${job.jobId} must retain a ${PRIVATE_PAPER_RUNTIME_JOB_SCHEMA} payload.`,
+      'Persisted private-paper worker payloads aligned to the BWS runtime job schema.',
+    );
+  }
+  const identifiers = parsePrivatePaperRuntimeJobId(job.jobId);
+  if (!identifiers.ok) {
+    return identifiers;
+  }
+  if (
+    identifiers.value.schedulerCheckpointId !== schedulerCheckpoint.schedulerCheckpointId
+    || identifiers.value.cycleNumber !== cycleNumber
+  ) {
+    return blocked(
+      'BWS_QUERY_RUNTIME_CYCLE_JOB_INVALID',
+      `BWS private-paper worker job ${job.jobId} must align to scheduler checkpoint ${schedulerCheckpoint.schedulerCheckpointId} cycle ${cycleNumber}.`,
+      'Deterministic private-paper worker job identifiers aligned to the scheduler checkpoint and cycle number.',
+    );
+  }
+  if (payload['upstreamLockRecordId'] !== schedulerCheckpoint.upstreamLockRecordId) {
+    return blocked(
+      'BWS_QUERY_RUNTIME_CYCLE_JOB_INVALID',
+      `BWS private-paper worker job ${job.jobId} must stay pinned to upstream lock ${schedulerCheckpoint.upstreamLockRecordId}.`,
+      'Private-paper worker jobs pinned to the same committed-HEAD upstream lock as their scheduler checkpoint.',
+    );
+  }
+  if (payload['runtimeId'] !== schedulerCheckpoint.runtimeId) {
+    return blocked(
+      'BWS_QUERY_RUNTIME_CYCLE_JOB_INVALID',
+      `BWS private-paper worker job ${job.jobId} must stay aligned to runtime ${schedulerCheckpoint.runtimeId}.`,
+      'Private-paper worker payload runtime identifiers aligned to the scheduler checkpoint runtime.',
+    );
+  }
+  const sourceManifestHash = typeof source['sourceManifestHash'] === 'string'
+    ? source['sourceManifestHash'].trim().toLowerCase()
+    : undefined;
+  const sourceKind = source['kind'];
+  if (
+    sourceManifestHash === undefined
+    || !/^[0-9a-f]{64}$/.test(sourceManifestHash)
+    || (sourceKind !== 'read_only_query' && sourceKind !== 'pinned_records')
+  ) {
+    return blocked(
+      'BWS_QUERY_RUNTIME_CYCLE_JOB_INVALID',
+      `BWS private-paper worker job ${job.jobId} must retain a supported source kind and 64-character sourceManifestHash.`,
+      'Private-paper worker payload source metadata aligned to the accepted runtime source contract.',
+    );
+  }
+  return accepted(
+    Object.freeze({
+      cycleId: payload['cycleId'].trim(),
+      runtimeId: payload['runtimeId'].trim(),
+      sourceKind,
+      sourceManifestHash,
+    }),
+  );
+}
+
+function parsePrivatePaperRuntimeJobId(
+  jobId: string,
+): BoundaryResult<Readonly<{ readonly cycleNumber: number; readonly schedulerCheckpointId: string }>> {
+  const match = /^private-paper:(.+):cycle:(\d+)$/.exec(jobId);
+  if (match === null) {
+    return blocked(
+      'BWS_QUERY_RUNTIME_CYCLE_JOB_INVALID',
+      `BWS private-paper worker job id ${jobId} must stay on the deterministic private-paper scheduler format.`,
+      'Deterministic private-paper worker job ids.',
+    );
+  }
+  const cycleNumber = Number.parseInt(match[2]!, 10);
+  if (!Number.isSafeInteger(cycleNumber) || cycleNumber <= 0) {
+    return blocked(
+      'BWS_QUERY_RUNTIME_CYCLE_JOB_INVALID',
+      `BWS private-paper worker job id ${jobId} must encode a positive cycle number.`,
+      'Positive cycle numbers encoded in private-paper worker job ids.',
+    );
+  }
+  return accepted(
+    Object.freeze({
+      cycleNumber,
+      schedulerCheckpointId: match[1]!,
+    }),
+  );
+}
+
 function validateConfig(
   config: BwsReadOnlyQueryServiceConfig,
 ): BoundaryResult<Readonly<BwsReadOnlyQueryServiceConfig>> {
@@ -470,12 +1138,17 @@ function validateDependencies(
     typeof dependencies.importRuns?.get !== 'function'
     || typeof dependencies.pinnedStrategyExports?.get !== 'function'
     || typeof dependencies.pinnedStrategyExports?.list !== 'function'
+    || typeof dependencies.privatePaperSchedulerCheckpoints?.list !== 'function'
     || typeof dependencies.strategyLedger?.list !== 'function'
+    || typeof dependencies.upstreamApiCheckpoints?.get !== 'function'
     || typeof dependencies.upstreamLocks?.get !== 'function'
+    || typeof dependencies.workerJobs?.get !== 'function'
+    || typeof dependencies.workerJobs?.getDeadLetter !== 'function'
+    || typeof dependencies.workerJobs?.listCheckpoints !== 'function'
   ) {
     return blocked(
       'BWS_QUERY_DEPENDENCIES_INVALID',
-      'BWS read-only query service requires explicit persistence dependencies for upstream locks, import runs, pinned exports, and strategy ledger queries.',
+      'BWS read-only query service requires explicit persistence dependencies for upstream locks, import runs, pinned exports, scheduler checkpoints, upstream API checkpoints, worker jobs, and strategy ledger queries.',
       'Explicit surebet.* repository dependencies for the BWS read-only query service.',
     );
   }
@@ -627,6 +1300,53 @@ function validatePinnedStrategyExportRequest(
   );
 }
 
+function validatePrivatePaperRuntimeCycleRequest(
+  config: Readonly<BwsReadOnlyQueryServiceConfig>,
+  request: BwsPrivatePaperRuntimeCycleQueryRequest,
+): BoundaryResult<NormalizedPrivatePaperRuntimeCycleRequest> {
+  if (request.expand !== 'provenance') {
+    return blocked(
+      'BWS_QUERY_EXPANSION_REQUIRED',
+      'BWS read-only private-paper runtime cycle queries require expand=provenance.',
+      'Explicit provenance expansion for private-paper runtime cycle responses.',
+    );
+  }
+  const pageSize = validatePageSize(config.maxPageSize, request.pageSize);
+  if (!pageSize.ok) {
+    return pageSize;
+  }
+  const acceptanceState = validateAcceptanceState(request.filters.acceptanceState);
+  if (!acceptanceState.ok) {
+    return acceptanceState;
+  }
+  const stringFilters = validateOptionalStringFilters([
+    ['queueName', request.filters.queueName],
+    ['runtimeId', request.filters.runtimeId],
+    ['schedulerCheckpointId', request.filters.schedulerCheckpointId],
+    ['upstreamLockRecordId', request.filters.upstreamLockRecordId],
+  ]);
+  if (!stringFilters.ok) {
+    return stringFilters;
+  }
+  return accepted(
+    Object.freeze({
+      expand: 'provenance',
+      filters: Object.freeze({
+        acceptanceState: acceptanceState.value,
+        ...(stringFilters.value['queueName'] === undefined ? {} : { queueName: stringFilters.value['queueName'] }),
+        ...(stringFilters.value['runtimeId'] === undefined ? {} : { runtimeId: stringFilters.value['runtimeId'] }),
+        ...(stringFilters.value['schedulerCheckpointId'] === undefined
+          ? {}
+          : { schedulerCheckpointId: stringFilters.value['schedulerCheckpointId'] }),
+        ...(stringFilters.value['upstreamLockRecordId'] === undefined
+          ? {}
+          : { upstreamLockRecordId: stringFilters.value['upstreamLockRecordId'] }),
+      }),
+      pageSize: pageSize.value,
+    }),
+  );
+}
+
 function validatePageSize(maxPageSize: number, pageSize: number): BoundaryResult<number> {
   if (!Number.isSafeInteger(pageSize) || pageSize <= 0) {
     return blocked(
@@ -745,6 +1465,17 @@ function hasPinnedStrategyExportFilter(filters: BwsPinnedStrategyExportQueryFilt
     || filters.upstreamLockRecordId !== undefined;
 }
 
+function toRuntimeCycleSchedulerFilters(
+  filters: NormalizedPrivatePaperRuntimeCycleRequest['filters'],
+): SurebetPrivatePaperRuntimeSchedulerCheckpointListFilters {
+  return Object.freeze({
+    ...(filters.queueName === undefined ? {} : { queueName: filters.queueName }),
+    ...(filters.runtimeId === undefined ? {} : { runtimeId: filters.runtimeId }),
+    ...(filters.schedulerCheckpointId === undefined ? {} : { schedulerCheckpointId: filters.schedulerCheckpointId }),
+    ...(filters.upstreamLockRecordId === undefined ? {} : { upstreamLockRecordId: filters.upstreamLockRecordId }),
+  });
+}
+
 function hashCursorScope(
   resource: CursorPayload['resource'],
   filters: SurebetStrategyLedgerListFilters | SurebetPinnedStrategyExportListFilters,
@@ -806,6 +1537,19 @@ function decodeCursor(
 
 function encodeCursor(payload: CursorPayload): string {
   return Buffer.from(JSON.stringify(payload), 'utf-8').toString('base64url');
+}
+
+function buildPrivatePaperRuntimeJobId(schedulerCheckpointId: string, cycleNumber: number): string {
+  return `private-paper:${schedulerCheckpointId}:cycle:${cycleNumber}`;
+}
+
+function buildPrivatePaperRuntimeImportRunId(
+  checkpointId: string,
+  cycleNumber: number,
+  resource: 'settlement',
+  pageNumber: number,
+): string {
+  return `import:${checkpointId}:cycle:${cycleNumber}:${resource}:page:${pageNumber}`;
 }
 
 function stableJsonStringify(value: unknown): string {

@@ -13,6 +13,6 @@ test('historical local-engine ledger is retained as bootstrap evidence, not acti
   assert.match(historical, /active_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1/);
   assert.match(historical, /bootstrap, not the complete application/);
   assert.match(read('README.md'), /packages\/bootstrap/);
-  assert.match(read('docs/repo_status_current.md'), /BWS-510/);
+  assert.match(read('docs/repo_status_current.md'), /BWS-520/);
   assert.match(read('docs/repo_status_current.md'), /BWS-580/);
 });

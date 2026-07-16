@@ -7,7 +7,7 @@ import { join } from 'node:path';
 const ROOT = process.cwd();
 const read = (rel: string): string => readFileSync(join(ROOT, rel), 'utf-8');
 
-test('full implementation ledger reopens the executable continuous-runtime queue at BWS-520', () => {
+test('full implementation ledger records BWS-580 validation and leaves only the external BWS-600 gate blocked', () => {
   const ledger = read('backlog/bws_full_implementation.csv');
   const task = read('docs/automation/current-implementation-task.md');
   const status = read('docs/repo_status_current.md');
@@ -18,20 +18,21 @@ test('full implementation ledger reopens the executable continuous-runtime queue
     'BWS-230,VALIDATED', 'BWS-240,VALIDATED', 'BWS-300,VALIDATED',
     'BWS-310,VALIDATED', 'BWS-320,VALIDATED', 'BWS-400,VALIDATED',
     'BWS-410,VALIDATED', 'BWS-420,VALIDATED', 'BWS-500,VALIDATED',
-    'BWS-510,VALIDATED', 'BWS-520,PENDING', 'BWS-530,PENDING',
-    'BWS-540,PENDING', 'BWS-550,PENDING', 'BWS-560,PENDING',
-    'BWS-570,PENDING', 'BWS-580,PENDING', 'BWS-600,BLOCKED',
+    'BWS-510,VALIDATED', 'BWS-520,VALIDATED', 'BWS-530,VALIDATED',
+    'BWS-540,VALIDATED', 'BWS-550,VALIDATED', 'BWS-560,VALIDATED',
+    'BWS-570,VALIDATED', 'BWS-580,VALIDATED', 'BWS-600,BLOCKED',
     'BWS-900,PARKED',
   ]) {
     assert.match(ledger, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
   assert.match(task, /program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1/);
-  assert.match(task, /current_task=BWS-520/);
-  assert.match(task, /current_task_status=PENDING/);
+  assert.match(task, /current_task=BWS-580/);
+  assert.match(task, /current_task_status=VALIDATED/);
   assert.match(task, /safe_local_terminal_gate=BWS-580/);
-  assert.match(task, /CONTINUE_REQUIRED=yes/);
+  assert.match(task, /AUTONOMOUS_GOAL_COMPLETE=yes/);
   assert.match(task, /without editing protected root wrappers or controllers/);
   assert.match(status, /selected_controller=run-autonomous-implementation\.sh/);
+  assert.match(status, /paper_autopilot=runtime_handoff_review_required_before_bws_600_selection/);
   assert.doesNotMatch(task, /repo-local backlogs are complete/);
 });
 

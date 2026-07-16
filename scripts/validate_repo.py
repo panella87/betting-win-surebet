@@ -167,6 +167,7 @@ def main() -> None:
         'typecheck', 'test', 'validate', 'validate:starter', 'validate:ops',
         'validate:implementation-program', 'validate:loopback-acceptance', 'validate:upstream-boundary',
         'generate:upstream-lock', 'verify:upstream-lock',
+        'runtime:start', 'runtime:status', 'runtime:stop',
         'validate:three-repo-boundary', 'restore:executables', 'regen:source-manifest',
         'zip:codebase', 'autonomous:check', 'autonomous:start', 'autonomous:bugfix',
         'paper:evaluation', 'paper:autopilot', 'bugfix', 'bugfix:autopilot', 'automation:status',
@@ -182,18 +183,18 @@ def main() -> None:
         fail('package.json bin must expose ./cli.js')
 
     required_doc_markers = {
-        'README.md': ['program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1', 'repo_role=surebet_strategy_application', 'current_task=BWS-520', 'safe_local_terminal_gate=BWS-580', 'run-autonomous-implementation.sh'],
+        'README.md': ['program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1', 'repo_role=surebet_strategy_application', 'current_task=BWS-580', 'safe_local_terminal_gate=BWS-580', 'run-autonomous-implementation.sh'],
         'AGENTS.md': ['Source-of-truth order', 'BETTING_WIN_REPO_PATH', 'backlog/bws_full_implementation.csv', 'BWS-510', 'BWS-580'],
         'docs/automation/repo-profile.md': ['repo_role=surebet_strategy_application', 'program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1', 'Standard helper scripts'],
         'docs/automation/paper-evaluation.md': ['run-paper-evaluation.sh', 'retained fixture/pinned-bundle evaluator', 'SUREBET_PINNED_BUNDLE'],
         'docs/automation/paper-autopilot.md': ['run-paper-autopilot.sh', 'not the active router', 'BWS-580', 'PAPER_AUTOPILOT_BLOCKED_ON_PINNED_BUNDLE'],
         'docs/automation/autonomous-bugfix.md': ['strict implementation-handoff controller', 'BUGFIX_AUDIT_COMPLETE=yes', 'request_flags.txt'],
         'docs/automation/bugfix-autopilot.md': ['run-bugfix-autopilot.sh', 'same-area re-audit', 'campaign_coverage.tsv'],
-        'PROJECT_STATUS.md': ['program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1', 'status=IMPLEMENTATION_READY', 'current_task=BWS-520', 'safe_local_completion_gate=BWS-580'],
-        'docs/repo_status_current.md': ['Standard automation status', 'run_autonomous_implementation=standardized_and_selected_for_continuous_runtime_build', 'run_paper_autopilot=standardized_parent_not_selected_while_runtime_source_queue_remains', 'run_bugfix_autopilot=standardized_parent_for_broad_audit_and_repair'],
+        'PROJECT_STATUS.md': ['program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1', 'status=IMPLEMENTATION_READY', 'current_task=BWS-580', 'current_task_status=VALIDATED', 'safe_local_completion_gate=BWS-580'],
+        'docs/repo_status_current.md': ['Standard automation status', 'run_autonomous_implementation=standardized_and_selected_for_continuous_runtime_build', 'run_paper_autopilot=standardized_parent_pending_runtime_handoff_review_for_bws_600', 'run_bugfix_autopilot=standardized_parent_for_broad_audit_and_repair'],
         'docs/MASTER_PLAN.md': ['program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1', 'backlog/bws_full_implementation.csv', 'Automation operating model'],
         'docs/032_database_and_data_lifecycle.md': ['DB_URL_TEST', 'SUREBET_TEST_*', 'CREATEDB'],
-        'docs/033_continuous_private_paper_runtime_program.md': ['current_task=BWS-520', 'safe_local_terminal_gate=BWS-580', 'BWS-600'],
+        'docs/033_continuous_private_paper_runtime_program.md': ['current_task=BWS-580', 'safe_local_terminal_gate=BWS-580', 'BWS-600'],
     }
     for rel, markers in required_doc_markers.items():
         text = read(ROOT / rel)

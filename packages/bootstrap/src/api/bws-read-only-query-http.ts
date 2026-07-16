@@ -2,6 +2,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import { URL } from 'node:url';
 import type { BwsOperationalStatusSnapshot } from '../operations/service-runtime.js';
 import type {
+  BwsPrivatePaperRuntimeCycleQueryRequest,
   BwsPinnedStrategyExportQueryRequest,
   BwsReadOnlyQueryResponse,
   BwsReadOnlyQueryService,
@@ -11,6 +12,7 @@ import type {
 const JSON_CONTENT_TYPE = 'application/json; charset=utf-8';
 
 const HEALTH_PATH = '/health';
+const PRIVATE_PAPER_RUNTIME_CYCLES_PATH = '/api/read-only/private-paper-runtime-cycles';
 const STRATEGY_LEDGER_PATH = '/api/read-only/strategy-ledger';
 const PINNED_STRATEGY_EXPORTS_PATH = '/api/read-only/pinned-strategy-exports';
 const READINESS_PATH = '/readiness';
@@ -47,6 +49,16 @@ const PINNED_STRATEGY_EXPORT_QUERY_KEYS = new Set([
   'pageSize',
   'providerId',
   'sourceSha256',
+  'upstreamLockRecordId',
+]);
+
+const PRIVATE_PAPER_RUNTIME_CYCLE_QUERY_KEYS = new Set([
+  'acceptanceState',
+  'expand',
+  'pageSize',
+  'queueName',
+  'runtimeId',
+  'schedulerCheckpointId',
   'upstreamLockRecordId',
 ]);
 
@@ -137,6 +149,17 @@ export function createBwsReadOnlyQueryHttpHandler(
         return;
       }
 
+      if (pathname === PRIVATE_PAPER_RUNTIME_CYCLES_PATH) {
+        const requestBody = parsePrivatePaperRuntimeCycleRequest(requestUrl);
+        const result = service.queryPrivatePaperRuntimeCycles(requestBody);
+        if (!result.ok) {
+          writeBlockedResponse(response, result.blockers[0]);
+          return;
+        }
+        writeJson(response, 200, result.value);
+        return;
+      }
+
       writeJson(response, 404, {
         error: {
           code: 'BWS_QUERY_PATH_NOT_FOUND',
@@ -207,6 +230,27 @@ function parsePinnedStrategyExportRequest(url: URL): BwsPinnedStrategyExportQuer
       ...(importRunId === undefined ? {} : { importRunId }),
       ...(providerId === undefined ? {} : { providerId }),
       ...(sourceSha256 === undefined ? {} : { sourceSha256 }),
+      ...(upstreamLockRecordId === undefined ? {} : { upstreamLockRecordId }),
+    }),
+    pageSize: requirePositiveIntegerParam(url, 'pageSize'),
+  });
+}
+
+function parsePrivatePaperRuntimeCycleRequest(url: URL): BwsPrivatePaperRuntimeCycleQueryRequest {
+  assertAllowedQueryKeys(url, PRIVATE_PAPER_RUNTIME_CYCLE_QUERY_KEYS);
+  const expand = getSingleValue(url, 'expand');
+  const acceptanceState = getSingleValue(url, 'acceptanceState');
+  const queueName = getSingleValue(url, 'queueName');
+  const runtimeId = getSingleValue(url, 'runtimeId');
+  const schedulerCheckpointId = getSingleValue(url, 'schedulerCheckpointId');
+  const upstreamLockRecordId = getSingleValue(url, 'upstreamLockRecordId');
+  return Object.freeze({
+    ...(expand === undefined ? {} : { expand }),
+    filters: Object.freeze({
+      ...(acceptanceState === undefined ? {} : { acceptanceState }),
+      ...(queueName === undefined ? {} : { queueName }),
+      ...(runtimeId === undefined ? {} : { runtimeId }),
+      ...(schedulerCheckpointId === undefined ? {} : { schedulerCheckpointId }),
       ...(upstreamLockRecordId === undefined ? {} : { upstreamLockRecordId }),
     }),
     pageSize: requirePositiveIntegerParam(url, 'pageSize'),

@@ -35,13 +35,13 @@ EXPECTED_STATUS = {
     'BWS-420': 'VALIDATED',
     'BWS-500': 'VALIDATED',
     'BWS-510': 'VALIDATED',
-    'BWS-520': 'PENDING',
-    'BWS-530': 'PENDING',
-    'BWS-540': 'PENDING',
-    'BWS-550': 'PENDING',
-    'BWS-560': 'PENDING',
-    'BWS-570': 'PENDING',
-    'BWS-580': 'PENDING',
+    'BWS-520': 'VALIDATED',
+    'BWS-530': 'VALIDATED',
+    'BWS-540': 'VALIDATED',
+    'BWS-550': 'VALIDATED',
+    'BWS-560': 'VALIDATED',
+    'BWS-570': 'VALIDATED',
+    'BWS-580': 'VALIDATED',
     'BWS-600': 'BLOCKED',
     'BWS-900': 'PARKED',
 }
@@ -148,8 +148,8 @@ def main() -> None:
         if row['status'] == 'PENDING'
         and all(dep in validated for dep in parse_dependencies(row['depends_on']))
     ]
-    if ready != ['BWS-520']:
-        fail(f'first dependency-ready continuous-runtime task must be BWS-520, found {ready!r}')
+    if ready:
+        fail(f'no dependency-ready safe local task should remain after BWS-580 validation, found {ready!r}')
 
     for rel in ACTIVE_AUTHORITY:
         text = read(rel)
@@ -159,10 +159,10 @@ def main() -> None:
 
     task = read('docs/automation/current-implementation-task.md')
     for marker in [
-        'current_task=BWS-520', 'current_task_status=PENDING',
+        'current_task=BWS-580', 'current_task_status=VALIDATED',
         'safe_local_terminal_gate=BWS-580', 'backlog/bws_full_implementation.csv',
         'docs/033_continuous_private_paper_runtime_program.md',
-        'BETTING_WIN_REPO_PATH', 'CONTINUE_REQUIRED=yes',
+        'BETTING_WIN_REPO_PATH',
         'AUTONOMOUS_GOAL_COMPLETE=yes',
         'protected_automation_files=read_only',
     ]:
@@ -170,10 +170,10 @@ def main() -> None:
 
     status = read('docs/repo_status_current.md')
     for marker in [
-        'status=IMPLEMENTATION_READY', 'current_task=BWS-520',
-        'current_task_status=PENDING', 'safe_local_terminal_gate=BWS-580',
+        'status=IMPLEMENTATION_READY', 'current_task=BWS-580',
+        'current_task_status=VALIDATED', 'safe_local_terminal_gate=BWS-580',
         'selected_controller=run-autonomous-implementation.sh',
-        'paper_autopilot=not_selected_until_bws_580_validation_and_runtime_controller_review',
+        'paper_autopilot=runtime_handoff_review_required_before_bws_600_selection',
         'run_autonomous_implementation=standardized_and_selected_for_continuous_runtime_build',
     ]:
         require(status, marker, 'docs/repo_status_current.md')

@@ -1,4 +1,6 @@
 import type {
+  BwsPrivatePaperRuntimeCycleItem,
+  BwsPrivatePaperRuntimeCycleQueryRequest,
   BwsPinnedStrategyExportItem,
   BwsPinnedStrategyExportQueryRequest,
   BwsReadOnlyQueryResponse,
@@ -40,7 +42,7 @@ const RUN_KINDS = new Set<SurebetStrategyRunKind>([
 const SETTLEMENT_STATES = new Set<SurebetStrategySettlementState>(['blocked', 'reconciled']);
 const SOURCE_KINDS = new Set<SurebetStrategySourceKind>(['pinned_records', 'read_only_query', 'resource_export']);
 
-type ReadOnlyResponseItem = BwsStrategyLedgerItem | BwsPinnedStrategyExportItem;
+type ReadOnlyResponseItem = BwsPrivatePaperRuntimeCycleItem | BwsStrategyLedgerItem | BwsPinnedStrategyExportItem;
 
 export type BwsOperatorCockpitFetchResponse = Readonly<{
   ok: boolean;
@@ -57,6 +59,9 @@ export type BwsOperatorCockpitFetchLike = (
 ) => Promise<BwsOperatorCockpitFetchResponse>;
 
 export interface BwsOperatorCockpitApiClient {
+  queryPrivatePaperRuntimeCycles(
+    request: BwsPrivatePaperRuntimeCycleQueryRequest,
+  ): Promise<BwsReadOnlyQueryResponse<'private_paper_runtime_cycles', BwsPrivatePaperRuntimeCycleItem>>;
   queryPinnedStrategyExports(
     request: BwsPinnedStrategyExportQueryRequest,
   ): Promise<BwsReadOnlyQueryResponse<'pinned_strategy_exports', BwsPinnedStrategyExportItem>>;
@@ -402,6 +407,116 @@ function assertStrategyLedgerItem(value: unknown, label: string): BwsStrategyLed
   return record as unknown as BwsStrategyLedgerItem;
 }
 
+function assertPrivatePaperRuntimeCycleItem(value: unknown, label: string): BwsPrivatePaperRuntimeCycleItem {
+  const record = requireObjectRecord(value, label);
+  const acceptanceState = requireLiteral(record['acceptanceState'], ACCEPTANCE_STATES, `${label}.acceptanceState`);
+  requireOptionalNonEmptyString(record['blockedReasonCode'], `${label}.blockedReasonCode`);
+  const cycleId = requireNonEmptyString(record['cycleId'], `${label}.cycleId`);
+  requirePositiveInteger(record['cycleNumber'], `${label}.cycleNumber`);
+  requireNonEmptyString(record['runtimeId'], `${label}.runtimeId`);
+  requireLiteral(record['sourceKind'], SOURCE_KINDS, `${label}.sourceKind`);
+  requireSha256(record['sourceManifestHash'], `${label}.sourceManifestHash`);
+
+  const job = requireObjectRecord(record['job'], `${label}.job`);
+  requirePositiveInteger(job['attemptCount'], `${label}.job.attemptCount`);
+  requireNonNegativeInteger(job['checkpointCount'], `${label}.job.checkpointCount`);
+  requireOptionalNonEmptyString(job['completedAt'], `${label}.job.completedAt`);
+  requireIsoTimestamp(job['insertedAt'], `${label}.job.insertedAt`);
+  requireNonEmptyString(job['jobId'], `${label}.job.jobId`);
+  requireOptionalNonEmptyString(job['lastCheckpointAt'], `${label}.job.lastCheckpointAt`);
+  requireOptionalNonEmptyString(job['lastCheckpointId'], `${label}.job.lastCheckpointId`);
+  requireOptionalNonEmptyString(job['lastErrorCode'], `${label}.job.lastErrorCode`);
+  requireNonEmptyString(job['queueName'], `${label}.job.queueName`);
+  requireNonEmptyString(job['status'], `${label}.job.status`);
+  requireIsoTimestamp(job['updatedAt'], `${label}.job.updatedAt`);
+
+  const provenance = requireObjectRecord(record['provenance'], `${label}.provenance`);
+  const upstreamLockRecordId = requireNonEmptyString(
+    provenance['upstreamLockRecordId'],
+    `${label}.provenance.upstreamLockRecordId`,
+  );
+  validateUpstreamLockBoundary(
+    assertUpstreamLock(provenance['upstreamLock'], `${label}.provenance.upstreamLock`),
+    `${label}.provenance.upstreamLock`,
+  );
+
+  const schedulerCheckpoint = requireObjectRecord(
+    provenance['schedulerCheckpoint'],
+    `${label}.provenance.schedulerCheckpoint`,
+  );
+  if (requireNonEmptyString(
+    schedulerCheckpoint['upstreamLockRecordId'],
+    `${label}.provenance.schedulerCheckpoint.upstreamLockRecordId`,
+  ) !== upstreamLockRecordId) {
+    fail(`${label}.provenance.schedulerCheckpoint.upstreamLockRecordId must match provenance.upstreamLockRecordId`);
+  }
+  requireNonEmptyString(
+    schedulerCheckpoint['schedulerCheckpointId'],
+    `${label}.provenance.schedulerCheckpoint.schedulerCheckpointId`,
+  );
+  requireNonEmptyString(schedulerCheckpoint['runtimeId'], `${label}.provenance.schedulerCheckpoint.runtimeId`);
+  requireNonEmptyString(schedulerCheckpoint['queueName'], `${label}.provenance.schedulerCheckpoint.queueName`);
+  requireNonEmptyString(
+    schedulerCheckpoint['upstreamCheckpointId'],
+    `${label}.provenance.schedulerCheckpoint.upstreamCheckpointId`,
+  );
+
+  const upstreamApiCheckpoint = requireObjectRecord(
+    provenance['upstreamApiCheckpoint'],
+    `${label}.provenance.upstreamApiCheckpoint`,
+  );
+  if (requireNonEmptyString(
+    upstreamApiCheckpoint['upstreamLockRecordId'],
+    `${label}.provenance.upstreamApiCheckpoint.upstreamLockRecordId`,
+  ) !== upstreamLockRecordId) {
+    fail(`${label}.provenance.upstreamApiCheckpoint.upstreamLockRecordId must match provenance.upstreamLockRecordId`);
+  }
+  requireNonEmptyString(upstreamApiCheckpoint['checkpointId'], `${label}.provenance.upstreamApiCheckpoint.checkpointId`);
+  requirePositiveInteger(upstreamApiCheckpoint['currentCycleNumber'], `${label}.provenance.upstreamApiCheckpoint.currentCycleNumber`);
+  requireNonNegativeInteger(
+    upstreamApiCheckpoint['completedCycleCount'],
+    `${label}.provenance.upstreamApiCheckpoint.completedCycleCount`,
+  );
+
+  if (provenance['cycleImportRun'] !== undefined) {
+    assertImportRunRecord(provenance['cycleImportRun'], `${label}.provenance.cycleImportRun`, upstreamLockRecordId);
+  }
+
+  const recentCheckpoints = requireArray<unknown>(record['recentCheckpoints'], `${label}.recentCheckpoints`);
+  for (const [index, checkpointValue] of recentCheckpoints.entries()) {
+    const checkpoint = requireObjectRecord(checkpointValue, `${label}.recentCheckpoints[${index}]`);
+    requireObjectRecord(checkpoint['checkpoint'], `${label}.recentCheckpoints[${index}].checkpoint`);
+    requireNonEmptyString(checkpoint['checkpointId'], `${label}.recentCheckpoints[${index}].checkpointId`);
+    requireSha256(checkpoint['checkpointSha256'], `${label}.recentCheckpoints[${index}].checkpointSha256`);
+    requireIsoTimestamp(checkpoint['recordedAt'], `${label}.recentCheckpoints[${index}].recordedAt`);
+  }
+
+  const strategyLedger = record['strategyLedger'] === undefined
+    ? undefined
+    : assertStrategyLedgerItem(record['strategyLedger'], `${label}.strategyLedger`);
+  if (strategyLedger !== undefined && strategyLedger.entry.acceptanceState !== acceptanceState) {
+    fail(`${label}.strategyLedger.entry.acceptanceState must match the runtime cycle acceptanceState`);
+  }
+
+  const deadLetter = record['deadLetter'] === undefined
+    ? undefined
+    : requireObjectRecord(record['deadLetter'], `${label}.deadLetter`);
+  if (deadLetter !== undefined) {
+    requireNonNegativeInteger(deadLetter['checkpointCount'], `${label}.deadLetter.checkpointCount`);
+    requireNonEmptyString(deadLetter['deadLetterReasonCode'], `${label}.deadLetter.deadLetterReasonCode`);
+    requireObjectRecord(deadLetter['deadLetterReasonDetails'], `${label}.deadLetter.deadLetterReasonDetails`);
+    requirePositiveInteger(deadLetter['finalAttemptCount'], `${label}.deadLetter.finalAttemptCount`);
+    requireIsoTimestamp(deadLetter['insertedAt'], `${label}.deadLetter.insertedAt`);
+  }
+  if (acceptanceState === 'accepted_local_evidence' && strategyLedger === undefined) {
+    fail(`${label} accepted runtime cycles must expose strategy-ledger evidence`);
+  }
+  if (acceptanceState === 'blocked' && strategyLedger === undefined && deadLetter === undefined) {
+    fail(`${label} blocked runtime cycles must expose either strategy-ledger evidence or a dead-letter record`);
+  }
+  return record as unknown as BwsPrivatePaperRuntimeCycleItem;
+}
+
 function assertPinnedStrategyExportItem(value: unknown, label: string): BwsPinnedStrategyExportItem {
   const record = requireObjectRecord(value, label);
   const provenance = requireObjectRecord(record['provenance'], `${label}.provenance`);
@@ -440,23 +555,28 @@ function assertPinnedStrategyExportItem(value: unknown, label: string): BwsPinne
 }
 
 function assertResponseItems<
-  TResource extends 'pinned_strategy_exports' | 'strategy_ledger_entries',
+  TResource extends 'pinned_strategy_exports' | 'private_paper_runtime_cycles' | 'strategy_ledger_entries',
 >(
   resource: TResource,
   items: readonly unknown[],
-): readonly (TResource extends 'pinned_strategy_exports' ? BwsPinnedStrategyExportItem : BwsStrategyLedgerItem)[] {
+) {
   if (resource === 'pinned_strategy_exports') {
     return Object.freeze(
       items.map((item, index) => assertPinnedStrategyExportItem(item, `page.items[${index}]`)),
-    ) as readonly (TResource extends 'pinned_strategy_exports' ? BwsPinnedStrategyExportItem : BwsStrategyLedgerItem)[];
+    );
+  }
+  if (resource === 'private_paper_runtime_cycles') {
+    return Object.freeze(
+      items.map((item, index) => assertPrivatePaperRuntimeCycleItem(item, `page.items[${index}]`)),
+    );
   }
   return Object.freeze(
     items.map((item, index) => assertStrategyLedgerItem(item, `page.items[${index}]`)),
-  ) as readonly (TResource extends 'pinned_strategy_exports' ? BwsPinnedStrategyExportItem : BwsStrategyLedgerItem)[];
+  );
 }
 
 function assertReadOnlyQueryResponse<
-  TResource extends 'pinned_strategy_exports' | 'strategy_ledger_entries',
+  TResource extends 'pinned_strategy_exports' | 'private_paper_runtime_cycles' | 'strategy_ledger_entries',
   TItem extends ReadOnlyResponseItem,
 >(
   value: unknown,
@@ -611,6 +731,18 @@ function createStrategyLedgerRequest(
   });
 }
 
+function createPrivatePaperRuntimeCycleRequest(
+  acceptanceState: 'accepted_local_evidence' | 'blocked',
+): BwsPrivatePaperRuntimeCycleQueryRequest {
+  return Object.freeze({
+    expand: 'provenance',
+    filters: Object.freeze({
+      acceptanceState,
+    }),
+    pageSize: 8,
+  });
+}
+
 function buildStrategyLedgerUrl(
   baseUrl: string,
   request: BwsStrategyLedgerQueryRequest,
@@ -647,6 +779,21 @@ function buildPinnedStrategyExportsUrl(
   appendQueryParameter(searchParams, 'sourceSha256', normalizedScope.sourceSha256);
   appendQueryParameter(searchParams, 'upstreamLockRecordId', normalizedScope.upstreamLockRecordId);
   return new URL(`/api/read-only/pinned-strategy-exports?${searchParams.toString()}`, baseUrl).href;
+}
+
+function buildPrivatePaperRuntimeCyclesUrl(
+  baseUrl: string,
+  request: BwsPrivatePaperRuntimeCycleQueryRequest,
+): string {
+  const searchParams = new URLSearchParams();
+  appendQueryParameter(searchParams, 'pageSize', request.pageSize);
+  appendQueryParameter(searchParams, 'expand', request.expand);
+  appendQueryParameter(searchParams, 'acceptanceState', request.filters.acceptanceState);
+  appendQueryParameter(searchParams, 'queueName', request.filters.queueName);
+  appendQueryParameter(searchParams, 'runtimeId', request.filters.runtimeId);
+  appendQueryParameter(searchParams, 'schedulerCheckpointId', request.filters.schedulerCheckpointId);
+  appendQueryParameter(searchParams, 'upstreamLockRecordId', request.filters.upstreamLockRecordId);
+  return new URL(`/api/read-only/private-paper-runtime-cycles?${searchParams.toString()}`, baseUrl).href;
 }
 
 function buildErrorMessage(path: string, status: number, payloadText: string): string {
@@ -734,6 +881,16 @@ export function createBwsOperatorCockpitApiClient(
   fetchImpl: BwsOperatorCockpitFetchLike = defaultFetchLike(),
 ): BwsOperatorCockpitApiClient {
   return Object.freeze({
+    async queryPrivatePaperRuntimeCycles(
+      request: BwsPrivatePaperRuntimeCycleQueryRequest,
+    ) {
+      const path = buildPrivatePaperRuntimeCyclesUrl(configuration.apiBaseUrl, request);
+      const response = await readOnlyGetJson<unknown>(path, fetchImpl);
+      return assertReadOnlyQueryResponse<'private_paper_runtime_cycles', BwsPrivatePaperRuntimeCycleItem>(
+        response,
+        'private_paper_runtime_cycles',
+      );
+    },
     async queryPinnedStrategyExports(
       request: BwsPinnedStrategyExportQueryRequest,
     ) {
@@ -774,8 +931,10 @@ export async function loadBwsOperatorCockpitSnapshot(
       return Object.freeze({
         acceptedBacktests: mockSnapshot.acceptedBacktests,
         acceptedPaperRuns: mockSnapshot.acceptedPaperRuns,
+        acceptedRuntimeCycles: mockSnapshot.acceptedRuntimeCycles,
         blockedBacktests: mockSnapshot.blockedBacktests,
         blockedPaperRuns: mockSnapshot.blockedPaperRuns,
+        blockedRuntimeCycles: mockSnapshot.blockedRuntimeCycles,
       });
     }
     return Object.freeze({
@@ -790,6 +949,8 @@ export async function loadBwsOperatorCockpitSnapshot(
     blockedBacktests,
     acceptedPaperRuns,
     blockedPaperRuns,
+    acceptedRuntimeCycles,
+    blockedRuntimeCycles,
     pinnedStrategyExports,
   ] = await Promise.all([
     client.queryStrategyLedger(
@@ -803,6 +964,12 @@ export async function loadBwsOperatorCockpitSnapshot(
     ),
     client.queryStrategyLedger(
       createStrategyLedgerRequest('blocked', 'private_paper_runtime_cycle'),
+    ),
+    client.queryPrivatePaperRuntimeCycles(
+      createPrivatePaperRuntimeCycleRequest('accepted_local_evidence'),
+    ),
+    client.queryPrivatePaperRuntimeCycles(
+      createPrivatePaperRuntimeCycleRequest('blocked'),
     ),
     request.includePinnedStrategyExports && request.evidenceScope !== undefined
       ? client.queryPinnedStrategyExports(
@@ -818,8 +985,10 @@ export async function loadBwsOperatorCockpitSnapshot(
   return Object.freeze({
     acceptedBacktests,
     acceptedPaperRuns,
+    acceptedRuntimeCycles,
     blockedBacktests,
     blockedPaperRuns,
+    blockedRuntimeCycles,
     ...(request.includePinnedStrategyExports && request.evidenceScope !== undefined && pinnedStrategyExports !== undefined
       ? {
           pinnedExportScope: request.evidenceScope,

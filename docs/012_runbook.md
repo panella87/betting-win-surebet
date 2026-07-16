@@ -6,7 +6,7 @@
 2. Ensure `BETTING_WIN_REPO_PATH` points to the existing readable betting-win Git checkout. BWS reads committed `HEAD` only and must not clone, clean, reset or modify it.
 3. Keep the validated PostgreSQL URLs private in `.env`.
 4. Start `run-autonomous-implementation.sh` with the canonical 72-hour, 200-cycle campaign.
-5. The controller begins at `BWS-520` and continues through every dependency-ready safe local task up to `BWS-580`.
+5. The validated safe local queue ran from `BWS-520` through `BWS-580`; inspect the retained evidence before advancing any controller-routing decision.
 6. Inspect the newest `artifacts/autonomous_implementation_*` evidence, not process exit or elapsed time alone.
 
 `BWS-510` loopback acceptance remains validated. The current queue operationalizes that source into executable continuous services and does not repeat the original build.

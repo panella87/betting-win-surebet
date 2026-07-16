@@ -4,7 +4,7 @@
 paper_mode_owner=betting-win-surebet
 account_policy=separate_from_betting-win-betting
 current_stage=continuous_runtime_implementation
-current_task=BWS-520
+current_task=BWS-580
 safe_local_terminal_gate=BWS-580
 ```
 
@@ -12,9 +12,9 @@ safe_local_terminal_gate=BWS-580
 
 `BWS-310` proves bounded private-paper domain behavior and `BWS-510` proves integrated loopback behavior. Those proofs remain binding.
 
-## Remaining source work
+## Safe local completion
 
-Use `run-autonomous-implementation.sh` for `BWS-520` through `BWS-580` to create executable API/worker applications, explicit export and API convergence, persisted scheduling, operator lifecycle, runtime/API/cockpit convergence and integrated continuous-runtime acceptance.
+`run-autonomous-implementation.sh` validated `BWS-520` through `BWS-580`, creating executable API/worker applications, explicit export and API convergence, persisted scheduling, operator lifecycle, runtime/API/cockpit convergence, integrated continuous-runtime acceptance, and the strict machine-readable runtime handoff.
 
 Paper mode must select exactly one explicit upstream mode:
 
@@ -31,7 +31,7 @@ Evidence includes upstream lock, source fingerprints, BWS config, selected mode,
 
 ## Continuous runtime gate
 
-`BWS-600` remains blocked until `BWS-580` is validated and accepted operator-approved betting-win continuous read-only runtime evidence and configuration exist. Loopback or fixture success cannot remove this external gate.
+`BWS-600` remains blocked because accepted operator-approved betting-win continuous read-only runtime evidence and configuration do not yet exist. Loopback or fixture success cannot remove this external gate.
 
 ## Prohibited
 

@@ -15,7 +15,7 @@ backtesting_owner=betting-win-surebet
 paper_mode_owner=betting-win-surebet
 future_live_decision_owner=betting-win-surebet_after_explicit_gate
 account_policy=separate_from_betting-win-betting
-current_task=BWS-520
+current_task=BWS-580
 safe_local_terminal_gate=BWS-580
 execution_gate=closed
 ```
@@ -47,23 +47,23 @@ surebet_profile=surebet_standard_binary_v0
 
 ## Current implementation state
 
-`BWS-100` through `BWS-510` are validated. The workspace migration keeps tested implementations in `packages/bootstrap`, `packages/persistence` and `packages/upstream`, with `src/` compatibility shims and a validated React cockpit under `apps/web`.
+`BWS-100` through `BWS-580` are validated. The workspace migration keeps tested implementations in `packages/bootstrap`, `packages/persistence` and `packages/upstream`, with `src/` compatibility shims and a validated React cockpit under `apps/web`.
 
 Continuous runtime implementation remains:
 
 ```text
-BWS-520 executable loopback API and worker applications
-BWS-530 continuous immutable-export convergence
-BWS-540 continuous typed API convergence
-BWS-550 continuous scheduling and bounded workers
-BWS-560 operator lifecycle, status and evidence
-BWS-570 runtime/API/cockpit convergence
-BWS-580 integrated continuous-runtime acceptance and handoff
-BWS-600 accepted external runtime evidence
+BWS-520 executable loopback API and worker applications [validated]
+BWS-530 continuous immutable-export convergence [validated]
+BWS-540 continuous typed API convergence [validated]
+BWS-550 continuous scheduling and bounded workers [validated]
+BWS-560 operator lifecycle, status and evidence [validated]
+BWS-570 runtime/API/cockpit convergence [validated]
+BWS-580 integrated continuous-runtime acceptance and handoff [validated]
+BWS-600 accepted external runtime evidence [externally blocked]
 BWS-900 separately authorized execution
 ```
 
-The current root lifecycle still starts no service and the paper evaluator remains single-pass fixture/pinned-bundle only. That is why `BWS-520`, not paper autopilot, is the active task.
+The product-owned runtime surface now includes loopback API and bounded worker entrypoints, explicit immutable-export and typed API convergence, restart-safe API-mode scheduling into deterministic private-paper jobs, verified repo-owned lifecycle evidence publication, persisted runtime/API/cockpit convergence over accepted and blocked continuous paper cycles, and a strict machine-readable paper-runtime handoff with immutable source archive packaging. Safe local implementation is complete through `BWS-580`; `BWS-600` remains blocked on accepted external betting-win runtime evidence and paper-controller review.
 
 ## Authority
 

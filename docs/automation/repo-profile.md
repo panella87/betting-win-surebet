@@ -4,7 +4,7 @@
 repo_role=surebet_strategy_application
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 upstream_platform=betting-win
-current_task=BWS-520
+current_task=BWS-580
 safe_local_terminal_gate=BWS-580
 node_runtime=20
 package_manager=npm
@@ -35,4 +35,4 @@ run-paper-evaluation.sh           retained no-service fixture/pinned-bundle eval
 run-paper-autopilot.sh            not selected until continuous runtime source work is validated
 ```
 
-The repository has validated runtime libraries and loopback acceptance through `BWS-510`, but not an executable continuous service lifecycle. `BWS-520` through `BWS-580` build that surface. `BWS-600` remains the external accepted-runtime evidence gate.
+The repository has validated runtime libraries, loopback acceptance, executable loopback-only API/worker applications, explicit immutable-export plus typed API convergence, continuous API-mode scheduler/worker orchestration, verified repo-owned loopback lifecycle plus immutable evidence publication through `BWS-560`, persisted runtime/API/cockpit convergence through `BWS-570`, and integrated continuous-runtime acceptance plus strict handoff packaging through `BWS-580`. `BWS-600` remains the external accepted-runtime evidence gate.

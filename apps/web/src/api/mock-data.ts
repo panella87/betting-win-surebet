@@ -1,4 +1,5 @@
 import type {
+  BwsPrivatePaperRuntimeCycleItem,
   BwsPinnedStrategyExportItem,
   BwsReadOnlyQueryResponse,
   BwsStrategyLedgerItem,
@@ -199,6 +200,196 @@ function strategyResponse(
   });
 }
 
+function runtimeCycleResponse(
+  items: readonly BwsPrivatePaperRuntimeCycleItem[],
+): BwsReadOnlyQueryResponse<'private_paper_runtime_cycles', BwsPrivatePaperRuntimeCycleItem> {
+  return Object.freeze({
+    boundary: Object.freeze({
+      automaticFallback: 'forbidden',
+      bwsReadOnlyQueryServiceBoundary: '@betting-win-surebet/bootstrap:BWS-400',
+      upstreamReadOnlyQueryClientBoundary: '@betting-win-surebet/bootstrap:BWS-140',
+    }),
+    generatedAt: MOCK_GENERATED_AT,
+    page: Object.freeze({
+      items: Object.freeze(items),
+      pageSize: 8,
+      returnedCount: items.length,
+    }),
+    resource: 'private_paper_runtime_cycles',
+  });
+}
+
+function runtimeCycle(
+  values: Readonly<{
+    acceptanceState: 'accepted_local_evidence' | 'blocked';
+    blockedReasonCode?: string;
+    cycleNumber: number;
+    deadLetterReasonCode?: string;
+    jobId: string;
+    lastErrorCode?: string;
+    runtimeId: string;
+    schedulerCheckpointId: string;
+    sourceManifestHash: string;
+    strategyLedger?: BwsStrategyLedgerItem;
+  }>,
+): BwsPrivatePaperRuntimeCycleItem {
+  const cycleId = `${values.schedulerCheckpointId}:cycle:${values.cycleNumber}`;
+  return Object.freeze({
+    acceptanceState: values.acceptanceState,
+    ...(values.blockedReasonCode === undefined ? {} : { blockedReasonCode: values.blockedReasonCode }),
+    cycleId,
+    cycleNumber: values.cycleNumber,
+    ...(values.deadLetterReasonCode === undefined
+      ? {}
+      : {
+          deadLetter: Object.freeze({
+            checkpointCount: 1,
+            deadLetterReasonCode: values.deadLetterReasonCode,
+            deadLetterReasonDetails: Object.freeze({
+              evidenceRequired: 'Persisted dead-letter evidence.',
+              lastErrorCode: values.lastErrorCode ?? values.deadLetterReasonCode,
+            }),
+            finalAttemptCount: values.acceptanceState === 'accepted_local_evidence' ? 1 : 2,
+            insertedAt: MOCK_GENERATED_AT,
+          }),
+        }),
+    job: Object.freeze({
+      attemptCount: values.acceptanceState === 'accepted_local_evidence' ? 2 : 2,
+      checkpointCount: values.acceptanceState === 'accepted_local_evidence' ? 3 : 1,
+      completedAt: MOCK_GENERATED_AT,
+      insertedAt: MOCK_GENERATED_AT,
+      jobId: values.jobId,
+      lastCheckpointAt: MOCK_GENERATED_AT,
+      lastCheckpointId: values.acceptanceState === 'accepted_local_evidence'
+        ? 'attempt-2-strategy-ledger'
+        : 'attempt-2-runtime-blocked',
+      ...(values.lastErrorCode === undefined ? {} : { lastErrorCode: values.lastErrorCode }),
+      queueName: 'private-paper',
+      status: values.deadLetterReasonCode === undefined ? 'succeeded' : 'dead_lettered',
+      updatedAt: MOCK_GENERATED_AT,
+    }),
+    provenance: Object.freeze({
+      cycleImportRun: Object.freeze({
+        completedAt: MOCK_GENERATED_AT,
+        importRunId: `import:${values.schedulerCheckpointId}:cycle:${values.cycleNumber}:settlement:page:1`,
+        importedRecordCount: 4,
+        insertedAt: MOCK_GENERATED_AT,
+        metadata: Object.freeze({
+          checkpointId: values.schedulerCheckpointId,
+          contractSchema: 'betting-win.strategy-export.v1',
+          cycleNumber: values.cycleNumber,
+          mode: 'api',
+          page: Object.freeze({
+            pageNumber: 1,
+            provenance: Object.freeze({
+              responseReceivedAt: MOCK_GENERATED_AT,
+            }),
+            resource: 'settlement',
+          }),
+          upstreamLockRecordId: 'lock-001',
+        }),
+        outcome: 'succeeded',
+        requestedAt: MOCK_GENERATED_AT,
+        sourceKind: 'continuous_read_only_query_page',
+        sourceLocator: '/artifacts/imports/runtime-cycle-page-001.json',
+        startedAt: MOCK_GENERATED_AT,
+        updatedAt: MOCK_GENERATED_AT,
+        upstreamLockRecordId: 'lock-001',
+      }),
+      schedulerCheckpoint: Object.freeze({
+        configSha256: 'a'.repeat(64),
+        insertedAt: MOCK_GENERATED_AT,
+        lastScheduledApiCycleNumber: values.cycleNumber,
+        lastScheduledAt: MOCK_GENERATED_AT,
+        lastScheduledJobId: values.jobId,
+        lastScheduledSourceId: `api-cycle:${values.schedulerCheckpointId}:${values.cycleNumber}`,
+        mode: 'api',
+        queueName: 'private-paper',
+        runtimeId: values.runtimeId,
+        schedulerCheckpointId: values.schedulerCheckpointId,
+        updatedAt: MOCK_GENERATED_AT,
+        upstreamCheckpointId: 'checkpoint-api-001',
+        upstreamLockRecordId: 'lock-001',
+      }),
+      upstreamApiCheckpoint: Object.freeze({
+        apiBaseUrl: 'http://127.0.0.1:4312',
+        checkpointId: 'checkpoint-api-001',
+        completedCycleCount: values.cycleNumber,
+        contractVersion: 'v1',
+        currentCycleNumber: values.cycleNumber + 1,
+        currentResource: 'identity',
+        currentResourcePageCount: 0,
+        insertedAt: MOCK_GENERATED_AT,
+        maxPagesPerResource: 4,
+        mode: 'api',
+        pageSize: 2,
+        retryBackoffMs: 250,
+        retryLimit: 1,
+        timeoutMs: 1000,
+        updatedAt: MOCK_GENERATED_AT,
+        upstreamLockRecordId: 'lock-001',
+      }),
+      upstreamLock: Object.freeze({
+        capabilities: Object.freeze([
+          'exportHistoricalBundle',
+          'getHistoricalQuotes',
+          'getProviderGenerations',
+          'inspectSourceLineage',
+        ]),
+        commitSha: '1'.repeat(40),
+        contractAlias: MOCK_CONTRACT_ALIAS,
+        contractSchema: 'betting-win.strategy-export.v1',
+        gitTreeSha: '2'.repeat(40),
+        packageVersion: '0.48.0',
+        packageVersions: Object.freeze({
+          '@betting-win/query-service': '0.48.0',
+        }),
+        repository: 'betting-win',
+        repositoryPath: '/workspace/betting-win',
+        schema: 'betting-win-surebet-upstream-lock-v1',
+        sourceFingerprintAlgorithm: 'sha256_git_ls_tree_r_full_tree_head_v1',
+        sourceView: 'committed_git_head',
+        surebetProfile: 'surebet_standard_binary_v0',
+        trackedTreeListingSha256: '3'.repeat(64),
+        verifiedAt: MOCK_GENERATED_AT,
+      }),
+      upstreamLockRecordId: 'lock-001',
+    }),
+    recentCheckpoints: Object.freeze(
+      (values.acceptanceState === 'accepted_local_evidence'
+        ? [
+            {
+              checkpoint: Object.freeze({ checkpointStage: 'payload_validated' }),
+              checkpointId: 'attempt-2-payload-validated',
+            },
+            {
+              checkpoint: Object.freeze({ checkpointStage: 'runtime_cycle_completed', stopReason: 'cycle_complete' }),
+              checkpointId: 'attempt-2-runtime-cycle',
+            },
+            {
+              checkpoint: Object.freeze({ checkpointStage: 'strategy_ledger_persisted', ledgerEntryId: values.strategyLedger?.ledgerEntryId }),
+              checkpointId: 'attempt-2-strategy-ledger',
+            },
+          ]
+        : [
+            {
+              checkpoint: Object.freeze({ checkpointStage: 'runtime_cycle_completed', blockerCode: values.deadLetterReasonCode }),
+              checkpointId: 'attempt-2-runtime-blocked',
+            },
+          ]).map((checkpoint) =>
+        Object.freeze({
+          ...checkpoint,
+          checkpointSha256: '6'.repeat(64),
+          recordedAt: MOCK_GENERATED_AT,
+        })),
+    ),
+    runtimeId: values.runtimeId,
+    sourceKind: 'read_only_query',
+    sourceManifestHash: values.sourceManifestHash,
+    ...(values.strategyLedger === undefined ? {} : { strategyLedger: values.strategyLedger }),
+  });
+}
+
 function pinnedExport(
   scope: BwsOperatorCockpitPinnedExportScope,
 ): BwsReadOnlyQueryResponse<'pinned_strategy_exports', BwsPinnedStrategyExportItem> {
@@ -289,6 +480,47 @@ function pinnedExport(
 }
 
 export function createMockBwsOperatorCockpitSnapshot(): BwsOperatorCockpitSnapshot {
+  const acceptedPaperRuns = strategyResponse([
+    strategyEntry({
+      acceptanceState: 'accepted_local_evidence',
+      blockedCandidateCount: 0,
+      blockerCodes: Object.freeze([]),
+      blockerCount: 0,
+      candidateId: 'candidate-paper-accepted-001',
+      canonicalMarketId: 'market-003',
+      completionGroupState: 'group_complete',
+      exportedAt: MOCK_GENERATED_AT,
+      finalOutcome: 'no',
+      ledgerEntryId: 'private_paper_runtime_cycle:cccc',
+      reportId: 'report-paper-accepted-001',
+      runFingerprintSha256: 'c'.repeat(64),
+      runKind: 'private_paper_runtime_cycle',
+      runReferenceId: 'runtime-001:scheduler-001:cycle:1',
+      settledNetMinor: '-3',
+      sourceKind: 'read_only_query',
+      sourceManifestHash: 'd'.repeat(64),
+      stopReason: 'cycle_complete',
+    }),
+  ]);
+  const blockedPaperRuns = strategyResponse([
+    strategyEntry({
+      acceptanceState: 'blocked',
+      blockedCandidateCount: 1,
+      blockerCodes: Object.freeze(['RESIDUAL_EXPOSURE_FLOOR_TRIGGERED']),
+      blockerCount: 1,
+      candidateId: 'candidate-paper-blocked-001',
+      canonicalMarketId: 'market-005',
+      exportedAt: MOCK_GENERATED_AT,
+      ledgerEntryId: 'private_paper_runtime_cycle:9999',
+      reportId: 'report-paper-blocked-001',
+      runFingerprintSha256: '9'.repeat(64),
+      runKind: 'private_paper_runtime_cycle',
+      runReferenceId: 'runtime-001:scheduler-001:cycle:2',
+      sourceKind: 'read_only_query',
+      sourceManifestHash: '8'.repeat(64),
+      stopReason: 'kill_triggered',
+    }),
+  ]);
   return Object.freeze({
     acceptedBacktests: strategyResponse([
       strategyEntry({
@@ -311,26 +543,16 @@ export function createMockBwsOperatorCockpitSnapshot(): BwsOperatorCockpitSnapsh
         sourceManifestHash: 'b'.repeat(64),
       }),
     ]),
-    acceptedPaperRuns: strategyResponse([
-      strategyEntry({
+    acceptedPaperRuns,
+    acceptedRuntimeCycles: runtimeCycleResponse([
+      runtimeCycle({
         acceptanceState: 'accepted_local_evidence',
-        blockedCandidateCount: 0,
-        blockerCodes: Object.freeze([]),
-        blockerCount: 0,
-        candidateId: 'candidate-paper-accepted-001',
-        canonicalMarketId: 'market-003',
-        completionGroupState: 'group_complete',
-        exportedAt: MOCK_GENERATED_AT,
-        finalOutcome: 'no',
-        ledgerEntryId: 'private_paper_runtime_cycle:cccc',
-        reportId: 'report-paper-accepted-001',
-        runFingerprintSha256: 'c'.repeat(64),
-        runKind: 'private_paper_runtime_cycle',
-        runReferenceId: 'runtime-001:cycle-001',
-        settledNetMinor: '-3',
-        sourceKind: 'read_only_query',
+        cycleNumber: 1,
+        jobId: 'private-paper:scheduler-001:cycle:1',
+        runtimeId: 'runtime-001',
+        schedulerCheckpointId: 'scheduler-001',
         sourceManifestHash: 'd'.repeat(64),
-        stopReason: 'cycle_complete',
+        strategyLedger: acceptedPaperRuns.page.items[0]!,
       }),
     ]),
     blockedBacktests: strategyResponse([
@@ -351,23 +573,18 @@ export function createMockBwsOperatorCockpitSnapshot(): BwsOperatorCockpitSnapsh
         sourceManifestHash: 'f'.repeat(64),
       }),
     ]),
-    blockedPaperRuns: strategyResponse([
-      strategyEntry({
+    blockedPaperRuns,
+    blockedRuntimeCycles: runtimeCycleResponse([
+      runtimeCycle({
         acceptanceState: 'blocked',
-        blockedCandidateCount: 1,
-        blockerCodes: Object.freeze(['RESIDUAL_EXPOSURE_FLOOR_TRIGGERED']),
-        blockerCount: 1,
-        candidateId: 'candidate-paper-blocked-001',
-        canonicalMarketId: 'market-005',
-        exportedAt: MOCK_GENERATED_AT,
-        ledgerEntryId: 'private_paper_runtime_cycle:9999',
-        reportId: 'report-paper-blocked-001',
-        runFingerprintSha256: '9'.repeat(64),
-        runKind: 'private_paper_runtime_cycle',
-        runReferenceId: 'runtime-001:cycle-002',
-        sourceKind: 'pinned_records',
+        blockedReasonCode: 'BWS_PRIVATE_PAPER_RUNTIME_BLOCKED',
+        cycleNumber: 2,
+        deadLetterReasonCode: 'BWS_PRIVATE_PAPER_RUNTIME_BLOCKED',
+        jobId: 'private-paper:scheduler-001:cycle:2',
+        lastErrorCode: 'BWS_PRIVATE_PAPER_RUNTIME_BLOCKED',
+        runtimeId: 'runtime-001',
+        schedulerCheckpointId: 'scheduler-001',
         sourceManifestHash: '8'.repeat(64),
-        stopReason: 'kill_triggered',
       }),
     ]),
     pinnedExportScope: Object.freeze({

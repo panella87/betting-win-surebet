@@ -102,6 +102,11 @@ export interface SurebetWorkerJobCheckpointRequest {
   readonly recordedAt: string;
 }
 
+export interface SurebetWorkerJobCheckpointListOptions {
+  readonly limit?: number;
+  readonly newestFirst?: boolean;
+}
+
 export interface SurebetWorkerJobHeartbeatRequest {
   readonly jobId: string;
   readonly workerId: string;
@@ -524,7 +529,15 @@ FROM (
     return normalizeCheckpointRow(rows[0]);
   }
 
-  listCheckpoints(jobId: string): readonly SurebetWorkerJobCheckpointRecord[] {
+  listCheckpoints(
+    jobId: string,
+    options: SurebetWorkerJobCheckpointListOptions = {},
+  ): readonly SurebetWorkerJobCheckpointRecord[] {
+    const validatedJobId = requireNonEmptyString(jobId, 'jobId');
+    const limitClause = options.limit === undefined
+      ? ''
+      : `LIMIT ${requirePositiveIntegerValue(options.limit, 'limit')}`;
+    const orderDirection = options.newestFirst === true ? 'DESC' : 'ASC';
     return Object.freeze(
       queryPsqlJsonRows<WorkerJobCheckpointRow>(
         this.#config,
@@ -542,8 +555,9 @@ FROM (
     to_char(recorded_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') AS "recordedAt",
     to_char(inserted_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') AS "insertedAt"
   FROM surebet.worker_job_checkpoints
-  WHERE job_id = ${quoteSqlLiteral(requireNonEmptyString(jobId, 'jobId'))}
-  ORDER BY recorded_at ASC, checkpoint_id ASC
+  WHERE job_id = ${quoteSqlLiteral(validatedJobId)}
+  ORDER BY recorded_at ${orderDirection}, checkpoint_id ${orderDirection}
+  ${limitClause}
 ) AS t;
 `,
       ).map((row) => normalizeCheckpointRow(row))
@@ -1166,6 +1180,16 @@ function requireIsoTimestamp(value: string, field: string): string {
     throw new SurebetPersistenceError(
       'SUREBET_WORKER_JOB_INVALID',
       `Surebet worker jobs require ${field} to be an ISO-8601 UTC timestamp.`,
+    );
+  }
+  return value;
+}
+
+function requirePositiveIntegerValue(value: number, field: string): number {
+  if (!Number.isSafeInteger(value) || value < 1) {
+    throw new SurebetPersistenceError(
+      'SUREBET_WORKER_JOB_INVALID',
+      `Surebet worker jobs require ${field} to be a positive integer.`,
     );
   }
   return value;

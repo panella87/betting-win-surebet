@@ -16,10 +16,10 @@ test('historical private-paper ledger is retained while executable continuous ru
   }
 });
 
-test('implementation remains active until BWS-580 and paper autopilot remains bounded no-service infrastructure', () => {
+test('paper autopilot remains bounded no-service infrastructure after BWS-580 validation and before BWS-600 selection', () => {
   assert.match(read('docs/automation/paper-evaluation.md'), /not the current implementation controller/);
   assert.match(read('docs/automation/paper-autopilot.md'), /not the active router/);
-  assert.match(read('docs/repo_status_current.md'), /paper_autopilot=not_selected_until_bws_580_validation_and_runtime_controller_review/);
+  assert.match(read('docs/repo_status_current.md'), /paper_autopilot=runtime_handoff_review_required_before_bws_600_selection/);
   assert.match(read('docs/repo_status_current.md'), /selected_controller=run-autonomous-implementation\.sh/);
   const command = read('commands/run-sure-paper-mode-autonomous.sh');
   assert.match(command, /run-paper-autopilot\.sh/);
