@@ -16,10 +16,10 @@ test('historical private-paper ledger remains evidence while full lifecycle task
   }
 });
 
-test('paper controllers remain no-service until BWS-588 and BWS-589', () => {
-  assert.match(read('docs/automation/paper-evaluation.md'), /replacement_task=BWS-588/);
+test('paper evaluation and paper autopilot are validated while final local runtime acceptance remains pending', () => {
+  assert.match(read('docs/automation/paper-evaluation.md'), /validated_task=BWS-588/);
   assert.match(read('docs/automation/paper-autopilot.md'), /integration_task=BWS-589/);
-  assert.match(read('docs/repo_status_current.md'), /paper_autopilot=not_selected_until_bws_589_and_bws_599_validation/);
+  assert.match(read('docs/repo_status_current.md'), /paper_autopilot=runtime_evidence_parent_validated_pending_bws_599/);
   assert.match(read('docs/repo_status_current.md'), /selected_controller=run-autonomous-implementation\.sh/);
   const command = read('commands/run-sure-paper-mode-autonomous.sh');
   assert.match(command, /run-paper-autopilot\.sh/);

@@ -14,6 +14,6 @@ PARKED
 
 The controller selects the first `PENDING` row whose internal dependencies are `VALIDATED`. It updates a row only after implementation, focused success/failure proof, restart/idempotency/cleanup or recovery proof where applicable, canonical validation and regenerated source evidence pass.
 
-`BWS-100` through `BWS-580` are validated. Safe local implementation remains from `BWS-581` through the terminal gate `BWS-599`. `BWS-600` is externally blocked and `BWS-900` is separately parked.
+`BWS-100` through `BWS-583` are validated. Safe local implementation remains from `BWS-584` through the terminal gate `BWS-599`. `BWS-600` is externally blocked and `BWS-900` is separately parked.
 
 Historical SURE ledgers are retained evidence, not routing authority.

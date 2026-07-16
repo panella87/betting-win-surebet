@@ -9,6 +9,7 @@ import {
   buildBwsOperatorCockpitPageModel,
   createBwsOperatorCockpitApiClient,
   createMockBwsOperatorCockpitSnapshot,
+  describeBwsOperatorCockpitProcessDefinition,
   loadBwsOperatorCockpitSnapshot,
   listBwsOperatorCockpitRoutes,
   normalizeBwsOperatorCockpitPinnedExportScope,
@@ -80,6 +81,25 @@ test('BWS operator cockpit browser config rejects non-http API URLs, non-loopbac
       dataMode: 'api',
     }),
   );
+});
+
+test('BWS operator cockpit process metadata stays loopback-only in explicit api mode', () => {
+  const processDefinition = describeBwsOperatorCockpitProcessDefinition(
+    resolveBwsOperatorCockpitBrowserConfig({
+      [BWS_OPERATOR_COCKPIT_DATA_MODE_ENV]: 'api',
+      [BWS_OPERATOR_COCKPIT_API_BASE_URL_ENV]: 'http://127.0.0.1:4312',
+    }),
+  );
+  assert.equal(processDefinition.exposure, 'loopback_only');
+  assert.deepEqual(processDefinition.networkBindings, [
+    Object.freeze({
+      exposure: 'loopback_only',
+      host: '127.0.0.1',
+      port: 4312,
+      protocol: 'http',
+      purpose: 'operator_cockpit',
+    }),
+  ]);
 });
 
 test('BWS operator cockpit pinned export scope rejects unbounded and malformed filters', () => {

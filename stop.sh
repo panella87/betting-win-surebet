@@ -1,6 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
-cat <<'MSG'
-betting-win-surebet has no long-running service in the current private paper-only phase.
-No provider, trading, database, worker, scheduler, or production process was stopped.
-MSG
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$repo_root"
+fail() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
+target=""
+[[ -f .nvmrc ]] && target="$(tr -d '[:space:]' < .nvmrc)"
+target_no_v="${target#v}"
+expected_major="${target_no_v%%.*}"
+command -v node >/dev/null 2>&1 || fail "Node is missing. Activate the repo runtime first: . \"$HOME/.nvm/nvm.sh\" && nvm use ${target_no_v:-20}"
+actual_version="$(node -p 'process.versions.node')"
+actual_major="${actual_version%%.*}"
+if [[ -n "$expected_major" && "$actual_major" != "$expected_major" ]]; then
+  fail "active Node is v${actual_version}, expected major ${expected_major}. Run: . \"$HOME/.nvm/nvm.sh\" && nvm use ${target_no_v:-20}"
+fi
+printf 'NODE_OK=v%s\n' "$actual_version"
+node scripts/bws-root-wrapper-runtime.mjs stop

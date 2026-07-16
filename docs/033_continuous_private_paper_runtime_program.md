@@ -11,14 +11,15 @@ execution_gate=BWS-900
 
 ## Validated foundation
 
-`BWS-520` through `BWS-580` are validated. They added:
+`BWS-520` through `BWS-587` are validated. They added:
 
 - executable loopback-only API and bounded worker entrypoints;
 - explicit immutable-export and typed read-only API convergence passes;
 - persisted convergence and scheduler checkpoints;
 - deterministic private-paper jobs and bounded worker processing;
-- an API-only lifecycle owner with exact process identity;
-- persisted runtime/API/cockpit visibility;
+- a full-stack lifecycle owner with exact process identity and ordered shutdown;
+- protected root start/stop/progress/log wrappers delegated to product-owned lifecycle and runtime evidence;
+- persisted runtime/API/cockpit visibility plus managed loopback cockpit serving;
 - integrated loopback acceptance and machine-readable runtime handoff packaging.
 
 These results remain binding and must not regress.
@@ -28,15 +29,11 @@ These results remain binding and must not regress.
 The validated components are still assembled as bounded passes and component-level acceptance. Current source inspection shows:
 
 ```text
-convergence service loop=missing
-scheduler service loop=missing
-worker service loop=missing
-managed full-stack lifecycle=missing
-managed cockpit server=missing
-root lifecycle wrappers=missing
+complete product-owned lifecycle=validated
+root lifecycle wrappers=validated
 service-owned paper evaluation=missing
 paper autopilot lifecycle integration=missing
-database backup/restore/retention=missing
+database backup/restore/retention=validated
 release/upgrade/recovery/soak acceptance=missing
 ```
 

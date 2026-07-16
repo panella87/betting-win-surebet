@@ -100,6 +100,7 @@ test('BWS operational status snapshots require immutable strategy evidence polic
       [BWS_OPERATOR_COCKPIT_DATA_MODE_ENV]: 'mock',
     });
     const snapshot = createBwsOperationalStatusSnapshot({
+      cockpitState: createReadyCockpitState(),
       cockpitProcessDefinition: describeBwsOperatorCockpitProcessDefinition(cockpitConfig),
       config,
       generatedAt: TEST_TIMESTAMP,
@@ -115,9 +116,12 @@ test('BWS operational status snapshots require immutable strategy evidence polic
     assert.equal(snapshot.ok, true);
     assert.equal(snapshot.value.health.status, 'healthy');
     assert.equal(snapshot.value.readiness.status, 'ready');
+    assert.equal(snapshot.value.readiness.components.cockpit, 'ready');
+    assert.equal(snapshot.value.observability.cockpit.buildDirectory, 'dist/apps/web');
     assert.equal(snapshot.value.observability.processDefinitions.length, 3);
 
     const invalid = createBwsOperationalStatusSnapshot({
+      cockpitState: createReadyCockpitState(),
       cockpitProcessDefinition: describeBwsOperatorCockpitProcessDefinition(cockpitConfig),
       config,
       generatedAt: TEST_TIMESTAMP,
@@ -145,6 +149,7 @@ test('BWS read-only HTTP handler surfaces health and readiness snapshots with se
       [BWS_OPERATOR_COCKPIT_DATA_MODE_ENV]: 'mock',
     });
     const snapshot = createBwsOperationalStatusSnapshot({
+      cockpitState: createReadyCockpitState(),
       cockpitProcessDefinition: describeBwsOperatorCockpitProcessDefinition(cockpitConfig),
       config,
       generatedAt: TEST_TIMESTAMP,
@@ -199,6 +204,9 @@ test('BWS read-only HTTP handler surfaces health and readiness snapshots with se
       assert.equal(readinessResponse.status, 200);
       const readinessBody = await readinessResponse.json() as {
         readonly observability: {
+          readonly cockpit: {
+            readonly assetFingerprint?: string;
+          };
           readonly configuration: {
             readonly persistence: {
               readonly password?: string;
@@ -206,11 +214,16 @@ test('BWS read-only HTTP handler surfaces health and readiness snapshots with se
           };
         };
         readonly readiness: {
+          readonly components: {
+            readonly cockpit: string;
+          };
           readonly status: string;
         };
       };
       assert.equal(readinessBody.readiness.status, 'ready');
+      assert.equal(readinessBody.readiness.components.cockpit, 'ready');
       assert.equal(readinessBody.observability.configuration.persistence.password, '[redacted]');
+      assert.equal(readinessBody.observability.cockpit.assetFingerprint, 'f'.repeat(64));
     } finally {
       server.close();
       await once(server, 'close');
@@ -343,4 +356,15 @@ function getServerPort(server: ReturnType<typeof createServer>): number {
   assert.notEqual(address, null);
   assert.equal(typeof address, 'object');
   return (address as AddressInfo).port;
+}
+
+function createReadyCockpitState() {
+  return Object.freeze({
+    apiBaseUrl: 'http://127.0.0.1:4312',
+    assetFingerprint: 'f'.repeat(64),
+    buildDirectory: 'dist/apps/web',
+    dataMode: 'api' as const,
+    entryDocumentPath: 'dist/apps/web/index.html',
+    status: 'ready' as const,
+  });
 }

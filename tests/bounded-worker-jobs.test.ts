@@ -526,6 +526,143 @@ test('bounded worker pass runs a persisted private-paper job into immutable stra
   }
 });
 
+test('bounded worker pass renews the active lease while a long-running handler is still in progress', async () => {
+  const sleepResolvers: Array<() => void> = [];
+  const heartbeats: string[] = [];
+  let claimCount = 0;
+  let releaseHandler: (() => void) | undefined;
+
+  const handlerDone = new Promise<void>((resolve) => {
+    releaseHandler = resolve;
+  });
+
+  const passPromise = runBoundedWorkerPass({
+    handlers: Object.freeze({
+      private_paper_runtime_cycle_v1: {
+        async run() {
+          await handlerDone;
+          return Object.freeze({
+            completedAt: '2026-07-14T10:06:00.500Z',
+            outcome: 'completed' as const,
+            successResult: Object.freeze({ completed: true }),
+          });
+        },
+      },
+    }),
+    jobs: {
+      claimNext() {
+        if (claimCount > 0) {
+          return undefined;
+        }
+        claimCount += 1;
+        return createStubLeasedJob('job-renew-001');
+      },
+      complete() {
+        return createStubLeasedJob('job-renew-001');
+      },
+      deadLetterOwnedJob() {
+        throw new Error('deadLetterOwnedJob must not be reached');
+      },
+      fail() {
+        throw new Error('fail must not be reached');
+      },
+      heartbeatLease(request) {
+        heartbeats.push(request.heartbeatAt);
+        return createStubLeasedJob('job-renew-001');
+      },
+      recordCheckpoint() {
+        throw new Error('recordCheckpoint must not be reached');
+      },
+      reapExpiredLeases() {
+        return Object.freeze([]);
+      },
+    },
+    leaseDurationMs: 20,
+    maxJobs: 1,
+    now: createDeterministicClock('2026-07-14T10:06:00.000Z'),
+    queueName: 'private-paper',
+    sleep() {
+      return new Promise<void>((resolve) => {
+        sleepResolvers.push(resolve);
+      });
+    },
+    workerId: 'worker-renew-001',
+  });
+
+  await waitFor(() => sleepResolvers.length >= 1);
+  sleepResolvers.shift()?.();
+  await waitFor(() => heartbeats.length >= 1);
+
+  await waitFor(() => sleepResolvers.length >= 1);
+  sleepResolvers.shift()?.();
+  await waitFor(() => heartbeats.length >= 2);
+
+  releaseHandler?.();
+  const result = await passPromise;
+  assert.equal(result.ok, true);
+  assert.equal(result.value.leaseRenewalCount, 2);
+  assert.equal(result.value.completedCount, 1);
+  assert.equal(heartbeats.length, 2);
+  assert.equal(Date.parse(heartbeats[0]!), Date.parse(heartbeats[1]!) - 1);
+});
+
+test('bounded worker pass drains cleanly after the current job and stops before claiming another one', async () => {
+  const claimedJobIds: string[] = [];
+  let shouldDrain = false;
+  const queuedJobs = ['job-drain-001', 'job-drain-002'];
+
+  const result = await runBoundedWorkerPass({
+    handlers: Object.freeze({
+      private_paper_runtime_cycle_v1: {
+        async run(context) {
+          claimedJobIds.push(context.job.jobId);
+          shouldDrain = true;
+          return Object.freeze({
+            completedAt: '2026-07-14T10:07:00.100Z',
+            outcome: 'completed' as const,
+            successResult: Object.freeze({ jobId: context.job.jobId }),
+          });
+        },
+      },
+    }),
+    jobs: {
+      claimNext() {
+        const nextJobId = queuedJobs.shift();
+        return nextJobId === undefined ? undefined : createStubLeasedJob(nextJobId);
+      },
+      complete(request) {
+        return createStubLeasedJob(request.jobId);
+      },
+      deadLetterOwnedJob() {
+        throw new Error('deadLetterOwnedJob must not be reached');
+      },
+      fail() {
+        throw new Error('fail must not be reached');
+      },
+      heartbeatLease() {
+        throw new Error('heartbeatLease must not be reached');
+      },
+      recordCheckpoint() {
+        throw new Error('recordCheckpoint must not be reached');
+      },
+      reapExpiredLeases() {
+        return Object.freeze([]);
+      },
+    },
+    leaseDurationMs: 1_000,
+    maxJobs: 2,
+    now: createDeterministicClock('2026-07-14T10:07:00.000Z'),
+    queueName: 'private-paper',
+    shouldDrain: () => shouldDrain,
+    workerId: 'worker-drain-001',
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.value.claimedCount, 1);
+  assert.equal(result.value.drained, true);
+  assert.deepEqual(claimedJobIds, ['job-drain-001']);
+});
+
 function serializeRecords(records: readonly BettingWinResourceRecord[]): readonly JsonValue[] {
   return Object.freeze(
     records.map((record) => {
@@ -564,6 +701,38 @@ function createDeterministicClock(start: string): () => string {
     offset += 1;
     return next;
   };
+}
+
+async function waitFor(predicate: () => boolean): Promise<void> {
+  for (let index = 0; index < 50; index += 1) {
+    if (predicate()) {
+      return;
+    }
+    await Promise.resolve();
+  }
+  throw new Error('Timed out waiting for asynchronous worker test state.');
+}
+
+function createStubLeasedJob(jobId: string) {
+  return Object.freeze({
+    attemptCount: 1,
+    availableAt: TEST_TIMESTAMP,
+    checkpointCount: 0,
+    claimedAt: TEST_TIMESTAMP,
+    insertedAt: TEST_TIMESTAMP,
+    jobId,
+    jobKind: 'private_paper_runtime_cycle_v1' as const,
+    leaseDurationMs: 1_000,
+    leaseExpiresAt: '2026-07-14T10:06:01.000Z',
+    leaseOwner: 'worker-stub',
+    leaseToken: 'lease-stub',
+    payload: Object.freeze({ schema: 'stub' }) as JsonValue,
+    payloadSha256: '8'.repeat(64),
+    queueName: 'private-paper',
+    retryDelaysMs: Object.freeze([]),
+    status: 'leased' as const,
+    updatedAt: TEST_TIMESTAMP,
+  });
 }
 
 function hasDisposableDatabaseTestConfig(): boolean {

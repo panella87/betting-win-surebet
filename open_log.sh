@@ -6,10 +6,11 @@ MODE="controller"
 CYCLE=""
 ROUND=""
 RUN_DIR=""
+RUNTIME_ROLE="lifecycle"
 usage() { cat <<'USAGE'
-Usage: ./open_log.sh [--controller|--codex|--paper|--bugfix|--implementation] [--cycle N] [--round N] [--tail N] [--run-dir PATH]
+Usage: ./open_log.sh [--controller|--codex|--paper|--bugfix|--implementation|--runtime] [--role NAME] [--cycle N] [--round N] [--tail N] [--run-dir PATH]
 
-Tails automation logs from the latest local artifact run. Read-only.
+Tails automation logs from the latest local artifact run or product runtime structured logs. Read-only.
 USAGE
 }
 while [[ $# -gt 0 ]]; do
@@ -19,6 +20,8 @@ while [[ $# -gt 0 ]]; do
     --paper) MODE="paper"; shift ;;
     --bugfix) MODE="bugfix"; shift ;;
     --implementation) MODE="implementation"; shift ;;
+    --runtime) MODE="runtime"; shift ;;
+    --role) [[ $# -ge 2 ]] || { echo "ERROR: --role requires a value" >&2; exit 1; }; RUNTIME_ROLE="$2"; shift 2 ;;
     --round) [[ $# -ge 2 ]] || { echo "ERROR: --round requires a value" >&2; exit 1; }; ROUND="$2"; shift 2 ;;
     --cycle) [[ $# -ge 2 ]] || { echo "ERROR: --cycle requires a value" >&2; exit 1; }; CYCLE="$2"; shift 2 ;;
     --tail) [[ $# -ge 2 ]] || { echo "ERROR: --tail requires a value" >&2; exit 1; }; TAIL_LINES="$2"; shift 2 ;;
@@ -30,10 +33,16 @@ done
 [[ "$TAIL_LINES" =~ ^[1-9][0-9]*$ ]] || { echo "ERROR: --tail must be a positive integer" >&2; exit 1; }
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$repo_root" || exit 1
+if [[ "$MODE" == "runtime" ]]; then
+  log_file="$(node scripts/bws-root-wrapper-runtime.mjs runtime-log-path "$RUNTIME_ROLE")" || exit 1
+  echo "log_file=$log_file"
+  tail -n "$TAIL_LINES" "$log_file"
+  exit 0
+fi
 if [[ -z "$RUN_DIR" ]]; then
   RUN_DIR="$(find artifacts -maxdepth 1 -type d \( -name 'autonomous_implementation_*' -o -name 'autonomous_bugfix_*' -o -name 'paper_evaluation_*' -o -name 'paper_autopilot_*' -o -name 'bugfix_autopilot_*' -o -name 'autonomous_surebet_implementation_*' \) -print 2>/dev/null | sort | tail -n 1)"
 fi
-[[ -n "$RUN_DIR" && -d "$RUN_DIR" ]] || { echo "ERROR: no automation run directory found" >&2; exit 1; }
+[[ -n "$RUN_DIR" && -d "$RUN_DIR" ]] || { echo "ERROR: no automation run directory found; use --runtime for product logs" >&2; exit 1; }
 resolve_cycle_dir() {
   local run_dir="$1" cycle="$2" latest=""
   if [[ -n "$cycle" ]]; then

@@ -6,7 +6,7 @@ program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 status=IMPLEMENTATION_READY
 repo_role=surebet_strategy_application
 upstream_platform=betting-win
-current_task=BWS-581
+current_task=BWS-590
 current_task_status=PENDING
 safe_local_terminal_gate=BWS-599
 provider_truth_owner=betting-win
@@ -18,26 +18,21 @@ execution_gate=closed
 
 ## Binding state
 
-`BWS-100` through `BWS-580` are validated. The latest autonomous campaign completed twelve validated cycles and truthfully closed `BWS-580`.
+`BWS-100` through `BWS-589` are validated. The previous autonomous campaign truthfully closed `BWS-580`, the latest autonomous campaign closed `BWS-581` by adding a long-running explicit-mode upstream convergence service with durable state, overlap defense, signal-aware shutdown and machine-readable evidence, the follow-on cycle closed `BWS-582` by adding long-running scheduler and worker services with restart-safe state, queue backpressure, lease renewal and graceful drain behavior, the next cycle closed `BWS-583` by serving the built cockpit on loopback through the managed runtime with explicit API-mode build verification, independent readiness reporting and failure-closed asset validation, the following cycle closed `BWS-584` by expanding product-owned lifecycle control to the complete BWS stack with exact multi-role ownership, ordered shutdown, crash recovery and `/proc` identity verification, the next cycle closed `BWS-585` by adding product-owned migration status, backup, restore-verification and bounded retention commands with disposable PostgreSQL proof, the following cycle closed `BWS-586` by adding structured role logs, loopback metrics, read-only diagnostics bundles and an append-only evidence index, the next cycle closed `BWS-587` by wiring the protected root wrappers to the product-owned lifecycle, runtime summary, and structured runtime logs, the following cycle closed `BWS-588` by upgrading paper evaluation to an explicit runtime-evidence controller with exact stack ownership checks and bounded local-only evidence collection, and the current cycle closed `BWS-589` by promoting paper autopilot into a runtime-evidence parent that preserves selected upstream mode, runtime campaign identity and source-fix re-evaluation state through atomic child-result handoffs.
 
 The previous `AUTONOMOUS_GOAL_COMPLETE=yes` conclusion is not the final application boundary. Direct source inspection confirms that the operator runtime is still incomplete:
 
 ```text
-upstream convergence=one bounded pass
-scheduler=one bounded pass
-worker=one bounded pass
-managed lifecycle=read-only API only
-managed cockpit=not served
-start.sh=install_and_validate_only
-stop.sh=no_long_running_service
-progress/log helpers=automation_artifacts_only
-paper evaluation=single_pass_no_service
-paper autopilot=paper_service_lifecycle=none
-database backup/restore/retention=missing
+start.sh=validated_product_owned_lifecycle_start
+stop.sh=validated_product_owned_lifecycle_stop
+progress/log helpers=validated_automation_and_runtime_state
+paper evaluation=runtime_evidence_mode_validated
+paper autopilot=runtime_evidence_parent_validated
+database backup/restore/retention=validated_product_commands_present
 release/upgrade/recovery/soak acceptance=missing
 ```
 
-The binding queue is `backlog/bws_full_implementation.csv`. `BWS-581` is the first dependency-ready `PENDING` row. Safe local implementation continues through `BWS-599`; `BWS-600` remains the external operator-approved runtime evidence gate.
+The binding queue is `backlog/bws_full_implementation.csv`. `BWS-590` is the first dependency-ready `PENDING` row. Safe local implementation continues through `BWS-599`; `BWS-600` remains the external operator-approved runtime evidence gate.
 
 ## Validated upstream facts
 
@@ -57,20 +52,20 @@ api_web_workers=present
 
 ## Existing source
 
-The validated source under `packages/bootstrap`, `packages/persistence`, `packages/upstream`, `apps/web` and compatibility `src/` shims includes the domain engine, `surebet.*` persistence, immutable export intake, explicit export/API convergence passes, typed read-only client, bounded private-paper runtime, strategy ledger, read-only API, bounded workers, cockpit, runtime configuration, loopback acceptance, API-only lifecycle evidence and runtime handoff packaging.
+The validated source under `packages/bootstrap`, `packages/persistence`, `packages/upstream`, `apps/web` and compatibility `src/` shims includes the domain engine, `surebet.*` persistence, immutable export intake, explicit export/API convergence passes, a long-running explicit-mode upstream convergence service, typed read-only client, bounded private-paper runtime, strategy ledger, read-only API, bounded workers, cockpit, managed loopback cockpit serving, runtime configuration, loopback acceptance, complete full-stack lifecycle evidence and runtime handoff packaging.
 
 ## Remaining queue
 
 ```text
-BWS-581=PENDING_LONG_RUNNING_UPSTREAM_SERVICE
-BWS-582=PENDING_LONG_RUNNING_SCHEDULER_WORKER_SERVICES
-BWS-583=PENDING_MANAGED_COCKPIT_AND_FULL_STACK_CONVERGENCE
-BWS-584=PENDING_COMPLETE_PRODUCT_LIFECYCLE
-BWS-585=PENDING_DATABASE_BACKUP_RETENTION_RESTORE
-BWS-586=PENDING_OBSERVABILITY_DIAGNOSTICS_EVIDENCE
-BWS-587=PENDING_ROOT_WRAPPER_INTEGRATION
-BWS-588=PENDING_SERVICE_OWNED_PAPER_EVALUATION
-BWS-589=PENDING_FULL_LIFECYCLE_PAPER_AUTOPILOT
+BWS-581=VALIDATED_LONG_RUNNING_UPSTREAM_SERVICE
+BWS-582=VALIDATED_LONG_RUNNING_SCHEDULER_WORKER_SERVICES
+BWS-583=VALIDATED_MANAGED_COCKPIT_AND_FULL_STACK_CONVERGENCE
+BWS-584=VALIDATED_COMPLETE_PRODUCT_LIFECYCLE
+BWS-585=VALIDATED_DATABASE_BACKUP_RETENTION_RESTORE
+BWS-586=VALIDATED_OBSERVABILITY_DIAGNOSTICS_EVIDENCE
+BWS-587=VALIDATED_ROOT_WRAPPER_INTEGRATION
+BWS-588=VALIDATED_SERVICE_OWNED_PAPER_EVALUATION
+BWS-589=VALIDATED_RUNTIME_EVIDENCE_PAPER_AUTOPILOT
 BWS-590=PENDING_RELEASE_DEPLOYMENT
 BWS-591=PENDING_UPGRADE_ROLLBACK_RECOVERY
 BWS-592=PENDING_SOAK_FAILURE_INJECTION
@@ -95,7 +90,7 @@ The exact list is binding. Protected changes outside it are forbidden. Product t
 selected_controller=run-autonomous-implementation.sh
 selected_task_source=docs/automation/current-implementation-task.md
 force_unlock=no_evidence
-paper_autopilot=not_selected_until_bws_589_and_bws_599_validation
+paper_autopilot=runtime_evidence_parent_validated_pending_bws_599
 ```
 
 ## Safety
@@ -108,8 +103,8 @@ Direct provider connections, provider credentials, betting-win `core.*` writes, 
 run_autonomous_implementation=standardized_and_selected_for_remaining_operator_runtime
 run_autonomous_bugfix=standardized_standalone_audit
 run_bugfix_autopilot=standardized_parent_for_broad_audit_and_repair
-run_paper_evaluation=retained_no_service_until_bws_588
-run_paper_autopilot=standardized_parent_pending_bws_589_and_bws_599
+run_paper_evaluation=fixture_and_runtime_evidence_validated_bws_588
+run_paper_autopilot=runtime_evidence_parent_validated_bws_589_pending_bws_599
 standalone_controller_telegram=enabled_by_default
 autopilot_child_telegram=disabled
 autopilot_parent_telegram=final_only

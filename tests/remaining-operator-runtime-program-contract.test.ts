@@ -10,11 +10,9 @@ const read = (rel: string): string => readFileSync(join(ROOT, rel), 'utf-8');
 test('remaining operator runtime program documents every safe local stage through BWS-599', () => {
   const program = read('docs/034_remaining_operator_runtime_implementation_program.md');
   for (const marker of [
-    'current_task=BWS-581', 'safe_local_terminal_gate=BWS-599',
-    'upstream convergence commands=one bounded pass',
-    'product lifecycle=read-only API process only',
-    'paper evaluation=single_pass_no_service',
-    'BWS-581', 'BWS-584', 'BWS-585', 'BWS-589', 'BWS-593', 'BWS-599',
+    'current_task=BWS-590', 'safe_local_terminal_gate=BWS-599',
+    'paper evaluation=runtime_evidence_mode_validated',
+    'BWS-581', 'BWS-585', 'BWS-586', 'BWS-589', 'BWS-593', 'BWS-599',
   ]) assert.match(program, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
 
   for (const rel of [

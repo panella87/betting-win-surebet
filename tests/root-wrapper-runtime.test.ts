@@ -1,0 +1,332 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { createServer } from 'node:http';
+import type { AddressInfo } from 'node:net';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { execFile, execFileSync } from 'node:child_process';
+
+const REPO_ROOT = process.cwd();
+
+test('check_progress.sh reports automation artifacts and product runtime state', async () => {
+  const fixture = await createRuntimeFixture();
+  try {
+    const output = await execFileText('bash', ['check_progress.sh', '--tail', '5'], {
+      cwd: fixture.repositoryRoot,
+    });
+
+    assert.match(output, /run_dir=artifacts\/autonomous_implementation_/);
+    assert.match(output, /runtime_source=product_runtime_state/);
+    assert.match(output, /runtime_condition=ready/);
+    assert.match(output, /runtime_configuration_status=matched/);
+    assert.match(output, /runtime_component_api=ready/);
+    assert.match(output, /runtime_upstream_mode=export/);
+  } finally {
+    await fixture.dispose();
+  }
+});
+
+test('check_progress.sh blocks runtime status when explicit configuration mismatches active state', async () => {
+  const fixture = await createRuntimeFixture({
+    envOverrides: Object.freeze({
+      BWS_API_PORT: '4999',
+    }),
+  });
+  try {
+    const output = await execFileText('bash', ['check_progress.sh', '--tail', '5'], {
+      cwd: fixture.repositoryRoot,
+    });
+
+    assert.match(output, /runtime_condition=blocked/);
+    assert.match(output, /runtime_configuration_status=mismatched/);
+    assert.match(output, /BWS_API_PORT=expected:4999,actual:/);
+  } finally {
+    await fixture.dispose();
+  }
+});
+
+test('open_log.sh can tail product runtime structured logs', async () => {
+  const fixture = await createRuntimeFixture();
+  try {
+    const output = await execFileText('bash', ['open_log.sh', '--runtime', '--role', 'lifecycle', '--tail', '5'], {
+      cwd: fixture.repositoryRoot,
+    });
+
+    assert.match(output, /log_file=.*runtime\/bws-observability\/logs\/lifecycle\.jsonl/);
+    assert.match(output, /lifecycle_event/);
+  } finally {
+    await fixture.dispose();
+  }
+});
+
+test('start.sh and stop.sh delegate to the product-owned lifecycle helper', () => {
+  const repositoryRoot = mkdtempSync(join(tmpdir(), 'bws-root-start-stop-'));
+  try {
+    mkdirSync(join(repositoryRoot, 'scripts'), { recursive: true });
+    mkdirSync(join(repositoryRoot, 'dist', 'packages', 'bootstrap', 'src', 'cli'), { recursive: true });
+
+    copyFileSync(join(REPO_ROOT, 'start.sh'), join(repositoryRoot, 'start.sh'));
+    copyFileSync(join(REPO_ROOT, 'stop.sh'), join(repositoryRoot, 'stop.sh'));
+    copyFileSync(
+      join(REPO_ROOT, 'scripts', 'bws-root-wrapper-runtime.mjs'),
+      join(repositoryRoot, 'scripts', 'bws-root-wrapper-runtime.mjs'),
+    );
+
+    writeFileSync(join(repositoryRoot, '.nvmrc'), '20\n', 'utf-8');
+    writeFileSync(
+      join(repositoryRoot, 'scripts', 'restore-required-executable-bits.js'),
+      'process.exit(0);\n',
+      'utf-8',
+    );
+    writeFileSync(
+      join(repositoryRoot, 'package.json'),
+      JSON.stringify({
+        name: 'bws-root-wrapper-runtime-fixture',
+        private: true,
+        scripts: {
+          build: 'node -e "require(\'node:fs\').mkdirSync(\'markers\',{recursive:true});require(\'node:fs\').writeFileSync(\'markers/build.txt\',\'ok\\\\n\')"',
+          'build:runtime-cockpit': 'node -e "require(\'node:fs\').writeFileSync(\'markers/cockpit.txt\',\'ok\\\\n\')"',
+        },
+      }, null, 2) + '\n',
+      'utf-8',
+    );
+    writeFileSync(
+      join(repositoryRoot, 'dist', 'packages', 'bootstrap', 'src', 'cli', 'bws-operator-lifecycle.js'),
+      [
+        'const command = process.argv[2];',
+        'process.stdout.write(JSON.stringify({ command, evidenceFile: "runtime/bws-operator-lifecycle/evidence/latest.json" }, null, 2) + "\\n");',
+      ].join('\n'),
+      'utf-8',
+    );
+
+    const startOutput = execFileSync('bash', ['start.sh'], {
+      cwd: repositoryRoot,
+      encoding: 'utf-8',
+      stdio: 'pipe',
+    });
+    assert.match(startOutput, /NODE_OK=v/);
+    assert.match(startOutput, /"command": "start"/);
+    assert.equal(readFileSync(join(repositoryRoot, 'markers', 'build.txt'), 'utf-8'), 'ok\n');
+    assert.equal(readFileSync(join(repositoryRoot, 'markers', 'cockpit.txt'), 'utf-8'), 'ok\n');
+
+    const stopOutput = execFileSync('bash', ['stop.sh'], {
+      cwd: repositoryRoot,
+      encoding: 'utf-8',
+      stdio: 'pipe',
+    });
+    assert.match(stopOutput, /NODE_OK=v/);
+    assert.match(stopOutput, /"command": "stop"/);
+  } finally {
+    rmSync(repositoryRoot, { force: true, recursive: true });
+  }
+});
+
+async function createRuntimeFixture(options: Readonly<{
+  readonly envOverrides?: Readonly<Record<string, string>>;
+}> = {}): Promise<{
+  readonly dispose: () => Promise<void>;
+  readonly repositoryRoot: string;
+}> {
+  const root = mkdtempSync(join(tmpdir(), 'bws-root-runtime-'));
+  const repositoryRoot = join(root, 'repo');
+  const upstreamRoot = join(root, 'betting-win');
+  mkdirSync(repositoryRoot, { recursive: true });
+  mkdirSync(upstreamRoot, { recursive: true });
+  mkdirSync(join(repositoryRoot, 'scripts'), { recursive: true });
+
+  copyFileSync(join(REPO_ROOT, 'check_progress.sh'), join(repositoryRoot, 'check_progress.sh'));
+  copyFileSync(join(REPO_ROOT, 'open_log.sh'), join(repositoryRoot, 'open_log.sh'));
+  copyFileSync(join(REPO_ROOT, 'watch_progress.sh'), join(repositoryRoot, 'watch_progress.sh'));
+  copyFileSync(
+    join(REPO_ROOT, 'scripts', 'bws-root-wrapper-runtime.mjs'),
+    join(repositoryRoot, 'scripts', 'bws-root-wrapper-runtime.mjs'),
+  );
+
+  const server = createServer((request, response) => {
+    response.setHeader('content-type', 'application/json');
+    if (request.url === '/health') {
+      response.end(JSON.stringify({ status: 'healthy' }));
+      return;
+    }
+    if (request.url === '/readiness') {
+      response.end(JSON.stringify({ status: 'ready' }));
+      return;
+    }
+    if (request.url === '/metrics') {
+      response.end(JSON.stringify({
+        runtime: { lifecycleState: 'running' },
+        scheduler: { lifecycleState: 'running' },
+        schema: 'bws.metrics_snapshot.v1',
+        upstream: { lifecycleState: 'running', mode: 'export' },
+        worker: { lifecycleState: 'running' },
+      }));
+      return;
+    }
+    response.statusCode = 404;
+    response.end(JSON.stringify({ error: 'not_found' }));
+  });
+  server.listen(0, '127.0.0.1');
+  await new Promise<void>((resolveReady) => server.once('listening', () => resolveReady()));
+  const port = (server.address() as AddressInfo).port;
+
+  mkdirSync(join(repositoryRoot, 'artifacts', 'autonomous_implementation_20260716T000000Z', 'cycles', 'cycle_1'), {
+    recursive: true,
+  });
+  writeFileSync(
+    join(repositoryRoot, 'artifacts', 'autonomous_implementation_20260716T000000Z', 'final-summary.md'),
+    '# final summary\n',
+    'utf-8',
+  );
+  writeFileSync(
+    join(repositoryRoot, 'artifacts', 'autonomous_implementation_20260716T000000Z', 'controller.log'),
+    'controller line\n',
+    'utf-8',
+  );
+
+  mkdirSync(join(repositoryRoot, 'runtime', 'bws-operator-lifecycle', 'evidence'), { recursive: true });
+  mkdirSync(join(repositoryRoot, 'runtime', 'bws-observability', 'evidence'), { recursive: true });
+  mkdirSync(join(repositoryRoot, 'runtime', 'bws-observability', 'logs'), { recursive: true });
+
+  writeFileSync(
+    join(repositoryRoot, 'runtime', 'bws-operator-lifecycle', 'state.json'),
+    JSON.stringify({
+      configuration: {
+        api: { bindHost: '127.0.0.1', port },
+        persistence: {
+          database: 'surebet_local',
+          host: '127.0.0.1',
+          port: 5432,
+          user: 'surebet',
+        },
+        policy: {
+          executionEnabled: false,
+          providerConnections: 'disabled',
+          runtimeMode: 'paper',
+        },
+        upstream: {
+          lockPath: 'config/betting-win.upstream.lock.json',
+          repositoryPath: upstreamRoot,
+        },
+        worker: {
+          leaseDurationMs: 30000,
+          queueName: 'private-paper',
+          workerId: 'worker-local-001',
+        },
+      },
+      repositoryRoot,
+      runtimeBaseUrl: `http://127.0.0.1:${port}`,
+      runtimeId: 'runtime-local-001',
+      stateRecordedAt: '2026-07-16T08:40:00.000Z',
+    }, null, 2) + '\n',
+    'utf-8',
+  );
+  writeFileSync(
+    join(repositoryRoot, 'runtime', 'bws-operator-lifecycle', 'evidence', 'latest.json'),
+    JSON.stringify({
+      outcome: 'running',
+      stack: {
+        components: {
+          api: 'ready',
+          cockpit: 'ready',
+          private_paper_scheduler: 'ready',
+          private_paper_worker: 'ready',
+          upstream_convergence: 'ready',
+        },
+        healthStatus: 'healthy',
+        readinessStatus: 'ready',
+      },
+    }, null, 2) + '\n',
+    'utf-8',
+  );
+  writeFileSync(
+    join(repositoryRoot, 'runtime', 'bws-observability', 'evidence', 'latest.json'),
+    JSON.stringify({ entryCount: 2 }, null, 2) + '\n',
+    'utf-8',
+  );
+  writeFileSync(
+    join(repositoryRoot, 'runtime', 'bws-observability', 'logs', 'lifecycle.jsonl'),
+    '{"eventCode":"lifecycle_event"}\n',
+    'utf-8',
+  );
+
+  const envValues = Object.freeze({
+    BETTING_WIN_REPO_PATH: upstreamRoot,
+    BWS_API_PORT: options.envOverrides?.BWS_API_PORT ?? String(port),
+    BWS_UPSTREAM_LOCK_PATH: 'config/betting-win.upstream.lock.json',
+    BWS_UPSTREAM_MODE: 'export',
+    BWS_WORKER_ID: 'worker-local-001',
+    BWS_WORKER_LEASE_DURATION_MS: '30000',
+    BWS_WORKER_QUEUE_NAME: 'private-paper',
+    SUREBET_EXECUTION_ENABLED: 'false',
+    SUREBET_PG_DATABASE: 'surebet_local',
+    SUREBET_PG_HOST: '127.0.0.1',
+    SUREBET_PG_PORT: '5432',
+    SUREBET_PG_USER: 'surebet',
+    SUREBET_PROVIDER_CONNECTIONS: 'disabled',
+    SUREBET_RUNTIME_MODE: 'paper',
+    ...(options.envOverrides ?? {}),
+  });
+  writeFileSync(
+    join(repositoryRoot, '.env'),
+    Object.entries(envValues).map(([key, value]) => `${key}=${value}`).join('\n') + '\n',
+    'utf-8',
+  );
+
+  return Object.freeze({
+    async dispose() {
+      await new Promise<void>((resolveDone, rejectDone) => {
+        server.close((error) => {
+          if (error) {
+            rejectDone(error);
+            return;
+          }
+          resolveDone();
+        });
+      });
+      rmSync(root, { force: true, recursive: true });
+    },
+    repositoryRoot,
+  });
+}
+
+function execFileText(
+  command: string,
+  argumentsList: readonly string[],
+  options: Readonly<{
+    readonly cwd: string;
+  }>,
+): Promise<string> {
+  return awaitable((resolvePromise, rejectPromise) => {
+    execFile(
+      command,
+      [...argumentsList],
+      {
+        cwd: options.cwd,
+        encoding: 'utf-8',
+      },
+      (
+        error: Error | null,
+        stdout: string | Buffer,
+        stderr: string | Buffer,
+      ) => {
+        if (error) {
+          rejectPromise(new Error(`${stdout ?? ''}${stderr ?? ''}`));
+          return;
+        }
+        resolvePromise(String(stdout));
+      },
+    );
+  });
+}
+
+function awaitable<T>(
+  executor: (
+    resolvePromise: (value: T) => void,
+    rejectPromise: (error: Error) => void,
+  ) => void,
+): Promise<T> {
+  return new Promise<T>((resolvePromise, rejectPromise) => {
+    executor(resolvePromise, rejectPromise);
+  });
+}

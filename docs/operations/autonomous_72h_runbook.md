@@ -5,7 +5,7 @@
 ```text
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 controller=run-autonomous-implementation.sh
-current_task=BWS-581
+current_task=BWS-590
 safe_local_terminal_gate=BWS-599
 canonical_duration=72h
 max_cycles=200

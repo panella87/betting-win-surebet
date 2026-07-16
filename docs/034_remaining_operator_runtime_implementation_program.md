@@ -2,7 +2,7 @@
 
 ```text
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-current_task=BWS-581
+current_task=BWS-590
 safe_local_terminal_gate=BWS-599
 external_runtime_gate=BWS-600
 execution_gate=BWS-900
@@ -10,22 +10,17 @@ execution_gate=BWS-900
 
 ## Why the program continues
 
-`BWS-580` validated a substantial closed-stack test surface, bounded convergence passes, an API-only lifecycle owner and a machine-readable runtime handoff. It did not finish the operator-runnable application.
+`BWS-580` validated a substantial closed-stack test surface, bounded convergence passes, a machine-readable runtime handoff, and `BWS-584` completed the full-stack lifecycle owner. The operator-runnable application is still incomplete.
 
 The current source still has these concrete local gaps:
 
 ```text
-upstream convergence commands=one bounded pass
-scheduler command=one bounded pass
-worker command=one bounded pass
-product lifecycle=read-only API process only
-cockpit=buildable but not served by the managed runtime
-start.sh=install_and_validate_only
-stop.sh=no_long_running_service
-check/watch/open_log=automation artifacts only
-paper evaluation=single_pass_no_service
-paper autopilot=paper_service_lifecycle=none
-database retention/backup/restore=not implemented as product commands
+start/stop wrappers=validated_product_lifecycle_delegation
+check/watch/open_log=validated_automation_plus_product_runtime_state
+paper evaluation=runtime_evidence_mode_validated
+paper autopilot=runtime_evidence_parent_validated
+database retention/backup/restore=validated product commands with disposable proof
+logs/metrics/diagnostics/evidence index=validated product surface
 release/upgrade/recovery/soak acceptance=not implemented
 ```
 
@@ -37,21 +32,20 @@ The machine-readable authority is `backlog/bws_full_implementation.csv`. Select 
 
 ### Runtime service construction
 
-- `BWS-581`: real long-running explicit-mode upstream convergence service.
 - `BWS-582`: long-running scheduler and worker loops with lease, backpressure and graceful-drain semantics.
-- `BWS-583`: loopback cockpit serving and full typed API/UI convergence.
-- `BWS-584`: complete product-owned lifecycle for API, convergence, scheduler, worker and cockpit processes.
+- `BWS-583`: validated loopback cockpit serving and full typed API/UI convergence.
+- `BWS-584`: validated complete product-owned lifecycle for API, convergence, scheduler, worker and cockpit processes.
 
 ### Operations and evidence
 
-- `BWS-585`: database migration status, retention, backup and disposable restore verification.
-- `BWS-586`: structured logs, metrics, diagnostics, evidence index and bounded retention.
-- `BWS-587`: exact protected root wrapper integration for lifecycle, status, progress and logs.
+- `BWS-585`: validated database migration status, retention, backup and disposable restore verification.
+- `BWS-586`: structured logs, metrics, diagnostics, evidence index and bounded retention (validated).
+- `BWS-587`: exact protected root wrapper integration for lifecycle, status, progress and logs (validated).
 
 ### Paper automation
 
-- `BWS-588`: standalone service-owned continuous paper evaluation.
-- `BWS-589`: paper autopilot lifecycle and runtime handoff integration.
+- `BWS-588`: validated standalone service-owned continuous paper evaluation.
+- `BWS-589`: paper autopilot lifecycle and runtime handoff integration (validated).
 
 ### Release and resilience
 
@@ -68,7 +62,7 @@ CONTINUE_REQUIRED=yes
   while any dependency-ready row through BWS-599 is PENDING
 
 AUTONOMOUS_GOAL_COMPLETE=yes
-  only after BWS-581 through BWS-599 are VALIDATED
+  only after BWS-582 through BWS-599 are VALIDATED and BWS-581 remains closed
 
 BLOCKED=yes
   only for a concrete unrecoverable repository state or exact missing external evidence

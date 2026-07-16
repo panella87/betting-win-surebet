@@ -2,12 +2,12 @@
 
 ```text
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-current_task=BWS-581
+current_task=BWS-590
 safe_local_terminal_gate=BWS-599
 selected_controller=run-autonomous-implementation.sh
 ```
 
-`BWS-100` through `BWS-580` are validated. The active queue builds the missing operator-runnable full stack, operations, protected wrapper integration, paper lifecycle, release/recovery tooling, soak proof and final local acceptance through `BWS-599`.
+`BWS-100` through `BWS-589` are validated. The active queue now builds release/deployment tooling, recovery tooling, soak proof and final local acceptance through `BWS-599`.
 
 # `.automation/`
 
@@ -41,4 +41,4 @@ A blanket manual protected-file override is disabled. Any changed protected file
 
 ## Current paper limitation
 
-`run-paper-evaluation.sh` and `run-paper-autopilot.sh` still report no-service lifecycle until `BWS-588` and `BWS-589`. They must not be selected as a substitute for the pending source queue.
+`run-paper-evaluation.sh` and `run-paper-autopilot.sh` now expose the validated runtime-evidence local lifecycle from `BWS-588` and `BWS-589`. They do not replace the remaining release, recovery, soak, or final-acceptance queue.

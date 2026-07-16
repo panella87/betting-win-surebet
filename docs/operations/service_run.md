@@ -2,17 +2,17 @@
 
 ## Current state
 
-The repository has validated executable components through `BWS-580`, but it does not yet have a complete operator-owned service stack.
+The repository has validated executable components, product-owned lifecycle control, protected root wrapper integration, and standalone paper runtime evidence through `BWS-588`, but it does not yet have a complete operator-owned service stack.
 
 ```text
-upstream convergence=one bounded pass
-scheduler=one bounded pass
-worker=one bounded pass
-product lifecycle=read_only_api_only
-cockpit=buildable_not_managed
-start.sh=install_and_validate_only
-stop.sh=no_long_running_service
-paper_evaluation=single_pass_no_service
+upstream convergence=continuous_service_validated
+scheduler=continuous_service_validated
+worker=continuous_service_validated
+product lifecycle=full_stack_owner_validated
+cockpit=managed_loopback_service_validated
+start.sh=product_lifecycle_start_validated
+stop.sh=product_lifecycle_stop_validated
+paper_evaluation=runtime_evidence_mode_validated
 paper_autopilot=paper_service_lifecycle_none
 ```
 

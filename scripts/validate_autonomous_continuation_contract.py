@@ -31,7 +31,7 @@ def main() -> None:
 
     for marker in [
         'BWS_FULL_PLATFORM_IMPLEMENTATION_V1', 'backlog/bws_full_implementation.csv',
-        'BWS-100', 'BWS-580', 'BWS-581', 'BWS-589', 'BWS-599',
+        'BWS-100', 'BWS-582', 'BWS-581', 'BWS-589', 'BWS-599',
         'CONTINUE_REQUIRED=yes', 'AUTONOMOUS_GOAL_COMPLETE=yes',
         'Historical SURE-001/SURE-002A/SURE-002B files are bootstrap ledgers only',
         'task-file automation maintenance',
@@ -39,7 +39,7 @@ def main() -> None:
         require(implementation, marker, 'docs/automation/autonomous-implementation.md')
 
     for marker in [
-        'current_task=BWS-581', 'current_task_status=PENDING',
+        'current_task=BWS-590', 'current_task_status=PENDING',
         'safe_local_terminal_gate=BWS-599', 'BETTING_WIN_REPO_PATH',
         'automation_maintenance_allowed=yes', 'allowed_protected_files=',
         'provider_connections=prohibited', 'execution=prohibited',
@@ -47,7 +47,7 @@ def main() -> None:
         require(task, marker, 'docs/automation/current-implementation-task.md')
 
     for marker in [
-        'status=IMPLEMENTATION_READY', 'current_task=BWS-581',
+        'status=IMPLEMENTATION_READY', 'current_task=BWS-590',
         'current_task_status=PENDING', 'safe_local_terminal_gate=BWS-599',
         'selected_controller=run-autonomous-implementation.sh',
     ]:

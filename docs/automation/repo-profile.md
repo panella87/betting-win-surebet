@@ -4,7 +4,7 @@
 repo_role=surebet_strategy_application
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 upstream_platform=betting-win
-current_task=BWS-581
+current_task=BWS-590
 safe_local_terminal_gate=BWS-599
 node_runtime=20
 package_manager=npm
@@ -31,8 +31,8 @@ open_log.sh
 run-autonomous-implementation.sh  selected for remaining local build
 run-autonomous-bugfix.sh          standalone audit
 run-bugfix-autopilot.sh           broad unattended audit and repair
-run-paper-evaluation.sh           retained no-service evaluator until BWS-588
-run-paper-autopilot.sh            pending full lifecycle integration at BWS-589
+run-paper-evaluation.sh           fixture evaluator plus runtime-evidence mode after BWS-588
+run-paper-autopilot.sh            validated runtime-evidence lifecycle integration at BWS-589
 ```
 
-The current product has bounded runtime commands and an API-only lifecycle owner. The active queue builds a real full-stack service, then integrates the exact protected root wrappers and paper controllers.
+The current product now has long-running explicit-mode upstream convergence, long-running scheduler and worker services, managed loopback cockpit serving, a validated full-stack lifecycle owner, validated product-owned database lifecycle operations, and validated protected root wrapper integration. The active queue now implements service-owned paper evaluation and the remaining paper/runtime operations.

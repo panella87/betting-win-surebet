@@ -4,13 +4,13 @@
 
 Authority comes from `docs/automation/current-implementation-task.md` and `backlog/bws_full_implementation.csv`. There is no `--task` flag. A separate `--prompt-file` is unnecessary.
 
-The current first task is `BWS-581`. The controller must continue through the first dependency-ready `PENDING` rows until `BWS-599` is validated, the scheduling budget or cycle ceiling is reached, or a concrete blocker is proven.
+The current first task is `BWS-590`. The controller must continue through the first dependency-ready `PENDING` rows until `BWS-599` is validated, the scheduling budget or cycle ceiling is reached, or a concrete blocker is proven.
 
-Historical SURE-001/SURE-002A/SURE-002B files are bootstrap ledgers only. `BWS-100` through `BWS-580` are validated carry-forward foundations, not authorization for a no-op goal-complete result.
+Historical SURE-001/SURE-002A/SURE-002B files are bootstrap ledgers only. `BWS-100` through `BWS-588` are validated carry-forward foundations, not authorization for a no-op goal-complete result.
 
 Allowed work includes continuous loopback services, scheduler/worker loops, cockpit serving, full-stack lifecycle, database backup/restore/retention, logs/metrics/diagnostics, release and recovery tooling, root wrapper integration, paper-controller integration, soak acceptance and external-runtime preflight.
 
-The binding sequence includes `BWS-581` continuous convergence, `BWS-587` root wrapper integration, `BWS-589` paper autopilot lifecycle, and terminal local acceptance at `BWS-599`.
+The binding sequence includes validated `BWS-581` continuous convergence, validated `BWS-582` scheduler/worker services, validated `BWS-587` root wrapper integration, `BWS-589` paper autopilot lifecycle, and terminal local acceptance at `BWS-599`.
 
 Forbidden work includes direct provider clients/URLs/credentials, betting-win `core.*` writes, modifying the betting-win checkout, execution paths, public signals and profitability claims.
 

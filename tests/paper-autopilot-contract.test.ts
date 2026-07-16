@@ -8,18 +8,22 @@ function read(rel: string): string { return readFileSync(join(REPO_ROOT, rel), '
 function esc(marker: string): RegExp { return new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')); }
 function contains(text: string, marker: string): void { assert.match(text, esc(marker), `missing marker: ${marker}`); }
 
-test('paper autopilot is a surebet no-service parent supervisor', () => {
+test('paper autopilot is a surebet runtime-evidence parent supervisor', () => {
   const script = read('run-paper-autopilot.sh');
   for (const marker of [
-    'Parent no-service paper/autonomous supervisor for betting-win-surebet',
-    'paper_service_lifecycle=none',
+    'Parent runtime-evidence paper/autonomous supervisor for betting-win-surebet',
+    'paper_service_lifecycle=full_stack_owned',
     'paper_autopilot',
     'rounds.tsv',
     'child_command.txt',
     'child_output.log',
     'child_result.env',
     'child_terminal_result.env',
-    'PAPER_AUTOPILOT_BLOCKED_ON_PINNED_BUNDLE',
+    '--runtime-evidence',
+    'PAPER_AUTOPILOT_READY_RUNTIME_EVIDENCE_LOCAL_ONLY',
+    'PAPER_AUTOPILOT_BLOCKED_RUNTIME_OWNERSHIP_AMBIGUOUS',
+    'PAPER_AUTOPILOT_BLOCKED_RUNTIME_STOP_FAILED',
+    'PAPER_AUTOPILOT_BLOCKED_RUNTIME_EVIDENCE_COLLECTION_FAILED',
     'PAPER_AUTOPILOT_BLOCKED_IMPLEMENTATION_NOOP',
     'PAPER_AUTOPILOT_BLOCKED_IMPLEMENTATION_HANDOVER_NOT_REFRESHABLE',
     'PAPER_AUTOPILOT_BLOCKED_CHILD_IDENTITY',
@@ -32,6 +36,8 @@ test('paper autopilot is a surebet no-service parent supervisor', () => {
     'automation_v2_touch_owned_parent_lock',
     'parent_child_cleanup_failure_classification=enabled',
     'parent_lock_release_failure_classification=enabled',
+    'RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE',
+    'RUNTIME_EVIDENCE_CAMPAIGN_RUN_ID',
     'child_telegram_notifications=suppressed_by_parent',
     'parent_telegram_notification=final_only',
     '"TELEGRAM_NOTIFY=0"',
@@ -52,9 +58,12 @@ test('paper evaluation writes autopilot-readable implementation handoff metadata
     'PAPER_MODE_NOOP_SUCCESS_ALLOWED=no',
     'PAPER_MODE_EXPECTED_PRIVATE_PAPER_REEVALUATION_AFTER_SOURCE_CHANGE=yes',
     'PAPER_MODE_AUTOMATION_MAINTENANCE_ALLOWED=',
-    'PAPER_SERVICE_SUPPORTED=0',
-    'SERVICE_REFRESH_REQUIRED=0',
-    'RUNTIME_EVIDENCE_REQUIRED=0',
+    'paper_service_supported_value()',
+    'service_refresh_required_value()',
+    'runtime_evidence_required_value()',
+    'RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE=',
+    'RUNTIME_EVIDENCE_CAMPAIGN_RUN_ID=',
+    'PAPER_EVALUATION_READY_RUNTIME_EVIDENCE_LOCAL_ONLY',
   ]) contains(script, marker);
 });
 
@@ -68,9 +77,11 @@ test('implementation controller writes fingerprinted paper re-evaluation handoff
     'PRIVATE_PAPER_REEVALUATION_REQUIRED=$reevaluate',
     'SOURCE_HANDOFF_FINGERPRINT=$ACTIVE_HANDOFF_FINGERPRINT',
     'automation_v2_add_or_verify_fingerprint',
-    'PAPER_SERVICE_SUPPORTED=0',
-    'SERVICE_REFRESH_REQUIRED=0',
-    'RUNTIME_EVIDENCE_REQUIRED=0',
+    'PAPER_SERVICE_SUPPORTED=$ACTIVE_HANDOFF_PAPER_SERVICE_SUPPORTED',
+    'SERVICE_REFRESH_REQUIRED=$ACTIVE_HANDOFF_SERVICE_REFRESH_REQUIRED',
+    'RUNTIME_EVIDENCE_REQUIRED=$ACTIVE_HANDOFF_RUNTIME_EVIDENCE_REQUIRED',
+    'RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE=$ACTIVE_HANDOFF_RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE',
+    'RUNTIME_EVIDENCE_CAMPAIGN_RUN_ID=$ACTIVE_HANDOFF_RUNTIME_EVIDENCE_CAMPAIGN_RUN_ID',
     '${ACTIVE_HANDOFF_MODE}_handover_noop_disallowed',
     'PAPER_MODE_NOOP_SUCCESS_ALLOWED',
     'PAPER_MODE_AUTOMATION_MAINTENANCE_ALLOWED',
@@ -83,8 +94,8 @@ test('automation config and docs register paper autopilot as the unattended pape
   contains(config, 'AUTOMATION_PAPER_AUTOPILOT_COMMAND');
   contains(config, 'AUTOMATION_PAPER_COMMAND="$AUTOMATION_PAPER_AUTOPILOT_COMMAND"');
   contains(config, 'run-paper-autopilot.sh');
-  contains(status, 'run_paper_autopilot=standardized_parent_pending_bws_589_and_bws_599');
-  contains(read('docs/automation/paper-autopilot.md'), 'PAPER_AUTOPILOT_BLOCKED_ON_PINNED_BUNDLE');
+  contains(status, 'run_paper_autopilot=runtime_evidence_parent_validated_bws_589_pending_bws_599');
+  contains(read('docs/automation/paper-autopilot.md'), 'selected_now=yes_for_runtime_evidence_source_fix_loops');
 });
 
 
@@ -98,6 +109,7 @@ test('paper autopilot reconciles nonzero child exits through explicit machine-re
     'child_terminal_result_transport=atomic_side_channel_v1',
     'child_stdout_machine_parsing=disabled',
     'LAST_CHILD_RESULT_VALID',
+    'continue_runtime_evidence_observation',
     'setsid "${launch_cmd[@]}"',
     'ACTIVE_CHILD_PID=$!',
     'parent_budget_clamping=enabled',

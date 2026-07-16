@@ -50,7 +50,7 @@ test('paper runtime handoff writes a strict latest handoff plus immutable source
       readonly schema: string;
     };
     assert.equal(latest.schema, 'bws.paper_runtime_handoff.v1');
-    assert.equal(latest.runtime.evidenceFile, 'runtime/bws-operator-lifecycle/read-only-api/evidence/latest.json');
+    assert.equal(latest.runtime.evidenceFile, 'runtime/bws-operator-lifecycle/evidence/latest.json');
     assert.equal(latest.packaging.sourceHandoffArchive.sha256, result.archive.sha256);
   } finally {
     rmSync(repositoryRoot, { recursive: true, force: true });
@@ -155,7 +155,7 @@ function sampleLifecycleStatus(): BwsOperatorLifecycleCommandResult {
         workerId: 'worker-001',
       }),
     }),
-    evidenceFile: 'runtime/bws-operator-lifecycle/read-only-api/evidence/latest.json',
+    evidenceFile: 'runtime/bws-operator-lifecycle/evidence/latest.json',
     generatedAt: TEST_TIMESTAMP,
     health: Object.freeze({
       body: Object.freeze({
@@ -171,12 +171,64 @@ function sampleLifecycleStatus(): BwsOperatorLifecycleCommandResult {
       command: Object.freeze(['/usr/bin/node', 'dist/packages/bootstrap/src/cli/bws-read-only-api.js']),
       commandCwd: '/tmp/repo',
       entryPointPath: '/tmp/repo/dist/packages/bootstrap/src/cli/bws-read-only-api.js',
+      kind: 'api_runtime',
       lifecycleToken: 'lifecycle-token-001',
       pid: 1234,
       processName: 'bws-read-only-api',
       procStartTicks: '123456',
+      roles: Object.freeze(['cockpit', 'api'] as const),
       startedAt: TEST_TIMESTAMP,
     }),
+    processes: Object.freeze([
+      Object.freeze({
+        command: Object.freeze(['/usr/bin/node', 'dist/packages/bootstrap/src/cli/bws-upstream-convergence-service.js', 'run']),
+        commandCwd: '/tmp/repo',
+        entryPointPath: '/tmp/repo/dist/packages/bootstrap/src/cli/bws-upstream-convergence-service.js',
+        kind: 'upstream_convergence',
+        lifecycleToken: 'lifecycle-token-001',
+        pid: 1231,
+        processName: 'bws-upstream-convergence-service',
+        procStartTicks: '123451',
+        roles: Object.freeze(['upstream_convergence'] as const),
+        startedAt: TEST_TIMESTAMP,
+      }),
+      Object.freeze({
+        command: Object.freeze(['/usr/bin/node', 'dist/packages/bootstrap/src/cli/bws-private-paper-scheduler-service.js', 'run']),
+        commandCwd: '/tmp/repo',
+        entryPointPath: '/tmp/repo/dist/packages/bootstrap/src/cli/bws-private-paper-scheduler-service.js',
+        kind: 'private_paper_scheduler',
+        lifecycleToken: 'lifecycle-token-001',
+        pid: 1232,
+        processName: 'bws-private-paper-scheduler-service',
+        procStartTicks: '123452',
+        roles: Object.freeze(['private_paper_scheduler'] as const),
+        startedAt: TEST_TIMESTAMP,
+      }),
+      Object.freeze({
+        command: Object.freeze(['/usr/bin/node', 'dist/packages/bootstrap/src/cli/bws-private-paper-worker-service.js', 'run']),
+        commandCwd: '/tmp/repo',
+        entryPointPath: '/tmp/repo/dist/packages/bootstrap/src/cli/bws-private-paper-worker-service.js',
+        kind: 'private_paper_worker',
+        lifecycleToken: 'lifecycle-token-001',
+        pid: 1233,
+        processName: 'bws-private-paper-worker-service',
+        procStartTicks: '123453',
+        roles: Object.freeze(['private_paper_worker'] as const),
+        startedAt: TEST_TIMESTAMP,
+      }),
+      Object.freeze({
+        command: Object.freeze(['/usr/bin/node', 'dist/packages/bootstrap/src/cli/bws-read-only-api.js']),
+        commandCwd: '/tmp/repo',
+        entryPointPath: '/tmp/repo/dist/packages/bootstrap/src/cli/bws-read-only-api.js',
+        kind: 'api_runtime',
+        lifecycleToken: 'lifecycle-token-001',
+        pid: 1234,
+        processName: 'bws-read-only-api',
+        procStartTicks: '123456',
+        roles: Object.freeze(['cockpit', 'api'] as const),
+        startedAt: TEST_TIMESTAMP,
+      }),
+    ]),
     readiness: Object.freeze({
       body: Object.freeze({
         observability: Object.freeze({}),
@@ -186,7 +238,7 @@ function sampleLifecycleStatus(): BwsOperatorLifecycleCommandResult {
       statusCode: 200,
       url: 'http://127.0.0.1:4312/readiness',
     }),
-    service: 'read_only_api',
+    service: 'full_stack',
     sourceFingerprints: Object.freeze({
       packageVersion: '0.1.0-bws-full-platform',
       sourceManifestGeneratedAt: TEST_TIMESTAMP,
@@ -196,7 +248,33 @@ function sampleLifecycleStatus(): BwsOperatorLifecycleCommandResult {
       upstreamGitTreeSha: '89abcdef0123456789abcdef0123456789abcdef',
       upstreamTrackedTreeListingSha256: 'a'.repeat(64),
     }),
-    stateFile: 'runtime/bws-operator-lifecycle/read-only-api/state.json',
+    stack: Object.freeze({
+      blockers: Object.freeze([]),
+      components: Object.freeze({
+        api: 'ready',
+        cockpit: 'ready',
+        private_paper_scheduler: 'ready',
+        private_paper_worker: 'ready',
+        upstream_convergence: 'ready',
+      }),
+      healthStatus: 'healthy',
+      readinessStatus: 'ready',
+      roles: Object.freeze([
+        Object.freeze({ lifecycleToken: 'lifecycle-token-001', pid: 1231, processName: 'bws-upstream-convergence-service', role: 'upstream_convergence', startedAt: TEST_TIMESTAMP, state: 'running' }),
+        Object.freeze({ lifecycleToken: 'lifecycle-token-001', pid: 1232, processName: 'bws-private-paper-scheduler-service', role: 'private_paper_scheduler', startedAt: TEST_TIMESTAMP, state: 'running' }),
+        Object.freeze({ lifecycleToken: 'lifecycle-token-001', pid: 1233, processName: 'bws-private-paper-worker-service', role: 'private_paper_worker', startedAt: TEST_TIMESTAMP, state: 'running' }),
+        Object.freeze({ lifecycleToken: 'lifecycle-token-001', pid: 1234, processName: 'bws-read-only-api', role: 'cockpit', startedAt: TEST_TIMESTAMP, state: 'running' }),
+        Object.freeze({ lifecycleToken: 'lifecycle-token-001', pid: 1234, processName: 'bws-read-only-api', role: 'api', startedAt: TEST_TIMESTAMP, state: 'running' }),
+      ]),
+      shutdownOrder: Object.freeze([
+        'upstream_convergence',
+        'private_paper_scheduler',
+        'private_paper_worker',
+        'cockpit',
+        'api',
+      ] as const),
+    }),
+    stateFile: 'runtime/bws-operator-lifecycle/state.json',
   });
 }
 

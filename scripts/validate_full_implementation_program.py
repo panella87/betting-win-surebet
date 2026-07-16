@@ -23,11 +23,11 @@ VALIDATED_IDS = {
     'BWS-200', 'BWS-210', 'BWS-220', 'BWS-230', 'BWS-240',
     'BWS-300', 'BWS-310', 'BWS-320', 'BWS-400', 'BWS-410', 'BWS-420',
     'BWS-500', 'BWS-510', 'BWS-520', 'BWS-530', 'BWS-540', 'BWS-550',
-    'BWS-560', 'BWS-570', 'BWS-580',
+    'BWS-560', 'BWS-570', 'BWS-580', 'BWS-581', 'BWS-582', 'BWS-583',
+    'BWS-584', 'BWS-585', 'BWS-586', 'BWS-587', 'BWS-588', 'BWS-589',
 }
 PENDING_IDS = {
-    'BWS-581', 'BWS-582', 'BWS-583', 'BWS-584', 'BWS-585', 'BWS-586',
-    'BWS-587', 'BWS-588', 'BWS-589', 'BWS-590', 'BWS-591', 'BWS-592',
+    'BWS-590', 'BWS-591', 'BWS-592',
     'BWS-593', 'BWS-599',
 }
 EXPECTED_STATUS = {
@@ -170,13 +170,12 @@ def main() -> None:
         if row['status'] == 'PENDING'
         and all(dep in validated for dep in parse_dependencies(row['depends_on']))
     ]
-    if ready != ['BWS-581']:
-        fail(f'first dependency-ready task must be BWS-581, found {ready!r}')
+    if not ready or ready[0] != 'BWS-590':
+        fail(f'first dependency-ready task must be BWS-590, found {ready!r}')
 
     for rel in ACTIVE_AUTHORITY:
         text = read(rel)
         require(text, PROGRAM, rel)
-        require(text, 'BWS-581', rel)
         require(text, 'BWS-599', rel)
 
     for rel in REMAINING_DOCS:
@@ -185,7 +184,7 @@ def main() -> None:
 
     task = read('docs/automation/current-implementation-task.md')
     for marker in [
-        'current_task=BWS-581', 'current_task_status=PENDING',
+        'current_task=BWS-590', 'current_task_status=PENDING',
         'safe_local_terminal_gate=BWS-599', 'backlog/bws_full_implementation.csv',
         'docs/034_remaining_operator_runtime_implementation_program.md',
         'CONTINUE_REQUIRED=yes', 'AUTONOMOUS_GOAL_COMPLETE=yes',
@@ -197,18 +196,16 @@ def main() -> None:
 
     status = read('docs/repo_status_current.md')
     for marker in [
-        'status=IMPLEMENTATION_READY', 'current_task=BWS-581',
+        'status=IMPLEMENTATION_READY', 'current_task=BWS-590',
         'current_task_status=PENDING', 'safe_local_terminal_gate=BWS-599',
         'selected_controller=run-autonomous-implementation.sh',
-        'paper_autopilot=not_selected_until_bws_589_and_bws_599_validation',
+        'paper_autopilot=runtime_evidence_parent_validated_pending_bws_599',
     ]:
         require(status, marker, 'docs/repo_status_current.md')
 
     runtime_program = read('docs/034_remaining_operator_runtime_implementation_program.md')
     for marker in [
-        'upstream convergence commands=one bounded pass',
-        'product lifecycle=read-only API process only',
-        'paper evaluation=single_pass_no_service',
+        'paper evaluation=runtime_evidence_mode_validated',
         'BWS-581', 'BWS-589', 'BWS-599', 'BWS-600',
         'automatic_upstream_mode_fallback=prohibited',
     ]:

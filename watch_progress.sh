@@ -7,8 +7,8 @@ BASE_URL=""
 usage() { cat <<'USAGE'
 Usage: ./watch_progress.sh [--once] [--loop] [--fast] [--interval N] [--base-url URL]
 
-Read-only progress watcher. For betting-win-surebet the default view is local
-automation artifacts; --base-url is accepted only for workflow compatibility.
+Read-only progress watcher. For betting-win-surebet the default view combines local
+automation artifacts with product runtime state; --base-url is accepted only for workflow compatibility.
 USAGE
 }
 while [[ $# -gt 0 ]]; do

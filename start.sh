@@ -17,5 +17,4 @@ fi
 printf 'NODE_OK=v%s\n' "$actual_version"
 printf 'NPM_OK=%s\n' "$(npm --version)"
 node scripts/restore-required-executable-bits.js
-npm install
-npm run validate
+node scripts/bws-root-wrapper-runtime.mjs start

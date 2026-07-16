@@ -260,6 +260,14 @@ test('loopback acceptance assembles migration, intake, backtest, paper worker, A
       [BWS_OPERATOR_COCKPIT_DATA_MODE_ENV]: 'api',
     });
     const operationalStatus = createBwsOperationalStatusSnapshot({
+      cockpitState: Object.freeze({
+        apiBaseUrl,
+        assetFingerprint: 'f'.repeat(64),
+        buildDirectory: 'dist/apps/web',
+        dataMode: 'api' as const,
+        entryDocumentPath: 'dist/apps/web/index.html',
+        status: 'ready' as const,
+      }),
       cockpitProcessDefinition: describeBwsOperatorCockpitProcessDefinition(cockpitConfig),
       config: runtimeConfig,
       generatedAt: TEST_TIMESTAMP,

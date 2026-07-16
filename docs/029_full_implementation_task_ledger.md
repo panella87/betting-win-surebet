@@ -21,17 +21,17 @@ A row becomes `BLOCKED` only after all safe local work in that row is exhausted 
 ## Current selection
 
 ```text
-current_task=BWS-581
+current_task=BWS-590
 current_task_status=PENDING
-reason=the repository exposes bounded passes and an API-only lifecycle but no real long-running full-stack operator service
+reason=the repository now has validated runtime-evidence paper autopilot lifecycle ownership, and release/deployment packaging is the next dependency-ready local gap
 ```
 
 ## Remaining sequence
 
 ```text
 BWS-581..BWS-584  continuous service and lifecycle
-BWS-585..BWS-586  database, observability and evidence operations
-BWS-587..BWS-589  protected wrapper and paper automation integration
+BWS-586           observability and evidence operations (validated)
+BWS-587..BWS-589  protected wrapper and paper automation integration (validated)
 BWS-590..BWS-593  release, recovery, soak and external preflight
 BWS-599           final local acceptance
 BWS-600           external accepted-runtime evidence

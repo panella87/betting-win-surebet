@@ -2,13 +2,13 @@
 
 ```text
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-current_task=BWS-581
+current_task=BWS-590
 current_task_status=PENDING
 selected_controller=run-autonomous-implementation.sh
 safe_local_terminal_gate=BWS-599
 ```
 
-`BWS-100` through `BWS-580` are validated carry-forward foundations. They do not finish the operator application: the current runtime still uses one-shot convergence, scheduler and worker commands, an API-only lifecycle owner, unserved cockpit assets, disconnected root lifecycle wrappers and no-service paper controllers.
+`BWS-100` through `BWS-588` are validated carry-forward foundations. They do not finish the operator application: the current runtime now has validated full-stack lifecycle ownership, product-owned database lifecycle operations, structured observability surfaces, integrated root lifecycle wrappers and standalone paper runtime evidence, but paper autopilot remains outside the owned lifecycle.
 
 The binding queue continues through `BWS-599`. The detailed contracts are `docs/034_remaining_operator_runtime_implementation_program.md` through `docs/041_external_runtime_preflight_and_bws600_campaign.md`.
 
@@ -17,11 +17,11 @@ The binding queue continues through `BWS-599`. The detailed contracts are `docs/
 ## Controller selection
 
 ```text
-run-autonomous-implementation.sh  selected for BWS-581 through BWS-599
+run-autonomous-implementation.sh  selected for BWS-589 through BWS-599 after BWS-588 validation
 run-autonomous-bugfix.sh          standalone audit only
 run-bugfix-autopilot.sh           broad audit and automatic repair after implementation
-run-paper-evaluation.sh           retained no-service evaluator until BWS-588
-run-paper-autopilot.sh            not selected until BWS-589 and BWS-599 are validated
+run-paper-evaluation.sh           fixture evaluator plus runtime-evidence mode after BWS-588
+run-paper-autopilot.sh            runtime-evidence parent validated at BWS-589; selected for later BWS-599/BWS-600 campaigns
 ```
 
 Do not use paper autopilot as a workaround for missing product lifecycle implementation.

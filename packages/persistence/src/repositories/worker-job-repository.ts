@@ -85,6 +85,16 @@ export interface SurebetWorkerJobDeadLetterRecord {
   readonly insertedAt: string;
 }
 
+export interface SurebetWorkerQueueSummary {
+  readonly queueName: string;
+  readonly pendingCount: number;
+  readonly leasedCount: number;
+  readonly retryWaitCount: number;
+  readonly succeededCount: number;
+  readonly deadLetteredCount: number;
+  readonly outstandingCount: number;
+}
+
 export interface SurebetWorkerJobClaimRequest {
   readonly queueName: string;
   readonly workerId: string;
@@ -189,6 +199,15 @@ interface WorkerJobDeadLetterRow {
 
 interface WorkerJobMutationRow {
   readonly jobId: string;
+}
+
+interface WorkerJobQueueSummaryRow {
+  readonly queueName: string;
+  readonly pendingCount: number;
+  readonly leasedCount: number;
+  readonly retryWaitCount: number;
+  readonly succeededCount: number;
+  readonly deadLetteredCount: number;
 }
 
 export class SurebetWorkerJobRepository {
@@ -309,6 +328,28 @@ FROM (
 `,
     );
     return normalizeJobRow(rows[0]);
+  }
+
+  summarizeQueue(queueName: string): SurebetWorkerQueueSummary {
+    const validatedQueueName = requireNonEmptyString(queueName, 'queueName');
+    const rows = queryPsqlJsonRows<WorkerJobQueueSummaryRow>(
+      this.#config,
+      `
+SELECT row_to_json(t)::text
+FROM (
+  SELECT
+    ${quoteSqlLiteral(validatedQueueName)} AS "queueName",
+    COALESCE(SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END), 0) AS "pendingCount",
+    COALESCE(SUM(CASE WHEN status = 'leased' THEN 1 ELSE 0 END), 0) AS "leasedCount",
+    COALESCE(SUM(CASE WHEN status = 'retry_wait' THEN 1 ELSE 0 END), 0) AS "retryWaitCount",
+    COALESCE(SUM(CASE WHEN status = 'succeeded' THEN 1 ELSE 0 END), 0) AS "succeededCount",
+    COALESCE(SUM(CASE WHEN status = 'dead_lettered' THEN 1 ELSE 0 END), 0) AS "deadLetteredCount"
+  FROM surebet.worker_jobs
+  WHERE queue_name = ${quoteSqlLiteral(validatedQueueName)}
+) AS t;
+`,
+    );
+    return normalizeQueueSummaryRow(rows[0], validatedQueueName);
   }
 
   claimNext(request: SurebetWorkerJobClaimRequest): SurebetWorkerJobRecord | undefined {
@@ -1068,6 +1109,37 @@ function normalizeDeadLetterRow(
     finalLeaseToken: row.finalLeaseToken,
     checkpointCount: requireSafeInteger(row.checkpointCount, 'checkpointCount'),
     insertedAt: row.insertedAt,
+  });
+}
+
+function normalizeQueueSummaryRow(
+  row: WorkerJobQueueSummaryRow | undefined,
+  queueName: string,
+): SurebetWorkerQueueSummary {
+  if (row === undefined) {
+    return Object.freeze({
+      deadLetteredCount: 0,
+      leasedCount: 0,
+      outstandingCount: 0,
+      pendingCount: 0,
+      queueName,
+      retryWaitCount: 0,
+      succeededCount: 0,
+    });
+  }
+  const pendingCount = requireSafeInteger(row.pendingCount, 'pendingCount');
+  const leasedCount = requireSafeInteger(row.leasedCount, 'leasedCount');
+  const retryWaitCount = requireSafeInteger(row.retryWaitCount, 'retryWaitCount');
+  const succeededCount = requireSafeInteger(row.succeededCount, 'succeededCount');
+  const deadLetteredCount = requireSafeInteger(row.deadLetteredCount, 'deadLetteredCount');
+  return Object.freeze({
+    deadLetteredCount,
+    leasedCount,
+    outstandingCount: pendingCount + leasedCount + retryWaitCount,
+    pendingCount,
+    queueName: row.queueName,
+    retryWaitCount,
+    succeededCount,
   });
 }
 

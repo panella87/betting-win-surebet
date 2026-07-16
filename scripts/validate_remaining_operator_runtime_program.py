@@ -13,8 +13,8 @@ TASK_IDS = [
 ]
 DOC_MARKERS = {
     'docs/034_remaining_operator_runtime_implementation_program.md': [
-        'current_task=BWS-581', 'safe_local_terminal_gate=BWS-599',
-        'upstream convergence commands=one bounded pass', 'paper evaluation=single_pass_no_service',
+        'current_task=BWS-590', 'safe_local_terminal_gate=BWS-599',
+        'paper evaluation=runtime_evidence_mode_validated',
         'BWS-581', 'BWS-589', 'BWS-599', 'BWS-600',
     ],
     'docs/035_continuous_service_supervisor_contract.md': [
@@ -71,7 +71,16 @@ def main() -> None:
     for task_id in TASK_IDS:
         if task_id not in rows:
             fail(f'ledger missing remaining task: {task_id}')
-        if rows[task_id]['status'] != 'PENDING':
+        if task_id in {'BWS-581', 'BWS-582', 'BWS-583', 'BWS-584', 'BWS-585'}:
+            if rows[task_id]['status'] != 'VALIDATED':
+                fail(f'{task_id} must be VALIDATED after its runtime service milestone lands')
+        elif task_id in {'BWS-586', 'BWS-588', 'BWS-589'}:
+            if rows[task_id]['status'] != 'VALIDATED':
+                fail(f'{task_id} must be VALIDATED after its landed milestone closes')
+        elif task_id == 'BWS-587':
+            if rows[task_id]['status'] != 'VALIDATED':
+                fail(f'{task_id} must be VALIDATED after the protected root wrapper milestone lands')
+        elif rows[task_id]['status'] != 'PENDING':
             fail(f'{task_id} must initially be PENDING')
         if not rows[task_id]['objective'].strip() or not rows[task_id]['required_proof'].strip():
             fail(f'{task_id} must have objective and required proof')
@@ -81,7 +90,7 @@ def main() -> None:
         'docs/repo_status_current.md', 'docs/automation/current-implementation-task.md',
     ]:
         text = read(rel)
-        for marker in [PROGRAM, 'BWS-581', 'BWS-599']:
+        for marker in [PROGRAM, 'BWS-599']:
             if marker not in text:
                 fail(f'{rel} missing required marker: {marker}')
 

@@ -7,6 +7,14 @@ export * from './api/bws-read-only-query-http.js';
 export * from './api/bws-read-only-query-service.js';
 export * from './backtest/standard-binary-backtest.js';
 export {
+  printBwsObservabilityHelp,
+  runBwsObservabilityCli,
+} from './cli/bws-observability.js';
+export {
+  printBwsDatabaseLifecycleHelp,
+  runBwsDatabaseLifecycleCli,
+} from './cli/bws-database-lifecycle.js';
+export {
   printBwsOperatorLifecycleHelp,
   runBwsOperatorLifecycleCli,
 } from './cli/bws-operator-lifecycle.js';
@@ -15,13 +23,25 @@ export {
   runBwsPaperRuntimeHandoffCli,
 } from './cli/bws-paper-runtime-handoff.js';
 export {
+  printBwsPaperRuntimeEvidenceHelp,
+  runBwsPaperRuntimeEvidenceCli,
+} from './cli/bws-paper-runtime-evidence.js';
+export {
   printBwsPrivatePaperWorkerHelp,
   runBwsPrivatePaperWorkerCli,
 } from './cli/bws-private-paper-worker.js';
 export {
+  printBwsPrivatePaperWorkerServiceHelp,
+  runBwsPrivatePaperWorkerServiceCli,
+} from './cli/bws-private-paper-worker-service.js';
+export {
   printBwsPrivatePaperSchedulerHelp,
   runBwsPrivatePaperSchedulerCli,
 } from './cli/bws-private-paper-scheduler.js';
+export {
+  printBwsPrivatePaperSchedulerServiceHelp,
+  runBwsPrivatePaperSchedulerServiceCli,
+} from './cli/bws-private-paper-scheduler-service.js';
 export {
   printBwsUpstreamExportConvergenceHelp,
   runBwsUpstreamExportConvergenceCli,
@@ -30,6 +50,10 @@ export {
   printBwsUpstreamApiConvergenceHelp,
   runBwsUpstreamApiConvergenceCli,
 } from './cli/bws-upstream-api-convergence.js';
+export {
+  printBwsUpstreamConvergenceServiceHelp,
+  runBwsUpstreamConvergenceServiceCli,
+} from './cli/bws-upstream-convergence-service.js';
 export {
   printBwsReadOnlyApiHelp,
   runBwsReadOnlyApiCli,
@@ -60,11 +84,17 @@ export * from './identity/market-group-key.js';
 export * from './opportunity/standard-binary-derivation.js';
 export * from './opportunity/standard-binary-stake-solver.js';
 export * from './operations/service-runtime.js';
+export * from './operations/observability.js';
+export * from './operations/database-lifecycle.js';
 export * from './operations/operator-lifecycle.js';
 export * from './operations/paper-runtime-handoff.js';
+export * from './operations/paper-runtime-evidence.js';
 export * from './operations/runtime-applications.js';
 export * from './operations/private-paper-runtime-scheduler.js';
+export * from './operations/private-paper-scheduler-service.js';
+export * from './operations/private-paper-worker-service.js';
 export * from './operations/upstream-api-convergence.js';
+export * from './operations/upstream-convergence-service.js';
 export * from './operations/upstream-export-convergence.js';
 export * from './quotes/fee-cost-model.js';
 export * from './quotes/quote-capacity.js';

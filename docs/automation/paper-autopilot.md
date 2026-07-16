@@ -7,12 +7,12 @@ paper evaluation -> source defect -> implementation -> runtime re-evaluation
 ```
 
 ```text
-current_paper_service_lifecycle=none
+current_paper_service_lifecycle=full_stack_owned
 integration_task=BWS-589
-selected_now=no
+selected_now=yes_for_runtime_evidence_source_fix_loops
 ```
 
-The current child evaluator is no-service and therefore cannot own the final continuous campaign. Its current bounded missing-input classification remains `PAPER_AUTOPILOT_BLOCKED_ON_PINNED_BUNDLE`; that result is not continuous-runtime readiness. `BWS-589` must bind the parent to the product-owned full-stack lifecycle while preserving:
+`BWS-589` validates the parent against the product-owned full-stack runtime-evidence lifecycle while preserving:
 
 - exact parent and child lock ownership;
 - atomic child terminal-result files;
@@ -22,6 +22,6 @@ The current child evaluator is no-service and therefore cannot own the final con
 - post-lock artifact refresh;
 - no parsing machine state from streamed logs.
 
-After `BWS-589`, `BWS-599` must prove the complete local paper-autopilot flow. `BWS-600` remains externally blocked until an operator-approved runtime campaign manifest and read-only input exist.
+`BWS-599` must still prove the complete local paper-autopilot flow. `BWS-600` remains externally blocked until an operator-approved runtime campaign manifest and read-only input exist.
 
 Seven-day and 72-hour durations are ceilings. A bounded task may finish quickly, but the parent or implementation controller must continue while another dependency-ready safe task remains.

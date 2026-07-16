@@ -8,7 +8,7 @@ Build the complete private surebet application on top of the read-only betting-w
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 repo_role=surebet_strategy_application
 upstream_platform=betting-win
-current_task=BWS-581
+current_task=BWS-590
 safe_local_terminal_gate=BWS-599
 continuous_runtime_gate=BWS-600
 execution_gate=BWS-900
@@ -45,9 +45,9 @@ Primary phases:
 4. `BWS-300` to `BWS-320`: backtest, bounded private paper, strategy ledger and reports.
 5. `BWS-400` to `BWS-500`: API, workers, cockpit, security, observability and process contracts.
 6. `BWS-510`: integrated clean-install and loopback acceptance.
-7. `BWS-520` to `BWS-580`: executable bounded runtime components, explicit convergence, bounded scheduling, API-only lifecycle, persisted visibility and component-level continuous-runtime acceptance.
+7. `BWS-520` to `BWS-580`: executable bounded runtime components, explicit convergence, bounded scheduling, persisted visibility and component-level continuous-runtime acceptance.
 8. `BWS-581` to `BWS-584`: real long-running services, cockpit serving and complete full-stack lifecycle.
-9. `BWS-585` to `BWS-589`: database/evidence operations plus root wrapper and paper-controller integration.
+9. `BWS-586` to `BWS-589`: evidence operations plus root wrapper and paper-controller integration.
 10. `BWS-590` to `BWS-593`: release, upgrade/recovery, soak/failure injection and accepted-runtime preflight.
 11. `BWS-599`: integrated final local operator/runtime/automation/recovery acceptance.
 12. `BWS-600`: validation against an accepted operator-approved betting-win runtime, externally gated.

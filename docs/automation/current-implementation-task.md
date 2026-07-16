@@ -4,7 +4,7 @@ Repository: `betting-win-surebet`.
 
 ```text
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-current_task=BWS-581
+current_task=BWS-590
 current_task_status=PENDING
 safe_local_terminal_gate=BWS-599
 external_runtime_gate=BWS-600
@@ -12,7 +12,7 @@ external_runtime_gate=BWS-600
 
 ## Campaign objective
 
-Implement every remaining safe local component required for a real operator-runnable continuous private-paper BWS application. Use `backlog/bws_full_implementation.csv` as the binding dependency ledger. Start with the first dependency-ready `PENDING` row, currently `BWS-581`, and continue across validated cycles through `BWS-599`.
+Implement every remaining safe local component required for a real operator-runnable continuous private-paper BWS application. Use `backlog/bws_full_implementation.csv` as the binding dependency ledger. Start with the first dependency-ready `PENDING` row, currently `BWS-590`, and continue across validated cycles through `BWS-599`.
 
 Do not stop after one bounded task while another dependency-ready safe row remains.
 
@@ -35,20 +35,13 @@ Do not stop after one bounded task while another dependency-ready safe row remai
 
 ## Verified carry-forward state
 
-`BWS-100` through `BWS-580` are validated. Preserve their contracts. Do not reimplement or weaken validated functionality merely to create work.
+`BWS-100` through `BWS-589` are validated. Preserve their contracts. Do not reimplement or weaken validated functionality merely to create work.
 
 Carry-forward upstream proof must prove the betting-win committed HEAD remains unchanged during verification, retain no placeholder fields in the lock, and use no clone or temporary worktree.
 
 The current concrete gaps are:
 
 ```text
-one-shot convergence, scheduler and worker commands
-API-only lifecycle ownership
-cockpit not served by managed runtime
-root start/stop/progress/log helpers not integrated
-paper evaluation and paper autopilot remain no-service
-no product database backup/restore/retention commands
-no complete observability/evidence retention surface
 no release/upgrade/rollback/recovery package
 no long-running soak/failure-injection acceptance
 no external runtime preflight/campaign manifest
@@ -57,36 +50,21 @@ no external runtime preflight/campaign manifest
 ## First task
 
 ```text
-id=BWS-581
-objective=implement a real long-running explicit-mode upstream convergence service
+id=BWS-590
+objective=implement reproducible release and deployment packaging
 ```
 
 Required outcomes:
 
-- select exactly one explicit upstream mode: `export` or `api`;
-- preserve exact upstream-lock and no-fallback behavior;
-- run repeated bounded convergence passes at an explicit positive interval;
-- prevent overlapping passes;
-- apply bounded retry/backoff;
-- persist success, no-change, blocker and failure state;
-- resume deterministically after restart;
-- handle `SIGINT` and `SIGTERM` without corrupting checkpoints;
-- expose machine-readable service status and evidence;
-- add success, mismatch, timeout, restart, overlap, signal and cleanup coverage;
+- produce a versioned private release package with source/build checksums and exact upstream-lock references;
+- add Node 20 and PostgreSQL preflight plus a private environment template without secret output;
+- provide user-service templates and a non-mutating install verification path;
+- preserve execution-disabled, provider-disabled and no-fallback boundaries throughout packaging and verification;
 - update the task ledger only after complete proof and `npm run validate` pass.
 
 ## Full remaining sequence
 
 ```text
-BWS-581  long-running upstream convergence
-BWS-582  long-running scheduler and worker loops
-BWS-583  managed loopback cockpit and full-stack convergence
-BWS-584  complete product-owned lifecycle
-BWS-585  database retention, backup and restore
-BWS-586  structured logs, metrics, diagnostics and evidence index
-BWS-587  root lifecycle/progress/log wrappers
-BWS-588  service-owned paper evaluation
-BWS-589  full lifecycle paper autopilot
 BWS-590  release and deployment packaging
 BWS-591  upgrade, rollback and disaster recovery
 BWS-592  soak and failure injection

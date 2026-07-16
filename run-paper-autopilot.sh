@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Parent no-service paper/autonomous supervisor for betting-win-surebet.
+# Parent runtime-evidence paper/autonomous supervisor for betting-win-surebet.
 # Inherits the active Node runtime from the parent shell and never sources nvm.sh.
 set -Eeuo pipefail
 
@@ -12,7 +12,7 @@ AUTOMATION_REPO_ROOT="$SCRIPT_DIR"
 # shellcheck source=.automation/lib/telegram_notify.sh
 . "$SCRIPT_DIR/.automation/lib/telegram_notify.sh"
 
-SCRIPT_VERSION="2026-07-15.surebet-v10-atomic-child-result"
+SCRIPT_VERSION="2026-07-16.surebet-v11-runtime-evidence-parent"
 SCRIPT_NAME="run-paper-autopilot.sh"
 DURATION_SECONDS="$(automation_parse_duration_seconds 7d)"
 PAPER_DURATION_SECONDS="$(automation_parse_duration_seconds 72h)"
@@ -73,6 +73,11 @@ CURRENT_PAPER_HANDOFF_RUN_DIR=""
 CURRENT_PAPER_HANDOFF_FINAL_STATUS=""
 CURRENT_PAPER_HANDOFF_STOP_REASON=""
 CURRENT_PAPER_HANDOFF_EXIT_CODE=""
+CURRENT_PAPER_SERVICE_SUPPORTED="0"
+CURRENT_PAPER_SERVICE_REFRESH_REQUIRED="0"
+CURRENT_PAPER_RUNTIME_EVIDENCE_REQUIRED="0"
+CURRENT_PAPER_RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE="none"
+CURRENT_PAPER_RUNTIME_EVIDENCE_CAMPAIGN_RUN_ID="none"
 CHILD_CLEANUP_STATUS="not_attempted"
 CHILD_CLEANUP_EXIT_CODE=0
 LOCK_RELEASE_STATUS="not_attempted"
@@ -85,8 +90,9 @@ Usage:
   ./run-paper-autopilot.sh [options]
 
 Purpose:
-  Parent supervisor that alternates no-service private-paper evaluation and
-  bounded autonomous implementation through verified handoff files.
+  Parent supervisor that alternates full-stack runtime-evidence paper
+  evaluation and bounded autonomous implementation through verified handoff
+  files.
 
 Primary options:
   --duration VALUE                 Overall parent budget. Default: 7d.
@@ -239,7 +245,7 @@ print_config() {
   cat <<EOF_CONFIG
 controller=$SCRIPT_NAME
 script_version=$SCRIPT_VERSION
-controller_mode=paper_evaluation_implementation_parent
+controller_mode=paper_runtime_evidence_implementation_parent
 repo_dir=$AUTOMATION_REPO_ROOT
 duration_seconds=$DURATION_SECONDS
 paper_duration_seconds=$PAPER_DURATION_SECONDS
@@ -258,7 +264,7 @@ install_timeout_seconds=$INSTALL_TIMEOUT_SECONDS
 zip_timeout_seconds=$ZIP_TIMEOUT_SECONDS
 artifacts_zip_scope=full_artifacts_directory
 final_artifacts_zip_refresh=post_lock_release_atomic
-paper_service_lifecycle=none
+paper_service_lifecycle=full_stack_owned
 strict_handoff_parser=enabled
 semantic_handoff_fingerprints=enabled
 explicit_child_result_contract=enabled
@@ -280,6 +286,10 @@ lock_preservation_on_child_identity_failure=enabled
 child_telegram_notifications=suppressed_by_parent
 parent_telegram_notification=final_only
 EOF_CONFIG
+}
+
+paper_service_lifecycle_value() {
+  printf 'full_stack_owned\n'
 }
 
 assert_active_node_runtime() {
@@ -633,7 +643,7 @@ validate_paper_handoff() {
   local schema repo controller source_run_id paper_status paper_stop paper_exit blocker_family
   local maintenance allowed pinned_required run_dir evidence_hash source_fingerprint current_source existing computed
   automation_v2_load_env_strict "$PAPER_HANDOFF_FILE" || return 2
-  validate_loaded_env_keys 'HANDOVER_SCHEMA_VERSION,HANDOVER_KIND,REPOSITORY,CONTROLLER,SOURCE_RUN_ID,RUN_AUTONOMOUS_IMPLEMENTATION_NEXT,AUTONOMOUS_IMPLEMENTATION_EXPECTED_FLAG,PAPER_MODE_FINAL_STATUS,PAPER_MODE_STOP_REASON,PAPER_MODE_FINAL_EXIT_CODE,PAPER_MODE_RESUME_AFTER_IMPLEMENTATION,PAPER_MODE_NOOP_SUCCESS_ALLOWED,PAPER_MODE_REQUIRED_ACTION,PAPER_MODE_BLOCKER_FAMILY,PAPER_MODE_EXPECTED_PRIVATE_PAPER_REEVALUATION_AFTER_SOURCE_CHANGE,PAPER_MODE_AUTOMATION_MAINTENANCE_ALLOWED,ALLOWED_PROTECTED_FILES,PAPER_SERVICE_SUPPORTED,SERVICE_REFRESH_REQUIRED,RUNTIME_EVIDENCE_REQUIRED,PINNED_BUNDLE_REQUIRED,SUREBET_PINNED_BUNDLE,HANDOFF_REASON,PAPER_SOURCE_FINGERPRINT,SOURCE_EVIDENCE_PATH,SOURCE_EVIDENCE_SHA256,VALIDATION_REQUIRED,RUN_DIR,WRITTEN_AT,HANDOVER_FINGERPRINT' || return 2
+  validate_loaded_env_keys 'HANDOVER_SCHEMA_VERSION,HANDOVER_KIND,REPOSITORY,CONTROLLER,SOURCE_RUN_ID,RUN_AUTONOMOUS_IMPLEMENTATION_NEXT,AUTONOMOUS_IMPLEMENTATION_EXPECTED_FLAG,PAPER_MODE_FINAL_STATUS,PAPER_MODE_STOP_REASON,PAPER_MODE_FINAL_EXIT_CODE,PAPER_MODE_RESUME_AFTER_IMPLEMENTATION,PAPER_MODE_NOOP_SUCCESS_ALLOWED,PAPER_MODE_REQUIRED_ACTION,PAPER_MODE_BLOCKER_FAMILY,PAPER_MODE_EXPECTED_PRIVATE_PAPER_REEVALUATION_AFTER_SOURCE_CHANGE,PAPER_MODE_AUTOMATION_MAINTENANCE_ALLOWED,ALLOWED_PROTECTED_FILES,PAPER_SERVICE_SUPPORTED,SERVICE_REFRESH_REQUIRED,RUNTIME_EVIDENCE_REQUIRED,RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE,RUNTIME_EVIDENCE_CAMPAIGN_RUN_ID,PINNED_BUNDLE_REQUIRED,SUREBET_PINNED_BUNDLE,HANDOFF_REASON,PAPER_SOURCE_FINGERPRINT,SOURCE_EVIDENCE_PATH,SOURCE_EVIDENCE_SHA256,VALIDATION_REQUIRED,RUN_DIR,WRITTEN_AT,HANDOVER_FINGERPRINT' || return 2
 
   schema="$(automation_v2_env_require HANDOVER_SCHEMA_VERSION)" || return 2
   [[ "$schema" == 1 ]] || { echo "ERROR: unsupported paper handoff schema version: $schema" >&2; return 2; }
@@ -689,9 +699,39 @@ validate_paper_handoff() {
   else
     [[ "$allowed" == none ]] || { echo "ERROR: paper allowlist set while maintenance is disabled" >&2; return 2; }
   fi
-  [[ "$(automation_v2_env_require PAPER_SERVICE_SUPPORTED)" == 0 ]] || return 2
-  [[ "$(automation_v2_env_require SERVICE_REFRESH_REQUIRED)" == 0 ]] || return 2
-  [[ "$(automation_v2_env_require RUNTIME_EVIDENCE_REQUIRED)" == 0 ]] || return 2
+  CURRENT_PAPER_SERVICE_SUPPORTED="$(require_handoff_zero_one PAPER_SERVICE_SUPPORTED)" || return 2
+  CURRENT_PAPER_SERVICE_REFRESH_REQUIRED="$(require_handoff_zero_one SERVICE_REFRESH_REQUIRED)" || return 2
+  CURRENT_PAPER_RUNTIME_EVIDENCE_REQUIRED="$(require_handoff_zero_one RUNTIME_EVIDENCE_REQUIRED)" || return 2
+  CURRENT_PAPER_RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE="$(automation_v2_env_require RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE)" || return 2
+  CURRENT_PAPER_RUNTIME_EVIDENCE_CAMPAIGN_RUN_ID="$(automation_v2_env_require RUNTIME_EVIDENCE_CAMPAIGN_RUN_ID)" || return 2
+  if [[ "$CURRENT_PAPER_RUNTIME_EVIDENCE_REQUIRED" == "1" ]]; then
+    [[ "$CURRENT_PAPER_SERVICE_SUPPORTED" == "1" && "$CURRENT_PAPER_SERVICE_REFRESH_REQUIRED" == "1" ]] || {
+      echo "ERROR: runtime-evidence paper handoff requires PAPER_SERVICE_SUPPORTED=1 and SERVICE_REFRESH_REQUIRED=1" >&2
+      return 2
+    }
+    case "$CURRENT_PAPER_RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE" in
+      api|export) ;;
+      *)
+        echo "ERROR: runtime-evidence paper handoff requires RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE=api or export" >&2
+        return 2
+        ;;
+    esac
+    [[ "$CURRENT_PAPER_RUNTIME_EVIDENCE_CAMPAIGN_RUN_ID" =~ ^[A-Za-z0-9._:-]+$ ]] || {
+      echo "ERROR: invalid runtime-evidence campaign run id" >&2
+      return 2
+    }
+    [[ "$CURRENT_PAPER_RUNTIME_EVIDENCE_CAMPAIGN_RUN_ID" == "$(basename "$AUTOMATION_RUN_DIR")" ]] || {
+      echo "ERROR: runtime-evidence campaign run id does not match the parent run directory" >&2
+      return 2
+    }
+  else
+    [[ "$CURRENT_PAPER_SERVICE_SUPPORTED" == "0" && "$CURRENT_PAPER_SERVICE_REFRESH_REQUIRED" == "0" ]] || {
+      echo "ERROR: no-service paper handoff requires PAPER_SERVICE_SUPPORTED=0 and SERVICE_REFRESH_REQUIRED=0" >&2
+      return 2
+    }
+    [[ "$CURRENT_PAPER_RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE" == "none" ]] || return 2
+    [[ "$CURRENT_PAPER_RUNTIME_EVIDENCE_CAMPAIGN_RUN_ID" == "none" ]] || return 2
+  fi
   pinned_required="$(require_handoff_zero_one PINNED_BUNDLE_REQUIRED)" || return 2
   validate_optional_pinned_bundle_from_handoff "${AUTOMATION_V2_ENV[SUREBET_PINNED_BUNDLE]-}" || return 2
   if [[ "$pinned_required" == 1 ]]; then [[ -n "${AUTOMATION_V2_ENV[SUREBET_PINNED_BUNDLE]-}" ]] || return 2; fi
@@ -727,7 +767,7 @@ validate_paper_handoff() {
 validate_implementation_handoff() {
   local computed existing source_changed source_valid reevaluate reaud run_dir
   automation_v2_load_env_strict "$IMPLEMENTATION_HANDOFF_FILE" || return 2
-  validate_loaded_env_keys 'HANDOVER_SCHEMA_VERSION,HANDOVER_KIND,REPOSITORY,CONTROLLER,SOURCE_HANDOFF_FINGERPRINT,RUN_PAPER_EVALUATION_NEXT,AUTONOMOUS_FINAL_STATUS,AUTONOMOUS_STOP_REASON,AUTONOMOUS_FINAL_EXIT_CODE,IMPLEMENTATION_SOURCE_CHANGED,IMPLEMENTATION_SOURCE_VALIDATION_PASSED,PRIVATE_PAPER_REEVALUATION_REQUIRED,BUGFIX_REAUDIT_REQUIRED,AUDIT_AREA,BUG_IDS,PAPER_SERVICE_SUPPORTED,SERVICE_REFRESH_REQUIRED,RUNTIME_EVIDENCE_REQUIRED,REAL_UPSTREAM_EVALUATION,RUN_DIR,WRITTEN_AT,HANDOVER_FINGERPRINT' || return 2
+  validate_loaded_env_keys 'HANDOVER_SCHEMA_VERSION,HANDOVER_KIND,REPOSITORY,CONTROLLER,SOURCE_HANDOFF_FINGERPRINT,RUN_PAPER_EVALUATION_NEXT,AUTONOMOUS_FINAL_STATUS,AUTONOMOUS_STOP_REASON,AUTONOMOUS_FINAL_EXIT_CODE,IMPLEMENTATION_SOURCE_CHANGED,IMPLEMENTATION_SOURCE_VALIDATION_PASSED,PRIVATE_PAPER_REEVALUATION_REQUIRED,BUGFIX_REAUDIT_REQUIRED,AUDIT_AREA,BUG_IDS,PAPER_SERVICE_SUPPORTED,SERVICE_REFRESH_REQUIRED,RUNTIME_EVIDENCE_REQUIRED,RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE,RUNTIME_EVIDENCE_CAMPAIGN_RUN_ID,REAL_UPSTREAM_EVALUATION,RUN_DIR,WRITTEN_AT,HANDOVER_FINGERPRINT' || return 2
   [[ "$(automation_v2_env_require HANDOVER_SCHEMA_VERSION)" == 1 ]] || return 2
   [[ "$(automation_v2_env_require HANDOVER_KIND)" == paper-mode-after-autonomous-implementation ]] || return 2
   [[ "$(automation_v2_env_require REPOSITORY)" == "${AUTOMATION_REPO_NAME:-betting-win-surebet}" ]] || return 2
@@ -753,9 +793,11 @@ validate_implementation_handoff() {
   [[ "$reaud" == "$reevaluate" ]] || return 2
   [[ "$(automation_v2_env_require AUDIT_AREA)" == none ]] || return 2
   [[ "$(automation_v2_env_require BUG_IDS)" == none ]] || return 2
-  [[ "$(automation_v2_env_require PAPER_SERVICE_SUPPORTED)" == 0 ]] || return 2
-  [[ "$(automation_v2_env_require SERVICE_REFRESH_REQUIRED)" == 0 ]] || return 2
-  [[ "$(automation_v2_env_require RUNTIME_EVIDENCE_REQUIRED)" == 0 ]] || return 2
+  [[ "$(automation_v2_env_require PAPER_SERVICE_SUPPORTED)" == "$CURRENT_PAPER_SERVICE_SUPPORTED" ]] || return 2
+  [[ "$(automation_v2_env_require SERVICE_REFRESH_REQUIRED)" == "$CURRENT_PAPER_SERVICE_REFRESH_REQUIRED" ]] || return 2
+  [[ "$(automation_v2_env_require RUNTIME_EVIDENCE_REQUIRED)" == "$CURRENT_PAPER_RUNTIME_EVIDENCE_REQUIRED" ]] || return 2
+  [[ "$(automation_v2_env_require RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE)" == "$CURRENT_PAPER_RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE" ]] || return 2
+  [[ "$(automation_v2_env_require RUNTIME_EVIDENCE_CAMPAIGN_RUN_ID)" == "$CURRENT_PAPER_RUNTIME_EVIDENCE_CAMPAIGN_RUN_ID" ]] || return 2
   [[ "$(automation_v2_env_require REAL_UPSTREAM_EVALUATION)" == blocked_on_required_upstream_input ]] || return 2
   validate_handoff_timestamp WRITTEN_AT || return 2
   existing="$(automation_v2_env_require HANDOVER_FINGERPRINT)" || return 2
@@ -774,7 +816,7 @@ run_child_controller() {
   budget="$(clamped_child_budget "$([[ "$kind" == paper ]] && echo "$PAPER_DURATION_SECONDS" || echo "$IMPLEMENTATION_DURATION_SECONDS")")" || return 3
   if [[ "$kind" == "paper" ]]; then
     script="$PAPER_CHILD_SCRIPT"
-    cmd=(bash "$script" --duration "$budget" --interval "$INTERVAL_SECONDS")
+    cmd=(bash "$script" --duration "$budget" --interval "$INTERVAL_SECONDS" --runtime-evidence)
     [[ "$ADAPTIVE" == "1" ]] && cmd+=(--adaptive) || cmd+=(--no-adaptive)
     [[ "$KEEP_MONITORING_WHEN_READY" == "1" ]] && cmd+=(--keep-monitoring-when-ready)
     cmd+=(--model "$CODEX_MODEL" --fallback-model "$CODEX_FALLBACK_MODEL" --repo-dir "$AUTOMATION_REPO_ROOT" --sandbox "$CODEX_SANDBOX" --max-cycles "$PAPER_MAX_CYCLES" --codex-phase-timeout "$PAPER_CODEX_TIMEOUT_SECONDS" --validation-timeout "$VALIDATION_TIMEOUT_SECONDS" --install-timeout "$INSTALL_TIMEOUT_SECONDS" --zip-timeout "$ZIP_TIMEOUT_SECONDS")
@@ -790,6 +832,8 @@ run_child_controller() {
     "AUTOMATION_PARENT_CONTROLLER=$SCRIPT_NAME" \
     "AUTOMATION_PARENT_PID=$$" \
     "AUTOMATION_PARENT_LOCK_FILE=$LOCK_FILE" \
+    "AUTOMATION_PARENT_RUN_DIR=$AUTOMATION_RUN_DIR" \
+    "AUTOMATION_PARENT_RUN_ID=$(basename "$AUTOMATION_RUN_DIR")" \
     "AUTOMATION_CHILD_RESULT_FILE=$terminal_result" \
     "TELEGRAM_NOTIFY=0" \
     "${cmd[@]}")
@@ -886,7 +930,10 @@ write_final_summary() {
       printf 'lock_preserved=%s\n' "$LOCK_PRESERVED"
       printf 'lock_file=%s\n' "$LOCK_FILE"
     fi
-    printf 'paper_service_lifecycle=none\n'
+    printf 'paper_service_lifecycle=%s\n' "$(paper_service_lifecycle_value)"
+    printf 'runtime_evidence_required=%s\n' "$CURRENT_PAPER_RUNTIME_EVIDENCE_REQUIRED"
+    printf 'runtime_evidence_selected_upstream_mode=%s\n' "$CURRENT_PAPER_RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE"
+    printf 'runtime_evidence_campaign_run_id=%s\n' "$CURRENT_PAPER_RUNTIME_EVIDENCE_CAMPAIGN_RUN_ID"
     printf 'completed_at=%s\n' "$(automation_now_iso)"
   } > "$AUTOMATION_RUN_DIR/final_summary.txt"
   cp "$AUTOMATION_RUN_DIR/final_summary.txt" "$AUTOMATION_RUN_DIR/final-summary.md"
@@ -1103,20 +1150,35 @@ main_loop() {
         continue
       fi
 
-      if [[ "$rc" != "0" ]]; then
-        append_round "$ROUNDS_COMPLETED" paper "$rc" "$LAST_CHILD_STATUS" "$LAST_CHILD_STOP_REASON" "$LAST_CHILD_RUN_DIR" blocked_paper_child none
-        FINAL_STATUS="PAPER_AUTOPILOT_BLOCKED_PAPER_CHILD"; STOP_REASON="paper_child_blocked"; exit 2
-      fi
       case "$LAST_CHILD_STATUS" in
-        PAPER_EVALUATION_READY_PRIVATE_FIXTURE_ONLY_BLOCKED_ON_PINNED_BUNDLE)
-          decision=blocked_on_required_upstream_input
-          FINAL_STATUS="PAPER_AUTOPILOT_BLOCKED_ON_PINNED_BUNDLE"
-          STOP_REASON="private_fixture_only_blocked_on_required_upstream_input"
+        PAPER_EVALUATION_READY_RUNTIME_EVIDENCE_LOCAL_ONLY)
+          [[ "$rc" == "0" ]] || {
+            append_round "$ROUNDS_COMPLETED" paper "$rc" "$LAST_CHILD_STATUS" "$LAST_CHILD_STOP_REASON" "$LAST_CHILD_RUN_DIR" blocked_runtime_evidence_exit_mismatch none
+            FINAL_STATUS="PAPER_AUTOPILOT_BLOCKED_PAPER_CHILD"; STOP_REASON="runtime_evidence_exit_mismatch"; exit 2
+          }
+          decision=runtime_evidence_local_only_ready
+          FINAL_STATUS="PAPER_AUTOPILOT_READY_RUNTIME_EVIDENCE_LOCAL_ONLY"
+          STOP_REASON="runtime_window_ready_local_only"
           ;;
-        PAPER_EVALUATION_PINNED_BUNDLE_ACCEPTED_PRIVATE_REPORT_WRITTEN)
-          decision=pinned_bundle_private_report_written
-          FINAL_STATUS="PAPER_AUTOPILOT_PINNED_BUNDLE_ACCEPTED_PRIVATE_REPORT_WRITTEN"
-          STOP_REASON="pinned_bundle_private_report_written"
+        PAPER_EVALUATION_BLOCKED_RUNTIME_OBSERVATION_NOT_READY)
+          append_round "$ROUNDS_COMPLETED" paper "$rc" "$LAST_CHILD_STATUS" "$LAST_CHILD_STOP_REASON" "$LAST_CHILD_RUN_DIR" continue_runtime_evidence_observation none
+          next_child="paper"
+          continue
+          ;;
+        PAPER_EVALUATION_BLOCKED_RUNTIME_OWNERSHIP_AMBIGUOUS)
+          decision=blocked_runtime_ownership_ambiguous
+          FINAL_STATUS="PAPER_AUTOPILOT_BLOCKED_RUNTIME_OWNERSHIP_AMBIGUOUS"
+          STOP_REASON="runtime_status_identity_or_configuration_mismatch"
+          ;;
+        PAPER_EVALUATION_BLOCKED_RUNTIME_STOP_FAILED)
+          decision=blocked_runtime_stop_failed
+          FINAL_STATUS="PAPER_AUTOPILOT_BLOCKED_RUNTIME_STOP_FAILED"
+          STOP_REASON="runtime_stack_stop_failed"
+          ;;
+        PAPER_EVALUATION_BLOCKED_RUNTIME_EVIDENCE_COLLECTION_FAILED)
+          decision=blocked_runtime_evidence_collection_failed
+          FINAL_STATUS="PAPER_AUTOPILOT_BLOCKED_RUNTIME_EVIDENCE_COLLECTION_FAILED"
+          STOP_REASON="runtime_evidence_collection_failed"
           ;;
         check_only_complete)
           decision=paper_check_only_complete
@@ -1124,13 +1186,20 @@ main_loop() {
           STOP_REASON="paper_check_only"
           ;;
         *)
+          if [[ "$rc" != "0" ]]; then
+            decision=blocked_paper_child
+            FINAL_STATUS="PAPER_AUTOPILOT_BLOCKED_PAPER_CHILD"
+            STOP_REASON="paper_child_blocked"
+            append_round "$ROUNDS_COMPLETED" paper "$rc" "$LAST_CHILD_STATUS" "$LAST_CHILD_STOP_REASON" "$LAST_CHILD_RUN_DIR" "$decision" none
+            exit 2
+          fi
           decision=unclassified_paper_terminal
           FINAL_STATUS="PAPER_AUTOPILOT_BLOCKED_PAPER_CHILD"
           STOP_REASON="unclassified_paper_terminal"
           ;;
       esac
       append_round "$ROUNDS_COMPLETED" paper "$rc" "$LAST_CHILD_STATUS" "$LAST_CHILD_STOP_REASON" "$LAST_CHILD_RUN_DIR" "$decision" none
-      [[ "$FINAL_STATUS" == "PAPER_AUTOPILOT_BLOCKED_PAPER_CHILD" ]] && exit 2 || exit 0
+      [[ "$FINAL_STATUS" == "PAPER_AUTOPILOT_BLOCKED_PAPER_CHILD" || "$FINAL_STATUS" == "PAPER_AUTOPILOT_BLOCKED_RUNTIME_OWNERSHIP_AMBIGUOUS" || "$FINAL_STATUS" == "PAPER_AUTOPILOT_BLOCKED_RUNTIME_STOP_FAILED" || "$FINAL_STATUS" == "PAPER_AUTOPILOT_BLOCKED_RUNTIME_EVIDENCE_COLLECTION_FAILED" ]] && exit 2 || exit 0
     fi
 
     [[ -f "$PAPER_HANDOFF_FILE" ]] || {

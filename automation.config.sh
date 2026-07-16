@@ -2,7 +2,7 @@
 # betting-win-surebet automation configuration.
 # This file documents the repo-specific commands used by the standardized automation layer.
 # Root implementation, bugfix, paper, and parent-autopilot controllers are standardized here.
-# run-paper-evaluation.sh is surebet-specific: no service lifecycle, private fixture/pinned-bundle only.
+# run-paper-evaluation.sh is surebet-specific: fixture mode plus local-only runtime-evidence mode.
 
 AUTOMATION_CONFIG_READY=1
 AUTOMATION_REPO_NAME="betting-win-surebet"

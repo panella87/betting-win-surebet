@@ -146,9 +146,11 @@ if [[ "$count" == "1" ]]; then
     "PAPER_MODE_EXPECTED_PRIVATE_PAPER_REEVALUATION_AFTER_SOURCE_CHANGE=yes" \\
     "PAPER_MODE_AUTOMATION_MAINTENANCE_ALLOWED=no" \\
     "ALLOWED_PROTECTED_FILES=none" \\
-    "PAPER_SERVICE_SUPPORTED=0" \\
-    "SERVICE_REFRESH_REQUIRED=0" \\
-    "RUNTIME_EVIDENCE_REQUIRED=0" \\
+    "PAPER_SERVICE_SUPPORTED=1" \\
+    "SERVICE_REFRESH_REQUIRED=1" \\
+    "RUNTIME_EVIDENCE_REQUIRED=1" \\
+    "RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE=\${BWS_UPSTREAM_MODE:-api}" \\
+    "RUNTIME_EVIDENCE_CAMPAIGN_RUN_ID=\${AUTOMATION_PARENT_RUN_ID:-none}" \\
     "PINNED_BUNDLE_REQUIRED=0" \\
     "SUREBET_PINNED_BUNDLE=" \\
     "HANDOFF_REASON=stub_source_fix_required" \\
@@ -161,7 +163,7 @@ if [[ "$count" == "1" ]]; then
   automation_v2_add_or_verify_fingerprint "$root/.automation/paper-mode-to-autonomous-implementation.env" >/dev/null
   status=PAPER_EVALUATION_BLOCKED_SOURCE_FIX_REQUIRED; reason=stub_source_fix_required; rc=2
 else
-  status=PAPER_EVALUATION_PINNED_BUNDLE_ACCEPTED_PRIVATE_REPORT_WRITTEN; reason=stub_paper_accepted; rc=0
+  status=PAPER_EVALUATION_READY_RUNTIME_EVIDENCE_LOCAL_ONLY; reason=runtime_window_ready_local_only; rc=0
 fi
 printf 'final_status=STALE_NESTED_STATUS\nstop_reason=stale_nested_reason\n'
 automation_v2_publish_child_result "$root" 'run-paper-evaluation.sh' 'stub-paper-v1' "$run_dir" "$status" "$reason" "$rc" 1 not_acquired 0 no
@@ -194,9 +196,11 @@ automation_v2_write_env_atomic "$root/.automation/paper-mode-handover.env" \\
   "BUGFIX_REAUDIT_REQUIRED=yes" \\
   "AUDIT_AREA=none" \\
   "BUG_IDS=none" \\
-  "PAPER_SERVICE_SUPPORTED=0" \\
-  "SERVICE_REFRESH_REQUIRED=0" \\
-  "RUNTIME_EVIDENCE_REQUIRED=0" \\
+  "PAPER_SERVICE_SUPPORTED=1" \\
+  "SERVICE_REFRESH_REQUIRED=1" \\
+  "RUNTIME_EVIDENCE_REQUIRED=1" \\
+  "RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE=api" \\
+  "RUNTIME_EVIDENCE_CAMPAIGN_RUN_ID=\${AUTOMATION_PARENT_RUN_ID:-none}" \\
   "REAL_UPSTREAM_EVALUATION=blocked_on_required_upstream_input" \\
   "RUN_DIR=$run_dir" \\
   "WRITTEN_AT=2026-07-11T00:00:00Z"
@@ -228,6 +232,7 @@ function runStubAutopilot(repo: string): ReturnType<typeof spawnSync> {
       TELEGRAM_NOTIFICATION_SENT: '0',
       TELEGRAM_BOT_TOKEN: 'dummy-token',
       TELEGRAM_CHAT_ID: 'dummy-chat',
+      BWS_UPSTREAM_MODE: 'api',
     },
   });
 }
@@ -237,7 +242,7 @@ test('paper autopilot consumes a verified implementation handoff and re-evaluate
   try {
     const result = runStubAutopilot(repo);
     assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
-    assert.match(String(result.stdout), /final_status=PAPER_AUTOPILOT_PINNED_BUNDLE_ACCEPTED_PRIVATE_REPORT_WRITTEN/);
+    assert.match(String(result.stdout), /final_status=PAPER_AUTOPILOT_READY_RUNTIME_EVIDENCE_LOCAL_ONLY/);
     assert.match(String(result.stdout), /rounds_completed=3/);
     assert.doesNotMatch(String(result.stdout), /PAPER_AUTOPILOT_BLOCKED_CHILD_RESULT/);
     assert.equal(existsSync(join(repo, '.automation', 'paper-mode-to-autonomous-implementation.env')), false);

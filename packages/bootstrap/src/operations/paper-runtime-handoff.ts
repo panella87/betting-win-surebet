@@ -60,7 +60,7 @@ export interface BwsPaperRuntimeHandoffRecord {
     readonly health: BwsOperatorLifecycleCommandResult['health'];
     readonly outcome: 'running';
     readonly readiness: BwsOperatorLifecycleCommandResult['readiness'];
-    readonly service: 'read_only_api';
+    readonly service: BwsOperatorLifecycleCommandResult['service'];
     readonly stateFile: string;
   }>;
   readonly safeLocalTerminalGate: typeof SAFE_LOCAL_TERMINAL_GATE;

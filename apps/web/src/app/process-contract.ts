@@ -7,12 +7,23 @@ const BWS_OPERATOR_COCKPIT_BROWSER_BOUNDARY = '@betting-win-surebet/web:BWS_OPER
 export function describeBwsOperatorCockpitProcessDefinition(
   config: BwsOperatorCockpitBrowserConfig,
 ): BwsProcessDefinition {
+  const networkBindings = config.dataMode === 'api'
+    ? Object.freeze([
+      Object.freeze({
+        exposure: 'loopback_only' as const,
+        host: readLoopbackHostname(config.apiBaseUrl),
+        port: readLoopbackPort(config.apiBaseUrl),
+        protocol: 'http' as const,
+        purpose: 'operator_cockpit' as const,
+      }),
+    ])
+    : Object.freeze([]);
   return Object.freeze({
     automaticFallback: 'forbidden',
     boundary: BWS_OPERATOR_COCKPIT_BROWSER_BOUNDARY,
     execution: 'disabled',
-    exposure: 'browser_only',
-    networkBindings: Object.freeze([]),
+    exposure: config.dataMode === 'api' ? 'loopback_only' : 'browser_only',
+    networkBindings,
     notes: Object.freeze([
       config.dataMode === 'api'
         ? `Reads the loopback-safe BWS API through ${config.apiBaseUrl}.`
@@ -28,4 +39,27 @@ export function describeBwsOperatorCockpitProcessDefinition(
     ),
     role: 'cockpit',
   });
+}
+
+function readLoopbackHostname(baseUrl: string): '127.0.0.1' {
+  const parsed = new URL(baseUrl);
+  if (parsed.hostname !== '127.0.0.1') {
+    throw new Error(`Managed cockpit process metadata requires a 127.0.0.1 API base URL. Received ${parsed.hostname}.`);
+  }
+  return '127.0.0.1';
+}
+
+function readLoopbackPort(baseUrl: string): number {
+  const parsed = new URL(baseUrl);
+  if (parsed.protocol !== 'http:') {
+    throw new Error(`Managed cockpit process metadata requires an http loopback API base URL. Received ${parsed.protocol}.`);
+  }
+  if (parsed.port.length === 0) {
+    throw new Error('Managed cockpit process metadata requires an explicit loopback API port.');
+  }
+  const port = Number.parseInt(parsed.port, 10);
+  if (!Number.isSafeInteger(port) || port <= 0) {
+    throw new Error(`Managed cockpit process metadata requires a positive loopback API port. Received ${parsed.port}.`);
+  }
+  return port;
 }

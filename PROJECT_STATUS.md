@@ -12,7 +12,7 @@ strategy_state_owner=betting-win-surebet
 backtesting_owner=betting-win-surebet
 paper_mode_owner=betting-win-surebet
 account_policy=separate_from_betting-win-betting
-current_task=BWS-581
+current_task=BWS-590
 current_task_status=PENDING
 safe_local_completion_gate=BWS-599
 continuous_private_paper=BWS-600_BLOCKED_AFTER_BWS_599
@@ -27,13 +27,13 @@ real_money_execution=BWS-900_PARKED
 - Identity, opportunity, solver, completion/exposure and settlement engines.
 - Deterministic backtest, bounded private-paper runtime and strategy ledger.
 - Read-only API, bounded workers, operator cockpit, runtime configuration and loopback acceptance.
-- Explicit immutable-export and typed API convergence passes.
-- Bounded scheduler/worker orchestration, API-only lifecycle ownership, runtime/API/cockpit evidence and runtime handoff.
+- Explicit immutable-export and typed API convergence passes plus a long-running explicit-mode upstream convergence service.
+- Bounded scheduler/worker orchestration, managed loopback cockpit serving, complete product-owned lifecycle ownership, runtime/API/cockpit evidence, product-owned database lifecycle operations and runtime handoff.
 - Hardened implementation, bugfix, paper and autopilot controller infrastructure with parent-only Telegram routing.
 
 ## Remaining safe local work
 
-`BWS-580` was a validated component and loopback milestone, not the final operator boundary. The current queue through `BWS-599` adds real long-running services, full-stack lifecycle ownership, cockpit serving, database operations, observability, root wrapper integration, service-owned paper evaluation/autopilot, release/upgrade/recovery and soak acceptance.
+`BWS-588` is validated, but it is not the final operator boundary. The current queue through `BWS-599` still adds full-lifecycle paper autopilot, release/upgrade/recovery and soak acceptance.
 
 ## Blocked or parked
 
@@ -44,7 +44,7 @@ real_money_execution=BWS-900_PARKED
 
 ```text
 selected_controller=run-autonomous-implementation.sh
-selected_task=BWS-581
+selected_task=BWS-589
 paper_autopilot_selected=no_until_BWS-589_validated
 bugfix_autopilot_selected=no
 force_unlock_required=no_evidence

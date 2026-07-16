@@ -57,7 +57,7 @@ export interface BwsProcessNetworkBinding {
   readonly host: typeof LOOPBACK_HOST;
   readonly port: number;
   readonly protocol: 'http';
-  readonly purpose: 'health' | 'read_only_query_api';
+  readonly purpose: 'health' | 'operator_cockpit' | 'read_only_query_api';
 }
 
 export interface BwsProcessDefinition {
@@ -132,6 +132,16 @@ export interface BwsStrategyEvidencePolicy {
   readonly publicDistributionState: string;
 }
 
+export interface BwsCockpitOperationalState {
+  readonly apiBaseUrl?: string;
+  readonly assetFingerprint?: string;
+  readonly blocker?: Blocker;
+  readonly buildDirectory: string;
+  readonly dataMode?: 'api' | 'mock';
+  readonly entryDocumentPath?: string;
+  readonly status: 'blocked' | 'ready';
+}
+
 export interface BwsOperationalStatusCheck {
   readonly blocker?: Blocker;
   readonly component:
@@ -152,16 +162,22 @@ export interface BwsOperationalStatusSnapshot {
     readonly status: 'blocked' | 'healthy';
   }>;
   readonly observability: Readonly<{
+    readonly cockpit: BwsCockpitOperationalState;
     readonly configuration: RedactedBwsServiceRuntimeConfig;
     readonly processDefinitions: readonly BwsProcessDefinition[];
   }>;
   readonly readiness: Readonly<{
     readonly blockers: readonly Blocker[];
+    readonly components: Readonly<{
+      readonly api: 'ready';
+      readonly cockpit: BwsCockpitOperationalState['status'];
+    }>;
     readonly status: 'blocked' | 'ready';
   }>;
 }
 
 export interface CreateBwsOperationalStatusSnapshotRequest {
+  readonly cockpitState: BwsCockpitOperationalState;
   readonly cockpitProcessDefinition: BwsProcessDefinition;
   readonly config: BwsServiceRuntimeConfig;
   readonly generatedAt: IsoTimestamp;
@@ -330,18 +346,28 @@ export function createBwsOperationalStatusSnapshot(
     }),
     Object.freeze({
       component: 'cockpit',
-      status: 'pass',
-      summary: `Cockpit process ${request.cockpitProcessDefinition.processName} uses ${request.cockpitProcessDefinition.exposure} exposure with fallback forbidden.`,
+      status: request.cockpitState.status === 'ready' ? 'pass' : 'fail',
+      summary: request.cockpitState.status === 'ready'
+        ? `Cockpit process ${request.cockpitProcessDefinition.processName} serves the built operator UI from ${request.cockpitState.buildDirectory} with fingerprint ${request.cockpitState.assetFingerprint}.`
+        : `Cockpit process ${request.cockpitProcessDefinition.processName} is blocked: ${request.cockpitState.blocker?.message ?? 'missing cockpit readiness evidence.'}`,
     }),
   ] satisfies readonly BwsOperationalStatusCheck[]);
+  const readinessBlockers = request.cockpitState.blocker === undefined
+    ? Object.freeze([] as readonly Blocker[])
+    : Object.freeze([request.cockpitState.blocker]);
+  const healthStatus = checks.some((check) => check.status === 'fail')
+    ? 'blocked'
+    : 'healthy';
+  const readinessStatus = readinessBlockers.length === 0 ? 'ready' : 'blocked';
 
   const snapshot: BwsOperationalStatusSnapshot = Object.freeze({
     generatedAt: request.generatedAt,
     health: Object.freeze({
       checks,
-      status: 'healthy',
+      status: healthStatus,
     }),
     observability: Object.freeze({
+      cockpit: request.cockpitState,
       configuration: redactBwsServiceRuntimeConfig(request.config),
       processDefinitions: Object.freeze([
         ...request.config.processDefinitions,
@@ -349,8 +375,12 @@ export function createBwsOperationalStatusSnapshot(
       ]),
     }),
     readiness: Object.freeze({
-      blockers: Object.freeze([]),
-      status: 'ready',
+      blockers: readinessBlockers,
+      components: Object.freeze({
+        api: 'ready',
+        cockpit: request.cockpitState.status,
+      }),
+      status: readinessStatus,
     }),
   });
   return accepted(snapshot);

@@ -16,24 +16,24 @@ test('full implementation ledger keeps BWS-580 validated and opens the remaining
     'BWS-000,VALIDATED', 'BWS-100,VALIDATED', 'BWS-510,VALIDATED',
     'BWS-520,VALIDATED', 'BWS-530,VALIDATED', 'BWS-540,VALIDATED',
     'BWS-550,VALIDATED', 'BWS-560,VALIDATED', 'BWS-570,VALIDATED',
-    'BWS-580,VALIDATED', 'BWS-581,PENDING', 'BWS-582,PENDING',
-    'BWS-583,PENDING', 'BWS-584,PENDING', 'BWS-585,PENDING',
-    'BWS-586,PENDING', 'BWS-587,PENDING', 'BWS-588,PENDING',
-    'BWS-589,PENDING', 'BWS-590,PENDING', 'BWS-591,PENDING',
+    'BWS-580,VALIDATED', 'BWS-581,VALIDATED', 'BWS-582,VALIDATED',
+    'BWS-583,VALIDATED', 'BWS-584,VALIDATED', 'BWS-585,VALIDATED',
+    'BWS-586,VALIDATED', 'BWS-587,VALIDATED', 'BWS-588,VALIDATED',
+    'BWS-589,VALIDATED', 'BWS-590,PENDING', 'BWS-591,PENDING',
     'BWS-592,PENDING', 'BWS-593,PENDING', 'BWS-599,PENDING',
     'BWS-600,BLOCKED', 'BWS-900,PARKED',
   ]) {
     assert.match(ledger, esc(marker));
   }
   assert.match(task, /program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1/);
-  assert.match(task, /current_task=BWS-581/);
+  assert.match(task, /current_task=BWS-590/);
   assert.match(task, /current_task_status=PENDING/);
   assert.match(task, /safe_local_terminal_gate=BWS-599/);
   assert.match(task, /automation_maintenance_allowed=yes/);
   assert.match(task, /allowed_protected_files=start\.sh/);
   assert.match(task, /AUTONOMOUS_GOAL_COMPLETE=yes/);
   assert.match(status, /selected_controller=run-autonomous-implementation\.sh/);
-  assert.match(status, /paper_autopilot=not_selected_until_bws_589_and_bws_599_validation/);
+  assert.match(status, /paper_autopilot=runtime_evidence_parent_validated_pending_bws_599/);
 });
 
 test('full implementation program validator passes the repository contract', () => {

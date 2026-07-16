@@ -39,6 +39,49 @@ test('read-only API application starts on loopback, serves readiness, and shuts 
     const queryService = createQueryServiceStub();
     const firstLogger = createLogCapture();
     const firstSignals = createSignalCapture();
+    const metricsSnapshot = Object.freeze({
+      api: Object.freeze({
+        requestMetrics: Object.freeze({
+          api: Object.freeze({ errorCount: 0, requestCount: 0, responseBytes: 0, totalDurationMs: 0 }),
+          cockpit: Object.freeze({ errorCount: 0, requestCount: 0, responseBytes: 0, totalDurationMs: 0 }),
+          health: Object.freeze({ errorCount: 0, requestCount: 0, responseBytes: 0, totalDurationMs: 0 }),
+          metrics: Object.freeze({ errorCount: 0, requestCount: 0, responseBytes: 0, totalDurationMs: 0 }),
+          readiness: Object.freeze({ errorCount: 0, requestCount: 0, responseBytes: 0, totalDurationMs: 0 }),
+        }),
+        runtimeId: 'runtime-001',
+        status: 'ready',
+      }),
+      cockpit: Object.freeze({
+        assetFingerprint: 'f'.repeat(64),
+        requestMetrics: Object.freeze({ errorCount: 0, requestCount: 0, responseBytes: 0, totalDurationMs: 0 }),
+        status: 'ready',
+      }),
+      database: Object.freeze({
+        connectivity: 'available',
+        pendingMigrationCount: 0,
+        status: 'compatible',
+      }),
+      evidence: Object.freeze({
+        entryCount: 0,
+      }),
+      generatedAt: TEST_TIMESTAMP,
+      runtime: Object.freeze({
+        lifecycleState: 'running',
+        runtimeId: 'runtime-001',
+      }),
+      scheduler: Object.freeze({
+        lifecycleState: 'running',
+      }),
+      schema: 'bws.metrics_snapshot.v1',
+      sourceFingerprint: 'a'.repeat(64),
+      upstream: Object.freeze({
+        lifecycleState: 'running',
+        mode: 'api',
+      }),
+      worker: Object.freeze({
+        lifecycleState: 'running',
+      }),
+    });
     let firstMigrations = 0;
 
     const firstApplication = await startBwsReadOnlyApiApplication({
@@ -49,6 +92,7 @@ test('read-only API application starts on loopback, serves readiness, and shuts 
       cockpitProcessDefinition: createCockpitProcessDefinition(config),
       config,
       logger: firstLogger.logger,
+      metricsSnapshotFactory: () => metricsSnapshot,
       queryService,
       repositoryRoot: fixture.repositoryRoot,
       signalRegistrar: firstSignals.registrar,
@@ -71,6 +115,12 @@ test('read-only API application starts on loopback, serves readiness, and shuts 
       assert.equal(readinessResponse.status, 200);
       const readinessBody = await readinessResponse.json() as {
         readonly observability: {
+          readonly cockpit: {
+            readonly apiBaseUrl?: string;
+            readonly assetFingerprint?: string;
+            readonly buildDirectory: string;
+            readonly status: string;
+          };
           readonly configuration: {
             readonly persistence: {
               readonly password?: string;
@@ -78,11 +128,49 @@ test('read-only API application starts on loopback, serves readiness, and shuts 
           };
         };
         readonly readiness: {
+          readonly components: {
+            readonly cockpit: string;
+          };
           readonly status: string;
         };
       };
       assert.equal(readinessBody.readiness.status, 'ready');
+      assert.equal(readinessBody.readiness.components.cockpit, 'ready');
       assert.equal(readinessBody.observability.configuration.persistence.password, '[redacted]');
+      assert.equal(readinessBody.observability.cockpit.apiBaseUrl, baseUrl);
+      assert.equal(readinessBody.observability.cockpit.buildDirectory, 'dist/apps/web');
+      assert.match(readinessBody.observability.cockpit.assetFingerprint ?? '', /^[0-9a-f]{64}$/);
+
+      const metricsResponse = await fetch(`${baseUrl}/metrics`);
+      assert.equal(metricsResponse.status, 200);
+      const metricsBody = await metricsResponse.json() as {
+        readonly api: {
+          readonly runtimeId: string;
+          readonly status: string;
+        };
+        readonly schema: string;
+        readonly upstream: {
+          readonly mode?: string;
+        };
+      };
+      assert.equal(metricsBody.schema, 'bws.metrics_snapshot.v1');
+      assert.equal(metricsBody.api.runtimeId, 'runtime-001');
+      assert.equal(metricsBody.api.status, 'ready');
+      assert.equal(metricsBody.upstream.mode, 'api');
+
+      const cockpitResponse = await fetch(`${baseUrl}/`);
+      assert.equal(cockpitResponse.status, 200);
+      assert.equal(cockpitResponse.headers.get('content-type'), 'text/html; charset=utf-8');
+      assert.match(await cockpitResponse.text(), /BWS Operator Cockpit/);
+
+      const routeResponse = await fetch(`${baseUrl}/paper-runs`);
+      assert.equal(routeResponse.status, 200);
+      assert.match(await routeResponse.text(), /assets\/app\.js/);
+
+      const assetResponse = await fetch(`${baseUrl}/assets/app.js`);
+      assert.equal(assetResponse.status, 200);
+      assert.equal(assetResponse.headers.get('content-type'), 'text/javascript; charset=utf-8');
+      assert.match(await assetResponse.text(), /BWS managed cockpit asset/);
 
       assert.equal(firstMigrations, 1);
       assert.equal(firstApplication.processIdentity.processName, 'bws-read-only-api');
@@ -109,6 +197,7 @@ test('read-only API application starts on loopback, serves readiness, and shuts 
       },
       cockpitProcessDefinition: createCockpitProcessDefinition(config),
       config,
+      metricsSnapshotFactory: () => metricsSnapshot,
       queryService,
       repositoryRoot: fixture.repositoryRoot,
       signalRegistrar: secondSignals.registrar,
@@ -120,6 +209,44 @@ test('read-only API application starts on loopback, serves readiness, and shuts 
       await secondApplication.close();
       await secondApplication.closed;
     }
+  } finally {
+    fixture.dispose();
+  }
+});
+
+test('read-only API application fails closed when the managed cockpit build is missing or targets the wrong API base URL', async () => {
+  const fixture = createRuntimeFixture();
+  try {
+    const config = resolveBwsServiceRuntimeConfig(fixture.environment, fixture.repositoryRoot);
+    const queryService = createQueryServiceStub();
+
+    rmSync(join(fixture.repositoryRoot, 'dist'), { force: true, recursive: true });
+    await assert.rejects(
+      () => startBwsReadOnlyApiApplication({
+        applyMigrations() {
+          return Object.freeze({ applied: Object.freeze([]), skipped: Object.freeze([]) });
+        },
+        cockpitProcessDefinition: createCockpitProcessDefinition(config),
+        config,
+        queryService,
+        repositoryRoot: fixture.repositoryRoot,
+      }),
+      /Managed cockpit build directory is missing/,
+    );
+
+    createManagedCockpitBuild(fixture.repositoryRoot, 'http://127.0.0.1:9999');
+    await assert.rejects(
+      () => startBwsReadOnlyApiApplication({
+        applyMigrations() {
+          return Object.freeze({ applied: Object.freeze([]), skipped: Object.freeze([]) });
+        },
+        cockpitProcessDefinition: createCockpitProcessDefinition(config),
+        config,
+        queryService,
+        repositoryRoot: fixture.repositoryRoot,
+      }),
+      /Managed cockpit build targets http:\/\/127\.0\.0\.1:9999 but the runtime serves http:\/\/127\.0\.0\.1:4312/,
+    );
   } finally {
     fixture.dispose();
   }
@@ -291,8 +418,16 @@ function createCockpitProcessDefinition(config: BwsServiceRuntimeConfig): BwsPro
     automaticFallback: 'forbidden',
     boundary: '@betting-win-surebet/web:BWS_OPERATOR_COCKPIT_R1',
     execution: 'disabled',
-    exposure: 'browser_only',
-    networkBindings: Object.freeze([]),
+    exposure: 'loopback_only',
+    networkBindings: Object.freeze([
+      Object.freeze({
+        exposure: 'loopback_only',
+        host: '127.0.0.1' as const,
+        port: config.api.port,
+        protocol: 'http' as const,
+        purpose: 'operator_cockpit' as const,
+      }),
+    ]),
     notes: Object.freeze([
       `Reads the loopback-safe BWS API through http://127.0.0.1:${config.api.port}.`,
       'Cockpit never enables provider connections, execution, or silent fallback.',
@@ -389,8 +524,10 @@ function createWorkerPassResult(config: BwsServiceRuntimeConfig, completedCount:
     claimedCount: completedCount,
     completedCount,
     deadLetterCount: 0,
+    drained: false,
     expiredLeaseDeadLetterCount: 0,
     finishedAt: '2026-07-15T09:15:00.500Z',
+    leaseRenewalCount: 0,
     processedJobs: Object.freeze([]),
     queueName: config.worker.queueName,
     retryCount: 0,
@@ -432,6 +569,7 @@ function createRuntimeFixture(): {
     `${JSON.stringify(sampleUpstreamLock(upstreamRoot), null, 2)}\n`,
     'utf-8',
   );
+  createManagedCockpitBuild(repositoryRoot, 'http://127.0.0.1:4312');
   return {
     dispose: () => rmSync(root, { force: true, recursive: true }),
     environment: Object.freeze({
@@ -452,6 +590,38 @@ function createRuntimeFixture(): {
     }),
     repositoryRoot,
   };
+}
+
+function createManagedCockpitBuild(repositoryRoot: string, apiBaseUrl: string): void {
+  mkdirSync(join(repositoryRoot, 'dist', 'apps', 'web', 'assets'), { recursive: true });
+  writeFileSync(
+    join(repositoryRoot, 'dist', 'apps', 'web', 'index.html'),
+    [
+      '<!doctype html>',
+      '<html lang="en">',
+      '  <head><meta charset="UTF-8" /><title>BWS Operator Cockpit</title></head>',
+      '  <body>',
+      '    <div id="root">BWS Operator Cockpit</div>',
+      '    <script type="module" src="/assets/app.js"></script>',
+      '  </body>',
+      '</html>',
+    ].join('\n'),
+    'utf-8',
+  );
+  writeFileSync(
+    join(repositoryRoot, 'dist', 'apps', 'web', 'assets', 'app.js'),
+    `console.log(${JSON.stringify(`BWS managed cockpit asset for ${apiBaseUrl}`)});\n`,
+    'utf-8',
+  );
+  writeFileSync(
+    join(repositoryRoot, 'dist', 'apps', 'web', 'bws-cockpit-build.json'),
+    `${JSON.stringify({
+      apiBaseUrl,
+      dataMode: 'api',
+      schema: 'bws.operator_cockpit_build.v1',
+    }, null, 2)}\n`,
+    'utf-8',
+  );
 }
 
 function sampleUpstreamLock(repositoryPath: string): BettingWinUpstreamLock {

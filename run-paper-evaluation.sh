@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
-# Canonical no-service private paper-evaluation controller for betting-win-surebet.
-# Default duration: 72h. This repo has no paper service lifecycle; evaluation is one repo-local fixture/pinned-bundle pass only.
+# Canonical private paper-evaluation controller for betting-win-surebet.
+# Default mode remains the repo-local fixture/pinned-bundle pass. BWS-588 also adds an explicit service-owned runtime-evidence mode.
+# Default duration: 72h.
+# Default fixture-mode markers remain:
+# controller_mode=single_pass_no_service
+# paper_service_lifecycle=none
+# duration_semantics=maximum_controller_budget_not_monitoring_runtime
+# interval_semantics=workflow_compatibility_no_wait_in_single_pass_mode
 set -Eeuo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
@@ -22,6 +28,7 @@ CHECK_ONLY=0
 PRINT_CONFIG=0
 AUTO_INSTALL=0
 ALLOW_PARALLEL=0
+RUNTIME_EVIDENCE=0
 FINISHED=0
 EXIT_STATUS=0
 STOP_REASON="not_started"
@@ -50,6 +57,14 @@ SCRIPT_NAME="run-paper-evaluation.sh"
 ZIP_TIMEOUT_SECONDS=""
 PAPER_HANDOFF_FILE=""
 PAPER_HANDOFF_FINGERPRINT=""
+RUNTIME_EVIDENCE_RESULT_PATH=""
+RUNTIME_EVIDENCE_LATEST_DIAGNOSTICS=""
+RUNTIME_EVIDENCE_HANDOFF_PATH=""
+RUNTIME_EVIDENCE_HANDOFF_LATEST_PATH=""
+RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE=""
+RUNTIME_EVIDENCE_CAMPAIGN_RUN_ID=""
+RUNTIME_EVIDENCE_STACK_OWNERSHIP=""
+RUNTIME_EVIDENCE_STACK_STOP_DISPOSITION=""
 ARTIFACT_PACKAGING_EXIT_STATUS=0
 LOCK_RELEASE_STATUS="not_attempted"
 LOCK_RELEASE_EXIT_CODE=0
@@ -61,20 +76,21 @@ Usage:
   ./run-paper-evaluation.sh [options]
 
 Primary options:
-  --duration VALUE               Maximum controller budget. Default: 72h. This no-service controller still performs one pass.
-  --interval VALUE               Compatibility cadence value; no waiting occurs in single-pass mode.
-  --adaptive                     Compatibility flag. This no-service repo does not delegate wait intervals to Codex.
-  --keep-monitoring-when-ready   Accepted for compatibility; no service monitoring is performed in this repo.
+  --duration VALUE               Maximum controller budget. Default: 72h.
+  --interval VALUE               Observation cadence. Fixture mode keeps compatibility semantics; runtime mode polls at this interval.
+  --adaptive                     Compatibility flag. Fixture mode remains single-pass; runtime mode uses an explicit fixed interval.
+  --keep-monitoring-when-ready   In runtime-evidence mode, continue sampling until --duration even after readiness.
   --model MODEL                  Override the Codex model for any future paper handoff/audit integration. Use cli-default for profile default.
   --fallback-model MODEL         Fallback model selector. Use none to disable fallback.
   --repo-dir PATH                Override repository path.
 
 Controller behavior:
+  --runtime-evidence             Attach to or start the repo-owned full stack and collect bounded local-only runtime evidence.
   --check-only                   Run preflight validation only. No private report write, no Codex phase.
   --status                       Show the current paper-controller lock state and exit.
   --force-unlock                 Terminate only a verified repo-scoped paper controller lock owner, remove the lock, and exit.
   --auto-install                 Permit one npm install --ignore-scripts when node_modules is absent.
-  --max-cycles N                 Accepted canonical option. No-service surebet evaluation completes in one cycle.
+  --max-cycles N                 Accepted canonical option. The controller still performs one bounded evaluation cycle.
   --sandbox MODE                 read-only, workspace-write, or danger-full-access.
   --codex-phase-timeout VALUE    Accepted canonical option for handoff parity. Alias: --codex-timeout.
   --codex-timeout VALUE          Alias for --codex-phase-timeout.
@@ -91,22 +107,23 @@ Environment:
   SUREBET_REQUIRE_PINNED_BUNDLE=1   # accepted values: unset, 0, or 1
 
 Surebet behavior:
-  - Validates any supplied pinned-bundle path before creating a run or starting expensive validation.
-  - Accepts only an existing, regular, non-symlink, repo-local .json pinned bundle.
+  - Default mode validates any supplied pinned-bundle path before creating a run or starting expensive validation.
+  - Default mode accepts only an existing, regular, non-symlink, repo-local .json pinned bundle.
   - Validates the repo and hard no-provider/no-execution/no-direct-DB boundaries.
   - Runs one repo-local private fixture paper smoke.
-  - Runs pinned-bundle smoke only when SUREBET_PINNED_BUNDLE is explicitly provided.
+  - Runs pinned-bundle smoke only when SUREBET_PINNED_BUNDLE is explicitly provided in fixture mode.
+  - Runtime-evidence mode requires BWS_UPSTREAM_MODE=api or export and never treats local-only success as BWS-600 evidence.
   - Executes known Node commands as direct argv, never through shell-constructed command text.
   - Verifies that source and protected automation files remain unchanged.
   - Writes .automation/paper-mode-to-autonomous-implementation.env only for source/validation defects.
-  - Does not start, stop, refresh, poll, or mutate any service.
+  - Runtime-evidence mode starts the full stack only when no exact-owner stack is active and stops only the stack instance it started.
   - Does not source nvm.sh; root run scripts inherit the active parent-shell Node runtime.
   - Does not call providers, read betting-win DBs, place orders, mutate .env, or claim live/paper readiness.
 
 Exit codes:
-  0 = check-only passed, private fixture smoke accepted, or pinned bundle accepted into private report.
+  0 = check-only passed, private fixture smoke accepted, pinned bundle accepted into private report, or local-only runtime evidence reached readiness.
   1 = controller/setup/local preflight failure before classified paper state.
-  2 = blocked by invalid pinned bundle, safety, validation, tooling, source mutation, or source-fix requirement.
+  2 = blocked by invalid pinned bundle, safety, validation, tooling, source mutation, source-fix requirement, or runtime-evidence blocker.
   3 = duration/max-cycle elapsed while continuation remains required.
   130 = interrupted.
 EOF_USAGE
@@ -210,6 +227,7 @@ parse_args() {
       --fallback-model=*) CODEX_FALLBACK_MODEL="${1#*=}"; shift ;;
       --repo-dir) [[ $# -ge 2 ]] || { echo "ERROR: --repo-dir requires a value" >&2; return 2; }; REPO_DIR_OVERRIDE="$2"; shift 2 ;;
       --repo-dir=*) REPO_DIR_OVERRIDE="${1#*=}"; shift ;;
+      --runtime-evidence) RUNTIME_EVIDENCE=1; shift ;;
       --check-only) CHECK_ONLY=1; shift ;;
       --status) STATUS_ONLY=1; shift ;;
       --force-unlock) FORCE_UNLOCK=1; shift ;;
@@ -261,15 +279,104 @@ configure_defaults() {
   export AUTOMATION_CODEX_MODEL="$CODEX_MODEL" AUTOMATION_CODEX_FALLBACK_MODEL="$CODEX_FALLBACK_MODEL" AUTOMATION_CODEX_SANDBOX="$CODEX_SANDBOX" AUTOMATION_CODEX_STREAM_LOGS="$CODEX_STREAM_LOGS"
 }
 
+paper_controller_mode() {
+  if [[ "$RUNTIME_EVIDENCE" == "1" ]]; then
+    printf 'runtime_evidence\n'
+  else
+    printf 'single_pass_no_service\n'
+  fi
+}
+
+paper_service_lifecycle_value() {
+  if [[ "$RUNTIME_EVIDENCE" == "1" ]]; then
+    printf 'full_stack_owned\n'
+  else
+    printf 'none\n'
+  fi
+}
+
+duration_semantics_value() {
+  if [[ "$RUNTIME_EVIDENCE" == "1" ]]; then
+    printf 'bounded_runtime_observation_window\n'
+  else
+    printf 'maximum_controller_budget_not_monitoring_runtime\n'
+  fi
+}
+
+interval_semantics_value() {
+  if [[ "$RUNTIME_EVIDENCE" == "1" ]]; then
+    printf 'explicit_runtime_observation_poll_interval\n'
+  else
+    printf 'workflow_compatibility_no_wait_in_single_pass_mode\n'
+  fi
+}
+
+paper_service_supported_value() {
+  if [[ "$RUNTIME_EVIDENCE" == "1" ]]; then
+    printf '1\n'
+  else
+    printf '0\n'
+  fi
+}
+
+service_refresh_required_value() {
+  if [[ "$RUNTIME_EVIDENCE" == "1" ]]; then
+    printf '1\n'
+  else
+    printf '0\n'
+  fi
+}
+
+runtime_evidence_required_value() {
+  if [[ "$RUNTIME_EVIDENCE" == "1" ]]; then
+    printf '1\n'
+  else
+    printf '0\n'
+  fi
+}
+
+runtime_evidence_selected_upstream_mode_value() {
+  local value
+  if [[ "$RUNTIME_EVIDENCE" != "1" ]]; then
+    printf 'none\n'
+    return 0
+  fi
+  value="${RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE:-${BWS_UPSTREAM_MODE:-}}"
+  case "$value" in
+    api|export) printf '%s\n' "$value" ;;
+    *)
+      echo "ERROR: runtime-evidence mode requires BWS_UPSTREAM_MODE=api or export" >&2
+      return 2
+      ;;
+  esac
+}
+
+runtime_evidence_campaign_run_id_value() {
+  local value="${RUNTIME_EVIDENCE_CAMPAIGN_RUN_ID:-${AUTOMATION_PARENT_RUN_ID:-none}}"
+  if [[ "$RUNTIME_EVIDENCE" != "1" ]]; then
+    printf 'none\n'
+    return 0
+  fi
+  if [[ "$value" == "none" ]]; then
+    printf 'none\n'
+    return 0
+  fi
+  [[ "$value" =~ ^[A-Za-z0-9._:-]+$ ]] || {
+    echo "ERROR: runtime-evidence campaign run id is invalid: $value" >&2
+    return 2
+  }
+  printf '%s\n' "$value"
+}
+
 print_config() {
   cat <<EOF_CONFIG
 controller=run-paper-evaluation.sh
-controller_mode=single_pass_no_service
+controller_mode=$(paper_controller_mode)
 repo_dir=$AUTOMATION_REPO_ROOT
 duration_seconds=$DURATION_SECONDS
-duration_semantics=maximum_controller_budget_not_monitoring_runtime
+duration_semantics=$(duration_semantics_value)
 interval_seconds=$INTERVAL_SECONDS
-interval_semantics=workflow_compatibility_no_wait_in_single_pass_mode
+interval_semantics=$(interval_semantics_value)
 adaptive=$ADAPTIVE
 keep_monitoring_when_ready=$KEEP_MONITORING_WHEN_READY
 validation_timeout_seconds=$VALIDATION_TIMEOUT_SECONDS
@@ -287,7 +394,8 @@ stream_logs=$CODEX_STREAM_LOGS
 auto_install=$AUTO_INSTALL
 surebet_pinned_bundle=${PINNED_BUNDLE_PATH:-}
 surebet_require_pinned_bundle=$REQUIRE_PINNED_BUNDLE
-paper_service_lifecycle=none
+runtime_evidence_mode=$RUNTIME_EVIDENCE
+paper_service_lifecycle=$(paper_service_lifecycle_value)
 canonical_paper_handoff_schema=1
 atomic_paper_handoff=enabled
 source_evidence_hash_verification=enabled
@@ -369,6 +477,7 @@ rotate_stale_paper_handoff() {
 write_paper_mode_handoff() {
   local reason="$1" evidence_dir="$2" blocker_family="${3:-source}" automation_maintenance="${4:-no}" expected_exit_code="${5:-2}"
   local allowed_protected_files="${6:-none}" final_dir evidence_abs evidence_rel evidence_file evidence_hash source_run_id
+  local paper_service_supported service_refresh_required runtime_evidence_required selected_upstream_mode runtime_campaign_run_id
 
   PAPER_HANDOFF_FILE="$AUTOMATION_REPO_ROOT/.automation/paper-mode-to-autonomous-implementation.env"
   automation_v2_validate_yes_no_value PAPER_MODE_AUTOMATION_MAINTENANCE_ALLOWED "$automation_maintenance" || return 2
@@ -400,6 +509,11 @@ write_paper_mode_handoff() {
   } > "$evidence_file"
   evidence_hash="$(automation_v2_sha256_file "$evidence_file")" || return 2
   evidence_rel="${evidence_file#$AUTOMATION_REPO_ROOT/}"
+  paper_service_supported="$(paper_service_supported_value)" || return 2
+  service_refresh_required="$(service_refresh_required_value)" || return 2
+  runtime_evidence_required="$(runtime_evidence_required_value)" || return 2
+  selected_upstream_mode="$(runtime_evidence_selected_upstream_mode_value)" || return 2
+  runtime_campaign_run_id="$(runtime_evidence_campaign_run_id_value)" || return 2
 
   final_dir="$AUTOMATION_RUN_DIR/final"
   mkdir -p "$AUTOMATION_REPO_ROOT/.automation" "$final_dir"
@@ -421,9 +535,11 @@ write_paper_mode_handoff() {
     "PAPER_MODE_EXPECTED_PRIVATE_PAPER_REEVALUATION_AFTER_SOURCE_CHANGE=yes" \
     "PAPER_MODE_AUTOMATION_MAINTENANCE_ALLOWED=$automation_maintenance" \
     "ALLOWED_PROTECTED_FILES=$allowed_protected_files" \
-    "PAPER_SERVICE_SUPPORTED=0" \
-    "SERVICE_REFRESH_REQUIRED=0" \
-    "RUNTIME_EVIDENCE_REQUIRED=0" \
+    "PAPER_SERVICE_SUPPORTED=$paper_service_supported" \
+    "SERVICE_REFRESH_REQUIRED=$service_refresh_required" \
+    "RUNTIME_EVIDENCE_REQUIRED=$runtime_evidence_required" \
+    "RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE=$selected_upstream_mode" \
+    "RUNTIME_EVIDENCE_CAMPAIGN_RUN_ID=$runtime_campaign_run_id" \
     "PINNED_BUNDLE_REQUIRED=$REQUIRE_PINNED_BUNDLE" \
     "SUREBET_PINNED_BUNDLE=${PINNED_BUNDLE_PATH:-}" \
     "HANDOFF_REASON=$reason" \
@@ -490,15 +606,23 @@ write_final_summary() {
     printf 'stop_reason=%s\n' "$STOP_REASON"
     printf 'exit_status=%s\n' "$EXIT_STATUS"
     printf 'cycles_attempted=%s\n' "$CYCLES_ATTEMPTED"
-    printf 'controller_mode=single_pass_no_service\n'
+    printf 'controller_mode=%s\n' "$(paper_controller_mode)"
     printf 'duration_seconds=%s\n' "$DURATION_SECONDS"
-    printf 'duration_semantics=maximum_controller_budget_not_monitoring_runtime\n'
+    printf 'duration_semantics=%s\n' "$(duration_semantics_value)"
     printf 'interval_seconds=%s\n' "$INTERVAL_SECONDS"
-    printf 'interval_semantics=workflow_compatibility_no_wait_in_single_pass_mode\n'
+    printf 'interval_semantics=%s\n' "$(interval_semantics_value)"
     printf 'adaptive=%s\n' "$ADAPTIVE"
     printf 'keep_monitoring_when_ready=%s\n' "$KEEP_MONITORING_WHEN_READY"
     printf 'local_fixture_report=%s\n' "${PAPER_LOCAL_REPORT_PATH:-}"
     printf 'pinned_bundle_report=%s\n' "${PAPER_PINNED_REPORT_PATH:-}"
+    printf 'runtime_evidence_mode=%s\n' "$RUNTIME_EVIDENCE"
+    printf 'runtime_evidence_result=%s\n' "${RUNTIME_EVIDENCE_RESULT_PATH:-}"
+    printf 'runtime_evidence_latest_diagnostics=%s\n' "${RUNTIME_EVIDENCE_LATEST_DIAGNOSTICS:-}"
+    printf 'runtime_evidence_handoff=%s\n' "${RUNTIME_EVIDENCE_HANDOFF_PATH:-}"
+    printf 'runtime_evidence_handoff_latest=%s\n' "${RUNTIME_EVIDENCE_HANDOFF_LATEST_PATH:-}"
+    printf 'runtime_evidence_selected_upstream_mode=%s\n' "${RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE:-}"
+    printf 'runtime_evidence_stack_ownership=%s\n' "${RUNTIME_EVIDENCE_STACK_OWNERSHIP:-}"
+    printf 'runtime_evidence_stack_stop_disposition=%s\n' "${RUNTIME_EVIDENCE_STACK_STOP_DISPOSITION:-}"
     printf 'surebet_pinned_bundle=%s\n' "${PINNED_BUNDLE_PATH:-}"
     printf 'source_fingerprint_before=%s\n' "${INITIAL_SOURCE_FINGERPRINT:-}"
     printf 'source_fingerprint_after=%s\n' "${FINAL_SOURCE_FINGERPRINT:-}"
@@ -511,7 +635,7 @@ write_final_summary() {
       printf 'lock_preserved=%s\n' "$LOCK_PRESERVED"
       printf 'lock_file=%s\n' "${AUTOMATION_LOCK_FILE:-none}"
     fi
-    printf 'paper_service_lifecycle=none\n'
+    printf 'paper_service_lifecycle=%s\n' "$(paper_service_lifecycle_value)"
     printf 'completed_at=%s\n' "$(automation_now_iso)"
   } > "$AUTOMATION_RUN_DIR/final-summary.md"
   cp "$AUTOMATION_RUN_DIR/final-summary.md" "$AUTOMATION_RUN_DIR/final/final-summary.md" 2>/dev/null || true
@@ -710,13 +834,103 @@ NODE
   [[ "$rc" -eq 0 ]] || { automation_log "pinned_bundle_artifact_validation_failed log=$verify_log"; return 1; }
 }
 
+run_runtime_evidence_mode() {
+  local cycle_dir stamp out_rel out_abs env_file rc
+  local -a cmd
+  cycle_dir="$1"
+  stamp="$(date -u +%Y%m%dT%H%M%SZ)"
+  out_rel="artifacts/paper-runtime-evidence/runtime-evidence-${stamp}.json"
+  out_abs="$AUTOMATION_REPO_ROOT/$out_rel"
+  env_file="$cycle_dir/runtime-evidence-result.env"
+  RUNTIME_EVIDENCE_RESULT_PATH="$out_rel"
+  cmd=(
+    node
+    dist/packages/bootstrap/src/cli/bws-paper-runtime-evidence.js
+    --output "$out_rel"
+    --max-duration-ms "$((DURATION_SECONDS * 1000))"
+    --interval-ms "$((INTERVAL_SECONDS * 1000))"
+  )
+  if [[ "$KEEP_MONITORING_WHEN_READY" == "1" ]]; then
+    cmd+=(--keep-monitoring-when-ready)
+  fi
+  automation_quote_argv "${cmd[@]}" > "$cycle_dir/runtime-evidence-command.txt"
+  if ! automation_run_argv_command "runtime_evidence" "$PAPER_COMMAND_TIMEOUT_SECONDS" "$cycle_dir/runtime-evidence.log" "${cmd[@]}"; then
+    FINAL_STATUS="PAPER_EVALUATION_BLOCKED_RUNTIME_EVIDENCE_COLLECTION_FAILED"
+    STOP_REASON="runtime_evidence_command_failed"
+    return 1
+  fi
+  [[ -f "$out_abs" && ! -L "$out_abs" ]] || {
+    FINAL_STATUS="PAPER_EVALUATION_BLOCKED_RUNTIME_EVIDENCE_COLLECTION_FAILED"
+    STOP_REASON="runtime_evidence_result_missing"
+    return 1
+  }
+  node - "$out_abs" > "$env_file" <<'NODE'
+const { readFileSync } = require('node:fs');
+const resultPath = process.argv[2];
+const result = JSON.parse(readFileSync(resultPath, 'utf8'));
+const keys = [
+  ['PAPER_RUNTIME_EVIDENCE_FINAL_STATUS', result.finalStatus],
+  ['PAPER_RUNTIME_EVIDENCE_STOP_REASON', result.stopReason],
+  ['PAPER_RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE', result.selectedUpstreamMode],
+  ['PAPER_RUNTIME_EVIDENCE_STACK_OWNERSHIP', result.stackOwnership],
+  ['PAPER_RUNTIME_EVIDENCE_STACK_STOP_DISPOSITION', result.stackStopDisposition],
+  ['PAPER_RUNTIME_EVIDENCE_SAMPLE_COUNT', String(result.observation?.sampleCount ?? 0)],
+  ['PAPER_RUNTIME_EVIDENCE_LATEST_DIAGNOSTICS', result.latestDiagnosticsManifestFile ?? 'none'],
+  ['PAPER_RUNTIME_EVIDENCE_HANDOFF_FILE', result.latestRuntimeHandoffFile ?? 'none'],
+  ['PAPER_RUNTIME_EVIDENCE_HANDOFF_LATEST_FILE', result.latestRuntimeHandoffLatestFile ?? 'none'],
+];
+for (const [key, value] of keys) {
+  if (typeof value !== 'string' || value.length === 0 || /[\r\n]/.test(value)) {
+    throw new Error(`Invalid runtime evidence value for ${key}.`);
+  }
+  process.stdout.write(`${key}=${value}\n`);
+}
+NODE
+  rc=$?
+  [[ "$rc" -eq 0 ]] || {
+    FINAL_STATUS="PAPER_EVALUATION_BLOCKED_RUNTIME_EVIDENCE_COLLECTION_FAILED"
+    STOP_REASON="runtime_evidence_result_parse_failed"
+    return 1
+  }
+  automation_v2_load_env_strict "$env_file" || {
+    FINAL_STATUS="PAPER_EVALUATION_BLOCKED_RUNTIME_EVIDENCE_COLLECTION_FAILED"
+    STOP_REASON="runtime_evidence_result_env_invalid"
+    return 1
+  }
+  RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE="$(automation_v2_env_require PAPER_RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE)" || return 1
+  RUNTIME_EVIDENCE_CAMPAIGN_RUN_ID="${AUTOMATION_PARENT_RUN_ID:-none}"
+  RUNTIME_EVIDENCE_STACK_OWNERSHIP="$(automation_v2_env_require PAPER_RUNTIME_EVIDENCE_STACK_OWNERSHIP)" || return 1
+  RUNTIME_EVIDENCE_STACK_STOP_DISPOSITION="$(automation_v2_env_require PAPER_RUNTIME_EVIDENCE_STACK_STOP_DISPOSITION)" || return 1
+  RUNTIME_EVIDENCE_LATEST_DIAGNOSTICS="$(automation_v2_env_require PAPER_RUNTIME_EVIDENCE_LATEST_DIAGNOSTICS)" || return 1
+  RUNTIME_EVIDENCE_HANDOFF_PATH="$(automation_v2_env_require PAPER_RUNTIME_EVIDENCE_HANDOFF_FILE)" || return 1
+  RUNTIME_EVIDENCE_HANDOFF_LATEST_PATH="$(automation_v2_env_require PAPER_RUNTIME_EVIDENCE_HANDOFF_LATEST_FILE)" || return 1
+  FINAL_STATUS="$(automation_v2_env_require PAPER_RUNTIME_EVIDENCE_FINAL_STATUS)" || return 1
+  STOP_REASON="$(automation_v2_env_require PAPER_RUNTIME_EVIDENCE_STOP_REASON)" || return 1
+  case "$FINAL_STATUS" in
+    PAPER_EVALUATION_READY_RUNTIME_EVIDENCE_LOCAL_ONLY|\
+    PAPER_EVALUATION_BLOCKED_RUNTIME_OBSERVATION_NOT_READY|\
+    PAPER_EVALUATION_BLOCKED_RUNTIME_OWNERSHIP_AMBIGUOUS|\
+    PAPER_EVALUATION_BLOCKED_RUNTIME_STOP_FAILED|\
+    PAPER_EVALUATION_BLOCKED_RUNTIME_EVIDENCE_COLLECTION_FAILED)
+      automation_log "runtime_evidence_result=$FINAL_STATUS mode=$RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE ownership=$RUNTIME_EVIDENCE_STACK_OWNERSHIP stop=$RUNTIME_EVIDENCE_STACK_STOP_DISPOSITION"
+      ;;
+    *)
+      FINAL_STATUS="PAPER_EVALUATION_BLOCKED_RUNTIME_EVIDENCE_COLLECTION_FAILED"
+      STOP_REASON="runtime_evidence_final_status_invalid"
+      return 1
+      ;;
+  esac
+}
+
 parse_args "$@" || exit 1
 configure_defaults || exit 1
 LOCK_FILE="$AUTOMATION_REPO_ROOT/.automation/locks/run-paper-evaluation.lock"
 if [[ "$STATUS_ONLY" == "1" ]]; then automation_status_lock "$LOCK_FILE"; exit 0; fi
 if [[ "$FORCE_UNLOCK" == "1" ]]; then automation_force_unlock "$LOCK_FILE" "$SCRIPT_NAME" "$AUTOMATION_REPO_ROOT"; exit 0; fi
 if [[ "$PRINT_CONFIG" == "1" ]]; then print_config; exit 0; fi
-validate_pinned_bundle_preflight || exit 2
+if [[ "$RUNTIME_EVIDENCE" != "1" ]]; then
+  validate_pinned_bundle_preflight || exit 2
+fi
 trap 'finish $?' EXIT
 trap on_signal INT TERM
 AUTOMATION_SCRIPT_COMMAND="$0 $*"
@@ -750,15 +964,16 @@ CYCLE_DIR="$AUTOMATION_RUN_DIR/cycles/cycle_1"
 mkdir -p "$CYCLE_DIR"
 {
   printf 'cycle=1\n'
-  printf 'controller_mode=single_pass_no_service\n'
-  printf 'paper_service_lifecycle=none\n'
+  printf 'controller_mode=%s\n' "$(paper_controller_mode)"
+  printf 'paper_service_lifecycle=%s\n' "$(paper_service_lifecycle_value)"
+  printf 'runtime_evidence_mode=%s\n' "$RUNTIME_EVIDENCE"
   printf 'adaptive_requested=%s\n' "$ADAPTIVE"
   printf 'keep_monitoring_when_ready=%s\n' "$KEEP_MONITORING_WHEN_READY"
   printf 'pinned_bundle=%s\n' "${PINNED_BUNDLE_PATH:-}"
   printf 'require_pinned_bundle=%s\n' "$REQUIRE_PINNED_BUNDLE"
   printf 'started_at=%s\n' "$(automation_now_iso)"
 } > "$CYCLE_DIR/paper_health_packet.md"
-automation_log "paper_cycle_start cycle=1 service_lifecycle=none"
+automation_log "paper_cycle_start cycle=1 service_lifecycle=$(paper_service_lifecycle_value) mode=$(paper_controller_mode)"
 if ! run_repo_validation "$CYCLE_DIR/source-validation"; then
   FINAL_STATUS="PAPER_EVALUATION_BLOCKED_REPO_VALIDATION_FAILED"
   STOP_REASON="repo_validation_failed"
@@ -777,6 +992,17 @@ if ! run_private_fixture_smoke "$CYCLE_DIR"; then
     FINAL_STATUS="PAPER_EVALUATION_BLOCKED_HANDOFF_WRITE_FAILED"
     STOP_REASON="paper_handoff_write_failed_after_fixture_smoke"
   }
+  exit 2
+fi
+if [[ "$RUNTIME_EVIDENCE" == "1" ]]; then
+  if ! run_runtime_evidence_mode "$CYCLE_DIR"; then
+    if ! verify_paper_read_only_state runtime_evidence_failed; then exit 2; fi
+    exit 2
+  fi
+  verify_paper_read_only_state runtime_evidence_complete || exit 2
+  if [[ "$FINAL_STATUS" == "PAPER_EVALUATION_READY_RUNTIME_EVIDENCE_LOCAL_ONLY" ]]; then
+    exit 0
+  fi
   exit 2
 fi
 if [[ -z "${PINNED_BUNDLE_PATH:-}" ]]; then

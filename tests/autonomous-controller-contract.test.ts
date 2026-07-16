@@ -104,6 +104,7 @@ test('progress, start, and stop helpers match the no-service artifact contract',
   assert.match(check, /child_result\.env/);
   assert.match(check, /final-summary\.md/);
   assert.match(check, /cycles\/cycle_/);
+  assert.match(check, /bws-root-wrapper-runtime\.mjs runtime-summary/);
   assert.match(watch, /--fast/);
   assert.match(watch, /--base-url/);
   assert.match(watch, /progress_source=local_artifacts_no_service/);
@@ -112,12 +113,14 @@ test('progress, start, and stop helpers match the no-service artifact contract',
   assert.match(open, /--paper/);
   assert.match(open, /--bugfix/);
   assert.match(open, /--implementation/);
+  assert.match(open, /--runtime/);
+  assert.match(open, /--role/);
   assert.match(open, /--round/);
   assert.match(start, /node scripts\/restore-required-executable-bits\.js/);
-  assert.match(start, /npm run validate/);
+  assert.match(start, /bws-root-wrapper-runtime\.mjs start/);
   assert.doesNotMatch(start, /scripts\/load-node-runtime\.sh/);
   assert.doesNotMatch(start, /source .*nvm/);
-  assert.match(stop, /has no long-running service/);
+  assert.match(stop, /bws-root-wrapper-runtime\.mjs stop/);
 });
 
 test('implementation controller exposes canonical flags and telegram wiring', () => {
@@ -196,11 +199,14 @@ test('paper evaluation controller exposes canonical no-service private fixture a
   const script = read('run-paper-evaluation.sh');
   for (const marker of [
     '--adaptive','--keep-monitoring-when-ready','--model MODEL','--fallback-model MODEL','--repo-dir PATH',
+    '--runtime-evidence','runtime_evidence_mode=',
     '--check-only','--codex-phase-timeout VALUE','--validation-timeout VALUE','--zip-timeout VALUE','SUREBET_PINNED_BUNDLE',
     'SUREBET_REQUIRE_PINNED_BUNDLE','SUREBET_REQUIRE_PINNED_BUNDLE must be unset, 0, or 1',
     'validate_pinned_bundle_preflight()','automation_run_argv_command','controller_mode=single_pass_no_service',
     'verify_paper_read_only_state()','PAPER_EVALUATION_BLOCKED_SOURCE_MUTATION','paper_service_lifecycle=none',
     'PAPER_EVALUATION_READY_PRIVATE_FIXTURE_ONLY_BLOCKED_ON_PINNED_BUNDLE',
+    'PAPER_EVALUATION_READY_RUNTIME_EVIDENCE_LOCAL_ONLY',
+    'PAPER_EVALUATION_BLOCKED_RUNTIME_OWNERSHIP_AMBIGUOUS',
     'PAPER_EVALUATION_PINNED_BUNDLE_ACCEPTED_PRIVATE_REPORT_WRITTEN',
     'PAPER_EVALUATION_BLOCKED_INVALID_PINNED_BUNDLE','paper-mode-to-autonomous-implementation.env',
     'HANDOVER_SCHEMA_VERSION=1','SOURCE_EVIDENCE_SHA256','automation_v2_add_or_verify_fingerprint','automation_v2_write_env_atomic',
@@ -222,10 +228,10 @@ test('paper evaluation controller exposes canonical no-service private fixture a
 });
 
 
-test('paper autopilot controller exposes no-service parent supervisor contract', () => {
+test('paper autopilot controller exposes runtime-evidence parent supervisor contract', () => {
   const script = read('run-paper-autopilot.sh');
   for (const marker of [
-    'Parent no-service paper/autonomous supervisor for betting-win-surebet',
+    'Parent runtime-evidence paper/autonomous supervisor for betting-win-surebet',
     '--paper-duration VALUE',
     '--implementation-duration VALUE',
     '--max-same-handoff N',
@@ -234,7 +240,11 @@ test('paper autopilot controller exposes no-service parent supervisor contract',
     'paper_autopilot',
     'run-paper-evaluation.sh',
     'run-autonomous-implementation.sh',
-    'PAPER_AUTOPILOT_BLOCKED_ON_PINNED_BUNDLE',
+    '--runtime-evidence',
+    'PAPER_AUTOPILOT_READY_RUNTIME_EVIDENCE_LOCAL_ONLY',
+    'PAPER_AUTOPILOT_BLOCKED_RUNTIME_OWNERSHIP_AMBIGUOUS',
+    'PAPER_AUTOPILOT_BLOCKED_RUNTIME_STOP_FAILED',
+    'PAPER_AUTOPILOT_BLOCKED_RUNTIME_EVIDENCE_COLLECTION_FAILED',
     'PAPER_AUTOPILOT_BLOCKED_IMPLEMENTATION_NOOP',
     'PRIVATE_PAPER_REEVALUATION_REQUIRED',
     'canonical_paper_handoff_required=enabled',
@@ -257,7 +267,9 @@ test('paper autopilot controller exposes no-service parent supervisor contract',
     'parent_telegram_notification=final_only',
     '"TELEGRAM_NOTIFY=0"',
     "printf 'lock_release_status=%s\\n'",
-    'paper_service_lifecycle=none',
+    'paper_service_lifecycle=full_stack_owned',
+    'RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE',
+    'RUNTIME_EVIDENCE_CAMPAIGN_RUN_ID',
     'telegram_notify_send_final "run-paper-autopilot.sh"',
     'never sources nvm.sh',
   ]) assertContains(script, marker);
@@ -271,7 +283,7 @@ test('paper smoke and compatibility wrappers do not pre-create artifact outputs'
   const config = read('automation.config.sh');
   const pinnedSmoke = read('commands/run-pinned-interface-smoke.sh');
   const paperWrapper = read('commands/run-sure-paper-mode-autonomous.sh');
-  assertContains(config, 'run-paper-evaluation.sh is surebet-specific: no service lifecycle, private fixture/pinned-bundle only.');
+  assertContains(config, 'run-paper-evaluation.sh is surebet-specific: fixture mode plus local-only runtime-evidence mode.');
   assertContains(config, 'SUREBET_REQUIRE_PINNED_BUNDLE');
   assertContains(config, 'AUTOMATION_PAPER_AUTOPILOT_COMMAND');
   assertContains(config, 'AUTOMATION_PAPER_COMMAND="$AUTOMATION_PAPER_AUTOPILOT_COMMAND"');
@@ -288,9 +300,9 @@ test('status docs record the hardened controller surface', () => {
   assertContains(status, 'run_autonomous_implementation=standardized_and_selected_for_remaining_operator_runtime');
   assertContains(status, 'run_autonomous_bugfix=standardized_standalone_audit');
   assertContains(status, 'run_bugfix_autopilot=standardized_parent_for_broad_audit_and_repair');
-  assertContains(status, 'run_paper_evaluation=retained_no_service_until_bws_588');
-  assertContains(status, 'run_paper_evaluation=retained_no_service_until_bws_588');
-  assertContains(status, 'run_paper_autopilot=standardized_parent_pending_bws_589_and_bws_599');
+  assertContains(status, 'run_paper_evaluation=fixture_and_runtime_evidence_validated_bws_588');
+  assertContains(status, 'run_paper_evaluation=fixture_and_runtime_evidence_validated_bws_588');
+  assertContains(status, 'run_paper_autopilot=runtime_evidence_parent_validated_bws_589_pending_bws_599');
 });
 
 test('obsolete stop and paper-12h helpers are not present', () => {

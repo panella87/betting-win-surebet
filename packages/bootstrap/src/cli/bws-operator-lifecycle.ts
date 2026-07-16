@@ -1,7 +1,7 @@
 import {
-  getManagedBwsReadOnlyApiStatus,
-  startManagedBwsReadOnlyApi,
-  stopManagedBwsReadOnlyApi,
+  getManagedBwsOperatorStackStatus,
+  startManagedBwsOperatorStack,
+  stopManagedBwsOperatorStack,
 } from '../operations/operator-lifecycle.js';
 
 export async function runBwsOperatorLifecycleCli(
@@ -17,11 +17,11 @@ export async function runBwsOperatorLifecycleCli(
 
   const output = await (
     command === 'start'
-      ? startManagedBwsReadOnlyApi({ repositoryRoot })
+      ? startManagedBwsOperatorStack({ repositoryRoot })
       : command === 'status'
-        ? getManagedBwsReadOnlyApiStatus({ repositoryRoot })
+        ? getManagedBwsOperatorStackStatus({ repositoryRoot })
         : command === 'stop'
-          ? stopManagedBwsReadOnlyApi({ repositoryRoot })
+          ? stopManagedBwsOperatorStack({ repositoryRoot })
           : Promise.reject(new Error(`Unknown BWS operator lifecycle command: ${command}`))
   );
   stdout.write(`${JSON.stringify(output, null, 2)}\n`);
@@ -35,8 +35,8 @@ export function printBwsOperatorLifecycleHelp(
     [
       'Usage: node dist/packages/bootstrap/src/cli/bws-operator-lifecycle.js <start|status|stop>',
       '',
-      'Manages the repo-owned loopback BWS read-only API lifecycle without touching protected root wrappers.',
-      'Required environment: BETTING_WIN_REPO_PATH, BWS_UPSTREAM_LOCK_PATH, BWS_API_PORT, SUREBET_RUNTIME_MODE=paper, SUREBET_PROVIDER_CONNECTIONS=disabled, SUREBET_EXECUTION_ENABLED=false, SUREBET_PG_DATABASE, SUREBET_PG_USER, SUREBET_PG_PORT, and exactly one of SUREBET_PG_HOST or SUREBET_PG_SOCKET_DIRECTORY.',
+      'Manages the repo-owned full BWS stack lifecycle for upstream convergence, private-paper scheduler, private-paper worker, managed cockpit serving, and the loopback read-only API without touching protected root wrappers.',
+      'Required environment: BETTING_WIN_REPO_PATH, BWS_UPSTREAM_LOCK_PATH, BWS_UPSTREAM_MODE, BWS_API_PORT, BWS_WORKER_ID, BWS_WORKER_QUEUE_NAME, BWS_WORKER_LEASE_DURATION_MS, BWS_UPSTREAM_CONVERGENCE_INTERVAL_MS, BWS_UPSTREAM_CONVERGENCE_RETRY_BACKOFF_MS, BWS_UPSTREAM_CONVERGENCE_MAX_BACKOFF_MS, BWS_UPSTREAM_CONVERGENCE_PASS_TIMEOUT_MS, BWS_PRIVATE_PAPER_SCHEDULER_INTERVAL_MS, BWS_PRIVATE_PAPER_SCHEDULER_RETRY_BACKOFF_MS, BWS_PRIVATE_PAPER_SCHEDULER_MAX_BACKOFF_MS, BWS_PRIVATE_PAPER_SCHEDULER_PASS_TIMEOUT_MS, BWS_PRIVATE_PAPER_SCHEDULER_MAX_QUEUE_DEPTH, BWS_PRIVATE_PAPER_WORKER_INTERVAL_MS, BWS_PRIVATE_PAPER_WORKER_RETRY_BACKOFF_MS, BWS_PRIVATE_PAPER_WORKER_MAX_BACKOFF_MS, BWS_PRIVATE_PAPER_WORKER_PASS_TIMEOUT_MS, BWS_PRIVATE_PAPER_WORKER_MAX_JOBS_PER_PASS, SUREBET_RUNTIME_MODE=paper, SUREBET_PROVIDER_CONNECTIONS=disabled, SUREBET_EXECUTION_ENABLED=false, SUREBET_PG_DATABASE, SUREBET_PG_USER, SUREBET_PG_PORT, and exactly one of SUREBET_PG_HOST or SUREBET_PG_SOCKET_DIRECTORY.',
     ].join('\n'),
   );
 }

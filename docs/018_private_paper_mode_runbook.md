@@ -4,18 +4,18 @@
 paper_mode_owner=betting-win-surebet
 account_policy=separate_from_betting-win-betting
 current_stage=operator_runtime_implementation
-current_task=BWS-581
+current_task=BWS-590
 safe_local_terminal_gate=BWS-599
 external_runtime_gate=BWS-600
 ```
 
 ## Validated foundation
 
-`BWS-310` validates bounded private-paper domain behavior, `BWS-510` validates integrated loopback behavior and `BWS-520` through `BWS-580` validate executable components, bounded convergence/scheduling, an API-only lifecycle owner and runtime handoff.
+`BWS-310` validates bounded private-paper domain behavior, `BWS-510` validates integrated loopback behavior, `BWS-582` validates long-running scheduler and worker services, and `BWS-520` through `BWS-584` validate executable components, bounded convergence/scheduling, managed loopback cockpit serving, a complete product-owned lifecycle owner and runtime handoff.
 
 ## Remaining implementation
 
-`BWS-581` through `BWS-599` convert those components into a continuous operator-owned stack with full lifecycle, cockpit serving, database operations, observability, protected wrapper integration, service-owned paper evaluation, paper autopilot, release/recovery tooling, soak proof and final local acceptance.
+`BWS-585` through `BWS-599` continue converting those components into a continuous operator-owned stack with complete lifecycle ownership, observability, protected wrapper integration, service-owned paper evaluation, paper autopilot, release/recovery tooling, soak proof and final local acceptance after `BWS-583` closed managed cockpit serving.
 
 Private paper selects exactly one explicit upstream mode:
 

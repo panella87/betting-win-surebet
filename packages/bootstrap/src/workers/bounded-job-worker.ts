@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { setTimeout as sleepFor } from 'node:timers/promises';
 import type {
   SurebetWorkerJobCompletionRequest,
   SurebetWorkerJobFailureRequest,
@@ -10,6 +11,7 @@ import { accepted, blocked, type BoundaryResult, type IsoTimestamp } from '../co
 
 const ISO_UTC_TIMESTAMP = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/;
 const MAX_JOBS_PER_PASS = 128;
+const LEASE_RENEWAL_DIVISOR = 2;
 
 export interface BoundedWorkerJobCheckpointRequest {
   readonly checkpointId: string;
@@ -70,6 +72,8 @@ export interface RunBoundedWorkerPassRequest {
   readonly maxJobs: number;
   readonly now: () => IsoTimestamp;
   readonly queueName: string;
+  readonly shouldDrain?: () => boolean;
+  readonly sleep?: (milliseconds: number) => Promise<void>;
   readonly workerId: string;
 }
 
@@ -89,6 +93,8 @@ export interface BoundedWorkerPassResult {
   readonly retryCount: number;
   readonly deadLetterCount: number;
   readonly expiredLeaseDeadLetterCount: number;
+  readonly leaseRenewalCount: number;
+  readonly drained: boolean;
   readonly processedJobs: readonly BoundedWorkerProcessedJob[];
 }
 
@@ -107,8 +113,14 @@ export async function runBoundedWorkerPass(
   let completedCount = 0;
   let retryCount = 0;
   let deadLetterCount = 0;
+  let leaseRenewalCount = 0;
+  let drained = false;
 
   for (let index = 0; index < validated.value.maxJobs; index += 1) {
+    if (validated.value.shouldDrain?.() === true) {
+      drained = true;
+      break;
+    }
     const claimedAt = validated.value.now();
     const leaseToken = createLeaseToken(
       validated.value.workerId,
@@ -166,7 +178,9 @@ export async function runBoundedWorkerPass(
       };
     } else {
       try {
-        handlerResult = await handler.run(handlerContext);
+        const execution = await runHandlerWithLeaseRenewal(validated.value, handler, handlerContext);
+        handlerResult = execution.handlerResult;
+        leaseRenewalCount += execution.leaseRenewalCount;
       } catch (error) {
         handlerResult = {
           errorCode: 'BWS_WORKER_HANDLER_THROWN',
@@ -209,8 +223,10 @@ export async function runBoundedWorkerPass(
       claimedCount,
       completedCount,
       deadLetterCount,
+      drained,
       expiredLeaseDeadLetterCount,
       finishedAt: validated.value.now(),
+      leaseRenewalCount,
       processedJobs: Object.freeze(processedJobs),
       queueName: validated.value.queueName,
       retryCount,
@@ -277,7 +293,57 @@ function validateWorkerPassRequest(
       'A UTC clock function that returns ISO-8601 timestamps.',
     );
   }
+  if (request.shouldDrain !== undefined && typeof request.shouldDrain !== 'function') {
+    return blocked(
+      'BWS_WORKER_DRAIN_CALLBACK_INVALID',
+      'Bounded workers require shouldDrain to be a function when provided.',
+      'An optional drain callback that returns true once the worker should stop claiming new work.',
+    );
+  }
+  if (request.sleep !== undefined && typeof request.sleep !== 'function') {
+    return blocked(
+      'BWS_WORKER_SLEEP_INVALID',
+      'Bounded workers require sleep to be a function when provided.',
+      'An optional sleep function for bounded lease-renewal waits.',
+    );
+  }
   return accepted(request);
+}
+
+async function runHandlerWithLeaseRenewal(
+  request: RunBoundedWorkerPassRequest,
+  handler: BoundedWorkerJobHandler,
+  context: BoundedWorkerJobHandlerContext,
+): Promise<Readonly<{
+  readonly handlerResult: BoundedWorkerJobHandlerResult;
+  readonly leaseRenewalCount: number;
+}>> {
+  const settledHandler = handler.run(context).then(
+    (handlerResult) => Object.freeze({ handlerResult, kind: 'result' as const }),
+    (error) => Object.freeze({ error, kind: 'error' as const }),
+  );
+  const renewalIntervalMs = Math.max(1, Math.floor(request.leaseDurationMs / LEASE_RENEWAL_DIVISOR));
+  const sleep = request.sleep ?? defaultSleep;
+  let leaseRenewalCount = 0;
+
+  for (;;) {
+    const outcome = await Promise.race([
+      settledHandler,
+      sleep(renewalIntervalMs).then(() => Object.freeze({ kind: 'renew' as const })),
+    ]);
+    if (outcome.kind === 'renew') {
+      context.heartbeat(request.now());
+      leaseRenewalCount += 1;
+      continue;
+    }
+    if (outcome.kind === 'error') {
+      throw outcome.error;
+    }
+    return Object.freeze({
+      handlerResult: outcome.handlerResult,
+      leaseRenewalCount,
+    });
+  }
 }
 
 function createLeaseToken(
@@ -334,4 +400,8 @@ function toErrorDetails(error: unknown): JsonValue {
     message: String(error),
     name: 'NonErrorThrow',
   });
+}
+
+function defaultSleep(milliseconds: number): Promise<void> {
+  return sleepFor(milliseconds).then(() => undefined);
 }

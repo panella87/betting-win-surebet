@@ -15,7 +15,7 @@ backtesting_owner=betting-win-surebet
 paper_mode_owner=betting-win-surebet
 future_live_decision_owner=betting-win-surebet_after_explicit_gate
 account_policy=separate_from_betting-win-betting
-current_task=BWS-581
+current_task=BWS-590
 safe_local_terminal_gate=BWS-599
 external_runtime_gate=BWS-600
 execution_gate=closed
@@ -40,24 +40,19 @@ BWS must not connect directly to providers, write betting-win `core.*`, treat sn
 
 ## Validated foundation
 
-`BWS-100` through `BWS-580` are validated. The repository has the domain engine, `surebet.*` persistence, immutable intake, explicit export and API convergence passes, scheduler and worker primitives, read-only API, React cockpit, API-only lifecycle ownership, loopback acceptance and strict runtime handoff packaging.
+`BWS-100` through `BWS-588` are validated. The repository has the domain engine, `surebet.*` persistence, immutable intake, explicit export and API convergence passes, a long-running explicit-mode upstream convergence service, long-running scheduler and worker services, read-only API, React cockpit, managed loopback cockpit serving with explicit API-mode build verification, complete product-owned lifecycle ownership, product-owned database lifecycle operations, structured observability surfaces, loopback acceptance, strict runtime handoff packaging and service-owned paper runtime-evidence collection.
 
 Validated executable and integration composition remains under `packages/bootstrap`; the remaining queue extends that package surface rather than replacing it.
 
-That is not the final operator service. The current source still exposes one-shot convergence/scheduler/worker commands, manages only the API in its lifecycle owner, does not serve the cockpit from the managed stack, leaves root `start.sh` and `stop.sh` disconnected, and keeps paper evaluation in `single_pass_no_service` mode.
+That is not the final operator service. The current source now has long-running explicit-mode upstream convergence, long-running scheduler and worker services, managed loopback cockpit serving, a full product-owned lifecycle owner, integrated root lifecycle/progress/log wrappers, product runtime evidence surfaces and service-owned paper runtime-evidence mode, but paper autopilot still remains outside the owned lifecycle.
 
 ## Remaining safe local program
 
 The binding queue now continues through `BWS-599`:
 
 ```text
-BWS-581  long-running explicit-mode convergence service
-BWS-582  long-running scheduler and worker loops
-BWS-583  loopback cockpit serving and full-stack convergence
-BWS-584  complete product-owned lifecycle
-BWS-585  database retention, backup and restore verification
-BWS-586  logs, metrics, diagnostics and evidence retention
-BWS-587  root lifecycle/progress/log wrapper integration
+BWS-586  logs, metrics, diagnostics and evidence retention (validated)
+BWS-587  root lifecycle/progress/log wrapper integration (validated)
 BWS-588  service-owned paper evaluation
 BWS-589  full lifecycle paper autopilot
 BWS-590  release and deployment packaging
