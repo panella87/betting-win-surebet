@@ -102,3 +102,9 @@ The protected root-wrapper and paper-controller integration phase is complete. T
 ## Safety
 
 The program may build private loopback services, explicit read-only upstream convergence, persisted continuous paper, API, workers, UI, lifecycle, evidence, backup/restore and recovery. It may not use direct provider endpoints or credentials, create wallets/signers/orders/transactions, mutate provider accounts, publish signals, claim profitability or enable real-money execution.
+
+## Automation temp and inode safety
+
+Long autonomous and paper campaigns use one private repository-owned temp session per controller under `.automation/tmp`. The shared guard exports `TMPDIR`, `TMP`, and `TEMP`, rejects low free-byte or free-inode capacity, enforces per-session budgets, and removes dead marker-owned sessions. Parent and child controllers never share the same session.
+
+See `docs/automation/repository-temp-inode-safety.md`. The maintenance command `cleanup_automation_temp_inode_residue.sh` is dry-run by default and does not perform generic `/tmp` deletion.

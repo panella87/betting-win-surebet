@@ -74,3 +74,6 @@ OVERLAY_MANIFEST.json
 
 
 .automation/consumed-handoffs/
+
+# Repository-owned per-controller temporary sessions
+.automation/tmp/

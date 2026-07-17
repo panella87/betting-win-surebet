@@ -18,6 +18,7 @@ Active shared helpers:
 ```text
 .automation/lib/run_common.sh
 .automation/lib/controller_hardening_v2.sh
+.automation/lib/temp_inode_guard.sh
 .automation/lib/telegram_notify.sh
 ```
 
@@ -41,3 +42,9 @@ Do not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`. The blanket manual protected-
 ## Current paper limitation
 
 `run-paper-evaluation.sh` and `run-paper-autopilot.sh` now expose the validated runtime-evidence local lifecycle from `BWS-588` and `BWS-589`. They do not replace the remaining release, recovery, soak, or final-acceptance queue.
+
+## Repository temp and inode containment
+
+All five root controllers initialize a distinct repository-owned temp session through `run_common.sh`. The managed base is `.automation/tmp`; `TMPDIR`, `TMP`, and `TEMP` are exported before validations, Codex, packaging, or child-controller workload. Capacity checks cover free KiB, free inodes, per-session inode count, and per-session size. See `docs/automation/repository-temp-inode-safety.md`.
+
+Use `cleanup_automation_temp_inode_residue.sh` in dry-run mode first when recovering abandoned BWS-owned sessions. Generic `/tmp` purges are prohibited.

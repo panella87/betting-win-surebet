@@ -19,7 +19,9 @@ run-bugfix-autopilot.sh
 automation.config.sh
 .automation/lib/run_common.sh
 .automation/lib/controller_hardening_v2.sh
+.automation/lib/temp_inode_guard.sh
 .automation/lib/telegram_notify.sh
+cleanup_automation_temp_inode_residue.sh
 docs/automation/PROTECTED_AUTOMATION_FILES.md
 ```
 
@@ -69,3 +71,7 @@ allowed_protected_files=none
 Do not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` for `BWS-590` through `BWS-599`. Do not broaden authorization from inside an autonomous cycle.
 
 Executable command lists remain in `automation.config.sh`, `tools/required_executable_paths.js` and `scripts/validate_executable_bits.py`.
+
+## Temp/inode safety protection
+
+`.automation/lib/temp_inode_guard.sh` and `cleanup_automation_temp_inode_residue.sh` are protected automation files. Product implementation cycles may not weaken capacity thresholds, ownership checks, path containment, watchdog behavior, or cleanup boundaries.

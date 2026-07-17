@@ -116,3 +116,18 @@ autopilot_child_telegram=disabled
 autopilot_parent_telegram=final_only
 task_file_exact_protected_allowlist=enabled
 ```
+
+## Temporary-file and inode-safety state
+
+```text
+temp_inode_safety=repository_scoped_guard_enabled
+managed_temp_base=.automation/tmp
+confirmed_direct_leak=tests/bws-paper-runtime-evidence.test.ts
+confirmed_direct_leak_status=fixed_with_node_test_teardown
+startup_byte_and_inode_preflight=enabled
+runtime_capacity_watchdog=enabled
+stale_marker_owned_session_recovery=enabled
+post_overlay_controller=run-paper-autopilot.sh
+```
+
+The safe-local product implementation remains accepted. The next normal route is the BWS-600 runtime-evidence parent after filesystem capacity is healthy.

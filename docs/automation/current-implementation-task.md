@@ -150,3 +150,16 @@ pre_existing_service_mutation=prohibited
 ```
 
 Do not clone the betting-win checkout. Do not invent a contract, endpoint, acceptance result or external runtime evidence.
+
+## Repository automation safety transition
+
+The safe-local product queue through `BWS-599` is validated. Before the next `BWS-600` runtime-evidence campaign, the repository automation must retain the temp/inode guard implemented by this overlay.
+
+```text
+automation_safety=temp_inode_guard_required_and_implemented
+managed_temp_base=.automation/tmp
+post_overlay_controller=run-paper-autopilot.sh
+force_unlock_required=no
+```
+
+The next controller may start only after the server has enough free bytes and inodes to pass the guard preflight. The guard does not authorize provider connections, execution, or a generic system-temp purge.

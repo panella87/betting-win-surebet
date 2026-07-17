@@ -22,9 +22,11 @@ REQUIRED = [
     '.gitignore', '.gitattributes', '.env.example', '.nvmrc', 'cli.js',
     'start.sh', 'stop.sh', 'check_progress.sh', 'watch_progress.sh', 'open_log.sh',
     'update_git.sh', 'pull_artifacts_and_zip_codebase.sh', 'zip_codebase.sh',
+    'cleanup_automation_temp_inode_residue.sh',
     'run-autonomous-implementation.sh', 'run-paper-evaluation.sh', 'run-paper-autopilot.sh',
     'run-autonomous-bugfix.sh', 'run-bugfix-autopilot.sh', 'automation.config.sh',
     '.automation/lib/run_common.sh', '.automation/lib/controller_hardening_v2.sh',
+    '.automation/lib/temp_inode_guard.sh',
     '.automation/lib/telegram_notify.sh', '.automation/README.md',
     'docs/automation/README.md', 'docs/automation/PROTECTED_AUTOMATION_FILES.md',
     'docs/automation/repo-profile.md', 'docs/automation/autonomous-implementation.md',
@@ -32,6 +34,7 @@ REQUIRED = [
     'docs/automation/autonomous-bugfix.md', 'docs/automation/bugfix-autopilot.md',
     'docs/automation/current-implementation-task.md', 'docs/automation/SSH_KEY_SETUP.md',
     'docs/automation/POST_OVERLAY_CLEANUP.md', 'docs/automation/telegram-notifications.md',
+    'docs/automation/repository-temp-inode-safety.md',
     'docs/MASTER_PLAN.md', 'docs/repo_status_current.md', 'docs/autonomous_loop_contract.md',
     'docs/operations/autonomous_72h_runbook.md', 'docs/operations/service_run.md',
     *[f'docs/{number:03d}_{name}' for number, name in [
@@ -103,6 +106,7 @@ REQUIRED = [
     'scripts/validate_three_repo_surebet_boundary.py',
     'scripts/validate_full_implementation_program.py',
     'scripts/validate_remaining_operator_runtime_program.py',
+    'scripts/validate_temp_inode_safety.py',
     'scripts/validate_betting_win_upstream_contract.py',
     'scripts/validate_bws_loopback_acceptance.mjs',
     'scripts/build_bws_operator_cockpit.mjs', 'scripts/prepare_bws_test_environment.mjs',
@@ -122,6 +126,7 @@ REQUIRED = [
     'tests/validate-fixture-integrity.test.ts', 'tests/validate-shell-local-assignments.test.ts',
     'tests/validate-source-manifest.test.ts', 'tests/packaging-helpers.test.ts',
     'tests/validate-repo-contract.test.ts', 'tests/validation-matrix-contract.test.ts',
+    'tests/temp-inode-safety.test.ts',
     'tests/fixtures/pinned-interface-placeholder/.gitkeep',
     'tests/fixtures/pinned-interface-placeholder/local-placeholder.json',
     'tests/fixtures/private-paper-mode-smoke/accepted-local-bundle.json',
@@ -181,7 +186,7 @@ def main() -> None:
     if package.get('version') != '0.1.0-bws-full-platform':
         fail('package.json version must be 0.1.0-bws-full-platform')
     required_scripts = [
-        'typecheck', 'test', 'prepare:test-runtime', 'build:runtime-cockpit', 'validate', 'validate:starter', 'validate:ops',
+        'typecheck', 'test', 'prepare:test-runtime', 'build:runtime-cockpit', 'validate', 'validate:starter', 'validate:ops', 'validate:temp-inode-safety',
         'validate:implementation-program', 'validate:remaining-runtime-program', 'validate:loopback-acceptance', 'validate:upstream-boundary',
         'generate:upstream-lock', 'verify:upstream-lock',
         'runtime:start', 'runtime:status', 'runtime:stop',
@@ -200,14 +205,16 @@ def main() -> None:
         fail('package.json validate:web must use the managed cockpit builder with an explicit loopback validation port')
     if 'npm run validate:loopback-acceptance' not in package.get('scripts', {}).get('validate:starter', ''):
         fail('package.json validate:starter must invoke validate:loopback-acceptance')
+    if 'scripts/validate_temp_inode_safety.py' not in package.get('scripts', {}).get('validate:ops', ''):
+        fail('package.json validate:ops must invoke the temp/inode safety validator')
     if package.get('bin', {}).get('betting-win-surebet') != './cli.js':
         fail('package.json bin must expose ./cli.js')
 
     required_doc_markers = {
         'README.md': ['program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1', 'repo_role=surebet_strategy_application', 'current_task=BWS-599', 'safe_local_terminal_gate=BWS-599', 'run-autonomous-implementation.sh'],
         'AGENTS.md': ['Source-of-truth order', 'BETTING_WIN_REPO_PATH', 'backlog/bws_full_implementation.csv', 'BWS-580', 'BWS-581', 'BWS-599'],
-        'docs/automation/README.md': ['current_task=BWS-599', 'safe_local_terminal_gate=BWS-599', 'Exact protected-file policy', 'automation_maintenance_allowed=no', 'blanket manual override is disabled'],
-        'docs/automation/PROTECTED_AUTOMATION_FILES.md': ['Exact authorization contract', 'run-autonomous-implementation.sh', 'automation_maintenance_allowed=no', 'allowed_protected_files=none'],
+        'docs/automation/README.md': ['current_task=BWS-599', 'safe_local_terminal_gate=BWS-599', 'Exact protected-file policy', 'automation_maintenance_allowed=no', 'blanket manual override is disabled', 'repository-temp-inode-safety.md'],
+        'docs/automation/PROTECTED_AUTOMATION_FILES.md': ['Exact authorization contract', 'run-autonomous-implementation.sh', 'automation_maintenance_allowed=no', 'allowed_protected_files=none', 'temp_inode_guard.sh'],
         'docs/automation/repo-profile.md': ['repo_role=surebet_strategy_application', 'current_task=BWS-599', 'safe_local_terminal_gate=BWS-599'],
         'docs/automation/paper-evaluation.md': ['current_controller_mode=single_pass_fixture_or_runtime_evidence', 'validated_task=BWS-588', 'parent_integration_task=BWS-589_VALIDATED'],
         'docs/automation/paper-autopilot.md': ['integration_task=BWS-589', 'selected_now=yes_for_runtime_evidence_source_fix_loops', 'BWS-599'],
@@ -238,7 +245,7 @@ def main() -> None:
     gitignore = read(ROOT / '.gitignore')
     for marker in [
         'node_modules/', '.env', 'artifacts/*', '*.zip', '.codex_current_artifact_dir',
-        'config/betting-win.upstream.lock.json',
+        'config/betting-win.upstream.lock.json', '.automation/tmp/',
         '.automation/locks/', '.automation/corrupt/',
         '.automation/paper-mode-to-autonomous-implementation.env',
         '.automation/autonomous-implementation-handover.env', 'zi??????',

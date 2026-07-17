@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-07-17 - Repository temp and inode safety
+
+- Fixed the unbounded `bws-paper-runtime-evidence-*` test fixture leak by registering recursive `node:test` teardown.
+- Added one repository-scoped temp session per root-controller invocation under `.automation/tmp`, with distinct parent/child ownership, atomic metadata, heartbeat, stale recovery, byte/inode preflight, per-run budgets, and a bounded watchdog.
+- Added a dry-run-first cleanup command for dead marker-owned sessions and the confirmed legacy BWS fixture prefix.
+- Added static and executable regression coverage plus repository validation and executable-mode enforcement.
+- Preserved controller routing, lock semantics, notification ownership, artifact contracts, provider prohibition, and the closed execution gate.
+
 ## 2026-07-16 - Clean-checkout validation and cockpit build isolation
 
 - Made `npm test` bootstrap its ignored repo-local artifacts directory and generate plus verify the exact committed-HEAD betting-win lock before the serialized compiled test suite.

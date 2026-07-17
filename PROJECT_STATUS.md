@@ -57,3 +57,15 @@ bugfix_autopilot_selected=no
 force_unlock_required=no_evidence
 automation_maintenance_allowed=no
 ```
+
+## Automation filesystem safety
+
+```text
+repository_temp_sessions=.automation/tmp/sessions
+free_byte_preflight=required
+free_inode_preflight=required
+per_run_inode_budget=required
+watchdog=enabled
+cleanup_command=cleanup_automation_temp_inode_residue.sh
+next_controller_after_safety_repair=run-paper-autopilot.sh
+```

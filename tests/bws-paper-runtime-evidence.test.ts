@@ -1,6 +1,6 @@
-import test from 'node:test';
+import test, { type TestContext } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import {
@@ -239,8 +239,16 @@ function writeEvidenceIndex(repositoryRoot: string): void {
   );
 }
 
-function createTestRepositoryRoot(): string {
+function createTestRepositoryRoot(t: TestContext): string {
   const root = mkdtempSync(join(tmpdir(), 'bws-paper-runtime-evidence-'));
+  t.after(() => {
+    rmSync(root, {
+      force: true,
+      maxRetries: 3,
+      recursive: true,
+      retryDelay: 100,
+    });
+  });
   mkdirSync(join(root, 'runtime'), { recursive: true });
   writeEvidenceIndex(root);
   return root;
@@ -300,8 +308,8 @@ function createRuntimeHandoffResult(repositoryRoot: string): CreateBwsPaperRunti
   });
 }
 
-test('paper runtime evidence starts an owned stack, records ready observations, and stops only the stack it started', async () => {
-  const repositoryRoot = createTestRepositoryRoot();
+test('paper runtime evidence starts an owned stack, records ready observations, and stops only the stack it started', async (t) => {
+  const repositoryRoot = createTestRepositoryRoot(t);
   process.env.BWS_UPSTREAM_MODE = 'export';
   const observedCalls: string[] = [];
   let statusCallCount = 0;
@@ -370,8 +378,8 @@ test('paper runtime evidence starts an owned stack, records ready observations, 
   assert.deepEqual(observedCalls, ['status:not_running', 'start', 'status:running', 'diagnostics', 'stop']);
 });
 
-test('paper runtime evidence preserves an attached stack when exact identity and configuration already match', async () => {
-  const repositoryRoot = createTestRepositoryRoot();
+test('paper runtime evidence preserves an attached stack when exact identity and configuration already match', async (t) => {
+  const repositoryRoot = createTestRepositoryRoot(t);
   process.env.BWS_UPSTREAM_MODE = 'api';
   let statusCalls = 0;
   const result = await createBwsPaperRuntimeEvidence({
@@ -409,8 +417,8 @@ test('paper runtime evidence preserves an attached stack when exact identity and
   assert.equal(statusCalls, 2);
 });
 
-test('paper runtime evidence preserves the stack when ownership is ambiguous', async () => {
-  const repositoryRoot = createTestRepositoryRoot();
+test('paper runtime evidence preserves the stack when ownership is ambiguous', async (t) => {
+  const repositoryRoot = createTestRepositoryRoot(t);
   process.env.BWS_UPSTREAM_MODE = 'export';
   const result = await createBwsPaperRuntimeEvidence({
     getLifecycleStatus: async () => {
@@ -426,8 +434,8 @@ test('paper runtime evidence preserves the stack when ownership is ambiguous', a
   assert.equal(result.observation.sampleCount, 0);
 });
 
-test('paper runtime evidence returns a bounded blocker when the observation window never reaches readiness', async () => {
-  const repositoryRoot = createTestRepositoryRoot();
+test('paper runtime evidence returns a bounded blocker when the observation window never reaches readiness', async (t) => {
+  const repositoryRoot = createTestRepositoryRoot(t);
   process.env.BWS_UPSTREAM_MODE = 'export';
   const result = await createBwsPaperRuntimeEvidence({
     collectDiagnostics: async ({ repositoryRoot: root }) => createDiagnosticsBundleResult(root, 'bundle-blocked', {

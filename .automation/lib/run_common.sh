@@ -7,6 +7,10 @@ if [[ "${BASH_VERSION:-}" == "" ]]; then
   exit 127
 fi
 
+AUTOMATION_RUN_COMMON_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+# shellcheck source=.automation/lib/temp_inode_guard.sh
+. "$AUTOMATION_RUN_COMMON_DIR/temp_inode_guard.sh"
+
 automation_now_iso() { date -u +%Y-%m-%dT%H:%M:%SZ; }
 automation_now_epoch() { date -u +%s; }
 
@@ -527,8 +531,9 @@ automation_terminate_active_child() {
 automation_run_managed_argv() {
   local array_name="$1" label="$2" timeout_seconds="$3" out_file="$4" stream_logs="$5" expected_script="$6"
   local -n command_ref="$array_name"
-  local child_pid tail_pid="" rc
+  local child_pid tail_pid="" rc capacity_rc=0
   (( ${#command_ref[@]} > 0 )) || return 2
+  automation_temp_inode_check_capacity "before_managed_command:$label" || return $?
   mkdir -p "$(dirname "$out_file")"
   : > "$out_file"
   automation_require_command timeout
@@ -550,11 +555,16 @@ automation_run_managed_argv() {
   set -e
   [[ -n "$tail_pid" ]] && { wait "$tail_pid" 2>/dev/null || true; }
   automation_clear_active_child || true
+  automation_temp_inode_check_capacity "after_managed_command:$label" || capacity_rc=$?
+  if [[ "$capacity_rc" -ne 0 && "$rc" -eq 0 ]]; then
+    rc="$capacity_rc"
+  fi
   return "$rc"
 }
 
 automation_create_run_dir() {
   local slug="$1" stamp
+  automation_temp_inode_bootstrap "$slug" || automation_die "temporary-file and inode-safety bootstrap failed" 42
   stamp="$(date -u +%Y%m%dT%H%M%SZ)"
   mkdir -p "$AUTOMATION_REPO_ROOT/artifacts"
   AUTOMATION_RUN_DIR="$AUTOMATION_REPO_ROOT/artifacts/${slug}_${stamp}"
@@ -654,6 +664,7 @@ automation_source_path_is_excluded() {
   local rel="${1#./}"
   case "$rel" in
     .git|.git/*|artifacts|artifacts/*|node_modules|node_modules/*|dist|dist/*|coverage|coverage/*|tmp|tmp/*|.tmp|.tmp/*|.cache|.cache/*|\
+    .automation/tmp|.automation/tmp/*|\
     .automation/locks|.automation/locks/*|.automation/corrupt|.automation/corrupt/*|\
     .automation/paper-mode-to-autonomous-implementation.env|.automation/paper-mode-handover.env|\
     .automation/autonomous-implementation-handover.env|.automation/autonomous-implementation-handover.md|\
@@ -937,6 +948,7 @@ automation_build_artifacts_zip() {
   local run_dir="$1" root="$2" zip_tmp timeout_seconds
   [[ -d "$run_dir" ]] || return 0
   [[ -d "$root/artifacts" ]] || return 0
+  automation_temp_inode_check_capacity before_artifact_packaging || return $?
   automation_require_command zip
   timeout_seconds="$(automation_parse_duration_seconds "${AUTOMATION_ZIP_TIMEOUT:-10m}")" || return 2
   zip_tmp="$root/.artifacts.zip.tmp.$$.zip"
