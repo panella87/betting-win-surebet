@@ -48,6 +48,8 @@ def should_include(path: Path) -> bool:
         return False
     if rel.startswith(SKIP_PREFIXES):
         return False
+    if parts and parts[0] == 'runtime':
+        return False
     if any(part in SKIP_DIRECTORY_NAMES for part in parts[:-1]):
         return False
     lowered = rel.lower()

@@ -590,12 +590,30 @@ function runGit(
   try {
     return execFileSync('git', ['-C', repositoryPath, ...args], {
       encoding,
+      env: buildGitProcessEnvironment(),
       stdio: ['ignore', 'pipe', 'pipe'],
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new UpstreamVerificationError(errorCode, `git ${args.join(' ')} failed for ${repositoryPath}: ${message}`);
   }
+}
+
+function buildGitProcessEnvironment(): NodeJS.ProcessEnv {
+  const environment: NodeJS.ProcessEnv = { ...process.env };
+  for (const key of [
+    'GIT_ALTERNATE_OBJECT_DIRECTORIES',
+    'GIT_CEILING_DIRECTORIES',
+    'GIT_COMMON_DIR',
+    'GIT_DIR',
+    'GIT_DISCOVERY_ACROSS_FILESYSTEM',
+    'GIT_INDEX_FILE',
+    'GIT_OBJECT_DIRECTORY',
+    'GIT_WORK_TREE',
+  ]) {
+    delete environment[key];
+  }
+  return environment;
 }
 
 function requireLockRecord(value: unknown): Record<string, unknown> {

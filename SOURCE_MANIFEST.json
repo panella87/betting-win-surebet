@@ -1,6 +1,6 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-07-17T13:20:21Z",
+  "generated": "2026-07-17T14:23:54Z",
   "overlay": "api-only-upstream-wave24",
   "files": [
     {
@@ -925,8 +925,8 @@
     },
     {
       "path": "packages/bootstrap/src/operations/release-packaging.ts",
-      "sha256": "ef1e08a11fa8f4eac975c73ae6e0406c902f0b9f18d5b703a148ffc403e22b6f",
-      "size": 65107
+      "sha256": "8541767415d58395d940955beb82e7fe4cffaa19067c498a4f9c67be609fbc26",
+      "size": 65464
     },
     {
       "path": "packages/bootstrap/src/operations/release-upgrade.ts",
@@ -1165,8 +1165,8 @@
     },
     {
       "path": "packages/upstream/src/upstream/betting-win-upstream-lock.ts",
-      "sha256": "3b1a356a44250e7556e07bc6d3fbed61b04b513550b7802ed68713b49ada2621",
-      "size": 26171
+      "sha256": "2e4aaeac679b693b8672364b7a165f010849948dd830387470f870fdd4f516d8",
+      "size": 26637
     },
     {
       "path": "pull_artifacts_and_zip_codebase.sh",
@@ -1540,8 +1540,8 @@
     },
     {
       "path": "scripts/validate_executable_bits.py",
-      "sha256": "9b39fde4cbab97f0efd029acc6de292f9f2b1a3207b04b22f9b41411c33568f7",
-      "size": 1531
+      "sha256": "0ad3a7ca56d7fd3180e3f849b5183f7386f9bd2cb8b394b6bd895c5855468d52",
+      "size": 1652
     },
     {
       "path": "scripts/validate_fixture_integrity.py",
@@ -1600,8 +1600,8 @@
     },
     {
       "path": "scripts/validate_source_manifest.py",
-      "sha256": "7869e7f052e54897ce2cdbbe88e89a36df7a405bbbf4f517baa05e819cb4b996",
-      "size": 4098
+      "sha256": "db98844e4697b2dfc6686cbbf97ec197065cd12f290519e0d8f4903579c34d61",
+      "size": 4159
     },
     {
       "path": "scripts/validate_temp_inode_safety.py",
@@ -2045,8 +2045,8 @@
     },
     {
       "path": "tests/betting-win-upstream-contract.test.ts",
-      "sha256": "cbe94c5f9cc0a7b54628a326d4e0c135a41b36d4513808637ab45dc70a6eb3f7",
-      "size": 19354
+      "sha256": "747ab5e607d5a3dfe19cb7686cdd50b6a80943a5428f6b191bccab7d916f9621",
+      "size": 19309
     },
     {
       "path": "tests/blocker-report.test.ts",
@@ -2060,8 +2060,8 @@
     },
     {
       "path": "tests/bugfix-autopilot-contract.test.ts",
-      "sha256": "2fcd76793e5da3289fb6265b3058eac9efe7a8f689f4ae0cda7b69ef66292494",
-      "size": 16988
+      "sha256": "e57a82ff1a491a45da11b3bfbe91c525411c494f8f9deec83b778f9960bbe4c9",
+      "size": 16995
     },
     {
       "path": "tests/bws-database-lifecycle.test.ts",
@@ -2075,8 +2075,8 @@
     },
     {
       "path": "tests/bws-final-local-acceptance.test.ts",
-      "sha256": "31e9581939bec1f060ef9c840c55d3874a355ffb03d3376fd32e92ea94d95691",
-      "size": 33434
+      "sha256": "e66939cdf053e3f101b9f27b078fd276fe4ddccf77ea2ae72ed03a27b1e456ec",
+      "size": 33314
     },
     {
       "path": "tests/bws-loopback-acceptance-command.test.ts",
@@ -2315,8 +2315,8 @@
     },
     {
       "path": "tests/packaging-helpers.test.ts",
-      "sha256": "ebb8b2b60b944d04921dac4704cdcffa0d1ec0e60aaf99de2335ccd4828e23ea",
-      "size": 24715
+      "sha256": "466a159bf31de14b8898e458b05484f051b01e8c4123f29893d062df2b56ed2f",
+      "size": 24806
     },
     {
       "path": "tests/paper-autopilot-contract.test.ts",
@@ -2375,13 +2375,13 @@
     },
     {
       "path": "tests/run-script-hardening-wave2.test.ts",
-      "sha256": "f45bd7e515c627ea487d21f5d17eacd6008f45b270464ea185750e04ca4cea98",
-      "size": 13359
+      "sha256": "6377d427c321f18716ce3076c222f6d9622fa68cffbede0cb9d98bc9b0bc71a0",
+      "size": 13292
     },
     {
       "path": "tests/run-script-hardening-wave4.test.ts",
-      "sha256": "bdbef309b6410ae7bf33e992e643fdbd2bb9a1e4087bb17576cbb6776cad64e7",
-      "size": 10450
+      "sha256": "96b204880cccfc11966df54e55b11cdff3ed16637d08e6181af05823c6cce3f8",
+      "size": 10448
     },
     {
       "path": "tests/run-script-hardening-wave5.test.ts",
@@ -2480,8 +2480,8 @@
     },
     {
       "path": "tests/validate-source-manifest.test.ts",
-      "sha256": "f0aa14f8d84ee33e588f53d9a388a12f0c4bcf3c3df399214cc7d313487b632f",
-      "size": 15163
+      "sha256": "280c33e79e1c73045d66767807adf3f31c3c8722a7640e886791a59f6397e93f",
+      "size": 15348
     },
     {
       "path": "tests/validation-matrix-contract.test.ts",

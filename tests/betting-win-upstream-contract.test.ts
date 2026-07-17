@@ -3,7 +3,6 @@ import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { chmodSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
   UpstreamVerificationError,
@@ -53,7 +52,7 @@ function sha256Hex(value: Buffer | string): string {
 }
 
 function createBettingWinFixture(options: { readonly packageName?: string } = {}) {
-  const tempRoot = mkdtempSync(join(tmpdir(), 'bws-upstream-lock-'));
+  const tempRoot = mkdtempSync('/tmp/bws-upstream-lock-');
   const bwsRoot = join(tempRoot, 'betting-win-surebet');
   const upstreamRoot = join(tempRoot, 'betting-win');
   mkdirSync(bwsRoot, { recursive: true });

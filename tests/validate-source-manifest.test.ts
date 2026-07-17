@@ -169,6 +169,7 @@ test('source manifest regeneration helper reuses validator inclusion rules and e
     mkdirSync(join(dir, '.locks'), { recursive: true });
     mkdirSync(join(dir, '.automation', 'locks'), { recursive: true });
     mkdirSync(join(dir, '.automation', 'corrupt'), { recursive: true });
+    mkdirSync(join(dir, 'runtime', 'evidence'), { recursive: true });
     mkdirSync(join(dir, 'tmp'), { recursive: true });
     mkdirSync(join(dir, '.tmp'), { recursive: true });
     writeFileSync(join(dir, '.env'), 'SECRET=1\n', { encoding: 'utf-8' });
@@ -190,6 +191,7 @@ test('source manifest regeneration helper reuses validator inclusion rules and e
     writeFileSync(join(dir, '.automation', 'corrupt', 'stale.lock'), 'corrupt\n', { encoding: 'utf-8' });
     writeFileSync(join(dir, '.automation', 'paper-mode-to-autonomous-implementation.env'), 'HANDOVER=1\n', { encoding: 'utf-8' });
     writeFileSync(join(dir, '.automation', 'autonomous-implementation-handover.md'), '# runtime handoff\n', { encoding: 'utf-8' });
+    writeFileSync(join(dir, 'runtime', 'evidence', 'index.jsonl'), '{"generated":true}\n', { encoding: 'utf-8' });
     writeFileSync(join(dir, 'tmp', 'scratch.txt'), 'tmp dir\n', { encoding: 'utf-8' });
     writeFileSync(join(dir, '.tmp', 'scratch.txt'), 'hidden tmp dir\n', { encoding: 'utf-8' });
     writeFileSync(join(dir, 'notes.txt'), 'keep me\n', { encoding: 'utf-8' });

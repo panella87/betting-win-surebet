@@ -2,18 +2,18 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync, spawn, spawnSync } from 'node:child_process';
 import { chmodSync, copyFileSync, cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 const ROOT = process.cwd();
 const read = (rel: string): string => readFileSync(join(ROOT, rel), 'utf8');
 
 function prepareTempRepo(): string {
-  const repo = mkdtempSync(join(tmpdir(), 'surebet-bugfix-autopilot-'));
+  const repo = mkdtempSync('/tmp/surebet-bugfix-autopilot-');
   mkdirSync(join(repo, '.automation', 'lib'), { recursive: true });
   for (const rel of [
     'run-bugfix-autopilot.sh',
     '.automation/lib/run_common.sh',
+    '.automation/lib/temp_inode_guard.sh',
     '.automation/lib/controller_hardening_v2.sh',
     '.automation/lib/telegram_notify.sh',
   ]) {
@@ -136,7 +136,7 @@ test('bugfix autopilot rejects an incompatible controller before creating campai
 });
 
 test('semantic handoff fingerprint ignores volatile evidence path but retains evidence hash', () => {
-  const temp = mkdtempSync(join(tmpdir(), 'surebet-handoff-fingerprint-'));
+  const temp = mkdtempSync('/tmp/surebet-handoff-fingerprint-');
   const helper = join(ROOT, '.automation', 'lib', 'controller_hardening_v2.sh');
   try {
     const a = join(temp, 'a.env');
@@ -159,9 +159,10 @@ test('bugfix autopilot requires implementation and then re-audits the same area 
 set -Eeuo pipefail
 repo=""; area=""; while [[ $# -gt 0 ]]; do case "$1" in --repo-dir) repo="$2"; shift 2;; --campaign-area) area="$2"; shift 2;; *) shift;; esac; done
 printf '%s\n' "\${TELEGRAM_NOTIFY:-unset}" >> "$repo/artifacts/stub-child-telegram-values"
+. "$repo/.automation/lib/run_common.sh"
 . "$repo/.automation/lib/controller_hardening_v2.sh"
-mkdir -p "$repo/.automation/runtime"
-count_file="$repo/.automation/runtime/stub-bugfix-count"
+mkdir -p "$repo/artifacts"
+count_file="$repo/artifacts/stub-bugfix-count"
 count=0; [[ -f "$count_file" ]] && count="$(cat "$count_file")"; count=$((count+1)); echo "$count" > "$count_file"
 run="$repo/artifacts/autonomous_bugfix_20260101T00000\${count}Z"; cycle="$run/cycles/cycle_1"; mkdir -p "$cycle"
 if [[ "$count" == 1 ]]; then

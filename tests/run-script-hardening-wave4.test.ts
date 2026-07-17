@@ -12,7 +12,6 @@ import {
   rmSync,
   writeFileSync,
 } from 'node:fs';
-import { tmpdir } from 'node:os';
 import { basename, dirname, join } from 'node:path';
 
 const ROOT = process.cwd();
@@ -59,11 +58,12 @@ function envRecords(path: string): Map<string, string> {
 }
 
 function makeControllerRepo(): string {
-  const repo = mkdtempSync(join(tmpdir(), 'surebet-wave4-'));
+  const repo = mkdtempSync('/tmp/surebet-wave4-');
   for (const rel of [
     'run-paper-evaluation.sh',
     'run-autonomous-implementation.sh',
     '.automation/lib/run_common.sh',
+    '.automation/lib/temp_inode_guard.sh',
     '.automation/lib/controller_hardening_v2.sh',
     '.automation/lib/telegram_notify.sh',
   ]) {

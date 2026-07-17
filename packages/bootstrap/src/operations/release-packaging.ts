@@ -1055,7 +1055,7 @@ function createReleaseFileEntry(repositoryRoot: string, relativePath: string): R
   const absolutePath = join(repositoryRoot, normalizedRelativePath);
   const stats = ensureFile(absolutePath, normalizedRelativePath);
   return Object.freeze({
-    mode: formatMode(stats),
+    mode: normalizedReleaseMode(stats),
     path: normalizedRelativePath,
     sha256: fileSha256(absolutePath),
     size: stats.size,
@@ -1193,8 +1193,8 @@ function verifyInventoryMatchesRelease(releaseDirectory: string, inventory: read
     if (stats.size !== entry.size) {
       throw new Error(`Release file size mismatch for ${entry.path}.`);
     }
-    if (formatMode(stats) !== entry.mode) {
-      throw new Error(`Release file mode mismatch for ${entry.path}.`);
+    if (hasExecutableMode(entry.mode) !== isExecutableMode(stats)) {
+      throw new Error(`Release file executability mismatch for ${entry.path}.`);
     }
   }
 }
@@ -1696,6 +1696,18 @@ function stableObjectFingerprint(value: unknown): string {
 
 function formatMode(stats: Stats): string {
   return (stats.mode & 0o777).toString(8).padStart(3, '0');
+}
+
+function normalizedReleaseMode(stats: Stats): string {
+  return (isExecutableMode(stats) ? 0o755 : 0o644).toString(8);
+}
+
+function isExecutableMode(stats: Stats): boolean {
+  return (stats.mode & 0o111) !== 0;
+}
+
+function hasExecutableMode(mode: string): boolean {
+  return (parseInt(mode, 8) & 0o111) !== 0;
 }
 
 function assertNodeEngineRange(value: string): void {

@@ -2,7 +2,6 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { chmodSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import {
   createBwsFinalLocalAcceptanceCleanupResult,
@@ -30,7 +29,7 @@ let cachedReleaseFixture: Promise<ReleaseFixture> | undefined;
 
 test('final local acceptance stage 1 verifies a clean-room extracted release and writes deterministic migration evidence', async () => {
   const fixture = await getReleaseFixture();
-  const tempDirectory = mkdtempSync(join(tmpdir(), 'bws-final-acceptance-stage1-'));
+  const tempDirectory = mkdtempSync('/tmp/bws-final-acceptance-stage1-');
   const envFile = join(tempDirectory, 'private.env');
   const extractionDirectory = join(tempDirectory, 'clean-room');
   const scratchDirectory = join(tempDirectory, 'scratch');
@@ -98,7 +97,7 @@ test('final local acceptance stage 1 verifies a clean-room extracted release and
 
 test('final local acceptance stage 1 fails closed when the clean-room migration status is not fully converged', async () => {
   const fixture = await getReleaseFixture();
-  const tempDirectory = mkdtempSync(join(tmpdir(), 'bws-final-acceptance-stage1-blocked-'));
+  const tempDirectory = mkdtempSync('/tmp/bws-final-acceptance-stage1-blocked-');
   const envFile = join(tempDirectory, 'private.env');
   const extractionDirectory = join(tempDirectory, 'clean-room');
   const scratchDirectory = join(tempDirectory, 'scratch');
@@ -143,7 +142,7 @@ test('final local acceptance stage 1 fails closed when the clean-room migration 
 });
 
 test('final local acceptance runtime evidence binds api/export runtime proof plus paper autopilot summary', () => {
-  const tempDirectory = mkdtempSync(join(tmpdir(), 'bws-final-acceptance-runtime-'));
+    const tempDirectory = mkdtempSync('/tmp/bws-final-acceptance-runtime-');
   try {
     const apiLifecycleEvidenceFile = join(tempDirectory, 'api-lifecycle.json');
     const apiDiagnosticsManifestFile = join(tempDirectory, 'api-diagnostics.json');
@@ -195,7 +194,7 @@ test('final local acceptance runtime evidence binds api/export runtime proof plu
 });
 
 test('final local acceptance recovery evidence requires successful, rollback, and interrupted-recovery proof', () => {
-  const tempDirectory = mkdtempSync(join(tmpdir(), 'bws-final-acceptance-recovery-'));
+  const tempDirectory = mkdtempSync('/tmp/bws-final-acceptance-recovery-');
   try {
     const files = createRecoveryEvidenceFixture(tempDirectory, 'c'.repeat(64));
     const outputFile = join(tempDirectory, 'recovery-result.json');
@@ -224,7 +223,7 @@ test('final local acceptance recovery evidence requires successful, rollback, an
 });
 
 test('final local acceptance manifest binds stage results, soak evidence, and external preflight output', () => {
-  const tempDirectory = mkdtempSync(join(tmpdir(), 'bws-final-acceptance-finalize-'));
+  const tempDirectory = mkdtempSync('/tmp/bws-final-acceptance-finalize-');
   try {
     const releaseSemanticFingerprint = 'd'.repeat(64);
     const upstreamLockFingerprint = 'e'.repeat(64);
@@ -277,7 +276,7 @@ test('final local acceptance manifest binds stage results, soak evidence, and ex
 });
 
 test('final local acceptance manifest fails closed on release fingerprint mismatches', () => {
-  const tempDirectory = mkdtempSync(join(tmpdir(), 'bws-final-acceptance-finalize-blocked-'));
+  const tempDirectory = mkdtempSync('/tmp/bws-final-acceptance-finalize-blocked-');
   try {
     const stageOneFile = join(tempDirectory, 'stage1.json');
     const runtimeResultFile = join(tempDirectory, 'runtime.json');
@@ -329,7 +328,7 @@ async function getReleaseFixture(): Promise<ReleaseFixture> {
   }
   cachedReleaseFixture = (async () => {
     await ensureRuntimeCockpitBuild();
-    const outputDirectory = mkdtempSync(join(tmpdir(), 'bws-final-acceptance-release-'));
+    const outputDirectory = mkdtempSync('/tmp/bws-final-acceptance-release-');
     const result = await createBwsReleasePackage({
       outputDirectory,
       repositoryRoot: REPO_ROOT,
@@ -363,7 +362,7 @@ async function ensureRuntimeCockpitBuild(): Promise<void> {
 }
 
 function createFakePostgreSqlClient(version: string): string {
-  const fakeBinDirectory = mkdtempSync(join(tmpdir(), 'bws-final-acceptance-fake-bin-'));
+  const fakeBinDirectory = mkdtempSync('/tmp/bws-final-acceptance-fake-bin-');
   const fakePsqlPath = join(fakeBinDirectory, 'psql');
   writeFileSync(fakePsqlPath, `#!/usr/bin/env bash\nprintf 'psql (PostgreSQL) ${version}\\n'\n`, 'utf-8');
   chmodSync(fakePsqlPath, 0o755);

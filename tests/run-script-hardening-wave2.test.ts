@@ -2,7 +2,6 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { chmodSync, cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 const ROOT = process.cwd();
@@ -16,7 +15,7 @@ function shell(script: string, env: NodeJS.ProcessEnv = {}): string {
 }
 
 test('strict handoff parser rejects duplicate keys', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'surebet-handoff-duplicate-'));
+  const dir = mkdtempSync('/tmp/surebet-handoff-duplicate-');
   const file = join(dir, 'handoff.env');
   try {
     writeFileSync(file, 'HANDOVER_KIND=a\nHANDOVER_KIND=b\n', 'utf-8');
@@ -32,7 +31,7 @@ test('strict handoff parser rejects duplicate keys', () => {
 });
 
 test('semantic handoff fingerprint ignores volatile timestamps and run paths', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'surebet-handoff-fingerprint-'));
+  const dir = mkdtempSync('/tmp/surebet-handoff-fingerprint-');
   const first = join(dir, 'first.env');
   const second = join(dir, 'second.env');
   try {
@@ -83,7 +82,7 @@ function writeExecutable(path: string, content: string): void {
 }
 
 function makeStubRepo(noop: boolean): string {
-  const repo = mkdtempSync(join(tmpdir(), 'surebet-paper-autopilot-stub-'));
+  const repo = mkdtempSync('/tmp/surebet-paper-autopilot-stub-');
   mkdirSync(join(repo, '.automation', 'lib'), { recursive: true });
   mkdirSync(join(repo, 'artifacts'), { recursive: true });
   cpSync(join(ROOT, 'run-paper-autopilot.sh'), join(repo, 'run-paper-autopilot.sh'));
