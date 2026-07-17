@@ -50,3 +50,9 @@ All five root controllers initialize a distinct repository-owned temp session th
 Use `cleanup_automation_temp_inode_residue.sh` in dry-run mode first when recovering abandoned BWS-owned sessions. Generic `/tmp` purges are prohibited.
 
 - `docs/automation/api-only-upstream.md`: binding API-only betting-win transport contract.
+
+### Watchdog measurement-race hardening
+
+<!-- WATCHDOG_RACE_TOLERANCE_V2 -->
+
+The repository temp/inode guard accepts usable numeric `du` output from a transient non-zero traversal result, retries unusable measurements, and retains bounded fatal watchdog events outside the ephemeral controller session.

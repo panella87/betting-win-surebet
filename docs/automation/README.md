@@ -70,3 +70,9 @@ The operator maintenance command is `cleanup_automation_temp_inode_residue.sh`. 
 The BWS runtime consumes betting-win only through its accepted read-only API. `BWS_UPSTREAM_MODE` and the file-export runtime selector are removed. Missing API readiness is a runtime-evidence blocker; there is no automatic file fallback.
 
 - `docs/automation/api-only-upstream.md`: binding API-only betting-win transport contract.
+
+### Watchdog measurement-race hardening
+
+<!-- WATCHDOG_RACE_TOLERANCE_V2 -->
+
+The centralized temp/inode guard no longer treats a single `du` traversal race as a controller failure. Sustained unusable measurements and genuine capacity breaches remain fail-closed and exact-owner scoped.

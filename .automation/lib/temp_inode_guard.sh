@@ -89,6 +89,7 @@ automation_temp_inode_configure() {
   AUTOMATION_MAX_RUN_TEMP_INODES="${AUTOMATION_MAX_RUN_TEMP_INODES:-250000}"
   AUTOMATION_MAX_RUN_TEMP_KIB="${AUTOMATION_MAX_RUN_TEMP_KIB:-4194304}"
   AUTOMATION_CAPACITY_CHECK_INTERVAL_SECONDS="${AUTOMATION_CAPACITY_CHECK_INTERVAL_SECONDS:-15}"
+  AUTOMATION_TEMP_WATCHDOG_MAX_CONSECUTIVE_MEASUREMENT_FAILURES="${AUTOMATION_TEMP_WATCHDOG_MAX_CONSECUTIVE_MEASUREMENT_FAILURES:-20}"
   AUTOMATION_TEMP_USAGE_SCAN_TIMEOUT_SECONDS="${AUTOMATION_TEMP_USAGE_SCAN_TIMEOUT_SECONDS:-10}"
   AUTOMATION_TEMP_CLEANUP_TIMEOUT_SECONDS="${AUTOMATION_TEMP_CLEANUP_TIMEOUT_SECONDS:-120}"
 
@@ -101,14 +102,15 @@ automation_temp_inode_configure() {
   _automation_temp_require_uint AUTOMATION_MAX_RUN_TEMP_INODES "$AUTOMATION_MAX_RUN_TEMP_INODES" 100 2000000000 || return
   _automation_temp_require_uint AUTOMATION_MAX_RUN_TEMP_KIB "$AUTOMATION_MAX_RUN_TEMP_KIB" 1024 1099511627776 || return
   _automation_temp_require_uint AUTOMATION_CAPACITY_CHECK_INTERVAL_SECONDS "$AUTOMATION_CAPACITY_CHECK_INTERVAL_SECONDS" 1 3600 || return
+  _automation_temp_require_uint AUTOMATION_TEMP_WATCHDOG_MAX_CONSECUTIVE_MEASUREMENT_FAILURES "$AUTOMATION_TEMP_WATCHDOG_MAX_CONSECUTIVE_MEASUREMENT_FAILURES" 1 1000 || return
   _automation_temp_require_uint AUTOMATION_TEMP_USAGE_SCAN_TIMEOUT_SECONDS "$AUTOMATION_TEMP_USAGE_SCAN_TIMEOUT_SECONDS" 1 600 || return
   _automation_temp_require_uint AUTOMATION_TEMP_CLEANUP_TIMEOUT_SECONDS "$AUTOMATION_TEMP_CLEANUP_TIMEOUT_SECONDS" 1 3600 || return
 
   export AUTOMATION_TEMP_INODE_SAFETY_ENABLED AUTOMATION_TEMP_ROOT_RELATIVE
   export AUTOMATION_TEMP_STALE_SECONDS AUTOMATION_MIN_FREE_INODES AUTOMATION_MIN_FREE_INODE_PERCENT
   export AUTOMATION_MIN_FREE_KIB AUTOMATION_MAX_RUN_TEMP_INODES AUTOMATION_MAX_RUN_TEMP_KIB
-  export AUTOMATION_CAPACITY_CHECK_INTERVAL_SECONDS AUTOMATION_TEMP_USAGE_SCAN_TIMEOUT_SECONDS
-  export AUTOMATION_TEMP_CLEANUP_TIMEOUT_SECONDS
+  export AUTOMATION_CAPACITY_CHECK_INTERVAL_SECONDS AUTOMATION_TEMP_WATCHDOG_MAX_CONSECUTIVE_MEASUREMENT_FAILURES
+  export AUTOMATION_TEMP_USAGE_SCAN_TIMEOUT_SECONDS AUTOMATION_TEMP_CLEANUP_TIMEOUT_SECONDS
 }
 
 _automation_temp_prepare_base() {
@@ -283,24 +285,30 @@ automation_temp_inode_check_capacity() {
     else
       rc=$?
     fi
-    if [[ "$rc" != 0 ]]; then
-      _automation_temp_error "AUTOMATION_TEMP_USAGE_SCAN_BLOCKED context=$context mode=inodes exit=$rc"
+    session_inodes="${usage%%[[:space:]]*}"
+    if [[ "$session_inodes" =~ ^[0-9]+$ ]]; then
+      if [[ "$rc" != 0 ]]; then
+        _automation_temp_log "usage_scan_race_tolerated context=$context mode=inodes exit=$rc value=$session_inodes"
+      fi
+    else
+      _automation_temp_error "AUTOMATION_TEMP_USAGE_SCAN_BLOCKED context=$context mode=inodes exit=$rc reason=no_usable_numeric_output"
       return 44
     fi
-    session_inodes="${usage%%[[:space:]]*}"
-    [[ "$session_inodes" =~ ^[0-9]+$ ]] || { _automation_temp_error 'inode usage scan returned malformed output'; return 44; }
     if usage="$(timeout --signal=TERM --kill-after=2s "${AUTOMATION_TEMP_USAGE_SCAN_TIMEOUT_SECONDS}s" \
       du -skx -- "$AUTOMATION_TEMP_SESSION_ROOT" 2>/dev/null)"; then
       rc=0
     else
       rc=$?
     fi
-    if [[ "$rc" != 0 ]]; then
-      _automation_temp_error "AUTOMATION_TEMP_USAGE_SCAN_BLOCKED context=$context mode=kib exit=$rc"
+    session_kib="${usage%%[[:space:]]*}"
+    if [[ "$session_kib" =~ ^[0-9]+$ ]]; then
+      if [[ "$rc" != 0 ]]; then
+        _automation_temp_log "usage_scan_race_tolerated context=$context mode=kib exit=$rc value=$session_kib"
+      fi
+    else
+      _automation_temp_error "AUTOMATION_TEMP_USAGE_SCAN_BLOCKED context=$context mode=kib exit=$rc reason=no_usable_numeric_output"
       return 44
     fi
-    session_kib="${usage%%[[:space:]]*}"
-    [[ "$session_kib" =~ ^[0-9]+$ ]] || { _automation_temp_error 'space usage scan returned malformed output'; return 44; }
     if (( session_inodes > AUTOMATION_MAX_RUN_TEMP_INODES )); then
       _automation_temp_error "AUTOMATION_TEMP_RUN_INODE_BUDGET_EXCEEDED context=$context session_inodes=$session_inodes limit=$AUTOMATION_MAX_RUN_TEMP_INODES"
       return 45
@@ -371,31 +379,117 @@ automation_temp_inode_recover_stale() {
   return "$rc"
 }
 
+_automation_temp_watchdog_event_directory_is_safe() {
+  local directory="${1:?directory required}" real parent
+  [[ -n "${AUTOMATION_TEMP_REPO_REALPATH:-}" && -d "$AUTOMATION_TEMP_REPO_REALPATH" ]] || return 1
+  mkdir -p -- "$directory" 2>/dev/null || return 1
+  [[ -d "$directory" && ! -L "$directory" ]] || return 1
+  real="$(realpath -e -- "$directory" 2>/dev/null)" || return 1
+  case "$real/" in
+    "$AUTOMATION_TEMP_REPO_REALPATH"/*/) ;;
+    *) return 1 ;;
+  esac
+  parent="$(dirname -- "$real")"
+  [[ "$parent" != / && "$real" != "$AUTOMATION_TEMP_REPO_REALPATH" ]] || return 1
+  printf '%s\n' "$real"
+}
+
+_automation_temp_prune_watchdog_events() {
+  local directory="${1:?directory required}" record count=0
+  [[ -d "$directory" && ! -L "$directory" ]] || return 0
+  while IFS= read -r record; do
+    [[ -n "$record" ]] || continue
+    count=$((count + 1))
+    if (( count > 20 )); then
+      case "$record" in
+        "$directory"/watchdog-event-*.env) rm -f -- "$record" 2>/dev/null || true ;;
+      esac
+    fi
+  done < <(
+    find -P "$directory" -mindepth 1 -maxdepth 1 -type f -name 'watchdog-event-*.env' \
+      -printf '%T@ %p\n' 2>/dev/null | sort -nr | sed 's/^[^ ]* //'
+  )
+}
+
+_automation_temp_persist_watchdog_event() {
+  local owner_pid="${1:?owner pid required}" owner_start="${2:?owner start required}" boot_id="${3:?boot id required}"
+  local session="${4:?session required}" reason="${5:?reason required}" check_rc="${6:?check rc required}" failure_streak="${7:-0}"
+  local directory safe_directory now stamp basename tmp final
+  now="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  stamp="$(date -u +%Y%m%dT%H%M%SZ)"
+  basename="watchdog-event-${stamp}-${owner_pid}-$$.env"
+  for directory in \
+    "$AUTOMATION_TEMP_BASE/watchdog-events" \
+    "$AUTOMATION_TEMP_REPO_REALPATH/artifacts/temp_inode_watchdog_events"; do
+    safe_directory="$(_automation_temp_watchdog_event_directory_is_safe "$directory" 2>/dev/null)" || continue
+    tmp="$safe_directory/.${basename}.tmp.$RANDOM"
+    final="$safe_directory/$basename"
+    umask 077
+    if {
+      printf 'schema_version=2\n'
+      printf 'detected_at=%s\n' "$now"
+      printf 'repository_realpath=%s\n' "$AUTOMATION_TEMP_REPO_REALPATH"
+      printf 'session_root=%s\n' "$session"
+      printf 'owner_pid=%s\n' "$owner_pid"
+      printf 'owner_start_ticks=%s\n' "$owner_start"
+      printf 'boot_id=%s\n' "$boot_id"
+      printf 'reason=%s\n' "$reason"
+      printf 'exit_code=%s\n' "$check_rc"
+      printf 'consecutive_measurement_failures=%s\n' "$failure_streak"
+      printf 'action=term_exact_owner_only\n'
+    } > "$tmp" 2>/dev/null; then
+      chmod 0600 "$tmp" 2>/dev/null || true
+      mv -f -- "$tmp" "$final" 2>/dev/null || rm -f -- "$tmp" 2>/dev/null || true
+    else
+      rm -f -- "$tmp" 2>/dev/null || true
+    fi
+    _automation_temp_prune_watchdog_events "$safe_directory"
+  done
+}
+
 _automation_temp_watchdog_loop() {
   local owner_pid="${1:?owner pid required}" owner_start="${2:?owner start required}" boot_id="${3:?boot id required}"
   local session="${4:?session required}" controller="${5:?controller required}" created_epoch="${6:?created epoch required}" created_iso="${7:?created iso required}"
-  local breach_file="$session/capacity-breach.env" check_rc
+  local breach_file="$session/capacity-breach.env" check_rc measurement_failure_streak=0 reason
   set +Eeuo pipefail
   trap '' HUP
   while _automation_temp_exact_owner_alive "$owner_pid" "$owner_start" "$boot_id"; do
     _automation_temp_update_heartbeat "$session" "$controller" "$owner_pid" "$owner_start" "$boot_id" "$created_epoch" "$created_iso" || true
     automation_temp_inode_check_capacity watchdog
     check_rc=$?
-    if [[ "$check_rc" != 0 ]]; then
-      {
-        printf 'schema_version=1\n'
-        printf 'reason=capacity_check_failed\n'
-        printf 'exit_code=%s\n' "$check_rc"
-        printf 'detected_at=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-        printf 'owner_pid=%s\n' "$owner_pid"
-      } > "$breach_file"
-      chmod 0600 "$breach_file" 2>/dev/null || true
-      if _automation_temp_exact_owner_alive "$owner_pid" "$owner_start" "$boot_id"; then
-        kill -TERM "$owner_pid" 2>/dev/null || true
+    if [[ "$check_rc" == 44 ]]; then
+      measurement_failure_streak=$((measurement_failure_streak + 1))
+      _automation_temp_log "watchdog_measurement_retry consecutive_failures=$measurement_failure_streak max_failures=$AUTOMATION_TEMP_WATCHDOG_MAX_CONSECUTIVE_MEASUREMENT_FAILURES"
+      if (( measurement_failure_streak < AUTOMATION_TEMP_WATCHDOG_MAX_CONSECUTIVE_MEASUREMENT_FAILURES )); then
+        sleep "$AUTOMATION_CAPACITY_CHECK_INTERVAL_SECONDS"
+        continue
       fi
-      break
+      reason=measurement_unavailable
+    elif [[ "$check_rc" != 0 ]]; then
+      measurement_failure_streak=0
+      reason=capacity_check_failed
+    else
+      measurement_failure_streak=0
+      sleep "$AUTOMATION_CAPACITY_CHECK_INTERVAL_SECONDS"
+      continue
     fi
-    sleep "$AUTOMATION_CAPACITY_CHECK_INTERVAL_SECONDS"
+
+    {
+      printf 'schema_version=2\n'
+      printf 'reason=%s\n' "$reason"
+      printf 'exit_code=%s\n' "$check_rc"
+      printf 'consecutive_measurement_failures=%s\n' "$measurement_failure_streak"
+      printf 'detected_at=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+      printf 'owner_pid=%s\n' "$owner_pid"
+      printf 'action=term_exact_owner_only\n'
+    } > "$breach_file"
+    chmod 0600 "$breach_file" 2>/dev/null || true
+    _automation_temp_persist_watchdog_event \
+      "$owner_pid" "$owner_start" "$boot_id" "$session" "$reason" "$check_rc" "$measurement_failure_streak"
+    if _automation_temp_exact_owner_alive "$owner_pid" "$owner_start" "$boot_id"; then
+      kill -TERM "$owner_pid" 2>/dev/null || true
+    fi
+    break
   done
   if ! _automation_temp_exact_owner_alive "$owner_pid" "$owner_start" "$boot_id"; then
     _automation_temp_safe_remove_session "$session" dead_only >/dev/null 2>&1 || true

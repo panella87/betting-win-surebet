@@ -500,3 +500,9 @@
 - Fixed runtime convergence, scheduling, paper evaluation, release/recovery, soak, and external preflight to the betting-win read-only API.
 - Added API-only contract validation and repaired controller test sandboxes for the temp/inode guard.
 
+## 2026-07-17 - Watchdog measurement-race hardening
+
+- Accepted valid numeric session measurements even when concurrent file deletion makes `du` return non-zero.
+- Added bounded consecutive-failure handling for genuinely unusable measurements.
+- Preserved exact-owner `TERM` behavior for real capacity breaches and added bounded durable watchdog event evidence outside ephemeral temp sessions.
+- Added executable race and exact-owner regression coverage.

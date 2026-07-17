@@ -42,6 +42,7 @@ def main() -> None:
         'AUTOMATION_MIN_FREE_KIB',
         'AUTOMATION_MAX_RUN_TEMP_INODES',
         'AUTOMATION_CAPACITY_CHECK_INTERVAL_SECONDS',
+        'AUTOMATION_TEMP_WATCHDOG_MAX_CONSECUTIVE_MEASUREMENT_FAILURES',
         'AUTOMATION_TEMP_USAGE_SCAN_TIMEOUT_SECONDS',
         'AUTOMATION_TEMP_CLEANUP_TIMEOUT_SECONDS',
         'repository_id=',
@@ -59,6 +60,10 @@ def main() -> None:
         'kill -TERM "$owner_pid"',
         'rm -rf --one-file-system -- "$path"',
         'automation_temp_inode_recover_stale',
+        'usage_scan_race_tolerated',
+        'watchdog_measurement_retry',
+        'term_exact_owner_only',
+        'watchdog-events',
         'automation_temp_inode_bootstrap',
     ]
     require_markers('.automation/lib/temp_inode_guard.sh', guard_markers)

@@ -176,3 +176,13 @@ npm run validate:temp-inode-safety
 npm run build
 node --test --test-concurrency=1 dist/tests/temp-inode-safety.test.js dist/tests/bws-paper-runtime-evidence.test.js
 ```
+
+## Watchdog measurement-race handling
+
+<!-- WATCHDOG_RACE_TOLERANCE_V2 -->
+
+Repository tests may create and remove files while the temp watchdog measures a controller session. GNU `du` can return a non-zero status when a traversed file disappears while still returning a valid numeric total. The guard accepts that numeric total and records `usage_scan_race_tolerated` rather than terminating a healthy controller.
+
+A sample with no usable numeric result is retried. The exact owner is terminated only after `AUTOMATION_TEMP_WATCHDOG_MAX_CONSECUTIVE_MEASUREMENT_FAILURES` consecutive unusable samples, or immediately for a genuine inode, free-space, session-inode, or session-space threshold breach.
+
+Fatal decisions are published atomically to bounded `watchdog-events` directories under the managed temp base and `artifacts/temp_inode_watchdog_events/`. These diagnostics survive deletion of the ephemeral session. The guard still sends only `TERM` to the marker-verified exact owner and never uses broad process matching or `KILL`.
