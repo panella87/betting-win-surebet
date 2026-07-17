@@ -1,9 +1,12 @@
 import { readFileSync } from 'node:fs';
+import { relative, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import {
   createBwsSoakCampaign,
   executeBwsSoakCampaign,
   parseBwsSoakFailureSchedule,
   recordBwsSoakCampaignCheckpoint,
+  runBwsSoakCampaignRuntime,
   validateBwsSoakCampaignExecution,
 } from '../operations/soak-campaign.js';
 
@@ -73,6 +76,35 @@ export async function runBwsSoakCampaignCli(
     return 0;
   }
 
+  if (command === 'run-runtime') {
+    const integrationModule = requireFlagValue(options, '--integration-module');
+    const manifestFile = requireFlagValue(options, '--manifest-file');
+    const resultFile = requireFlagValue(options, '--result-file');
+    const stateFile = requireFlagValue(options, '--state-file');
+    const integration = await loadSoakRuntimeIntegration(
+      integrationModule,
+      repositoryRoot,
+      Object.freeze({
+        manifestFile,
+        resultFile,
+        stateFile,
+      }),
+    );
+    const result = await runBwsSoakCampaignRuntime({
+      ...(options.has('--execute-until-cycle-number')
+        ? { executeUntilCycleNumber: parseIntegerFlagValue(options, '--execute-until-cycle-number') }
+        : {}),
+      ...(integration.lifecycleRequest === undefined ? {} : { lifecycleRequest: integration.lifecycleRequest }),
+      ...(integration.dependencies === undefined ? {} : { dependencies: integration.dependencies }),
+      manifestFile,
+      repositoryRoot,
+      resultFile,
+      stateFile,
+    });
+    stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+    return 0;
+  }
+
   if (command === 'validate') {
     const result = validateBwsSoakCampaignExecution({
       repositoryRoot,
@@ -88,15 +120,32 @@ export async function runBwsSoakCampaignCli(
 export function printBwsSoakCampaignHelp(stream: NodeJS.WriteStream = process.stdout): void {
   stream.write(
     [
-      'Usage: node dist/packages/bootstrap/src/cli/bws-soak-campaign.js <prepare|checkpoint|execute|validate> [options]',
+      'Usage: node dist/packages/bootstrap/src/cli/bws-soak-campaign.js <prepare|checkpoint|execute|run-runtime|validate> [options]',
       '',
       'Deterministic soak campaign manifest, execution, and validation tooling for the BWS-592 foundation tranche.',
       'prepare options: --manifest-output <path> --state-file <path> --checkpoint-dir <dir> --duration-ms <positive-integer> --interval-ms <positive-integer> --max-cycles <positive-integer> --seed <token> --upstream-mode <api|export> --release-fingerprint <sha256> --database-identity <token> --runtime-dir <dir> --evidence-dir <dir> --failure-schedule-file <path> [--upstream-lock-path <path>] [--resume]',
       'checkpoint options: --manifest-file <path> --state-file <path> --classification <name> --status <name> [--cycle-number <positive-integer>] [--details-file <path>]',
       'execute options: --manifest-file <path> --state-file <path> --result-file <path> --execute-until-cycle-number <positive-integer>',
+      'run-runtime options: --manifest-file <path> --state-file <path> --result-file <path> --integration-module <repo-local .mjs/.js> [--execute-until-cycle-number <positive-integer>]',
+      'built integration module example: dist/packages/bootstrap/src/operations/bws-soak-runtime-integration.js',
+      'integration module contract: export createSoakRuntimeIntegration(context) returning an object with optional lifecycleRequest and dependencies fields, including explicit executeFailure and verifyDatabaseCleanup hooks; repo-escaping modules are rejected',
       'validate options: --result-file <path>',
     ].join('\n'),
   );
+}
+
+interface SoakRuntimeIntegrationModuleShape {
+  readonly createSoakRuntimeIntegration?: (context: Readonly<{
+    readonly manifestFile?: string;
+    readonly repositoryRoot: string;
+    readonly resultFile?: string;
+    readonly stateFile?: string;
+  }>) => Promise<SoakRuntimeIntegrationShape> | SoakRuntimeIntegrationShape;
+}
+
+interface SoakRuntimeIntegrationShape {
+  readonly dependencies?: Readonly<Record<string, unknown>>;
+  readonly lifecycleRequest?: Readonly<Record<string, unknown>>;
 }
 
 function parseFlags(argv: readonly string[]): ReadonlyMap<string, string | true> {
@@ -172,6 +221,55 @@ function requireFlagValue(flags: ReadonlyMap<string, string | true>, flag: strin
     throw new Error(`Missing required ${flag} value.`);
   }
   return value;
+}
+
+async function loadSoakRuntimeIntegration(
+  modulePath: string,
+  repositoryRoot: string,
+  contextPaths: Readonly<{
+    readonly manifestFile: string;
+    readonly resultFile: string;
+    readonly stateFile: string;
+  }>,
+): Promise<SoakRuntimeIntegrationShape> {
+  const resolvedModulePath = resolveRepositoryPath(repositoryRoot, modulePath);
+  const loaded = await import(pathToFileURL(resolvedModulePath).href) as SoakRuntimeIntegrationModuleShape;
+  if (typeof loaded.createSoakRuntimeIntegration !== 'function') {
+    throw new Error(
+      'The soak runtime integration module must export createSoakRuntimeIntegration(context).',
+    );
+  }
+  const integration = await loaded.createSoakRuntimeIntegration(
+    Object.freeze({
+      manifestFile: contextPaths.manifestFile,
+      repositoryRoot,
+      resultFile: contextPaths.resultFile,
+      stateFile: contextPaths.stateFile,
+    }),
+  );
+  if (integration === null || typeof integration !== 'object' || Array.isArray(integration)) {
+    throw new Error('createSoakRuntimeIntegration(context) must return a JSON-object-shaped integration descriptor.');
+  }
+  if (integration.dependencies !== undefined && !isRecord(integration.dependencies)) {
+    throw new Error('The soak runtime integration dependencies value must be an object when provided.');
+  }
+  if (integration.lifecycleRequest !== undefined && !isRecord(integration.lifecycleRequest)) {
+    throw new Error('The soak runtime integration lifecycleRequest value must be an object when provided.');
+  }
+  return integration;
+}
+
+function resolveRepositoryPath(repositoryRoot: string, inputPath: string): string {
+  const resolvedPath = resolve(repositoryRoot, inputPath);
+  const relativePath = relative(repositoryRoot, resolvedPath);
+  if (relativePath.length === 0 || relativePath === '.' || relativePath.startsWith('..')) {
+    throw new Error(`Resolved repository path escapes the repository root: ${inputPath}`);
+  }
+  return resolvedPath;
+}
+
+function isRecord(value: unknown): value is Readonly<Record<string, unknown>> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
 if (import.meta.url === new URL(process.argv[1] === undefined ? '' : process.argv[1], 'file:').href) {

@@ -15,7 +15,7 @@ backtesting_owner=betting-win-surebet
 paper_mode_owner=betting-win-surebet
 future_live_decision_owner=betting-win-surebet_after_explicit_gate
 account_policy=separate_from_betting-win-betting
-current_task=BWS-592
+current_task=BWS-599
 safe_local_terminal_gate=BWS-599
 external_runtime_gate=BWS-600
 execution_gate=closed
@@ -40,11 +40,11 @@ BWS must not connect directly to providers, write betting-win `core.*`, treat sn
 
 ## Validated foundation
 
-`BWS-100` through `BWS-590` are validated. The repository has the domain engine, `surebet.*` persistence, immutable intake, explicit export and API convergence passes, a long-running explicit-mode upstream convergence service, long-running scheduler and worker services, read-only API, React cockpit, managed loopback cockpit serving with explicit API-mode build verification, complete product-owned lifecycle ownership, product-owned database lifecycle operations, structured observability surfaces, loopback acceptance, strict runtime handoff packaging, deterministic release packaging and service-owned paper runtime-evidence collection.
+`BWS-100` through `BWS-593` are validated. The repository has the domain engine, `surebet.*` persistence, immutable intake, explicit export and API convergence passes, a long-running explicit-mode upstream convergence service, long-running scheduler and worker services, read-only API, React cockpit, managed loopback cockpit serving with explicit API-mode build verification, complete product-owned lifecycle ownership, product-owned database lifecycle operations, structured observability surfaces, loopback acceptance, strict runtime handoff packaging, deterministic release packaging, service-owned paper runtime-evidence collection, managed-runtime soak/failure proof, and exact-mode external runtime preflight.
 
 Validated executable and integration composition remains under `packages/bootstrap`; the remaining queue extends that package surface rather than replacing it.
 
-That is not the final operator service. The current source now has long-running explicit-mode upstream convergence, long-running scheduler and worker services, managed loopback cockpit serving, a full product-owned lifecycle owner, integrated root lifecycle/progress/log wrappers, product runtime evidence surfaces, service-owned paper runtime-evidence mode, runtime-evidence paper autopilot inside the owned lifecycle, and exact-version upgrade/rollback/recovery proof. The remaining gaps are soak, external preflight and final clean-room acceptance.
+The safe local operator service boundary is complete. The current source now has long-running explicit-mode upstream convergence, long-running scheduler and worker services, managed loopback cockpit serving, a full product-owned lifecycle owner, integrated root lifecycle/progress/log wrappers, product runtime evidence surfaces, service-owned paper runtime-evidence mode, runtime-evidence paper autopilot inside the owned lifecycle, exact-version upgrade/rollback/recovery proof, deterministic soak/failure evidence, external-runtime preflight, and final clean-room acceptance. The next gate is `BWS-600` external accepted-runtime evidence.
 
 ## Remaining safe local program
 
@@ -57,9 +57,9 @@ BWS-588  service-owned paper evaluation (validated)
 BWS-589  runtime-evidence paper autopilot (validated)
 BWS-590  release and deployment packaging (validated)
 BWS-591  upgrade, rollback and recovery proof (validated)
-BWS-592  long-running soak and failure injection
-BWS-593  external-runtime preflight and campaign manifest
-BWS-599  integrated final local acceptance
+BWS-592  long-running soak and failure injection (validated)
+BWS-593  external-runtime preflight and campaign manifest (validated)
+BWS-599  integrated final local acceptance (validated)
 BWS-600  accepted operator-approved runtime evidence
 BWS-900  separately authorized execution
 ```

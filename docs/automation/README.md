@@ -2,15 +2,15 @@
 
 ```text
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-current_task=BWS-592
-current_task_status=PENDING
+current_task=BWS-599
+current_task_status=VALIDATED
 selected_controller=run-autonomous-implementation.sh
 safe_local_terminal_gate=BWS-599
 ```
 
 `BWS-100` through `BWS-589` are validated carry-forward foundations. The runtime has full product lifecycle ownership, database lifecycle, observability, root wrappers, service-owned paper evaluation and runtime-evidence paper autopilot.
 
-The remaining queue is soak, external preflight and final clean-room acceptance through `BWS-599`. Detailed contracts are `docs/039` through `docs/046`; the dependency-ordered subtask map is `backlog/bws_remaining_safe_local_map.csv`.
+The remaining queue is the final clean-room acceptance through `BWS-599`. `BWS-592` soak/failure injection and `BWS-593` external preflight are now validated carry-forward surfaces. Detailed contracts are `docs/039` through `docs/046`; the dependency-ordered subtask map is `backlog/bws_remaining_safe_local_map.csv`.
 
 `BETTING_WIN_REPO_PATH` remains a read-only pointer to the existing betting-win checkout. BWS reads committed `HEAD` through Git objects and must not clone, clean, reset or modify that checkout.
 

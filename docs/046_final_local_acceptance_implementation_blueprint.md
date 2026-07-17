@@ -3,7 +3,7 @@
 ```text
 parent_task=BWS-599
 cohesive_tranche=final_acceptance
-status=WAITING_FOR_BWS_593
+status=READY_FOR_BWS_599
 safe_local_terminal_gate=BWS-599
 ```
 

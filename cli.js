@@ -12,10 +12,13 @@ const READ_ONLY_API_DIST_ENTRY = 'dist/packages/bootstrap/src/cli/bws-read-only-
 const PRIVATE_PAPER_WORKER_DIST_ENTRY = 'dist/packages/bootstrap/src/cli/bws-private-paper-worker.js';
 const OPERATOR_LIFECYCLE_DIST_ENTRY = 'dist/packages/bootstrap/src/cli/bws-operator-lifecycle.js';
 const PAPER_RUNTIME_HANDOFF_DIST_ENTRY = 'dist/packages/bootstrap/src/cli/bws-paper-runtime-handoff.js';
+const SOAK_CAMPAIGN_DIST_ENTRY = 'dist/packages/bootstrap/src/cli/bws-soak-campaign.js';
+const EXTERNAL_RUNTIME_PREFLIGHT_DIST_ENTRY = 'dist/packages/bootstrap/src/cli/bws-external-runtime-preflight.js';
+const FINAL_LOCAL_ACCEPTANCE_DIST_ENTRY = 'dist/packages/bootstrap/src/cli/bws-final-local-acceptance.js';
 
 function printHelp() {
   process.stdout.write(
-    `betting-win-surebet CLI\n\nCommands:\n  help                Show this help\n  status              Print current repository status\n  validate            Run npm run validate\n  local-report        Validate a repo-local export bundle and write a private report under artifacts/\n  local-report-batch  Validate a repo-local directory of pinned bundles and write private reports plus a private batch summary under artifacts/\n  runtime-upstream-api     Build and run one bounded BWS read-only upstream API convergence pass\n  runtime-upstream-export  Build and run one bounded BWS immutable upstream export convergence pass\n  runtime-scheduler   Build and run one bounded BWS private-paper scheduler pass\n  runtime-api         Build and start the loopback-only BWS read-only API\n  runtime-worker      Build and run one bounded BWS private-paper worker pass\n  runtime-start       Build and start the repo-owned BWS read-only API lifecycle process\n  runtime-status      Build and print machine-readable BWS lifecycle status and evidence\n  runtime-stop        Build and stop the repo-owned BWS read-only API lifecycle process\n  runtime-handoff     Build and print a machine-readable BWS private-paper runtime handoff plus immutable source archive\n`,
+    `betting-win-surebet CLI\n\nCommands:\n  help                     Show this help\n  status                   Print current repository status\n  validate                 Run npm run validate\n  local-report             Validate a repo-local export bundle and write a private report under artifacts/\n  local-report-batch       Validate a repo-local directory of pinned bundles and write private reports plus a private batch summary under artifacts/\n  runtime-upstream-api     Build and run one bounded BWS read-only upstream API convergence pass\n  runtime-upstream-export  Build and run one bounded BWS immutable upstream export convergence pass\n  runtime-scheduler        Build and run one bounded BWS private-paper scheduler pass\n  runtime-api              Build and start the loopback-only BWS read-only API\n  runtime-worker           Build and run one bounded BWS private-paper worker pass\n  runtime-start            Build and start the repo-owned full BWS stack lifecycle\n  runtime-status           Build and print machine-readable full-stack BWS lifecycle status and evidence\n  runtime-stop             Build and stop the repo-owned full BWS stack lifecycle\n  runtime-handoff          Build and print a machine-readable BWS private-paper runtime handoff plus immutable source archive\n  soak-campaign            Build and run the BWS-592 soak campaign CLI\n  external-runtime-preflight  Build and run the BWS-593 external runtime preflight CLI\n  final-local-acceptance   Build and run the staged BWS-599 final local acceptance CLI\n`,
   );
 }
 
@@ -76,6 +79,18 @@ if (command === 'runtime-stop') {
 
 if (command === 'runtime-handoff') {
   runBuiltEntry(PAPER_RUNTIME_HANDOFF_DIST_ENTRY, process.argv.slice(3));
+}
+
+if (command === 'soak-campaign') {
+  runBuiltEntry(SOAK_CAMPAIGN_DIST_ENTRY, process.argv.slice(3));
+}
+
+if (command === 'external-runtime-preflight') {
+  runBuiltEntry(EXTERNAL_RUNTIME_PREFLIGHT_DIST_ENTRY, process.argv.slice(3));
+}
+
+if (command === 'final-local-acceptance') {
+  runBuiltEntry(FINAL_LOCAL_ACCEPTANCE_DIST_ENTRY, process.argv.slice(3));
 }
 
 function runBuiltEntry(entryPoint, argv) {

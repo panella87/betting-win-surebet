@@ -10,7 +10,7 @@ const read = (rel: string): string => readFileSync(join(ROOT, rel), 'utf-8');
 test('remaining operator runtime program documents every safe local stage through BWS-599', () => {
   const program = read('docs/034_remaining_operator_runtime_implementation_program.md');
   for (const marker of [
-    'current_task=BWS-592', 'safe_local_terminal_gate=BWS-599',
+    'current_task=BWS-599', 'safe_local_terminal_gate=BWS-599',
     'paper evaluation=runtime_evidence_mode_validated',
     'backlog/bws_remaining_safe_local_map.csv',
     'BWS-581', 'BWS-589', 'BWS-590', 'BWS-593', 'BWS-599',

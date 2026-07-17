@@ -2,7 +2,7 @@
 
 ```text
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-current_task=BWS-592
+current_task=BWS-599
 safe_local_terminal_gate=BWS-599
 external_runtime_gate=BWS-600
 execution_gate=BWS-900
@@ -10,13 +10,11 @@ execution_gate=BWS-900
 
 Objective: implement every safe local component required for a private operator-runnable continuous private-paper and surebet backtest application on betting-win.
 
-`BWS-100` through `BWS-591` are validated foundations. `BWS-580` closed the integrated bounded runtime handoff, `BWS-581` through `BWS-589` closed the continuous service, lifecycle, operations and paper-automation layers, `BWS-590` closed deterministic private release packaging, and `BWS-591` closed exact-version upgrade, rollback and disaster-recovery proof. They include exact upstream pinning, the validated workspace migration, domain and persistence layers, immutable export and typed API intake, long-running convergence, scheduler and worker services, read-only API and cockpit, complete product lifecycle, database lifecycle, observability, root wrappers, service-owned paper evaluation, runtime-evidence paper autopilot, deterministic release/install verification and checkpointed upgrade/recovery evidence.
+`BWS-100` through `BWS-593` are validated foundations. `BWS-580` closed the integrated bounded runtime handoff, `BWS-581` through `BWS-589` closed the continuous service, lifecycle, operations and paper-automation layers, `BWS-590` closed deterministic private release packaging, `BWS-591` closed exact-version upgrade, rollback and disaster-recovery proof, `BWS-592` closed deterministic managed-runtime soak plus bounded failure injection, and `BWS-593` closed exact-mode external runtime preflight and campaign-manifest generation. They include exact upstream pinning, the validated workspace migration, domain and persistence layers, immutable export and typed API intake, long-running convergence, scheduler and worker services, read-only API and cockpit, complete product lifecycle, database lifecycle, observability, root wrappers, service-owned paper evaluation, runtime-evidence paper autopilot, deterministic release/install verification, checkpointed upgrade/recovery evidence, managed-runtime soak evidence and external-runtime campaign preparation.
 
 The remaining program is:
 
 ```text
-BWS-592  retained multi-hour soak and bounded failure injection
-BWS-593  accepted-runtime preflight and campaign manifest
 BWS-599  integrated clean-room final local acceptance
 ```
 

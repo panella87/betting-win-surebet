@@ -8,7 +8,7 @@ const ROOT = process.cwd();
 const read = (rel: string): string => readFileSync(join(ROOT, rel), 'utf-8');
 const esc = (value: string): RegExp => new RegExp(value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
 
-test('full implementation ledger keeps BWS-580 validated and opens the remaining safe-local queue through BWS-599', () => {
+test('full implementation ledger keeps BWS-580 validated and records BWS-599 as the closed safe-local terminal gate', () => {
   const ledger = read('backlog/bws_full_implementation.csv');
   const task = read('docs/automation/current-implementation-task.md');
   const status = read('docs/repo_status_current.md');
@@ -20,21 +20,21 @@ test('full implementation ledger keeps BWS-580 validated and opens the remaining
     'BWS-583,VALIDATED', 'BWS-584,VALIDATED', 'BWS-585,VALIDATED',
     'BWS-586,VALIDATED', 'BWS-587,VALIDATED', 'BWS-588,VALIDATED',
     'BWS-589,VALIDATED', 'BWS-590,VALIDATED', 'BWS-591,VALIDATED',
-    'BWS-592,PENDING', 'BWS-593,PENDING', 'BWS-599,PENDING',
+    'BWS-592,VALIDATED', 'BWS-593,VALIDATED', 'BWS-599,VALIDATED',
     'BWS-600,BLOCKED', 'BWS-900,PARKED',
   ]) {
     assert.match(ledger, esc(marker));
   }
   assert.match(task, /program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1/);
-  assert.match(task, /current_task=BWS-592/);
-  assert.match(task, /current_task_status=PENDING/);
+  assert.match(task, /current_task=BWS-599/);
+  assert.match(task, /current_task_status=VALIDATED/);
   assert.match(task, /safe_local_terminal_gate=BWS-599/);
   assert.match(task, /automation_maintenance_allowed=no/);
   assert.match(task, /allowed_protected_files=none/);
   assert.match(task, /backlog\/bws_remaining_safe_local_map\.csv/);
   assert.match(task, /AUTONOMOUS_GOAL_COMPLETE=yes/);
   assert.match(status, /selected_controller=run-autonomous-implementation\.sh/);
-  assert.match(status, /paper_autopilot=runtime_evidence_parent_validated_pending_bws_599/);
+  assert.match(status, /paper_autopilot=runtime_evidence_parent_validated_ready_for_bws_600/);
 });
 
 test('full implementation program validator passes the repository contract', () => {

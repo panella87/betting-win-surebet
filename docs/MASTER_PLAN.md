@@ -8,7 +8,7 @@ Build the complete private surebet application on top of the read-only betting-w
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 repo_role=surebet_strategy_application
 upstream_platform=betting-win
-current_task=BWS-592
+current_task=BWS-599
 safe_local_terminal_gate=BWS-599
 continuous_runtime_gate=BWS-600
 execution_gate=BWS-900
@@ -52,6 +52,11 @@ Primary phases:
 11. `BWS-599`: integrated final local operator/runtime/automation/recovery acceptance.
 12. `BWS-600`: validation against an accepted operator-approved betting-win runtime, externally gated.
 13. `BWS-900`: real-money execution, parked pending separate authorization.
+
+Latest validated carry-forward tranche:
+
+- `BWS-592`: deterministic managed-runtime soak and bounded failure injection.
+- `BWS-593`: exact-mode external runtime preflight and campaign-manifest generation.
 
 ## Continuation
 

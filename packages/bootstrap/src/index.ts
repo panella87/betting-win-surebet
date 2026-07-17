@@ -15,6 +15,10 @@ export {
   runBwsExternalRuntimePreflightCli,
 } from './cli/bws-external-runtime-preflight.js';
 export {
+  printBwsFinalLocalAcceptanceHelp,
+  runBwsFinalLocalAcceptanceCli,
+} from './cli/bws-final-local-acceptance.js';
+export {
   printBwsReleasePackagingHelp,
   runBwsReleasePackagingCli,
 } from './cli/bws-release-packaging.js';
@@ -103,6 +107,7 @@ export * from './operations/service-runtime.js';
 export * from './operations/observability.js';
 export * from './operations/database-lifecycle.js';
 export * from './operations/external-runtime-preflight.js';
+export * from './operations/final-local-acceptance.js';
 export * from './operations/release-packaging.js';
 export * from './operations/release-upgrade.js';
 export * from './operations/soak-campaign.js';

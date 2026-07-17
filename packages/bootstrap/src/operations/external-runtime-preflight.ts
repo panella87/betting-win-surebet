@@ -86,7 +86,7 @@ interface DatabaseRestoreVerificationShape extends Pick<BwsVerifyDatabaseRestore
 
 interface SoakManifestShape extends Pick<BwsSoakCampaignManifest, 'campaignId' | 'closedBoundary' | 'observation' | 'release' | 'resumeGuard' | 'schema' | 'semanticFingerprint' | 'upstream'> {}
 
-interface SoakStateShape extends Pick<BwsSoakCampaignState, 'campaignSemanticFingerprint' | 'completedCycleCount' | 'currentCheckpointSequence' | 'lastCheckpointFile' | 'schema'> {}
+interface SoakStateShape extends Pick<BwsSoakCampaignState, 'campaignSemanticFingerprint' | 'completedCycleCount' | 'currentCheckpointSequence' | 'lastCheckpointFile' | 'runtimeEvidence' | 'schema'> {}
 
 interface SoakCheckpointShape {
   readonly classification: 'campaign_completed' | 'cleanup_verified' | 'cycle_observed' | 'failure_injected' | 'recovery_verified' | 'campaign_initialized' | 'campaign_resumed';
@@ -595,6 +595,24 @@ function validateSoakEvidence(
   }
   if (!soakObservationBudgetSatisfied(soakManifest, soakState)) {
     throw new Error('External runtime preflight requires soak evidence that satisfies the retained duration budget.');
+  }
+  if (soakState.runtimeEvidence === undefined) {
+    throw new Error('External runtime preflight requires soak evidence with retained managed runtime wall-clock proof.');
+  }
+  if (soakState.runtimeEvidence.runner !== 'managed_runtime') {
+    throw new Error('External runtime preflight requires soak runtime evidence produced by the managed runtime runner.');
+  }
+  if (soakState.runtimeEvidence.requiredDurationMs !== soakManifest.observation.durationMs) {
+    throw new Error('External runtime preflight requires soak runtime evidence bound to the same observation duration.');
+  }
+  if (soakState.runtimeEvidence.completedAt === undefined) {
+    throw new Error('External runtime preflight requires soak runtime evidence with a completedAt timestamp.');
+  }
+  if (soakState.runtimeEvidence.elapsedWallClockMs < CANONICAL_SOAK_DURATION_MS) {
+    throw new Error('External runtime preflight requires soak runtime evidence with at least two hours of wall-clock elapsed time.');
+  }
+  if (soakState.runtimeEvidence.observationCount < soakState.completedCycleCount) {
+    throw new Error('External runtime preflight requires soak runtime evidence observationCount to cover the completed campaign cycles.');
   }
   const lastCheckpoint = readSoakCheckpointFile(repositoryRoot, soakState.lastCheckpointFile);
   if (lastCheckpoint.classification !== 'cleanup_verified' || lastCheckpoint.status !== 'completed') {

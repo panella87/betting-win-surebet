@@ -302,7 +302,7 @@ test('status docs record the hardened controller surface', () => {
   assertContains(status, 'run_bugfix_autopilot=standardized_parent_for_broad_audit_and_repair');
   assertContains(status, 'run_paper_evaluation=fixture_and_runtime_evidence_validated_bws_588');
   assertContains(status, 'run_paper_evaluation=fixture_and_runtime_evidence_validated_bws_588');
-  assertContains(status, 'run_paper_autopilot=runtime_evidence_parent_validated_bws_589_pending_bws_599');
+  assertContains(status, 'run_paper_autopilot=runtime_evidence_parent_validated_bws_589_ready_for_bws_600');
 });
 
 test('obsolete stop and paper-12h helpers are not present', () => {

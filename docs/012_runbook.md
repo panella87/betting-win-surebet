@@ -4,7 +4,7 @@
 
 ```text
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-current_task=BWS-592
+current_task=BWS-599
 safe_local_terminal_gate=BWS-599
 selected_controller=run-autonomous-implementation.sh
 ```

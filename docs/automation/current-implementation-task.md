@@ -4,23 +4,22 @@ Repository: `betting-win-surebet`.
 
 ```text
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-current_task=BWS-592
-current_task_status=PENDING
+current_task=BWS-599
+current_task_status=VALIDATED
 safe_local_terminal_gate=BWS-599
 external_runtime_gate=BWS-600
 ```
 
 ## Campaign objective
 
-Implement every remaining safe local component required for a real operator-runnable continuous private-paper BWS application. Use `backlog/bws_full_implementation.csv` as the binding dependency ledger and `backlog/bws_remaining_safe_local_map.csv` as the dependency-ordered implementation map.
+This file retains the validated completion record for the final safe local component required for a real operator-runnable continuous private-paper BWS application. Use `backlog/bws_full_implementation.csv` as the binding dependency ledger and `backlog/bws_remaining_safe_local_map.csv` as the dependency-ordered implementation map.
 
-Start with the first dependency-ready `PENDING` row, currently `BWS-592`, and continue across validated cycles through `BWS-599`. Do not stop after one bounded task while another dependency-ready safe row remains.
+`BWS-599` is validated. No dependency-ready safe local `PENDING` row remains through `BWS-599`.
 
 Prefer the largest safe cohesive tranche:
 
 ```text
-tranche_1=BWS-592_then_BWS-593_soak_and_external_preflight
-tranche_2=BWS-599_final_clean_room_acceptance
+tranche_1=BWS-599_final_clean_room_acceptance
 ```
 
 Each binding ledger row must still be validated separately. Do not merge unrelated work or mark a dependent row complete before its own proof passes.
@@ -48,43 +47,40 @@ The validated service, database, observability, wrapper and paper-controller con
 
 ## Verified carry-forward state
 
-`BWS-100` through `BWS-591` are validated. Preserve their contracts. Do not reimplement or weaken validated functionality merely to create work.
+`BWS-100` through `BWS-593` are validated. Preserve their contracts. Do not reimplement or weaken validated functionality merely to create work.
 
 The `BWS-589` runtime-evidence paper-autopilot change required a reviewed protected update to `run-autonomous-implementation.sh` so selected mode and campaign identity survive implementation return handoffs. That source is now accepted carry-forward baseline. The protected integration phase is closed.
 
 Carry-forward upstream proof must prove the betting-win committed HEAD remains unchanged during lock verification, retain no placeholder fields, and use no clone or temporary worktree.
 
-The remaining concrete gaps are:
+The previously remaining concrete gap is now closed:
 
 ```text
-no retained multi-hour soak and bounded failure-injection campaign
-no accepted-runtime preflight and external campaign manifest
-no integrated clean-room final local acceptance
+integrated clean-room final local acceptance=validated
 ```
 
 ## First task
 
 ```text
-id=BWS-592
-objective=implement retained multi-hour soak and bounded failure-injection acceptance
-largest_safe_tranche=complete_BWS-592_soak_and_external_preflight_then_continue_to_BWS-593
+id=BWS-599
+objective=validated integrated clean-room final local acceptance
+largest_safe_tranche=complete_BWS-599_final_local_acceptance
 ```
 
 Required outcomes:
 
-- define deterministic soak campaign identities, checkpoints, resume guards and retained evidence;
-- exercise repeated loopback convergence, scheduler and worker activity for a real multi-hour bounded campaign;
-- inject bounded failures across upstream, database, scheduler, worker, API, cockpit, supervisor, backup and upgrade paths with exact ownership and cleanup;
-- retain immutable soak, failure-recovery and cleanup evidence without mutating unrelated services or persistent project databases;
+- create a clean release extraction and prove it installs, preflights and migrates without depending on the source checkout;
+- run the full stack, diagnostics, paper evaluation and bounded paper-autopilot acceptance against exact repo-owned loopback services;
+- verify backup, restore, upgrade, rollback decision and interrupted recovery paths against disposable acceptance-owned targets;
+- consume the validated `BWS-592` soak/failure evidence and `BWS-593` external preflight manifest inputs inside one final immutable acceptance manifest;
+- verify cleanup of acceptance-owned processes, databases, leases and temporary files without mutating unrelated services or persistent project databases;
 - preserve execution-disabled, provider-disabled, loopback-only and no-fallback boundaries;
 - update the task ledger only after complete proof and `npm run validate` pass.
 
 ## Full remaining sequence
 
 ```text
-BWS-592  multi-hour soak and failure injection
-BWS-593  external runtime preflight and campaign manifest
-BWS-599  integrated final local acceptance
+BWS-599  integrated final local acceptance (validated)
 ```
 
 ## Protected automation authorization
@@ -111,7 +107,7 @@ recommended_cycle_timeout=6h
 validation_timeout=45m
 ```
 
-The longer cycle timeout is required so `BWS-592` can retain a real two-hour soak proof with setup, recovery and cleanup inside one bounded cycle. Shorter tasks may finish earlier; the controller must continue to the next dependency-ready row.
+The `BWS-599` clean-room acceptance is validated. A successful completion cycle now reports `AUTONOMOUS_GOAL_COMPLETE=yes`.
 
 ## Process-test authorization
 

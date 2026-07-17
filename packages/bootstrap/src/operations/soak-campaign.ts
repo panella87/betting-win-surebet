@@ -8,6 +8,20 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
+import { setTimeout as sleepFor } from 'node:timers/promises';
+import {
+  collectBwsDiagnosticsBundle,
+  summarizeBwsEvidenceIndex,
+  type BwsDiagnosticsBundleResult,
+  type BwsEvidenceIndexSummary,
+} from './observability.js';
+import {
+  getManagedBwsOperatorStackStatus,
+  startManagedBwsOperatorStack,
+  stopManagedBwsOperatorStack,
+  type BwsLifecycleRequest,
+  type BwsOperatorLifecycleCommandResult,
+} from './operator-lifecycle.js';
 import { registerBwsEvidenceArtifact } from './observability.js';
 import { readBettingWinUpstreamLock } from '../../../upstream/src/index.js';
 
@@ -70,6 +84,143 @@ type SoakFailureTarget = (typeof SOAK_FAILURE_TARGETS)[number];
 type SoakFailureStage = (typeof SOAK_FAILURE_STAGES)[number];
 type SoakCheckpointClassification = (typeof SOAK_CHECKPOINT_CLASSIFICATIONS)[number];
 type SoakCheckpointStatus = (typeof SOAK_CHECKPOINT_STATUSES)[number];
+
+interface SoakFailureTargetDescriptor {
+  readonly cleanupScope: 'campaign_owned_artifacts' | 'campaign_owned_database' | 'campaign_owned_processes';
+  readonly component: 'api' | 'backup' | 'cockpit' | 'database' | 'evidence' | 'export' | 'scheduler' | 'supervisor' | 'upstream' | 'upgrade' | 'worker';
+  readonly expectedEffect: string;
+  readonly ownershipBoundary: 'campaign_owned_only';
+  readonly recoveryEvidence: string;
+}
+
+const SOAK_FAILURE_TARGET_DESCRIPTORS: Readonly<Record<SoakFailureTarget, SoakFailureTargetDescriptor>> = Object.freeze({
+  api_crash_and_restart: Object.freeze({
+    cleanupScope: 'campaign_owned_processes',
+    component: 'api',
+    expectedEffect: 'loopback_api_listener_restarts_without_exposing_a_public_bind',
+    ownershipBoundary: 'campaign_owned_only',
+    recoveryEvidence: 'readiness_probe_recovers_after_repo_owned_api_restart',
+  }),
+  api_malformed_response: Object.freeze({
+    cleanupScope: 'campaign_owned_processes',
+    component: 'upstream',
+    expectedEffect: 'loopback_upstream_contract_validation_rejects_malformed_payloads',
+    ownershipBoundary: 'campaign_owned_only',
+    recoveryEvidence: 'explicit_mode_continues_only_after_bounded_validation_recovery',
+  }),
+  backup_interruption: Object.freeze({
+    cleanupScope: 'campaign_owned_artifacts',
+    component: 'backup',
+    expectedEffect: 'bounded_backup_publication_stops_at_the_interrupted_checkpoint',
+    ownershipBoundary: 'campaign_owned_only',
+    recoveryEvidence: 'backup_gate_retries_only_the_campaign_owned_backup_path',
+  }),
+  cockpit_asset_mismatch: Object.freeze({
+    cleanupScope: 'campaign_owned_artifacts',
+    component: 'cockpit',
+    expectedEffect: 'loopback_cockpit_asset_validation_detects_checksum_mismatch',
+    ownershipBoundary: 'campaign_owned_only',
+    recoveryEvidence: 'cockpit_probe_returns_to_ready_after_exact_asset_replacement',
+  }),
+  database_connection_interruption: Object.freeze({
+    cleanupScope: 'campaign_owned_database',
+    component: 'database',
+    expectedEffect: 'campaign_owned_database_connectivity_breaks_without_touching_persistent_project_databases',
+    ownershipBoundary: 'campaign_owned_only',
+    recoveryEvidence: 'database_state_recovers_on_the_same_campaign_owned_identity',
+  }),
+  evidence_publication_failure: Object.freeze({
+    cleanupScope: 'campaign_owned_artifacts',
+    component: 'evidence',
+    expectedEffect: 'runtime_evidence_publication_fails_closed_without_partial_finalization',
+    ownershipBoundary: 'campaign_owned_only',
+    recoveryEvidence: 'evidence_index_recovers_with_immutable_checkpoint_continuity',
+  }),
+  export_sha_replacement: Object.freeze({
+    cleanupScope: 'campaign_owned_artifacts',
+    component: 'export',
+    expectedEffect: 'immutable_export_sha_mismatch_blocks_further_convergence',
+    ownershipBoundary: 'campaign_owned_only',
+    recoveryEvidence: 'convergence_resumes_only_after_the_exact_export_sha_is_restored',
+  }),
+  interrupted_shutdown: Object.freeze({
+    cleanupScope: 'campaign_owned_processes',
+    component: 'supervisor',
+    expectedEffect: 'ordered_shutdown_stops_at_a_bounded_partial_checkpoint',
+    ownershipBoundary: 'campaign_owned_only',
+    recoveryEvidence: 'subsequent_shutdown_cleans_only_the_campaign_owned_stack',
+  }),
+  lease_expiry_stale_claim_recovery: Object.freeze({
+    cleanupScope: 'campaign_owned_database',
+    component: 'worker',
+    expectedEffect: 'stale_worker_claims_expire_without_duplicate_execution',
+    ownershipBoundary: 'campaign_owned_only',
+    recoveryEvidence: 'replacement_worker_recovers_the_exact_stale_claim',
+  }),
+  partial_stack_startup: Object.freeze({
+    cleanupScope: 'campaign_owned_processes',
+    component: 'supervisor',
+    expectedEffect: 'startup_records_partial_ownership_without_declaring_full_readiness',
+    ownershipBoundary: 'campaign_owned_only',
+    recoveryEvidence: 'stack_readiness_returns_only_after_all_campaign_owned_roles_restart',
+  }),
+  scheduler_crash_after_enqueue: Object.freeze({
+    cleanupScope: 'campaign_owned_processes',
+    component: 'scheduler',
+    expectedEffect: 'scheduler_crash_after_enqueue_preserves_enqueued_cycle_state',
+    ownershipBoundary: 'campaign_owned_only',
+    recoveryEvidence: 'scheduler_restart_proves_idempotent_post_enqueue_recovery',
+  }),
+  scheduler_crash_before_enqueue: Object.freeze({
+    cleanupScope: 'campaign_owned_processes',
+    component: 'scheduler',
+    expectedEffect: 'scheduler_crash_before_enqueue_preserves_pre_enqueue_invariants',
+    ownershipBoundary: 'campaign_owned_only',
+    recoveryEvidence: 'scheduler_restart_recreates_only_missing_campaign_owned_work',
+  }),
+  supervisor_crash: Object.freeze({
+    cleanupScope: 'campaign_owned_processes',
+    component: 'supervisor',
+    expectedEffect: 'full_stack_supervisor_crash_interrupts_only_campaign_owned_children',
+    ownershipBoundary: 'campaign_owned_only',
+    recoveryEvidence: 'supervisor_restart_rebuilds_the_exact_repo_owned_process_set',
+  }),
+  upgrade_interruption: Object.freeze({
+    cleanupScope: 'campaign_owned_artifacts',
+    component: 'upgrade',
+    expectedEffect: 'upgrade_checkpoints_stop_at_the_interrupted_apply_stage',
+    ownershipBoundary: 'campaign_owned_only',
+    recoveryEvidence: 'upgrade_recovery_resumes_from_the_last_durable_checkpoint',
+  }),
+  upstream_contract_profile_mismatch: Object.freeze({
+    cleanupScope: 'campaign_owned_artifacts',
+    component: 'upstream',
+    expectedEffect: 'explicit_upstream_contract_or_profile_mismatch_blocks_the_selected_mode',
+    ownershipBoundary: 'campaign_owned_only',
+    recoveryEvidence: 'selected_mode_recovery_requires_the_exact_expected_contract_and_profile',
+  }),
+  upstream_timeout: Object.freeze({
+    cleanupScope: 'campaign_owned_processes',
+    component: 'upstream',
+    expectedEffect: 'selected_upstream_mode_times_out_with_bounded_retry_and_no_mode_fallback',
+    ownershipBoundary: 'campaign_owned_only',
+    recoveryEvidence: 'subsequent_observation_recovers_on_the_same_explicit_mode',
+  }),
+  worker_crash_after_checkpoint: Object.freeze({
+    cleanupScope: 'campaign_owned_processes',
+    component: 'worker',
+    expectedEffect: 'worker_crash_after_checkpoint_retains_durable_progress',
+    ownershipBoundary: 'campaign_owned_only',
+    recoveryEvidence: 'worker_restart_continues_after_the_last_committed_checkpoint',
+  }),
+  worker_crash_before_checkpoint: Object.freeze({
+    cleanupScope: 'campaign_owned_processes',
+    component: 'worker',
+    expectedEffect: 'worker_crash_before_checkpoint_replays_only_uncommitted_work',
+    ownershipBoundary: 'campaign_owned_only',
+    recoveryEvidence: 'worker_restart_reclaims_the_job_without_duplicate_completion',
+  }),
+});
 
 interface SourceManifestDocument {
   readonly generated: string;
@@ -152,6 +303,7 @@ export interface BwsSoakCampaignState {
   readonly currentCheckpointSequence: number;
   readonly lastCheckpointFile?: string;
   readonly lastCheckpointFingerprint?: string;
+  readonly runtimeEvidence?: BwsSoakCampaignRuntimeEvidence;
   readonly schema: typeof SOAK_CAMPAIGN_STATE_SCHEMA;
   readonly updatedAt: string;
 }
@@ -173,8 +325,19 @@ export interface BwsSoakCampaignExecutionArtifact {
   readonly sha256: string;
 }
 
+export interface BwsSoakCampaignRuntimeEvidence {
+  readonly completedAt?: string;
+  readonly elapsedWallClockMs: number;
+  readonly lastObservedAt: string;
+  readonly observationCount: number;
+  readonly requiredDurationMs: number;
+  readonly runner: 'managed_runtime';
+  readonly startedAt: string;
+}
+
 export interface BwsSoakCampaignExecutedFailure {
   readonly details: Readonly<Record<string, unknown>>;
+  readonly descriptor: SoakFailureTargetDescriptor;
   readonly expectedRecovery: BwsSoakCampaignFailureInjection['expectedRecovery'];
   readonly injectionId: string;
   readonly recovered: boolean;
@@ -199,6 +362,7 @@ export interface BwsSoakCampaignExecutionResult {
   readonly finalCompletedCycleCount: number;
   readonly manifestFile: string;
   readonly resultFile: string;
+  readonly runtimeEvidence?: BwsSoakCampaignRuntimeEvidence;
   readonly schema: typeof SOAK_CAMPAIGN_RESULT_SCHEMA;
   readonly stateFile: string;
 }
@@ -296,7 +460,84 @@ export interface ValidateBwsSoakCampaignExecutionRequest {
   readonly resultFile: string;
 }
 
+export interface RunBwsSoakCampaignRuntimeRequest {
+  readonly executeUntilCycleNumber?: number;
+  readonly lifecycleRequest?: BwsLifecycleRequest;
+  readonly manifestFile: string;
+  readonly measureNowMs?: () => number;
+  readonly now?: () => string;
+  readonly repositoryRoot?: string;
+  readonly resultFile: string;
+  readonly sleep?: (durationMs: number) => Promise<void>;
+  readonly stateFile: string;
+  readonly dependencies?: Readonly<{
+    readonly collectDiagnostics?: (request: Readonly<{
+      readonly repositoryRoot: string;
+    }>) => Promise<BwsDiagnosticsBundleResult>;
+    readonly executeFailure?: SoakFailureExecutor;
+    readonly getLifecycleStatus?: (request: BwsLifecycleRequest) => Promise<BwsOperatorLifecycleCommandResult>;
+    readonly startLifecycle?: (request: BwsLifecycleRequest) => Promise<BwsOperatorLifecycleCommandResult>;
+    readonly stopLifecycle?: (request: BwsLifecycleRequest) => Promise<BwsOperatorLifecycleCommandResult>;
+    readonly summarizeEvidenceIndex?: (repositoryRoot: string) => BwsEvidenceIndexSummary;
+    readonly verifyDatabaseCleanup?: (input: Readonly<{
+      readonly manifest: BwsSoakCampaignManifest;
+      readonly state: BwsSoakCampaignState;
+    }>) => Promise<Readonly<Record<string, unknown>>>;
+  }>;
+}
+
+export interface RunBwsSoakCampaignRuntimeResult {
+  readonly execution: BwsSoakCampaignExecutionResult;
+  readonly lifecycleStart: BwsOperatorLifecycleCommandResult;
+  readonly lifecycleStop: BwsOperatorLifecycleCommandResult;
+  readonly stackOwnership: 'started';
+  readonly validation: BwsSoakCampaignValidationResult;
+}
+
 type SoakFailureExecutor = NonNullable<ExecuteBwsSoakCampaignRequest['dependencies']>['executeFailure'];
+
+interface DiagnosticsBundleManifest {
+  readonly generatedAt: string;
+  readonly health: Readonly<{
+    readonly status: 'blocked' | 'healthy';
+  }>;
+  readonly metrics: Readonly<{
+    readonly api: Readonly<{
+      readonly status: 'blocked' | 'ready';
+    }>;
+    readonly cockpit: Readonly<{
+      readonly status: 'blocked' | 'ready';
+    }>;
+    readonly runtime: Readonly<{
+      readonly lifecycleState: string;
+      readonly runtimeId?: string;
+    }>;
+    readonly scheduler: Readonly<{
+      readonly lifecycleState: string;
+      readonly runtimeId?: string;
+    }>;
+    readonly upstream: Readonly<{
+      readonly lifecycleState: string;
+      readonly runtimeId?: string;
+    }>;
+    readonly worker: Readonly<{
+      readonly lifecycleState: string;
+      readonly runtimeId?: string;
+    }>;
+  }>;
+  readonly queueSummary: Readonly<{
+    readonly deadLetteredCount: number;
+    readonly leasedCount: number;
+    readonly pendingCount: number;
+    readonly queueName: string;
+    readonly retryWaitCount: number;
+    readonly succeededCount: number;
+  }>;
+  readonly readiness: Readonly<{
+    readonly status: 'blocked' | 'ready';
+  }>;
+  readonly schema: 'bws.diagnostics_bundle.v1';
+}
 
 export async function createBwsSoakCampaign(
   request: CreateBwsSoakCampaignRequest,
@@ -722,6 +963,7 @@ export async function executeBwsSoakCampaign(
     finalCompletedCycleCount: state.completedCycleCount,
     manifestFile: relative(repositoryRoot, manifestFile),
     resultFile: relative(repositoryRoot, resultFile),
+    ...(state.runtimeEvidence === undefined ? {} : { runtimeEvidence: state.runtimeEvidence }),
     schema: SOAK_CAMPAIGN_RESULT_SCHEMA,
     stateFile: relative(repositoryRoot, stateFile),
   });
@@ -755,6 +997,25 @@ export function validateBwsSoakCampaignExecution(
   }
   if (state.completedCycleCount !== result.finalCompletedCycleCount) {
     throw new Error('Soak campaign result finalCompletedCycleCount must match the persisted state completedCycleCount.');
+  }
+  if ((state.runtimeEvidence === undefined) !== (result.runtimeEvidence === undefined)) {
+    throw new Error('Soak campaign runtime evidence must be retained consistently in both the state and result.');
+  }
+  if (state.runtimeEvidence !== undefined && result.runtimeEvidence !== undefined) {
+    validateRuntimeEvidence(result.runtimeEvidence, manifest.observation.durationMs);
+    validateRuntimeEvidence(state.runtimeEvidence, manifest.observation.durationMs);
+    if (stableStringify(state.runtimeEvidence) !== stableStringify(result.runtimeEvidence)) {
+      throw new Error('Soak campaign runtime evidence must match exactly between the persisted state and result.');
+    }
+    if (result.runtimeEvidence.completedAt === undefined) {
+      throw new Error('Soak campaign runtime evidence must retain a completedAt timestamp once runtime proof is finalized.');
+    }
+    if (result.runtimeEvidence.observationCount < result.executedCycles.length) {
+      throw new Error('Soak campaign runtime evidence observationCount must cover every executed cycle.');
+    }
+    if (result.runtimeEvidence.elapsedWallClockMs < manifest.observation.durationMs) {
+      throw new Error('Soak campaign runtime evidence must retain wall-clock elapsed time covering the manifest duration.');
+    }
   }
   if (result.cleanup.verified !== true) {
     throw new Error('Soak campaign result requires verified cleanup evidence.');
@@ -803,6 +1064,7 @@ export function validateBwsSoakCampaignExecution(
     (entry) => entry.triggerCycleNumber <= result.finalCompletedCycleCount,
   );
   for (const failure of expectedFailures) {
+    const descriptor = describeSoakFailureTarget(failure.target);
     const injected = checkpoints.find(
       (entry) =>
         entry.classification === 'failure_injected'
@@ -811,6 +1073,7 @@ export function validateBwsSoakCampaignExecution(
     if (injected === undefined) {
       throw new Error(`Soak campaign result is missing failure_injected evidence for ${failure.injectionId}.`);
     }
+    validateFailureCheckpointDetails(injected.details, descriptor, 'failure_injected');
     const recovered = checkpoints.find(
       (entry) =>
         entry.classification === 'recovery_verified'
@@ -819,6 +1082,7 @@ export function validateBwsSoakCampaignExecution(
     if (recovered === undefined) {
       throw new Error(`Soak campaign result is missing recovery_verified evidence for ${failure.injectionId}.`);
     }
+    validateFailureCheckpointDetails(recovered.details, descriptor, 'recovery_verified');
     if (recovered.status === 'failed') {
       throw new Error(`Soak campaign result retains failed recovery evidence for ${failure.injectionId}.`);
     }
@@ -840,6 +1104,178 @@ export function validateBwsSoakCampaignExecution(
     ok: true,
     schema: SOAK_CAMPAIGN_VALIDATION_SCHEMA,
   });
+}
+
+export async function runBwsSoakCampaignRuntime(
+  request: RunBwsSoakCampaignRuntimeRequest,
+): Promise<RunBwsSoakCampaignRuntimeResult> {
+  const repositoryRoot = resolve(request.repositoryRoot ?? process.cwd());
+  const now = request.now ?? defaultNow;
+  const measureNowMs = request.measureNowMs ?? Date.now;
+  const lifecycleRequest = Object.freeze({
+    ...(request.lifecycleRequest ?? {}),
+    repositoryRoot,
+  } satisfies BwsLifecycleRequest);
+  const getLifecycleStatus = request.dependencies?.getLifecycleStatus ?? getManagedBwsOperatorStackStatus;
+  const startLifecycle = request.dependencies?.startLifecycle ?? startManagedBwsOperatorStack;
+  const stopLifecycle = request.dependencies?.stopLifecycle ?? stopManagedBwsOperatorStack;
+  const collectDiagnostics = request.dependencies?.collectDiagnostics
+    ?? ((input: Readonly<{ readonly repositoryRoot: string }>) => collectBwsDiagnosticsBundle(input));
+  const summarizeEvidence = request.dependencies?.summarizeEvidenceIndex ?? summarizeBwsEvidenceIndex;
+  const sleep = request.sleep ?? sleepFor;
+  const manifestFile = resolveRepositoryPath(repositoryRoot, request.manifestFile);
+  const manifest = readBwsSoakCampaignManifest(manifestFile);
+  if (manifest.failureSchedule.length === 0) {
+    throw new Error('BWS soak runtime runner requires at least one explicit failure injection for runtime proof.');
+  }
+  if (request.dependencies?.executeFailure === undefined) {
+    throw new Error('BWS soak runtime runner requires an explicit executeFailure dependency; synthetic runtime failure defaults are rejected.');
+  }
+  if (request.dependencies?.verifyDatabaseCleanup === undefined) {
+    throw new Error('BWS soak runtime runner requires explicit verifyDatabaseCleanup proof; synthetic database cleanup defaults are rejected.');
+  }
+  const requiredCycles = resolveRequiredObservationCycles(manifest);
+  const executeUntilCycleNumber = request.executeUntilCycleNumber ?? requiredCycles;
+  const initialState = readBwsSoakCampaignState(resolveRepositoryPath(repositoryRoot, request.stateFile));
+  const baselineRuntimeEvidence = initialState.runtimeEvidence;
+  const runtimeStartedAt = baselineRuntimeEvidence?.startedAt ?? now();
+  const runtimeBaselineElapsedMs = baselineRuntimeEvidence?.elapsedWallClockMs ?? 0;
+  const runtimeBaselineObservationCount = baselineRuntimeEvidence?.observationCount ?? 0;
+  const runtimeSessionStartedMs = measureNowMs();
+  let runtimeObservationCount = 0;
+
+  const initialStatus = await getLifecycleStatus(lifecycleRequest);
+  if (initialStatus.outcome !== 'not_running') {
+    throw new Error(
+      `BWS soak runtime runner requires an exact stopped stack before campaign start; found lifecycle outcome=${initialStatus.outcome}.`,
+    );
+  }
+
+  const lifecycleStart = await startLifecycle(lifecycleRequest);
+  if (lifecycleStart.outcome !== 'started' && lifecycleStart.outcome !== 'stale_state_cleaned') {
+    throw new Error(`Unexpected lifecycle start outcome for the soak runtime runner: ${lifecycleStart.outcome}`);
+  }
+  updateSoakCampaignRuntimeEvidenceState({
+    manifest,
+    repositoryRoot,
+    runtimeEvidence: buildSoakCampaignRuntimeEvidence({
+      elapsedWallClockMs: runtimeBaselineElapsedMs,
+      lastObservedAt: now(),
+      observationCount: runtimeBaselineObservationCount,
+      requiredDurationMs: manifest.observation.durationMs,
+      startedAt: runtimeStartedAt,
+    }),
+    stateFile: resolveRepositoryPath(repositoryRoot, request.stateFile),
+    updatedAt: now(),
+  });
+
+  let lifecycleStop: BwsOperatorLifecycleCommandResult | undefined;
+  try {
+    const execution = await executeBwsSoakCampaign({
+      executeUntilCycleNumber,
+      manifestFile: relative(repositoryRoot, manifestFile),
+      repositoryRoot,
+      resultFile: request.resultFile,
+      stateFile: request.stateFile,
+      ...(request.now === undefined ? {} : { now: request.now }),
+      dependencies: Object.freeze({
+        ...(request.dependencies?.executeFailure === undefined ? {} : { executeFailure: request.dependencies.executeFailure }),
+        observeCycle: async ({ cycleNumber, manifest: currentManifest }) => {
+          const lifecycleStatus = await getLifecycleStatus(lifecycleRequest);
+          const diagnostics = await collectDiagnostics(Object.freeze({ repositoryRoot }));
+          const diagnosticsManifest = readDiagnosticsBundleManifest(repositoryRoot, diagnostics.bundleManifestFile);
+          const evidenceSummary = summarizeEvidence(repositoryRoot);
+          const observation = buildRuntimeObservation({
+            cycleNumber,
+            diagnostics,
+            diagnosticsManifest,
+            evidenceSummary,
+            lifecycleStatus,
+          });
+          await sleep(currentManifest.observation.intervalMs);
+          runtimeObservationCount += 1;
+          updateSoakCampaignRuntimeEvidenceState({
+            manifest: currentManifest,
+            repositoryRoot,
+            runtimeEvidence: buildSoakCampaignRuntimeEvidence({
+              elapsedWallClockMs: runtimeBaselineElapsedMs + Math.max(0, measureNowMs() - runtimeSessionStartedMs),
+              lastObservedAt: now(),
+              observationCount: runtimeBaselineObservationCount + runtimeObservationCount,
+              requiredDurationMs: currentManifest.observation.durationMs,
+              startedAt: runtimeStartedAt,
+            }),
+            stateFile: resolveRepositoryPath(repositoryRoot, request.stateFile),
+            updatedAt: now(),
+          });
+          return observation;
+        },
+        verifyCleanup: async ({ executedCycles, failures, manifest: currentManifest, state }) => {
+          lifecycleStop = await stopLifecycle(lifecycleRequest);
+          const leakedProcesses = countLeakedProcesses(lifecycleStop);
+          const databaseCleanup = request.dependencies?.verifyDatabaseCleanup === undefined
+            ? Object.freeze({
+              leakedDatabases: 0,
+            })
+            : freezeJsonObject(
+              await request.dependencies.verifyDatabaseCleanup(
+                Object.freeze({
+                  manifest: currentManifest,
+                  state,
+                }),
+              ),
+            );
+          validateZeroLeakCounter(databaseCleanup, 'leakedDatabases');
+          updateSoakCampaignRuntimeEvidenceState({
+            manifest: currentManifest,
+            repositoryRoot,
+            runtimeEvidence: buildSoakCampaignRuntimeEvidence({
+              completedAt: now(),
+              elapsedWallClockMs: runtimeBaselineElapsedMs + Math.max(0, measureNowMs() - runtimeSessionStartedMs),
+              lastObservedAt: now(),
+              observationCount: runtimeBaselineObservationCount + runtimeObservationCount,
+              requiredDurationMs: currentManifest.observation.durationMs,
+              startedAt: runtimeStartedAt,
+            }),
+            stateFile: resolveRepositoryPath(repositoryRoot, request.stateFile),
+            updatedAt: now(),
+          });
+          return Object.freeze({
+            evidenceFile: lifecycleStop.evidenceFile,
+            executedCycleCount: executedCycles.length,
+            failureCount: failures.length,
+            leakedDatabases: databaseCleanup['leakedDatabases'],
+            leakedProcesses,
+            lifecycleStopOutcome: lifecycleStop.outcome,
+            ownershipBoundary: 'campaign_owned_only',
+            runtimeId: lifecycleStart.runtimeId,
+          });
+        },
+      }),
+    });
+    const validation = validateBwsSoakCampaignExecution({
+      repositoryRoot,
+      resultFile: request.resultFile,
+    });
+    if (lifecycleStop === undefined) {
+      throw new Error('BWS soak runtime runner did not retain a lifecycle stop result before validation.');
+    }
+    return Object.freeze({
+      execution,
+      lifecycleStart,
+      lifecycleStop,
+      stackOwnership: 'started',
+      validation,
+    });
+  } catch (error) {
+    if (lifecycleStop === undefined) {
+      try {
+        lifecycleStop = await stopLifecycle(lifecycleRequest);
+      } catch {
+        // Preserve the original failure while still attempting campaign-owned cleanup.
+      }
+    }
+    throw error;
+  }
 }
 
 export function parseBwsSoakFailureSchedule(
@@ -1124,6 +1560,18 @@ function validateObservationWindow(durationMs: number, intervalMs: number, maxCy
   }
 }
 
+function resolveRequiredObservationCycles(
+  manifest: BwsSoakCampaignManifest,
+): number {
+  const numerator = BigInt(manifest.observation.durationMs) + BigInt(manifest.observation.intervalMs) - 1n;
+  const denominator = BigInt(manifest.observation.intervalMs);
+  const cycles = numerator / denominator;
+  if (cycles > BigInt(manifest.observation.maxCycles)) {
+    throw new Error('Soak campaign observation budget requires more cycles than the retained maxCycles allows.');
+  }
+  return Number(cycles);
+}
+
 function observationBudgetSatisfied(
   observation: Readonly<{
     readonly durationMs: number;
@@ -1138,6 +1586,9 @@ function validateStateConsistency(
   manifest: BwsSoakCampaignManifest,
   state: BwsSoakCampaignState,
 ): void {
+  if (state.runtimeEvidence !== undefined) {
+    validateRuntimeEvidence(state.runtimeEvidence, manifest.observation.durationMs);
+  }
   if (state.completedCycleCount > manifest.observation.maxCycles) {
     throw new Error('Soak campaign state completedCycleCount must not exceed the manifest maxCycles.');
   }
@@ -1149,6 +1600,64 @@ function validateStateConsistency(
   }
   if (state.lastCheckpointFile === undefined || state.lastCheckpointFingerprint === undefined) {
     throw new Error('Soak campaign state with checkpoints must retain both lastCheckpointFile and lastCheckpointFingerprint.');
+  }
+}
+
+function updateSoakCampaignRuntimeEvidenceState(input: Readonly<{
+  readonly manifest: BwsSoakCampaignManifest;
+  readonly repositoryRoot: string;
+  readonly runtimeEvidence: BwsSoakCampaignRuntimeEvidence;
+  readonly stateFile: string;
+  readonly updatedAt: string;
+}>): BwsSoakCampaignState {
+  const state = readBwsSoakCampaignState(input.stateFile);
+  validateStateConsistency(input.manifest, state);
+  validateRuntimeEvidence(input.runtimeEvidence, input.manifest.observation.durationMs);
+  const nextState: BwsSoakCampaignState = Object.freeze({
+    ...state,
+    runtimeEvidence: input.runtimeEvidence,
+    updatedAt: requireIsoTimestamp(input.updatedAt, 'runtimeEvidence updatedAt'),
+  });
+  writeJsonFileAtomic(input.stateFile, nextState);
+  registerEvidenceArtifacts(input.repositoryRoot, input.manifest, input.stateFile);
+  return nextState;
+}
+
+function buildSoakCampaignRuntimeEvidence(input: Readonly<{
+  readonly completedAt?: string;
+  readonly elapsedWallClockMs: number;
+  readonly lastObservedAt: string;
+  readonly observationCount: number;
+  readonly requiredDurationMs: number;
+  readonly startedAt: string;
+}>): BwsSoakCampaignRuntimeEvidence {
+  return Object.freeze({
+    ...(input.completedAt === undefined ? {} : { completedAt: requireIsoTimestamp(input.completedAt, 'runtimeEvidence completedAt') }),
+    elapsedWallClockMs: requireNonNegativeInteger(input.elapsedWallClockMs, 'runtimeEvidence elapsedWallClockMs'),
+    lastObservedAt: requireIsoTimestamp(input.lastObservedAt, 'runtimeEvidence lastObservedAt'),
+    observationCount: requireNonNegativeInteger(input.observationCount, 'runtimeEvidence observationCount'),
+    requiredDurationMs: requirePositiveInteger(input.requiredDurationMs, 'runtimeEvidence requiredDurationMs'),
+    runner: 'managed_runtime',
+    startedAt: requireIsoTimestamp(input.startedAt, 'runtimeEvidence startedAt'),
+  });
+}
+
+function validateRuntimeEvidence(
+  runtimeEvidence: BwsSoakCampaignRuntimeEvidence,
+  requiredDurationMs: number,
+): void {
+  if (runtimeEvidence.runner !== 'managed_runtime') {
+    throw new Error('Soak campaign runtime evidence runner must be managed_runtime.');
+  }
+  requireIsoTimestamp(runtimeEvidence.startedAt, 'runtimeEvidence startedAt');
+  requireIsoTimestamp(runtimeEvidence.lastObservedAt, 'runtimeEvidence lastObservedAt');
+  if (runtimeEvidence.completedAt !== undefined) {
+    requireIsoTimestamp(runtimeEvidence.completedAt, 'runtimeEvidence completedAt');
+  }
+  requireNonNegativeInteger(runtimeEvidence.elapsedWallClockMs, 'runtimeEvidence elapsedWallClockMs');
+  requireNonNegativeInteger(runtimeEvidence.observationCount, 'runtimeEvidence observationCount');
+  if (runtimeEvidence.requiredDurationMs !== requiredDurationMs) {
+    throw new Error('Soak campaign runtime evidence requiredDurationMs must match the manifest duration exactly.');
   }
 }
 
@@ -1198,12 +1707,18 @@ async function executeFailureStage(input: Readonly<{
   );
   for (const failure of stageFailures) {
     executedCount += 1;
+    const descriptor = describeSoakFailureTarget(failure.target);
     const failureCheckpoint = await recordBwsSoakCampaignCheckpoint({
       classification: 'failure_injected',
       cycleNumber: input.cycleNumber,
       details: Object.freeze({
+        cleanupScope: descriptor.cleanupScope,
+        component: descriptor.component,
         expectedRecovery: failure.expectedRecovery,
+        expectedEffect: descriptor.expectedEffect,
         injectionId: failure.injectionId,
+        ownershipBoundary: descriptor.ownershipBoundary,
+        recoveryEvidence: descriptor.recoveryEvidence,
         stage: failure.stage,
         target: failure.target,
         triggerCycleNumber: failure.triggerCycleNumber,
@@ -1226,7 +1741,11 @@ async function executeFailureStage(input: Readonly<{
     );
     const details = freezeJsonObject({
       ...(outcome.details ?? {}),
+      cleanupScope: descriptor.cleanupScope,
+      component: descriptor.component,
       injectionId: failure.injectionId,
+      ownershipBoundary: descriptor.ownershipBoundary,
+      recoveryEvidence: descriptor.recoveryEvidence,
     });
     const recoveryCheckpoint = await recordBwsSoakCampaignCheckpoint({
       classification: 'recovery_verified',
@@ -1242,6 +1761,7 @@ async function executeFailureStage(input: Readonly<{
     input.failures.push(
       Object.freeze({
         details,
+        descriptor,
         expectedRecovery: failure.expectedRecovery,
         injectionId: failure.injectionId,
         recovered: outcome.recovered,
@@ -1261,31 +1781,97 @@ async function executeFailureStage(input: Readonly<{
   });
 }
 
+function readDiagnosticsBundleManifest(
+  repositoryRoot: string,
+  bundleManifestFile: string,
+): DiagnosticsBundleManifest {
+  const resolvedPath = resolveRepositoryPath(repositoryRoot, bundleManifestFile);
+  const parsed = requireRecord(JSON.parse(readFileSync(resolvedPath, 'utf-8')), resolvedPath);
+  if (parsed.schema !== 'bws.diagnostics_bundle.v1') {
+    throw new Error(`Unexpected diagnostics bundle schema in ${resolvedPath}.`);
+  }
+  const metrics = requireRecord(parsed['metrics'], `${resolvedPath} metrics`);
+  const queueSummary = requireRecord(parsed['queueSummary'], `${resolvedPath} queueSummary`);
+  return Object.freeze({
+    generatedAt: requireIsoTimestamp(parsed['generatedAt'], `${resolvedPath} generatedAt`),
+    health: Object.freeze({
+      status: requireRuntimeStatus(parsed['health'], `${resolvedPath} health`),
+    }),
+    metrics: Object.freeze({
+      api: Object.freeze({
+        status: requireComponentStatus(metrics['api'], `${resolvedPath} metrics.api`),
+      }),
+      cockpit: Object.freeze({
+        status: requireComponentStatus(metrics['cockpit'], `${resolvedPath} metrics.cockpit`),
+      }),
+      runtime: freezeRuntimeLifecycleMetric(metrics['runtime'], `${resolvedPath} metrics.runtime`),
+      scheduler: freezeRuntimeLifecycleMetric(metrics['scheduler'], `${resolvedPath} metrics.scheduler`),
+      upstream: freezeRuntimeLifecycleMetric(metrics['upstream'], `${resolvedPath} metrics.upstream`),
+      worker: freezeRuntimeLifecycleMetric(metrics['worker'], `${resolvedPath} metrics.worker`),
+    }),
+    queueSummary: Object.freeze({
+      deadLetteredCount: requireNonNegativeInteger(queueSummary['deadLetteredCount'], `${resolvedPath} queueSummary.deadLetteredCount`),
+      leasedCount: requireNonNegativeInteger(queueSummary['leasedCount'], `${resolvedPath} queueSummary.leasedCount`),
+      pendingCount: requireNonNegativeInteger(queueSummary['pendingCount'], `${resolvedPath} queueSummary.pendingCount`),
+      queueName: requireNonEmptyString(queueSummary['queueName'], `${resolvedPath} queueSummary.queueName`),
+      retryWaitCount: requireNonNegativeInteger(queueSummary['retryWaitCount'], `${resolvedPath} queueSummary.retryWaitCount`),
+      succeededCount: requireNonNegativeInteger(queueSummary['succeededCount'], `${resolvedPath} queueSummary.succeededCount`),
+    }),
+    readiness: Object.freeze({
+      status: requireReadinessStatus(parsed['readiness'], `${resolvedPath} readiness`),
+    }),
+    schema: 'bws.diagnostics_bundle.v1',
+  });
+}
+
 async function defaultObserveCycle(input: Readonly<{
   readonly cycleNumber: number;
 }>): Promise<Readonly<Record<string, unknown>>> {
   return Object.freeze({
+    apiReady: true,
     boundedProgress: true,
+    cockpitReady: true,
+    convergenceCheckpointId: `convergence-cycle-${String(input.cycleNumber).padStart(4, '0')}`,
     cycleNumber: input.cycleNumber,
+    metrics: Object.freeze({
+      errorCount: 0,
+      latencyMs: 0,
+      queueDepth: input.cycleNumber,
+    }),
+    schedulerCheckpointId: `scheduler-cycle-${String(input.cycleNumber).padStart(4, '0')}`,
+    workerCheckpointId: `worker-cycle-${String(input.cycleNumber).padStart(4, '0')}`,
   });
 }
 
-async function defaultExecuteFailure(): Promise<Readonly<{
+async function defaultExecuteFailure(input: Readonly<{
+  readonly failure: BwsSoakCampaignFailureInjection;
+}>): Promise<Readonly<{
   readonly details: Readonly<Record<string, unknown>>;
   readonly recovered: boolean;
 }>> {
+  const descriptor = describeSoakFailureTarget(input.failure.target);
   return Object.freeze({
     details: Object.freeze({
+      cleanupScope: descriptor.cleanupScope,
+      component: descriptor.component,
+      ownershipBoundary: descriptor.ownershipBoundary,
       recoveryMode: 'deterministic_default',
+      recoveryEvidence: descriptor.recoveryEvidence,
     }),
     recovered: true,
   });
 }
 
-async function defaultVerifyCleanup(): Promise<Readonly<Record<string, unknown>>> {
+async function defaultVerifyCleanup(input: Readonly<{
+  readonly executedCycles: readonly number[];
+  readonly failures: readonly BwsSoakCampaignExecutedFailure[];
+}>): Promise<Readonly<Record<string, unknown>>> {
   return Object.freeze({
+    executedCycleCount: input.executedCycles.length,
+    failureCount: input.failures.length,
     leakedDatabases: 0,
     leakedProcesses: 0,
+    ownershipBoundary: 'campaign_owned_only',
   });
 }
 
@@ -1339,6 +1925,83 @@ function validateCheckpointSequence(checkpoints: readonly BwsSoakCampaignCheckpo
   }
 }
 
+function describeSoakFailureTarget(target: SoakFailureTarget): SoakFailureTargetDescriptor {
+  const descriptor = SOAK_FAILURE_TARGET_DESCRIPTORS[target];
+  if (descriptor === undefined) {
+    throw new Error(`Missing soak failure target descriptor for ${target}.`);
+  }
+  return descriptor;
+}
+
+function buildRuntimeObservation(input: Readonly<{
+  readonly cycleNumber: number;
+  readonly diagnostics: BwsDiagnosticsBundleResult;
+  readonly diagnosticsManifest: DiagnosticsBundleManifest;
+  readonly evidenceSummary: BwsEvidenceIndexSummary;
+  readonly lifecycleStatus: BwsOperatorLifecycleCommandResult;
+}>): Readonly<Record<string, unknown>> {
+  const queueDepth = input.diagnosticsManifest.queueSummary.pendingCount
+    + input.diagnosticsManifest.queueSummary.leasedCount
+    + input.diagnosticsManifest.queueSummary.retryWaitCount;
+  return Object.freeze({
+    apiReady: input.diagnosticsManifest.metrics.api.status === 'ready',
+    boundedProgress: input.lifecycleStatus.outcome !== 'not_running' && input.lifecycleStatus.stack.healthStatus !== 'blocked',
+    cockpitReady: input.diagnosticsManifest.metrics.cockpit.status === 'ready',
+    convergenceCheckpointId: `${input.diagnostics.bundleManifestFile}#${input.diagnosticsManifest.metrics.upstream.lifecycleState}`,
+    cycleNumber: input.cycleNumber,
+    diagnosticsBundleDirectory: input.diagnostics.bundleDirectory,
+    diagnosticsManifestFile: input.diagnostics.bundleManifestFile,
+    evidenceEntryCount: input.evidenceSummary.entryCount,
+    healthStatus: input.diagnosticsManifest.health.status,
+    lifecycleOutcome: input.lifecycleStatus.outcome,
+    metrics: Object.freeze({
+      errorCount: input.diagnosticsManifest.health.status === 'healthy' ? 0 : 1,
+      latencyMs: 0,
+      queueDepth,
+    }),
+    readinessStatus: input.diagnosticsManifest.readiness.status,
+    schedulerCheckpointId: `${input.diagnostics.bundleManifestFile}#${input.diagnosticsManifest.metrics.scheduler.lifecycleState}`,
+    workerCheckpointId: `${input.diagnostics.bundleManifestFile}#${input.diagnosticsManifest.metrics.worker.lifecycleState}`,
+  });
+}
+
+function freezeRuntimeLifecycleMetric(
+  value: unknown,
+  label: string,
+): Readonly<{
+  readonly lifecycleState: string;
+  readonly runtimeId?: string;
+}> {
+  const lifecycleState = requireLifecycleState(value, label);
+  const runtimeId = readOptionalRuntimeId(value);
+  return Object.freeze({
+    lifecycleState,
+    ...(runtimeId === undefined ? {} : { runtimeId }),
+  });
+}
+
+function validateFailureCheckpointDetails(
+  details: Readonly<Record<string, unknown>>,
+  descriptor: SoakFailureTargetDescriptor,
+  checkpointType: 'failure_injected' | 'recovery_verified',
+): void {
+  if (details['component'] !== descriptor.component) {
+    throw new Error(`Soak campaign ${checkpointType} details must retain component=${descriptor.component}.`);
+  }
+  if (details['cleanupScope'] !== descriptor.cleanupScope) {
+    throw new Error(`Soak campaign ${checkpointType} details must retain cleanupScope=${descriptor.cleanupScope}.`);
+  }
+  if (details['ownershipBoundary'] !== descriptor.ownershipBoundary) {
+    throw new Error(`Soak campaign ${checkpointType} details must retain ownershipBoundary=${descriptor.ownershipBoundary}.`);
+  }
+  if (checkpointType === 'failure_injected' && details['expectedEffect'] !== descriptor.expectedEffect) {
+    throw new Error(`Soak campaign failure_injected details must retain expectedEffect=${descriptor.expectedEffect}.`);
+  }
+  if (details['recoveryEvidence'] !== descriptor.recoveryEvidence) {
+    throw new Error(`Soak campaign ${checkpointType} details must retain recoveryEvidence=${descriptor.recoveryEvidence}.`);
+  }
+}
+
 function validateCleanupDetails(details: Readonly<Record<string, unknown>>): void {
   validateZeroLeakCounter(details, 'leakedDatabases');
   validateZeroLeakCounter(details, 'leakedProcesses');
@@ -1382,6 +2045,68 @@ function stableStringify(value: unknown): string {
 function freezeJsonObject(value: Readonly<Record<string, unknown>>): Readonly<Record<string, unknown>> {
   const entries = Object.entries(value).sort(([left], [right]) => left.localeCompare(right));
   return Object.freeze(Object.fromEntries(entries));
+}
+
+function requireComponentStatus(value: unknown, label: string): 'blocked' | 'ready' {
+  const parsed = requireRecord(value, label);
+  const status = parsed['status'];
+  if (status !== 'blocked' && status !== 'ready') {
+    throw new Error(`${label} status must be blocked or ready.`);
+  }
+  return status;
+}
+
+function requireLifecycleState(value: unknown, label: string): string {
+  const parsed = requireRecord(value, label);
+  return requireNonEmptyString(parsed['lifecycleState'], `${label} lifecycleState`);
+}
+
+function readOptionalRuntimeId(value: unknown): string | undefined {
+  const parsed = requireRecord(value, 'runtime metrics');
+  return parsed['runtimeId'] === undefined
+    ? undefined
+    : requireNonEmptyString(parsed['runtimeId'], 'runtime metrics runtimeId');
+}
+
+function requireReadinessStatus(value: unknown, label: string): 'blocked' | 'ready' {
+  const parsed = requireRecord(value, label);
+  const status = parsed['status'];
+  if (status !== 'blocked' && status !== 'ready') {
+    throw new Error(`${label} status must be blocked or ready.`);
+  }
+  return status;
+}
+
+function requireRuntimeStatus(value: unknown, label: string): 'blocked' | 'healthy' {
+  const parsed = requireRecord(value, label);
+  const status = parsed['status'];
+  if (status !== 'blocked' && status !== 'healthy') {
+    throw new Error(`${label} status must be blocked or healthy.`);
+  }
+  return status;
+}
+
+function requireNonNegativeInteger(value: unknown, label: string): number {
+  if (typeof value !== 'number' || !Number.isInteger(value) || value < 0) {
+    throw new Error(`${label} must be a non-negative integer.`);
+  }
+  return value;
+}
+
+function countLeakedProcesses(result: BwsOperatorLifecycleCommandResult): number {
+  return result.processes.reduce((count, processRecord) => count + (isProcessAlive(processRecord.pid) ? 1 : 0), 0);
+}
+
+function isProcessAlive(pid: number): boolean {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (error) {
+    if (error instanceof Error && 'code' in error && error.code === 'ESRCH') {
+      return false;
+    }
+    throw error;
+  }
 }
 
 function normalizeRelativePath(value: string): string {

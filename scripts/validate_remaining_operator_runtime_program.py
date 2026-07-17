@@ -13,12 +13,12 @@ TASK_IDS = [
 ]
 VALIDATED_IDS = {
     'BWS-581', 'BWS-582', 'BWS-583', 'BWS-584', 'BWS-585', 'BWS-586',
-    'BWS-587', 'BWS-588', 'BWS-589', 'BWS-590', 'BWS-591',
+    'BWS-587', 'BWS-588', 'BWS-589', 'BWS-590', 'BWS-591', 'BWS-592', 'BWS-593', 'BWS-599',
 }
-PENDING_IDS = {'BWS-592', 'BWS-593', 'BWS-599'}
+PENDING_IDS = set()
 BLUEPRINT_DOCS = {
     'docs/034_remaining_operator_runtime_implementation_program.md': [
-        'current_task=BWS-592', 'safe_local_terminal_gate=BWS-599',
+        'current_task=BWS-599', 'safe_local_terminal_gate=BWS-599',
         'paper evaluation=runtime_evidence_mode_validated',
         'backlog/bws_remaining_safe_local_map.csv', 'BWS-590', 'BWS-599', 'BWS-600',
     ],
@@ -115,14 +115,19 @@ def main() -> None:
     if len(ids) != len(set(ids)):
         fail('remaining implementation map contains duplicate subtask ids')
     parents = {row['parent_task'] for row in map_rows}
-    if parents != PENDING_IDS:
+    if parents != {'BWS-592', 'BWS-593', 'BWS-599'}:
         fail(f'remaining implementation map parent tasks must be {sorted(PENDING_IDS)!r}, found {sorted(parents)!r}')
     for row in map_rows:
-        if row['dependency_state'] not in {'READY', 'WAITING'}:
+        if row['dependency_state'] not in {'READY', 'WAITING', 'VALIDATED'}:
             fail(f'{row["subtask_id"]} has invalid dependency_state')
-        expected_dependency_state = 'READY' if row['subtask_id'] == 'BWS-592-A' else 'WAITING'
-        if row['dependency_state'] != expected_dependency_state:
-            fail(f'{row["subtask_id"]} must be {expected_dependency_state}, found {row["dependency_state"]}')
+        if row['subtask_id'].startswith('BWS-592-') or row['subtask_id'].startswith('BWS-593-'):
+            if row['dependency_state'] != 'VALIDATED':
+                fail(f'{row["subtask_id"]} must be VALIDATED, found {row["dependency_state"]}')
+        elif row['subtask_id'].startswith('BWS-599-'):
+            if row['dependency_state'] != 'VALIDATED':
+                fail(f'{row["subtask_id"]} must be VALIDATED, found {row["dependency_state"]}')
+        elif row['dependency_state'] != 'WAITING':
+            fail(f'{row["subtask_id"]} must be WAITING, found {row["dependency_state"]}')
         for field in MAP_COLUMNS:
             if not row[field].strip():
                 fail(f'{row["subtask_id"]} has empty {field}')
@@ -133,7 +138,7 @@ def main() -> None:
         'docs/automation/current-implementation-task.md',
     ]:
         text = read(rel)
-        for marker in [PROGRAM, 'BWS-592', 'BWS-599']:
+        for marker in [PROGRAM, 'BWS-592', 'BWS-593', 'BWS-599']:
             if marker not in text:
                 fail(f'{rel} missing required marker: {marker}')
 

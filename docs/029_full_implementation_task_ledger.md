@@ -25,17 +25,18 @@ A row becomes `BLOCKED` only after all safe local work in that row is exhausted 
 ## Current selection
 
 ```text
-current_task=BWS-592
-current_task_status=PENDING
-reason=BWS-591 upgrade, rollback and disaster-recovery proof is validated and bounded soak/failure injection is the next dependency-ready local gap
+current_task=BWS-599
+current_task_status=VALIDATED
+reason=BWS-599 final clean-room acceptance is validated; no dependency-ready safe local gap remains before the external BWS-600 gate
 ```
 
 ## Remaining sequence
 
 ```text
 BWS-591           release upgrade, rollback and recovery (validated)
-BWS-592..BWS-593  multi-hour soak, failure injection and external preflight
-BWS-599           integrated clean-room final local acceptance
+BWS-592           multi-hour soak and failure injection (validated)
+BWS-593           external runtime preflight and campaign manifest (validated)
+BWS-599           integrated clean-room final local acceptance (validated)
 BWS-600           external accepted-runtime evidence
 BWS-900           parked execution
 ```

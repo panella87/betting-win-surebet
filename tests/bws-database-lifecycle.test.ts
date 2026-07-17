@@ -161,7 +161,7 @@ test(
       );
 
       const retentionPlan = planBwsDatabaseRetention({
-        cutoff: '2026-07-17T00:00:00.000Z',
+        cutoff: '2100-01-01T00:00:00.000Z',
         maxRows: 5,
         persistenceConfig: database.databaseConfig,
         repositoryRoot: REPO_ROOT,
@@ -172,7 +172,7 @@ test(
       assert.deepEqual(retentionPlan.candidates[0]?.primaryKey, { importRunId: 'import-585-prunable' });
 
       const retentionApply = applyBwsDatabaseRetention({
-        cutoff: '2026-07-17T00:00:00.000Z',
+        cutoff: '2100-01-01T00:00:00.000Z',
         maxRows: 5,
         persistenceConfig: database.databaseConfig,
         planFingerprint: retentionPlan.planFingerprint,

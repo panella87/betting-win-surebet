@@ -454,7 +454,7 @@ REQUIRED_FRAGMENTS = {
     ],
     'docs/automation/README.md': [
         'Repo automation contract: betting-win-surebet',
-        'current_task=BWS-592',
+        'current_task=BWS-599',
         'safe_local_terminal_gate=BWS-599',
         'Exact protected-file policy',
         'AUTOMATION_ALLOW_PROTECTED_CHANGES=1',
@@ -514,7 +514,7 @@ REQUIRED_FRAGMENTS = {
         'not blanket permission',
     ],
     '.automation/README.md': [
-        'current_task=BWS-592',
+        'current_task=BWS-599',
         'safe_local_terminal_gate=BWS-599',
         '.automation/lib/run_common.sh',
         '.automation/lib/controller_hardening_v2.sh',
@@ -528,7 +528,7 @@ REQUIRED_FRAGMENTS = {
         'run_autonomous_bugfix=standardized_standalone_audit',
         'run_bugfix_autopilot=standardized_parent_for_broad_audit_and_repair',
         'run_paper_evaluation=fixture_and_runtime_evidence_validated_bws_588',
-        'run_paper_autopilot=runtime_evidence_parent_validated_bws_589_pending_bws_599',
+        'run_paper_autopilot=runtime_evidence_parent_validated_bws_589_ready_for_bws_600',
         'autopilot_child_telegram=disabled',
         'autopilot_parent_telegram=final_only',
         'standalone_controller_telegram=enabled_by_default',

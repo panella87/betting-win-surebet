@@ -12,8 +12,8 @@ strategy_state_owner=betting-win-surebet
 backtesting_owner=betting-win-surebet
 paper_mode_owner=betting-win-surebet
 account_policy=separate_from_betting-win-betting
-current_task=BWS-592
-current_task_status=PENDING
+current_task=BWS-599
+current_task_status=VALIDATED
 safe_local_completion_gate=BWS-599
 continuous_private_paper=BWS-600_BLOCKED_AFTER_BWS_599
 real_money_execution=BWS-900_PARKED
@@ -35,9 +35,9 @@ real_money_execution=BWS-900_PARKED
 ```text
 BWS-590=VALIDATED_RELEASE_DEPLOYMENT
 BWS-591=VALIDATED_UPGRADE_ROLLBACK_RECOVERY
-BWS-592=PENDING_SOAK_FAILURE_INJECTION
-BWS-593=PENDING_EXTERNAL_RUNTIME_PREFLIGHT
-BWS-599=PENDING_FINAL_LOCAL_ACCEPTANCE
+BWS-592=VALIDATED_SOAK_FAILURE_INJECTION
+BWS-593=VALIDATED_EXTERNAL_RUNTIME_PREFLIGHT
+BWS-599=VALIDATED_FINAL_LOCAL_ACCEPTANCE
 ```
 
 The detailed dependency map is `backlog/bws_remaining_safe_local_map.csv` and the implementation blueprints are `docs/042` through `docs/046`.
@@ -51,8 +51,8 @@ The detailed dependency map is `backlog/bws_remaining_safe_local_map.csv` and th
 
 ```text
 selected_controller=run-autonomous-implementation.sh
-selected_task=BWS-592
-paper_autopilot_selected=no_until_BWS-599_local_acceptance_or_BWS-600_campaign
+selected_task=BWS-599
+paper_autopilot_selected=no_until_BWS-600_external_campaign
 bugfix_autopilot_selected=no
 force_unlock_required=no_evidence
 automation_maintenance_allowed=no

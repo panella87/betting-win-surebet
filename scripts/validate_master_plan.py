@@ -28,13 +28,13 @@ def main() -> None:
     required = {
         'docs/MASTER_PLAN.md': [
             PROGRAM, 'repo_role=surebet_strategy_application', 'upstream_platform=betting-win',
-            'current_task=BWS-592', 'safe_local_terminal_gate=BWS-599',
+            'current_task=BWS-599', 'safe_local_terminal_gate=BWS-599',
             'continuous_runtime_gate=BWS-600', 'execution_gate=BWS-900',
             'BWS-581', 'BWS-599', 'backlog/bws_full_implementation.csv',
             'run-autonomous-implementation.sh', 'run-bugfix-autopilot.sh', 'run-paper-autopilot.sh',
         ],
         'docs/repo_status_current.md': [
-            PROGRAM, 'status=IMPLEMENTATION_READY', 'current_task=BWS-592',
+            PROGRAM, 'status=IMPLEMENTATION_READY', 'current_task=BWS-599',
             'safe_local_terminal_gate=BWS-599',
             'selected_controller=run-autonomous-implementation.sh',
         ],
@@ -43,7 +43,7 @@ def main() -> None:
         ],
         'docs/029_full_implementation_task_ledger.md': [
             PROGRAM, 'backlog/bws_full_implementation.csv',
-            'current_task=BWS-592', 'current_task_status=PENDING',
+            'current_task=BWS-599', 'current_task_status=VALIDATED',
         ],
         'docs/030_upstream_compatibility_and_pin_contract.md': [
             'BETTING_WIN_REPO_PATH', 'config/betting-win.upstream.lock.json',
@@ -53,11 +53,11 @@ def main() -> None:
             'BWS-520', 'BWS-580', 'BWS-581', 'BWS-599', 'BWS-600',
         ],
         'docs/034_remaining_operator_runtime_implementation_program.md': [
-            'current_task=BWS-592', 'safe_local_terminal_gate=BWS-599',
+            'current_task=BWS-599', 'safe_local_terminal_gate=BWS-599',
             'BWS-581', 'BWS-589', 'BWS-599',
         ],
         'docs/012_runbook.md': [
-            'run-autonomous-implementation.sh', 'current_task=BWS-592', 'BWS-599', 'run-paper-autopilot.sh',
+            'run-autonomous-implementation.sh', 'current_task=BWS-599', 'BWS-599', 'run-paper-autopilot.sh',
         ],
         'docs/018_private_paper_mode_runbook.md': [
             'current_stage=operator_runtime_implementation', 'BWS-582', 'BWS-599', 'BWS-600',

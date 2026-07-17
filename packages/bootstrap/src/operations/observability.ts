@@ -399,8 +399,10 @@ export function registerBwsEvidenceArtifact(request: Readonly<{
   const existingEntries = readEvidenceIndexEntries(paths.evidenceIndexFilePath);
   const duplicate = existingEntries.some((candidate) => candidate.path === entry.path && candidate.sha256 === entry.sha256);
   if (!duplicate) {
+    mkdirSync(dirname(paths.evidenceIndexFilePath), { recursive: true });
     appendFileSync(paths.evidenceIndexFilePath, `${JSON.stringify(entry)}\n`, 'utf-8');
   }
+  mkdirSync(dirname(paths.evidenceIndexSummaryPath), { recursive: true });
   writeJsonFile(paths.evidenceIndexSummaryPath, summarizeEntries(readEvidenceIndexEntries(paths.evidenceIndexFilePath)));
   return entry;
 }

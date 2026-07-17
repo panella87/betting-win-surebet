@@ -175,6 +175,47 @@
       "type": "string",
       "minLength": 1
     },
+    "runtimeEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "elapsedWallClockMs",
+        "lastObservedAt",
+        "observationCount",
+        "requiredDurationMs",
+        "runner",
+        "startedAt"
+      ],
+      "properties": {
+        "completedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "elapsedWallClockMs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "lastObservedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "observationCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "requiredDurationMs": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "runner": {
+          "const": "managed_runtime"
+        },
+        "startedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
     "schema": {
       "const": "bws.soak_campaign_result.v1"
     },

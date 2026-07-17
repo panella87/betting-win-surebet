@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { createHash } from 'node:crypto';
 import {
+  existsSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
@@ -22,7 +23,9 @@ import { readBettingWinUpstreamLock } from '../packages/upstream/src/index.js';
 
 const REPO_ROOT = process.cwd();
 const TEST_TIMESTAMP = '2026-07-16T19:00:00.000Z';
-test('external runtime preflight builds a deterministic export-mode manifest without leaking secrets', async () => {
+const SEQUENTIAL_TEST_OPTIONS = Object.freeze({ concurrency: false });
+
+test('external runtime preflight builds a deterministic export-mode manifest without leaking secrets', SEQUENTIAL_TEST_OPTIONS, async () => {
   const fixture = await createFixture();
   try {
     const first = await createBwsExternalRuntimeCampaignManifest(createExportRequest(fixture));
@@ -48,7 +51,7 @@ test('external runtime preflight builds a deterministic export-mode manifest wit
   }
 });
 
-test('external runtime preflight API mode inspects a loopback contract endpoint and CLI prepare prints json', async () => {
+test('external runtime preflight API mode inspects a loopback contract endpoint and CLI prepare prints json', SEQUENTIAL_TEST_OPTIONS, async () => {
   const fixture = await createFixture();
   const capture = createCaptureStream();
   const server = createServer((request, response) => {
@@ -156,7 +159,7 @@ test('external runtime preflight API mode inspects a loopback contract endpoint 
   }
 });
 
-test('external runtime preflight rejects credential-bearing API URLs', async () => {
+test('external runtime preflight rejects credential-bearing API URLs', SEQUENTIAL_TEST_OPTIONS, async () => {
   const fixture = await createFixture();
   writeApiEnvFile(fixture.apiEnvFile, 'http://127.0.0.1:4301');
   try {
@@ -177,7 +180,7 @@ test('external runtime preflight rejects credential-bearing API URLs', async () 
   }
 });
 
-test('external runtime preflight rejects install verification evidence for a different selected mode', async () => {
+test('external runtime preflight rejects install verification evidence for a different selected mode', SEQUENTIAL_TEST_OPTIONS, async () => {
   const fixture = await createFixture();
   try {
     await assert.rejects(
@@ -193,7 +196,7 @@ test('external runtime preflight rejects install verification evidence for a dif
   }
 });
 
-test('external runtime preflight rejects incomplete soak evidence that does not reach cleanup verification', async () => {
+test('external runtime preflight rejects incomplete soak evidence that does not reach cleanup verification', SEQUENTIAL_TEST_OPTIONS, async () => {
   const fixture = await createFixture();
   try {
     await assert.rejects(
@@ -204,6 +207,22 @@ test('external runtime preflight rejects incomplete soak evidence that does not 
           soakStateFile: fixture.incompleteSoakStateFile,
         }),
       /cleanup_verified|duration budget/i,
+    );
+  } finally {
+    fixture.dispose();
+  }
+});
+
+test('external runtime preflight rejects soak evidence without retained managed runtime wall-clock proof', SEQUENTIAL_TEST_OPTIONS, async () => {
+  const fixture = await createFixture();
+  try {
+    const state = JSON.parse(readFileSync(fixture.exportSoakStateFile, 'utf-8')) as Record<string, unknown>;
+    delete state.runtimeEvidence;
+    writeFileSync(fixture.exportSoakStateFile, `${JSON.stringify(state, null, 2)}\n`, 'utf-8');
+
+    await assert.rejects(
+      () => createBwsExternalRuntimeCampaignManifest(createExportRequest(fixture)),
+      /managed runtime wall-clock proof/i,
     );
   } finally {
     fixture.dispose();
@@ -279,6 +298,7 @@ function createApiRequest(fixture: Awaited<ReturnType<typeof createFixture>>) {
 }
 
 async function createFixture() {
+  resetSharedObservabilityDirectory();
   const tempDirectory = mkdtempSync(join(REPO_ROOT, 'artifacts', 'bws-external-runtime-preflight-'));
   const releaseDirectoryAbsolute = join(tempDirectory, 'release');
   const runtimeDirectoryAbsolute = join(tempDirectory, 'runtime');
@@ -445,8 +465,8 @@ async function createFixture() {
     apiSoakStateFile: apiSoak.stateFile,
     backupManifestFile: backupManifestFileAbsolute,
     dispose() {
-      rmSync(tempDirectory, { force: true, recursive: true, maxRetries: 5, retryDelay: 20 });
-      rmSync(join(REPO_ROOT, 'runtime', 'bws-observability'), { force: true, recursive: true, maxRetries: 5, retryDelay: 20 });
+      removeDirectoryWithRetries(tempDirectory);
+      removeDirectoryWithRetries(join(REPO_ROOT, 'runtime', 'bws-observability'));
     },
     evidenceDirectory: evidenceDirectoryAbsolute,
     exportEnvFile: exportEnvFileAbsolute,
@@ -469,6 +489,10 @@ async function createFixture() {
     tempDirectory,
     upstreamLockFingerprint,
   });
+}
+
+function resetSharedObservabilityDirectory(): void {
+  removeDirectoryWithRetries(join(REPO_ROOT, 'runtime', 'bws-observability'));
 }
 
 async function createSoakEvidence(request: Readonly<{
@@ -519,6 +543,7 @@ async function createSoakEvidence(request: Readonly<{
       resultFile: relative(REPO_ROOT, join(request.outputDirectory, 'result.json')),
       stateFile: relative(REPO_ROOT, stateFile),
     });
+    writeSoakRuntimeEvidenceState(stateFile, 7_200_000, 2);
   } else {
     await recordBwsSoakCampaignCheckpoint({
       classification: 'cycle_observed',
@@ -535,6 +560,24 @@ async function createSoakEvidence(request: Readonly<{
     manifestFile,
     stateFile,
   });
+}
+
+function writeSoakRuntimeEvidenceState(
+  stateFile: string,
+  elapsedWallClockMs: number,
+  observationCount: number,
+): void {
+  const parsed = JSON.parse(readFileSync(stateFile, 'utf-8')) as Record<string, unknown>;
+  parsed.runtimeEvidence = Object.freeze({
+    completedAt: TEST_TIMESTAMP,
+    elapsedWallClockMs,
+    lastObservedAt: TEST_TIMESTAMP,
+    observationCount,
+    requiredDurationMs: 7_200_000,
+    runner: 'managed_runtime',
+    startedAt: TEST_TIMESTAMP,
+  });
+  writeFileSync(stateFile, `${JSON.stringify(parsed, null, 2)}\n`, 'utf-8');
 }
 
 function writeExportEnvFile(path: string): void {
@@ -699,4 +742,19 @@ function createCaptureStream() {
       },
     } as unknown as NodeJS.WriteStream,
   });
+}
+
+function removeDirectoryWithRetries(path: string): void {
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    rmSync(path, { force: true, recursive: true, maxRetries: 5, retryDelay: 20 });
+    if (!existsSync(path)) {
+      return;
+    }
+    sleepSynchronously(25);
+  }
+  rmSync(path, { force: true, recursive: true, maxRetries: 5, retryDelay: 20 });
+}
+
+function sleepSynchronously(durationMs: number): void {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, durationMs);
 }
