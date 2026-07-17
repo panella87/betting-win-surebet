@@ -663,7 +663,7 @@ automation_run_argv_command() {
 automation_source_path_is_excluded() {
   local rel="${1#./}"
   case "$rel" in
-    .git|.git/*|artifacts|artifacts/*|node_modules|node_modules/*|dist|dist/*|coverage|coverage/*|tmp|tmp/*|.tmp|.tmp/*|.cache|.cache/*|\
+    .git|.git/*|artifacts|artifacts/*|runtime|runtime/*|node_modules|node_modules/*|dist|dist/*|coverage|coverage/*|tmp|tmp/*|.tmp|.tmp/*|.cache|.cache/*|\
     .automation/tmp|.automation/tmp/*|\
     .automation/locks|.automation/locks/*|.automation/corrupt|.automation/corrupt/*|\
     .automation/paper-mode-to-autonomous-implementation.env|.automation/paper-mode-handover.env|\

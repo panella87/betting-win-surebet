@@ -122,6 +122,66 @@ test('start.sh and stop.sh delegate to the product-owned lifecycle helper', () =
   }
 });
 
+test('paper runtime-evidence wrapper loads only selected .env values and forces API mode', () => {
+  const repositoryRoot = mkdtempSync(join(tmpdir(), 'bws-root-paper-runtime-evidence-'));
+  try {
+    mkdirSync(join(repositoryRoot, 'scripts'), { recursive: true });
+    mkdirSync(join(repositoryRoot, 'dist', 'packages', 'bootstrap', 'src', 'cli'), { recursive: true });
+    copyFileSync(
+      join(REPO_ROOT, 'scripts', 'bws-root-wrapper-runtime.mjs'),
+      join(repositoryRoot, 'scripts', 'bws-root-wrapper-runtime.mjs'),
+    );
+    writeFileSync(
+      join(repositoryRoot, '.env'),
+      [
+        'SUREBET_PG_DATABASE=database-from-env',
+        'BWS_API_PORT=4321',
+        'UNRELATED_PRIVATE_VALUE=must-not-load',
+        '',
+      ].join('\n'),
+      'utf-8',
+    );
+    writeFileSync(
+      join(repositoryRoot, 'dist', 'packages', 'bootstrap', 'src', 'cli', 'bws-paper-runtime-evidence.js'),
+      [
+        "process.stdout.write(JSON.stringify({",
+        "  apiPort: process.env.BWS_API_PORT,",
+        "  argv: process.argv.slice(2),",
+        "  database: process.env.SUREBET_PG_DATABASE,",
+        "  exportSelection: process.env.BWS_UPSTREAM_EXPORT_SELECTION_PATH,",
+        "  mode: process.env.BWS_UPSTREAM_MODE,",
+        "  unrelated: process.env.UNRELATED_PRIVATE_VALUE,",
+        "}));",
+        '',
+      ].join('\n'),
+      'utf-8',
+    );
+
+    const output = execFileSync(
+      'node',
+      ['scripts/bws-root-wrapper-runtime.mjs', 'paper-runtime-evidence', '--output', 'artifacts/result.json'],
+      {
+        cwd: repositoryRoot,
+        encoding: 'utf-8',
+        env: {
+          ...process.env,
+          BWS_UPSTREAM_EXPORT_SELECTION_PATH: 'config/stale-export.json',
+          BWS_UPSTREAM_MODE: 'export',
+        },
+      },
+    );
+    const parsed = JSON.parse(output) as Readonly<Record<string, unknown>>;
+    assert.equal(parsed.apiPort, '4321');
+    assert.deepEqual(parsed.argv, ['--output', 'artifacts/result.json']);
+    assert.equal(parsed.database, 'database-from-env');
+    assert.equal(parsed.exportSelection, undefined);
+    assert.equal(parsed.mode, 'api');
+    assert.equal(parsed.unrelated, undefined);
+  } finally {
+    rmSync(repositoryRoot, { recursive: true, force: true });
+  }
+});
+
 async function createRuntimeFixture(options: Readonly<{
   readonly envOverrides?: Readonly<Record<string, string>>;
 }> = {}): Promise<{

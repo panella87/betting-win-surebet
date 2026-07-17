@@ -19,8 +19,10 @@ test('historical private-paper ledger remains evidence while full lifecycle task
 test('paper evaluation and paper autopilot are validated and remain ready for the external BWS-600 campaign', () => {
   assert.match(read('docs/automation/paper-evaluation.md'), /validated_task=BWS-588/);
   assert.match(read('docs/automation/paper-autopilot.md'), /integration_task=BWS-589/);
-  assert.match(read('docs/repo_status_current.md'), /paper_autopilot=runtime_evidence_parent_validated_ready_for_bws_600/);
-  assert.match(read('docs/repo_status_current.md'), /selected_controller=run-autonomous-implementation\.sh/);
+  assert.match(read('docs/018_private_paper_mode_runbook.md'), /runtime_upstream_mode=api_only/);
+  assert.match(read('docs/018_private_paper_mode_runbook.md'), /automatic_file_fallback=prohibited/);
+  assert.match(read('docs/repo_status_current.md'), /paper_autopilot=selected_for_bws_600_runtime_evidence/);
+  assert.match(read('docs/repo_status_current.md'), /selected_controller=run-paper-autopilot\.sh/);
   const command = read('commands/run-sure-paper-mode-autonomous.sh');
   assert.match(command, /run-paper-autopilot\.sh/);
   assert.equal(command.includes('DATABASE' + '_URL'), false);

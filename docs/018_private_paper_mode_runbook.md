@@ -3,28 +3,23 @@
 ```text
 paper_mode_owner=betting-win-surebet
 account_policy=separate_from_betting-win-betting
-current_stage=operator_runtime_implementation
-current_task=BWS-599
+current_stage=external_runtime_evidence
+current_task=BWS-600
 safe_local_terminal_gate=BWS-599
 external_runtime_gate=BWS-600
+runtime_upstream_mode=api_only
+automatic_file_fallback=prohibited
 ```
 
 ## Validated foundation
 
 `BWS-310` validates bounded private-paper domain behavior, `BWS-510` validates integrated loopback behavior, `BWS-582` validates long-running scheduler and worker services, and `BWS-520` through `BWS-584` validate executable components, bounded convergence/scheduling, managed loopback cockpit serving, a complete product-owned lifecycle owner and runtime handoff.
 
-## Remaining implementation
+## Current runtime evidence
 
-`BWS-585` through `BWS-599` continue converting those components into a continuous operator-owned stack with complete lifecycle ownership, observability, protected wrapper integration, service-owned paper evaluation, paper autopilot, release/recovery tooling, soak proof and final local acceptance after `BWS-583` closed managed cockpit serving.
+`BWS-585` through `BWS-599` are validated. The active private-paper gate is `BWS-600`, using only the typed operator-approved betting-win read-only API.
 
-Private paper selects exactly one explicit upstream mode:
-
-```text
-export  immutable pinned betting-win export
-api     typed operator-approved read-only betting-win query/API
-```
-
-There is no automatic fallback to another mode, fixture or mock.
+The operator does not select an upstream mode. Runtime transport is fixed to API, and there is no export, fixture, mock, or file fallback.
 
 ## Evidence
 

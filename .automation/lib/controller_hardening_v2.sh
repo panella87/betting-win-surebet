@@ -193,7 +193,7 @@ automation_v2_source_path_excluded() {
     automation_source_path_is_excluded "$path" && return 0
   fi
   case "$path" in
-    artifacts|artifacts/*|node_modules|node_modules/*|dist|dist/*|coverage|coverage/*|logs|logs/*|*.log|*.zip|*.tar|*.tar.gz|*.tgz|.git|.git/*|.tmp|.tmp/*|tmp|tmp/*)
+    artifacts|artifacts/*|runtime|runtime/*|node_modules|node_modules/*|dist|dist/*|coverage|coverage/*|logs|logs/*|*.log|*.zip|*.tar|*.tar.gz|*.tgz|.git|.git/*|.tmp|.tmp/*|tmp|tmp/*)
       return 0
       ;;
     .automation/*.lock|.automation/*.lock/*|.automation/runtime|.automation/runtime/*|.automation/consumed-handoffs|.automation/consumed-handoffs/*)

@@ -6,6 +6,7 @@ Repository: `betting-win-surebet`.
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 current_task=BWS-599
 current_task_status=VALIDATED
+active_implementation_queue=none
 safe_local_terminal_gate=BWS-599
 external_runtime_gate=BWS-600
 ```

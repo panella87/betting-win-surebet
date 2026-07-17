@@ -257,6 +257,7 @@ test('evidence index deduplicates repeated registrations and diagnostics bundles
       }[]>;
       readonly schema: string;
       readonly sourceFingerprints: {
+        readonly sourceManifestGeneratedAt: string;
         readonly sourceManifestSha256: string;
       };
     };
@@ -264,6 +265,7 @@ test('evidence index deduplicates repeated registrations and diagnostics bundles
     assert.equal(manifest.configurationPresence.BWS_API_PORT, true);
     assert.equal(manifest.evidenceIndex.entryCount, 1);
     assert.equal(manifest.logs.private_paper_scheduler?.[0]?.eventCode, 'diagnostic_event');
+    assert.equal(manifest.sourceFingerprints.sourceManifestGeneratedAt, TEST_TIMESTAMP);
     assert.equal(manifest.sourceFingerprints.sourceManifestSha256.length, 64);
   } finally {
     rmSync(repositoryRoot, { force: true, recursive: true });
@@ -280,7 +282,7 @@ function createRepositoryFixture(): string {
   );
   writeFileSync(
     join(root, 'SOURCE_MANIFEST.json'),
-    `${JSON.stringify({ generatedAt: TEST_TIMESTAMP, overlay: 'none' }, null, 2)}\n`,
+    `${JSON.stringify({ generated: TEST_TIMESTAMP, overlay: 'none' }, null, 2)}\n`,
     'utf-8',
   );
   writeFileSync(

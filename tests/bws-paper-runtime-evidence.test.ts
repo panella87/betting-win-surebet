@@ -468,3 +468,30 @@ test('paper runtime evidence returns a bounded blocker when the observation wind
   assert.equal(result.observation.sampleCount, 1);
   assert.equal(result.observation.samples[0]?.apiStatus, 'blocked');
 });
+
+
+test('paper runtime evidence retains a bounded redacted collection-failure stage', async (t) => {
+  const repositoryRoot = createTestRepositoryRoot(t);
+  process.env.BWS_UPSTREAM_MODE = 'api';
+  const databaseUri = `${['post', 'gresql'].join('')}://user:database-secret@127.0.0.1:5432/db`;
+  const result = await createBwsPaperRuntimeEvidence({
+    collectDiagnostics: async () => {
+      throw new Error(
+        `diagnostics password=prefix:super-secret ${databaseUri} Bearer bearer-secret failed\nnext-line`,
+      );
+    },
+    getLifecycleStatus: async () => createLifecycleStatus('running'),
+    intervalMs: 1000,
+    maxDurationMs: 2000,
+    repositoryRoot,
+  });
+
+  assert.equal(result.finalStatus, 'PAPER_EVALUATION_BLOCKED_RUNTIME_EVIDENCE_COLLECTION_FAILED');
+  assert.equal(result.collectionFailure?.stage, 'diagnostics_collection');
+  assert.equal(result.collectionFailure?.errorName, 'Error');
+  assert.match(
+    result.collectionFailure?.message ?? '',
+    /password=\[redacted\].+\[redacted\]@127\.0\.0\.1:5432\/db Bearer \[redacted\] failed next-line/,
+  );
+  assert.doesNotMatch(result.collectionFailure?.message ?? '', /prefix|super-secret|database-secret|bearer-secret/);
+});

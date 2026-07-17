@@ -49,6 +49,11 @@ export interface BwsPaperRuntimeEvidenceObservationSample {
 }
 
 export interface BwsPaperRuntimeEvidenceResult {
+  readonly collectionFailure?: Readonly<{
+    readonly errorName: string;
+    readonly message: string;
+    readonly stage: BwsPaperRuntimeEvidenceCollectionStage;
+  }>;
   readonly finalStatus: BwsPaperRuntimeEvidenceFinalStatus;
   readonly generatedAt: string;
   readonly latestDiagnosticsManifestFile?: string;
@@ -78,6 +83,17 @@ export interface BwsPaperRuntimeEvidenceResult {
     | 'runtime_status_identity_or_configuration_mismatch'
     | 'runtime_window_ready_local_only';
 }
+
+export type BwsPaperRuntimeEvidenceCollectionStage =
+  | 'diagnostics_collection'
+  | 'diagnostics_manifest_read'
+  | 'evidence_index_summary'
+  | 'initial_lifecycle_status'
+  | 'lifecycle_start'
+  | 'observation_lifecycle_status'
+  | 'observation_sleep'
+  | 'runtime_handoff_creation'
+  | 'runtime_stop';
 
 export interface CreateBwsPaperRuntimeEvidenceRequest {
   readonly collectDiagnostics?: (request: Readonly<{ readonly repositoryRoot: string }>) => Promise<BwsDiagnosticsBundleResult>;
@@ -165,8 +181,11 @@ export async function createBwsPaperRuntimeEvidence(
   let startedLifecycle = false;
   let finalStatus: BwsPaperRuntimeEvidenceFinalStatus = 'PAPER_EVALUATION_BLOCKED_RUNTIME_EVIDENCE_COLLECTION_FAILED';
   let stopReason: BwsPaperRuntimeEvidenceResult['stopReason'] = 'runtime_evidence_collection_failed';
+  let activeStage: BwsPaperRuntimeEvidenceCollectionStage = 'initial_lifecycle_status';
+  let collectionFailure: BwsPaperRuntimeEvidenceResult['collectionFailure'];
 
   try {
+    activeStage = 'initial_lifecycle_status';
     const initialStatus = await readLifecycleStatusOrThrow(getLifecycleStatus, lifecycleRequest);
     if (initialStatus === undefined) {
       stackOwnership = 'ambiguous_preserved';
@@ -175,6 +194,7 @@ export async function createBwsPaperRuntimeEvidence(
       stopReason = 'runtime_status_identity_or_configuration_mismatch';
     } else {
       if (initialStatus.outcome === 'not_running' || initialStatus.outcome === 'stale_state_cleaned') {
+        activeStage = 'lifecycle_start';
         const startStatus = await startLifecycle(lifecycleRequest);
         if (startStatus.outcome !== 'started' && startStatus.outcome !== 'stale_state_cleaned') {
           throw new Error(`Unexpected lifecycle start outcome: ${startStatus.outcome}`);
@@ -190,9 +210,13 @@ export async function createBwsPaperRuntimeEvidence(
       let ready = false;
       do {
         const cycleGeneratedAt = now();
+        activeStage = 'observation_lifecycle_status';
         const lifecycleStatus = await getLifecycleStatus(lifecycleRequest);
+        activeStage = 'diagnostics_collection';
         const diagnostics = await collectDiagnostics({ repositoryRoot });
+        activeStage = 'diagnostics_manifest_read';
         const manifest = readDiagnosticsManifest(repositoryRoot, diagnostics.bundleManifestFile);
+        activeStage = 'evidence_index_summary';
         const evidenceIndex = summarizeEvidenceIndex(repositoryRoot);
         const sample = buildObservationSample(
           cycleGeneratedAt,
@@ -204,6 +228,7 @@ export async function createBwsPaperRuntimeEvidence(
         samples.push(sample);
         ready = sampleIsReady(sample);
         if (ready && runtimeHandoff === undefined) {
+          activeStage = 'runtime_handoff_creation';
           runtimeHandoff = await createRuntimeHandoff({ repositoryRoot });
         }
         if (ready && !keepMonitoringWhenReady) {
@@ -212,6 +237,7 @@ export async function createBwsPaperRuntimeEvidence(
         if (Date.parse(cycleGeneratedAt) - observationStart >= maxDurationMs) {
           break;
         }
+        activeStage = 'observation_sleep';
         await sleepFor(intervalMs);
       } while (true);
 
@@ -223,16 +249,19 @@ export async function createBwsPaperRuntimeEvidence(
         stopReason = 'runtime_observation_window_not_ready';
       }
     }
-  } catch {
+  } catch (error) {
+    collectionFailure = createCollectionFailure(activeStage, error);
     finalStatus = 'PAPER_EVALUATION_BLOCKED_RUNTIME_EVIDENCE_COLLECTION_FAILED';
     stopReason = 'runtime_evidence_collection_failed';
   }
 
   if (startedLifecycle) {
     try {
+      activeStage = 'runtime_stop';
       await stopLifecycle(lifecycleRequest);
       stackStopDisposition = 'stopped_started_stack';
-    } catch {
+    } catch (error) {
+      collectionFailure = createCollectionFailure('runtime_stop', error);
       stackStopDisposition = 'preserved_due_to_ambiguity';
       finalStatus = 'PAPER_EVALUATION_BLOCKED_RUNTIME_STOP_FAILED';
       stopReason = 'runtime_stack_stop_failed';
@@ -240,6 +269,7 @@ export async function createBwsPaperRuntimeEvidence(
   }
 
   return createResult({
+    ...(collectionFailure === undefined ? {} : { collectionFailure }),
     finalStatus,
     generatedAt: now(),
     intervalMs,
@@ -316,6 +346,7 @@ function sampleIsReady(sample: BwsPaperRuntimeEvidenceObservationSample): boolea
 }
 
 function createResult(request: Readonly<{
+  readonly collectionFailure?: BwsPaperRuntimeEvidenceResult['collectionFailure'];
   readonly finalStatus: BwsPaperRuntimeEvidenceFinalStatus;
   readonly generatedAt: string;
   readonly intervalMs: number;
@@ -332,6 +363,9 @@ function createResult(request: Readonly<{
   readonly stopReason: BwsPaperRuntimeEvidenceResult['stopReason'];
 }>): BwsPaperRuntimeEvidenceResult {
   return Object.freeze({
+    ...(request.collectionFailure === undefined
+      ? {}
+      : { collectionFailure: request.collectionFailure }),
     finalStatus: request.finalStatus,
     generatedAt: request.generatedAt,
     ...(request.latestDiagnosticsManifestFile === undefined
@@ -379,6 +413,32 @@ async function readLifecycleStatusOrThrow(
 function readDiagnosticsManifest(repositoryRoot: string, manifestFile: string): RuntimeEvidenceManifest {
   const manifestPath = resolve(repositoryRoot, manifestFile);
   return JSON.parse(readFileSync(manifestPath, 'utf-8')) as RuntimeEvidenceManifest;
+}
+
+function createCollectionFailure(
+  stage: BwsPaperRuntimeEvidenceCollectionStage,
+  error: unknown,
+): NonNullable<BwsPaperRuntimeEvidenceResult['collectionFailure']> {
+  const rawName = error instanceof Error ? error.name : 'Error';
+  const rawMessage = error instanceof Error ? error.message : String(error);
+  const message = rawMessage
+    .replace(/\b([a-z][a-z0-9+.-]*:\/\/)[^\s/@:]+:[^\s/@]+@/gi, '$1[redacted]@')
+    .replace(/\b(Bearer|Basic)\s+[^\s,;]+/gi, '$1 [redacted]')
+    .replace(
+      /(?:api[_ -]?key|credential|mnemonic|passphrase|password|private[_ -]?key|secret|seed|token)\s*[:=]\s*(?:"[^"]*"|'[^']*'|[^\s,;]+)/gi,
+      (match) => {
+        const separatorIndex = match.search(/[:=]/);
+        return `${match.slice(0, separatorIndex + 1)}[redacted]`;
+      },
+    )
+    .replace(/[\r\n\t]+/g, ' ')
+    .trim()
+    .slice(0, 512);
+  return Object.freeze({
+    errorName: rawName.replace(/[^A-Za-z0-9_.-]/g, '_').slice(0, 80) || 'Error',
+    message: message || 'Runtime evidence collection failed without an error message.',
+    stage,
+  });
 }
 
 function requireUpstreamMode(value: string | undefined): 'api' | 'export' {

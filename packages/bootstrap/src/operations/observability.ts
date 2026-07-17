@@ -730,11 +730,11 @@ function collectSourceFingerprints(
   };
   const sourceManifestContents = readFileSync(sourceManifestPath, 'utf-8');
   const sourceManifest = JSON.parse(sourceManifestContents) as {
-    readonly generatedAt?: unknown;
+    readonly generated?: unknown;
   };
   return Object.freeze({
     packageVersion: requireNonEmptyString(String(packageJson.version ?? ''), 'package.version'),
-    sourceManifestGeneratedAt: requireIsoTimestamp(String(sourceManifest.generatedAt ?? ''), 'SOURCE_MANIFEST.generatedAt'),
+    sourceManifestGeneratedAt: requireIsoTimestamp(String(sourceManifest.generated ?? ''), 'SOURCE_MANIFEST.generated'),
     sourceManifestSha256: sha256String(sourceManifestContents),
     upstreamCommitSha: config.upstream.lock.commitSha,
     upstreamGitTreeSha: config.upstream.lock.gitTreeSha,

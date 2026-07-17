@@ -8,15 +8,9 @@ canonical_history_owner=betting-win
 strategy_state_owner=betting-win-surebet
 ```
 
-A process selects exactly one explicit upstream mode:
+The operator runtime uses the typed betting-win read-only API only. Workspace inspection and immutable export parsing remain deterministic development, fixture, and backtest compatibility surfaces; they are not selectable runtime transports.
 
-```text
-workspace  development-time read-only compatibility inspection
-export     immutable pinned betting-win.strategy-export.v1 input
-api        typed read-only betting-win query/API input
-```
-
-There is no automatic fallback. Each mode has distinct required configuration and validation.
+There is no automatic fallback from API runtime to a workspace, export, fixture, or mock input.
 
 Canonical family:
 

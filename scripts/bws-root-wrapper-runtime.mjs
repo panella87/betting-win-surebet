@@ -70,6 +70,9 @@ async function main() {
     case 'stop':
       runLifecycleStop();
       return;
+    case 'paper-runtime-evidence':
+      runPaperRuntimeEvidence(rest);
+      return;
     case 'runtime-summary':
       await printRuntimeSummary();
       return;
@@ -78,7 +81,7 @@ async function main() {
       return;
     default:
       fail(
-        'Usage: node scripts/bws-root-wrapper-runtime.mjs <start|stop|runtime-summary|runtime-log-path>',
+        'Usage: node scripts/bws-root-wrapper-runtime.mjs <start|stop|paper-runtime-evidence|runtime-summary|runtime-log-path>',
       );
   }
 }
@@ -104,6 +107,27 @@ function runLifecycleStart() {
     [cliPath, 'start'],
     environment,
     'BWS lifecycle start failed.',
+    true,
+  );
+  process.stdout.write(output);
+}
+
+function runPaperRuntimeEvidence(argumentsList) {
+  const environment = resolveRuntimeEnvironment();
+  const cliPath = resolve(
+    REPOSITORY_ROOT,
+    'dist/packages/bootstrap/src/cli/bws-paper-runtime-evidence.js',
+  );
+  if (!existsSync(cliPath)) {
+    fail(
+      `Missing paper runtime-evidence CLI: ${relative(REPOSITORY_ROOT, cliPath)}. Run npm run build first.`,
+    );
+  }
+  const output = runCommand(
+    'node',
+    [cliPath, ...argumentsList],
+    environment,
+    'BWS paper runtime evidence failed.',
     true,
   );
   process.stdout.write(output);

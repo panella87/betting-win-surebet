@@ -2,29 +2,29 @@
 
 ```text
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-current_task=BWS-599
-current_task_status=VALIDATED
-selected_controller=run-autonomous-implementation.sh
+current_task=BWS-600
+current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
+selected_controller=run-paper-autopilot.sh
 safe_local_terminal_gate=BWS-599
 ```
 
 `BWS-100` through `BWS-589` are validated carry-forward foundations. The runtime has full product lifecycle ownership, database lifecycle, observability, root wrappers, service-owned paper evaluation and runtime-evidence paper autopilot.
 
-The remaining queue is the final clean-room acceptance through `BWS-599`. `BWS-592` soak/failure injection and `BWS-593` external preflight are now validated carry-forward surfaces. Detailed contracts are `docs/039` through `docs/046`; the dependency-ordered subtask map is `backlog/bws_remaining_safe_local_map.csv`.
+The safe-local queue through `BWS-599` is complete. `BWS-592` soak/failure injection, `BWS-593` external preflight, and `BWS-599` final acceptance are validated carry-forward surfaces. The active gate is `BWS-600` external runtime evidence.
 
 `BETTING_WIN_REPO_PATH` remains a read-only pointer to the existing betting-win checkout. BWS reads committed `HEAD` through Git objects and must not clone, clean, reset or modify that checkout.
 
 ## Controller selection
 
 ```text
-run-autonomous-implementation.sh  selected for BWS-592 through BWS-599
+run-autonomous-implementation.sh  selected only for validated source-fix handoffs
 run-autonomous-bugfix.sh          standalone audit only
 run-bugfix-autopilot.sh           broad audit and automatic repair after implementation
 run-paper-evaluation.sh           fixture evaluator plus validated runtime-evidence mode
-run-paper-autopilot.sh            validated runtime-evidence parent for BWS-599/BWS-600 campaigns
+run-paper-autopilot.sh            selected runtime-evidence parent for BWS-600
 ```
 
-Do not use paper autopilot as a workaround for remaining local implementation.
+Paper autopilot is the normal route because no known safe-local implementation row remains.
 
 ## Exact protected-file policy
 

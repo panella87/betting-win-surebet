@@ -22,6 +22,6 @@ selected_now=yes_for_runtime_evidence_source_fix_loops
 - post-lock artifact refresh;
 - no parsing machine state from streamed logs.
 
-`BWS-599` must still prove the complete local paper-autopilot flow. `BWS-600` remains externally blocked until an operator-approved runtime campaign manifest and read-only input exist.
+`BWS-599` has validated the complete local paper-autopilot flow. `BWS-600` is now the selected externally gated campaign and remains blocked until the operator-approved betting-win read-only API and campaign evidence are available.
 
 Seven-day and 72-hour durations are ceilings. A bounded task may finish quickly, but the parent or implementation controller must continue while another dependency-ready safe task remains.

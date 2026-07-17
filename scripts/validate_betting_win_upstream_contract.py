@@ -157,7 +157,7 @@ def main() -> None:
 
     docs = {
         'README.md': [EXPECTED_ARCHIVE_SHA256, 'BWS-100', 'betting-win.strategy-export.v1', 'surebet_standard_binary_v0'],
-        'docs/002_dependency_contract_with_betting_win.md': ['workspace', 'export', 'api', 'There is no automatic fallback'],
+        'docs/002_dependency_contract_with_betting_win.md': ['read-only API only', 'Workspace inspection', 'immutable export parsing', 'There is no automatic fallback'],
         'docs/016_pinned_betting_win_interface_readiness.md': ['The upstream interface is no longer hypothetical', 'BWS-100'],
         'docs/030_upstream_compatibility_and_pin_contract.md': ['BETTING_WIN_REPO_PATH', 'committed `HEAD`', 'git show HEAD:', 'git ls-tree -r --full-tree HEAD', 'No fallback'],
         'docs/automation/current-implementation-task.md': ['prove the betting-win committed HEAD remains unchanged', 'no placeholder fields', 'no clone or temporary worktree'],

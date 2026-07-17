@@ -4,16 +4,17 @@
 
 `BWS-593` is safe local implementation. `BWS-600` is the external evidence campaign.
 
+```text
+runtime_upstream_mode=api_only
+automatic_file_fallback=prohibited
+selected_controller=run-paper-autopilot.sh
+```
+
 ## BWS-593 preflight tooling
 
-Provide a fail-closed preflight command that accepts exactly one operator-selected upstream input:
+Provide a fail-closed preflight command for the fixed API-only runtime input:
 
 ```text
-export mode
-  immutable export path
-  expected SHA-256
-  exact contract/profile/generation/lineage expectations
-
 api mode
   operator-approved read-only base URL
   exact contract version
@@ -21,10 +22,12 @@ api mode
   no provider credentials
 ```
 
+Export files are not operator-selectable BWS-600 runtime inputs.
+
 The preflight must verify:
 
 - exact `config/betting-win.upstream.lock.json` compatibility;
-- selected input mode and no fallback;
+- API-only input and no fallback;
 - private BWS database and runtime configuration presence;
 - loopback BWS API/cockpit binding;
 - execution and provider connections disabled;

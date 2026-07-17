@@ -1,20 +1,20 @@
 # 012 - Operator runbook
 
-## Current implementation campaign
+## Current runtime-evidence campaign
 
 ```text
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-current_task=BWS-599
+current_task=BWS-600
 safe_local_terminal_gate=BWS-599
-selected_controller=run-autonomous-implementation.sh
+selected_controller=run-paper-autopilot.sh
 ```
 
 1. Use Node 20.
 2. Keep `~/app_testing/betting-win-surebet` as the working repository.
 3. Set `BETTING_WIN_REPO_PATH` to the existing read-only `~/app_testing/betting-win` checkout. Do not clone or mutate it.
-4. Keep the private BWS `.env` configured for PostgreSQL and loopback runtime tests. `DB_URL_TEST` or a complete `SUREBET_TEST_*` tuple must reference an existing role with `CREATEDB` for disposable proof.
-5. Launch the canonical 72-hour implementation controller without `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`. The active task disallows protected automation changes and the controller enforces that fail-closed policy.
-6. Continue through every dependency-ready row to `BWS-599`. Do not route to paper autopilot while source tasks remain.
+4. Keep the private BWS `.env` configured for PostgreSQL and the accepted betting-win read-only API. The runtime wrapper loads only its explicit allowlist from `.env` and forces API mode.
+5. Launch the canonical seven-day paper autopilot without `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`. It owns 72-hour paper and implementation children and invokes implementation only for a validated source-fix handoff.
+6. Treat missing or incompatible betting-win API evidence as a precise BWS-600 runtime blocker. There is no export fallback.
 7. Inspect the newest retained machine-readable artifacts and ledger, not elapsed time alone.
 
 ## Runtime safety
@@ -23,6 +23,6 @@ The implementation may launch bounded, uniquely identified, loopback-only child 
 
 ## After local completion
 
-After `BWS-599` is validated, use the `BWS-593` preflight to create an operator-reviewed `bws.external_runtime_campaign.v1` manifest. Only then may the router select `run-paper-autopilot.sh` for `BWS-600`.
+`BWS-599` is validated. Use the `BWS-593` preflight and accepted betting-win API configuration as the input boundary for `run-paper-autopilot.sh` at `BWS-600`.
 
 `BWS-600` remains private paper. `BWS-900` remains separately parked execution.

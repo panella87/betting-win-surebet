@@ -15,7 +15,8 @@ backtesting_owner=betting-win-surebet
 paper_mode_owner=betting-win-surebet
 future_live_decision_owner=betting-win-surebet_after_explicit_gate
 account_policy=separate_from_betting-win-betting
-current_task=BWS-599
+current_task=BWS-600
+current_task_status=RUNTIME_EVIDENCE
 safe_local_terminal_gate=BWS-599
 external_runtime_gate=BWS-600
 execution_gate=closed
@@ -93,11 +94,11 @@ npm ci --ignore-scripts
 npm run validate
 ```
 
-## Autonomous implementation
+## Current automation route
 
-The selected controller is `run-autonomous-implementation.sh`. It reads the current task and binding ledger; no invented `--task` or prompt file is required.
+The selected controller is `run-paper-autopilot.sh` for the externally gated `BWS-600` runtime-evidence campaign. The safe-local implementation queue through `BWS-599` is complete; `run-autonomous-implementation.sh` is selected only when paper evidence produces a validated source-fix handoff.
 
-The protected root-wrapper and paper-controller integration phase is complete. The current `BWS-590` through `BWS-599` campaign authorizes no protected automation changes and must not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`.
+The protected root-wrapper and paper-controller integration phase is complete. Do not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`; any future protected automation repair requires a reviewed external overlay.
 
 ## Safety
 

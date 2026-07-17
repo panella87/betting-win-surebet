@@ -8,7 +8,7 @@ Build the complete private surebet application on top of the read-only betting-w
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 repo_role=surebet_strategy_application
 upstream_platform=betting-win
-current_task=BWS-599
+current_task=BWS-600
 safe_local_terminal_gate=BWS-599
 continuous_runtime_gate=BWS-600
 execution_gate=BWS-900
@@ -72,9 +72,9 @@ No task may pass by weakening validators, inventing upstream evidence, accepting
 
 ## Automation operating model
 
-- Remaining local implementation: `run-autonomous-implementation.sh`.
-- Broad audit and repair after implementation: `run-bugfix-autopilot.sh`.
-- Runtime evidence after `BWS-589` and final local acceptance: `run-paper-autopilot.sh`.
+- No known safe-local implementation queue remains; `run-autonomous-implementation.sh` is entered only through a validated source-fix handoff.
+- Broad audit and repair remains available through `run-bugfix-autopilot.sh` after the blueprint gate.
+- `run-paper-autopilot.sh` is selected for `BWS-600` runtime evidence.
 - Standalone audit and paper controllers remain available only for their explicit bounded roles.
 
 The protected wrapper and paper-controller integration phase is complete. The active `BWS-590` through `BWS-599` campaign authorizes no protected automation changes. Detailed execution blueprints are `docs/042` through `docs/046`, with machine-readable decomposition in `backlog/bws_remaining_safe_local_map.csv`.

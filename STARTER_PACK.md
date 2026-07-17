@@ -4,7 +4,7 @@
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 repo_role=surebet_strategy_application
 upstream_platform=betting-win
-current_task=BWS-599
+current_task=BWS-600
 safe_local_terminal_gate=BWS-599
 current_live_execution_gate=closed
 ```
@@ -36,4 +36,4 @@ BWS-593  external-runtime preflight and campaign manifest (validated)
 BWS-599  final local acceptance (validated)
 ```
 
-No safe local implementation row remains. Route to paper autopilot only for the later accepted `BWS-600` runtime campaign.
+No safe local implementation row remains. Route to paper autopilot for the active `BWS-600` runtime campaign.

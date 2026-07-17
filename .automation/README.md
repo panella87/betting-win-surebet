@@ -2,12 +2,12 @@
 
 ```text
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-current_task=BWS-599
+current_task=BWS-600
 safe_local_terminal_gate=BWS-599
-selected_controller=run-autonomous-implementation.sh
+selected_controller=run-paper-autopilot.sh
 ```
 
-`BWS-100` through `BWS-593` are validated. The active queue now builds final local acceptance through `BWS-599`.
+`BWS-100` through `BWS-599` are validated. No known safe-local implementation queue remains; the active route is `BWS-600` runtime evidence through paper autopilot.
 
 # `.automation/`
 
@@ -30,7 +30,7 @@ Parent autopilots pass `TELEGRAM_NOTIFY=0` to children and send one final parent
 
 ## Current maintenance gate
 
-The root-wrapper and paper-controller integration phase is complete. The active `BWS-590` through `BWS-599` task contains:
+The root-wrapper and paper-controller integration phase is complete. The closed safe-local implementation task contains:
 
 ```text
 automation_maintenance_allowed=no
@@ -41,7 +41,7 @@ Do not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`. The blanket manual protected-
 
 ## Current paper limitation
 
-`run-paper-evaluation.sh` and `run-paper-autopilot.sh` now expose the validated runtime-evidence local lifecycle from `BWS-588` and `BWS-589`. They do not replace the remaining release, recovery, soak, or final-acceptance queue.
+`run-paper-evaluation.sh` and `run-paper-autopilot.sh` expose the validated runtime-evidence lifecycle from `BWS-588` and `BWS-589`. They are now the selected path for `BWS-600`; implementation is entered only through a validated source-fix handoff.
 
 ## Repository temp and inode containment
 

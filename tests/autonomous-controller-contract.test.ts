@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -190,6 +190,31 @@ test('shared source fingerprint detects edits to an already-dirty tracked file',
 
     writeFileSync(join(tempRoot, 'artifacts.zip'), 'runtime evidence\n', 'utf-8');
     assert.equal(fingerprint(), secondDirtyFingerprint, 'runtime artifacts must be excluded');
+    mkdirSync(join(tempRoot, 'runtime', 'bws-observability'), { recursive: true });
+    writeFileSync(join(tempRoot, 'runtime', 'bws-observability', 'latest.json'), '{}\n', 'utf-8');
+    assert.equal(fingerprint(), secondDirtyFingerprint, 'generated runtime tree must be excluded');
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test('v2 source fingerprint excludes the generated runtime tree even without run_common loaded', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'surebet-v2-source-fingerprint-'));
+  const helper = join(REPO_ROOT, '.automation', 'lib', 'controller_hardening_v2.sh');
+  const fingerprint = (): string => execFileSync(
+    'bash',
+    ['-lc', '. "$HELPER_PATH"; automation_v2_source_tree_fingerprint "$1"', 'bash', tempRoot],
+    { encoding: 'utf-8', env: { ...process.env, HELPER_PATH: helper } },
+  ).trim();
+
+  try {
+    execFileSync('git', ['init', '-q'], { cwd: tempRoot });
+    writeFileSync(join(tempRoot, 'tracked.txt'), 'source\n', 'utf-8');
+    execFileSync('git', ['add', 'tracked.txt'], { cwd: tempRoot });
+    const before = fingerprint();
+    mkdirSync(join(tempRoot, 'runtime', 'generated'), { recursive: true });
+    writeFileSync(join(tempRoot, 'runtime', 'generated', 'state.json'), '{}\n', 'utf-8');
+    assert.equal(fingerprint(), before);
   } finally {
     rmSync(tempRoot, { recursive: true, force: true });
   }
@@ -207,6 +232,10 @@ test('paper evaluation controller exposes canonical no-service private fixture a
     'PAPER_EVALUATION_READY_PRIVATE_FIXTURE_ONLY_BLOCKED_ON_PINNED_BUNDLE',
     'PAPER_EVALUATION_READY_RUNTIME_EVIDENCE_LOCAL_ONLY',
     'PAPER_EVALUATION_BLOCKED_RUNTIME_OWNERSHIP_AMBIGUOUS',
+    'runtime_environment_loader=selective_root_wrapper_env',
+    'bws-root-wrapper-runtime.mjs',
+    'paper-runtime-evidence',
+    'runtime_evidence_failure_stage',
     'PAPER_EVALUATION_PINNED_BUNDLE_ACCEPTED_PRIVATE_REPORT_WRITTEN',
     'PAPER_EVALUATION_BLOCKED_INVALID_PINNED_BUNDLE','paper-mode-to-autonomous-implementation.env',
     'HANDOVER_SCHEMA_VERSION=1','SOURCE_EVIDENCE_SHA256','automation_v2_add_or_verify_fingerprint','automation_v2_write_env_atomic',
@@ -297,12 +326,15 @@ test('paper smoke and compatibility wrappers do not pre-create artifact outputs'
 
 test('status docs record the hardened controller surface', () => {
   const status = read('docs/repo_status_current.md');
-  assertContains(status, 'run_autonomous_implementation=standardized_and_selected_for_remaining_operator_runtime');
+  assertContains(status, 'run_autonomous_implementation=standardized_not_selected_no_known_implementation_queue');
   assertContains(status, 'run_autonomous_bugfix=standardized_standalone_audit');
   assertContains(status, 'run_bugfix_autopilot=standardized_parent_for_broad_audit_and_repair');
   assertContains(status, 'run_paper_evaluation=fixture_and_runtime_evidence_validated_bws_588');
   assertContains(status, 'run_paper_evaluation=fixture_and_runtime_evidence_validated_bws_588');
-  assertContains(status, 'run_paper_autopilot=runtime_evidence_parent_validated_bws_589_ready_for_bws_600');
+  assertContains(status, 'run_paper_autopilot=standardized_and_selected_for_bws_600_runtime_evidence');
+  assertContains(status, 'paper_runtime_env_loader=selective_root_wrapper_env');
+  assertContains(status, 'source_fingerprint_runtime_exclusion=enabled');
+  assertContains(status, 'runtime_evidence_failure_stage=bounded_redacted');
 });
 
 test('obsolete stop and paper-12h helpers are not present', () => {

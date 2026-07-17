@@ -21,7 +21,10 @@ test('autonomous authority records the completed safe-local operator-runtime que
   assert.match(task, /automation_maintenance_allowed=no/);
   assert.match(task, /allowed_protected_files=none/);
   assert.match(task, /recommended_cycle_timeout=6h/);
-  assert.match(status, /selected_controller=run-autonomous-implementation\.sh/);
-  assert.match(status, /current_task=BWS-599/);
+  assert.match(task, /active_implementation_queue=none/);
+  assert.match(status, /selected_controller=run-paper-autopilot\.sh/);
+  assert.match(status, /current_task=BWS-600/);
+  assert.match(status, /run_autonomous_implementation=standardized_not_selected_no_known_implementation_queue/);
+  assert.match(status, /run_paper_autopilot=standardized_and_selected_for_bws_600_runtime_evidence/);
   assert.match(status, /safe_local_terminal_gate=BWS-599/);
 });

@@ -44,6 +44,12 @@ package=json.loads((ROOT/'package.json').read_text())
 if 'runtime:upstream-export' in package.get('scripts',{}): errors.append('package.json: export runtime remains')
 for rel in ['run-paper-evaluation.sh','run-paper-autopilot.sh']:
  if 'upstream_mode=api' not in (ROOT/rel).read_text(): errors.append(f'{rel}: missing upstream_mode=api')
+wrapper=(ROOT/'scripts/bws-root-wrapper-runtime.mjs').read_text(encoding='utf-8')
+for marker in ["case 'paper-runtime-evidence'", "merged.BWS_UPSTREAM_MODE = 'api'", 'delete merged.BWS_UPSTREAM_EXPORT_SELECTION_PATH']:
+ if marker not in wrapper: errors.append(f'scripts/bws-root-wrapper-runtime.mjs: missing {marker}')
+paper=(ROOT/'run-paper-evaluation.sh').read_text(encoding='utf-8')
+for marker in ['scripts/bws-root-wrapper-runtime.mjs', 'paper-runtime-evidence', 'runtime_environment_loader=selective_root_wrapper_env']:
+ if marker not in paper: errors.append(f'run-paper-evaluation.sh: missing {marker}')
 
 for rel in [
  'packages/bootstrap/src/cli/bws-upstream-api-convergence.ts',

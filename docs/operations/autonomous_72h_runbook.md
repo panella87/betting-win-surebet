@@ -1,11 +1,11 @@
 # Autonomous 72-hour implementation runbook
 
-## Selected campaign
+## Completed safe-local campaign
 
 ```text
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 controller=run-autonomous-implementation.sh
-current_task=BWS-599
+current_task=BWS-599_VALIDATED
 safe_local_terminal_gate=BWS-599
 canonical_duration=72h
 max_cycles=200
@@ -13,7 +13,7 @@ cycle_timeout=6h
 validation_timeout=45m
 ```
 
-The controller starts with the first dependency-ready `PENDING` row and continues across validated cycles while safe local work remains. A cycle may complete quickly; the campaign must not declare goal complete while another dependency-ready task through `BWS-599` is pending.
+This campaign is retained as the completed BWS-599 implementation runbook. No dependency-ready safe-local `PENDING` row remains; the selected controller is now `run-paper-autopilot.sh` for BWS-600.
 
 Launch from `~/app_testing/betting-win-surebet` under Node 20. Point `BETTING_WIN_REPO_PATH` to the existing read-only checkout. Do not clone, reset or clean betting-win.
 

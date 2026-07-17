@@ -1,3 +1,11 @@
+## 2026-07-17 - Paper runtime-evidence recovery and BWS-600 routing
+
+- Routed the completed safe-local program through `run-paper-autopilot.sh` for `BWS-600` and marked autonomous implementation as handoff-only while no known implementation queue remains.
+- Added a selective root-wrapper paper-runtime command that loads only the approved private `.env` keys, forces API-only upstream transport, and removes stale export selectors before the compiled runtime entrypoint starts.
+- Excluded the repo-root generated `runtime/` tree from both source-fingerprint implementations, matching codebase packaging and source-manifest boundaries without hiding actual source changes.
+- Corrected observability to read the canonical `SOURCE_MANIFEST.generated` field and added precise, bounded, secret-redacted runtime-evidence failure stages.
+- Updated binding status, runbooks, validators, and regression tests for the completed `BWS-599` queue and active external `BWS-600` evidence gate.
+
 ## 2026-07-17 - API-only upstream transport
 
 - Removed the operator-selectable upstream mode and export path from active configuration, controllers, root CLI, package scripts, and runtime handoffs.

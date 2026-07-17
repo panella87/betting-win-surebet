@@ -3,11 +3,11 @@
 ```text
 repo=betting-win-surebet
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-status=IMPLEMENTATION_READY
+status=RUNTIME_EVIDENCE_READY
 repo_role=surebet_strategy_application
 upstream_platform=betting-win
-current_task=BWS-599
-current_task_status=VALIDATED
+current_task=BWS-600
+current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
 safe_local_terminal_gate=BWS-599
 provider_truth_owner=betting-win
 canonical_history_owner=betting-win
@@ -20,7 +20,7 @@ execution_gate=closed
 
 `BWS-100` through `BWS-593` are validated. The previous autonomous campaign truthfully closed `BWS-580`, the latest autonomous campaign closed `BWS-581` by adding a long-running explicit-mode upstream convergence service with durable state, overlap defense, signal-aware shutdown and machine-readable evidence, the follow-on cycle closed `BWS-582` by adding long-running scheduler and worker services with restart-safe state, queue backpressure, lease renewal and graceful drain behavior, the next cycle closed `BWS-583` by serving the built cockpit on loopback through the managed runtime with explicit API-mode build verification, independent readiness reporting and failure-closed asset validation, the following cycle closed `BWS-584` by expanding product-owned lifecycle control to the complete BWS stack with exact multi-role ownership, ordered shutdown, crash recovery and `/proc` identity verification, the next cycle closed `BWS-585` by adding product-owned migration status, backup, restore-verification and bounded retention commands with disposable PostgreSQL proof, the following cycle closed `BWS-586` by adding structured role logs, loopback metrics, read-only diagnostics bundles and an append-only evidence index, the next cycle closed `BWS-587` by wiring the protected root wrappers to the product-owned lifecycle, runtime summary, and structured runtime logs, the following cycle closed `BWS-588` by upgrading paper evaluation to an explicit runtime-evidence controller with exact stack ownership checks and bounded local-only evidence collection, the next cycle closed `BWS-589` by promoting paper autopilot into a runtime-evidence parent that preserves selected upstream mode, runtime campaign identity and source-fix re-evaluation state through atomic child-result handoffs, the following cycle closed `BWS-590` by adding deterministic private release packaging, Node 20 and PostgreSQL preflight, secret-safe environment templating, non-privileged user-service templates and non-mutating install verification with tamper rejection, the following cycle closed `BWS-591` by adding deterministic upgrade planning, checkpointed apply/recovery, rollback-decision classification and disposable restore-bound recovery proof, and the latest cycle closed `BWS-592` plus `BWS-593` by adding deterministic managed-runtime soak evidence, bounded failure injection, cleanup verification, exact-mode runtime preflight, and the external campaign-manifest generator.
 
-The previous `AUTONOMOUS_GOAL_COMPLETE=yes` conclusion is not the final application boundary. Direct source inspection confirms that the operator runtime is still incomplete:
+The safe-local implementation program is complete through `BWS-599`. No additional local product tranche is currently binding. The remaining application boundary is the externally gated `BWS-600` API runtime-evidence campaign:
 
 ```text
 start.sh=validated_product_owned_lifecycle_start
@@ -36,7 +36,7 @@ external preflight=validated
 final acceptance=validated
 ```
 
-The binding queue is `backlog/bws_full_implementation.csv`; the supporting detailed map is `backlog/bws_remaining_safe_local_map.csv`. `BWS-599` is now the first dependency-ready `PENDING` row. Safe local implementation continues through `BWS-599`; `BWS-600` remains the external operator-approved runtime evidence gate.
+The binding queue is `backlog/bws_full_implementation.csv`; the supporting detailed map is `backlog/bws_remaining_safe_local_map.csv`. `BWS-599` is validated and no dependency-ready safe-local `PENDING` row remains. `BWS-600` is the active external operator-approved runtime-evidence gate.
 
 ## Validated upstream facts
 
@@ -93,10 +93,10 @@ Do not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`. Any protected change is a blo
 ## Routing
 
 ```text
-selected_controller=run-autonomous-implementation.sh
-selected_task_source=docs/automation/current-implementation-task.md
+selected_controller=run-paper-autopilot.sh
+selected_task_source=docs/041_external_runtime_preflight_and_bws600_campaign.md
 force_unlock=no_evidence
-paper_autopilot=runtime_evidence_parent_validated_ready_for_bws_600
+paper_autopilot=selected_for_bws_600_runtime_evidence
 ```
 
 ## Safety
@@ -106,11 +106,11 @@ Direct provider connections, provider credentials, betting-win `core.*` writes, 
 ## Standard automation status
 
 ```text
-run_autonomous_implementation=standardized_and_selected_for_remaining_operator_runtime
+run_autonomous_implementation=standardized_not_selected_no_known_implementation_queue
 run_autonomous_bugfix=standardized_standalone_audit
 run_bugfix_autopilot=standardized_parent_for_broad_audit_and_repair
 run_paper_evaluation=fixture_and_runtime_evidence_validated_bws_588
-run_paper_autopilot=runtime_evidence_parent_validated_bws_589_ready_for_bws_600
+run_paper_autopilot=standardized_and_selected_for_bws_600_runtime_evidence
 standalone_controller_telegram=enabled_by_default
 autopilot_child_telegram=disabled
 autopilot_parent_telegram=final_only
@@ -128,9 +128,12 @@ startup_byte_and_inode_preflight=enabled
 runtime_capacity_watchdog=enabled
 stale_marker_owned_session_recovery=enabled
 post_overlay_controller=run-paper-autopilot.sh
+paper_runtime_env_loader=selective_root_wrapper_env
+source_fingerprint_runtime_exclusion=enabled
+runtime_evidence_failure_stage=bounded_redacted
 ```
 
-The safe-local product implementation remains accepted. The next normal route is the BWS-600 runtime-evidence parent after filesystem capacity is healthy.
+The safe-local product implementation remains accepted. The next normal route is the BWS-600 runtime-evidence parent; the repository temp/inode guard remains a mandatory startup preflight.
 ## API-only upstream transport
 
 The BWS runtime consumes betting-win only through its accepted read-only API. `BWS_UPSTREAM_MODE` and the file-export runtime selector are removed. Missing API readiness is a runtime-evidence blocker; there is no automatic file fallback.

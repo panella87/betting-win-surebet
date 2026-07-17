@@ -184,6 +184,7 @@ def main() -> None:
     task = read('docs/automation/current-implementation-task.md')
     for marker in [
         'current_task=BWS-599', 'current_task_status=VALIDATED',
+        'active_implementation_queue=none',
         'safe_local_terminal_gate=BWS-599', 'backlog/bws_full_implementation.csv',
         'docs/034_remaining_operator_runtime_implementation_program.md',
         'CONTINUE_REQUIRED=yes', 'AUTONOMOUS_GOAL_COMPLETE=yes',
@@ -199,10 +200,12 @@ def main() -> None:
 
     status = read('docs/repo_status_current.md')
     for marker in [
-        'status=IMPLEMENTATION_READY', 'current_task=BWS-599',
-        'current_task_status=VALIDATED', 'safe_local_terminal_gate=BWS-599',
-        'selected_controller=run-autonomous-implementation.sh',
-        'paper_autopilot=runtime_evidence_parent_validated_ready_for_bws_600',
+        'status=RUNTIME_EVIDENCE_READY', 'current_task=BWS-600',
+        'current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE', 'safe_local_terminal_gate=BWS-599',
+        'selected_controller=run-paper-autopilot.sh',
+        'paper_autopilot=selected_for_bws_600_runtime_evidence',
+        'run_autonomous_implementation=standardized_not_selected_no_known_implementation_queue',
+        'run_paper_autopilot=standardized_and_selected_for_bws_600_runtime_evidence',
     ]:
         require(status, marker, 'docs/repo_status_current.md')
 

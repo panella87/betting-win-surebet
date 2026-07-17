@@ -52,7 +52,7 @@ PAPER_LOCAL_REPORT_PATH=""
 PAPER_PINNED_REPORT_PATH=""
 INITIAL_SOURCE_FINGERPRINT=""
 FINAL_SOURCE_FINGERPRINT=""
-SCRIPT_VERSION="2026-07-15.surebet-v8-atomic-child-result"
+SCRIPT_VERSION="2026-07-17.surebet-v9-runtime-env-boundary"
 SCRIPT_NAME="run-paper-evaluation.sh"
 ZIP_TIMEOUT_SECONDS=""
 PAPER_HANDOFF_FILE=""
@@ -65,6 +65,7 @@ RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE=""
 RUNTIME_EVIDENCE_CAMPAIGN_RUN_ID=""
 RUNTIME_EVIDENCE_STACK_OWNERSHIP=""
 RUNTIME_EVIDENCE_STACK_STOP_DISPOSITION=""
+RUNTIME_EVIDENCE_FAILURE_STAGE=""
 ARTIFACT_PACKAGING_EXIT_STATUS=0
 LOCK_RELEASE_STATUS="not_attempted"
 LOCK_RELEASE_EXIT_CODE=0
@@ -387,6 +388,7 @@ auto_install=$AUTO_INSTALL
 surebet_pinned_bundle=${PINNED_BUNDLE_PATH:-}
 surebet_require_pinned_bundle=$REQUIRE_PINNED_BUNDLE
 runtime_evidence_mode=$RUNTIME_EVIDENCE
+runtime_environment_loader=selective_root_wrapper_env
 upstream_mode=api
 paper_service_lifecycle=$(paper_service_lifecycle_value)
 canonical_paper_handoff_schema=1
@@ -616,6 +618,7 @@ write_final_summary() {
     printf 'runtime_evidence_selected_upstream_mode=%s\n' "${RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE:-}"
     printf 'runtime_evidence_stack_ownership=%s\n' "${RUNTIME_EVIDENCE_STACK_OWNERSHIP:-}"
     printf 'runtime_evidence_stack_stop_disposition=%s\n' "${RUNTIME_EVIDENCE_STACK_STOP_DISPOSITION:-}"
+    printf 'runtime_evidence_failure_stage=%s\n' "${RUNTIME_EVIDENCE_FAILURE_STAGE:-none}"
     printf 'surebet_pinned_bundle=%s\n' "${PINNED_BUNDLE_PATH:-}"
     printf 'source_fingerprint_before=%s\n' "${INITIAL_SOURCE_FINGERPRINT:-}"
     printf 'source_fingerprint_after=%s\n' "${FINAL_SOURCE_FINGERPRINT:-}"
@@ -838,7 +841,8 @@ run_runtime_evidence_mode() {
   RUNTIME_EVIDENCE_RESULT_PATH="$out_rel"
   cmd=(
     node
-    dist/packages/bootstrap/src/cli/bws-paper-runtime-evidence.js
+    scripts/bws-root-wrapper-runtime.mjs
+    paper-runtime-evidence
     --output "$out_rel"
     --max-duration-ms "$((DURATION_SECONDS * 1000))"
     --interval-ms "$((INTERVAL_SECONDS * 1000))"
@@ -867,6 +871,7 @@ const keys = [
   ['PAPER_RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE', result.selectedUpstreamMode],
   ['PAPER_RUNTIME_EVIDENCE_STACK_OWNERSHIP', result.stackOwnership],
   ['PAPER_RUNTIME_EVIDENCE_STACK_STOP_DISPOSITION', result.stackStopDisposition],
+  ['PAPER_RUNTIME_EVIDENCE_FAILURE_STAGE', result.collectionFailure?.stage ?? 'none'],
   ['PAPER_RUNTIME_EVIDENCE_SAMPLE_COUNT', String(result.observation?.sampleCount ?? 0)],
   ['PAPER_RUNTIME_EVIDENCE_LATEST_DIAGNOSTICS', result.latestDiagnosticsManifestFile ?? 'none'],
   ['PAPER_RUNTIME_EVIDENCE_HANDOFF_FILE', result.latestRuntimeHandoffFile ?? 'none'],
@@ -894,6 +899,7 @@ NODE
   RUNTIME_EVIDENCE_CAMPAIGN_RUN_ID="${AUTOMATION_PARENT_RUN_ID:-none}"
   RUNTIME_EVIDENCE_STACK_OWNERSHIP="$(automation_v2_env_require PAPER_RUNTIME_EVIDENCE_STACK_OWNERSHIP)" || return 1
   RUNTIME_EVIDENCE_STACK_STOP_DISPOSITION="$(automation_v2_env_require PAPER_RUNTIME_EVIDENCE_STACK_STOP_DISPOSITION)" || return 1
+  RUNTIME_EVIDENCE_FAILURE_STAGE="$(automation_v2_env_require PAPER_RUNTIME_EVIDENCE_FAILURE_STAGE)" || return 1
   RUNTIME_EVIDENCE_LATEST_DIAGNOSTICS="$(automation_v2_env_require PAPER_RUNTIME_EVIDENCE_LATEST_DIAGNOSTICS)" || return 1
   RUNTIME_EVIDENCE_HANDOFF_PATH="$(automation_v2_env_require PAPER_RUNTIME_EVIDENCE_HANDOFF_FILE)" || return 1
   RUNTIME_EVIDENCE_HANDOFF_LATEST_PATH="$(automation_v2_env_require PAPER_RUNTIME_EVIDENCE_HANDOFF_LATEST_FILE)" || return 1
@@ -905,7 +911,7 @@ NODE
     PAPER_EVALUATION_BLOCKED_RUNTIME_OWNERSHIP_AMBIGUOUS|\
     PAPER_EVALUATION_BLOCKED_RUNTIME_STOP_FAILED|\
     PAPER_EVALUATION_BLOCKED_RUNTIME_EVIDENCE_COLLECTION_FAILED)
-      automation_log "runtime_evidence_result=$FINAL_STATUS mode=$RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE ownership=$RUNTIME_EVIDENCE_STACK_OWNERSHIP stop=$RUNTIME_EVIDENCE_STACK_STOP_DISPOSITION"
+      automation_log "runtime_evidence_result=$FINAL_STATUS mode=$RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE ownership=$RUNTIME_EVIDENCE_STACK_OWNERSHIP stop=$RUNTIME_EVIDENCE_STACK_STOP_DISPOSITION failure_stage=$RUNTIME_EVIDENCE_FAILURE_STAGE"
       ;;
     *)
       FINAL_STATUS="PAPER_EVALUATION_BLOCKED_RUNTIME_EVIDENCE_COLLECTION_FAILED"

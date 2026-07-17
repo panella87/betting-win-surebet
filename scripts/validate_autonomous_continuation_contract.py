@@ -40,6 +40,7 @@ def main() -> None:
 
     for marker in [
         'current_task=BWS-599', 'current_task_status=VALIDATED',
+        'active_implementation_queue=none',
         'safe_local_terminal_gate=BWS-599', 'BETTING_WIN_REPO_PATH',
         'automation_maintenance_allowed=no', 'allowed_protected_files=none',
         'recommended_cycle_timeout=6h',
@@ -48,9 +49,11 @@ def main() -> None:
         require(task, marker, 'docs/automation/current-implementation-task.md')
 
     for marker in [
-        'status=IMPLEMENTATION_READY', 'current_task=BWS-599',
-        'current_task_status=VALIDATED', 'safe_local_terminal_gate=BWS-599',
-        'selected_controller=run-autonomous-implementation.sh',
+        'status=RUNTIME_EVIDENCE_READY', 'current_task=BWS-600',
+        'current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE', 'safe_local_terminal_gate=BWS-599',
+        'selected_controller=run-paper-autopilot.sh',
+        'run_autonomous_implementation=standardized_not_selected_no_known_implementation_queue',
+        'run_paper_autopilot=standardized_and_selected_for_bws_600_runtime_evidence',
     ]:
         require(status, marker, 'docs/repo_status_current.md')
 
