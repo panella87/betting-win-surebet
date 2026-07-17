@@ -270,6 +270,7 @@ semantic_handoff_fingerprints=enabled
 explicit_child_result_contract=enabled
 child_terminal_result_transport=atomic_side_channel_v1
 child_stdout_machine_parsing=disabled
+upstream_mode=api
 parent_budget_clamping=enabled
 child_aware_lock=enabled
 cross_controller_lock_guard=enabled
@@ -710,9 +711,9 @@ validate_paper_handoff() {
       return 2
     }
     case "$CURRENT_PAPER_RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE" in
-      api|export) ;;
+      api) ;;
       *)
-        echo "ERROR: runtime-evidence paper handoff requires RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE=api or export" >&2
+        echo "ERROR: runtime-evidence paper handoff requires fixed RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE=api" >&2
         return 2
         ;;
     esac

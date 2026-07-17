@@ -48,3 +48,5 @@ Do not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`. The blanket manual protected-
 All five root controllers initialize a distinct repository-owned temp session through `run_common.sh`. The managed base is `.automation/tmp`; `TMPDIR`, `TMP`, and `TEMP` are exported before validations, Codex, packaging, or child-controller workload. Capacity checks cover free KiB, free inodes, per-session inode count, and per-session size. See `docs/automation/repository-temp-inode-safety.md`.
 
 Use `cleanup_automation_temp_inode_residue.sh` in dry-run mode first when recovering abandoned BWS-owned sessions. Generic `/tmp` purges are prohibited.
+
+- `docs/automation/api-only-upstream.md`: binding API-only betting-win transport contract.

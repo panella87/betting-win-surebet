@@ -36,7 +36,7 @@ interface FinalizerResult {
 
 function copyHelpers(repo: string): void {
   mkdirSync(join(repo, '.automation', 'lib'), { recursive: true });
-  for (const helper of ['run_common.sh', 'controller_hardening_v2.sh', 'telegram_notify.sh']) {
+  for (const helper of ['run_common.sh', 'temp_inode_guard.sh', 'controller_hardening_v2.sh', 'telegram_notify.sh']) {
     copyFileSync(join(ROOT, '.automation', 'lib', helper), join(repo, '.automation', 'lib', helper));
   }
 }

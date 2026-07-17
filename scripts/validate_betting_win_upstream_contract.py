@@ -131,10 +131,13 @@ def main() -> None:
         fail('upstream lock sourceFingerprintAlgorithm must identify the canonical Git tree listing algorithm')
 
     env = read('.env.example')
-    for marker in ['BETTING_WIN_REPO_PATH', 'BWS_UPSTREAM_MODE', 'BWS_UPSTREAM_LOCK']:
+    for marker in ['BETTING_WIN_REPO_PATH', 'BWS_UPSTREAM_LOCK_PATH', 'BWS_UPSTREAM_API_BASE_URL']:
         require(env, marker, '.env.example')
     if re.search(r'^BETTING_WIN_REPO_PATH=', env, re.MULTILINE):
         fail('.env.example must not provide a silent active BETTING_WIN_REPO_PATH default')
+    for forbidden in ['BWS_UPSTREAM_MODE', 'BWS_UPSTREAM_EXPORT_SELECTION_PATH']:
+        if forbidden in env:
+            fail(f'.env.example must not expose removed runtime selector: {forbidden}')
 
     package = load_json('package.json')
     serialized = json.dumps(package, sort_keys=True)

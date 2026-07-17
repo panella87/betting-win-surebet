@@ -14,12 +14,14 @@ import {
   BWS_UPSTREAM_MODE_ENV,
   parseBwsUpstreamExportSelectionManifest,
   resolveBwsUpstreamExportConvergenceConfig,
-  runBwsUpstreamExportConvergenceCli,
   runBwsUpstreamExportConvergencePass,
   type BwsUpstreamExportConvergenceConfig,
   type BwsUpstreamExportSelectionEntry,
   type RunBwsUpstreamExportConvergencePassRequest,
 } from '../packages/bootstrap/src/index.js';
+import {
+  runBwsUpstreamExportConvergenceCli,
+} from '../packages/bootstrap/src/cli/bws-upstream-export-convergence.js';
 import {
   writeBettingWinUpstreamLock,
   type BettingWinUpstreamLock,
@@ -249,10 +251,10 @@ test('upstream export selection parser and CLI help stay explicit about export-o
   assert.equal(parsed.ok, false);
   assert.equal(parsed.blockers[0]?.code, 'BWS_UPSTREAM_EXPORT_SELECTION_IDS_DUPLICATE');
 
-  const help = captureStream();
-  assert.equal(await runBwsUpstreamExportConvergenceCli(['--help'], ROOT, help.stream), 0);
-  assert.match(help.read(), /BWS_UPSTREAM_MODE=export/);
-  assert.match(help.read(), /BWS_UPSTREAM_EXPORT_SELECTION_PATH/);
+  await assert.rejects(
+    () => runBwsUpstreamExportConvergenceCli(['--help'], ROOT, captureStream().stream),
+    /export runtime has been removed/,
+  );
 });
 
 test('upstream export convergence config fails closed when export mode is combined with api or fixture inputs', () => {

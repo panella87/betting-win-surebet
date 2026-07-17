@@ -88,6 +88,7 @@ function makeStubRepo(noop: boolean): string {
   mkdirSync(join(repo, 'artifacts'), { recursive: true });
   cpSync(join(ROOT, 'run-paper-autopilot.sh'), join(repo, 'run-paper-autopilot.sh'));
   cpSync(join(ROOT, '.automation', 'lib', 'run_common.sh'), join(repo, '.automation', 'lib', 'run_common.sh'));
+  cpSync(join(ROOT, '.automation', 'lib', 'temp_inode_guard.sh'), join(repo, '.automation', 'lib', 'temp_inode_guard.sh'));
   cpSync(join(ROOT, '.automation', 'lib', 'controller_hardening_v2.sh'), join(repo, '.automation', 'lib', 'controller_hardening_v2.sh'));
   cpSync(join(ROOT, '.automation', 'lib', 'telegram_notify.sh'), join(repo, '.automation', 'lib', 'telegram_notify.sh'));
   chmodSync(join(repo, 'run-paper-autopilot.sh'), 0o755);
@@ -149,7 +150,7 @@ if [[ "$count" == "1" ]]; then
     "PAPER_SERVICE_SUPPORTED=1" \\
     "SERVICE_REFRESH_REQUIRED=1" \\
     "RUNTIME_EVIDENCE_REQUIRED=1" \\
-    "RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE=\${BWS_UPSTREAM_MODE:-api}" \\
+    "RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE=api" \\
     "RUNTIME_EVIDENCE_CAMPAIGN_RUN_ID=\${AUTOMATION_PARENT_RUN_ID:-none}" \\
     "PINNED_BUNDLE_REQUIRED=0" \\
     "SUREBET_PINNED_BUNDLE=" \\
@@ -232,7 +233,7 @@ function runStubAutopilot(repo: string): ReturnType<typeof spawnSync> {
       TELEGRAM_NOTIFICATION_SENT: '0',
       TELEGRAM_BOT_TOKEN: 'dummy-token',
       TELEGRAM_CHAT_ID: 'dummy-chat',
-      BWS_UPSTREAM_MODE: 'api',
+      AUTOMATION_TEMP_INODE_SAFETY_ENABLED: '0',
     },
   });
 }

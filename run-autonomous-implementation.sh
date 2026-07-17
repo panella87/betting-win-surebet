@@ -522,9 +522,9 @@ load_active_handoff() {
         return 2
       }
       case "$ACTIVE_HANDOFF_RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE" in
-        api|export) ;;
+        api) ;;
         *)
-          echo "ERROR: runtime-evidence paper handoff requires RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE=api or export" >&2
+          echo "ERROR: runtime-evidence paper handoff requires fixed RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE=api" >&2
           return 2
           ;;
       esac

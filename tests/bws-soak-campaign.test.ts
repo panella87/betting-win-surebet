@@ -219,6 +219,14 @@ test('soak campaign checkpoints fail closed on repeated or out-of-range cycle pr
   }
 });
 
+
+test('soak campaign CLI rejects the retired upstream-mode selector', async () => {
+  await assert.rejects(
+    () => runBwsSoakCampaignCli(['prepare', '--upstream-mode', 'export']),
+    /--upstream-mode has been removed/,
+  );
+});
+
 test('soak campaign CLI prints help and prepare writes schema-aligned output', SEQUENTIAL_TEST_OPTIONS, async () => {
   const fixture = createFixture();
   const capture = createCaptureStream();
@@ -250,8 +258,6 @@ test('soak campaign CLI prints help and prepare writes schema-aligned output', S
         '400',
         '--seed',
         'seed-592-foundation',
-        '--upstream-mode',
-        'export',
         '--release-fingerprint',
         'a'.repeat(64),
         '--database-identity',

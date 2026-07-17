@@ -21,7 +21,7 @@ test('check_progress.sh reports automation artifacts and product runtime state',
     assert.match(output, /runtime_condition=ready/);
     assert.match(output, /runtime_configuration_status=matched/);
     assert.match(output, /runtime_component_api=ready/);
-    assert.match(output, /runtime_upstream_mode=export/);
+    assert.match(output, /runtime_upstream_mode=api/);
   } finally {
     await fixture.dispose();
   }
@@ -158,7 +158,7 @@ async function createRuntimeFixture(options: Readonly<{
         runtime: { lifecycleState: 'running' },
         scheduler: { lifecycleState: 'running' },
         schema: 'bws.metrics_snapshot.v1',
-        upstream: { lifecycleState: 'running', mode: 'export' },
+        upstream: { lifecycleState: 'running', mode: 'api' },
         worker: { lifecycleState: 'running' },
       }));
       return;
@@ -254,7 +254,7 @@ async function createRuntimeFixture(options: Readonly<{
     BETTING_WIN_REPO_PATH: upstreamRoot,
     BWS_API_PORT: options.envOverrides?.BWS_API_PORT ?? String(port),
     BWS_UPSTREAM_LOCK_PATH: 'config/betting-win.upstream.lock.json',
-    BWS_UPSTREAM_MODE: 'export',
+    BWS_UPSTREAM_MODE: 'export', // stale private selector must be ignored by API-only runtime
     BWS_WORKER_ID: 'worker-local-001',
     BWS_WORKER_LEASE_DURATION_MS: '30000',
     BWS_WORKER_QUEUE_NAME: 'private-paper',

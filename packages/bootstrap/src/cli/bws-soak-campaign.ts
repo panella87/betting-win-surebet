@@ -1,3 +1,4 @@
+import { enforceBwsApiOnlyProcessEnvironment } from './api-only-upstream.js';
 import { readFileSync } from 'node:fs';
 import { relative, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -15,6 +16,7 @@ export async function runBwsSoakCampaignCli(
   repositoryRoot: string = process.cwd(),
   stdout: NodeJS.WriteStream = process.stdout,
 ): Promise<number> {
+  enforceBwsApiOnlyProcessEnvironment();
   const [command, ...rest] = argv;
   if (command === undefined || command === '--help' || command === '-h' || command === 'help') {
     printBwsSoakCampaignHelp(stdout);
@@ -22,6 +24,9 @@ export async function runBwsSoakCampaignCli(
   }
 
   const options = parseFlags(rest);
+  if (options.has('--upstream-mode')) {
+    throw new Error('--upstream-mode has been removed; BWS soak campaigns are API-only.');
+  }
 
   if (command === 'prepare') {
     const failureSchedule = parseFailureScheduleFile(requireFlagValue(options, '--failure-schedule-file'));
@@ -38,7 +43,7 @@ export async function runBwsSoakCampaignCli(
       resume: options.has('--resume'),
       runtimeDirectory: requireFlagValue(options, '--runtime-dir'),
       seed: requireFlagValue(options, '--seed'),
-      selectedUpstreamMode: requireModeFlagValue(options, '--upstream-mode'),
+      selectedUpstreamMode: 'api',
       stateFile: requireFlagValue(options, '--state-file'),
       ...(options.has('--upstream-lock-path')
         ? { upstreamLockPath: requireFlagValue(options, '--upstream-lock-path') }
@@ -123,7 +128,7 @@ export function printBwsSoakCampaignHelp(stream: NodeJS.WriteStream = process.st
       'Usage: node dist/packages/bootstrap/src/cli/bws-soak-campaign.js <prepare|checkpoint|execute|run-runtime|validate> [options]',
       '',
       'Deterministic soak campaign manifest, execution, and validation tooling for the BWS-592 foundation tranche.',
-      'prepare options: --manifest-output <path> --state-file <path> --checkpoint-dir <dir> --duration-ms <positive-integer> --interval-ms <positive-integer> --max-cycles <positive-integer> --seed <token> --upstream-mode <api|export> --release-fingerprint <sha256> --database-identity <token> --runtime-dir <dir> --evidence-dir <dir> --failure-schedule-file <path> [--upstream-lock-path <path>] [--resume]',
+      'prepare options: --manifest-output <path> --state-file <path> --checkpoint-dir <dir> --duration-ms <positive-integer> --interval-ms <positive-integer> --max-cycles <positive-integer> --seed <token> --release-fingerprint <sha256> --database-identity <token> --runtime-dir <dir> --evidence-dir <dir> --failure-schedule-file <path> [--upstream-lock-path <path>] [--resume]',
       'checkpoint options: --manifest-file <path> --state-file <path> --classification <name> --status <name> [--cycle-number <positive-integer>] [--details-file <path>]',
       'execute options: --manifest-file <path> --state-file <path> --result-file <path> --execute-until-cycle-number <positive-integer>',
       'run-runtime options: --manifest-file <path> --state-file <path> --result-file <path> --integration-module <repo-local .mjs/.js> [--execute-until-cycle-number <positive-integer>]',
@@ -196,13 +201,6 @@ function parseIntegerFlagValue(flags: ReadonlyMap<string, string | true>, flag: 
   return parsed;
 }
 
-function requireModeFlagValue(flags: ReadonlyMap<string, string | true>, flag: string): 'api' | 'export' {
-  const value = requireFlagValue(flags, flag);
-  if (value !== 'api' && value !== 'export') {
-    throw new Error(`${flag} must be exactly api or export.`);
-  }
-  return value;
-}
 
 function readOptionalFlagValue(flags: ReadonlyMap<string, string | true>, flag: string): string | undefined {
   const value = flags.get(flag);

@@ -1,3 +1,4 @@
+import { enforceBwsApiOnlyProcessEnvironment } from './api-only-upstream.js';
 import {
   getBwsPrivatePaperSchedulerServiceStatus,
   runBwsPrivatePaperSchedulerService,
@@ -8,6 +9,7 @@ export async function runBwsPrivatePaperSchedulerServiceCli(
   repositoryRoot: string = process.cwd(),
   stdout: NodeJS.WriteStream = process.stdout,
 ): Promise<number> {
+  enforceBwsApiOnlyProcessEnvironment();
   if (argv.includes('--help') || argv.includes('-h')) {
     printBwsPrivatePaperSchedulerServiceHelp(stdout);
     return 0;
@@ -30,10 +32,9 @@ export function printBwsPrivatePaperSchedulerServiceHelp(
     [
       'Usage: node dist/packages/bootstrap/src/cli/bws-private-paper-scheduler-service.js <run|status>',
       '',
-      'Runs or inspects the long-running BWS private-paper scheduler service. The service repeats bounded scheduler passes, enforces queue backpressure, persists restart-safe status, and stops on SIGINT or SIGTERM without mode fallback.',
-      'Required environment: BETTING_WIN_REPO_PATH, BWS_UPSTREAM_LOCK_PATH, BWS_UPSTREAM_MODE, BWS_PRIVATE_PAPER_SCHEDULE_PATH, BWS_WORKER_QUEUE_NAME, BWS_PRIVATE_PAPER_SCHEDULER_INTERVAL_MS, BWS_PRIVATE_PAPER_SCHEDULER_RETRY_BACKOFF_MS, BWS_PRIVATE_PAPER_SCHEDULER_MAX_BACKOFF_MS, BWS_PRIVATE_PAPER_SCHEDULER_PASS_TIMEOUT_MS, BWS_PRIVATE_PAPER_SCHEDULER_MAX_QUEUE_DEPTH, SUREBET_RUNTIME_MODE=paper, SUREBET_PROVIDER_CONNECTIONS=disabled, SUREBET_EXECUTION_ENABLED=false, SUREBET_PG_DATABASE, SUREBET_PG_USER, SUREBET_PG_PORT, and exactly one of SUREBET_PG_HOST or SUREBET_PG_SOCKET_DIRECTORY.',
-      'When BWS_UPSTREAM_MODE=api, also set BWS_UPSTREAM_API_CHECKPOINT_ID, BWS_UPSTREAM_API_BASE_URL, BWS_UPSTREAM_API_CONTRACT_VERSION, BWS_UPSTREAM_API_PAGE_SIZE, BWS_UPSTREAM_API_MAX_PAGES_PER_RESOURCE, BWS_UPSTREAM_API_RETRY_LIMIT, BWS_UPSTREAM_API_RETRY_BACKOFF_MS, and BWS_UPSTREAM_API_TIMEOUT_MS.',
-      'When BWS_UPSTREAM_MODE=export, also set BWS_UPSTREAM_EXPORT_SELECTION_PATH.',
+      'Runs or inspects the long-running BWS private-paper scheduler service. The service repeats bounded scheduler passes, enforces queue backpressure, persists restart-safe status, and stops on SIGINT or SIGTERM with no alternate transport or fallback.',
+      'Required environment: BETTING_WIN_REPO_PATH, BWS_UPSTREAM_LOCK_PATH, BWS_PRIVATE_PAPER_SCHEDULE_PATH, BWS_WORKER_QUEUE_NAME, BWS_PRIVATE_PAPER_SCHEDULER_INTERVAL_MS, BWS_PRIVATE_PAPER_SCHEDULER_RETRY_BACKOFF_MS, BWS_PRIVATE_PAPER_SCHEDULER_MAX_BACKOFF_MS, BWS_PRIVATE_PAPER_SCHEDULER_PASS_TIMEOUT_MS, BWS_PRIVATE_PAPER_SCHEDULER_MAX_QUEUE_DEPTH, SUREBET_RUNTIME_MODE=paper, SUREBET_PROVIDER_CONNECTIONS=disabled, SUREBET_EXECUTION_ENABLED=false, SUREBET_PG_DATABASE, SUREBET_PG_USER, SUREBET_PG_PORT, and exactly one of SUREBET_PG_HOST or SUREBET_PG_SOCKET_DIRECTORY.',
+      'Also set BWS_UPSTREAM_API_CHECKPOINT_ID, BWS_UPSTREAM_API_BASE_URL, BWS_UPSTREAM_API_CONTRACT_VERSION, BWS_UPSTREAM_API_PAGE_SIZE, BWS_UPSTREAM_API_MAX_PAGES_PER_RESOURCE, BWS_UPSTREAM_API_RETRY_LIMIT, BWS_UPSTREAM_API_RETRY_BACKOFF_MS, and BWS_UPSTREAM_API_TIMEOUT_MS.',
     ].join('\n'),
   );
 }

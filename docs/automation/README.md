@@ -65,3 +65,8 @@ For status, inspect machine-readable retained evidence. Do not infer success fro
 `docs/automation/repository-temp-inode-safety.md` is binding for every autonomous, bugfix, paper, and parent-autopilot controller. `run_common.sh` creates one `.automation/tmp/sessions/...` root per controller, propagates `TMPDIR`/`TMP`/`TEMP`, performs byte and inode preflight, and runs a bounded capacity watchdog. Parent and child controllers receive distinct roots.
 
 The operator maintenance command is `cleanup_automation_temp_inode_residue.sh`. It is dry-run by default and never performs a generic `/tmp` purge.
+## API-only upstream transport
+
+The BWS runtime consumes betting-win only through its accepted read-only API. `BWS_UPSTREAM_MODE` and the file-export runtime selector are removed. Missing API readiness is a runtime-evidence blocker; there is no automatic file fallback.
+
+- `docs/automation/api-only-upstream.md`: binding API-only betting-win transport contract.

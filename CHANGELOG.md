@@ -1,3 +1,9 @@
+## 2026-07-17 - API-only upstream transport
+
+- Removed the operator-selectable upstream mode and export path from active configuration, controllers, root CLI, package scripts, and runtime handoffs.
+- Fixed active BWS runtime entrypoints to the betting-win read-only API and retired the executable export convergence CLI without changing historical deterministic evidence contracts.
+- Added an API-only repository validator and regression coverage, including the temp/inode guard dependency in copied controller sandboxes.
+
 # Changelog
 
 ## 2026-07-17 - Repository temp and inode safety
@@ -487,3 +493,10 @@
   pinned `betting-win` export bundle.
 - Refreshed validation-matrix wording from stale SURE-001/SURE-002A phrasing to
   the current completed SURE-002B private paper-mode gate.
+
+## API-only betting-win upstream rebaseline
+
+- Removed the operator-selectable export runtime and the upstream mode setting.
+- Fixed runtime convergence, scheduling, paper evaluation, release/recovery, soak, and external preflight to the betting-win read-only API.
+- Added API-only contract validation and repaired controller test sandboxes for the temp/inode guard.
+

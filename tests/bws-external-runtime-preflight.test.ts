@@ -51,6 +51,14 @@ test('external runtime preflight builds a deterministic export-mode manifest wit
   }
 });
 
+
+test('external runtime preflight CLI rejects the retired mode selector', async () => {
+  await assert.rejects(
+    () => runBwsExternalRuntimePreflightCli(['prepare', '--mode', 'export']),
+    /--mode has been removed/,
+  );
+});
+
 test('external runtime preflight API mode inspects a loopback contract endpoint and CLI prepare prints json', SEQUENTIAL_TEST_OPTIONS, async () => {
   const fixture = await createFixture();
   const capture = createCaptureStream();
@@ -77,8 +85,6 @@ test('external runtime preflight API mode inspects a loopback contract endpoint 
     const exitCode = await runBwsExternalRuntimePreflightCli(
       [
         'prepare',
-        '--mode',
-        'api',
         '--release-dir',
         fixture.releaseDirectory,
         '--env-file',

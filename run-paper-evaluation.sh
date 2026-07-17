@@ -112,7 +112,7 @@ Surebet behavior:
   - Validates the repo and hard no-provider/no-execution/no-direct-DB boundaries.
   - Runs one repo-local private fixture paper smoke.
   - Runs pinned-bundle smoke only when SUREBET_PINNED_BUNDLE is explicitly provided in fixture mode.
-  - Runtime-evidence mode requires BWS_UPSTREAM_MODE=api or export and never treats local-only success as BWS-600 evidence.
+  - Runtime-evidence mode always uses the betting-win read-only API and never treats local-only success as BWS-600 evidence.
   - Executes known Node commands as direct argv, never through shell-constructed command text.
   - Verifies that source and protected automation files remain unchanged.
   - Writes .automation/paper-mode-to-autonomous-implementation.env only for source/validation defects.
@@ -336,19 +336,11 @@ runtime_evidence_required_value() {
 }
 
 runtime_evidence_selected_upstream_mode_value() {
-  local value
   if [[ "$RUNTIME_EVIDENCE" != "1" ]]; then
     printf 'none\n'
     return 0
   fi
-  value="${RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE:-${BWS_UPSTREAM_MODE:-}}"
-  case "$value" in
-    api|export) printf '%s\n' "$value" ;;
-    *)
-      echo "ERROR: runtime-evidence mode requires BWS_UPSTREAM_MODE=api or export" >&2
-      return 2
-      ;;
-  esac
+  printf 'api\n'
 }
 
 runtime_evidence_campaign_run_id_value() {
@@ -395,6 +387,7 @@ auto_install=$AUTO_INSTALL
 surebet_pinned_bundle=${PINNED_BUNDLE_PATH:-}
 surebet_require_pinned_bundle=$REQUIRE_PINNED_BUNDLE
 runtime_evidence_mode=$RUNTIME_EVIDENCE
+upstream_mode=api
 paper_service_lifecycle=$(paper_service_lifecycle_value)
 canonical_paper_handoff_schema=1
 atomic_paper_handoff=enabled

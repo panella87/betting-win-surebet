@@ -42,7 +42,7 @@ interface HarnessResult {
 
 function copyHelpers(repo: string): void {
   mkdirSync(join(repo, '.automation', 'lib'), { recursive: true });
-  for (const helper of ['run_common.sh', 'controller_hardening_v2.sh', 'telegram_notify.sh']) {
+  for (const helper of ['run_common.sh', 'temp_inode_guard.sh', 'controller_hardening_v2.sh', 'telegram_notify.sh']) {
     copyFileSync(join(ROOT, '.automation', 'lib', helper), join(repo, '.automation', 'lib', helper));
   }
 }
@@ -175,6 +175,7 @@ test('shared standalone lock claims are full-file atomic and exactly one concurr
     mkdirSync(join(repo, '.automation', 'lib'), { recursive: true });
     mkdirSync(join(repo, '.automation', 'locks'), { recursive: true });
     copyFileSync(join(ROOT, '.automation', 'lib', 'run_common.sh'), join(repo, '.automation', 'lib', 'run_common.sh'));
+    copyFileSync(join(ROOT, '.automation', 'lib', 'temp_inode_guard.sh'), join(repo, '.automation', 'lib', 'temp_inode_guard.sh'));
     const dummy = join(repo, 'dummy.sh');
     writeFileSync(dummy, '#!/usr/bin/env bash\n', 'utf-8');
     chmodSync(dummy, 0o755);

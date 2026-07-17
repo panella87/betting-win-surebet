@@ -6,7 +6,6 @@ const command = process.argv[2] || 'help';
 const LOCAL_REPORT_DIST_ENTRY = 'dist/src/cli/local-paper-report.js';
 const LOCAL_REPORT_BATCH_DIST_ENTRY = 'dist/src/cli/local-paper-batch-report.js';
 const UPSTREAM_API_CONVERGENCE_DIST_ENTRY = 'dist/packages/bootstrap/src/cli/bws-upstream-api-convergence.js';
-const UPSTREAM_EXPORT_CONVERGENCE_DIST_ENTRY = 'dist/packages/bootstrap/src/cli/bws-upstream-export-convergence.js';
 const PRIVATE_PAPER_SCHEDULER_DIST_ENTRY = 'dist/packages/bootstrap/src/cli/bws-private-paper-scheduler.js';
 const READ_ONLY_API_DIST_ENTRY = 'dist/packages/bootstrap/src/cli/bws-read-only-api.js';
 const PRIVATE_PAPER_WORKER_DIST_ENTRY = 'dist/packages/bootstrap/src/cli/bws-private-paper-worker.js';
@@ -18,7 +17,7 @@ const FINAL_LOCAL_ACCEPTANCE_DIST_ENTRY = 'dist/packages/bootstrap/src/cli/bws-f
 
 function printHelp() {
   process.stdout.write(
-    `betting-win-surebet CLI\n\nCommands:\n  help                     Show this help\n  status                   Print current repository status\n  validate                 Run npm run validate\n  local-report             Validate a repo-local export bundle and write a private report under artifacts/\n  local-report-batch       Validate a repo-local directory of pinned bundles and write private reports plus a private batch summary under artifacts/\n  runtime-upstream-api     Build and run one bounded BWS read-only upstream API convergence pass\n  runtime-upstream-export  Build and run one bounded BWS immutable upstream export convergence pass\n  runtime-scheduler        Build and run one bounded BWS private-paper scheduler pass\n  runtime-api              Build and start the loopback-only BWS read-only API\n  runtime-worker           Build and run one bounded BWS private-paper worker pass\n  runtime-start            Build and start the repo-owned full BWS stack lifecycle\n  runtime-status           Build and print machine-readable full-stack BWS lifecycle status and evidence\n  runtime-stop             Build and stop the repo-owned full BWS stack lifecycle\n  runtime-handoff          Build and print a machine-readable BWS private-paper runtime handoff plus immutable source archive\n  soak-campaign            Build and run the BWS-592 soak campaign CLI\n  external-runtime-preflight  Build and run the BWS-593 external runtime preflight CLI\n  final-local-acceptance   Build and run the staged BWS-599 final local acceptance CLI\n`,
+    `betting-win-surebet CLI\n\nCommands:\n  help                     Show this help\n  status                   Print current repository status\n  validate                 Run npm run validate\n  local-report             Validate a repo-local export bundle and write a private report under artifacts/\n  local-report-batch       Validate a repo-local directory of pinned bundles and write private reports plus a private batch summary under artifacts/\n  runtime-upstream-api     Build and run one bounded BWS read-only upstream API convergence pass\n  runtime-scheduler        Build and run one bounded BWS private-paper scheduler pass\n  runtime-api              Build and start the loopback-only BWS read-only API\n  runtime-worker           Build and run one bounded BWS private-paper worker pass\n  runtime-start            Build and start the repo-owned full BWS stack lifecycle\n  runtime-status           Build and print machine-readable full-stack BWS lifecycle status and evidence\n  runtime-stop             Build and stop the repo-owned full BWS stack lifecycle\n  runtime-handoff          Build and print a machine-readable BWS private-paper runtime handoff plus immutable source archive\n  soak-campaign            Build and run the BWS-592 soak campaign CLI\n  external-runtime-preflight  Build and run the BWS-593 external runtime preflight CLI\n  final-local-acceptance   Build and run the staged BWS-599 final local acceptance CLI\n`,
   );
 }
 
@@ -53,9 +52,6 @@ if (command === 'runtime-upstream-api') {
   runBuiltEntry(UPSTREAM_API_CONVERGENCE_DIST_ENTRY, process.argv.slice(3));
 }
 
-if (command === 'runtime-upstream-export') {
-  runBuiltEntry(UPSTREAM_EXPORT_CONVERGENCE_DIST_ENTRY, process.argv.slice(3));
-}
 
 if (command === 'runtime-scheduler') {
   runBuiltEntry(PRIVATE_PAPER_SCHEDULER_DIST_ENTRY, process.argv.slice(3));

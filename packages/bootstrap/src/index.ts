@@ -63,10 +63,6 @@ export {
   runBwsPrivatePaperSchedulerServiceCli,
 } from './cli/bws-private-paper-scheduler-service.js';
 export {
-  printBwsUpstreamExportConvergenceHelp,
-  runBwsUpstreamExportConvergenceCli,
-} from './cli/bws-upstream-export-convergence.js';
-export {
   printBwsUpstreamApiConvergenceHelp,
   runBwsUpstreamApiConvergenceCli,
 } from './cli/bws-upstream-api-convergence.js';

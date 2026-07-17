@@ -13,7 +13,6 @@ import {
   BWS_UPSTREAM_API_RETRY_BACKOFF_MS_ENV,
   BWS_UPSTREAM_API_RETRY_LIMIT_ENV,
   BWS_UPSTREAM_API_TIMEOUT_MS_ENV,
-  BWS_UPSTREAM_EXPORT_SELECTION_PATH_ENV,
   BWS_UPSTREAM_LOCK_PATH_ENV,
   BWS_UPSTREAM_MODE_ENV,
   resolveBwsUpstreamApiConvergenceConfig,
@@ -324,20 +323,13 @@ test('upstream API convergence config and CLI help stay explicit about api mode 
     assert.equal(config.mode, 'api');
     assert.equal(config.query.contractVersion, '1.0.0');
 
-    assert.throws(
-      () => resolveBwsUpstreamApiConvergenceConfig({
-        ...baseEnvironment,
-        [BWS_UPSTREAM_EXPORT_SELECTION_PATH_ENV]: 'config/upstream-export-selection.json',
-      }, fixture.bwsRoot),
-      /must not fall back to export mode/,
-    );
 
     assert.throws(
       () => resolveBwsUpstreamApiConvergenceConfig({
         ...baseEnvironment,
         SUREBET_PINNED_BUNDLE: 'tests/fixtures/private-paper-mode-smoke/accepted-local-bundle.json',
       }, fixture.bwsRoot),
-      /must not fall back to local fixture or mock intake/,
+      /forbids SUREBET_PINNED_BUNDLE/,
     );
 
     assert.throws(
@@ -350,8 +342,10 @@ test('upstream API convergence config and CLI help stay explicit about api mode 
 
     const help = captureStream();
     assert.equal(await runBwsUpstreamApiConvergenceCli(['--help'], ROOT, help.stream), 0);
-    assert.match(help.read(), /BWS_UPSTREAM_MODE=api/);
-    assert.match(help.read(), /BWS_UPSTREAM_API_CONTRACT_VERSION/);
+    const helpText = help.read();
+    assert.match(helpText, /betting-win read-only query client/);
+    assert.match(helpText, /BWS_UPSTREAM_API_CONTRACT_VERSION/);
+    assert.doesNotMatch(helpText, /BWS_UPSTREAM_MODE|export/);
   } finally {
     rmSync(fixture.tempRoot, { force: true, recursive: true });
   }

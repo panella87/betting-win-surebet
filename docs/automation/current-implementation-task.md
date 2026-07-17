@@ -163,3 +163,7 @@ force_unlock_required=no
 ```
 
 The next controller may start only after the server has enough free bytes and inodes to pass the guard preflight. The guard does not authorize provider connections, execution, or a generic system-temp purge.
+## API-only upstream transport
+
+The BWS runtime consumes betting-win only through its accepted read-only API. `BWS_UPSTREAM_MODE` and the file-export runtime selector are removed. Missing API readiness is a runtime-evidence blocker; there is no automatic file fallback.
+

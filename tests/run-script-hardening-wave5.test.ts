@@ -39,6 +39,7 @@ function makeLockRepo(): string {
   mkdirSync(join(repo, '.automation', 'lib'), { recursive: true });
   mkdirSync(join(repo, '.automation', 'locks'), { recursive: true });
   copyFileSync(join(ROOT, '.automation', 'lib', 'run_common.sh'), join(repo, '.automation', 'lib', 'run_common.sh'));
+  copyFileSync(join(ROOT, '.automation', 'lib', 'temp_inode_guard.sh'), join(repo, '.automation', 'lib', 'temp_inode_guard.sh'));
   writeFileSync(join(repo, 'automation.config.sh'), [
     'AUTOMATION_REPO_NAME=test-repo',
     'AUTOMATION_PROJECT_NAME=test-repo',

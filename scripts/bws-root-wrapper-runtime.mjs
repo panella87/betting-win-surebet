@@ -36,9 +36,7 @@ const RUNTIME_ENVIRONMENT_KEYS = Object.freeze([
   'BWS_UPSTREAM_CONVERGENCE_MAX_BACKOFF_MS',
   'BWS_UPSTREAM_CONVERGENCE_PASS_TIMEOUT_MS',
   'BWS_UPSTREAM_CONVERGENCE_RETRY_BACKOFF_MS',
-  'BWS_UPSTREAM_EXPORT_SELECTION_PATH',
   'BWS_UPSTREAM_LOCK_PATH',
-  'BWS_UPSTREAM_MODE',
   'BWS_WORKER_ID',
   'BWS_WORKER_LEASE_DURATION_MS',
   'BWS_WORKER_QUEUE_NAME',
@@ -157,6 +155,8 @@ function resolveRuntimeEnvironment() {
       merged[key] = fileEnvironment.get(key);
     }
   }
+  merged.BWS_UPSTREAM_MODE = 'api';
+  delete merged.BWS_UPSTREAM_EXPORT_SELECTION_PATH;
   return merged;
 }
 
@@ -324,15 +324,11 @@ function compareStateWithEnvironment(state, environment, metricsProbe) {
     environment.SUREBET_PG_SOCKET_DIRECTORY,
     readObjectStringField(state, 'configuration', 'persistence', 'socketDirectory'),
   );
-  if (environment.BWS_UPSTREAM_MODE !== undefined) {
-    const actualMode = metricsProbe.ok === true
-      ? readObjectStringField(metricsProbe.value, 'upstream', 'mode')
-      : undefined;
-    if (actualMode === undefined) {
-      mismatches.push('BWS_UPSTREAM_MODE=unverifiable');
-    } else {
-      compareExact(mismatches, 'BWS_UPSTREAM_MODE', environment.BWS_UPSTREAM_MODE, actualMode);
-    }
+  const actualMode = metricsProbe.ok === true
+    ? readObjectStringField(metricsProbe.value, 'upstream', 'mode')
+    : undefined;
+  if (actualMode !== undefined && actualMode !== 'api') {
+    mismatches.push(`upstream_mode_expected=api actual=${actualMode}`);
   }
   const comparedKeys = RUNTIME_ENVIRONMENT_KEYS.filter((key) => readProcessValue(key, environment) !== undefined);
   return Object.freeze({

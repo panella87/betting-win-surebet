@@ -1,3 +1,4 @@
+import { enforceBwsApiOnlyProcessEnvironment } from './api-only-upstream.js';
 import {
   createBwsExternalRuntimeCampaignManifest,
 } from '../operations/external-runtime-preflight.js';
@@ -7,6 +8,7 @@ export async function runBwsExternalRuntimePreflightCli(
   repositoryRoot: string = process.cwd(),
   stdout: NodeJS.WriteStream = process.stdout,
 ): Promise<number> {
+  enforceBwsApiOnlyProcessEnvironment();
   const [command, ...rest] = argv;
   if (command === undefined || command === '--help' || command === '-h' || command === 'help') {
     printBwsExternalRuntimePreflightHelp(stdout);
@@ -17,7 +19,9 @@ export async function runBwsExternalRuntimePreflightCli(
   }
 
   const options = parseFlags(rest);
-  const selectedMode = requireModeFlagValue(options, '--mode');
+  if (options.has('--mode')) {
+    throw new Error('--mode has been removed; BWS external runtime preflight is API-only.');
+  }
   const result = await createBwsExternalRuntimeCampaignManifest({
     backupManifestFile: requireFlagValue(options, '--backup-manifest-file'),
     campaignCycleTimeoutMinutes: parseIntegerFlagValue(options, '--campaign-cycle-timeout-minutes'),
@@ -33,34 +37,22 @@ export async function runBwsExternalRuntimePreflightCli(
     repositoryRoot,
     restoreVerificationFile: requireFlagValue(options, '--restore-verification-file'),
     runtimeDirectory: requireFlagValue(options, '--runtime-dir'),
-    selectedInput: selectedMode === 'export'
-      ? Object.freeze({
-        contractAlias: requireFlagValue(options, '--contract-alias'),
-        contractSchema: requireFlagValue(options, '--contract-schema'),
-        expectedSha256: requireFlagValue(options, '--expected-sha256'),
-        expectedUpstreamLockFingerprint: requireFlagValue(options, '--expected-upstream-lock-fingerprint'),
-        exportPath: requireFlagValue(options, '--export-path'),
-        mode: 'export' as const,
-        providerGenerationIds: parseTokenListFlagValue(options, '--provider-generation-ids'),
-        sourceLineageRecordIds: parseTokenListFlagValue(options, '--source-lineage-ids'),
-        surebetProfile: requireFlagValue(options, '--surebet-profile'),
-      })
-      : Object.freeze({
-        apiBaseUrl: requireFlagValue(options, '--api-base-url'),
-        ...(options.has('--api-contract-path')
-          ? { apiContractPath: requireFlagValue(options, '--api-contract-path') }
-          : {}),
-        checkpointId: requireFlagValue(options, '--checkpoint-id'),
-        contractVersion: requireFlagValue(options, '--contract-version'),
-        expectedUpstreamLockFingerprint: requireFlagValue(options, '--expected-upstream-lock-fingerprint'),
-        inspectContract: options.has('--inspect-contract'),
-        maxPagesPerResource: parseIntegerFlagValue(options, '--max-pages-per-resource'),
-        mode: 'api' as const,
-        pageSize: parseIntegerFlagValue(options, '--page-size'),
-        retryBackoffMs: parseIntegerFlagValue(options, '--retry-backoff-ms'),
-        retryLimit: parseIntegerFlagValue(options, '--retry-limit'),
-        timeoutMs: parseIntegerFlagValue(options, '--timeout-ms'),
-      }),
+    selectedInput: Object.freeze({
+      apiBaseUrl: requireFlagValue(options, '--api-base-url'),
+      ...(options.has('--api-contract-path')
+        ? { apiContractPath: requireFlagValue(options, '--api-contract-path') }
+        : {}),
+      checkpointId: requireFlagValue(options, '--checkpoint-id'),
+      contractVersion: requireFlagValue(options, '--contract-version'),
+      expectedUpstreamLockFingerprint: requireFlagValue(options, '--expected-upstream-lock-fingerprint'),
+      inspectContract: options.has('--inspect-contract'),
+      maxPagesPerResource: parseIntegerFlagValue(options, '--max-pages-per-resource'),
+      mode: 'api' as const,
+      pageSize: parseIntegerFlagValue(options, '--page-size'),
+      retryBackoffMs: parseIntegerFlagValue(options, '--retry-backoff-ms'),
+      retryLimit: parseIntegerFlagValue(options, '--retry-limit'),
+      timeoutMs: parseIntegerFlagValue(options, '--timeout-ms'),
+    }),
     soakManifestFile: requireFlagValue(options, '--soak-manifest-file'),
     soakStateFile: requireFlagValue(options, '--soak-state-file'),
   });
@@ -74,9 +66,8 @@ export function printBwsExternalRuntimePreflightHelp(stream: NodeJS.WriteStream 
       'Usage: node dist/packages/bootstrap/src/cli/bws-external-runtime-preflight.js prepare [options]',
       '',
       'Fail-closed external runtime preflight and campaign-manifest generation for BWS-593.',
-      'common options: --mode <export|api> --release-dir <dir> --env-file <path> --install-verification-file <path> --migration-status-file <path> --backup-manifest-file <path> --restore-verification-file <path> --soak-manifest-file <path> --soak-state-file <path> --runtime-dir <dir> --evidence-dir <dir> --output-file <path> --campaign-duration-hours <positive-integer> --campaign-max-cycles <positive-integer> --campaign-cycle-timeout-minutes <positive-integer> --minimum-available-bytes <positive-integer> --expected-upstream-lock-fingerprint <sha256>',
-      'export mode options: --export-path <path> --expected-sha256 <sha256> --contract-schema <value> --contract-alias <value> --surebet-profile <value> --provider-generation-ids <comma-separated> --source-lineage-ids <comma-separated>',
-      'api mode options: --checkpoint-id <token> --api-base-url <url> --contract-version <value> --page-size <positive-integer> --max-pages-per-resource <positive-integer> --timeout-ms <positive-integer> --retry-limit <positive-integer> --retry-backoff-ms <positive-integer> [--inspect-contract] [--api-contract-path </contract>]',
+      'common options: --release-dir <dir> --env-file <path> --install-verification-file <path> --migration-status-file <path> --backup-manifest-file <path> --restore-verification-file <path> --soak-manifest-file <path> --soak-state-file <path> --runtime-dir <dir> --evidence-dir <dir> --output-file <path> --campaign-duration-hours <positive-integer> --campaign-max-cycles <positive-integer> --campaign-cycle-timeout-minutes <positive-integer> --minimum-available-bytes <positive-integer> --expected-upstream-lock-fingerprint <sha256>',
+      'API options: --checkpoint-id <token> --api-base-url <url> --contract-version <value> --page-size <positive-integer> --max-pages-per-resource <positive-integer> --timeout-ms <positive-integer> --retry-limit <positive-integer> --retry-backoff-ms <positive-integer> [--inspect-contract] [--api-contract-path </contract>]',
     ].join('\n'),
   );
 }
@@ -122,13 +113,6 @@ function parseTokenListFlagValue(flags: ReadonlyMap<string, string | true>, flag
   return Object.freeze(items);
 }
 
-function requireModeFlagValue(flags: ReadonlyMap<string, string | true>, flag: string): 'api' | 'export' {
-  const value = requireFlagValue(flags, flag);
-  if (value !== 'api' && value !== 'export') {
-    throw new Error(`${flag} must be exactly api or export.`);
-  }
-  return value;
-}
 
 function readOptionalFlagValue(flags: ReadonlyMap<string, string | true>, flag: string): string | undefined {
   const value = flags.get(flag);

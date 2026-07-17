@@ -24,7 +24,7 @@ real_money_execution=BWS-900_PARKED
 - Exact committed-HEAD upstream lock and compatibility proof.
 - Workspace packages, `surebet.*` persistence, immutable intake and typed read-only client.
 - Identity, opportunity, solver, completion/exposure, settlement, backtest and private-paper engines.
-- Read-only API, bounded workers, operator cockpit, explicit export/API convergence and loopback acceptance.
+- Read-only API, bounded workers, operator cockpit, API-only convergence and loopback acceptance.
 - Long-running convergence, scheduler and worker services with complete product-owned lifecycle ownership.
 - Database backup/restore/retention, structured observability, diagnostics and evidence indexing.
 - Root lifecycle/progress/log wrappers, service-owned paper evaluation and runtime-evidence paper autopilot.
@@ -69,3 +69,7 @@ watchdog=enabled
 cleanup_command=cleanup_automation_temp_inode_residue.sh
 next_controller_after_safety_repair=run-paper-autopilot.sh
 ```
+## API-only upstream transport
+
+The BWS runtime consumes betting-win only through its accepted read-only API. `BWS_UPSTREAM_MODE` and the file-export runtime selector are removed. Missing API readiness is a runtime-evidence blocker; there is no automatic file fallback.
+

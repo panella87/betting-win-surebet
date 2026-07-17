@@ -108,3 +108,7 @@ The program may build private loopback services, explicit read-only upstream con
 Long autonomous and paper campaigns use one private repository-owned temp session per controller under `.automation/tmp`. The shared guard exports `TMPDIR`, `TMP`, and `TEMP`, rejects low free-byte or free-inode capacity, enforces per-session budgets, and removes dead marker-owned sessions. Parent and child controllers never share the same session.
 
 See `docs/automation/repository-temp-inode-safety.md`. The maintenance command `cleanup_automation_temp_inode_residue.sh` is dry-run by default and does not perform generic `/tmp` deletion.
+## API-only upstream transport
+
+The BWS runtime consumes betting-win only through its accepted read-only API. `BWS_UPSTREAM_MODE` and the file-export runtime selector are removed. Missing API readiness is a runtime-evidence blocker; there is no automatic file fallback.
+

@@ -7,7 +7,7 @@
     "packages/*",
     "apps/*"
   ],
-  "description": "Downstream surebet and complete-set application built on betting-win provider, data, history, export, and read-only query contracts.",
+  "description": "Downstream surebet and complete-set application built on the betting-win read-only API and committed-HEAD contracts.",
   "engines": {
     "node": ">=20 <21"
   },
@@ -24,14 +24,13 @@
     "validate:repo": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_repo.py",
     "validate:boundary": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_contract_boundary.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_no_provider_connections.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_no_execution_paths.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_fixture_integrity.py",
     "validate:temp-inode-safety": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_temp_inode_safety.py",
-    "validate:ops": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_temp_inode_safety.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_master_plan.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_executable_bits.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_artifact_hygiene.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_node_runtime_loader.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_shell_local_assignments.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_autonomous_controller_contract.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_source_manifest.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_autonomous_continuation_contract.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_local_engine_backlog_contract.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_private_paper_mode_backlog_contract.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_three_repo_surebet_boundary.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_full_implementation_program.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_remaining_operator_runtime_program.py && npm run validate:upstream-boundary",
+    "validate:ops": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_temp_inode_safety.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_master_plan.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_executable_bits.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_artifact_hygiene.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_node_runtime_loader.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_shell_local_assignments.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_autonomous_controller_contract.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_source_manifest.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_autonomous_continuation_contract.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_local_engine_backlog_contract.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_private_paper_mode_backlog_contract.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_three_repo_surebet_boundary.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_full_implementation_program.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_remaining_operator_runtime_program.py && npm run validate:upstream-boundary && npm run validate:api-only-upstream",
     "validate:loopback-acceptance": "node scripts/validate_bws_loopback_acceptance.mjs",
     "validate:web": "npm run --workspace @betting-win-surebet/web typecheck && BWS_API_PORT=4312 npm run build:runtime-cockpit",
     "build:runtime-cockpit": "node scripts/build_bws_operator_cockpit.mjs",
     "validate:starter": "npm run typecheck && npm test && npm run validate:web && npm run validate:repo && npm run validate:boundary && npm run validate:ops && npm run validate:loopback-acceptance",
     "validate": "npm run validate:starter",
     "runtime:upstream-api": "npm run build && node dist/packages/bootstrap/src/cli/bws-upstream-api-convergence.js",
-    "runtime:upstream-export": "npm run build && node dist/packages/bootstrap/src/cli/bws-upstream-export-convergence.js",
     "runtime:upstream-service": "npm run build && node dist/packages/bootstrap/src/cli/bws-upstream-convergence-service.js run",
     "runtime:upstream-service-status": "npm run build && node dist/packages/bootstrap/src/cli/bws-upstream-convergence-service.js status",
     "runtime:scheduler": "npm run build && node dist/packages/bootstrap/src/cli/bws-private-paper-scheduler.js",
@@ -64,7 +63,8 @@
     "bugfix:autopilot": "bash run-bugfix-autopilot.sh",
     "validate:implementation-program": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_full_implementation_program.py",
     "validate:upstream-boundary": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_betting_win_upstream_contract.py && npm run generate:upstream-lock && npm run verify:upstream-lock",
-    "validate:remaining-runtime-program": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_remaining_operator_runtime_program.py"
+    "validate:remaining-runtime-program": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_remaining_operator_runtime_program.py",
+    "validate:api-only-upstream": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_api_only_upstream.py"
   },
   "devDependencies": {
     "@types/node": "20.12.11",

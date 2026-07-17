@@ -1,3 +1,4 @@
+import { enforceBwsApiOnlyProcessEnvironment } from './api-only-upstream.js';
 import {
   writeBwsPaperRuntimeEvidence,
 } from '../operations/paper-runtime-evidence.js';
@@ -7,6 +8,7 @@ export async function runBwsPaperRuntimeEvidenceCli(
   repositoryRoot: string = process.cwd(),
   stdout: NodeJS.WriteStream = process.stdout,
 ): Promise<number> {
+  enforceBwsApiOnlyProcessEnvironment();
   if (argv.includes('--help') || argv.includes('-h')) {
     printBwsPaperRuntimeEvidenceHelp(stdout);
     return 0;
@@ -35,7 +37,7 @@ export function printBwsPaperRuntimeEvidenceHelp(
       'Usage: node dist/packages/bootstrap/src/cli/bws-paper-runtime-evidence.js --output <repo-relative-path> --max-duration-ms <positive-int> --interval-ms <positive-int> [--keep-monitoring-when-ready]',
       '',
       'Builds strict local-only runtime evidence for BWS paper evaluation by attaching to or starting the validated repo-owned full stack, collecting bounded lifecycle and diagnostics observations, and stopping only the stack instance this command started.',
-      'Required environment includes BETTING_WIN_REPO_PATH, BWS_UPSTREAM_LOCK_PATH, BWS_UPSTREAM_MODE, BWS_API_PORT, BWS_WORKER_ID, BWS_WORKER_QUEUE_NAME, BWS_WORKER_LEASE_DURATION_MS, SUREBET_RUNTIME_MODE=paper, SUREBET_PROVIDER_CONNECTIONS=disabled, SUREBET_EXECUTION_ENABLED=false, SUREBET_PG_DATABASE, SUREBET_PG_USER, SUREBET_PG_PORT, and exactly one of SUREBET_PG_HOST or SUREBET_PG_SOCKET_DIRECTORY.',
+      'Required environment includes BETTING_WIN_REPO_PATH, BWS_UPSTREAM_LOCK_PATH, BWS_API_PORT, BWS_WORKER_ID, BWS_WORKER_QUEUE_NAME, BWS_WORKER_LEASE_DURATION_MS, SUREBET_RUNTIME_MODE=paper, SUREBET_PROVIDER_CONNECTIONS=disabled, SUREBET_EXECUTION_ENABLED=false, SUREBET_PG_DATABASE, SUREBET_PG_USER, SUREBET_PG_PORT, and exactly one of SUREBET_PG_HOST or SUREBET_PG_SOCKET_DIRECTORY.',
     ].join('\n'),
   );
 }
