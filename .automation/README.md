@@ -41,7 +41,7 @@ Do not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`. The blanket manual protected-
 
 ## Current paper limitation
 
-`run-paper-evaluation.sh` and `run-paper-autopilot.sh` expose the validated runtime-evidence lifecycle from `BWS-588` and `BWS-589`. They are now the selected path for `BWS-600`; implementation is entered only through a validated source-fix handoff.
+`run-paper-evaluation.sh` and `run-paper-autopilot.sh` expose the validated runtime-evidence lifecycle from `BWS-588` and `BWS-589`. They are now the selected path for `BWS-600`; implementation is entered only through a validated source-fix handoff. The runtime child uses explicit process values before selective `.env` fill, passes the operator-approved repo-local private-paper schedule path, and enforces API-only paper-safe policy before lifecycle status is read. It never substitutes a fixture schedule.
 
 ## Repository temp and inode containment
 

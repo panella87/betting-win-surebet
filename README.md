@@ -111,5 +111,5 @@ Long autonomous and paper campaigns use one private repository-owned temp sessio
 See `docs/automation/repository-temp-inode-safety.md`. The maintenance command `cleanup_automation_temp_inode_residue.sh` is dry-run by default and does not perform generic `/tmp` deletion.
 ## API-only upstream transport
 
-The BWS runtime consumes betting-win only through its accepted read-only API. `BWS_UPSTREAM_MODE` and the file-export runtime selector are removed. Missing API readiness is a runtime-evidence blocker; there is no automatic file fallback.
+The BWS runtime consumes betting-win only through its accepted read-only API. `BWS_UPSTREAM_MODE` and the file-export runtime selector are removed. Missing API readiness is a runtime-evidence blocker; there is no automatic file fallback. Supported root runtime commands enforce `paper`, provider-disabled, and execution-disabled policy; explicit process connection settings take precedence and `.env` only fills missing approved values, including the required operator-approved repo-local schedule path. No fixture schedule is synthesized.
 

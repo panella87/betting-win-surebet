@@ -13,6 +13,10 @@ The runtime transport is fixed. Operators do not set `BWS_UPSTREAM_MODE`, and no
 - Missing, unreachable, or incompatible betting-win API evidence produces a precise runtime-evidence blocker.
 - Source-fix handoffs preserve API campaign identity automatically.
 - BWS never contacts providers directly and never writes betting-win-owned state.
+- Supported root runtime wrappers enforce `SUREBET_RUNTIME_MODE=paper`, `SUREBET_PROVIDER_CONNECTIONS=disabled`, and `SUREBET_EXECUTION_ENABLED=false`; these are not operator-selectable fallbacks.
+- Explicit process values take precedence for approved connection settings, while `.env` fills only missing allowlisted values.
+- `BWS_PRIVATE_PAPER_SCHEDULE_PATH` is passed only when explicitly supplied as an operator-approved repo-local manifest; no fixture or fallback schedule is created.
+- Retired export selectors and `SUREBET_PINNED_BUNDLE` are scrubbed from runtime children.
 
 ## Historical export code
 

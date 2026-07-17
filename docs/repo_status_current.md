@@ -129,11 +129,15 @@ runtime_capacity_watchdog=enabled
 stale_marker_owned_session_recovery=enabled
 post_overlay_controller=run-paper-autopilot.sh
 paper_runtime_env_loader=selective_root_wrapper_env
+paper_runtime_env_precedence=explicit_process_then_dotenv_fill
+paper_runtime_schedule=operator_approved_repo_local_manifest
+paper_runtime_policy=enforced_api_paper_provider_disabled_execution_false
+paper_runtime_retired_inputs=export_selectors_and_pinned_bundle_scrubbed
 source_fingerprint_runtime_exclusion=enabled
 runtime_evidence_failure_stage=bounded_redacted
 ```
 
-The safe-local product implementation remains accepted. The next normal route is the BWS-600 runtime-evidence parent; the repository temp/inode guard remains a mandatory startup preflight.
+The safe-local product implementation remains accepted. The root runtime wrapper now treats API transport, paper mode, provider-disabled operation, and execution-disabled operation as controller-owned invariants; private `.env` values only fill missing non-policy configuration and cannot override an explicit shell value. It also passes the explicit operator-approved repo-local private-paper schedule path; it does not invent a fixture or fallback schedule. The next normal route is the BWS-600 runtime-evidence parent; the repository temp/inode guard remains a mandatory startup preflight.
 ## API-only upstream transport
 
 The BWS runtime consumes betting-win only through its accepted read-only API. `BWS_UPSTREAM_MODE` and the file-export runtime selector are removed. Missing API readiness is a runtime-evidence blocker; there is no automatic file fallback.

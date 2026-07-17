@@ -19,7 +19,7 @@ automatic_file_fallback=prohibited
 
 `BWS-585` through `BWS-599` are validated. The active private-paper gate is `BWS-600`, using only the typed operator-approved betting-win read-only API.
 
-The operator does not select an upstream mode. Runtime transport is fixed to API, and there is no export, fixture, mock, or file fallback.
+The operator does not select an upstream mode. Runtime transport is fixed to API, and there is no export, fixture, mock, or file fallback. The supported root runtime path also fixes the policy to `paper`, provider connections disabled, and execution disabled. These invariants do not depend on private `.env` completeness. The operator must still provide an accepted repo-local `BWS_PRIVATE_PAPER_SCHEDULE_PATH`; the wrapper passes it through but does not manufacture campaign plans.
 
 ## Evidence
 

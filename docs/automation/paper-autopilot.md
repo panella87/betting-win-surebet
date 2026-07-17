@@ -24,4 +24,6 @@ selected_now=yes_for_runtime_evidence_source_fix_loops
 
 `BWS-599` has validated the complete local paper-autopilot flow. `BWS-600` is now the selected externally gated campaign and remains blocked until the operator-approved betting-win read-only API and campaign evidence are available.
 
+The paper child starts runtime evidence through `scripts/bws-root-wrapper-runtime.mjs`. That wrapper uses explicit process configuration first, fills only missing approved non-policy keys from the private `.env`, passes the required operator-approved repo-local private-paper schedule path, enforces API-only private paper (`paper`, provider-disabled, execution-disabled), and removes retired export or pinned-bundle runtime inputs before lifecycle inspection. It never substitutes a fixture schedule.
+
 Seven-day and 72-hour durations are ceilings. A bounded task may finish quickly, but the parent or implementation controller must continue while another dependency-ready safe task remains.

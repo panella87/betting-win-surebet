@@ -14,6 +14,7 @@ const STRUCTURED_LOG_DIRECTORY = resolve(REPOSITORY_ROOT, 'runtime/bws-observabi
 const RUNTIME_ENVIRONMENT_KEYS = Object.freeze([
   'BETTING_WIN_REPO_PATH',
   'BWS_API_PORT',
+  'BWS_PRIVATE_PAPER_SCHEDULE_PATH',
   'BWS_PRIVATE_PAPER_SCHEDULER_INTERVAL_MS',
   'BWS_PRIVATE_PAPER_SCHEDULER_MAX_BACKOFF_MS',
   'BWS_PRIVATE_PAPER_SCHEDULER_MAX_QUEUE_DEPTH',
@@ -40,17 +41,27 @@ const RUNTIME_ENVIRONMENT_KEYS = Object.freeze([
   'BWS_WORKER_ID',
   'BWS_WORKER_LEASE_DURATION_MS',
   'BWS_WORKER_QUEUE_NAME',
-  'SUREBET_EXECUTION_ENABLED',
   'SUREBET_PG_DATABASE',
   'SUREBET_PG_HOST',
   'SUREBET_PG_PASSWORD',
   'SUREBET_PG_PORT',
   'SUREBET_PG_SOCKET_DIRECTORY',
   'SUREBET_PG_USER',
-  'SUREBET_PROVIDER_CONNECTIONS',
-  'SUREBET_RUNTIME_MODE',
   'VITE_BWS_COCKPIT_API_BASE_URL',
   'VITE_BWS_COCKPIT_DATA_MODE',
+]);
+const RUNTIME_COMPARISON_KEYS = Object.freeze([
+  ...RUNTIME_ENVIRONMENT_KEYS,
+  'SUREBET_EXECUTION_ENABLED',
+  'SUREBET_PROVIDER_CONNECTIONS',
+  'SUREBET_RUNTIME_MODE',
+]);
+const RETIRED_RUNTIME_ENVIRONMENT_KEYS = Object.freeze([
+  'BWS_PINNED_EXPORT_PATH',
+  'BWS_UPSTREAM_EXPORT_FILE',
+  'BWS_UPSTREAM_EXPORT_PATH',
+  'BWS_UPSTREAM_EXPORT_SELECTION_PATH',
+  'SUREBET_PINNED_BUNDLE',
 ]);
 const RUNTIME_LOG_ROLES = Object.freeze([
   'api',
@@ -175,12 +186,20 @@ function resolveRuntimeEnvironment() {
   const fileEnvironment = readSelectedEnvFile(ENV_FILE_PATH, RUNTIME_ENVIRONMENT_KEYS);
   const merged = { ...process.env };
   for (const key of RUNTIME_ENVIRONMENT_KEYS) {
-    if (fileEnvironment.has(key)) {
+    if (readProcessValue(key, merged) === undefined && fileEnvironment.has(key)) {
       merged[key] = fileEnvironment.get(key);
     }
   }
+
+  // These are controller-owned paper-safety invariants, not operator-selectable defaults.
   merged.BWS_UPSTREAM_MODE = 'api';
-  delete merged.BWS_UPSTREAM_EXPORT_SELECTION_PATH;
+  merged.SUREBET_RUNTIME_MODE = 'paper';
+  merged.SUREBET_PROVIDER_CONNECTIONS = 'disabled';
+  merged.SUREBET_EXECUTION_ENABLED = 'false';
+
+  for (const key of RETIRED_RUNTIME_ENVIRONMENT_KEYS) {
+    delete merged[key];
+  }
   return merged;
 }
 
@@ -354,7 +373,9 @@ function compareStateWithEnvironment(state, environment, metricsProbe) {
   if (actualMode !== undefined && actualMode !== 'api') {
     mismatches.push(`upstream_mode_expected=api actual=${actualMode}`);
   }
-  const comparedKeys = RUNTIME_ENVIRONMENT_KEYS.filter((key) => readProcessValue(key, environment) !== undefined);
+  const comparedKeys = RUNTIME_COMPARISON_KEYS.filter(
+    (key) => readProcessValue(key, environment) !== undefined,
+  );
   return Object.freeze({
     comparedKeys,
     mismatches: Object.freeze(mismatches),

@@ -84,6 +84,10 @@ test('paper evaluation runs known report commands as direct argv', () => {
   assert.match(script, /automation_run_argv_command "pinned_bundle_smoke"/);
   assert.match(script, /scripts\/bws-root-wrapper-runtime\.mjs[\s\S]*paper-runtime-evidence/);
   assert.match(script, /runtime_environment_loader=selective_root_wrapper_env/);
+  assert.match(script, /runtime_environment_precedence=explicit_process_then_dotenv_fill/);
+  assert.match(script, /runtime_schedule_loader=operator_approved_repo_local_manifest/);
+  assert.match(script, /runtime_policy_enforcement=api_paper_provider_disabled_execution_false/);
+  assert.match(script, /runtime_retired_input_scrub=export_selectors_and_pinned_bundle/);
   assert.match(script, /cmd=\(node cli\.js local-report --bundle "\$LOCAL_FIXTURE_BUNDLE" --output "\$out_rel"\)/);
   assert.match(script, /cmd=\(node cli\.js local-report --bundle "\$PINNED_BUNDLE_PATH" --output "\$out_rel" --pinned-intake\)/);
   assert.doesNotMatch(script, /paper_shell_quote\(\)/);

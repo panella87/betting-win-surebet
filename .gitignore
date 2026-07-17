@@ -16,6 +16,7 @@ coverage/
 *.p12
 
 # Runtime output and autonomous artifacts
+/runtime/
 artifacts/*
 !artifacts/.gitkeep
 !artifacts/**/.gitkeep

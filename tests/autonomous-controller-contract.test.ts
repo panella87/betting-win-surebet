@@ -233,6 +233,10 @@ test('paper evaluation controller exposes canonical no-service private fixture a
     'PAPER_EVALUATION_READY_RUNTIME_EVIDENCE_LOCAL_ONLY',
     'PAPER_EVALUATION_BLOCKED_RUNTIME_OWNERSHIP_AMBIGUOUS',
     'runtime_environment_loader=selective_root_wrapper_env',
+    'runtime_environment_precedence=explicit_process_then_dotenv_fill',
+    'runtime_schedule_loader=operator_approved_repo_local_manifest',
+    'runtime_policy_enforcement=api_paper_provider_disabled_execution_false',
+    'runtime_retired_input_scrub=export_selectors_and_pinned_bundle',
     'bws-root-wrapper-runtime.mjs',
     'paper-runtime-evidence',
     'runtime_evidence_failure_stage',
@@ -333,6 +337,9 @@ test('status docs record the hardened controller surface', () => {
   assertContains(status, 'run_paper_evaluation=fixture_and_runtime_evidence_validated_bws_588');
   assertContains(status, 'run_paper_autopilot=standardized_and_selected_for_bws_600_runtime_evidence');
   assertContains(status, 'paper_runtime_env_loader=selective_root_wrapper_env');
+  assertContains(status, 'paper_runtime_env_precedence=explicit_process_then_dotenv_fill');
+  assertContains(status, 'paper_runtime_schedule=operator_approved_repo_local_manifest');
+  assertContains(status, 'paper_runtime_policy=enforced_api_paper_provider_disabled_execution_false');
   assertContains(status, 'source_fingerprint_runtime_exclusion=enabled');
   assertContains(status, 'runtime_evidence_failure_stage=bounded_redacted');
 });

@@ -1,3 +1,12 @@
+## 2026-07-17 - Paper runtime policy enforcement
+
+- Fixed the BWS-600 runtime-evidence path that returned immediately at `initial_lifecycle_status` when a private `.env` omitted `SUREBET_RUNTIME_MODE`.
+- Made the supported root runtime wrapper enforce API-only private-paper policy: `SUREBET_RUNTIME_MODE=paper`, provider connections disabled, and execution disabled.
+- Changed approved non-policy environment merging so explicit process values take precedence and `.env` only fills missing keys.
+- Passed the required operator-approved repo-local `BWS_PRIVATE_PAPER_SCHEDULE_PATH` through the selective runtime boundary and documented `runtime/operator-inputs/` as the private location; no fixture schedule is synthesized.
+- Scrubbed retired export selectors and `SUREBET_PINNED_BUNDLE` before runtime lifecycle inspection.
+- Added regression, controller-contract, API-only, status, and runbook coverage without reopening the completed safe-local product queue.
+
 ## 2026-07-17 - Paper runtime-evidence recovery and BWS-600 routing
 
 - Routed the completed safe-local program through `run-paper-autopilot.sh` for `BWS-600` and marked autonomous implementation as handoff-only while no known implementation queue remains.

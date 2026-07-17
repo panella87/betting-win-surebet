@@ -45,10 +45,37 @@ if 'runtime:upstream-export' in package.get('scripts',{}): errors.append('packag
 for rel in ['run-paper-evaluation.sh','run-paper-autopilot.sh']:
  if 'upstream_mode=api' not in (ROOT/rel).read_text(): errors.append(f'{rel}: missing upstream_mode=api')
 wrapper=(ROOT/'scripts/bws-root-wrapper-runtime.mjs').read_text(encoding='utf-8')
-for marker in ["case 'paper-runtime-evidence'", "merged.BWS_UPSTREAM_MODE = 'api'", 'delete merged.BWS_UPSTREAM_EXPORT_SELECTION_PATH']:
+if 'merged.BWS_PRIVATE_PAPER_SCHEDULE_PATH =' in wrapper:
+ errors.append('scripts/bws-root-wrapper-runtime.mjs: private-paper schedule fallback must not be synthesized')
+for marker in [
+ "case 'paper-runtime-evidence'",
+ "merged.BWS_UPSTREAM_MODE = 'api'",
+ "merged.SUREBET_RUNTIME_MODE = 'paper'",
+ "merged.SUREBET_PROVIDER_CONNECTIONS = 'disabled'",
+ "merged.SUREBET_EXECUTION_ENABLED = 'false'",
+ "readProcessValue(key, merged) === undefined && fileEnvironment.has(key)",
+ "'BWS_PRIVATE_PAPER_SCHEDULE_PATH'",
+ "'BWS_PINNED_EXPORT_PATH'",
+ "'BWS_UPSTREAM_EXPORT_FILE'",
+ "'BWS_UPSTREAM_EXPORT_PATH'",
+ "'BWS_UPSTREAM_EXPORT_SELECTION_PATH'",
+ "'SUREBET_PINNED_BUNDLE'",
+]:
  if marker not in wrapper: errors.append(f'scripts/bws-root-wrapper-runtime.mjs: missing {marker}')
+
+env_template=(ROOT/'config/bws.private.env.template').read_text(encoding='utf-8')
+if 'BWS_PRIVATE_PAPER_SCHEDULE_PATH=runtime/operator-inputs/bws.private-paper-schedule.json' not in env_template:
+ errors.append('config/bws.private.env.template: missing operator-approved private-paper schedule path')
+if '/runtime/' not in (ROOT/'.gitignore').read_text(encoding='utf-8'):
+ errors.append('.gitignore: runtime output and operator inputs must be ignored')
+for rel in [
+ 'packages/bootstrap/src/cli/bws-operator-lifecycle.ts',
+ 'packages/bootstrap/src/cli/bws-paper-runtime-evidence.ts',
+]:
+ if 'BWS_PRIVATE_PAPER_SCHEDULE_PATH' not in (ROOT/rel).read_text(encoding='utf-8'):
+  errors.append(f'{rel}: missing private-paper schedule requirement')
 paper=(ROOT/'run-paper-evaluation.sh').read_text(encoding='utf-8')
-for marker in ['scripts/bws-root-wrapper-runtime.mjs', 'paper-runtime-evidence', 'runtime_environment_loader=selective_root_wrapper_env']:
+for marker in ['scripts/bws-root-wrapper-runtime.mjs', 'paper-runtime-evidence', 'runtime_environment_loader=selective_root_wrapper_env', 'runtime_schedule_loader=operator_approved_repo_local_manifest']:
  if marker not in paper: errors.append(f'run-paper-evaluation.sh: missing {marker}')
 
 for rel in [

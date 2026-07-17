@@ -122,7 +122,7 @@ test('start.sh and stop.sh delegate to the product-owned lifecycle helper', () =
   }
 });
 
-test('paper runtime-evidence wrapper loads only selected .env values and forces API mode', () => {
+test('paper runtime-evidence wrapper fills selected .env values and enforces the fixed paper-safe API policy', () => {
   const repositoryRoot = mkdtempSync(join(tmpdir(), 'bws-root-paper-runtime-evidence-'));
   try {
     mkdirSync(join(repositoryRoot, 'scripts'), { recursive: true });
@@ -136,6 +136,10 @@ test('paper runtime-evidence wrapper loads only selected .env values and forces 
       [
         'SUREBET_PG_DATABASE=database-from-env',
         'BWS_API_PORT=4321',
+        'BWS_PRIVATE_PAPER_SCHEDULE_PATH=runtime/operator-inputs/bws.private-paper-schedule.json',
+        'SUREBET_RUNTIME_MODE=live',
+        'SUREBET_PROVIDER_CONNECTIONS=enabled',
+        'SUREBET_EXECUTION_ENABLED=true',
         'UNRELATED_PRIVATE_VALUE=must-not-load',
         '',
       ].join('\n'),
@@ -148,8 +152,16 @@ test('paper runtime-evidence wrapper loads only selected .env values and forces 
         "  apiPort: process.env.BWS_API_PORT,",
         "  argv: process.argv.slice(2),",
         "  database: process.env.SUREBET_PG_DATABASE,",
+        "  executionEnabled: process.env.SUREBET_EXECUTION_ENABLED,",
+        "  exportFile: process.env.BWS_UPSTREAM_EXPORT_FILE,",
+        "  exportPath: process.env.BWS_UPSTREAM_EXPORT_PATH,",
         "  exportSelection: process.env.BWS_UPSTREAM_EXPORT_SELECTION_PATH,",
         "  mode: process.env.BWS_UPSTREAM_MODE,",
+        "  pinnedBundle: process.env.SUREBET_PINNED_BUNDLE,",
+        "  pinnedExport: process.env.BWS_PINNED_EXPORT_PATH,",
+        "  providerConnections: process.env.SUREBET_PROVIDER_CONNECTIONS,",
+        "  runtimeMode: process.env.SUREBET_RUNTIME_MODE,",
+        "  schedulePath: process.env.BWS_PRIVATE_PAPER_SCHEDULE_PATH,",
         "  unrelated: process.env.UNRELATED_PRIVATE_VALUE,",
         "}));",
         '',
@@ -165,17 +177,33 @@ test('paper runtime-evidence wrapper loads only selected .env values and forces 
         encoding: 'utf-8',
         env: {
           ...process.env,
+          BWS_API_PORT: '4999',
+          BWS_PINNED_EXPORT_PATH: 'config/stale-pinned-export.json',
+          BWS_UPSTREAM_EXPORT_FILE: 'runtime/stale-export.json',
+          BWS_UPSTREAM_EXPORT_PATH: 'runtime/stale-export-directory',
           BWS_UPSTREAM_EXPORT_SELECTION_PATH: 'config/stale-export.json',
           BWS_UPSTREAM_MODE: 'export',
+          SUREBET_EXECUTION_ENABLED: 'true',
+          SUREBET_PINNED_BUNDLE: 'tests/fixtures/stale-bundle.json',
+          SUREBET_PROVIDER_CONNECTIONS: 'enabled',
+          SUREBET_RUNTIME_MODE: 'live',
         },
       },
     );
     const parsed = JSON.parse(output) as Readonly<Record<string, unknown>>;
-    assert.equal(parsed.apiPort, '4321');
+    assert.equal(parsed.apiPort, '4999');
     assert.deepEqual(parsed.argv, ['--output', 'artifacts/result.json']);
     assert.equal(parsed.database, 'database-from-env');
+    assert.equal(parsed.executionEnabled, 'false');
+    assert.equal(parsed.exportFile, undefined);
+    assert.equal(parsed.exportPath, undefined);
     assert.equal(parsed.exportSelection, undefined);
     assert.equal(parsed.mode, 'api');
+    assert.equal(parsed.pinnedBundle, undefined);
+    assert.equal(parsed.pinnedExport, undefined);
+    assert.equal(parsed.providerConnections, 'disabled');
+    assert.equal(parsed.runtimeMode, 'paper');
+    assert.equal(parsed.schedulePath, 'runtime/operator-inputs/bws.private-paper-schedule.json');
     assert.equal(parsed.unrelated, undefined);
   } finally {
     rmSync(repositoryRoot, { recursive: true, force: true });
