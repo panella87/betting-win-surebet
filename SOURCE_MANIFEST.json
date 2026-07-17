@@ -1,6 +1,6 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-07-17T20:18:10Z",
+  "generated": "2026-07-17T20:40:37Z",
   "overlay": "paper-runtime-policy-schedule-wave28",
   "files": [
     {
@@ -2365,8 +2365,8 @@
     },
     {
       "path": "tests/root-wrapper-runtime.test.ts",
-      "sha256": "d4c92541c340a23c3c18547425efaf56c09aee507711c1cbb6ca4ec23d6b8998",
-      "size": 15331
+      "sha256": "4d664149a9b8569b59bf933ee45e2c6207797bcbda82e6d6d8316cd0ff6113d5",
+      "size": 15790
     },
     {
       "path": "tests/rounding.test.ts",

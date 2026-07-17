@@ -8,6 +8,12 @@ import { join } from 'node:path';
 import { execFile, execFileSync } from 'node:child_process';
 
 const REPO_ROOT = process.cwd();
+const RUNTIME_ENVIRONMENT_PREFIXES = Object.freeze([
+  'BETTING_WIN_',
+  'BWS_',
+  'SUREBET_',
+  'VITE_BWS_',
+]);
 
 test('check_progress.sh reports automation artifacts and product runtime state', async () => {
   const fixture = await createRuntimeFixture();
@@ -392,6 +398,7 @@ function execFileText(
       {
         cwd: options.cwd,
         encoding: 'utf-8',
+        env: createSanitizedRuntimeEnvironment(),
       },
       (
         error: Error | null,
@@ -417,4 +424,14 @@ function awaitable<T>(
   return new Promise<T>((resolvePromise, rejectPromise) => {
     executor(resolvePromise, rejectPromise);
   });
+}
+
+function createSanitizedRuntimeEnvironment(): NodeJS.ProcessEnv {
+  const sanitized = { ...process.env };
+  for (const key of Object.keys(sanitized)) {
+    if (RUNTIME_ENVIRONMENT_PREFIXES.some((prefix) => key.startsWith(prefix))) {
+      delete sanitized[key];
+    }
+  }
+  return sanitized;
 }
