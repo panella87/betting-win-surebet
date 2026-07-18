@@ -11,6 +11,7 @@ const REPO_ROOT = process.cwd();
 const RUNTIME_ENVIRONMENT_PREFIXES = Object.freeze([
   'BETTING_WIN_',
   'BWS_',
+  'POSTGRES_',
   'SUREBET_',
   'VITE_BWS_',
 ]);
@@ -140,7 +141,10 @@ test('paper runtime-evidence wrapper fills selected .env values and enforces the
     writeFileSync(
       join(repositoryRoot, '.env'),
       [
-        'SUREBET_PG_DATABASE=database-from-env',
+        'POSTGRES_ADDRESS=127.0.0.1:5433',
+        'POSTGRES_USER=user-from-env',
+        'POSTGRES_PASSWORD=password-from-env',
+        'POSTGRES_DB=database-from-env',
         'BWS_API_PORT=4321',
         'BWS_PRIVATE_PAPER_SCHEDULE_PATH=runtime/operator-inputs/bws.private-paper-schedule.json',
         'SUREBET_RUNTIME_MODE=live',
@@ -158,6 +162,10 @@ test('paper runtime-evidence wrapper fills selected .env values and enforces the
         "  apiPort: process.env.BWS_API_PORT,",
         "  argv: process.argv.slice(2),",
         "  database: process.env.SUREBET_PG_DATABASE,",
+        "  dbHost: process.env.SUREBET_PG_HOST,",
+        "  dbPassword: process.env.SUREBET_PG_PASSWORD,",
+        "  dbPort: process.env.SUREBET_PG_PORT,",
+        "  dbUser: process.env.SUREBET_PG_USER,",
         "  executionEnabled: process.env.SUREBET_EXECUTION_ENABLED,",
         "  exportFile: process.env.BWS_UPSTREAM_EXPORT_FILE,",
         "  exportPath: process.env.BWS_UPSTREAM_EXPORT_PATH,",
@@ -200,6 +208,10 @@ test('paper runtime-evidence wrapper fills selected .env values and enforces the
     assert.equal(parsed.apiPort, '4999');
     assert.deepEqual(parsed.argv, ['--output', 'artifacts/result.json']);
     assert.equal(parsed.database, 'database-from-env');
+    assert.equal(parsed.dbHost, '127.0.0.1');
+    assert.equal(parsed.dbPassword, 'password-from-env');
+    assert.equal(parsed.dbPort, '5433');
+    assert.equal(parsed.dbUser, 'user-from-env');
     assert.equal(parsed.executionEnabled, 'false');
     assert.equal(parsed.exportFile, undefined);
     assert.equal(parsed.exportPath, undefined);
@@ -211,6 +223,52 @@ test('paper runtime-evidence wrapper fills selected .env values and enforces the
     assert.equal(parsed.runtimeMode, 'paper');
     assert.equal(parsed.schedulePath, 'runtime/operator-inputs/bws.private-paper-schedule.json');
     assert.equal(parsed.unrelated, undefined);
+  } finally {
+    rmSync(repositoryRoot, { recursive: true, force: true });
+  }
+});
+
+
+test('paper runtime-evidence wrapper rejects retired DB_URL settings', () => {
+  const repositoryRoot = mkdtempSync(join(tmpdir(), 'bws-root-retired-db-url-'));
+  try {
+    mkdirSync(join(repositoryRoot, 'scripts'), { recursive: true });
+    mkdirSync(join(repositoryRoot, 'dist', 'packages', 'bootstrap', 'src', 'cli'), { recursive: true });
+    copyFileSync(
+      join(REPO_ROOT, 'scripts', 'bws-root-wrapper-runtime.mjs'),
+      join(repositoryRoot, 'scripts', 'bws-root-wrapper-runtime.mjs'),
+    );
+    writeFileSync(
+      join(repositoryRoot, '.env'),
+      [
+        ['DB_URL=postgresql', '://betting_win:do-not-print@127.0.0.1:5432/betting_win_surebet'].join(''),
+        'POSTGRES_ADDRESS=127.0.0.1:5432',
+        'POSTGRES_USER=betting_win',
+        'POSTGRES_PASSWORD=password-from-env',
+        'POSTGRES_DB=betting_win_surebet',
+        '',
+      ].join('\n'),
+      'utf-8',
+    );
+    writeFileSync(
+      join(repositoryRoot, 'dist', 'packages', 'bootstrap', 'src', 'cli', 'bws-paper-runtime-evidence.js'),
+      'process.stdout.write("unexpected");\n',
+      'utf-8',
+    );
+
+    assert.throws(
+      () => execFileSync(
+        'node',
+        ['scripts/bws-root-wrapper-runtime.mjs', 'paper-runtime-evidence', '--output', 'artifacts/result.json'],
+        {
+          cwd: repositoryRoot,
+          encoding: 'utf-8',
+          env: createSanitizedRuntimeEnvironment(),
+          stdio: 'pipe',
+        },
+      ),
+      /DB_URL is retired for BWS runtime configuration/,
+    );
   } finally {
     rmSync(repositoryRoot, { recursive: true, force: true });
   }
@@ -352,11 +410,11 @@ async function createRuntimeFixture(options: Readonly<{
     BWS_WORKER_ID: 'worker-local-001',
     BWS_WORKER_LEASE_DURATION_MS: '30000',
     BWS_WORKER_QUEUE_NAME: 'private-paper',
+    POSTGRES_ADDRESS: '127.0.0.1:5432',
+    POSTGRES_DB: 'surebet_local',
+    POSTGRES_PASSWORD: 'secret-local-password',
+    POSTGRES_USER: 'surebet',
     SUREBET_EXECUTION_ENABLED: 'false',
-    SUREBET_PG_DATABASE: 'surebet_local',
-    SUREBET_PG_HOST: '127.0.0.1',
-    SUREBET_PG_PORT: '5432',
-    SUREBET_PG_USER: 'surebet',
     SUREBET_PROVIDER_CONNECTIONS: 'disabled',
     SUREBET_RUNTIME_MODE: 'paper',
     ...(options.envOverrides ?? {}),

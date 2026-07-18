@@ -148,9 +148,10 @@ const COMMON_ENVIRONMENT_KEYS = Object.freeze([
   'SUREBET_RUNTIME_MODE',
   'SUREBET_PROVIDER_CONNECTIONS',
   'SUREBET_EXECUTION_ENABLED',
-  'SUREBET_PG_DATABASE',
-  'SUREBET_PG_USER',
-  'SUREBET_PG_PORT',
+  'POSTGRES_ADDRESS',
+  'POSTGRES_DB',
+  'POSTGRES_PASSWORD',
+  'POSTGRES_USER',
 ]);
 const EXPORT_MODE_KEYS = Object.freeze([
   'BWS_UPSTREAM_EXPORT_SELECTION_PATH',
@@ -1315,21 +1316,11 @@ function buildConfigurationPresence(
   for (const name of modeKeys) {
     entries[name] = environment.has(name);
   }
-  const hasHost = environment.has('SUREBET_PG_HOST');
-  const hasSocketDirectory = environment.has('SUREBET_PG_SOCKET_DIRECTORY');
-  if (hasHost === hasSocketDirectory) {
-    throw new Error('Release preflight requires exactly one of SUREBET_PG_HOST or SUREBET_PG_SOCKET_DIRECTORY.');
-  }
-  entries.SUREBET_PG_HOST = hasHost;
-  entries.SUREBET_PG_SOCKET_DIRECTORY = hasSocketDirectory;
   return Object.freeze(entries);
 }
 
 function validateEnvironmentPresence(configurationPresence: Readonly<Record<string, boolean>>): void {
   for (const [name, present] of Object.entries(configurationPresence)) {
-    if ((name === 'SUREBET_PG_HOST' || name === 'SUREBET_PG_SOCKET_DIRECTORY') && !present) {
-      continue;
-    }
     if (!present) {
       throw new Error(`Release preflight requires ${name} to be present in the private environment file.`);
     }
@@ -1412,7 +1403,7 @@ function readStrictEnvironmentFile(path: string): ReadonlyMap<string, string> {
     if (name === undefined || rawValue === undefined) {
       throw new Error(`Private environment file line ${index + 1} is invalid.`);
     }
-    if (SENSITIVE_KEY_PATTERN.test(name) && name !== 'SUREBET_PG_PASSWORD') {
+    if (SENSITIVE_KEY_PATTERN.test(name) && name !== 'POSTGRES_PASSWORD') {
       throw new Error(`Private environment file must not include unexpected sensitive key ${name}.`);
     }
     if (values.has(name)) {

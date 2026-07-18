@@ -221,7 +221,7 @@ def main() -> None:
         'PROJECT_STATUS.md': ['program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1', 'status=RUNTIME_EVIDENCE_READY', 'current_task=BWS-600', 'current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE', 'safe_local_completion_gate=BWS-599', 'selected_controller=run-paper-autopilot.sh'],
         'docs/repo_status_current.md': ['Standard automation status', 'run_autonomous_implementation=standardized_not_selected_no_known_implementation_queue', 'run_paper_autopilot=standardized_and_selected_for_bws_600_runtime_evidence', 'run_bugfix_autopilot=standardized_parent_for_broad_audit_and_repair', 'paper_runtime_env_loader=selective_root_wrapper_env', 'paper_runtime_env_precedence=explicit_process_then_dotenv_fill', 'paper_runtime_schedule=operator_approved_repo_local_manifest', 'paper_runtime_policy=enforced_api_paper_provider_disabled_execution_false', 'source_fingerprint_runtime_exclusion=enabled', 'runtime_evidence_failure_stage=bounded_redacted', 'selected_task_source=docs/041_external_runtime_preflight_and_bws600_campaign.md'],
         'docs/MASTER_PLAN.md': ['program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1', 'current_task=BWS-600', 'backlog/bws_full_implementation.csv', 'BWS-581', 'BWS-599', 'Automation operating model'],
-        'docs/032_database_and_data_lifecycle.md': ['DB_URL_TEST', 'SUREBET_TEST_*', 'CREATEDB', 'BWS-585'],
+        'docs/032_database_and_data_lifecycle.md': ['POSTGRES_*', 'SUREBET_TEST_*', 'CREATEDB', 'BWS-585'],
         'docs/033_continuous_private_paper_runtime_program.md': ['BWS-520', 'BWS-580', 'BWS-581', 'BWS-599', 'BWS-600'],
         'docs/034_remaining_operator_runtime_implementation_program.md': ['current_task=BWS-599', 'safe_local_terminal_gate=BWS-599', 'paper evaluation=runtime_evidence_mode_validated'],
         'docs/041_external_runtime_preflight_and_bws600_campaign.md': ['BWS-593', 'BWS-600', 'bws.external_runtime_campaign.v1', 'runtime_upstream_mode=api_only', 'automatic_file_fallback=prohibited'],
@@ -238,9 +238,12 @@ def main() -> None:
                 fail(f'{rel} missing required marker: {marker}')
 
     env_example = read(ROOT / '.env.example')
-    for marker in ['DB_URL=', 'DB_URL_TEST=', 'CREATEDB']:
+    for marker in ['POSTGRES_ADDRESS=', 'POSTGRES_USER=', 'POSTGRES_PASSWORD=', 'POSTGRES_DB=']:
         if marker not in env_example:
-            fail(f'.env.example missing BWS-510 database marker: {marker}')
+            fail(f'.env.example missing canonical database marker: {marker}')
+    for marker in ['DB_URL=', 'DB_URL_TEST=']:
+        if marker in env_example:
+            fail(f'.env.example still contains retired database URL marker: {marker}')
 
     gitignore = read(ROOT / '.gitignore')
     for marker in [

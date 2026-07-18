@@ -249,7 +249,7 @@ def main() -> None:
         fail('package.json validate:implementation-program is missing or non-canonical')
 
     loopback_validator = read('scripts/validate_bws_loopback_acceptance.mjs')
-    for marker in ['DB_URL_TEST', 'repo-local .env', 'SUREBET_TEST_ADMIN_DATABASE', 'SUREBET_TEST_USER']:
+    for marker in ['POSTGRES_ADDRESS', 'repo-local .env', 'SUREBET_TEST_ADMIN_DATABASE', 'SUREBET_TEST_USER']:
         require(loopback_validator, marker, 'scripts/validate_bws_loopback_acceptance.mjs')
 
     repo_validator = read('scripts/validate_repo.py')

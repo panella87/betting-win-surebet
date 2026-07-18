@@ -7,16 +7,27 @@ import { join } from 'node:path';
 
 const ROOT = process.cwd();
 const SCRIPT = join(ROOT, 'scripts', 'validate_bws_loopback_acceptance.mjs');
-const VALID_DATABASE_URL = ['postgresql', '://betting_win:private-password@127.0.0.1:5432/betting_win_surebet_test'].join('');
+
+const VALID_POSTGRES_ENV: Readonly<Record<string, string>> = Object.freeze({
+  POSTGRES_ADDRESS: '127.0.0.1:5432',
+  POSTGRES_DB: 'betting_win_surebet',
+  POSTGRES_PASSWORD: 'private-password',
+  POSTGRES_USER: 'betting_win',
+});
 
 const CLEARED_DATABASE_ENV: Partial<NodeJS.ProcessEnv> = Object.freeze({
+  DB_URL: undefined,
   DB_URL_TEST: undefined,
+  POSTGRES_ADDRESS: undefined,
+  POSTGRES_DB: undefined,
+  POSTGRES_PASSWORD: undefined,
+  POSTGRES_USER: undefined,
   SUREBET_TEST_ADMIN_DATABASE: undefined,
-  SUREBET_TEST_USER: undefined,
-  SUREBET_TEST_PORT: undefined,
   SUREBET_TEST_HOST: undefined,
-  SUREBET_TEST_SOCKET_DIRECTORY: undefined,
   SUREBET_TEST_PASSWORD: undefined,
+  SUREBET_TEST_PORT: undefined,
+  SUREBET_TEST_SOCKET_DIRECTORY: undefined,
+  SUREBET_TEST_USER: undefined,
 });
 
 test('loopback acceptance validator fails closed when BETTING_WIN_REPO_PATH is missing', () => {
@@ -24,8 +35,8 @@ test('loopback acceptance validator fails closed when BETTING_WIN_REPO_PATH is m
     const error = captureFailure(
       {
         ...CLEARED_DATABASE_ENV,
+        ...VALID_POSTGRES_ENV,
         BETTING_WIN_REPO_PATH: undefined,
-        DB_URL_TEST: VALID_DATABASE_URL,
       },
       cwd,
     );
@@ -49,7 +60,7 @@ test('loopback acceptance validator fails closed when neither supported database
 
     assert.match(
       error.output,
-      /requires either a complete SUREBET_TEST_\* tuple or DB_URL_TEST in the process environment or repo-local \.env/,
+      /requires either a complete SUREBET_TEST_\* tuple or canonical POSTGRES_\* settings/,
     );
   });
 });
@@ -76,31 +87,31 @@ test('loopback acceptance validator fails closed when host and socket directory 
   });
 });
 
-test('loopback acceptance validator rejects a partial SUREBET_TEST tuple instead of mixing it with DB_URL_TEST', () => {
+test('loopback acceptance validator rejects a partial SUREBET_TEST tuple instead of mixing it with POSTGRES settings', () => {
   withTemporaryWorkingDirectory((cwd) => {
     const error = captureFailure(
       {
         ...CLEARED_DATABASE_ENV,
+        ...VALID_POSTGRES_ENV,
         BETTING_WIN_REPO_PATH: cwd,
-        DB_URL_TEST: VALID_DATABASE_URL,
         SUREBET_TEST_USER: 'betting_win',
       },
       cwd,
     );
 
     assert.match(error.output, /Incomplete SUREBET_TEST_\* configuration in process environment/);
-    assert.match(error.output, /Do not mix a partial SUREBET_TEST_\* tuple with DB_URL_TEST/);
+    assert.match(error.output, /Do not mix a partial SUREBET_TEST_\* tuple with POSTGRES_\* settings/);
   });
 });
 
-test('loopback acceptance validator derives the disposable database tuple from process DB_URL_TEST', () => {
+test('loopback acceptance validator derives the disposable database tuple from process POSTGRES settings', () => {
   withTemporaryWorkingDirectory((cwd) => {
     const missingCheckout = join(cwd, 'missing-betting-win-checkout');
     const error = captureFailure(
       {
         ...CLEARED_DATABASE_ENV,
+        ...VALID_POSTGRES_ENV,
         BETTING_WIN_REPO_PATH: missingCheckout,
-        DB_URL_TEST: VALID_DATABASE_URL,
       },
       cwd,
     );
@@ -111,9 +122,19 @@ test('loopback acceptance validator derives the disposable database tuple from p
   });
 });
 
-test('loopback acceptance validator reads DB_URL_TEST from the repo-local .env without printing credentials', () => {
+test('loopback acceptance validator reads POSTGRES settings from the repo-local .env without printing credentials', () => {
   withTemporaryWorkingDirectory((cwd) => {
-    writeFileSync(join(cwd, '.env'), `DB_URL_TEST=${VALID_DATABASE_URL}\n`, 'utf-8');
+    writeFileSync(
+      join(cwd, '.env'),
+      [
+        'POSTGRES_ADDRESS=127.0.0.1:5432',
+        'POSTGRES_USER=betting_win',
+        'POSTGRES_PASSWORD=private-password',
+        'POSTGRES_DB=betting_win_surebet',
+        '',
+      ].join('\n'),
+      'utf-8',
+    );
     const missingCheckout = join(cwd, 'missing-betting-win-checkout');
     const error = captureFailure(
       {
@@ -128,19 +149,36 @@ test('loopback acceptance validator reads DB_URL_TEST from the repo-local .env w
   });
 });
 
-test('loopback acceptance validator rejects malformed DB_URL_TEST without exposing its value', () => {
+test('loopback acceptance validator rejects malformed POSTGRES_ADDRESS without exposing the password', () => {
   withTemporaryWorkingDirectory((cwd) => {
-    const malformed = ['postgresql', '://betting_win:do-not-print@127.0.0.1/betting_win_surebet_test'].join('');
     const error = captureFailure(
       {
         ...CLEARED_DATABASE_ENV,
+        ...VALID_POSTGRES_ENV,
         BETTING_WIN_REPO_PATH: cwd,
-        DB_URL_TEST: malformed,
+        POSTGRES_ADDRESS: '127.0.0.1',
       },
       cwd,
     );
 
-    assert.match(error.output, /DB_URL_TEST must include an explicit PostgreSQL port/);
+    assert.match(error.output, /POSTGRES_ADDRESS in process environment must use host:port format/);
+    assert.doesNotMatch(error.output, /private-password/);
+  });
+});
+
+test('loopback acceptance validator rejects retired DB_URL_TEST without exposing its value', () => {
+  withTemporaryWorkingDirectory((cwd) => {
+    const error = captureFailure(
+      {
+        ...CLEARED_DATABASE_ENV,
+        ...VALID_POSTGRES_ENV,
+        BETTING_WIN_REPO_PATH: cwd,
+        DB_URL_TEST: ['postgresql', '://betting_win:do-not-print@127.0.0.1:5432/betting_win_surebet_test'].join(''),
+      },
+      cwd,
+    );
+
+    assert.match(error.output, /DB_URL_TEST is retired for BWS loopback acceptance/);
     assert.doesNotMatch(error.output, /do-not-print/);
   });
 });

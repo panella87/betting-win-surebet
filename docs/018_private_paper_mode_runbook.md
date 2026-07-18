@@ -19,7 +19,7 @@ automatic_file_fallback=prohibited
 
 `BWS-585` through `BWS-599` are validated. The active private-paper gate is `BWS-600`, using only the typed operator-approved betting-win read-only API.
 
-The operator does not select an upstream mode. Runtime transport is fixed to API, and there is no export, fixture, mock, or file fallback. The supported root runtime path also fixes the policy to `paper`, provider connections disabled, and execution disabled. These invariants do not depend on private `.env` completeness. The operator must still provide an accepted repo-local `BWS_PRIVATE_PAPER_SCHEDULE_PATH`; the wrapper passes it through but does not manufacture campaign plans.
+The operator does not select an upstream mode. Runtime transport is fixed to API, and there is no export, fixture, mock, or file fallback. The supported root runtime path also fixes the policy to `paper`, provider connections disabled, and execution disabled. These invariants do not depend on private `.env` completeness. The operator must still provide the repo-local private-paper manifest content under the standard `runtime/operator-inputs/bws.private-paper-schedule.json` path or explicitly override `BWS_PRIVATE_PAPER_SCHEDULE_PATH`; the wrapper does not manufacture campaign plans. PostgreSQL runtime input is the canonical `POSTGRES_ADDRESS`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_DB` tuple; `DB_URL` and `DB_URL_TEST` are retired.
 
 ## Evidence
 

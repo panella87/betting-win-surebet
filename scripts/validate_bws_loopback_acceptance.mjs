@@ -14,6 +14,17 @@ const TEST_ENV_KEYS = Object.freeze([
   'SUREBET_TEST_SOCKET_DIRECTORY',
   'SUREBET_TEST_PASSWORD',
 ]);
+const POSTGRES_ENV_KEYS = Object.freeze([
+  'POSTGRES_ADDRESS',
+  'POSTGRES_USER',
+  'POSTGRES_PASSWORD',
+  'POSTGRES_DB',
+]);
+const RETIRED_DATABASE_URL_KEYS = Object.freeze([
+  'DATABASE_URL',
+  'DB_URL',
+  'DB_URL_TEST',
+]);
 const REQUIRED_TEST_ENV_KEYS = Object.freeze([
   'SUREBET_TEST_ADMIN_DATABASE',
   'SUREBET_TEST_USER',
@@ -55,9 +66,11 @@ function main() {
 function readEnvironment() {
   const fileEnvironment = readSelectedEnvFile(ENV_FILE_PATH, [
     'BETTING_WIN_REPO_PATH',
-    'DB_URL_TEST',
+    ...POSTGRES_ENV_KEYS,
+    ...RETIRED_DATABASE_URL_KEYS,
     ...TEST_ENV_KEYS,
   ]);
+  rejectRetiredDatabaseUrlInputs(fileEnvironment);
   const bettingWinRepoPath = readProcessValue('BETTING_WIN_REPO_PATH')
     ?? fileEnvironment.get('BETTING_WIN_REPO_PATH');
   if (bettingWinRepoPath === undefined) {
@@ -72,9 +85,7 @@ function readEnvironment() {
   );
 
   const testEnvironment = selectedTestEnvironment
-    ?? readDatabaseUrlTestEnvironment(
-      readProcessValue('DB_URL_TEST') ?? fileEnvironment.get('DB_URL_TEST'),
-    );
+    ?? readPostgresEnvironment(readSelectedProcessEnvironment(POSTGRES_ENV_KEYS), readSelectedMapEnvironment(fileEnvironment, POSTGRES_ENV_KEYS));
 
   return Object.freeze({
     bettingWinRepoPath,
@@ -100,7 +111,7 @@ function validateExplicitTestEnvironment(values, sourceLabel) {
   const missing = REQUIRED_TEST_ENV_KEYS.filter((name) => values.get(name) === undefined);
   if (missing.length > 0) {
     fail(
-      `Incomplete SUREBET_TEST_* configuration in ${sourceLabel}. Missing: ${missing.join(', ')}. Do not mix a partial SUREBET_TEST_* tuple with DB_URL_TEST.`,
+      `Incomplete SUREBET_TEST_* configuration in ${sourceLabel}. Missing: ${missing.join(', ')}. Do not mix a partial SUREBET_TEST_* tuple with POSTGRES_* settings.`,
     );
   }
 
@@ -123,53 +134,64 @@ function validateExplicitTestEnvironment(values, sourceLabel) {
   });
 }
 
-function readDatabaseUrlTestEnvironment(rawValue) {
-  if (rawValue === undefined) {
+function rejectRetiredDatabaseUrlInputs(fileEnvironment) {
+  for (const key of RETIRED_DATABASE_URL_KEYS) {
+    if (readProcessValue(key) !== undefined || fileEnvironment.has(key)) {
+      fail(`${key} is retired for BWS loopback acceptance. Use POSTGRES_ADDRESS, POSTGRES_USER, POSTGRES_PASSWORD, and POSTGRES_DB instead.`);
+    }
+  }
+}
+
+function readPostgresEnvironment(processValues, fileValues) {
+  const values = processValues.size > 0 ? processValues : fileValues;
+  const sourceLabel = processValues.size > 0 ? 'process environment' : 'repo-local .env';
+  const missing = POSTGRES_ENV_KEYS.filter((name) => values.get(name) === undefined);
+  if (missing.length > 0) {
     fail(
-      'Loopback acceptance requires either a complete SUREBET_TEST_* tuple or DB_URL_TEST in the process environment or repo-local .env.',
+      `Loopback acceptance requires either a complete SUREBET_TEST_* tuple or canonical POSTGRES_* settings in the process environment or repo-local .env. Missing: ${missing.join(', ')}.`,
     );
   }
 
-  let parsed;
-  try {
-    parsed = new URL(rawValue);
-  } catch {
-    fail('DB_URL_TEST must be a valid PostgreSQL URL.');
+  const { host, port } = parsePostgresAddress(values.get('POSTGRES_ADDRESS'), sourceLabel);
+  const database = requireNonEmptyPostgresValue(values.get('POSTGRES_DB'), 'POSTGRES_DB', sourceLabel);
+  const user = requireNonEmptyPostgresValue(values.get('POSTGRES_USER'), 'POSTGRES_USER', sourceLabel);
+  const password = requireNonEmptyPostgresValue(values.get('POSTGRES_PASSWORD'), 'POSTGRES_PASSWORD', sourceLabel);
+  if (database.includes('/')) {
+    fail(`POSTGRES_DB in ${sourceLabel} must identify exactly one maintenance database.`);
   }
-
-  if (parsed.protocol !== 'postgresql:' && parsed.protocol !== 'postgres:') {
-    fail('DB_URL_TEST must use the postgresql: or postgres: protocol.');
-  }
-  if (parsed.username.length === 0) {
-    fail('DB_URL_TEST must include an explicit PostgreSQL user.');
-  }
-  if (parsed.hostname.length === 0) {
-    fail('DB_URL_TEST must include an explicit PostgreSQL host.');
-  }
-  if (parsed.port.length === 0) {
-    fail('DB_URL_TEST must include an explicit PostgreSQL port.');
-  }
-  if (parsed.search.length > 0 || parsed.hash.length > 0) {
-    fail('DB_URL_TEST must not include query parameters or a fragment for loopback acceptance.');
-  }
-
-  const database = decodeUrlComponent(parsed.pathname.replace(/^\/+/, ''), 'database');
-  const user = decodeUrlComponent(parsed.username, 'user');
-  const password = parsed.password.length === 0
-    ? undefined
-    : decodeUrlComponent(parsed.password, 'password');
-  if (database.length === 0 || database.includes('/')) {
-    fail('DB_URL_TEST must identify exactly one maintenance database.');
-  }
-  const port = parseRequiredPort(parsed.port, 'DB_URL_TEST port');
 
   return Object.freeze({
     SUREBET_TEST_ADMIN_DATABASE: database,
-    SUREBET_TEST_USER: user,
+    SUREBET_TEST_HOST: host,
+    SUREBET_TEST_PASSWORD: password,
     SUREBET_TEST_PORT: String(port),
-    SUREBET_TEST_HOST: parsed.hostname,
-    ...(password === undefined ? {} : { SUREBET_TEST_PASSWORD: password }),
+    SUREBET_TEST_USER: user,
   });
+}
+
+function parsePostgresAddress(value, sourceLabel) {
+  const raw = requireNonEmptyPostgresValue(value, 'POSTGRES_ADDRESS', sourceLabel);
+  const separator = raw.lastIndexOf(':');
+  if (separator <= 0 || separator === raw.length - 1) {
+    fail(`POSTGRES_ADDRESS in ${sourceLabel} must use host:port format, for example 127.0.0.1:5432.`);
+  }
+  let host = raw.slice(0, separator);
+  const rawPort = raw.slice(separator + 1);
+  if (host.startsWith('[') && host.endsWith(']')) {
+    host = host.slice(1, -1);
+  }
+  if (host.length === 0) {
+    fail(`POSTGRES_ADDRESS in ${sourceLabel} must include a non-empty host.`);
+  }
+  const port = parseRequiredPort(rawPort, 'POSTGRES_ADDRESS port');
+  return Object.freeze({ host, port });
+}
+
+function requireNonEmptyPostgresValue(value, name, sourceLabel) {
+  if (value === undefined || value.trim().length === 0) {
+    fail(`${name} in ${sourceLabel} must be a non-empty string.`);
+  }
+  return value.trim();
 }
 
 function readSelectedProcessEnvironment(names) {
@@ -254,14 +276,6 @@ function parseRequiredPort(rawValue, label) {
     fail(`${label} must be an explicit integer between 1 and 65535 for loopback acceptance.`);
   }
   return port;
-}
-
-function decodeUrlComponent(value, label) {
-  try {
-    return decodeURIComponent(value);
-  } catch {
-    fail(`DB_URL_TEST contains invalid percent-encoding in its ${label}.`);
-  }
 }
 
 function runLoopbackAcceptanceTest(environment) {

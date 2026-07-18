@@ -1,3 +1,11 @@
+## 2026-07-18 - Canonical PostgreSQL environment tuple
+
+- Replaced operator-facing `DB_URL` and `DB_URL_TEST` startup configuration with the canonical `POSTGRES_ADDRESS`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_DB` tuple.
+- Made the supported root runtime wrapper derive internal `SUREBET_PG_*` values from the canonical tuple while keeping API-only, paper-mode, provider-disabled, and execution-disabled policy enforced in code.
+- Added repo-owned defaults for BWS runtime intervals, worker identity, API transport, cockpit mode, upstream lock path, and the standard private-paper schedule path so the launch command no longer carries the full runtime tuple.
+- Updated loopback acceptance to use the canonical PostgreSQL tuple as the disposable maintenance source when no explicit `SUREBET_TEST_*` tuple is supplied, without restoring a separate test database URL.
+- Refreshed templates, runbooks, validators, and regression tests for the BWS-600 runtime-evidence environment contract.
+
 ## 2026-07-17 - Paper runtime policy enforcement
 
 - Fixed the BWS-600 runtime-evidence path that returned immediately at `initial_lifecycle_status` when a private `.env` omitted `SUREBET_RUNTIME_MODE`.

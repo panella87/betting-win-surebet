@@ -139,7 +139,7 @@ test('install verification rejects tampered releases and partial private configu
 
   const cleanExtraction = extractReleaseArchive(fixture.result.archiveFile);
   const partialEnvFile = join(cleanExtraction.tempDirectory, 'partial.env');
-  writePrivateEnvironmentFile(partialEnvFile, cleanExtraction.manifest, TEST_PASSWORD, ['SUREBET_PG_USER']);
+  writePrivateEnvironmentFile(partialEnvFile, cleanExtraction.manifest, TEST_PASSWORD, ['POSTGRES_USER']);
   const partialResult = spawnSync(
     'node',
     [
@@ -161,7 +161,7 @@ test('install verification rejects tampered releases and partial private configu
   );
   try {
     assert.notEqual(partialResult.status, 0);
-    assert.match(partialResult.stderr, /SUREBET_PG_USER/);
+    assert.match(partialResult.stderr, /POSTGRES_USER/);
     assert.ok(!partialResult.stderr.includes(TEST_PASSWORD), 'partial-config failure must not leak secrets');
   } finally {
     cleanupExtraction(extraction.tempDirectory);
@@ -345,11 +345,10 @@ function writePrivateEnvironmentFile(
     'SUREBET_RUNTIME_MODE=paper',
     'SUREBET_PROVIDER_CONNECTIONS=disabled',
     'SUREBET_EXECUTION_ENABLED=false',
-    'SUREBET_PG_DATABASE=surebet_private',
-    'SUREBET_PG_USER=surebet',
-    'SUREBET_PG_PORT=5432',
-    'SUREBET_PG_HOST=127.0.0.1',
-    `SUREBET_PG_PASSWORD=${password}`,
+    'POSTGRES_ADDRESS=127.0.0.1:5432',
+    'POSTGRES_USER=betting_win',
+    `POSTGRES_PASSWORD=${password}`,
+    'POSTGRES_DB=betting_win_surebet',
   ];
   const filtered = lines.filter((line) => {
     const separatorIndex = line.indexOf('=');

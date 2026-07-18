@@ -1,7 +1,7 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-07-18T07:37:33Z",
-  "overlay": "paper-runtime-policy-schedule-wave28",
+  "generated": "2026-07-18T08:33:12Z",
+  "overlay": "postgres-env-contract-wave30",
   "files": [
     {
       "path": ".automation/README.md",
@@ -30,8 +30,8 @@
     },
     {
       "path": ".env.example",
-      "sha256": "d78d6e1131f66d1dbfcd0a34cf36af2fc4a53087a72e62fd24861f59cc707b26",
-      "size": 2569
+      "sha256": "8c15f2d28ce8d4822911e4753bcf6345267d33c6f9e210c60c49df6cb0aa1192",
+      "size": 2533
     },
     {
       "path": ".gitattributes",
@@ -55,8 +55,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "7c7b31aacfb62cc5b39aa65761d9fea33a01926498a360b4303718fb64b48b62",
-      "size": 58100
+      "sha256": "39dbbc7889da14c756b6e393aa4fe5d05db396cc98a06238848ca8364e80ed4a",
+      "size": 59100
     },
     {
       "path": "DOCUMENTATION_CHECK_REPORT.md",
@@ -65,13 +65,13 @@
     },
     {
       "path": "PROJECT_STATUS.md",
-      "sha256": "16051ce03e668de615434aca06cf0f016edff3a642b2c8da734c6b64f24eb92d",
-      "size": 3212
+      "sha256": "d432448536c13ca7bf3d24f902aaeeab9ed6e409ef44d36854e7fb6c360259b6",
+      "size": 3278
     },
     {
       "path": "README.md",
-      "sha256": "951f05f5fd2bcb87343b5fd9e88608198c0de1b79ad0c48e4669fed12c3944aa",
-      "size": 7087
+      "sha256": "47732849ffac29b236bf7bd67d33c1c186494a887591fb7cbd7d489fbe00655c",
+      "size": 7143
     },
     {
       "path": "STARTER_PACK.md",
@@ -240,8 +240,8 @@
     },
     {
       "path": "config/bws.private.env.template",
-      "sha256": "901f17be12d7b21b63dd3a297671f026809f666b73599e8e9e7bbbdcd8a5853e",
-      "size": 2267
+      "sha256": "23a839551763514d6357a919d062662f32ac08fa4cbf10eafb23d7375709d1f2",
+      "size": 2335
     },
     {
       "path": "database/migrations/surebet/001_create_upstream_locks_and_import_runs.sql",
@@ -370,8 +370,8 @@
     },
     {
       "path": "docs/012_runbook.md",
-      "sha256": "35f6ef6c5031df61525f14b85a6facfd5c71ab11f786daa42f704c8f653d7da0",
-      "size": 1848
+      "sha256": "57d589f85bc9be59fea44fbc01713369ab0765b90abed4bee69bb7d8ed25b683",
+      "size": 1968
     },
     {
       "path": "docs/013_autonomous_controller_status_contract.md",
@@ -400,8 +400,8 @@
     },
     {
       "path": "docs/018_private_paper_mode_runbook.md",
-      "sha256": "aa34c62b8283d4c3ba5e1083a65f65f6f4997fda8df8028ee3dfadc48fd9fa23",
-      "size": 2107
+      "sha256": "9a9265fabcae0d86881b0e510ac5543e01bdca7239701e70050e2490df798427",
+      "size": 2378
     },
     {
       "path": "docs/019_three_repo_surebet_strategy_boundary.md",
@@ -470,8 +470,8 @@
     },
     {
       "path": "docs/032_database_and_data_lifecycle.md",
-      "sha256": "05e5aecdfb3b5d98cf9da2927872471854e02028fb12fa494e512b9b8943e6e1",
-      "size": 1381
+      "sha256": "bb73f87f14e9840c8bb7051003bc04f043c42383bcce070b06dace6a06a447f5",
+      "size": 1466
     },
     {
       "path": "docs/033_continuous_private_paper_runtime_program.md",
@@ -560,8 +560,8 @@
     },
     {
       "path": "docs/automation/README.md",
-      "sha256": "f3bd1ee085084fc3e2ac83346701e059512cda83611a058189ab826d30ed5dbe",
-      "size": 5727
+      "sha256": "793786dd1e043a5cb2d9da8522160f793c8d6708d6a84e21dbdbb4d6ccc2dc91",
+      "size": 5917
     },
     {
       "path": "docs/automation/SSH_KEY_SETUP.md",
@@ -570,8 +570,8 @@
     },
     {
       "path": "docs/automation/api-only-upstream.md",
-      "sha256": "9bc9eaa679586838e565bb7679f8a322f7557aff671b4787ae23d5a4d321ef1a",
-      "size": 1626
+      "sha256": "d9a63763ab1825749db321f9ccf03d4ffcf7475a711bcbe9b6f8e925c15a720a",
+      "size": 1956
     },
     {
       "path": "docs/automation/autonomous-bugfix.md",
@@ -595,8 +595,8 @@
     },
     {
       "path": "docs/automation/paper-autopilot.md",
-      "sha256": "2bd18c84b7d51a1270f1b366a696f0d6d533431ff22c770d25d34ebe2b318e8f",
-      "size": 2055
+      "sha256": "8ed9dbef4cbbea59b5220ceb2857e1258d53921ed9899867dec20a770fc9ac24",
+      "size": 2047
     },
     {
       "path": "docs/automation/paper-evaluation.md",
@@ -670,8 +670,8 @@
     },
     {
       "path": "docs/repo_status_current.md",
-      "sha256": "8903397c87c56005b636d9eb3d9d0384b987ea4e0dc60075b597967531946f82",
-      "size": 9649
+      "sha256": "9ae89c996e4a862a737bdec4dbb7dc69aea88fe7b95564a32b08ed052f72791e",
+      "size": 9815
     },
     {
       "path": "open_log.sh",
@@ -880,8 +880,8 @@
     },
     {
       "path": "packages/bootstrap/src/operations/external-runtime-preflight.ts",
-      "sha256": "9331c9f0f6d572923a8f0af9a72273584f58c7b1b4a3d938d488ece7d9c30615",
-      "size": 47051
+      "sha256": "82afb1e7c903ea51866a1a4255da60c91f3ca868c1be7d64488604d754881ec6",
+      "size": 46765
     },
     {
       "path": "packages/bootstrap/src/operations/final-local-acceptance.ts",
@@ -925,8 +925,8 @@
     },
     {
       "path": "packages/bootstrap/src/operations/release-packaging.ts",
-      "sha256": "8541767415d58395d940955beb82e7fe4cffaa19067c498a4f9c67be609fbc26",
-      "size": 65464
+      "sha256": "bb76800bbf1a7d9a8d2341d9ace9d38cae96ed591c1741167fd40b979aa1edaa",
+      "size": 64974
     },
     {
       "path": "packages/bootstrap/src/operations/release-upgrade.ts",
@@ -1470,8 +1470,8 @@
     },
     {
       "path": "scripts/bws-root-wrapper-runtime.mjs",
-      "sha256": "db243a189fd7c272dacaffd741ef1eb46412afea3f55a23a91595ea25d13b788",
-      "size": 23308
+      "sha256": "508eaec53335af0774178259e50c879d146dea2101eb4a47ddc142b84a482aef",
+      "size": 28016
     },
     {
       "path": "scripts/create-source-handoff-archive.sh",
@@ -1505,8 +1505,8 @@
     },
     {
       "path": "scripts/validate_api_only_upstream.py",
-      "sha256": "e3bc2de60f7dbf34658528a9c1d78ddc0747880be48aab9a43fe58232d1f640a",
-      "size": 5594
+      "sha256": "aa243d81f91bcdb7fe3b5d4af66e49dfe7e3e47434a7b129a0530503e770b4d8",
+      "size": 6101
     },
     {
       "path": "scripts/validate_artifact_hygiene.py",
@@ -1530,8 +1530,8 @@
     },
     {
       "path": "scripts/validate_bws_loopback_acceptance.mjs",
-      "sha256": "972e5cb859ae0f0d7399028a37efbf55044fe0ca4e708635bc31de7366198365",
-      "size": 9764
+      "sha256": "1624933a115da5e14c687b95913d7de272bfddf528039fb90acdb502087d1c50",
+      "size": 10779
     },
     {
       "path": "scripts/validate_contract_boundary.py",
@@ -1550,8 +1550,8 @@
     },
     {
       "path": "scripts/validate_full_implementation_program.py",
-      "sha256": "58fc7f2b866caefc30969b816a3b34ebb9824115edd485de1a6e9a4feb375ce6",
-      "size": 12198
+      "sha256": "6be461f349eaa4929a09b013ab17aa26718b4d2f5d884c021b5d9e593f34cde2",
+      "size": 12203
     },
     {
       "path": "scripts/validate_local_engine_backlog_contract.py",
@@ -1590,8 +1590,8 @@
     },
     {
       "path": "scripts/validate_repo.py",
-      "sha256": "0e79fe46256983ef6750be7bdb7b9ab2e2ae41c29ebda95bf98332a7ee223c72",
-      "size": 17984
+      "sha256": "26f31f71f9caba7d4f0b9a090ae33e5e015931b297796bda44505f922dd4b245",
+      "size": 18191
     },
     {
       "path": "scripts/validate_shell_local_assignments.py",
@@ -2070,8 +2070,8 @@
     },
     {
       "path": "tests/bws-external-runtime-preflight.test.ts",
-      "sha256": "dc9fb216334cb238e73a9a0f8f6c5ca624c7ed8a9a59ac8bf4c28767a977e9a4",
-      "size": 26636
+      "sha256": "f9b0e13b1671082d2c1036dca659a0124f98c55a3fd71d28425e8d19bf2a492d",
+      "size": 26580
     },
     {
       "path": "tests/bws-final-local-acceptance.test.ts",
@@ -2080,8 +2080,8 @@
     },
     {
       "path": "tests/bws-loopback-acceptance-command.test.ts",
-      "sha256": "f0e543e0c72a97e2c2478068386278f9723fdb94a7165299a977aa50a2a69b15",
-      "size": 7356
+      "sha256": "421613807fea52aaf752ec2aa9cc12274a80be4da1efb68210e4307b4bb5d9b3",
+      "size": 8289
     },
     {
       "path": "tests/bws-loopback-acceptance.test.ts",
@@ -2135,8 +2135,8 @@
     },
     {
       "path": "tests/bws-release-packaging.test.ts",
-      "sha256": "ad8868355cbe2be4440cb13aec250c1d25ff3b3f2371236b98983fbe84a051c3",
-      "size": 12866
+      "sha256": "5f5ca35ecbfbc0b42ef4ed943943ed6a73f0e3eb37011e2bce735a95fa6ee556",
+      "size": 12836
     },
     {
       "path": "tests/bws-release-upgrade.test.ts",
@@ -2365,8 +2365,8 @@
     },
     {
       "path": "tests/root-wrapper-runtime.test.ts",
-      "sha256": "41c80d4dd6102b6120f309f6f84fa7b696063e3477dab51ab0bcb564956c0451",
-      "size": 15814
+      "sha256": "749ba83393bcd7201831d806a53e6c43da004447bc7b3bbf95f361dbe3ac0a1e",
+      "size": 17954
     },
     {
       "path": "tests/rounding.test.ts",

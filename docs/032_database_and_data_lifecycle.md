@@ -22,10 +22,10 @@ Canonical tests accept exactly one deterministic shape:
 ```text
 complete SUREBET_TEST_* tuple
 or
-DB_URL_TEST from process environment or repo-local .env
+canonical POSTGRES_* settings from process environment or repo-local .env
 ```
 
-A partial tuple is rejected and never mixed with `DB_URL_TEST`. The selected PostgreSQL role must already have `CREATEDB`. Tests create uniquely named disposable databases and drop only those databases after proof.
+A partial tuple is rejected and never mixed with `POSTGRES_*` settings. The selected PostgreSQL role behind `POSTGRES_USER` must already have `CREATEDB` for disposable validation databases. Tests create uniquely named disposable databases and drop only those databases after proof.
 
 ## Remaining operations
 

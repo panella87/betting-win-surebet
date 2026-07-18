@@ -67,9 +67,10 @@ const COMMON_ENV_KEYS = Object.freeze([
   'SUREBET_RUNTIME_MODE',
   'SUREBET_PROVIDER_CONNECTIONS',
   'SUREBET_EXECUTION_ENABLED',
-  'SUREBET_PG_DATABASE',
-  'SUREBET_PG_USER',
-  'SUREBET_PG_PORT',
+  'POSTGRES_ADDRESS',
+  'POSTGRES_DB',
+  'POSTGRES_PASSWORD',
+  'POSTGRES_USER',
 ] as const);
 
 type ExternalRuntimeMode = 'api' | 'export';
@@ -667,11 +668,6 @@ function requireCommonEnvironmentPresence(environment: ReadonlyMap<string, strin
       throw new Error(`External runtime preflight requires ${name} in the private environment file.`);
     }
   }
-  const hasHost = environment.has('SUREBET_PG_HOST');
-  const hasSocketDirectory = environment.has('SUREBET_PG_SOCKET_DIRECTORY');
-  if (hasHost === hasSocketDirectory) {
-    throw new Error('External runtime preflight requires exactly one of SUREBET_PG_HOST or SUREBET_PG_SOCKET_DIRECTORY.');
-  }
 }
 
 function requireModeSpecificEnvironmentPresence(
@@ -891,7 +887,7 @@ function readStrictEnvironmentFile(path: string): ReadonlyMap<string, string> {
     if (name === undefined || rawValue === undefined) {
       throw new Error(`Private environment file line ${index + 1} is invalid.`);
     }
-    if (SENSITIVE_KEY_PATTERN.test(name) && name !== 'SUREBET_PG_PASSWORD') {
+    if (SENSITIVE_KEY_PATTERN.test(name) && name !== 'POSTGRES_PASSWORD') {
       throw new Error(`Private environment file must not include unexpected sensitive key ${name}.`);
     }
     if (values.has(name)) {

@@ -11,6 +11,17 @@ const LIFECYCLE_STATE_FILE = resolve(REPOSITORY_ROOT, 'runtime/bws-operator-life
 const LIFECYCLE_EVIDENCE_FILE = resolve(REPOSITORY_ROOT, 'runtime/bws-operator-lifecycle/evidence/latest.json');
 const EVIDENCE_INDEX_SUMMARY_FILE = resolve(REPOSITORY_ROOT, 'runtime/bws-observability/evidence/latest.json');
 const STRUCTURED_LOG_DIRECTORY = resolve(REPOSITORY_ROOT, 'runtime/bws-observability/logs');
+const POSTGRES_ENVIRONMENT_KEYS = Object.freeze([
+  'POSTGRES_ADDRESS',
+  'POSTGRES_DB',
+  'POSTGRES_PASSWORD',
+  'POSTGRES_USER',
+]);
+const RETIRED_DATABASE_URL_KEYS = Object.freeze([
+  'DATABASE_URL',
+  'DB_URL',
+  'DB_URL_TEST',
+]);
 const RUNTIME_ENVIRONMENT_KEYS = Object.freeze([
   'BETTING_WIN_REPO_PATH',
   'BWS_API_PORT',
@@ -41,15 +52,41 @@ const RUNTIME_ENVIRONMENT_KEYS = Object.freeze([
   'BWS_WORKER_ID',
   'BWS_WORKER_LEASE_DURATION_MS',
   'BWS_WORKER_QUEUE_NAME',
-  'SUREBET_PG_DATABASE',
-  'SUREBET_PG_HOST',
-  'SUREBET_PG_PASSWORD',
-  'SUREBET_PG_PORT',
-  'SUREBET_PG_SOCKET_DIRECTORY',
-  'SUREBET_PG_USER',
   'VITE_BWS_COCKPIT_API_BASE_URL',
   'VITE_BWS_COCKPIT_DATA_MODE',
 ]);
+const REPO_OWNED_RUNTIME_DEFAULTS = Object.freeze({
+  BWS_API_PORT: '4312',
+  BWS_PRIVATE_PAPER_SCHEDULE_PATH: 'runtime/operator-inputs/bws.private-paper-schedule.json',
+  BWS_PRIVATE_PAPER_SCHEDULER_INTERVAL_MS: '60000',
+  BWS_PRIVATE_PAPER_SCHEDULER_MAX_BACKOFF_MS: '30000',
+  BWS_PRIVATE_PAPER_SCHEDULER_MAX_QUEUE_DEPTH: '128',
+  BWS_PRIVATE_PAPER_SCHEDULER_PASS_TIMEOUT_MS: '30000',
+  BWS_PRIVATE_PAPER_SCHEDULER_RETRY_BACKOFF_MS: '1000',
+  BWS_PRIVATE_PAPER_WORKER_INTERVAL_MS: '5000',
+  BWS_PRIVATE_PAPER_WORKER_MAX_BACKOFF_MS: '30000',
+  BWS_PRIVATE_PAPER_WORKER_MAX_JOBS_PER_PASS: '128',
+  BWS_PRIVATE_PAPER_WORKER_PASS_TIMEOUT_MS: '30000',
+  BWS_PRIVATE_PAPER_WORKER_RETRY_BACKOFF_MS: '1000',
+  BWS_UPSTREAM_API_BASE_URL: 'http://127.0.0.1:3000',
+  BWS_UPSTREAM_API_CHECKPOINT_ID: 'checkpoint-api-001',
+  BWS_UPSTREAM_API_CONTRACT_VERSION: '1.0.0',
+  BWS_UPSTREAM_API_MAX_PAGES_PER_RESOURCE: '4',
+  BWS_UPSTREAM_API_PAGE_SIZE: '25',
+  BWS_UPSTREAM_API_RETRY_BACKOFF_MS: '250',
+  BWS_UPSTREAM_API_RETRY_LIMIT: '2',
+  BWS_UPSTREAM_API_TIMEOUT_MS: '10000',
+  BWS_UPSTREAM_CONVERGENCE_INTERVAL_MS: '60000',
+  BWS_UPSTREAM_CONVERGENCE_MAX_BACKOFF_MS: '30000',
+  BWS_UPSTREAM_CONVERGENCE_PASS_TIMEOUT_MS: '30000',
+  BWS_UPSTREAM_CONVERGENCE_RETRY_BACKOFF_MS: '1000',
+  BWS_UPSTREAM_LOCK_PATH: 'config/betting-win.upstream.lock.json',
+  BWS_WORKER_ID: 'worker-bws-release-001',
+  BWS_WORKER_LEASE_DURATION_MS: '30000',
+  BWS_WORKER_QUEUE_NAME: 'private-paper',
+  VITE_BWS_COCKPIT_API_BASE_URL: 'http://127.0.0.1:4312',
+  VITE_BWS_COCKPIT_DATA_MODE: 'mock',
+});
 const RUNTIME_COMPARISON_KEYS = Object.freeze([
   ...RUNTIME_ENVIRONMENT_KEYS,
   'SUREBET_EXECUTION_ENABLED',
@@ -183,13 +220,27 @@ function printRuntimeLogPath(argumentsList) {
 }
 
 function resolveRuntimeEnvironment() {
-  const fileEnvironment = readSelectedEnvFile(ENV_FILE_PATH, RUNTIME_ENVIRONMENT_KEYS);
+  const fileEnvironment = readSelectedEnvFile(ENV_FILE_PATH, [
+    ...RUNTIME_ENVIRONMENT_KEYS,
+    ...POSTGRES_ENVIRONMENT_KEYS,
+    ...RETIRED_DATABASE_URL_KEYS,
+  ]);
+  rejectRetiredDatabaseUrlInputs(fileEnvironment);
   const merged = { ...process.env };
+
   for (const key of RUNTIME_ENVIRONMENT_KEYS) {
     if (readProcessValue(key, merged) === undefined && fileEnvironment.has(key)) {
       merged[key] = fileEnvironment.get(key);
     }
   }
+  for (const [key, value] of Object.entries(REPO_OWNED_RUNTIME_DEFAULTS)) {
+    if (readProcessValue(key, merged) === undefined) {
+      merged[key] = value;
+    }
+  }
+
+  Object.assign(merged, resolveCanonicalPostgresEnvironment(fileEnvironment, merged));
+  delete merged.SUREBET_PG_SOCKET_DIRECTORY;
 
   // These are controller-owned paper-safety invariants, not operator-selectable defaults.
   merged.BWS_UPSTREAM_MODE = 'api';
@@ -202,6 +253,75 @@ function resolveRuntimeEnvironment() {
   }
   return merged;
 }
+
+function rejectRetiredDatabaseUrlInputs(fileEnvironment) {
+  for (const key of RETIRED_DATABASE_URL_KEYS) {
+    if (readProcessValue(key) !== undefined || fileEnvironment.has(key)) {
+      fail(`${key} is retired for BWS runtime configuration. Use POSTGRES_ADDRESS, POSTGRES_USER, POSTGRES_PASSWORD, and POSTGRES_DB instead.`);
+    }
+  }
+}
+
+function resolveCanonicalPostgresEnvironment(fileEnvironment, processEnvironment) {
+  const values = new Map();
+  const missing = [];
+  for (const key of POSTGRES_ENVIRONMENT_KEYS) {
+    const value = readProcessValue(key, processEnvironment) ?? fileEnvironment.get(key);
+    if (value === undefined) {
+      missing.push(key);
+      continue;
+    }
+    values.set(key, value);
+  }
+  if (missing.length > 0) {
+    fail(`Missing required canonical PostgreSQL runtime setting(s): ${missing.join(', ')}. Configure POSTGRES_ADDRESS, POSTGRES_USER, POSTGRES_PASSWORD, and POSTGRES_DB in .env.`);
+  }
+
+  const { host, port } = parsePostgresAddress(values.get('POSTGRES_ADDRESS'));
+  const database = requireNonEmptyPostgresValue(values.get('POSTGRES_DB'), 'POSTGRES_DB');
+  const user = requireNonEmptyPostgresValue(values.get('POSTGRES_USER'), 'POSTGRES_USER');
+  const password = requireNonEmptyPostgresValue(values.get('POSTGRES_PASSWORD'), 'POSTGRES_PASSWORD');
+  if (database.includes('/')) {
+    fail('POSTGRES_DB must identify exactly one PostgreSQL database name.');
+  }
+
+  return Object.freeze({
+    SUREBET_PG_DATABASE: database,
+    SUREBET_PG_HOST: host,
+    SUREBET_PG_PASSWORD: password,
+    SUREBET_PG_PORT: String(port),
+    SUREBET_PG_USER: user,
+  });
+}
+
+function parsePostgresAddress(value) {
+  const raw = requireNonEmptyPostgresValue(value, 'POSTGRES_ADDRESS');
+  const separator = raw.lastIndexOf(':');
+  if (separator <= 0 || separator === raw.length - 1) {
+    fail('POSTGRES_ADDRESS must use host:port format, for example 127.0.0.1:5432.');
+  }
+  let host = raw.slice(0, separator);
+  const rawPort = raw.slice(separator + 1);
+  if (host.startsWith('[') && host.endsWith(']')) {
+    host = host.slice(1, -1);
+  }
+  if (host.length === 0) {
+    fail('POSTGRES_ADDRESS must include a non-empty host.');
+  }
+  const port = Number.parseInt(rawPort, 10);
+  if (!/^[0-9]+$/.test(rawPort) || !Number.isInteger(port) || port <= 0 || port > 65535) {
+    fail('POSTGRES_ADDRESS port must be an integer between 1 and 65535.');
+  }
+  return Object.freeze({ host, port });
+}
+
+function requireNonEmptyPostgresValue(value, name) {
+  if (typeof value !== 'string' || value.trim().length === 0) {
+    fail(`${name} must be a non-empty string.`);
+  }
+  return value.trim();
+}
+
 
 async function createRuntimeSummary() {
   if (!existsSync(LIFECYCLE_STATE_FILE)) {

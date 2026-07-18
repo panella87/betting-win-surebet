@@ -66,6 +66,14 @@ for marker in [
 env_template=(ROOT/'config/bws.private.env.template').read_text(encoding='utf-8')
 if 'BWS_PRIVATE_PAPER_SCHEDULE_PATH=runtime/operator-inputs/bws.private-paper-schedule.json' not in env_template:
  errors.append('config/bws.private.env.template: missing operator-approved private-paper schedule path')
+
+for marker in ['POSTGRES_ADDRESS=127.0.0.1:5432', 'POSTGRES_USER=betting_win', 'POSTGRES_PASSWORD=replace_me', 'POSTGRES_DB=betting_win_surebet']:
+ if marker not in env_template:
+  errors.append(f'config/bws.private.env.template: missing canonical database marker {marker}')
+for marker in ['DB_URL=', 'DB_URL_TEST=', 'SUREBET_PG_DATABASE=', 'SUREBET_PG_USER=', 'SUREBET_PG_HOST=']:
+ if marker in env_template:
+  errors.append(f'config/bws.private.env.template: contains retired database marker {marker}')
+
 if '/runtime/' not in (ROOT/'.gitignore').read_text(encoding='utf-8'):
  errors.append('.gitignore: runtime output and operator inputs must be ignored')
 for rel in [
