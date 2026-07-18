@@ -88,6 +88,8 @@ test('paper evaluation runs known report commands as direct argv', () => {
   assert.match(script, /runtime_schedule_loader=operator_approved_repo_local_manifest/);
   assert.match(script, /runtime_policy_enforcement=api_paper_provider_disabled_execution_false/);
   assert.match(script, /runtime_retired_input_scrub=export_selectors_and_pinned_bundle/);
+  assert.match(script, /RUNTIME_EVIDENCE_COMMAND_TIMEOUT_SECONDS="\$\(\(DURATION_SECONDS \+ 300\)\)"/);
+  assert.match(script, /automation_run_argv_command "runtime_evidence" "\$RUNTIME_EVIDENCE_COMMAND_TIMEOUT_SECONDS"/);
   assert.match(script, /cmd=\(node cli\.js local-report --bundle "\$LOCAL_FIXTURE_BUNDLE" --output "\$out_rel"\)/);
   assert.match(script, /cmd=\(node cli\.js local-report --bundle "\$PINNED_BUNDLE_PATH" --output "\$out_rel" --pinned-intake\)/);
   assert.doesNotMatch(script, /paper_shell_quote\(\)/);

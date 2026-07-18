@@ -158,7 +158,7 @@ test('operator lifecycle rolls back partial startup failures and stops children 
 
     await assert.rejects(
       () => startManagedBwsOperatorStack(failingRequest),
-      /Timed out waiting for managed BWS API readiness/,
+      /Timed out waiting for managed BWS API health/,
     );
     const startedRoles = readSignalLog(fixture.startedLogPath);
     assert.equal(startedRoles.some((entry) => entry.includes('boot:upstream_convergence')), true);
@@ -185,6 +185,21 @@ test('operator lifecycle rolls back partial startup failures and stops children 
   }
 });
 
+test('operator lifecycle records a started stack when API health is observable but readiness remains blocked', async () => {
+  const fixture = await createLifecycleFixture({ apiReadinessStatus: 'blocked' });
+  try {
+    const start = await startManagedBwsOperatorStack(fixture.request);
+    assert.equal(start.outcome, 'started');
+    assert.equal(start.stack.healthStatus, 'blocked');
+    assert.equal(start.stack.readinessStatus, 'blocked');
+    assert.equal(start.stack.components.api, 'ready');
+    assert.equal(start.stack.components.cockpit, 'blocked');
+    assert.equal(existsSync(join(fixture.runtimeStateDirectory, 'state.json')), true);
+  } finally {
+    await fixture.dispose();
+  }
+});
+
 test('operator lifecycle CLI prints help without side effects', async () => {
   const capture = createCaptureStream();
   const exitCode = await runBwsOperatorLifecycleCli(['--help'], process.cwd(), capture.stream);
@@ -193,7 +208,9 @@ test('operator lifecycle CLI prints help without side effects', async () => {
   assert.match(capture.read(), /full BWS stack lifecycle/);
 });
 
-async function createLifecycleFixture(): Promise<{
+async function createLifecycleFixture(options: Readonly<{
+  readonly apiReadinessStatus?: 'blocked' | 'ready';
+}> = {}): Promise<{
   readonly dispose: () => Promise<void>;
   readonly port: number;
   readonly repositoryRoot: string;
@@ -227,6 +244,7 @@ async function createLifecycleFixture(): Promise<{
     apiStubPath,
     createApiStubServiceSource({
       port,
+      readinessStatus: options.apiReadinessStatus ?? 'ready',
       role: 'api_runtime',
       signalLogPath,
       startedLogPath,
@@ -414,6 +432,7 @@ async function createRepositoryFixture(repositoryRoot: string, upstreamRoot: str
 
 function createApiStubServiceSource(input: Readonly<{
   readonly port: number;
+  readonly readinessStatus: 'blocked' | 'ready';
   readonly role: string;
   readonly signalLogPath: string;
   readonly startedLogPath: string;
@@ -429,7 +448,8 @@ function createApiStubServiceSource(input: Readonly<{
     `const startedMarkerPath = ${JSON.stringify(input.startedMarkerPath)};`,
     "writeFileSync(startedMarkerPath, `${process.pid}\\n`, 'utf-8');",
     "appendFileSync(startedLogPath, `boot:${role}:${process.pid}\\n`, 'utf-8');",
-    "const responseBody = JSON.stringify({ ok: true, health: { status: 'healthy' }, readiness: { status: 'ready', components: { cockpit: 'ready' } }, observability: { configuration: { persistence: { password: '[redacted]' } } } });",
+    `const readinessStatus = ${JSON.stringify(input.readinessStatus)};`,
+    "const responseBody = JSON.stringify({ ok: true, health: { status: 'healthy' }, readiness: { status: readinessStatus, components: { cockpit: readinessStatus } }, observability: { configuration: { persistence: { password: '[redacted]' } } } });",
     "const server = createServer((request, response) => {",
     "  if (request.url === '/health' || request.url === '/readiness') {",
     "    response.statusCode = 200;",

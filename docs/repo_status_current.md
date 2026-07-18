@@ -133,11 +133,13 @@ paper_runtime_env_precedence=explicit_process_then_dotenv_fill
 paper_runtime_schedule=operator_approved_repo_local_manifest
 paper_runtime_policy=enforced_api_paper_provider_disabled_execution_false
 paper_runtime_retired_inputs=export_selectors_and_pinned_bundle_scrubbed
+paper_runtime_start_gate=api_health_observable_readiness_observed
+paper_runtime_evidence_command_timeout=duration_plus_300s
 source_fingerprint_runtime_exclusion=enabled
 runtime_evidence_failure_stage=bounded_redacted
 ```
 
-The safe-local product implementation remains accepted. The root runtime wrapper now treats API transport, paper mode, provider-disabled operation, and execution-disabled operation as controller-owned invariants; private `.env` values only fill missing non-policy configuration and cannot override an explicit shell value. It also passes the explicit operator-approved repo-local private-paper schedule path; it does not invent a fixture or fallback schedule. The next normal route is the BWS-600 runtime-evidence parent; the repository temp/inode guard remains a mandatory startup preflight.
+The safe-local product implementation remains accepted. The root runtime wrapper now treats API transport, paper mode, provider-disabled operation, and execution-disabled operation as controller-owned invariants; private `.env` values only fill missing non-policy configuration and cannot override an explicit shell value. It also passes the explicit operator-approved repo-local private-paper schedule path; it does not invent a fixture or fallback schedule. Runtime-evidence start records a managed stack once the API health endpoint is observable; blocked readiness is measured inside the evidence window instead of aborting startup. The runtime-evidence managed-command timeout follows the requested evidence duration plus a fixed 300-second margin. The next normal route is the BWS-600 runtime-evidence parent; the repository temp/inode guard remains a mandatory startup preflight.
 ## API-only upstream transport
 
 The BWS runtime consumes betting-win only through its accepted read-only API. `BWS_UPSTREAM_MODE` and the file-export runtime selector are removed. Missing API readiness is a runtime-evidence blocker; there is no automatic file fallback.

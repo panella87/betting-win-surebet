@@ -340,6 +340,8 @@ test('status docs record the hardened controller surface', () => {
   assertContains(status, 'paper_runtime_env_precedence=explicit_process_then_dotenv_fill');
   assertContains(status, 'paper_runtime_schedule=operator_approved_repo_local_manifest');
   assertContains(status, 'paper_runtime_policy=enforced_api_paper_provider_disabled_execution_false');
+  assertContains(status, 'paper_runtime_start_gate=api_health_observable_readiness_observed');
+  assertContains(status, 'paper_runtime_evidence_command_timeout=duration_plus_300s');
   assertContains(status, 'source_fingerprint_runtime_exclusion=enabled');
   assertContains(status, 'runtime_evidence_failure_stage=bounded_redacted');
 });

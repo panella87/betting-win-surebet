@@ -1,6 +1,6 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-07-17T22:22:50Z",
+  "generated": "2026-07-18T07:37:33Z",
   "overlay": "paper-runtime-policy-schedule-wave28",
   "files": [
     {
@@ -560,8 +560,8 @@
     },
     {
       "path": "docs/automation/README.md",
-      "sha256": "d4b412883e8241703d37d81ec616f55206ceb395c2f7d1af1bbf9a79c5405e3f",
-      "size": 5500
+      "sha256": "f3bd1ee085084fc3e2ac83346701e059512cda83611a058189ab826d30ed5dbe",
+      "size": 5727
     },
     {
       "path": "docs/automation/SSH_KEY_SETUP.md",
@@ -595,8 +595,8 @@
     },
     {
       "path": "docs/automation/paper-autopilot.md",
-      "sha256": "97693cfe9d2323a1c261df3c6973ededd7a0a5430a7aec3db82d6dee6881e0b2",
-      "size": 1744
+      "sha256": "2bd18c84b7d51a1270f1b366a696f0d6d533431ff22c770d25d34ebe2b318e8f",
+      "size": 2055
     },
     {
       "path": "docs/automation/paper-evaluation.md",
@@ -670,8 +670,8 @@
     },
     {
       "path": "docs/repo_status_current.md",
-      "sha256": "b75d744eed648da9100dac2454d221a71e280177299b95d5510ac6ca2b6106d5",
-      "size": 9231
+      "sha256": "8903397c87c56005b636d9eb3d9d0384b987ea4e0dc60075b597967531946f82",
+      "size": 9649
     },
     {
       "path": "open_log.sh",
@@ -895,8 +895,8 @@
     },
     {
       "path": "packages/bootstrap/src/operations/operator-lifecycle.ts",
-      "sha256": "52b582d6bafb0aaa4a31c98d5b89b278cb8baec89c826f26d71df18c2079728c",
-      "size": 42767
+      "sha256": "60adbf422f4177e30ccb1264618bd31b77b22a7511b9bd11364ad41de520e0ed",
+      "size": 43720
     },
     {
       "path": "packages/bootstrap/src/operations/paper-runtime-evidence.ts",
@@ -1405,8 +1405,8 @@
     },
     {
       "path": "run-paper-evaluation.sh",
-      "sha256": "fe702ce0e6259fc9815cfe5bd3edb4b414cbd091815b3da8a8b987eed161becb",
-      "size": 50190
+      "sha256": "d0ee7a4592f5fa8b7e7027d53476ec40ed927a37a65f5f69bb98bd0174893dfc",
+      "size": 50401
     },
     {
       "path": "schemas/betting-win-upstream-lock.v1.schema.json",
@@ -1520,8 +1520,8 @@
     },
     {
       "path": "scripts/validate_autonomous_controller_contract.py",
-      "sha256": "91a02bf8ec1f05d42224cd13fe9b6886113b78c0e41df85b8bce40cd2562c0db",
-      "size": 27411
+      "sha256": "7e6c5a32a7b85728b2e97edc2862feda3e4fd6460474c5f228a972ab0ab93b2e",
+      "size": 27741
     },
     {
       "path": "scripts/validate_betting_win_upstream_contract.py",
@@ -2020,8 +2020,8 @@
     },
     {
       "path": "tests/autonomous-controller-contract.test.ts",
-      "sha256": "e007a3f66b1d400cc54d9780fcf9c3f238369ac0938f98a991bc0a0380ff8960",
-      "size": 24203
+      "sha256": "b883153c578ab13abef4f9e35bb0604e342547a80dd3960edb61b44cdd993235",
+      "size": 24385
     },
     {
       "path": "tests/betting-win-adapters.test.ts",
@@ -2100,8 +2100,8 @@
     },
     {
       "path": "tests/bws-operator-lifecycle.test.ts",
-      "sha256": "1c5bf47ddda07491c7bc1b2f5fb0a63bbd698a121ee1b6c6d5ee86defc5736e5",
-      "size": 23021
+      "sha256": "69e003e8e23c97e5ac02a931cd0f22e12f0653928dbf32b09b311bac385a13ec",
+      "size": 23997
     },
     {
       "path": "tests/bws-paper-runtime-evidence.test.ts",
@@ -2325,8 +2325,8 @@
     },
     {
       "path": "tests/paper-evaluation-shell-hardening.test.ts",
-      "sha256": "22fa90d026c7d051070576c3c26b49bd4c65c7ff5cd8c81fc509a83991f2c881",
-      "size": 5931
+      "sha256": "6b03fdf9113eacc56dca315fbaad152b80040c416858c55da5cc29e9b8b1bff9",
+      "size": 6154
     },
     {
       "path": "tests/private-paper-mode-backlog-contract.test.ts",

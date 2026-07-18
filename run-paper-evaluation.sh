@@ -45,6 +45,7 @@ CODEX_FALLBACK_MODEL=""
 CODEX_SANDBOX=""
 CODEX_STREAM_LOGS=""
 PAPER_COMMAND_TIMEOUT_SECONDS=""
+RUNTIME_EVIDENCE_COMMAND_TIMEOUT_SECONDS=""
 PINNED_BUNDLE_PATH="${SUREBET_PINNED_BUNDLE:-}"
 REQUIRE_PINNED_BUNDLE="${SUREBET_REQUIRE_PINNED_BUNDLE-0}"
 LOCAL_FIXTURE_BUNDLE="tests/fixtures/private-paper-mode-smoke/accepted-local-bundle.json"
@@ -268,6 +269,7 @@ configure_defaults() {
   ZIP_TIMEOUT_SECONDS="${ZIP_TIMEOUT_SECONDS:-$(automation_parse_duration_seconds "${AUTOMATION_ZIP_TIMEOUT:-10m}")}"
   CODEX_PHASE_TIMEOUT_SECONDS="${CODEX_PHASE_TIMEOUT_SECONDS:-$(automation_parse_duration_seconds "${CODEX_PHASE_TIMEOUT:-30m}")}"
   PAPER_COMMAND_TIMEOUT_SECONDS="$(automation_parse_duration_seconds "${PAPER_COMMAND_TIMEOUT:-20m}")"
+  RUNTIME_EVIDENCE_COMMAND_TIMEOUT_SECONDS="$((DURATION_SECONDS + 300))"
   MAX_CYCLES="${MAX_CYCLES:-${AUTOMATION_PAPER_MAX_CYCLES:-1}}"
   CODEX_MODEL="${CODEX_MODEL:-${AUTOMATION_CODEX_MODEL:-}}"
   CODEX_FALLBACK_MODEL="${CODEX_FALLBACK_MODEL:-${AUTOMATION_CODEX_FALLBACK_MODEL:-}}"
@@ -379,6 +381,7 @@ artifacts_zip_scope=full_artifacts_directory
 final_artifacts_zip_refresh=post_lock_release_atomic
 codex_phase_timeout_seconds=$CODEX_PHASE_TIMEOUT_SECONDS
 paper_command_timeout_seconds=$PAPER_COMMAND_TIMEOUT_SECONDS
+runtime_evidence_command_timeout_seconds=$RUNTIME_EVIDENCE_COMMAND_TIMEOUT_SECONDS
 max_cycles=$MAX_CYCLES
 model=$(model_display)
 fallback_model=$(fallback_display)
@@ -860,7 +863,7 @@ run_runtime_evidence_mode() {
     cmd+=(--keep-monitoring-when-ready)
   fi
   automation_quote_argv "${cmd[@]}" > "$cycle_dir/runtime-evidence-command.txt"
-  if ! automation_run_argv_command "runtime_evidence" "$PAPER_COMMAND_TIMEOUT_SECONDS" "$cycle_dir/runtime-evidence.log" "${cmd[@]}"; then
+  if ! automation_run_argv_command "runtime_evidence" "$RUNTIME_EVIDENCE_COMMAND_TIMEOUT_SECONDS" "$cycle_dir/runtime-evidence.log" "${cmd[@]}"; then
     FINAL_STATUS="PAPER_EVALUATION_BLOCKED_RUNTIME_EVIDENCE_COLLECTION_FAILED"
     STOP_REASON="runtime_evidence_command_failed"
     return 1

@@ -69,7 +69,7 @@ The operator maintenance command is `cleanup_automation_temp_inode_residue.sh`. 
 
 The BWS runtime consumes betting-win only through its accepted read-only API. `BWS_UPSTREAM_MODE` and the file-export runtime selector are removed. Missing API readiness is a runtime-evidence blocker; there is no automatic file fallback.
 
-The supported root runtime path enforces `SUREBET_RUNTIME_MODE=paper`, `SUREBET_PROVIDER_CONNECTIONS=disabled`, and `SUREBET_EXECUTION_ENABLED=false`. Explicit process values win for non-policy connection settings; the selective `.env` reader fills only missing approved keys, including the required operator-approved repo-local `BWS_PRIVATE_PAPER_SCHEDULE_PATH`. Retired export selectors and `SUREBET_PINNED_BUNDLE` are removed from the runtime child environment. No fixture schedule is synthesized.
+The supported root runtime path enforces `SUREBET_RUNTIME_MODE=paper`, `SUREBET_PROVIDER_CONNECTIONS=disabled`, and `SUREBET_EXECUTION_ENABLED=false`. Explicit process values win for non-policy connection settings; the selective `.env` reader fills only missing approved keys, including the required operator-approved repo-local `BWS_PRIVATE_PAPER_SCHEDULE_PATH`. Retired export selectors and `SUREBET_PINNED_BUNDLE` are removed from the runtime child environment. No fixture schedule is synthesized. Runtime-evidence startup requires the managed API health endpoint to be observable, then records readiness as evidence over the requested window; the runtime-evidence command timeout is the requested duration plus 300 seconds.
 
 - `docs/automation/api-only-upstream.md`: binding API-only betting-win transport contract.
 

@@ -40,7 +40,7 @@ import {
 const BWS_OPERATOR_LIFECYCLE_STATE_SCHEMA = 'bws.operator_lifecycle_state.v2';
 const BWS_OPERATOR_LIFECYCLE_EVIDENCE_SCHEMA = 'bws.operator_lifecycle_evidence.v2';
 const DEFAULT_RUNTIME_STATE_DIRECTORY = 'runtime/bws-operator-lifecycle';
-const DEFAULT_START_TIMEOUT_MS = 10_000;
+const DEFAULT_START_TIMEOUT_MS = 60_000;
 const DEFAULT_STOP_TIMEOUT_MS = 10_000;
 const DEFAULT_STATUS_REQUEST_TIMEOUT_MS = 3_000;
 const DEFAULT_POLL_INTERVAL_MS = 100;
@@ -496,7 +496,7 @@ async function spawnAndPersistLifecycleState(
     }
 
     const apiProcess = requirePrimaryProcess(startedProcesses);
-    await waitForManagedApiReady(
+    await waitForManagedApiObservable(
       apiProcess.pid,
       apiProcess.command,
       context.paths.repositoryRoot,
@@ -944,7 +944,7 @@ async function waitForManagedProcessPresence(
   throw new Error(`Timed out waiting for managed process ${pid} to become observable.`);
 }
 
-async function waitForManagedApiReady(
+async function waitForManagedApiObservable(
   pid: number,
   command: readonly string[],
   repositoryRoot: string,
@@ -953,18 +953,26 @@ async function waitForManagedApiReady(
   timeoutMs: number,
 ): Promise<BwsProcessSnapshot> {
   const start = Date.now();
+  let lastHealth: BwsOperatorLifecycleCommandResult['health'] | undefined;
+  let lastReadiness: BwsOperatorLifecycleCommandResult['readiness'] | undefined;
   while (Date.now() - start <= timeoutMs) {
     const snapshot = readVerifiedProcessSnapshotFromRuntime(pid, command, repositoryRoot, lifecycleToken);
     if (snapshot !== 'missing') {
-      const health = await fetchProbe(`http://${config.api.bindHost}:${config.api.port}/health`, DEFAULT_POLL_INTERVAL_MS);
-      const readiness = await fetchProbe(`http://${config.api.bindHost}:${config.api.port}/readiness`, DEFAULT_POLL_INTERVAL_MS);
-      if (probeIsSuccessful(health) && probeIsSuccessful(readiness)) {
+      lastHealth = await fetchProbe(`http://${config.api.bindHost}:${config.api.port}/health`, DEFAULT_POLL_INTERVAL_MS);
+      lastReadiness = await fetchProbe(`http://${config.api.bindHost}:${config.api.port}/readiness`, DEFAULT_POLL_INTERVAL_MS);
+      if (probeIsSuccessful(lastHealth)) {
         return snapshot;
       }
     }
     await sleep(DEFAULT_POLL_INTERVAL_MS);
   }
-  throw new Error(`Timed out waiting for managed BWS API readiness on pid ${pid}.`);
+  throw new Error(
+    [
+      `Timed out waiting for managed BWS API health on pid ${pid}.`,
+      `last_health=${formatProbeForError(lastHealth)}`,
+      `last_readiness=${formatProbeForError(lastReadiness)}`,
+    ].join(' '),
+  );
 }
 
 function readVerifiedProcessSnapshot(
@@ -1108,6 +1116,26 @@ function probeIsSuccessful(
   probe: BwsOperatorLifecycleCommandResult['health'] | BwsOperatorLifecycleCommandResult['readiness'],
 ): probe is BwsOperatorLifecycleProbeResult {
   return 'ok' in probe && probe.ok && probe.statusCode === 200;
+}
+
+function formatProbeForError(
+  probe: BwsOperatorLifecycleCommandResult['health'] | BwsOperatorLifecycleCommandResult['readiness'] | undefined,
+): string {
+  if (probe === undefined) {
+    return 'not_attempted';
+  }
+  if ('error' in probe) {
+    return `error:${sanitizeProbeErrorField(probe.error)}`;
+  }
+  const body = sanitizeProbeErrorField(JSON.stringify(probe.body));
+  return `status:${String(probe.statusCode)} ok:${String(probe.ok)} body:${body}`;
+}
+
+function sanitizeProbeErrorField(value: string): string {
+  return value
+    .replace(/password[^,}\s]*/gi, 'password=[redacted]')
+    .replace(/secret[^,}\s]*/gi, 'secret=[redacted]')
+    .slice(0, 500);
 }
 
 function cockpitProbeIsReady(
