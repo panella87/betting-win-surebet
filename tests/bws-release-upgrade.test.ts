@@ -627,9 +627,14 @@ function writeEnvironmentFile(
 ): void {
   const manifest = readReleaseManifest(releaseDirectory);
   const apiPort = new URL(manifest.cockpit.apiBaseUrl).port;
-  const hostLine = persistenceConfig.host === undefined
-    ? `SUREBET_PG_SOCKET_DIRECTORY=${persistenceConfig.socketDirectory}`
-    : `SUREBET_PG_HOST=${persistenceConfig.host}`;
+  const host = persistenceConfig.host;
+  if (host === undefined) {
+    throw new Error('Upgrade fixture requires a TCP PostgreSQL host for canonical POSTGRES_ADDRESS coverage.');
+  }
+  const password = persistenceConfig.password;
+  if (password === undefined) {
+    throw new Error('Upgrade fixture requires a PostgreSQL password for canonical private environment coverage.');
+  }
   const lines = [
     'BETTING_WIN_REPO_PATH=/operator/read-only/betting-win',
     'BWS_UPSTREAM_LOCK_PATH=./config/betting-win.upstream.lock.json',
@@ -656,11 +661,10 @@ function writeEnvironmentFile(
     'SUREBET_RUNTIME_MODE=paper',
     'SUREBET_PROVIDER_CONNECTIONS=disabled',
     'SUREBET_EXECUTION_ENABLED=false',
-    `SUREBET_PG_DATABASE=${persistenceConfig.database}`,
-    `SUREBET_PG_USER=${persistenceConfig.user}`,
-    `SUREBET_PG_PORT=${persistenceConfig.port}`,
-    hostLine,
-    ...(persistenceConfig.password === undefined ? [] : [`SUREBET_PG_PASSWORD=${persistenceConfig.password}`]),
+    `POSTGRES_ADDRESS=${host}:${persistenceConfig.port}`,
+    `POSTGRES_DB=${persistenceConfig.database}`,
+    `POSTGRES_PASSWORD=${password}`,
+    `POSTGRES_USER=${persistenceConfig.user}`,
   ];
   writeFileSync(envFile, `${lines.join('\n')}\n`, 'utf-8');
 }
@@ -669,6 +673,7 @@ function samplePersistenceConfig(): SurebetPersistenceConfig {
   return Object.freeze({
     database: 'surebet_private',
     host: '127.0.0.1',
+    password: 'super-secret-upgrade-password',
     port: 5432,
     user: 'surebet',
   });

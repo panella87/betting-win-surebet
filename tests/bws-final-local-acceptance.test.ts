@@ -484,11 +484,10 @@ function writePrivateEnvironmentFile(envFile: string, manifest: BwsReleaseManife
     'SUREBET_RUNTIME_MODE=paper',
     'SUREBET_PROVIDER_CONNECTIONS=disabled',
     'SUREBET_EXECUTION_ENABLED=false',
-    'SUREBET_PG_DATABASE=surebet_final_acceptance',
-    'SUREBET_PG_USER=surebet',
-    'SUREBET_PG_PORT=5432',
-    'SUREBET_PG_HOST=127.0.0.1',
-    `SUREBET_PG_PASSWORD=${password}`,
+    'POSTGRES_ADDRESS=127.0.0.1:5432',
+    'POSTGRES_DB=surebet_final_acceptance',
+    `POSTGRES_PASSWORD=${password}`,
+    'POSTGRES_USER=surebet',
   ];
   writeFileSync(envFile, `${lines.join('\n')}\n`, 'utf-8');
 }

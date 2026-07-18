@@ -106,6 +106,17 @@ test('start.sh and stop.sh delegate to the product-owned lifecycle helper', () =
       ].join('\n'),
       'utf-8',
     );
+    writeFileSync(
+      join(repositoryRoot, '.env'),
+      [
+        'POSTGRES_ADDRESS=127.0.0.1:5432',
+        'POSTGRES_USER=betting_win',
+        'POSTGRES_PASSWORD=password-from-env',
+        'POSTGRES_DB=betting_win_surebet',
+        '',
+      ].join('\n'),
+      'utf-8',
+    );
 
     const startOutput = execFileSync('bash', ['start.sh'], {
       cwd: repositoryRoot,

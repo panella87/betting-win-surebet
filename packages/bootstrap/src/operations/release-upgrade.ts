@@ -375,7 +375,7 @@ export async function createBwsReleaseUpgradePlan(
   const persistenceConfig = request.persistenceConfig === undefined
     ? resolveSurebetPersistenceConfig(
       request.persistenceEnvironment === undefined
-        ? Object.fromEntries(environment) as SurebetPersistenceEnvironment
+        ? buildPersistenceEnvironmentFromCanonicalEnvironment(environment)
         : request.persistenceEnvironment,
     )
     : request.persistenceConfig;
@@ -514,7 +514,9 @@ export async function applyBwsReleaseUpgrade(
   const now = request.now === undefined ? defaultNow : request.now;
   const dependencies = resolveUpgradeDependencies(request.upgradeDependencies);
   const environment = readStrictEnvironmentFile(plan.environment.envFile);
-  const persistenceConfig = resolveSurebetPersistenceConfig(Object.fromEntries(environment) as SurebetPersistenceEnvironment);
+  const persistenceConfig = resolveSurebetPersistenceConfig(
+    buildPersistenceEnvironmentFromCanonicalEnvironment(environment),
+  );
   ensureDirectoryWritable(dirname(plan.checkpointing.stateFile), 'upgrade state parent directory');
   mkdirSync(plan.checkpointing.checkpointDirectory, { recursive: true });
 
@@ -760,7 +762,9 @@ export async function evaluateBwsReleaseRollbackDecision(
   const now = request.now === undefined ? defaultNow : request.now;
   const dependencies = resolveUpgradeDependencies(request.upgradeDependencies);
   const environment = readStrictEnvironmentFile(plan.environment.envFile);
-  const persistenceConfig = resolveSurebetPersistenceConfig(Object.fromEntries(environment) as SurebetPersistenceEnvironment);
+  const persistenceConfig = resolveSurebetPersistenceConfig(
+    buildPersistenceEnvironmentFromCanonicalEnvironment(environment),
+  );
   const migrationStatus = dependencies.getMigrationStatus({
     now,
     persistenceConfig,
@@ -999,9 +1003,65 @@ function buildLifecycleRequest(
   };
   Object.assign(
     request,
-    { environment: Object.freeze(Object.fromEntries(environment) as SurebetPersistenceEnvironment) },
+    { environment: buildLifecycleEnvironment(environment) },
   );
   return Object.freeze(request);
+}
+
+function buildLifecycleEnvironment(
+  environment: ReadonlyMap<string, string>,
+): BwsLifecycleRequest['environment'] {
+  return Object.freeze({
+    ...Object.fromEntries(environment),
+    ...buildPersistenceEnvironmentFromCanonicalEnvironment(environment),
+  });
+}
+
+function buildPersistenceEnvironmentFromCanonicalEnvironment(
+  environment: ReadonlyMap<string, string>,
+): SurebetPersistenceEnvironment {
+  const { host, port } = parseCanonicalPostgresAddress(requireCanonicalEnvironmentValue(environment, 'POSTGRES_ADDRESS'));
+  return Object.freeze({
+    SUREBET_PG_DATABASE: requireCanonicalEnvironmentValue(environment, 'POSTGRES_DB'),
+    SUREBET_PG_HOST: host,
+    SUREBET_PG_PASSWORD: requireCanonicalEnvironmentValue(environment, 'POSTGRES_PASSWORD'),
+    SUREBET_PG_PORT: port,
+    SUREBET_PG_USER: requireCanonicalEnvironmentValue(environment, 'POSTGRES_USER'),
+  });
+}
+
+function requireCanonicalEnvironmentValue(
+  environment: ReadonlyMap<string, string>,
+  name: 'POSTGRES_ADDRESS' | 'POSTGRES_DB' | 'POSTGRES_PASSWORD' | 'POSTGRES_USER',
+): string {
+  const value = environment.get(name);
+  if (value === undefined || value.trim().length === 0) {
+    throw new Error(`Upgrade environment requires ${name} to be present in the private environment file.`);
+  }
+  return value.trim();
+}
+
+function parseCanonicalPostgresAddress(value: string): Readonly<{ host: string; port: string }> {
+  const separator = value.lastIndexOf(':');
+  if (separator <= 0 || separator === value.length - 1) {
+    throw new Error('Upgrade environment requires POSTGRES_ADDRESS to use host:port format, for example 127.0.0.1:5432.');
+  }
+  let host = value.slice(0, separator);
+  const port = value.slice(separator + 1);
+  if (host.startsWith('[') && host.endsWith(']')) {
+    host = host.slice(1, -1);
+  }
+  if (host.length === 0) {
+    throw new Error('Upgrade environment requires POSTGRES_ADDRESS to include a non-empty host.');
+  }
+  if (!POSITIVE_INTEGER_PATTERN.test(port)) {
+    throw new Error('Upgrade environment requires POSTGRES_ADDRESS port to be a base-10 integer.');
+  }
+  const portNumber = Number.parseInt(port, 10);
+  if (!Number.isSafeInteger(portNumber) || portNumber <= 0 || portNumber > 65_535) {
+    throw new Error('Upgrade environment requires POSTGRES_ADDRESS port to be between 1 and 65535.');
+  }
+  return Object.freeze({ host, port });
 }
 
 function buildCurrentReleaseDatabaseCompatibilityReasons(
@@ -1514,7 +1574,7 @@ function readStrictEnvironmentFile(path: string): ReadonlyMap<string, string> {
     if (name === undefined || rawValue === undefined) {
       throw new Error(`Private environment file line ${index + 1} is invalid.`);
     }
-    if (SENSITIVE_KEY_PATTERN.test(name) && name !== 'SUREBET_PG_PASSWORD') {
+    if (SENSITIVE_KEY_PATTERN.test(name) && name !== 'POSTGRES_PASSWORD') {
       throw new Error(`Private environment file must not include unexpected sensitive key ${name}.`);
     }
     if (values.has(name)) {

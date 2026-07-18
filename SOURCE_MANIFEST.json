@@ -1,6 +1,6 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-07-18T08:33:12Z",
+  "generated": "2026-07-18T08:55:54Z",
   "overlay": "postgres-env-contract-wave30",
   "files": [
     {
@@ -930,8 +930,8 @@
     },
     {
       "path": "packages/bootstrap/src/operations/release-upgrade.ts",
-      "sha256": "793a121eae3c7397712a6547f3a6aa8f284998339119955f9c0eff9297d5d578",
-      "size": 62470
+      "sha256": "205eca0fdcb970c5870cb8ddff545bc1bc9df6dcdf4cfa32fe18bab60e553d8b",
+      "size": 64805
     },
     {
       "path": "packages/bootstrap/src/operations/runtime-applications.ts",
@@ -2075,8 +2075,8 @@
     },
     {
       "path": "tests/bws-final-local-acceptance.test.ts",
-      "sha256": "e66939cdf053e3f101b9f27b078fd276fe4ddccf77ea2ae72ed03a27b1e456ec",
-      "size": 33314
+      "sha256": "cb7f0b082828459c5012d562aaadb91adb2fcb10bd1b86b3b5ffbbd158206329",
+      "size": 33280
     },
     {
       "path": "tests/bws-loopback-acceptance-command.test.ts",
@@ -2140,8 +2140,8 @@
     },
     {
       "path": "tests/bws-release-upgrade.test.ts",
-      "sha256": "d2e03161f0014062895c8a0f0105341763774c27b573cb6bf2607b78ac23396a",
-      "size": 33647
+      "sha256": "5abd8be1b5a549c6e917b647eabcc7d5c4114778519f705859eee2c45034296d",
+      "size": 33805
     },
     {
       "path": "tests/bws-runtime-applications.test.ts",
@@ -2365,8 +2365,8 @@
     },
     {
       "path": "tests/root-wrapper-runtime.test.ts",
-      "sha256": "749ba83393bcd7201831d806a53e6c43da004447bc7b3bbf95f361dbe3ac0a1e",
-      "size": 17954
+      "sha256": "b0ef76be438aada143e1bf58fe491e7a98aa63569ce478f2405fccff64f7bd56",
+      "size": 18241
     },
     {
       "path": "tests/rounding.test.ts",
