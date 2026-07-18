@@ -1,3 +1,9 @@
+## 2026-07-18 - BWS-600 paper runtime cockpit build preflight
+
+- Ensured the root paper-runtime-evidence wrapper rebuilds the compiled TypeScript graph and managed cockpit assets immediately before evidence collection.
+- Added a regression that proves paper runtime evidence no longer relies on a stale `dist/apps/web/index.html` left behind by previous validation stages.
+- Preserved API-only paper mode, provider-disabled operation, execution-disabled operation, and canonical `POSTGRES_*` runtime configuration.
+
 ## 2026-07-18 - BWS runtime startup diagnostics
 
 - Captured bounded lifecycle child stdout/stderr logs for BWS-600 managed-stack startup failures.

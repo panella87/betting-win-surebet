@@ -1,6 +1,6 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-07-18T09:29:24Z",
+  "generated": "2026-07-18T10:06:06Z",
   "overlay": "bws65-lifecycle-start-stdio-diagnostics-wave31",
   "files": [
     {
@@ -55,8 +55,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "3fb5e0eb72e70b6e83a2be24bb4dd64cd1fbe10fdbc481f7de7eaf088b1e23b6",
-      "size": 59550
+      "sha256": "aaee8c5177a7bd63f9c58cffbe926a50cfd6e670995ecc6f6e5bc96ea07fefd8",
+      "size": 60066
     },
     {
       "path": "DOCUMENTATION_CHECK_REPORT.md",
@@ -560,8 +560,8 @@
     },
     {
       "path": "docs/automation/README.md",
-      "sha256": "54ba4173d38eb88d335882a407b9fa115d8ebf9765b4e096d56fd8a0c6ecb2c6",
-      "size": 6069
+      "sha256": "2a67f6724e5202445f8b6bb1c0f97f476e810d1fc7186af7901542f123d4a463",
+      "size": 6308
     },
     {
       "path": "docs/automation/SSH_KEY_SETUP.md",
@@ -595,8 +595,8 @@
     },
     {
       "path": "docs/automation/paper-autopilot.md",
-      "sha256": "a5ceabe74ddfb6c10bb1ed199e21a3e902ff9fc91a13cd03ca79011a3df7c65b",
-      "size": 2218
+      "sha256": "6e1db466b1889b6acbc61e920a4ea343e50043533394464e4ff15f92037ea07f",
+      "size": 2330
     },
     {
       "path": "docs/automation/paper-evaluation.md",
@@ -670,8 +670,8 @@
     },
     {
       "path": "docs/repo_status_current.md",
-      "sha256": "85e9ed616bc2c941bc9a64a193a858cba0e0966720ea8f321898d8842d80c3e3",
-      "size": 10095
+      "sha256": "c14f48db96837ec593217baf6cbcac11f85af5f4f63627839479ab40dbb84511",
+      "size": 10361
     },
     {
       "path": "open_log.sh",
@@ -1470,8 +1470,8 @@
     },
     {
       "path": "scripts/bws-root-wrapper-runtime.mjs",
-      "sha256": "508eaec53335af0774178259e50c879d146dea2101eb4a47ddc142b84a482aef",
-      "size": 28016
+      "sha256": "1d1d5fe74a399da77aeaffecf784c6d7f47176c5101e85ae9987cac87cc2bcb8",
+      "size": 28135
     },
     {
       "path": "scripts/create-source-handoff-archive.sh",
@@ -1505,8 +1505,8 @@
     },
     {
       "path": "scripts/validate_api_only_upstream.py",
-      "sha256": "aa243d81f91bcdb7fe3b5d4af66e49dfe7e3e47434a7b129a0530503e770b4d8",
-      "size": 6101
+      "sha256": "3ca579724c074847d1c7274a35bbb42b73bf192321d0c827c99c3dc6531ef9c4",
+      "size": 6139
     },
     {
       "path": "scripts/validate_artifact_hygiene.py",
@@ -2365,8 +2365,8 @@
     },
     {
       "path": "tests/root-wrapper-runtime.test.ts",
-      "sha256": "b0ef76be438aada143e1bf58fe491e7a98aa63569ce478f2405fccff64f7bd56",
-      "size": 18241
+      "sha256": "f216fabdae694a4848855786d665f2ac05e627648d7332d0b1e37c45dc9d22c3",
+      "size": 19015
     },
     {
       "path": "tests/rounding.test.ts",

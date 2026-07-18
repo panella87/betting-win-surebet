@@ -167,6 +167,18 @@ test('paper runtime-evidence wrapper fills selected .env values and enforces the
       'utf-8',
     );
     writeFileSync(
+      join(repositoryRoot, 'package.json'),
+      JSON.stringify({
+        name: 'bws-root-paper-runtime-evidence-fixture',
+        private: true,
+        scripts: {
+          build: 'node -e "require(\'node:fs\').mkdirSync(\'markers\',{recursive:true});require(\'node:fs\').writeFileSync(\'markers/build.txt\',\'ok\\n\')"',
+          'build:runtime-cockpit': 'node -e "require(\'node:fs\').mkdirSync(\'markers\',{recursive:true});require(\'node:fs\').writeFileSync(\'markers/cockpit.txt\',\'ok\\n\')"',
+        },
+      }, null, 2) + '\n',
+      'utf-8',
+    );
+    writeFileSync(
       join(repositoryRoot, 'dist', 'packages', 'bootstrap', 'src', 'cli', 'bws-paper-runtime-evidence.js'),
       [
         "process.stdout.write(JSON.stringify({",
@@ -234,6 +246,8 @@ test('paper runtime-evidence wrapper fills selected .env values and enforces the
     assert.equal(parsed.runtimeMode, 'paper');
     assert.equal(parsed.schedulePath, 'runtime/operator-inputs/bws.private-paper-schedule.json');
     assert.equal(parsed.unrelated, undefined);
+    assert.equal(readFileSync(join(repositoryRoot, 'markers', 'build.txt'), 'utf-8'), 'ok\n');
+    assert.equal(readFileSync(join(repositoryRoot, 'markers', 'cockpit.txt'), 'utf-8'), 'ok\n');
   } finally {
     rmSync(repositoryRoot, { recursive: true, force: true });
   }

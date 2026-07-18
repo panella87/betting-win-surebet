@@ -49,6 +49,7 @@ if 'merged.BWS_PRIVATE_PAPER_SCHEDULE_PATH =' in wrapper:
  errors.append('scripts/bws-root-wrapper-runtime.mjs: private-paper schedule fallback must not be synthesized')
 for marker in [
  "case 'paper-runtime-evidence'",
+ "prepareRuntimeBuild(environment);",
  "merged.BWS_UPSTREAM_MODE = 'api'",
  "merged.SUREBET_RUNTIME_MODE = 'paper'",
  "merged.SUREBET_PROVIDER_CONNECTIONS = 'disabled'",

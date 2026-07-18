@@ -136,13 +136,7 @@ async function main() {
 
 function runLifecycleStart() {
   const environment = resolveRuntimeEnvironment();
-  runCommand('npm', ['run', '--silent', 'build'], environment, 'BWS root build failed.');
-  runCommand(
-    'npm',
-    ['run', '--silent', 'build:runtime-cockpit'],
-    environment,
-    'BWS runtime cockpit build failed.',
-  );
+  prepareRuntimeBuild(environment);
   const cliPath = resolve(
     REPOSITORY_ROOT,
     'dist/packages/bootstrap/src/cli/bws-operator-lifecycle.js',
@@ -160,8 +154,19 @@ function runLifecycleStart() {
   process.stdout.write(output);
 }
 
+function prepareRuntimeBuild(environment) {
+  runCommand('npm', ['run', '--silent', 'build'], environment, 'BWS root build failed.');
+  runCommand(
+    'npm',
+    ['run', '--silent', 'build:runtime-cockpit'],
+    environment,
+    'BWS runtime cockpit build failed.',
+  );
+}
+
 function runPaperRuntimeEvidence(argumentsList) {
   const environment = resolveRuntimeEnvironment();
+  prepareRuntimeBuild(environment);
   const cliPath = resolve(
     REPOSITORY_ROOT,
     'dist/packages/bootstrap/src/cli/bws-paper-runtime-evidence.js',
