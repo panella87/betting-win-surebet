@@ -182,7 +182,7 @@ test('paper runtime-evidence wrapper fills selected .env values and enforces the
         cwd: repositoryRoot,
         encoding: 'utf-8',
         env: {
-          ...process.env,
+          ...createSanitizedRuntimeEnvironment(),
           BWS_API_PORT: '4999',
           BWS_PINNED_EXPORT_PATH: 'config/stale-pinned-export.json',
           BWS_UPSTREAM_EXPORT_FILE: 'runtime/stale-export.json',
