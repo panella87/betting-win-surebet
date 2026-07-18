@@ -1,3 +1,9 @@
+## 2026-07-18 - BWS runtime startup diagnostics
+
+- Captured bounded lifecycle child stdout/stderr logs for BWS-600 managed-stack startup failures.
+- Extended lifecycle-start timeout errors with API process state, repo-local log paths, redacted log tails, and last health/readiness probes so blockers identify the failing child instead of reporting only `fetch failed`.
+- Added regression coverage for startup diagnostic tails on API-health timeout.
+
 ## 2026-07-18 - Canonical PostgreSQL environment tuple
 
 - Replaced operator-facing `DB_URL` and `DB_URL_TEST` startup configuration with the canonical `POSTGRES_ADDRESS`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_DB` tuple.

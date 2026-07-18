@@ -158,7 +158,13 @@ test('operator lifecycle rolls back partial startup failures and stops children 
 
     await assert.rejects(
       () => startManagedBwsOperatorStack(failingRequest),
-      /Timed out waiting for managed BWS API health/,
+      (error: unknown) => {
+        assert.ok(error instanceof Error);
+        assert.match(error.message, /Timed out waiting for managed BWS API health/);
+        assert.match(error.message, /api_stdout_tail=/);
+        assert.match(error.message, /api_stderr_tail=/);
+        return true;
+      },
     );
     const startedRoles = readSignalLog(fixture.startedLogPath);
     assert.equal(startedRoles.some((entry) => entry.includes('boot:upstream_convergence')), true);

@@ -2,7 +2,9 @@ import { createHash, randomUUID } from 'node:crypto';
 import { spawn } from 'node:child_process';
 import {
   existsSync,
+  closeSync,
   mkdirSync,
+  openSync,
   readFileSync,
   realpathSync,
   renameSync,
@@ -85,6 +87,8 @@ export interface BwsOperatorLifecycleManagedProcess {
   readonly pid: number;
   readonly processName: string;
   readonly procStartTicks: string;
+  readonly stderrLogFile?: string;
+  readonly stdoutLogFile?: string;
   readonly roles: readonly BwsLifecycleStageRole[];
   readonly startedAt: string;
 }
@@ -179,6 +183,7 @@ interface BwsOperatorLifecyclePaths {
   readonly repositoryRoot: string;
   readonly stateDirectory: string;
   readonly stateFilePath: string;
+  readonly stdioDirectory: string;
 }
 
 interface BwsProcessSnapshot {
@@ -453,24 +458,8 @@ async function spawnAndPersistLifecycleState(
         ...(descriptor.commandArguments ?? []),
         `${BWS_LIFECYCLE_TOKEN_PREFIX}${lifecycleToken}`,
       ]);
-      const child = spawn(
-        process.execPath,
-        [
-          descriptor.entryPointPath,
-          ...(descriptor.commandArguments ?? []),
-          `${BWS_LIFECYCLE_TOKEN_PREFIX}${lifecycleToken}`,
-        ],
-        {
-          cwd: context.paths.repositoryRoot,
-          detached: true,
-          env: {
-            ...context.childEnvironment,
-            [BWS_OBSERVABILITY_RUNTIME_ID_ENV]: lifecycleToken,
-          },
-          stdio: 'ignore',
-        },
-      );
-      child.unref();
+      const logFiles = createManagedProcessStdioFiles(context.paths, lifecycleToken, descriptor.processName);
+      const child = spawnManagedLifecycleProcess(context, descriptor, lifecycleToken, logFiles);
       const pid = child.pid ?? fail(`Lifecycle start did not receive a child process pid for ${descriptor.processName}.`);
       const snapshot = await waitForManagedProcessPresence(
         pid,
@@ -491,16 +480,16 @@ async function spawnAndPersistLifecycleState(
           procStartTicks: snapshot.procStartTicks,
           roles: descriptor.roles,
           startedAt,
+          stderrLogFile: relative(context.paths.repositoryRoot, logFiles.stderr),
+          stdoutLogFile: relative(context.paths.repositoryRoot, logFiles.stdout),
         }),
       );
     }
 
     const apiProcess = requirePrimaryProcess(startedProcesses);
     await waitForManagedApiObservable(
-      apiProcess.pid,
-      apiProcess.command,
+      apiProcess,
       context.paths.repositoryRoot,
-      apiProcess.lifecycleToken,
       context.config,
       context.startTimeoutMs,
     );
@@ -870,8 +859,10 @@ function resolveLifecyclePaths(
     repositoryRoot,
     stateDirectory,
     stateFilePath: join(stateDirectory, 'state.json'),
+    stdioDirectory: join(stateDirectory, 'child-stdio'),
   });
 }
+
 
 function readLifecycleState(
   stateFilePath: string,
@@ -945,32 +936,44 @@ async function waitForManagedProcessPresence(
 }
 
 async function waitForManagedApiObservable(
-  pid: number,
-  command: readonly string[],
+  apiProcess: BwsOperatorLifecycleManagedProcess,
   repositoryRoot: string,
-  lifecycleToken: string,
   config: BwsServiceRuntimeConfig,
   timeoutMs: number,
 ): Promise<BwsProcessSnapshot> {
   const start = Date.now();
   let lastHealth: BwsOperatorLifecycleCommandResult['health'] | undefined;
   let lastReadiness: BwsOperatorLifecycleCommandResult['readiness'] | undefined;
+  let lastProcessState: 'missing' | 'running' = 'missing';
   while (Date.now() - start <= timeoutMs) {
-    const snapshot = readVerifiedProcessSnapshotFromRuntime(pid, command, repositoryRoot, lifecycleToken);
+    const snapshot = readVerifiedProcessSnapshotFromRuntime(
+      apiProcess.pid,
+      apiProcess.command,
+      repositoryRoot,
+      apiProcess.lifecycleToken,
+    );
     if (snapshot !== 'missing') {
+      lastProcessState = 'running';
       lastHealth = await fetchProbe(`http://${config.api.bindHost}:${config.api.port}/health`, DEFAULT_POLL_INTERVAL_MS);
       lastReadiness = await fetchProbe(`http://${config.api.bindHost}:${config.api.port}/readiness`, DEFAULT_POLL_INTERVAL_MS);
       if (probeIsSuccessful(lastHealth)) {
         return snapshot;
       }
+    } else {
+      lastProcessState = 'missing';
     }
     await sleep(DEFAULT_POLL_INTERVAL_MS);
   }
   throw new Error(
     [
-      `Timed out waiting for managed BWS API health on pid ${pid}.`,
+      `Timed out waiting for managed BWS API health on pid ${apiProcess.pid}.`,
+      `api_process_state=${lastProcessState}`,
+      `api_stdout=${apiProcess.stdoutLogFile ?? 'missing_log_path'}`,
+      `api_stderr=${apiProcess.stderrLogFile ?? 'missing_log_path'}`,
       `last_health=${formatProbeForError(lastHealth)}`,
       `last_readiness=${formatProbeForError(lastReadiness)}`,
+      `api_stdout_tail=${readManagedProcessStdioTail(repositoryRoot, apiProcess.stdoutLogFile)}`,
+      `api_stderr_tail=${readManagedProcessStdioTail(repositoryRoot, apiProcess.stderrLogFile)}`,
     ].join(' '),
   );
 }
@@ -1064,6 +1067,76 @@ function isProcessAlive(pid: number): boolean {
   }
 }
 
+function createManagedProcessStdioFiles(
+  paths: BwsOperatorLifecyclePaths,
+  lifecycleToken: string,
+  processName: string,
+): Readonly<{ readonly stderr: string; readonly stdout: string }> {
+  const safeProcessName = processName.replace(/[^A-Za-z0-9_.-]/g, '_');
+  const directory = join(paths.stdioDirectory, lifecycleToken);
+  mkdirSync(directory, { recursive: true });
+  return Object.freeze({
+    stderr: join(directory, `${safeProcessName}.stderr.log`),
+    stdout: join(directory, `${safeProcessName}.stdout.log`),
+  });
+}
+
+function spawnManagedLifecycleProcess(
+  context: ReturnType<typeof createLifecycleContext>,
+  descriptor: BwsOperatorLifecycleManagedProcessDescriptor,
+  lifecycleToken: string,
+  logFiles: Readonly<{ readonly stderr: string; readonly stdout: string }>,
+): ReturnType<typeof spawn> {
+  const stdoutFd = openSync(logFiles.stdout, 'a');
+  const stderrFd = openSync(logFiles.stderr, 'a');
+  try {
+    const child = spawn(
+      process.execPath,
+      [
+        descriptor.entryPointPath,
+        ...(descriptor.commandArguments ?? []),
+        `${BWS_LIFECYCLE_TOKEN_PREFIX}${lifecycleToken}`,
+      ],
+      {
+        cwd: context.paths.repositoryRoot,
+        detached: true,
+        env: {
+          ...context.childEnvironment,
+          [BWS_OBSERVABILITY_RUNTIME_ID_ENV]: lifecycleToken,
+        },
+        stdio: ['ignore', stdoutFd, stderrFd],
+      },
+    );
+    child.unref();
+    return child;
+  } finally {
+    closeSync(stdoutFd);
+    closeSync(stderrFd);
+  }
+}
+
+function readManagedProcessStdioTail(
+  repositoryRoot: string,
+  relativePath: string | undefined,
+): string {
+  if (relativePath === undefined) {
+    return 'missing_log_path';
+  }
+  const absolutePath = resolve(repositoryRoot, relativePath);
+  if (absolutePath !== repositoryRoot && !absolutePath.startsWith(`${repositoryRoot}/`)) {
+    return 'log_path_outside_repository';
+  }
+  if (!existsSync(absolutePath)) {
+    return 'missing_log_file';
+  }
+  const content = readFileSync(absolutePath, 'utf-8');
+  const sanitized = sanitizeProbeErrorField(content.split('\n').slice(-20).join('\n'))
+    .replace(/[\r\n\t]+/g, ' ')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+  return sanitized.length === 0 ? 'empty' : sanitized;
+}
+
 async function waitForManagedProcessExit(pid: number, timeoutMs: number): Promise<void> {
   const start = Date.now();
   while (Date.now() - start <= timeoutMs) {
@@ -1133,8 +1206,13 @@ function formatProbeForError(
 
 function sanitizeProbeErrorField(value: string): string {
   return value
+    .replace(/(postgres(?:ql)?:\/\/[^:\s"']+:)([^@\s"']+)(@)/gi, '$1[redacted]$3')
+    .replace(/((?:PASSWORD|TOKEN|SECRET|PGPASSWORD|DB_URL|DATABASE_URL)[A-Z0-9_]*\s*[=:]\s*)([^,}\s"']+)/gi, '$1[redacted]')
     .replace(/password[^,}\s]*/gi, 'password=[redacted]')
     .replace(/secret[^,}\s]*/gi, 'secret=[redacted]')
+    .replace(/token[^,}\s]*/gi, 'token=[redacted]')
+    .replace(/credential[^,}\s]*/gi, 'credential=[redacted]')
+    .replace(/private[_ -]?key[^,}\s]*/gi, 'private_key=[redacted]')
     .slice(0, 500);
 }
 
