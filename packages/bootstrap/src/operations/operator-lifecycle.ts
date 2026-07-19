@@ -854,12 +854,19 @@ function resolveLifecyclePaths(
   runtimeStateDirectory: string,
 ): BwsOperatorLifecyclePaths {
   const stateDirectory = resolve(repositoryRoot, runtimeStateDirectory);
+  const stdioDirectory = join(
+    repositoryRoot,
+    'artifacts',
+    'runtime',
+    'bws-operator-lifecycle',
+    'child-stdio',
+  );
   return Object.freeze({
     evidenceDirectory: join(stateDirectory, 'evidence'),
     repositoryRoot,
     stateDirectory,
     stateFilePath: join(stateDirectory, 'state.json'),
-    stdioDirectory: join(stateDirectory, 'child-stdio'),
+    stdioDirectory,
   });
 }
 

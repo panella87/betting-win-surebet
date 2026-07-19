@@ -27,6 +27,14 @@ test('operator lifecycle start, status, idempotent start, and stop manage the fu
     assert.equal(start.outcome, 'started');
     assert.equal(start.processes.length, 4);
     assert.equal(existsSync(join(fixture.runtimeStateDirectory, 'state.json')), true);
+    for (const processRecord of start.processes) {
+      assert.notEqual(processRecord.stdoutLogFile, undefined);
+      assert.notEqual(processRecord.stderrLogFile, undefined);
+      assert.match(processRecord.stdoutLogFile!, /^artifacts\/runtime\/bws-operator-lifecycle\/child-stdio\//);
+      assert.match(processRecord.stderrLogFile!, /^artifacts\/runtime\/bws-operator-lifecycle\/child-stdio\//);
+      assert.equal(existsSync(join(fixture.repositoryRoot, processRecord.stdoutLogFile!)), true);
+      assert.equal(existsSync(join(fixture.repositoryRoot, processRecord.stderrLogFile!)), true);
+    }
     assert.equal(start.stack.readinessStatus, 'ready');
     assert.equal(start.stack.healthStatus, 'healthy');
 
