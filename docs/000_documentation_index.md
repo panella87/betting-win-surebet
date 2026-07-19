@@ -3,7 +3,7 @@
 ```text
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 documentation_index_status=active
-documentation_slimming_phase=phase_2_bootstrap_ledgers_merged
+documentation_slimming_phase=phase_3_completion_status_compaction
 current_external_gate=BWS-600
 safe_local_terminal_gate=BWS-599
 execution_gate=BWS-900
@@ -128,3 +128,14 @@ docs/017_private_paper_mode_implementation_backlog.md
 ## Next slimming phase
 
 Next cleanup should be a bounded documentation-only pass. It may compact completed implementation blueprints or duplicate operational prose, but it must not weaken validators, remove active runbooks, delete BWS-599 carry-forward contracts, or change the BWS-600 external runtime gate.
+
+
+## Removed completion-only migration snapshots
+
+The following documents were completion records, not active contracts. Their information is represented by current ownership, archive and status documents.
+
+```text
+removed=
+  docs/023_legacy_betting_win_surebet_import_manifest.md
+  docs/025_research_archive_completion_status.md
+```
