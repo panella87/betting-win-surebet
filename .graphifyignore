@@ -1,0 +1,47 @@
+# BEGIN GRAPHIFY_CODE_ONLY_MANAGED
+# Keep Graphify local, deterministic, and code-only.
+# Generated/runtime output
+graphify-out/
+node_modules/
+dist/
+build/
+coverage/
+.cache/
+.next/
+.nuxt/
+__pycache__/
+artifacts/
+logs/
+tmp/
+temp/
+runtime/
+
+# Archives and logs
+*.log
+*.zip
+*.tar
+*.tar.gz
+
+# Secrets and private state
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+credentials/
+
+# Non-code semantic inputs intentionally excluded.
+# The refresh script uses --code-only, so no LLM API key is needed.
+*.md
+*.mdx
+*.pdf
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.svg
+# END GRAPHIFY_CODE_ONLY_MANAGED
