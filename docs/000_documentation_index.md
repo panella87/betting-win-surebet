@@ -34,6 +34,18 @@ docs/operations/autonomous_72h_runbook.md
 docs/operations/service_run.md
 ```
 
+
+## Removed bootstrap snapshots
+
+The following completed bootstrap snapshots are intentionally removed from the active repository tree. Their contracts are represented by current validators, ledgers and implementation history.
+
+```text
+removed=
+  docs/014_sure_001_remaining_hardening_backlog.md
+  docs/015_local_engine_implementation_backlog.md
+  docs/017_private_paper_mode_implementation_backlog.md
+```
+
 ## Historical bootstrap summary
 
 The old SURE bootstrap ledgers are retained here as compact provenance, not as active routing files.
