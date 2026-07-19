@@ -101,6 +101,24 @@ for rel in [
  text=(ROOT/rel).read_text(encoding='utf-8')
  if 'enforceBwsApiOnlyProcessEnvironment' not in text:
   errors.append(f'{rel}: missing API-only process boundary')
+paper_runtime=(ROOT/'packages/bootstrap/src/operations/paper-runtime-evidence.ts').read_text(encoding='utf-8')
+for marker in [
+ 'PAPER_EVALUATION_BLOCKED_BETTING_WIN_API_UNAVAILABLE',
+ 'BWS_UPSTREAM_API_BASE_URL',
+ "probePath: PAPER_RUNTIME_UPSTREAM_PROBE_PATH",
+ "'upstream_api_preflight'",
+ "must not target the local BWS API",
+]:
+ if marker not in paper_runtime:
+  errors.append(f'packages/bootstrap/src/operations/paper-runtime-evidence.ts: missing {marker}')
+external_preflight=(ROOT/'packages/bootstrap/src/operations/external-runtime-preflight.ts').read_text(encoding='utf-8')
+for marker in [
+ "selectedInput.apiBaseUrl",
+ "must stay on an explicit loopback host",
+ "must not target the local BWS API",
+]:
+ if marker not in external_preflight:
+  errors.append(f'packages/bootstrap/src/operations/external-runtime-preflight.ts: missing {marker}')
 retired=(ROOT/'packages/bootstrap/src/cli/bws-upstream-export-convergence.ts').read_text(encoding='utf-8')
 if 'export runtime has been removed' not in retired:
  errors.append('retired export CLI does not fail closed')
@@ -113,6 +131,14 @@ api_doc=(ROOT/'docs/automation/api-only-upstream.md').read_text(encoding='utf-8'
 for marker in ['fail-fast blocker before BWS enters a long runtime-evidence observation window', '127.0.0.1:4312', 'not upstream evidence']:
  if marker not in api_doc:
   errors.append(f'docs/automation/api-only-upstream.md: missing {marker}')
+for rel,markers in {
+ 'docs/automation/paper-autopilot.md': ['only after the upstream betting-win read-only API preflight succeeds', '127.0.0.1:4312', 'PAPER_EVALUATION_BLOCKED_BETTING_WIN_API_UNAVAILABLE'],
+ 'docs/041_external_runtime_preflight_and_bws600_campaign.md': ['post_source_fix_controller=run-paper-autopilot.sh', 'bws_local_api_4312_does_not_satisfy_upstream_preflight=true', 'BWS must fail fast if the upstream betting-win read-only API is unavailable before starting the long runtime-evidence observation window'],
+}.items():
+ text=(ROOT/rel).read_text(encoding='utf-8')
+ for marker in markers:
+  if marker not in text:
+   errors.append(f'{rel}: missing {marker}')
 
 if errors:
  print('API_ONLY_UPSTREAM_CONTRACT_FAILED',file=sys.stderr)

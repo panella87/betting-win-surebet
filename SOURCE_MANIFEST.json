@@ -1,6 +1,6 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-07-19T01:47:18Z",
+  "generated": "2026-07-19T06:09:06Z",
   "overlay": "bws67-bws600-upstream-api-preflight-task-wave33",
   "files": [
     {
@@ -570,8 +570,8 @@
     },
     {
       "path": "docs/automation/api-only-upstream.md",
-      "sha256": "4c9c340e57f27a62f7188efb4037e433a9065139d29f6e21d42f0cc4b63feac7",
-      "size": 2193
+      "sha256": "18b82e6ece6957fb4d81ea23dd1de1932f679d798c2fdfcebe1aba511f4dd490",
+      "size": 3066
     },
     {
       "path": "docs/automation/autonomous-bugfix.md",
@@ -595,8 +595,8 @@
     },
     {
       "path": "docs/automation/paper-autopilot.md",
-      "sha256": "640340fc09808645a658ef4e7ff9fab0c255061711df08ac4abff862e336e8e9",
-      "size": 2664
+      "sha256": "41f4c1fed5f72316a73b075b1092f7320ca6d2bb6977512c5879901419a25ec5",
+      "size": 3046
     },
     {
       "path": "docs/automation/paper-evaluation.md",
@@ -765,8 +765,8 @@
     },
     {
       "path": "packages/bootstrap/src/cli/bws-paper-runtime-evidence.ts",
-      "sha256": "04285732916f140ad52767c285e884fba9f45d27265cb17b9575783f9fa942a7",
-      "size": 3038
+      "sha256": "7b9ebfdadcec3aa4bd0234c03de1875dc8af10b8faa3038001131a11b250f461",
+      "size": 3129
     },
     {
       "path": "packages/bootstrap/src/cli/bws-paper-runtime-handoff.ts",
@@ -880,8 +880,8 @@
     },
     {
       "path": "packages/bootstrap/src/operations/external-runtime-preflight.ts",
-      "sha256": "82afb1e7c903ea51866a1a4255da60c91f3ca868c1be7d64488604d754881ec6",
-      "size": 46765
+      "sha256": "d2d622d89453d5b48ed5a157c1c7f3ae5ef0ddb9a633f52a06e156788c5fc2b5",
+      "size": 48030
     },
     {
       "path": "packages/bootstrap/src/operations/final-local-acceptance.ts",
@@ -900,8 +900,8 @@
     },
     {
       "path": "packages/bootstrap/src/operations/paper-runtime-evidence.ts",
-      "sha256": "326bfa2e1b8284161c4b9439a11164267c8e850e0544a0c7d001d1361903cd11",
-      "size": 19419
+      "sha256": "ede5ae0693b5aaaf67c7067622e034c0c82675222caf71e473a6eede16fbabaa",
+      "size": 33182
     },
     {
       "path": "packages/bootstrap/src/operations/paper-runtime-handoff.ts",
@@ -1505,8 +1505,8 @@
     },
     {
       "path": "scripts/validate_api_only_upstream.py",
-      "sha256": "df8bd72ef39bfb512f6baf7fca7cd5e4e12050d906dd8d81c380334ef0a84ee2",
-      "size": 6521
+      "sha256": "db341fcf997639021980a6e024430d7078d58055518203b5bb66e6bcfba2caed",
+      "size": 8053
     },
     {
       "path": "scripts/validate_artifact_hygiene.py",
@@ -2070,8 +2070,8 @@
     },
     {
       "path": "tests/bws-external-runtime-preflight.test.ts",
-      "sha256": "f9b0e13b1671082d2c1036dca659a0124f98c55a3fd71d28425e8d19bf2a492d",
-      "size": 26580
+      "sha256": "9984d74882954372c727ce68e40e8debb64bb4ca648752635de9770591510083",
+      "size": 28016
     },
     {
       "path": "tests/bws-final-local-acceptance.test.ts",
@@ -2105,8 +2105,8 @@
     },
     {
       "path": "tests/bws-paper-runtime-evidence.test.ts",
-      "sha256": "1b6a24678f27800847a99a038161f8890a2aefea1c48476a3a4aa23c2d92361a",
-      "size": 17995
+      "sha256": "abd775ee1b4ec42f346a1fa79a6375d5901419ad9c94f52b32d68f214711c789",
+      "size": 26643
     },
     {
       "path": "tests/bws-paper-runtime-handoff.test.ts",

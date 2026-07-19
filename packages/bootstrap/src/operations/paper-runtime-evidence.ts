@@ -1,6 +1,7 @@
 import { mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
+import { readBettingWinUpstreamLock } from '../../../upstream/src/index.js';
 import { type BwsMigrationStatusResult } from './database-lifecycle.js';
 import {
   collectBwsDiagnosticsBundle,
@@ -21,6 +22,15 @@ import {
 } from './operator-lifecycle.js';
 
 const BWS_PAPER_RUNTIME_EVIDENCE_SCHEMA = 'bws.paper_runtime_evidence.v1' as const;
+const BETTING_WIN_API_UNAVAILABLE_BLOCKER = 'PAPER_EVALUATION_BLOCKED_BETTING_WIN_API_UNAVAILABLE' as const;
+const LOOPBACK_HOSTS = new Set(['127.0.0.1', '::1', '[::1]', 'localhost']);
+const LOOPBACK_AUTHORITY_HOST = 'loopback';
+const PAPER_RUNTIME_API_PORT_ENV = 'BWS_API_PORT';
+const PAPER_RUNTIME_UPSTREAM_API_BASE_URL_ENV = 'BWS_UPSTREAM_API_BASE_URL';
+const PAPER_RUNTIME_UPSTREAM_API_CONTRACT_VERSION_ENV = 'BWS_UPSTREAM_API_CONTRACT_VERSION';
+const PAPER_RUNTIME_UPSTREAM_API_TIMEOUT_MS_ENV = 'BWS_UPSTREAM_API_TIMEOUT_MS';
+const PAPER_RUNTIME_UPSTREAM_LOCK_PATH_ENV = 'BWS_UPSTREAM_LOCK_PATH';
+const PAPER_RUNTIME_UPSTREAM_PROBE_PATH = '/contract' as const;
 const BWS_UPSTREAM_MODE_ENV = 'BWS_UPSTREAM_MODE';
 
 export type BwsPaperRuntimeEvidenceFinalStatus =
@@ -46,6 +56,31 @@ export interface BwsPaperRuntimeEvidenceObservationSample {
   readonly schedulerLifecycleState: string;
   readonly upstreamLifecycleState: string;
   readonly workerLifecycleState: string;
+}
+
+export interface BwsPaperRuntimeEvidenceUpstreamApiPreflight {
+  readonly blockerCode?: typeof BETTING_WIN_API_UNAVAILABLE_BLOCKER;
+  readonly configuredBaseUrl: string;
+  readonly errorMessage?: string;
+  readonly errorName?: string;
+  readonly failureClass?:
+    | 'bws_local_api_conflict'
+    | 'contract_version_mismatch'
+    | 'http_status'
+    | 'invalid_response'
+    | 'invalid_url'
+    | 'network_error';
+  readonly httpStatus?: number;
+  readonly localRuntimeApiBaseUrl: string;
+  readonly noExportFallbackUsed: true;
+  readonly outcome: 'blocked' | 'passed';
+  readonly probePath: typeof PAPER_RUNTIME_UPSTREAM_PROBE_PATH;
+  readonly reportedContractVersion?: string;
+  readonly timeoutMs: number;
+  readonly upstreamLock?: Readonly<{
+    readonly commitSha: string;
+    readonly packageVersion: string;
+  }>;
 }
 
 export interface BwsPaperRuntimeEvidenceResult {
@@ -77,11 +112,13 @@ export interface BwsPaperRuntimeEvidenceResult {
     | 'preserved_due_to_ambiguity'
     | 'stopped_started_stack';
   readonly stopReason:
+    | 'betting_win_api_unavailable'
     | 'runtime_evidence_collection_failed'
     | 'runtime_observation_window_not_ready'
     | 'runtime_stack_stop_failed'
     | 'runtime_status_identity_or_configuration_mismatch'
     | 'runtime_window_ready_local_only';
+  readonly upstreamApiPreflight?: BwsPaperRuntimeEvidenceUpstreamApiPreflight;
 }
 
 export type BwsPaperRuntimeEvidenceCollectionStage =
@@ -93,7 +130,8 @@ export type BwsPaperRuntimeEvidenceCollectionStage =
   | 'observation_lifecycle_status'
   | 'observation_sleep'
   | 'runtime_handoff_creation'
-  | 'runtime_stop';
+  | 'runtime_stop'
+  | 'upstream_api_preflight';
 
 export interface CreateBwsPaperRuntimeEvidenceRequest {
   readonly collectDiagnostics?: (request: Readonly<{ readonly repositoryRoot: string }>) => Promise<BwsDiagnosticsBundleResult>;
@@ -183,8 +221,35 @@ export async function createBwsPaperRuntimeEvidence(
   let stopReason: BwsPaperRuntimeEvidenceResult['stopReason'] = 'runtime_evidence_collection_failed';
   let activeStage: BwsPaperRuntimeEvidenceCollectionStage = 'initial_lifecycle_status';
   let collectionFailure: BwsPaperRuntimeEvidenceResult['collectionFailure'];
+  let upstreamApiPreflight: BwsPaperRuntimeEvidenceUpstreamApiPreflight | undefined;
 
   try {
+    activeStage = 'upstream_api_preflight';
+    upstreamApiPreflight = await runBettingWinUpstreamApiPreflight(repositoryRoot);
+    if (upstreamApiPreflight.outcome === 'blocked') {
+      collectionFailure = Object.freeze({
+        errorName: upstreamApiPreflight.errorName ?? 'Error',
+        message: upstreamApiPreflight.errorMessage
+          ?? 'The betting-win upstream API preflight failed before runtime evidence could start.',
+        stage: 'upstream_api_preflight',
+      });
+      stopReason = 'betting_win_api_unavailable';
+      return createResult({
+        collectionFailure,
+        finalStatus,
+        generatedAt: now(),
+        intervalMs,
+        maxDurationMs,
+        samples,
+        selectedUpstreamMode,
+        stackOwnership,
+        stackStopDisposition,
+        startedAt,
+        stopReason,
+        upstreamApiPreflight,
+      });
+    }
+
     activeStage = 'initial_lifecycle_status';
     const initialStatus = await readLifecycleStatusOrThrow(getLifecycleStatus, lifecycleRequest);
     if (initialStatus === undefined) {
@@ -288,6 +353,7 @@ export async function createBwsPaperRuntimeEvidence(
     stackStopDisposition,
     startedAt,
     stopReason,
+    ...(upstreamApiPreflight === undefined ? {} : { upstreamApiPreflight }),
   });
 }
 
@@ -361,6 +427,7 @@ function createResult(request: Readonly<{
   readonly stackStopDisposition: BwsPaperRuntimeEvidenceResult['stackStopDisposition'];
   readonly startedAt: string;
   readonly stopReason: BwsPaperRuntimeEvidenceResult['stopReason'];
+  readonly upstreamApiPreflight?: BwsPaperRuntimeEvidenceUpstreamApiPreflight;
 }>): BwsPaperRuntimeEvidenceResult {
   return Object.freeze({
     ...(request.collectionFailure === undefined
@@ -391,6 +458,7 @@ function createResult(request: Readonly<{
     stackOwnership: request.stackOwnership,
     stackStopDisposition: request.stackStopDisposition,
     stopReason: request.stopReason,
+    ...(request.upstreamApiPreflight === undefined ? {} : { upstreamApiPreflight: request.upstreamApiPreflight }),
   });
 }
 
@@ -403,10 +471,170 @@ async function readLifecycleStatusOrThrow(
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     if (message.includes('Lifecycle state belongs to a different repository root.')
-      || message.includes('Lifecycle state configuration fingerprint mismatch.')) {
+      || message.includes('Lifecycle state configuration fingerprint mismatch.')
+      || message.includes('Lifecycle command configuration fingerprint does not match the recorded managed process configuration.')) {
       return undefined;
     }
     throw error;
+  }
+}
+
+async function runBettingWinUpstreamApiPreflight(
+  repositoryRoot: string,
+  environment: NodeJS.ProcessEnv = process.env,
+): Promise<BwsPaperRuntimeEvidenceUpstreamApiPreflight> {
+  const timeoutMs = requirePositiveIntegerFromEnvironment(
+    environment[PAPER_RUNTIME_UPSTREAM_API_TIMEOUT_MS_ENV],
+    PAPER_RUNTIME_UPSTREAM_API_TIMEOUT_MS_ENV,
+  );
+  const configuredBaseUrl = sanitizeConfiguredUrl(
+    requireNonEmptyString(
+      environment[PAPER_RUNTIME_UPSTREAM_API_BASE_URL_ENV],
+      PAPER_RUNTIME_UPSTREAM_API_BASE_URL_ENV,
+    ),
+  );
+  const localRuntimeApiBaseUrl = buildLocalRuntimeApiBaseUrl(environment);
+  const upstreamLock = readOptionalUpstreamLock(repositoryRoot, environment);
+  const contractVersion = requireNonEmptyString(
+    environment[PAPER_RUNTIME_UPSTREAM_API_CONTRACT_VERSION_ENV],
+    PAPER_RUNTIME_UPSTREAM_API_CONTRACT_VERSION_ENV,
+  );
+
+  let parsedBaseUrl: URL;
+  try {
+    parsedBaseUrl = new URL(configuredBaseUrl);
+  } catch (error) {
+    return createUpstreamApiPreflightFailure({
+      configuredBaseUrl,
+      error: new Error(
+        `${PAPER_RUNTIME_UPSTREAM_API_BASE_URL_ENV} must be an absolute URL: ${error instanceof Error ? error.message : String(error)}`,
+      ),
+      failureClass: 'invalid_url',
+      localRuntimeApiBaseUrl,
+      timeoutMs,
+      upstreamLock,
+    });
+  }
+
+  if (parsedBaseUrl.protocol !== 'http:' && parsedBaseUrl.protocol !== 'https:') {
+    return createUpstreamApiPreflightFailure({
+      configuredBaseUrl,
+      error: new Error(`${PAPER_RUNTIME_UPSTREAM_API_BASE_URL_ENV} must use http or https.`),
+      failureClass: 'invalid_url',
+      localRuntimeApiBaseUrl,
+      timeoutMs,
+      upstreamLock,
+    });
+  }
+  if (parsedBaseUrl.username.length > 0 || parsedBaseUrl.password.length > 0) {
+    return createUpstreamApiPreflightFailure({
+      configuredBaseUrl,
+      error: new Error(`${PAPER_RUNTIME_UPSTREAM_API_BASE_URL_ENV} must not include embedded credentials.`),
+      failureClass: 'invalid_url',
+      localRuntimeApiBaseUrl,
+      timeoutMs,
+      upstreamLock,
+    });
+  }
+  if (parsedBaseUrl.search.length > 0 || parsedBaseUrl.hash.length > 0) {
+    return createUpstreamApiPreflightFailure({
+      configuredBaseUrl,
+      error: new Error(`${PAPER_RUNTIME_UPSTREAM_API_BASE_URL_ENV} must not include query or fragment components.`),
+      failureClass: 'invalid_url',
+      localRuntimeApiBaseUrl,
+      timeoutMs,
+      upstreamLock,
+    });
+  }
+  if (!LOOPBACK_HOSTS.has(parsedBaseUrl.hostname)) {
+    return createUpstreamApiPreflightFailure({
+      configuredBaseUrl,
+      error: new Error(`${PAPER_RUNTIME_UPSTREAM_API_BASE_URL_ENV} must stay on an explicit loopback host.`),
+      failureClass: 'invalid_url',
+      localRuntimeApiBaseUrl,
+      timeoutMs,
+      upstreamLock,
+    });
+  }
+  if (sameAuthorityAsLocalRuntimeApi(parsedBaseUrl, localRuntimeApiBaseUrl)) {
+    return createUpstreamApiPreflightFailure({
+      configuredBaseUrl,
+      error: new Error(
+        `${PAPER_RUNTIME_UPSTREAM_API_BASE_URL_ENV} must not target the local BWS API on ${localRuntimeApiBaseUrl}.`,
+      ),
+      failureClass: 'bws_local_api_conflict',
+      localRuntimeApiBaseUrl,
+      timeoutMs,
+      upstreamLock,
+    });
+  }
+
+  const probeUrl = buildProbeUrl(parsedBaseUrl.toString(), PAPER_RUNTIME_UPSTREAM_PROBE_PATH);
+  try {
+    const response = await fetch(probeUrl, {
+      headers: Object.freeze({
+        accept: 'application/json',
+      }),
+      method: 'GET',
+      signal: AbortSignal.timeout(timeoutMs),
+    });
+    if (!response.ok) {
+      return Object.freeze({
+        blockerCode: BETTING_WIN_API_UNAVAILABLE_BLOCKER,
+        configuredBaseUrl: stripTrailingSlash(parsedBaseUrl.toString()),
+        errorMessage: redactBoundedMessage(
+          `betting-win upstream API preflight probe ${PAPER_RUNTIME_UPSTREAM_PROBE_PATH} returned HTTP ${response.status}.`,
+        ),
+        errorName: 'Error',
+        failureClass: 'http_status',
+        httpStatus: response.status,
+        localRuntimeApiBaseUrl,
+        noExportFallbackUsed: true,
+        outcome: 'blocked',
+        probePath: PAPER_RUNTIME_UPSTREAM_PROBE_PATH,
+        timeoutMs,
+        ...(upstreamLock === undefined ? {} : { upstreamLock }),
+      });
+    }
+    const parsed = requireRecord(await response.json(), 'betting-win upstream API preflight response');
+    const reportedContractVersion = parseApiContractVersion(parsed);
+    if (reportedContractVersion !== contractVersion) {
+      return Object.freeze({
+        blockerCode: BETTING_WIN_API_UNAVAILABLE_BLOCKER,
+        configuredBaseUrl: stripTrailingSlash(parsedBaseUrl.toString()),
+        errorMessage: redactBoundedMessage(
+          `betting-win upstream API preflight expected contract version ${contractVersion} but received ${reportedContractVersion}.`,
+        ),
+        errorName: 'Error',
+        failureClass: 'contract_version_mismatch',
+        localRuntimeApiBaseUrl,
+        noExportFallbackUsed: true,
+        outcome: 'blocked',
+        probePath: PAPER_RUNTIME_UPSTREAM_PROBE_PATH,
+        reportedContractVersion,
+        timeoutMs,
+        ...(upstreamLock === undefined ? {} : { upstreamLock }),
+      });
+    }
+    return Object.freeze({
+      configuredBaseUrl: stripTrailingSlash(parsedBaseUrl.toString()),
+      localRuntimeApiBaseUrl,
+      noExportFallbackUsed: true,
+      outcome: 'passed',
+      probePath: PAPER_RUNTIME_UPSTREAM_PROBE_PATH,
+      reportedContractVersion,
+      timeoutMs,
+      ...(upstreamLock === undefined ? {} : { upstreamLock }),
+    });
+  } catch (error) {
+    return createUpstreamApiPreflightFailure({
+      configuredBaseUrl: stripTrailingSlash(parsedBaseUrl.toString()),
+      error,
+      failureClass: error instanceof SyntaxError ? 'invalid_response' : 'network_error',
+      localRuntimeApiBaseUrl,
+      timeoutMs,
+      upstreamLock,
+    });
   }
 }
 
@@ -421,7 +649,138 @@ function createCollectionFailure(
 ): NonNullable<BwsPaperRuntimeEvidenceResult['collectionFailure']> {
   const rawName = error instanceof Error ? error.name : 'Error';
   const rawMessage = error instanceof Error ? error.message : String(error);
-  const message = rawMessage
+  const message = redactBoundedMessage(rawMessage);
+  return Object.freeze({
+    errorName: rawName.replace(/[^A-Za-z0-9_.-]/g, '_').slice(0, 80) || 'Error',
+    message: message || 'Runtime evidence collection failed without an error message.',
+    stage,
+  });
+}
+
+function createUpstreamApiPreflightFailure(request: Readonly<{
+  readonly configuredBaseUrl: string;
+  readonly error: unknown;
+  readonly failureClass: NonNullable<BwsPaperRuntimeEvidenceUpstreamApiPreflight['failureClass']>;
+  readonly localRuntimeApiBaseUrl: string;
+  readonly timeoutMs: number;
+  readonly upstreamLock: Readonly<{
+    readonly commitSha: string;
+    readonly packageVersion: string;
+  }> | undefined;
+}>): BwsPaperRuntimeEvidenceUpstreamApiPreflight {
+  const errorName = request.error instanceof Error ? request.error.name : 'Error';
+  const errorMessage = redactBoundedMessage(
+    request.error instanceof Error ? request.error.message : String(request.error),
+  );
+  return Object.freeze({
+    blockerCode: BETTING_WIN_API_UNAVAILABLE_BLOCKER,
+    configuredBaseUrl: request.configuredBaseUrl,
+    errorMessage: errorMessage || 'betting-win upstream API preflight failed without an error message.',
+    errorName: errorName.replace(/[^A-Za-z0-9_.-]/g, '_').slice(0, 80) || 'Error',
+    failureClass: request.failureClass,
+    localRuntimeApiBaseUrl: request.localRuntimeApiBaseUrl,
+    noExportFallbackUsed: true,
+    outcome: 'blocked',
+    probePath: PAPER_RUNTIME_UPSTREAM_PROBE_PATH,
+    timeoutMs: request.timeoutMs,
+    ...(request.upstreamLock === undefined ? {} : { upstreamLock: request.upstreamLock }),
+  });
+}
+
+function buildLocalRuntimeApiBaseUrl(environment: NodeJS.ProcessEnv): string {
+  const apiPort = requirePositiveIntegerFromEnvironment(
+    environment[PAPER_RUNTIME_API_PORT_ENV],
+    PAPER_RUNTIME_API_PORT_ENV,
+  );
+  return `http://127.0.0.1:${String(apiPort)}`;
+}
+
+function buildProbeUrl(baseUrl: string, probePath: typeof PAPER_RUNTIME_UPSTREAM_PROBE_PATH): string {
+  return new URL(probePath.slice(1), `${stripTrailingSlash(baseUrl)}/`).toString();
+}
+
+function sameAuthorityAsLocalRuntimeApi(parsedBaseUrl: URL, localRuntimeApiBaseUrl: string): boolean {
+  const localRuntimeUrl = new URL(localRuntimeApiBaseUrl);
+  return normalizeAuthorityHostname(parsedBaseUrl.hostname) === normalizeAuthorityHostname(localRuntimeUrl.hostname)
+    && resolvedPort(parsedBaseUrl) === resolvedPort(localRuntimeUrl);
+}
+
+function normalizeAuthorityHostname(hostname: string): string {
+  return LOOPBACK_HOSTS.has(hostname) ? LOOPBACK_AUTHORITY_HOST : hostname;
+}
+
+function resolvedPort(url: URL): string {
+  if (url.port.length > 0) {
+    return url.port;
+  }
+  return url.protocol === 'https:' ? '443' : '80';
+}
+
+function sanitizeConfiguredUrl(value: string): string {
+  return value
+    .replace(/\b([a-z][a-z0-9+.-]*:\/\/)[^\s/@:]+:[^\s/@]+@/gi, '$1[redacted]@')
+    .trim();
+}
+
+function stripTrailingSlash(value: string): string {
+  return value.endsWith('/') ? value.slice(0, -1) : value;
+}
+
+function requireNonEmptyString(value: string | undefined, label: string): string {
+  if (typeof value !== 'string' || value.trim().length === 0) {
+    throw new Error(`${label} must be a non-empty string.`);
+  }
+  return value.trim();
+}
+
+function requirePositiveIntegerFromEnvironment(value: string | undefined, label: string): number {
+  const normalized = requireNonEmptyString(value, label);
+  if (!/^\d+$/.test(normalized)) {
+    throw new Error(`${label} must be a positive integer.`);
+  }
+  return requirePositiveInteger(Number.parseInt(normalized, 10), label);
+}
+
+function requireRecord(value: unknown, label: string): Record<string, unknown> {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error(`${label} must be a JSON object.`);
+  }
+  return value as Record<string, unknown>;
+}
+
+function parseApiContractVersion(parsed: Record<string, unknown>): string {
+  const contractVersion = parsed.contractVersion;
+  if (typeof contractVersion === 'string' && contractVersion.trim().length > 0) {
+    return contractVersion.trim();
+  }
+  const version = parsed.version;
+  if (typeof version === 'string' && version.trim().length > 0) {
+    return version.trim();
+  }
+  throw new Error('betting-win upstream API preflight response must contain contractVersion or version.');
+}
+
+function readOptionalUpstreamLock(
+  repositoryRoot: string,
+  environment: NodeJS.ProcessEnv,
+): Readonly<{ readonly commitSha: string; readonly packageVersion: string }> | undefined {
+  const configuredPath = environment[PAPER_RUNTIME_UPSTREAM_LOCK_PATH_ENV];
+  if (typeof configuredPath !== 'string' || configuredPath.trim().length === 0) {
+    return undefined;
+  }
+  try {
+    const upstreamLock = readBettingWinUpstreamLock(join(repositoryRoot, configuredPath.trim()), repositoryRoot);
+    return Object.freeze({
+      commitSha: upstreamLock.commitSha,
+      packageVersion: upstreamLock.packageVersion,
+    });
+  } catch {
+    return undefined;
+  }
+}
+
+function redactBoundedMessage(rawMessage: string): string {
+  return rawMessage
     .replace(/\b([a-z][a-z0-9+.-]*:\/\/)[^\s/@:]+:[^\s/@]+@/gi, '$1[redacted]@')
     .replace(/\b(Bearer|Basic)\s+[^\s,;]+/gi, '$1 [redacted]')
     .replace(
@@ -434,11 +793,6 @@ function createCollectionFailure(
     .replace(/[\r\n\t]+/g, ' ')
     .trim()
     .slice(0, 512);
-  return Object.freeze({
-    errorName: rawName.replace(/[^A-Za-z0-9_.-]/g, '_').slice(0, 80) || 'Error',
-    message: message || 'Runtime evidence collection failed without an error message.',
-    stage,
-  });
 }
 
 function requireUpstreamMode(value: string | undefined): 'api' | 'export' {

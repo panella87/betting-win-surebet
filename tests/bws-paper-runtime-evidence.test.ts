@@ -1,6 +1,8 @@
 import test, { type TestContext } from 'node:test';
 import assert from 'node:assert/strict';
+import { createServer } from 'node:http';
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import type { AddressInfo } from 'node:net';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import {
@@ -254,6 +256,73 @@ function createTestRepositoryRoot(t: TestContext): string {
   return root;
 }
 
+function configureUpstreamApiPreflightEnvironment(
+  t: TestContext,
+  values: Readonly<{
+    readonly apiBaseUrl: string;
+    readonly apiPort?: string;
+    readonly contractVersion?: string;
+    readonly lockPath?: string;
+    readonly timeoutMs?: string;
+  }>,
+): void {
+  const previous = Object.freeze({
+    BWS_API_PORT: process.env.BWS_API_PORT,
+    BWS_UPSTREAM_API_BASE_URL: process.env.BWS_UPSTREAM_API_BASE_URL,
+    BWS_UPSTREAM_API_CONTRACT_VERSION: process.env.BWS_UPSTREAM_API_CONTRACT_VERSION,
+    BWS_UPSTREAM_API_TIMEOUT_MS: process.env.BWS_UPSTREAM_API_TIMEOUT_MS,
+    BWS_UPSTREAM_LOCK_PATH: process.env.BWS_UPSTREAM_LOCK_PATH,
+    BWS_UPSTREAM_MODE: process.env.BWS_UPSTREAM_MODE,
+  });
+  t.after(() => {
+    restoreEnvironmentValue('BWS_API_PORT', previous.BWS_API_PORT);
+    restoreEnvironmentValue('BWS_UPSTREAM_API_BASE_URL', previous.BWS_UPSTREAM_API_BASE_URL);
+    restoreEnvironmentValue('BWS_UPSTREAM_API_CONTRACT_VERSION', previous.BWS_UPSTREAM_API_CONTRACT_VERSION);
+    restoreEnvironmentValue('BWS_UPSTREAM_API_TIMEOUT_MS', previous.BWS_UPSTREAM_API_TIMEOUT_MS);
+    restoreEnvironmentValue('BWS_UPSTREAM_LOCK_PATH', previous.BWS_UPSTREAM_LOCK_PATH);
+    restoreEnvironmentValue('BWS_UPSTREAM_MODE', previous.BWS_UPSTREAM_MODE);
+  });
+  process.env.BWS_API_PORT = values.apiPort ?? '4312';
+  process.env.BWS_UPSTREAM_API_BASE_URL = values.apiBaseUrl;
+  process.env.BWS_UPSTREAM_API_CONTRACT_VERSION = values.contractVersion ?? '1.0.0';
+  process.env.BWS_UPSTREAM_API_TIMEOUT_MS = values.timeoutMs ?? '1000';
+  process.env.BWS_UPSTREAM_LOCK_PATH = values.lockPath ?? 'config/betting-win.upstream.lock.json';
+  process.env.BWS_UPSTREAM_MODE = 'api';
+}
+
+function restoreEnvironmentValue(name: string, value: string | undefined): void {
+  if (value === undefined) {
+    delete process.env[name];
+    return;
+  }
+  process.env[name] = value;
+}
+
+async function createLoopbackUpstreamApiFixture(
+  t: TestContext,
+  handler: (path: string, response: import('node:http').ServerResponse) => void,
+): Promise<string> {
+  const server = createServer((request, response) => {
+    response.setHeader('content-type', 'application/json');
+    handler(request.url ?? '/', response);
+  });
+  server.listen(0, '127.0.0.1');
+  await new Promise<void>((resolvePromise) => server.once('listening', resolvePromise));
+  t.after(async () => {
+    await new Promise<void>((resolvePromise, rejectPromise) => {
+      server.close((error) => {
+        if (error === undefined) {
+          resolvePromise();
+          return;
+        }
+        rejectPromise(error);
+      });
+    });
+  });
+  const port = (server.address() as AddressInfo).port;
+  return `http://127.0.0.1:${String(port)}`;
+}
+
 function createRuntimeHandoffResult(repositoryRoot: string): CreateBwsPaperRuntimeHandoffResult {
   return Object.freeze({
     archive: Object.freeze({
@@ -310,7 +379,15 @@ function createRuntimeHandoffResult(repositoryRoot: string): CreateBwsPaperRunti
 
 test('paper runtime evidence starts an owned stack, records ready observations, and stops only the stack it started', async (t) => {
   const repositoryRoot = createTestRepositoryRoot(t);
-  process.env.BWS_UPSTREAM_MODE = 'export';
+  const upstreamApiBaseUrl = await createLoopbackUpstreamApiFixture(t, (path, response) => {
+    if (path === '/contract') {
+      response.end(JSON.stringify({ contractVersion: '1.0.0' }));
+      return;
+    }
+    response.statusCode = 404;
+    response.end(JSON.stringify({ error: 'not_found' }));
+  });
+  configureUpstreamApiPreflightEnvironment(t, { apiBaseUrl: upstreamApiBaseUrl });
   const observedCalls: string[] = [];
   let statusCallCount = 0;
   const result = await createBwsPaperRuntimeEvidence({
@@ -372,6 +449,8 @@ test('paper runtime evidence starts an owned stack, records ready observations, 
   assert.equal(result.finalStatus, 'PAPER_EVALUATION_READY_RUNTIME_EVIDENCE_LOCAL_ONLY');
   assert.equal(result.stackOwnership, 'started');
   assert.equal(result.stackStopDisposition, 'stopped_started_stack');
+  assert.equal(result.upstreamApiPreflight?.outcome, 'passed');
+  assert.equal(result.upstreamApiPreflight?.probePath, '/contract');
   assert.equal(result.observation.sampleCount, 1);
   assert.equal(result.observation.samples[0]?.runtimeLifecycleState, 'running');
   assert.equal(result.latestRuntimeHandoffFile, 'runtime/bws-paper-runtime-handoff/handoff.json');
@@ -380,7 +459,15 @@ test('paper runtime evidence starts an owned stack, records ready observations, 
 
 test('paper runtime evidence preserves an attached stack when exact identity and configuration already match', async (t) => {
   const repositoryRoot = createTestRepositoryRoot(t);
-  process.env.BWS_UPSTREAM_MODE = 'api';
+  const upstreamApiBaseUrl = await createLoopbackUpstreamApiFixture(t, (path, response) => {
+    if (path === '/contract') {
+      response.end(JSON.stringify({ version: '1.0.0' }));
+      return;
+    }
+    response.statusCode = 404;
+    response.end(JSON.stringify({ error: 'not_found' }));
+  });
+  configureUpstreamApiPreflightEnvironment(t, { apiBaseUrl: upstreamApiBaseUrl });
   let statusCalls = 0;
   const result = await createBwsPaperRuntimeEvidence({
     collectDiagnostics: async ({ repositoryRoot: root }) => createDiagnosticsBundleResult(root, 'bundle-attached', {
@@ -414,15 +501,127 @@ test('paper runtime evidence preserves an attached stack when exact identity and
   assert.equal(result.finalStatus, 'PAPER_EVALUATION_READY_RUNTIME_EVIDENCE_LOCAL_ONLY');
   assert.equal(result.stackOwnership, 'attached');
   assert.equal(result.stackStopDisposition, 'attached_stack_preserved');
+  assert.equal(result.upstreamApiPreflight?.outcome, 'passed');
   assert.equal(statusCalls, 2);
+});
+
+test('paper runtime evidence fails fast when the upstream API is unavailable before lifecycle ownership is touched', async (t) => {
+  const repositoryRoot = createTestRepositoryRoot(t);
+  const unavailablePort = await (async () => {
+    const server = createServer((_request, response) => {
+      response.end('unused');
+    });
+    server.listen(0, '127.0.0.1');
+    await new Promise<void>((resolvePromise) => server.once('listening', resolvePromise));
+    const port = (server.address() as AddressInfo).port;
+    await new Promise<void>((resolvePromise, rejectPromise) => {
+      server.close((error) => {
+        if (error === undefined) {
+          resolvePromise();
+          return;
+        }
+        rejectPromise(error);
+      });
+    });
+    return port;
+  })();
+  configureUpstreamApiPreflightEnvironment(t, {
+    apiBaseUrl: `http://127.0.0.1:${String(unavailablePort)}`,
+  });
+  let lifecycleTouched = false;
+
+  const result = await createBwsPaperRuntimeEvidence({
+    getLifecycleStatus: async () => {
+      lifecycleTouched = true;
+      return createLifecycleStatus('running');
+    },
+    intervalMs: 1000,
+    maxDurationMs: 2000,
+    repositoryRoot,
+    startLifecycle: async () => {
+      lifecycleTouched = true;
+      throw new Error('start should not be called');
+    },
+  });
+
+  assert.equal(result.finalStatus, 'PAPER_EVALUATION_BLOCKED_RUNTIME_EVIDENCE_COLLECTION_FAILED');
+  assert.equal(result.stopReason, 'betting_win_api_unavailable');
+  assert.equal(result.collectionFailure?.stage, 'upstream_api_preflight');
+  assert.equal(result.upstreamApiPreflight?.blockerCode, 'PAPER_EVALUATION_BLOCKED_BETTING_WIN_API_UNAVAILABLE');
+  assert.equal(result.upstreamApiPreflight?.failureClass, 'network_error');
+  assert.equal(result.upstreamApiPreflight?.outcome, 'blocked');
+  assert.equal(result.observation.sampleCount, 0);
+  assert.equal(lifecycleTouched, false);
+});
+
+test('paper runtime evidence rejects malformed, credential-bearing, non-loopback, and local-BWS upstream API URLs before lifecycle attach or start', async (t) => {
+  const repositoryRoot = createTestRepositoryRoot(t);
+  const cases = [
+    {
+      apiBaseUrl: 'http://user:password@127.0.0.1:4301',
+      expectedFailureClass: 'invalid_url',
+      expectedMessage: /must not include embedded credentials/i,
+    },
+    {
+      apiBaseUrl: 'https://upstream.invalid',
+      expectedFailureClass: 'invalid_url',
+      expectedMessage: /explicit loopback host/i,
+    },
+    {
+      apiBaseUrl: 'not-a-url',
+      expectedFailureClass: 'invalid_url',
+      expectedMessage: /must be an absolute URL/i,
+    },
+    {
+      apiBaseUrl: 'http://127.0.0.1:4312',
+      expectedFailureClass: 'bws_local_api_conflict',
+      expectedMessage: /must not target the local BWS API/i,
+    },
+    {
+      apiBaseUrl: 'http://localhost:4312',
+      expectedFailureClass: 'bws_local_api_conflict',
+      expectedMessage: /must not target the local BWS API/i,
+    },
+  ] as const;
+
+  for (const testCase of cases) {
+    configureUpstreamApiPreflightEnvironment(t, { apiBaseUrl: testCase.apiBaseUrl, apiPort: '4312' });
+    let lifecycleTouched = false;
+    const result = await createBwsPaperRuntimeEvidence({
+      getLifecycleStatus: async () => {
+        lifecycleTouched = true;
+        return createLifecycleStatus('running');
+      },
+      intervalMs: 1000,
+      maxDurationMs: 2000,
+      repositoryRoot,
+    });
+
+    assert.equal(result.finalStatus, 'PAPER_EVALUATION_BLOCKED_RUNTIME_EVIDENCE_COLLECTION_FAILED');
+    assert.equal(result.collectionFailure?.stage, 'upstream_api_preflight');
+    assert.equal(result.stopReason, 'betting_win_api_unavailable');
+    assert.equal(result.upstreamApiPreflight?.failureClass, testCase.expectedFailureClass);
+    assert.match(result.upstreamApiPreflight?.errorMessage ?? '', testCase.expectedMessage);
+    assert.equal(lifecycleTouched, false);
+  }
 });
 
 test('paper runtime evidence preserves the stack when ownership is ambiguous', async (t) => {
   const repositoryRoot = createTestRepositoryRoot(t);
-  process.env.BWS_UPSTREAM_MODE = 'export';
+  const upstreamApiBaseUrl = await createLoopbackUpstreamApiFixture(t, (path, response) => {
+    if (path === '/contract') {
+      response.end(JSON.stringify({ contractVersion: '1.0.0' }));
+      return;
+    }
+    response.statusCode = 404;
+    response.end(JSON.stringify({ error: 'not_found' }));
+  });
+  configureUpstreamApiPreflightEnvironment(t, { apiBaseUrl: upstreamApiBaseUrl });
   const result = await createBwsPaperRuntimeEvidence({
     getLifecycleStatus: async () => {
-      throw new Error('Lifecycle state configuration fingerprint mismatch.');
+      throw new Error(
+        'Lifecycle command configuration fingerprint does not match the recorded managed process configuration.',
+      );
     },
     intervalMs: 1000,
     maxDurationMs: 2000,
@@ -436,7 +635,15 @@ test('paper runtime evidence preserves the stack when ownership is ambiguous', a
 
 test('paper runtime evidence returns a bounded blocker when the observation window never reaches readiness', async (t) => {
   const repositoryRoot = createTestRepositoryRoot(t);
-  process.env.BWS_UPSTREAM_MODE = 'export';
+  const upstreamApiBaseUrl = await createLoopbackUpstreamApiFixture(t, (path, response) => {
+    if (path === '/contract') {
+      response.end(JSON.stringify({ contractVersion: '1.0.0' }));
+      return;
+    }
+    response.statusCode = 404;
+    response.end(JSON.stringify({ error: 'not_found' }));
+  });
+  configureUpstreamApiPreflightEnvironment(t, { apiBaseUrl: upstreamApiBaseUrl });
   const result = await createBwsPaperRuntimeEvidence({
     collectDiagnostics: async ({ repositoryRoot: root }) => createDiagnosticsBundleResult(root, 'bundle-blocked', {
       apiStatus: 'blocked',
@@ -472,7 +679,15 @@ test('paper runtime evidence returns a bounded blocker when the observation wind
 
 test('paper runtime evidence retains a bounded redacted collection-failure stage', async (t) => {
   const repositoryRoot = createTestRepositoryRoot(t);
-  process.env.BWS_UPSTREAM_MODE = 'api';
+  const upstreamApiBaseUrl = await createLoopbackUpstreamApiFixture(t, (path, response) => {
+    if (path === '/contract') {
+      response.end(JSON.stringify({ contractVersion: '1.0.0' }));
+      return;
+    }
+    response.statusCode = 404;
+    response.end(JSON.stringify({ error: 'not_found' }));
+  });
+  configureUpstreamApiPreflightEnvironment(t, { apiBaseUrl: upstreamApiBaseUrl });
   const databaseUri = `${['post', 'gresql'].join('')}://user:database-secret@127.0.0.1:5432/db`;
   const result = await createBwsPaperRuntimeEvidence({
     collectDiagnostics: async () => {

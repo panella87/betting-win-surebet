@@ -186,6 +186,50 @@ test('external runtime preflight rejects credential-bearing API URLs', SEQUENTIA
   }
 });
 
+test('external runtime preflight rejects non-loopback API URLs', SEQUENTIAL_TEST_OPTIONS, async () => {
+  const fixture = await createFixture();
+  writeApiEnvFile(fixture.apiEnvFile, 'https://upstream.invalid');
+  try {
+    await assert.rejects(
+      () =>
+        createBwsExternalRuntimeCampaignManifest({
+          ...createApiRequest(fixture),
+          envFile: fixture.apiEnvFile,
+          selectedInput: Object.freeze({
+            ...createApiRequest(fixture).selectedInput,
+            apiBaseUrl: 'https://upstream.invalid',
+          }),
+        }),
+      /must stay on an explicit loopback host/i,
+    );
+  } finally {
+    fixture.dispose();
+  }
+});
+
+test('external runtime preflight rejects the local BWS API and loopback aliases as upstream evidence', SEQUENTIAL_TEST_OPTIONS, async () => {
+  const fixture = await createFixture();
+  try {
+    for (const apiBaseUrl of ['http://127.0.0.1:4312', 'http://localhost:4312']) {
+      writeApiEnvFile(fixture.apiEnvFile, apiBaseUrl);
+      await assert.rejects(
+        () =>
+          createBwsExternalRuntimeCampaignManifest({
+            ...createApiRequest(fixture),
+            envFile: fixture.apiEnvFile,
+            selectedInput: Object.freeze({
+              ...createApiRequest(fixture).selectedInput,
+              apiBaseUrl,
+            }),
+          }),
+        /must not target the local BWS API/i,
+      );
+    }
+  } finally {
+    fixture.dispose();
+  }
+});
+
 test('external runtime preflight rejects install verification evidence for a different selected mode', SEQUENTIAL_TEST_OPTIONS, async () => {
   const fixture = await createFixture();
   try {

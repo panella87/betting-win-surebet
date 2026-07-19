@@ -39,6 +39,8 @@ const SOAK_CAMPAIGN_CHECKPOINT_SCHEMA = 'bws.soak_campaign_checkpoint.v1' as con
 const SOAK_CAMPAIGN_STATE_SCHEMA = 'bws.soak_campaign_state.v1' as const;
 const UPSTREAM_LOCK_RELEASE_PATH = 'config/betting-win.upstream.lock.json' as const;
 const LOOPBACK_HOST = '127.0.0.1' as const;
+const LOOPBACK_HOSTS = new Set(['127.0.0.1', '::1', '[::1]', 'localhost']);
+const LOOPBACK_AUTHORITY_HOST = 'loopback';
 const RELEASE_REQUIRED_CHECK = 'non_mutating_preflight_passed' as const;
 const CANONICAL_SOAK_DURATION_MS = 7_200_000;
 const SENSITIVE_KEY_PATTERN = /credential|mnemonic|passphrase|password|private[_ -]?key|secret|seed|token/i;
@@ -448,6 +450,7 @@ async function validateApiInput(
     retryLimit,
     timeoutMs,
   });
+  ensureApiBaseUrlDoesNotTargetLocalBwsApi(apiBaseUrl, environment);
 
   const manifestBase: Extract<BwsExternalRuntimeCampaignSelectedInput, { readonly mode: 'api' }> = Object.freeze({
     apiBaseUrl,
@@ -945,7 +948,38 @@ function requireHttpUrl(value: string, label: string): string {
   if (parsed.search.length > 0 || parsed.hash.length > 0) {
     throw new Error(`${label} must not include query or fragment components.`);
   }
+  if (!LOOPBACK_HOSTS.has(parsed.hostname)) {
+    throw new Error(`${label} must stay on an explicit loopback host.`);
+  }
   return parsed.toString().replace(/\/$/, '');
+}
+
+function ensureApiBaseUrlDoesNotTargetLocalBwsApi(
+  apiBaseUrl: string,
+  environment: ReadonlyMap<string, string>,
+): void {
+  const localBwsApiBaseUrl = buildLoopbackApiBaseUrl(environment);
+  if (sameAuthority(apiBaseUrl, localBwsApiBaseUrl)) {
+    throw new Error(`selectedInput.apiBaseUrl must not target the local BWS API on ${localBwsApiBaseUrl}.`);
+  }
+}
+
+function sameAuthority(left: string, right: string): boolean {
+  const leftUrl = new URL(left);
+  const rightUrl = new URL(right);
+  return normalizeAuthorityHostname(leftUrl.hostname) === normalizeAuthorityHostname(rightUrl.hostname)
+    && resolvedPort(leftUrl) === resolvedPort(rightUrl);
+}
+
+function normalizeAuthorityHostname(hostname: string): string {
+  return LOOPBACK_HOSTS.has(hostname) ? LOOPBACK_AUTHORITY_HOST : hostname;
+}
+
+function resolvedPort(url: URL): string {
+  if (url.port.length > 0) {
+    return url.port;
+  }
+  return url.protocol === 'https:' ? '443' : '80';
 }
 
 function inspectStorage(path: string, minimumRequiredBytes: number): Readonly<{
