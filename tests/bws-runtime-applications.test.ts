@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { createServer } from 'node:http';
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import type { AddressInfo } from 'node:net';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import {
@@ -33,7 +35,7 @@ import {
 const TEST_TIMESTAMP = '2026-07-15T09:15:00.000Z';
 
 test('read-only API application starts on loopback, serves readiness, and shuts down cleanly before restart', async () => {
-  const fixture = createRuntimeFixture();
+  const fixture = await createRuntimeFixture();
   try {
     const config = resolveBwsServiceRuntimeConfig(fixture.environment, fixture.repositoryRoot);
     const queryService = createQueryServiceStub();
@@ -215,9 +217,10 @@ test('read-only API application starts on loopback, serves readiness, and shuts 
 });
 
 test('read-only API application fails closed when the managed cockpit build is missing or targets the wrong API base URL', async () => {
-  const fixture = createRuntimeFixture();
+  const fixture = await createRuntimeFixture();
   try {
     const config = resolveBwsServiceRuntimeConfig(fixture.environment, fixture.repositoryRoot);
+    const runtimeBaseUrl = `http://127.0.0.1:${config.api.port}`;
     const queryService = createQueryServiceStub();
 
     rmSync(join(fixture.repositoryRoot, 'dist'), { force: true, recursive: true });
@@ -245,7 +248,9 @@ test('read-only API application fails closed when the managed cockpit build is m
         queryService,
         repositoryRoot: fixture.repositoryRoot,
       }),
-      /Managed cockpit build targets http:\/\/127\.0\.0\.1:9999 but the runtime serves http:\/\/127\.0\.0\.1:4312/,
+      new RegExp(
+        `Managed cockpit build targets http://127\\.0\\.0\\.1:9999 but the runtime serves ${escapeForRegExp(runtimeBaseUrl)}`,
+      ),
     );
   } finally {
     fixture.dispose();
@@ -253,7 +258,7 @@ test('read-only API application fails closed when the managed cockpit build is m
 });
 
 test('worker application executes one bounded pass, records process identity, and preserves signal intent across restart', async () => {
-  const fixture = createRuntimeFixture();
+  const fixture = await createRuntimeFixture();
   try {
     const config = resolveBwsServiceRuntimeConfig(fixture.environment, fixture.repositoryRoot);
     const events = createLogCapture();
@@ -554,14 +559,15 @@ function captureStream(): {
   });
 }
 
-function createRuntimeFixture(): {
+async function createRuntimeFixture(): Promise<{
   readonly dispose: () => void;
   readonly environment: BwsServiceRuntimeEnvironment;
   readonly repositoryRoot: string;
-} {
+}> {
   const root = mkdtempSync(join(tmpdir(), 'bws-runtime-applications-'));
   const repositoryRoot = join(root, 'betting-win-surebet');
   const upstreamRoot = join(root, 'betting-win');
+  const apiPort = await reserveLoopbackPort();
   mkdirSync(join(repositoryRoot, 'config'), { recursive: true });
   mkdirSync(upstreamRoot, { recursive: true });
   writeFileSync(
@@ -569,12 +575,12 @@ function createRuntimeFixture(): {
     `${JSON.stringify(sampleUpstreamLock(upstreamRoot), null, 2)}\n`,
     'utf-8',
   );
-  createManagedCockpitBuild(repositoryRoot, 'http://127.0.0.1:4312');
+  createManagedCockpitBuild(repositoryRoot, `http://127.0.0.1:${String(apiPort)}`);
   return {
     dispose: () => rmSync(root, { force: true, recursive: true }),
     environment: Object.freeze({
       BETTING_WIN_REPO_PATH: upstreamRoot,
-      [BWS_API_PORT_ENV]: '4312',
+      [BWS_API_PORT_ENV]: String(apiPort),
       [BWS_UPSTREAM_LOCK_PATH_ENV]: 'config/betting-win.upstream.lock.json',
       [BWS_WORKER_ID_ENV]: 'worker-bws-520',
       [BWS_WORKER_LEASE_DURATION_MS_ENV]: '30000',
@@ -590,6 +596,38 @@ function createRuntimeFixture(): {
     }),
     repositoryRoot,
   };
+}
+
+async function reserveLoopbackPort(): Promise<number> {
+  const server = createServer((_request, response) => {
+    response.end('unused');
+  });
+  server.listen(0, '127.0.0.1');
+  await new Promise<void>((resolvePromise) => server.once('listening', resolvePromise));
+  const address = server.address();
+  if (address === null || typeof address === 'string') {
+    await new Promise<void>((resolvePromise, rejectPromise) => {
+      server.close((error) => {
+        if (error === undefined) {
+          resolvePromise();
+          return;
+        }
+        rejectPromise(error);
+      });
+    });
+    throw new Error('Loopback port reservation did not return a TCP address.');
+  }
+  const port = (address as AddressInfo).port;
+  await new Promise<void>((resolvePromise, rejectPromise) => {
+    server.close((error) => {
+      if (error === undefined) {
+        resolvePromise();
+        return;
+      }
+      rejectPromise(error);
+    });
+  });
+  return port;
 }
 
 function createManagedCockpitBuild(repositoryRoot: string, apiBaseUrl: string): void {
@@ -622,6 +660,10 @@ function createManagedCockpitBuild(repositoryRoot: string, apiBaseUrl: string): 
     }, null, 2)}\n`,
     'utf-8',
   );
+}
+
+function escapeForRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 function sampleUpstreamLock(repositoryPath: string): BettingWinUpstreamLock {

@@ -20,6 +20,8 @@ The safe-local product queue through `BWS-599` remains validated. The bounded `B
 
 The next binding work is the external `BWS-600` runtime-evidence campaign. It may run only after the operator starts and approves the real `betting-win` read-only API. BWS must not start, stop, clone, reset, clean, commit, or otherwise mutate the `betting-win` checkout or service.
 
+Implementation handoff requirement: prove the betting-win committed HEAD remains unchanged, use no placeholder fields, and use no clone or temporary worktree.
+
 ```text
 bws600_source_fix=BWS-600_UPSTREAM_API_PREFLIGHT_SOURCE_FIX_PRESENT
 betting_win_api_preflight_required=before_bws_runtime_evidence_window
@@ -86,6 +88,7 @@ force_unlock_required=no
 campaign_duration=7d
 paper_child_duration=72h
 implementation_child_duration=72h
+recommended_cycle_timeout=6h
 ```
 
 Paper autopilot remains the parent because it owns the `paper -> runtime evidence -> source issue -> implementation -> paper` loop. If the new upstream API preflight finds the real `betting-win` API absent or incompatible, the run must fail fast with retained bounded non-secret evidence, not spend 72 hours collecting BWS-only degraded evidence.
