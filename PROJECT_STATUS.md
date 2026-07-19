@@ -3,7 +3,7 @@
 ```text
 repo=betting-win-surebet
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-status=RUNTIME_EVIDENCE_SOURCE_FIX_READY
+status=RUNTIME_EVIDENCE_READY
 repo_role=surebet_strategy_application
 upstream_platform=betting-win
 provider_truth_owner=betting-win
@@ -13,9 +13,9 @@ backtesting_owner=betting-win-surebet
 paper_mode_owner=betting-win-surebet
 account_policy=separate_from_betting-win-betting
 current_task=BWS-600
-current_task_status=SOURCE_IMPLEMENTATION_REQUIRED_BETTING_WIN_API_PREFLIGHT
+current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
 safe_local_completion_gate=BWS-599
-continuous_private_paper=BWS-600_BLOCKED_UNTIL_UPSTREAM_API_PREFLIGHT_SOURCE_FIX
+continuous_private_paper=BWS-600_BLOCKED_UNTIL_OPERATOR_APPROVED_UPSTREAM_API_RUNTIME
 real_money_execution=BWS-900_PARKED
 ```
 
@@ -44,15 +44,15 @@ The detailed dependency map is `backlog/bws_remaining_safe_local_map.csv` and th
 
 ## Blocked or parked
 
-- `BWS-600` requires a source fix that fails fast when the upstream betting-win read-only API is unavailable, then accepted operator-approved continuous read-only betting-win runtime evidence after `BWS-599`.
+- `BWS-600` now requires accepted operator-approved continuous read-only betting-win runtime evidence. The source-side fail-fast upstream API preflight is present and prevents BWS from treating its local API as upstream evidence.
 - `BWS-900` requires separate execution authorization and remains parked.
 
 ## Controller selection
 
 ```text
-selected_controller=run-autonomous-implementation.sh
+selected_controller=run-paper-autopilot.sh
 selected_task=BWS-600
-paper_autopilot_selected=paused_until_upstream_api_preflight_source_fix_validated
+paper_autopilot_selected=selected_for_bws600_runtime_evidence_after_upstream_api_preflight
 bugfix_autopilot_selected=no
 force_unlock_required=no_evidence
 automation_maintenance_allowed=no
@@ -67,7 +67,7 @@ free_inode_preflight=required
 per_run_inode_budget=required
 watchdog=enabled
 cleanup_command=cleanup_automation_temp_inode_residue.sh
-next_controller=run-autonomous-implementation.sh
+next_controller=run-paper-autopilot.sh
 ```
 ## API-only upstream transport
 

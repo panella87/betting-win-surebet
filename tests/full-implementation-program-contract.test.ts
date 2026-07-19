@@ -27,15 +27,14 @@ test('full implementation ledger keeps BWS-580 validated and records BWS-599 as 
   }
   assert.match(task, /program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1/);
   assert.match(task, /current_task=BWS-600/);
-  assert.match(task, /current_task_status=SOURCE_IMPLEMENTATION_REQUIRED/);
-  assert.match(task, /active_implementation_queue=BWS-600_UPSTREAM_API_PREFLIGHT_SOURCE_FIX/);
+  assert.match(task, /current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE/);
+  assert.match(task, /active_implementation_queue=none/);
   assert.match(task, /safe_local_terminal_gate=BWS-599/);
   assert.match(task, /automation_maintenance_allowed=no/);
   assert.match(task, /allowed_protected_files=none/);
   assert.match(task, /backlog\/bws_remaining_safe_local_map\.csv/);
-  assert.match(task, /AUTONOMOUS_GOAL_COMPLETE=yes/);
-  assert.match(status, /selected_controller=run-autonomous-implementation\.sh/);
-  assert.match(status, /paper_autopilot=paused_until_bws600_upstream_api_preflight_source_fix_validated/);
+  assert.match(status, /selected_controller=run-paper-autopilot\.sh/);
+  assert.match(status, /paper_autopilot=selected_for_bws600_runtime_evidence_after_upstream_api_preflight/);
   assert.match(status, /current_task=BWS-600/);
 });
 

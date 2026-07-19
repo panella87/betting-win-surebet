@@ -1,8 +1,8 @@
 # Autonomous implementation rules: betting-win-surebet
 
-`run-autonomous-implementation.sh` is selected for `BWS_FULL_PLATFORM_IMPLEMENTATION_V1`.
+`run-autonomous-implementation.sh` remains available for future bounded source-fix handoffs in `BWS_FULL_PLATFORM_IMPLEMENTATION_V1`, but it is not selected while no implementation queue is active.
 
-Authority comes from `docs/automation/current-implementation-task.md`, `backlog/bws_full_implementation.csv` and the supporting `backlog/bws_remaining_safe_local_map.csv`. There is no `--task` flag. A separate `--prompt-file` is unnecessary.
+Authority comes from `docs/automation/current-implementation-task.md`, `backlog/bws_full_implementation.csv` and the supporting `backlog/bws_remaining_safe_local_map.csv` when an implementation queue is active. There is no `--task` flag. A separate `--prompt-file` is unnecessary.
 
 The final safe local task was `BWS-599`. It is now validated, so no dependency-ready safe local `PENDING` row remains.
 
@@ -35,7 +35,7 @@ The longer cycle timeout allows the required `BWS-592` two-hour soak proof plus 
 
 ## Protected automation policy
 
-Task-file automation maintenance is disabled for the active queue.
+Task-file automation maintenance is disabled for the current state.
 
 The protected integration phase is complete. The active task source sets:
 

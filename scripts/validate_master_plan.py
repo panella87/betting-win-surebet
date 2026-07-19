@@ -34,9 +34,9 @@ def main() -> None:
             'run-autonomous-implementation.sh', 'run-bugfix-autopilot.sh', 'run-paper-autopilot.sh',
         ],
         'docs/repo_status_current.md': [
-            PROGRAM, 'status=RUNTIME_EVIDENCE_SOURCE_FIX_READY', 'current_task=BWS-600',
+            PROGRAM, 'status=RUNTIME_EVIDENCE_READY', 'current_task=BWS-600',
             'safe_local_terminal_gate=BWS-599',
-            'selected_controller=run-autonomous-implementation.sh',
+            'selected_controller=run-paper-autopilot.sh',
         ],
         'docs/028_full_implementation_program.md': [
             PROGRAM, 'BWS-100', 'BWS-580', 'BWS-581', 'BWS-599', 'BWS-600', 'BWS-900',

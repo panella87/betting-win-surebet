@@ -39,8 +39,8 @@ def main() -> None:
     for rel, markers in {
         'docs/018_private_paper_mode_runbook.md': ['current_stage=external_runtime_evidence', 'current_task=BWS-600', 'runtime_upstream_mode=api_only', 'automatic_file_fallback=prohibited', 'BWS-599', 'BWS-600'],
         'docs/automation/paper-evaluation.md': ['current_controller_mode=single_pass_fixture_or_runtime_evidence', 'validated_task=BWS-588', 'SUREBET_PINNED_BUNDLE'],
-        'docs/automation/paper-autopilot.md': ['integration_task=BWS-589', 'selected_now=yes_for_runtime_evidence_source_fix_loops', 'BWS-599', 'BWS-600'],
-        'docs/repo_status_current.md': ['paper_autopilot=paused_until_bws600_upstream_api_preflight_source_fix_validated', 'selected_controller=run-autonomous-implementation.sh', 'runtime_evidence_failure_stage=bounded_redacted'],
+        'docs/automation/paper-autopilot.md': ['integration_task=BWS-589', 'selected_now=yes_for_runtime_evidence_after_upstream_api_preflight', 'BWS-599', 'BWS-600'],
+        'docs/repo_status_current.md': ['paper_autopilot=selected_for_bws600_runtime_evidence_after_upstream_api_preflight', 'selected_controller=run-paper-autopilot.sh', 'runtime_evidence_failure_stage=bounded_redacted'],
     }.items():
         text = read(rel)
         for marker in markers:

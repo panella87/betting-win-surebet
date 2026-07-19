@@ -7,7 +7,7 @@
 ```text
 runtime_upstream_mode=api_only
 automatic_file_fallback=prohibited
-selected_controller=run-autonomous-implementation.sh
+selected_controller=run-paper-autopilot.sh
 ```
 
 ## BWS-593 preflight tooling
@@ -42,7 +42,7 @@ It writes a machine-readable `bws.external_runtime_campaign.v1` manifest with a 
 
 `BWS-600` starts only after `BWS-599` and an accepted campaign manifest.
 
-After the upstream API preflight source fix validates, the campaign uses `run-paper-autopilot.sh` with the service-owned lifecycle. It must retain continuous private-paper evidence for the operator-approved input and classify:
+After the upstream API preflight source fix, the campaign uses `run-paper-autopilot.sh` with the service-owned lifecycle. It must retain continuous private-paper evidence for the operator-approved input and classify:
 
 - source defects requiring implementation;
 - runtime or configuration blockers;
@@ -60,7 +60,7 @@ Loopback fixtures cannot validate `BWS-600`. The gate remains blocked until real
 ## BWS-600 upstream API preflight source fix
 
 ```text
-bws600_upstream_api_preflight_source_fix=required
+bws600_upstream_api_preflight_source_fix=present
 bws_local_api_4312_does_not_satisfy_upstream_preflight=true
 post_source_fix_controller=run-paper-autopilot.sh
 ```

@@ -3,11 +3,11 @@
 ```text
 repo=betting-win-surebet
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-status=RUNTIME_EVIDENCE_SOURCE_FIX_READY
+status=RUNTIME_EVIDENCE_READY
 repo_role=surebet_strategy_application
 upstream_platform=betting-win
 current_task=BWS-600
-current_task_status=SOURCE_IMPLEMENTATION_REQUIRED_BETTING_WIN_API_PREFLIGHT
+current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
 safe_local_terminal_gate=BWS-599
 provider_truth_owner=betting-win
 canonical_history_owner=betting-win
@@ -20,7 +20,7 @@ execution_gate=closed
 
 `BWS-100` through `BWS-593` are validated. The previous autonomous campaign truthfully closed `BWS-580`, the latest autonomous campaign closed `BWS-581` by adding a long-running explicit-mode upstream convergence service with durable state, overlap defense, signal-aware shutdown and machine-readable evidence, the follow-on cycle closed `BWS-582` by adding long-running scheduler and worker services with restart-safe state, queue backpressure, lease renewal and graceful drain behavior, the next cycle closed `BWS-583` by serving the built cockpit on loopback through the managed runtime with explicit API-mode build verification, independent readiness reporting and failure-closed asset validation, the following cycle closed `BWS-584` by expanding product-owned lifecycle control to the complete BWS stack with exact multi-role ownership, ordered shutdown, crash recovery and `/proc` identity verification, the next cycle closed `BWS-585` by adding product-owned migration status, backup, restore-verification and bounded retention commands with disposable PostgreSQL proof, the following cycle closed `BWS-586` by adding structured role logs, loopback metrics, read-only diagnostics bundles and an append-only evidence index, the next cycle closed `BWS-587` by wiring the protected root wrappers to the product-owned lifecycle, runtime summary, and structured runtime logs, the following cycle closed `BWS-588` by upgrading paper evaluation to an explicit runtime-evidence controller with exact stack ownership checks and bounded local-only evidence collection, the next cycle closed `BWS-589` by promoting paper autopilot into a runtime-evidence parent that preserves selected upstream mode, runtime campaign identity and source-fix re-evaluation state through atomic child-result handoffs, the following cycle closed `BWS-590` by adding deterministic private release packaging, Node 20 and PostgreSQL preflight, secret-safe environment templating, non-privileged user-service templates and non-mutating install verification with tamper rejection, the following cycle closed `BWS-591` by adding deterministic upgrade planning, checkpointed apply/recovery, rollback-decision classification and disposable restore-bound recovery proof, and the latest cycle closed `BWS-592` plus `BWS-593` by adding deterministic managed-runtime soak evidence, bounded failure injection, cleanup verification, exact-mode runtime preflight, and the external campaign-manifest generator.
 
-The safe-local implementation program is complete through `BWS-599`. A bounded source-fix tranche is now binding before the next `BWS-600` runtime-evidence campaign because the previous run proved BWS can keep its own API alive on `127.0.0.1:4312` while the upstream `betting-win` read-only API is absent. The next source implementation must add a fail-fast upstream API preflight before BWS enters the 72-hour evidence window. The remaining application boundary is still the externally gated `BWS-600` API runtime-evidence campaign:
+The safe-local implementation program is complete through `BWS-599`. The bounded source-fix tranche for the next `BWS-600` runtime-evidence campaign is present. It prevents BWS from treating its own API on `127.0.0.1:4312` as upstream `betting-win` evidence and fails fast before the 72-hour evidence window when the upstream `betting-win` read-only API is unavailable. The remaining application boundary is the externally gated `BWS-600` API runtime-evidence campaign:
 
 ```text
 start.sh=validated_product_owned_lifecycle_start
@@ -93,10 +93,10 @@ Do not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`. Any protected change is a blo
 ## Routing
 
 ```text
-selected_controller=run-autonomous-implementation.sh
-selected_task_source=docs/automation/current-implementation-task.md
+selected_controller=run-paper-autopilot.sh
+selected_task_source=docs/041_external_runtime_preflight_and_bws600_campaign.md
 force_unlock=no_evidence
-paper_autopilot=paused_until_bws600_upstream_api_preflight_source_fix_validated
+paper_autopilot=selected_for_bws600_runtime_evidence_after_upstream_api_preflight
 ```
 
 ## Safety
@@ -106,11 +106,11 @@ Direct provider connections, provider credentials, betting-win `core.*` writes, 
 ## Standard automation status
 
 ```text
-run_autonomous_implementation=selected_for_bws600_upstream_api_preflight_source_fix
+run_autonomous_implementation=standardized_not_selected_no_known_implementation_queue
 run_autonomous_bugfix=standardized_standalone_audit
 run_bugfix_autopilot=standardized_parent_for_broad_audit_and_repair
 run_paper_evaluation=fixture_and_runtime_evidence_validated_bws_588
-run_paper_autopilot=paused_until_bws600_upstream_api_preflight_source_fix_validated
+run_paper_autopilot=selected_for_bws600_runtime_evidence_after_upstream_api_preflight
 standalone_controller_telegram=enabled_by_default
 autopilot_child_telegram=disabled
 autopilot_parent_telegram=final_only
@@ -127,7 +127,7 @@ confirmed_direct_leak_status=fixed_with_node_test_teardown
 startup_byte_and_inode_preflight=enabled
 runtime_capacity_watchdog=enabled
 stale_marker_owned_session_recovery=enabled
-post_overlay_controller=run-autonomous-implementation.sh
+post_overlay_controller=run-paper-autopilot.sh
 paper_runtime_env_loader=selective_root_wrapper_env
 paper_runtime_env_precedence=explicit_process_then_dotenv_fill
 paper_runtime_schedule=operator_approved_repo_local_manifest
@@ -142,7 +142,7 @@ lifecycle_start_child_stdio_diagnostics=enabled
 paper_runtime_startup_child_logs=bounded_redacted
 ```
 
-The safe-local product implementation remains accepted. The root runtime wrapper now treats API transport, paper mode, provider-disabled operation, and execution-disabled operation as controller-owned invariants; private `.env` values provide the canonical `POSTGRES_ADDRESS`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_DB` tuple while repo-owned runtime defaults cover internal intervals, worker identity, API transport, cockpit mode, upstream lock path, and the standard private-paper schedule path. Explicit shell values can override approved non-policy settings; legacy URL-style database variables are rejected. The root wrapper rebuilds the TypeScript runtime and managed cockpit assets immediately before paper-runtime-evidence collection so runtime startup does not rely on stale validation output. Runtime-evidence start records a managed stack once the API health endpoint is observable; blocked readiness is measured inside the evidence window instead of aborting startup. If API health never becomes observable, lifecycle startup now retains bounded per-child stdout/stderr log files and reports redacted log tails with the last health/readiness probes. The runtime-evidence managed-command timeout follows the requested evidence duration plus a fixed 300-second margin. The next normal route is the BWS-600 runtime-evidence parent; the repository temp/inode guard remains a mandatory startup preflight.
+The safe-local product implementation remains accepted. The root runtime wrapper now treats API transport, paper mode, provider-disabled operation, and execution-disabled operation as controller-owned invariants; private `.env` values provide the canonical `POSTGRES_ADDRESS`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_DB` tuple while repo-owned runtime defaults cover internal intervals, worker identity, API transport, cockpit mode, upstream lock path, and the standard private-paper schedule path. Explicit shell values can override approved non-policy settings; legacy URL-style database variables are rejected. The root wrapper rebuilds the TypeScript runtime and managed cockpit assets immediately before paper-runtime-evidence collection so runtime startup does not rely on stale validation output. Runtime-evidence preflights the upstream betting-win read-only API before starting or attaching the BWS stack, rejects the local BWS API on `127.0.0.1:4312` and loopback aliases as upstream evidence, and retains bounded non-secret blocker evidence when unavailable. Runtime-evidence start records a managed stack once the BWS API health endpoint is observable; blocked readiness is measured inside the evidence window instead of aborting startup. If BWS API health never becomes observable, lifecycle startup now retains bounded per-child stdout/stderr log files and reports redacted log tails with the last health/readiness probes. The runtime-evidence managed-command timeout follows the requested evidence duration plus a fixed 300-second margin. The next normal route is the BWS-600 runtime-evidence parent; the repository temp/inode guard remains a mandatory startup preflight.
 ## API-only upstream transport
 
 The BWS runtime consumes betting-win only through its accepted read-only API. `BWS_UPSTREAM_MODE` and the file-export runtime selector are removed. Missing upstream API readiness must fail fast before the long BWS runtime-evidence window; there is no automatic file fallback. The BWS local API on `127.0.0.1:4312` is not upstream evidence and cannot satisfy the betting-win API preflight.

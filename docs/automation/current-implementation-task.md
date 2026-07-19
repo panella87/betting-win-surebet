@@ -1,4 +1,3 @@
-
 # Current implementation task
 
 Repository: `betting-win-surebet`.
@@ -6,27 +5,30 @@ Repository: `betting-win-surebet`.
 ```text
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 current_task=BWS-600
-current_task_status=SOURCE_IMPLEMENTATION_REQUIRED
-active_implementation_queue=BWS-600_UPSTREAM_API_PREFLIGHT_SOURCE_FIX
+current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
+active_implementation_queue=none
 safe_local_terminal_gate=BWS-599
 external_runtime_gate=BWS-600
-post_overlay_controller=run-autonomous-implementation.sh
+post_overlay_controller=run-paper-autopilot.sh
 ```
 
 ## Campaign objective
 
-Prepare the repository for the next autonomous implementation cycle that fixes the `BWS-600` runtime-evidence gate before another paper-autopilot campaign is started.
+No local source implementation queue is currently binding.
 
-The safe-local product queue through `BWS-599` remains validated. Do not reopen the product implementation ledger and do not reimplement validated BWS runtime features. The binding task is a bounded source-fix tranche for the `BWS-600` external runtime-evidence path:
+The safe-local product queue through `BWS-599` remains validated. The bounded `BWS-600_UPSTREAM_API_PREFLIGHT_SOURCE_FIX` is present in source: BWS now preflights the upstream `betting-win` read-only API before it starts or attaches to the BWS managed stack for `paper-runtime-evidence`.
+
+The next binding work is the external `BWS-600` runtime-evidence campaign. It may run only after the operator starts and approves the real `betting-win` read-only API. BWS must not start, stop, clone, reset, clean, commit, or otherwise mutate the `betting-win` checkout or service.
 
 ```text
-bws600_source_fix=BWS-600_UPSTREAM_API_PREFLIGHT_SOURCE_FIX
+bws600_source_fix=BWS-600_UPSTREAM_API_PREFLIGHT_SOURCE_FIX_PRESENT
 betting_win_api_preflight_required=before_bws_runtime_evidence_window
 bws_local_api_4312_does_not_satisfy_upstream_preflight=true
 run_paper_autopilot_after_source_fix=true
+selected_controller=run-paper-autopilot.sh
 ```
 
-The failure that motivates this task is that the BWS runtime can start its own loopback API and collect degraded evidence for a full 72-hour window even when the upstream `betting-win` read-only API is not running. `127.0.0.1:4312` is the BWS local read-only API and must never be accepted as proof that the upstream `betting-win` API is available.
+`127.0.0.1:4312`, `localhost:4312`, and other loopback aliases for the configured BWS local API are BWS listeners only. They must never be accepted as proof that the upstream `betting-win` API is available.
 
 ## Required reading
 
@@ -49,41 +51,21 @@ The validated service, database, observability, wrapper and paper-controller con
 
 ## Verified carry-forward state
 
-`BWS-100` through `BWS-599` are validated, including `BWS-592` soak/failure injection and `BWS-593` external runtime preflight. Preserve their contracts. Do not reimplement or weaken validated functionality merely to create work.
+`BWS-100` through `BWS-599` are validated, including `BWS-592` soak/failure injection, `BWS-593` external runtime preflight, and `BWS-599` final local acceptance. Preserve their contracts. Do not reimplement or weaken validated functionality merely to create work.
 
-`BWS-600` remains externally gated. The new source-fix implementation must only improve fail-fast detection and evidence when the required upstream `betting-win` read-only API is unavailable.
+`BWS-600` remains externally gated. The source-side fail-fast preflight now improves evidence when the required upstream `betting-win` read-only API is unavailable, malformed, incompatible, non-loopback, credential-bearing, or pointed at the local BWS API.
 
-## First task
-
-```text
-id=BWS-600_UPSTREAM_API_PREFLIGHT_SOURCE_FIX
-objective=fail fast before BWS starts a long runtime-evidence window when the upstream betting-win read-only API is unavailable
-largest_safe_tranche=complete_upstream_api_preflight_source_fix
-```
-
-Required outcomes:
-
-- resolve the configured upstream `betting-win` read-only API base URL from the existing approved runtime environment/default path;
-- reject credential-bearing, non-loopback, malformed, blank or unsupported upstream API URLs with a bounded redacted error;
-- probe the upstream `betting-win` read-only API before BWS starts or attaches to its own managed stack for `paper-runtime-evidence`;
-- make the probe prove upstream API availability, not merely BWS local API availability on `127.0.0.1:4312`;
-- fail fast when the upstream API is absent or incompatible instead of collecting 72 hours of degraded BWS-only evidence;
-- surface a precise runtime-evidence blocker such as `PAPER_EVALUATION_BLOCKED_BETTING_WIN_API_UNAVAILABLE` or an equivalent existing fail-closed classification;
-- retain bounded non-secret evidence: configured upstream base URL, probe path, HTTP status or connection error class, timeout, upstream lock commit/package version when available, and the fact that no export fallback was used;
-- preserve no-clone, no-reset, no-clean and no-mutation treatment of `BETTING_WIN_REPO_PATH`;
-- preserve no direct provider connections, no betting-win database reads/writes, no execution, no public signals and no profitability claims;
-- update affected docs, validators and tests so the fail-fast preflight is a maintained contract.
-
-## Full remaining sequence
+## Remaining sequence
 
 ```text
-BWS-600_UPSTREAM_API_PREFLIGHT_SOURCE_FIX  source implementation required before next paper-autopilot runtime-evidence campaign
-BWS-600_RUNTIME_EVIDENCE                  run paper autopilot only after the source fix validates and the operator starts/approves the betting-win read-only API
+BWS-600_UPSTREAM_API_PREFLIGHT_SOURCE_FIX  source implementation present and maintained
+BWS-600_RUNTIME_EVIDENCE                  run paper autopilot after the operator starts/approves the betting-win read-only API
+BWS-900                                   parked until separate execution authorization
 ```
 
 ## Protected automation authorization
 
-The protected wrapper and paper-controller integration tasks are complete. This source-fix task does not authorize protected automation edits.
+The protected wrapper and paper-controller integration tasks are complete. No protected automation edit is authorized by the current state.
 
 ```text
 automation_maintenance_allowed=no
@@ -94,42 +76,25 @@ Rules:
 
 - Do not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` for this campaign.
 - Do not edit protected automation files unless a later external overlay explicitly changes this task source and names the exact allowlist.
-- Prefer non-protected product/runtime source such as `scripts/bws-root-wrapper-runtime.mjs`, `packages/bootstrap/src/**`, `tests/**`, non-protected docs and validators.
 - Do not broaden authorization from inside an autonomous cycle.
 
-## Campaign budgets
+## Controller selection
 
 ```text
-campaign_duration=72h
-max_cycles=200
-recommended_cycle_timeout=6h
-validation_timeout=45m
+selected_controller=run-paper-autopilot.sh
+force_unlock_required=no
+campaign_duration=7d
+paper_child_duration=72h
+implementation_child_duration=72h
 ```
 
-A successful completion cycle reports `AUTONOMOUS_GOAL_COMPLETE=yes` only after the upstream API preflight source fix, focused tests, practical validation and source manifest update pass.
+Paper autopilot remains the parent because it owns the `paper -> runtime evidence -> source issue -> implementation -> paper` loop. If the new upstream API preflight finds the real `betting-win` API absent or incompatible, the run must fail fast with retained bounded non-secret evidence, not spend 72 hours collecting BWS-only degraded evidence.
 
-## Process-test authorization
+## External runtime gate
 
-Do not start, stop, restart, kill, detach or replace pre-existing services or user sessions.
+The operator must provide the real upstream API availability. BWS may probe it through the approved read-only API URL. BWS must not start, stop, or mutate the upstream service.
 
-Bounded repo-owned loopback child processes launched by tests are allowed only when required to prove the fail-fast preflight. They must use unique identities and ports, remain attached to the test, and be cleaned up by the creating test. Test fixtures may simulate a `betting-win` read-only API; they must not require or mutate the real `~/app_testing/betting-win` checkout.
-
-## Continuation rules
-
-```text
-CONTINUE_REQUIRED=yes
-  while another safe bounded source-fix slice for BWS-600 upstream API preflight remains
-
-AUTONOMOUS_GOAL_COMPLETE=yes
-  only after the BWS-600 upstream API fail-fast preflight source fix is validated
-
-BLOCKED=yes
-  only for a concrete unrecoverable repository state, unsafe protected-file requirement, unavailable tooling, or external operator evidence that cannot be produced by local source implementation
-```
-
-After this source fix validates, `BWS-600` runtime evidence may remain externally blocked until the operator starts and approves the `betting-win` read-only API. `BWS-900` remains parked.
-
-## Safety constraints
+Required runtime boundary:
 
 ```text
 BETTING_WIN_REPO_PATH=existing_read_only_checkout
@@ -151,18 +116,6 @@ pre_existing_service_mutation=prohibited
 ```
 
 Do not clone the betting-win checkout. Do not invent a contract, endpoint, acceptance result or external runtime evidence.
-
-## Repository automation transition
-
-```text
-automation_safety=temp_inode_guard_required_and_implemented
-managed_temp_base=.automation/tmp
-post_overlay_controller=run-autonomous-implementation.sh
-post_source_fix_controller=run-paper-autopilot.sh
-force_unlock_required=no
-```
-
-The next controller may start only after the server has enough free bytes and inodes to pass the guard preflight. The guard does not authorize provider connections, execution, service replacement, or a generic system-temp purge.
 
 ## API-only upstream transport
 

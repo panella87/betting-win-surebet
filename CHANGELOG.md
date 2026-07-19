@@ -1,3 +1,9 @@
+## 2026-07-19 - BWS-600 upstream API preflight source-fix route
+
+- Reconciled repository routing after the upstream API preflight source fix landed and focused validation passed.
+- Restored `run-paper-autopilot.sh` as the selected `BWS-600` runtime-evidence parent while preserving the external blocker on an operator-approved betting-win read-only API.
+- Documented that the implementation queue is empty, the BWS local API and loopback aliases remain invalid upstream evidence, and missing upstream API readiness must fail fast before the 72-hour evidence window.
+
 ## 2026-07-19 - BWS-600 upstream API preflight source-fix task
 
 - Reclassified the next BWS controller from paper autopilot to a bounded autonomous implementation task for the missing upstream betting-win API preflight.
