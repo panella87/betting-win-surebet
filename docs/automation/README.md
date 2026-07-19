@@ -15,6 +15,8 @@ The safe-local queue through `BWS-599` is complete. `BWS-592` soak/failure injec
 
 `BETTING_WIN_REPO_PATH` remains a read-only pointer to the existing betting-win checkout. BWS reads committed `HEAD` through Git objects and must not clone, clean, reset or modify that checkout.
 
+Documentation lookup starts at `docs/000_documentation_index.md`. Stale completion snapshots are intentionally removed from active validation; retained blueprints and archive files stay discoverable through that index.
+
 ## Controller selection
 
 ```text

@@ -38,6 +38,8 @@ final acceptance=validated
 
 The binding queue is `backlog/bws_full_implementation.csv`; the supporting detailed map is `backlog/bws_remaining_safe_local_map.csv`. `BWS-599` is validated and no dependency-ready safe-local `PENDING` row remains. `BWS-600` is the active external operator-approved runtime-evidence gate.
 
+Documentation slimming phase 1 is complete: `docs/000_documentation_index.md` is the compact active map, and stale completion snapshots were removed without deleting BWS-599 carry-forward contracts or legacy research archives.
+
 ## Validated upstream facts
 
 ```text

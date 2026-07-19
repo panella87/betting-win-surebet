@@ -14,7 +14,6 @@ REQUIRED_FILES = [
     'docs/legacy/surebet-research/README.md',
     'research/imported-from-betting-win/legacy/surebet/README.md',
     'research/imported-from-betting-win/legacy/surebet/RESEARCH_IMPORT_MANIFEST.json',
-    'docs/025_research_archive_completion_status.md',
     'schemas/imported-from-betting-win/legacy/surebet/README.md',
     'templates/imported-from-betting-win/legacy/surebet/README.md',
     'decisions/ADR-0004-three-repo-surebet-strategy-execution-boundary.md',
@@ -90,6 +89,11 @@ def main() -> None:
             'shared_bankroll_with_betting-win-betting=no',
             'betting-win_account_coordination=not_owned_here',
         ],
+        'docs/000_documentation_index.md': [
+            'documentation_index_status=active',
+            'archive_is_active_product_authority=no',
+            'docs/legacy/surebet-research/',
+        ],
         'docs/023_legacy_betting_win_surebet_import_manifest.md': [
             'legacy_surebet_import_status=imported_and_rehomed',
             'operator_move_status=complete',
@@ -125,6 +129,8 @@ def main() -> None:
     validator = read('scripts/validate_repo.py')
     for marker in [
         'three_repo_surebet_strategy_boundary.md',
+        'docs/000_documentation_index.md',
+        'docs/000_documentation_index.md',
         'docs/legacy/surebet-research/README.md',
         'research/imported-from-betting-win/legacy/surebet/RESEARCH_IMPORT_MANIFEST.json',
         'ADR-0005-bws-built-on-betting-win-platform.md',

@@ -1,3 +1,15 @@
+## 2026-07-19 - Documentation slimming part 2
+
+- Merged superseded bootstrap ledgers `docs/014`, `docs/015`, and `docs/017` into `docs/000_documentation_index.md`.
+- Kept local-engine and private-paper backlog validators active by pointing them at the compact historical bootstrap summary.
+- Reasserted that stale documentation snapshots remain removed while BWS-600 stays externally blocked on the real betting-win read-only API.
+
+## 2026-07-19 - Documentation slimming phase 1
+
+- Added `docs/000_documentation_index.md` as the compact documentation map.
+- Removed stale completion snapshots that duplicated current status and archive manifests.
+- Updated validation so active docs stay slim while retained BWS-599 contracts and archive evidence remain protected.
+
 ## 2026-07-19 - BWS-600 upstream API preflight source-fix route
 
 - Reconciled repository routing after the upstream API preflight source fix landed and focused validation passed.

@@ -70,14 +70,15 @@ def main() -> None:
         for marker in markers:
             require(text, marker, rel)
 
-    for rel in [
-        'docs/014_sure_001_remaining_hardening_backlog.md',
-        'docs/015_local_engine_implementation_backlog.md',
-        'docs/017_private_paper_mode_implementation_backlog.md',
+    bootstrap_index = read('docs/000_documentation_index.md')
+    for marker in [
+        'status=SUPERSEDED_BOOTSTRAP_LEDGER',
+        'legacy_stage=SURE-001',
+        'legacy_stage=SURE-002A_LOCAL_INTERFACE_AND_ENGINE_BOOTSTRAP',
+        'legacy_stage=SURE-002B_PRIVATE_PAPER_MODE_INTAKE',
+        f'active_program={PROGRAM}',
     ]:
-        text = read(rel)
-        require(text, 'status=SUPERSEDED_BOOTSTRAP_LEDGER', rel)
-        require(text, f'active_program={PROGRAM}', rel)
+        require(bootstrap_index, marker, 'docs/000_documentation_index.md')
 
     print('validate_master_plan: ok')
 

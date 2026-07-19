@@ -7,7 +7,7 @@ const ROOT = process.cwd();
 const read = (rel: string): string => readFileSync(join(ROOT, rel), 'utf-8');
 
 test('historical private-paper ledger remains evidence while full lifecycle tasks are pending', () => {
-  const historical = read('docs/017_private_paper_mode_implementation_backlog.md');
+  const historical = read('docs/000_documentation_index.md');
   assert.match(historical, /status=SUPERSEDED_BOOTSTRAP_LEDGER/);
   assert.match(historical, /legacy_stage=SURE-002B_PRIVATE_PAPER_MODE_INTAKE/);
   assert.match(historical, /do not constitute the final BWS paper platform/);

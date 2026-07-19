@@ -70,21 +70,15 @@ BWS-900  separately authorized execution
 Read in this order:
 
 1. `AGENTS.md`
-2. `docs/repo_status_current.md`
-3. `docs/MASTER_PLAN.md`
-4. `docs/028_full_implementation_program.md`
-5. `docs/029_full_implementation_task_ledger.md`
-6. `backlog/bws_full_implementation.csv`
-7. `docs/034_remaining_operator_runtime_implementation_program.md`
+2. `docs/000_documentation_index.md`
+3. `docs/repo_status_current.md`
+4. `docs/automation/current-implementation-task.md`
+5. `docs/automation/api-only-upstream.md`
+6. `docs/041_external_runtime_preflight_and_bws600_campaign.md`
+7. `backlog/bws_full_implementation.csv`
 8. `backlog/bws_remaining_safe_local_map.csv`
-9. `docs/042_release_packaging_implementation_blueprint.md`
-10. `docs/043_upgrade_rollback_recovery_implementation_blueprint.md`
-11. `docs/044_soak_failure_injection_implementation_blueprint.md`
-12. `docs/045_external_runtime_preflight_implementation_blueprint.md`
-13. `docs/046_final_local_acceptance_implementation_blueprint.md`
-14. `docs/automation/current-implementation-task.md`
 
-Historical SURE ledgers remain regression evidence only. They do not authorize implementation to stop.
+Detailed BWS-599 carry-forward contracts and historical blueprints stay discoverable from `docs/000_documentation_index.md`. Historical SURE ledgers remain regression evidence only and do not authorize implementation to stop.
 
 ## Validation
 

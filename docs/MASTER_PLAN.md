@@ -77,6 +77,6 @@ No task may pass by weakening validators, inventing upstream evidence, accepting
 - `run-paper-autopilot.sh` is selected for `BWS-600` runtime evidence after the upstream API preflight source fix. It may run only against an operator-approved betting-win read-only API.
 - Standalone audit and paper controllers remain available only for their explicit bounded roles.
 
-The protected wrapper and paper-controller integration phase is complete. The active `BWS-590` through `BWS-599` campaign authorizes no protected automation changes. Detailed execution blueprints are `docs/042` through `docs/046`, with machine-readable decomposition in `backlog/bws_remaining_safe_local_map.csv`.
+The protected wrapper and paper-controller integration phase is complete. The active `BWS-590` through `BWS-599` campaign authorizes no protected automation changes. `docs/000_documentation_index.md` is the compact map for active docs, retained blueprints and archive material. Detailed execution blueprints are `docs/042` through `docs/046`, with machine-readable decomposition in `backlog/bws_remaining_safe_local_map.csv`. Superseded bootstrap ledgers `docs/014`, `docs/015` and `docs/017` are merged into `docs/000_documentation_index.md`.
 
 Hardened parent controllers suppress child Telegram messages and send one final parent notification.

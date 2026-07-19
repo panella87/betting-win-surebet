@@ -7,7 +7,7 @@ const ROOT = process.cwd();
 const read = (rel: string): string => readFileSync(join(ROOT, rel), 'utf-8');
 
 test('historical local-engine ledger is bootstrap evidence while operator-runtime work remains active', () => {
-  const historical = read('docs/015_local_engine_implementation_backlog.md');
+  const historical = read('docs/000_documentation_index.md');
   assert.match(historical, /status=SUPERSEDED_BOOTSTRAP_LEDGER/);
   assert.match(historical, /legacy_stage=SURE-002A_LOCAL_INTERFACE_AND_ENGINE_BOOTSTRAP/);
   assert.match(historical, /active_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1/);

@@ -40,7 +40,7 @@ BWS-593=VALIDATED_EXTERNAL_RUNTIME_PREFLIGHT
 BWS-599=VALIDATED_FINAL_LOCAL_ACCEPTANCE
 ```
 
-The detailed dependency map is `backlog/bws_remaining_safe_local_map.csv` and the implementation blueprints are `docs/042` through `docs/046`.
+The short documentation map is `docs/000_documentation_index.md`. Detailed dependency history remains in `backlog/bws_remaining_safe_local_map.csv` and the retained implementation blueprints are `docs/042` through `docs/046`.
 
 ## Blocked or parked
 

@@ -25,7 +25,7 @@ def require(text: str, marker: str, rel: str) -> None:
 
 
 def main() -> None:
-    historical = read('docs/017_private_paper_mode_implementation_backlog.md')
+    historical = read('docs/000_documentation_index.md')
     for marker in [
         'status=SUPERSEDED_BOOTSTRAP_LEDGER',
         'legacy_stage=SURE-002B_PRIVATE_PAPER_MODE_INTAKE',
@@ -34,7 +34,7 @@ def main() -> None:
         'BWS-310', 'BWS-320', 'BWS-410', 'BWS-500', 'BWS-510',
         'BWS-520', 'BWS-580', 'BWS-600',
     ]:
-        require(historical, marker, 'docs/017_private_paper_mode_implementation_backlog.md')
+        require(historical, marker, 'docs/000_documentation_index.md')
 
     for rel, markers in {
         'docs/018_private_paper_mode_runbook.md': ['current_stage=external_runtime_evidence', 'current_task=BWS-600', 'runtime_upstream_mode=api_only', 'automatic_file_fallback=prohibited', 'BWS-599', 'BWS-600'],

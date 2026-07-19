@@ -25,7 +25,7 @@ def require(text: str, marker: str, rel: str) -> None:
 
 
 def main() -> None:
-    historical = read('docs/015_local_engine_implementation_backlog.md')
+    historical = read('docs/000_documentation_index.md')
     for marker in [
         'status=SUPERSEDED_BOOTSTRAP_LEDGER',
         'legacy_stage=SURE-002A_LOCAL_INTERFACE_AND_ENGINE_BOOTSTRAP',
@@ -33,7 +33,7 @@ def main() -> None:
         'bootstrap, not the complete application',
         'BWS-110', 'BWS-200', 'BWS-240', 'BWS-300', 'BWS-310',
     ]:
-        require(historical, marker, 'docs/015_local_engine_implementation_backlog.md')
+        require(historical, marker, 'docs/000_documentation_index.md')
 
     for rel, markers in {
         'README.md': ['current_task=BWS-600', 'safe_local_terminal_gate=BWS-599', 'packages/bootstrap'],
