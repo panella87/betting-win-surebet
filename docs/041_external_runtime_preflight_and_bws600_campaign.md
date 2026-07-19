@@ -7,7 +7,7 @@
 ```text
 runtime_upstream_mode=api_only
 automatic_file_fallback=prohibited
-selected_controller=run-paper-autopilot.sh
+selected_controller=run-autonomous-implementation.sh
 ```
 
 ## BWS-593 preflight tooling
@@ -42,7 +42,7 @@ It writes a machine-readable `bws.external_runtime_campaign.v1` manifest with a 
 
 `BWS-600` starts only after `BWS-599` and an accepted campaign manifest.
 
-The campaign uses `run-paper-autopilot.sh` with the service-owned lifecycle. It must retain continuous private-paper evidence for the operator-approved input and classify:
+After the upstream API preflight source fix validates, the campaign uses `run-paper-autopilot.sh` with the service-owned lifecycle. It must retain continuous private-paper evidence for the operator-approved input and classify:
 
 - source defects requiring implementation;
 - runtime or configuration blockers;
@@ -56,3 +56,13 @@ Loopback fixtures cannot validate `BWS-600`. The gate remains blocked until real
 ## Execution boundary
 
 `BWS-600` remains private paper only. It does not authorize provider credentials, account mutation, orders, wallets, signers, transactions, public signals or profitability claims. Those remain under separately parked `BWS-900`.
+
+## BWS-600 upstream API preflight source fix
+
+```text
+bws600_upstream_api_preflight_source_fix=required
+bws_local_api_4312_does_not_satisfy_upstream_preflight=true
+post_source_fix_controller=run-paper-autopilot.sh
+```
+
+BWS must fail fast if the upstream betting-win read-only API is unavailable before starting the long runtime-evidence observation window. The BWS local read-only API on `127.0.0.1:4312` is only a BWS listener and cannot satisfy the upstream preflight.

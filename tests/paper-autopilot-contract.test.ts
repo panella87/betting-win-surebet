@@ -94,7 +94,7 @@ test('automation config and docs register paper autopilot as the unattended pape
   contains(config, 'AUTOMATION_PAPER_AUTOPILOT_COMMAND');
   contains(config, 'AUTOMATION_PAPER_COMMAND="$AUTOMATION_PAPER_AUTOPILOT_COMMAND"');
   contains(config, 'run-paper-autopilot.sh');
-  contains(status, 'run_paper_autopilot=standardized_and_selected_for_bws_600_runtime_evidence');
+  contains(status, 'run_paper_autopilot=paused_until_bws600_upstream_api_preflight_source_fix_validated');
   contains(read('docs/automation/paper-autopilot.md'), 'selected_now=yes_for_runtime_evidence_source_fix_loops');
 });
 

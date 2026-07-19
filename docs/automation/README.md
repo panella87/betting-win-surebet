@@ -3,9 +3,10 @@
 ```text
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 current_task=BWS-600
-current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
-selected_controller=run-paper-autopilot.sh
+current_task_status=SOURCE_IMPLEMENTATION_REQUIRED_BETTING_WIN_API_PREFLIGHT
+selected_controller=run-autonomous-implementation.sh
 safe_local_terminal_gate=BWS-599
+bws600_upstream_api_preflight_source_fix=required
 ```
 
 `BWS-100` through `BWS-589` are validated carry-forward foundations. The runtime has full product lifecycle ownership, database lifecycle, observability, root wrappers, service-owned paper evaluation and runtime-evidence paper autopilot.
@@ -24,7 +25,7 @@ run-paper-evaluation.sh           fixture evaluator plus validated runtime-evide
 run-paper-autopilot.sh            selected runtime-evidence parent for BWS-600
 ```
 
-Paper autopilot is the normal route because no known safe-local implementation row remains.
+Implementation is temporarily selected because the `BWS-600` runtime-evidence path is missing a fail-fast upstream betting-win API availability gate. Paper autopilot resumes only after that source fix validates.
 
 ## Exact protected-file policy
 

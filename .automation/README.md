@@ -4,10 +4,11 @@
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 current_task=BWS-600
 safe_local_terminal_gate=BWS-599
-selected_controller=run-paper-autopilot.sh
+bws600_upstream_api_preflight_source_fix=required
+selected_controller=run-autonomous-implementation.sh
 ```
 
-`BWS-100` through `BWS-599` are validated. No known safe-local implementation queue remains; the active route is `BWS-600` runtime evidence through paper autopilot.
+`BWS-100` through `BWS-599` are validated. The active route is a bounded `BWS-600` source fix that must add a fail-fast upstream betting-win API preflight before paper autopilot is run again.
 
 # `.automation/`
 
@@ -41,7 +42,7 @@ Do not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`. The blanket manual protected-
 
 ## Current paper limitation
 
-`run-paper-evaluation.sh` and `run-paper-autopilot.sh` expose the validated runtime-evidence lifecycle from `BWS-588` and `BWS-589`. They are now the selected path for `BWS-600`; implementation is entered only through a validated source-fix handoff. The runtime child uses explicit process values before selective `.env` fill, passes the operator-approved repo-local private-paper schedule path, and enforces API-only paper-safe policy before lifecycle status is read. It never substitutes a fixture schedule.
+`run-paper-evaluation.sh` and `run-paper-autopilot.sh` expose the validated runtime-evidence lifecycle from `BWS-588` and `BWS-589`. They remain the selected path for `BWS-600` after this source fix; the current selected controller is implementation because the upstream betting-win API availability gate is missing. The runtime child uses explicit process values before selective `.env` fill, passes the operator-approved repo-local private-paper schedule path, and enforces API-only paper-safe policy before lifecycle status is read. It never substitutes a fixture schedule.
 
 ## Repository temp and inode containment
 

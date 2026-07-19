@@ -527,7 +527,7 @@ REQUIRED_FRAGMENTS = {
     ],
     '.automation/README.md': [
         'current_task=BWS-600',
-        'selected_controller=run-paper-autopilot.sh',
+        'selected_controller=run-autonomous-implementation.sh',
         'safe_local_terminal_gate=BWS-599',
         '.automation/lib/run_common.sh',
         '.automation/lib/controller_hardening_v2.sh',
@@ -537,11 +537,11 @@ REQUIRED_FRAGMENTS = {
         'blanket manual protected-file override is disabled',
     ],
     'docs/repo_status_current.md': [
-        'run_autonomous_implementation=standardized_not_selected_no_known_implementation_queue',
+        'run_autonomous_implementation=selected_for_bws600_upstream_api_preflight_source_fix',
         'run_autonomous_bugfix=standardized_standalone_audit',
         'run_bugfix_autopilot=standardized_parent_for_broad_audit_and_repair',
         'run_paper_evaluation=fixture_and_runtime_evidence_validated_bws_588',
-        'run_paper_autopilot=standardized_and_selected_for_bws_600_runtime_evidence',
+        'run_paper_autopilot=paused_until_bws600_upstream_api_preflight_source_fix_validated',
         'paper_runtime_env_loader=selective_root_wrapper_env',
         'paper_runtime_env_precedence=explicit_process_then_dotenv_fill',
         'paper_runtime_schedule=operator_approved_repo_local_manifest',

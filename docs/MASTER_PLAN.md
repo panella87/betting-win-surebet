@@ -74,7 +74,7 @@ No task may pass by weakening validators, inventing upstream evidence, accepting
 
 - No known safe-local implementation queue remains; `run-autonomous-implementation.sh` is entered only through a validated source-fix handoff.
 - Broad audit and repair remains available through `run-bugfix-autopilot.sh` after the blueprint gate.
-- `run-paper-autopilot.sh` is selected for `BWS-600` runtime evidence.
+- `run-autonomous-implementation.sh` is temporarily selected for the `BWS-600` upstream API preflight source fix; `run-paper-autopilot.sh` resumes for runtime evidence after that fix validates.
 - Standalone audit and paper controllers remain available only for their explicit bounded roles.
 
 The protected wrapper and paper-controller integration phase is complete. The active `BWS-590` through `BWS-599` campaign authorizes no protected automation changes. Detailed execution blueprints are `docs/042` through `docs/046`, with machine-readable decomposition in `backlog/bws_remaining_safe_local_map.csv`.

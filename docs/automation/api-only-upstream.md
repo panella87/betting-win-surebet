@@ -10,14 +10,15 @@ The runtime transport is fixed. Operators do not set `BWS_UPSTREAM_MODE`, and no
 
 - Paper evaluation and paper autopilot report `upstream_mode=api`.
 - Runtime lifecycle, scheduler, soak, release, upgrade, diagnostics, and external preflight use the read-only API tuple.
-- Missing, unreachable, or incompatible betting-win API evidence produces a precise runtime-evidence blocker.
+- Missing, unreachable, or incompatible betting-win API evidence must produce a precise fail-fast blocker before BWS enters a long runtime-evidence observation window.
 - Source-fix handoffs preserve API campaign identity automatically.
-- BWS never contacts providers directly and never writes betting-win-owned state.
+- BWS never contacts providers directly, never starts or stops betting-win services, and never writes betting-win-owned state.
 - Supported root runtime wrappers enforce `SUREBET_RUNTIME_MODE=paper`, `SUREBET_PROVIDER_CONNECTIONS=disabled`, and `SUREBET_EXECUTION_ENABLED=false`; these are not operator-selectable fallbacks.
 - Explicit process values take precedence for approved connection settings, while `.env` supplies the canonical `POSTGRES_ADDRESS`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_DB` tuple.
 - The wrapper derives internal `SUREBET_PG_*` values from `POSTGRES_*`, rejects URL-style database variables, and uses repo-owned defaults for internal BWS intervals, worker identity, API transport, cockpit mode, upstream lock path, and the standard private-paper schedule path.
 - `BWS_PRIVATE_PAPER_SCHEDULE_PATH` may be explicitly overridden, but the wrapper never creates fixture schedule content or falls back to a fixture.
 - Retired export selectors and `SUREBET_PINNED_BUNDLE` are scrubbed from runtime children.
+- The BWS local read-only API on `127.0.0.1:4312` is not upstream evidence; it cannot satisfy the required betting-win API preflight.
 
 ## Historical export code
 

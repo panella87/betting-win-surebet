@@ -49,6 +49,7 @@ if 'merged.BWS_PRIVATE_PAPER_SCHEDULE_PATH =' in wrapper:
  errors.append('scripts/bws-root-wrapper-runtime.mjs: private-paper schedule fallback must not be synthesized')
 for marker in [
  "case 'paper-runtime-evidence'",
+ "BWS_UPSTREAM_API_BASE_URL: 'http://127.0.0.1:3000'",
  "prepareRuntimeBuild(environment);",
  "merged.BWS_UPSTREAM_MODE = 'api'",
  "merged.SUREBET_RUNTIME_MODE = 'paper'",
@@ -106,6 +107,12 @@ if 'export runtime has been removed' not in retired:
 barrel=(ROOT/'packages/bootstrap/src/index.ts').read_text(encoding='utf-8')
 if "./cli/bws-upstream-export-convergence.js" in barrel:
  errors.append('bootstrap public barrel still exposes export CLI')
+
+
+api_doc=(ROOT/'docs/automation/api-only-upstream.md').read_text(encoding='utf-8')
+for marker in ['fail-fast blocker before BWS enters a long runtime-evidence observation window', '127.0.0.1:4312', 'not upstream evidence']:
+ if marker not in api_doc:
+  errors.append(f'docs/automation/api-only-upstream.md: missing {marker}')
 
 if errors:
  print('API_ONLY_UPSTREAM_CONTRACT_FAILED',file=sys.stderr)

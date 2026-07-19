@@ -16,7 +16,7 @@ paper_mode_owner=betting-win-surebet
 future_live_decision_owner=betting-win-surebet_after_explicit_gate
 account_policy=separate_from_betting-win-betting
 current_task=BWS-600
-current_task_status=RUNTIME_EVIDENCE
+current_task_status=SOURCE_IMPLEMENTATION_REQUIRED_BETTING_WIN_API_PREFLIGHT
 safe_local_terminal_gate=BWS-599
 external_runtime_gate=BWS-600
 execution_gate=closed
@@ -45,7 +45,7 @@ BWS must not connect directly to providers, write betting-win `core.*`, treat sn
 
 Validated executable and integration composition remains under `packages/bootstrap`; the remaining queue extends that package surface rather than replacing it.
 
-The safe local operator service boundary is complete. The current source now has long-running explicit-mode upstream convergence, long-running scheduler and worker services, managed loopback cockpit serving, a full product-owned lifecycle owner, integrated root lifecycle/progress/log wrappers, product runtime evidence surfaces, service-owned paper runtime-evidence mode, runtime-evidence paper autopilot inside the owned lifecycle, exact-version upgrade/rollback/recovery proof, deterministic soak/failure evidence, external-runtime preflight, and final clean-room acceptance. The next gate is `BWS-600` external accepted-runtime evidence.
+The safe local operator service boundary is complete. The current source now has long-running explicit-mode upstream convergence, long-running scheduler and worker services, managed loopback cockpit serving, a full product-owned lifecycle owner, integrated root lifecycle/progress/log wrappers, product runtime evidence surfaces, service-owned paper runtime-evidence mode, runtime-evidence paper autopilot inside the owned lifecycle, exact-version upgrade/rollback/recovery proof, deterministic soak/failure evidence, external-runtime preflight, and final clean-room acceptance. The next gate is a bounded `BWS-600` source fix that fails fast when the upstream betting-win read-only API is unavailable, followed by external accepted-runtime evidence.
 
 ## Remaining safe local program
 
@@ -96,7 +96,7 @@ npm run validate
 
 ## Current automation route
 
-The selected controller is `run-paper-autopilot.sh` for the externally gated `BWS-600` runtime-evidence campaign. The safe-local implementation queue through `BWS-599` is complete; `run-autonomous-implementation.sh` is selected only when paper evidence produces a validated source-fix handoff.
+The selected controller is temporarily `run-autonomous-implementation.sh` for the bounded `BWS-600` upstream API preflight source fix. The safe-local implementation queue through `BWS-599` is complete; `run-paper-autopilot.sh` resumes only after that source fix validates and the upstream betting-win read-only API is operator-approved.
 
 The protected root-wrapper and paper-controller integration phase is complete. Do not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`; any future protected automation repair requires a reviewed external overlay.
 

@@ -1,3 +1,10 @@
+## 2026-07-19 - BWS-600 upstream API preflight source-fix task
+
+- Reclassified the next BWS controller from paper autopilot to a bounded autonomous implementation task for the missing upstream betting-win API preflight.
+- Documented that the BWS local API on `127.0.0.1:4312` is not upstream API evidence and must not satisfy the BWS-600 gate.
+- Updated routing docs, status files, validators, and focused tests so the next implementation adds a fail-fast upstream API availability blocker before any 72-hour runtime-evidence window.
+- Preserved the validated safe-local `BWS-599` terminal gate, API-only transport, no export fallback, no provider access, no execution, and no protected automation authorization.
+
 ## 2026-07-18 - BWS-600 paper runtime cockpit build preflight
 
 - Ensured the root paper-runtime-evidence wrapper rebuilds the compiled TypeScript graph and managed cockpit assets immediately before evidence collection.

@@ -6,7 +6,7 @@
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 current_task=BWS-600
 safe_local_terminal_gate=BWS-599
-selected_controller=run-paper-autopilot.sh
+selected_controller=run-autonomous-implementation.sh
 ```
 
 1. Use Node 20.
@@ -23,6 +23,6 @@ The implementation may launch bounded, uniquely identified, loopback-only child 
 
 ## After local completion
 
-`BWS-599` is validated. Use the `BWS-593` preflight and accepted betting-win API configuration as the input boundary for `run-paper-autopilot.sh` at `BWS-600`.
+`BWS-599` is validated. First complete the `BWS-600` upstream API preflight source fix with `run-autonomous-implementation.sh`; then use the `BWS-593` preflight and accepted betting-win API configuration as the input boundary for `run-paper-autopilot.sh` at `BWS-600`.
 
 `BWS-600` remains private paper. `BWS-900` remains separately parked execution.

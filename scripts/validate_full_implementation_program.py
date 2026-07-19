@@ -183,8 +183,8 @@ def main() -> None:
 
     task = read('docs/automation/current-implementation-task.md')
     for marker in [
-        'current_task=BWS-599', 'current_task_status=VALIDATED',
-        'active_implementation_queue=none',
+        'current_task=BWS-600', 'current_task_status=SOURCE_IMPLEMENTATION_REQUIRED',
+        'active_implementation_queue=BWS-600_UPSTREAM_API_PREFLIGHT_SOURCE_FIX',
         'safe_local_terminal_gate=BWS-599', 'backlog/bws_full_implementation.csv',
         'docs/034_remaining_operator_runtime_implementation_program.md',
         'CONTINUE_REQUIRED=yes', 'AUTONOMOUS_GOAL_COMPLETE=yes',
@@ -193,6 +193,7 @@ def main() -> None:
         SUPPORTING_MAP,
         'docs/042_release_packaging_implementation_blueprint.md',
         'docs/046_final_local_acceptance_implementation_blueprint.md',
+        'betting_win_api_preflight_required=before_bws_runtime_evidence_window',
         'recommended_cycle_timeout=6h',
         'pre_existing_service_mutation=prohibited',
     ]:
@@ -200,12 +201,12 @@ def main() -> None:
 
     status = read('docs/repo_status_current.md')
     for marker in [
-        'status=RUNTIME_EVIDENCE_READY', 'current_task=BWS-600',
-        'current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE', 'safe_local_terminal_gate=BWS-599',
-        'selected_controller=run-paper-autopilot.sh',
-        'paper_autopilot=selected_for_bws_600_runtime_evidence',
-        'run_autonomous_implementation=standardized_not_selected_no_known_implementation_queue',
-        'run_paper_autopilot=standardized_and_selected_for_bws_600_runtime_evidence',
+        'status=RUNTIME_EVIDENCE_SOURCE_FIX_READY', 'current_task=BWS-600',
+        'current_task_status=SOURCE_IMPLEMENTATION_REQUIRED_BETTING_WIN_API_PREFLIGHT', 'safe_local_terminal_gate=BWS-599',
+        'selected_controller=run-autonomous-implementation.sh',
+        'paper_autopilot=paused_until_bws600_upstream_api_preflight_source_fix_validated',
+        'run_autonomous_implementation=selected_for_bws600_upstream_api_preflight_source_fix',
+        'run_paper_autopilot=paused_until_bws600_upstream_api_preflight_source_fix_validated',
     ]:
         require(status, marker, 'docs/repo_status_current.md')
 
