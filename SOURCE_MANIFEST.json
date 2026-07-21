@@ -1,7 +1,7 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-07-21T08:57:35Z",
-  "overlay": "bws70-doc-slimming-part2-wave36",
+  "generated": "2026-07-21T09:42:30Z",
+  "overlay": "bws79-standardized-automation-doc-alignment-wave44",
   "files": [
     {
       "path": ".automation/README.md",
@@ -115,8 +115,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "9351708f3294df74403a574bfd8a9ea5271c045fdeca0aa458a37b75fe871e66",
-      "size": 62562
+      "sha256": "a71cbea471b518438377fd580f023251b799f81ed63c6504be5cda3ba24e2c62",
+      "size": 63286
     },
     {
       "path": "PROJECT_STATUS.md",
@@ -125,8 +125,8 @@
     },
     {
       "path": "README.md",
-      "sha256": "873527c60372419909a4dd8fe00d85e65d2d7a2f2a237c49a71368022170f1ad",
-      "size": 7916
+      "sha256": "81d236775d8e277489829f262aee166c3b1cb2c3cafbfcd7cd1dc41c5c41a220",
+      "size": 8105
     },
     {
       "path": "STARTER_PACK.md",
@@ -235,8 +235,8 @@
     },
     {
       "path": "automation.config.sh",
-      "sha256": "8a78134abc87c816782b2154b5c6d9f2fd9ac76eadf0f9544b46bae898a3e688",
-      "size": 4951
+      "sha256": "5bf290be620d57c652a3627d13e48576d19e938bebca3f509195927f0030b2b4",
+      "size": 5109
     },
     {
       "path": "backlog/README.md",
@@ -590,8 +590,8 @@
     },
     {
       "path": "docs/automation/README.md",
-      "sha256": "a0a9ea495df2c10b0635e1a3a1200815983e44219df323703081020d7c05d0f2",
-      "size": 8167
+      "sha256": "f21568eadeae9ccf25937167191c907cf31fcd767d68d13f4214fbf1070a28c7",
+      "size": 8438
     },
     {
       "path": "docs/automation/SSH_KEY_SETUP.md",
@@ -630,13 +630,13 @@
     },
     {
       "path": "docs/automation/paper-evaluation.md",
-      "sha256": "db36a85038ed9550b0bf49a982297d1f4868b752b27b3475317b07767551462c",
-      "size": 1426
+      "sha256": "a584b7571ec36f3a4137ae5b01063aa1a5f58b765cf39348ccf4d75e0bcbffc4",
+      "size": 1731
     },
     {
       "path": "docs/automation/repo-profile.md",
-      "sha256": "99941eb019872899b3069c5820d8c0ee45f3ffb340ab3029b4f07eaad3d5b24a",
-      "size": 1967
+      "sha256": "bd55d09b69c485ceaa2a12edc8735d2d81163b105b53ab2f9e8b051999ecd51c",
+      "size": 2150
     },
     {
       "path": "docs/automation/repository-temp-inode-safety.md",

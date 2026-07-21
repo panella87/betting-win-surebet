@@ -35,6 +35,9 @@ pull_artifacts_and_zip_codebase.sh=pulls_root_artifacts_zip_then_calls_local_zip
 update_git.sh_acp=add_commit_push_shorthand_preserves_github_token_support
 run_paper_evaluation_12h=absent_obsolete
 stop_autonomous_run=absent_obsolete
+paper_evaluation_artifacts_zip=artifacts.zip
+paper_evaluation_operator_interval_range=5m..60m
+paper_evaluation_script_explicit_interval_clamp=not_enforced_by_current_protected_script
 ```
 
 ## Root controllers

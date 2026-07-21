@@ -1,3 +1,10 @@
+## 2026-07-21 - Standardized automation documentation alignment
+
+- Corrected active paper-evaluation automation docs to name the repo-root `artifacts.zip` output instead of a non-existent `root_artifacts.zip` filename.
+- Corrected adaptive interval wording so active docs describe the current safe operator contract instead of overclaiming automatic explicit-interval clamping in the protected controller.
+- Reconciled `automation.config.sh` with the documented protected automation file set by adding the temp inode guard and cleanup helper to protected-file and syntax-validation coverage.
+- No application source, strategy logic, runtime lifecycle logic, package scripts, provider behavior or business behavior changed.
+
 ## 2026-07-20 - Documentation slimming completion contract
 
 - Marked documentation slimming complete for the active operator map after `docs/023`, `docs/024`, `docs/025`, and `DOCUMENTATION_CHECK_REPORT.md` were removed.

@@ -29,11 +29,11 @@ AUTOMATION_PROTECTED_FILES=(
   "zip_codebase.sh" "pull_artifacts_and_zip_codebase.sh" "update_git.sh"
   "check_progress.sh" "watch_progress.sh" "open_log.sh" "start.sh" "stop.sh"
   "run-autonomous-implementation.sh" "run-paper-evaluation.sh" "run-paper-autopilot.sh" "run-autonomous-bugfix.sh" "run-bugfix-autopilot.sh"
-  "automation.config.sh" ".automation/lib/run_common.sh" ".automation/lib/controller_hardening_v2.sh" ".automation/lib/telegram_notify.sh"
-  "docs/automation/PROTECTED_AUTOMATION_FILES.md"
+  "automation.config.sh" ".automation/lib/run_common.sh" ".automation/lib/controller_hardening_v2.sh" ".automation/lib/temp_inode_guard.sh" ".automation/lib/telegram_notify.sh"
+  "cleanup_automation_temp_inode_residue.sh" "docs/automation/PROTECTED_AUTOMATION_FILES.md"
 )
 AUTOMATION_VALIDATION_COMMANDS=(
-  "bash -n start.sh stop.sh check_progress.sh watch_progress.sh open_log.sh run-autonomous-implementation.sh run-paper-evaluation.sh run-paper-autopilot.sh run-autonomous-bugfix.sh run-bugfix-autopilot.sh zip_codebase.sh pull_artifacts_and_zip_codebase.sh update_git.sh .automation/lib/run_common.sh .automation/lib/controller_hardening_v2.sh .automation/lib/telegram_notify.sh"
+  "bash -n start.sh stop.sh check_progress.sh watch_progress.sh open_log.sh cleanup_automation_temp_inode_residue.sh run-autonomous-implementation.sh run-paper-evaluation.sh run-paper-autopilot.sh run-autonomous-bugfix.sh run-bugfix-autopilot.sh zip_codebase.sh pull_artifacts_and_zip_codebase.sh update_git.sh .automation/lib/run_common.sh .automation/lib/controller_hardening_v2.sh .automation/lib/temp_inode_guard.sh .automation/lib/telegram_notify.sh"
   "npm run validate"
 )
 AUTOMATION_IMPLEMENTATION_VALIDATION_COMMANDS=("npm run validate")

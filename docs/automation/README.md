@@ -33,7 +33,7 @@ automation.config.sh                    repo executable config and protected-fil
 docs/automation/ and .automation/        repo-specific automation behavior and shared controller helpers
 ```
 
-`run-paper-evaluation.sh --adaptive` is the canonical adaptive flag and is clamped by config to 5..60 minutes. `--adaptive-interval` may exist only as a compatibility alias, not as the documented operator command. `stop-autonomous-run.sh` must not exist.
+`run-paper-evaluation.sh --adaptive` is the canonical adaptive flag. Active operator commands must keep explicit observation intervals inside the documented 5..60 minute policy; the current protected controller accepts direct `--interval` values as provided, so docs must not imply automatic explicit-interval clamping until a reviewed controller-maintenance overlay implements it. `--adaptive-interval` may exist only as a compatibility alias, not as the documented operator command. `stop-autonomous-run.sh` must not exist.
 
 ## Controller selection
 
