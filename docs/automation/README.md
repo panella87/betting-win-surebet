@@ -9,13 +9,31 @@ safe_local_terminal_gate=BWS-599
 bws600_upstream_api_preflight_source_fix=present
 ```
 
-`BWS-100` through `BWS-589` are validated carry-forward foundations. The runtime has full product lifecycle ownership, database lifecycle, observability, root wrappers, service-owned paper evaluation and runtime-evidence paper autopilot.
+`BWS-100` through `BWS-599` are validated carry-forward foundations. The runtime has full product lifecycle ownership, database lifecycle, observability, root wrappers, service-owned paper evaluation, runtime-evidence paper autopilot, release/recovery/soak/preflight proof and final local acceptance.
 
 The safe-local queue through `BWS-599` is complete. `BWS-592` soak/failure injection, `BWS-593` external preflight, and `BWS-599` final acceptance are validated carry-forward surfaces. The active gate is `BWS-600` external runtime evidence.
 
 `BETTING_WIN_REPO_PATH` remains a read-only pointer to the existing betting-win checkout. BWS reads committed `HEAD` through Git objects and must not clone, clean, reset or modify that checkout.
 
 Documentation lookup starts at `docs/000_documentation_index.md`. Stale completion snapshots are intentionally removed from active validation; retained blueprints and archive files stay discoverable through that index.
+
+
+## Standardized command surface
+
+```text
+zip_codebase.sh                         numbered repo-root zips, tracked plus untracked non-ignored files, no manifest
+pull_artifacts_and_zip_codebase.sh      pulls server root artifacts.zip, then calls local zip_codebase.sh, no automation.config.sh
+update_git.sh --acp                     add/commit/push shorthand with GITHUB_TOKEN env/.env support
+run-autonomous-implementation.sh        72h default, driven by repo docs/current task or handoff, no --task flag
+run-paper-evaluation.sh                 72h default, replaces run-paper-evaluation-12h.sh, writes root artifacts.zip
+run-autonomous-bugfix.sh                72h default standalone read-only audit/handoff, no proactive/reactive mode flags
+run-paper-autopilot.sh                  seven-day parent selected for BWS-600 runtime evidence
+run-bugfix-autopilot.sh                 seven-day parent for broad audit -> repair -> same-area re-audit
+automation.config.sh                    repo executable config and protected-file list
+docs/automation/ and .automation/        repo-specific automation behavior and shared controller helpers
+```
+
+`run-paper-evaluation.sh --adaptive` is the canonical adaptive flag and is clamped by config to 5..60 minutes. `--adaptive-interval` may exist only as a compatibility alias, not as the documented operator command. `stop-autonomous-run.sh` must not exist.
 
 ## Controller selection
 

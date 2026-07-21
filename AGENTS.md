@@ -58,27 +58,27 @@ automatic fallback between workspace, export, API or fixtures
 invented commit, schema, endpoint, package or acceptance evidence
 ```
 
-## Active implementation program
+## Validated implementation program
 
-`BWS-100` through `BWS-589` are validated. `BWS-580` remains the integrated bounded-runtime handoff milestone. They provide the domain engine, persistence, long-running explicit convergence, scheduler and worker services, API, cockpit, complete product lifecycle, database operations, observability, root wrappers, paper evaluation and runtime-evidence paper autopilot.
+`BWS-100` through `BWS-599` are validated. `BWS-580` remains the integrated bounded-runtime handoff milestone, and `BWS-599` is the safe-local terminal gate. The repository now has the domain engine, persistence, long-running explicit convergence, scheduler and worker services, API, cockpit, complete product lifecycle, database operations, observability, root wrappers, paper evaluation, runtime-evidence paper autopilot, release/recovery/soak/preflight proof and final local acceptance.
 
-Safe local release, recovery, soak, preflight and final acceptance work remains through `BWS-599`:
+No dependency-ready safe-local implementation row remains. The current gate is external `BWS-600` runtime evidence against an operator-approved running `betting-win` read-only API. `BWS-900` remains separately authorized execution.
 
 ```text
-BWS-581..BWS-584  real continuous services and complete lifecycle (validated)
-BWS-585..BWS-586  database operations, observability and evidence retention (validated)
-BWS-587..BWS-589  root wrappers and paper-controller integration (validated)
-BWS-590..BWS-591  release, deployment, upgrade, rollback and recovery
-BWS-592..BWS-593  soak/failure injection and external campaign preflight
-BWS-599           integrated final local acceptance
+BWS-100..BWS-580  platform foundation through integrated bounded runtime (validated)
+BWS-581..BWS-589  long-running services, lifecycle, evidence and paper automation (validated)
+BWS-590..BWS-591  release, upgrade, rollback and recovery (validated)
+BWS-592           soak and failure injection (validated)
+BWS-593           external runtime preflight (validated)
+BWS-599           integrated final local acceptance (validated)
 BWS-600           external operator-approved runtime evidence
 BWS-900           separately authorized execution
 ```
 
 ## Implementation discipline
 
-- Work through `backlog/bws_full_implementation.csv` in dependency order.
-- Implement one coherent row or bounded sub-slice per cycle, then continue while safe work remains through `BWS-599`.
+- There is no current safe-local implementation queue. Use `run-autonomous-implementation.sh` only for a future reviewed source-fix handoff or explicit dependency-ready task.
+- When an implementation queue exists, work through `backlog/bws_full_implementation.csv` in dependency order.
 - Preserve validated solver, completion, exposure, settlement, report, API and cockpit behavior.
 - Use fixed-point integer arithmetic for money, probability, fees, size and exposure.
 - Missing configuration, unknown schema/profile/generation, stale evidence, incomplete scenarios, insufficient depth, conflicting settlement or ambiguous process ownership fail closed.
@@ -90,7 +90,7 @@ BWS-900           separately authorized execution
 
 ## Protected automation policy
 
-Normal product files remain unprotected. The root-wrapper and paper-controller integration phase is complete. The active `BWS-590` through `BWS-599` task sets `automation_maintenance_allowed=no` and `allowed_protected_files=none`.
+Normal product files remain unprotected. The root-wrapper and paper-controller integration phase is complete. The active `BWS-600` state sets `automation_maintenance_allowed=no` and `allowed_protected_files=none`.
 
 Do not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`. Any protected automation change is a blocker unless an external overlay first changes the binding task source.
 
@@ -117,7 +117,25 @@ npm run validate
 
 ## Automation
 
-The canonical entrypoint remains `run-autonomous-implementation.sh`. Use `CONTINUE_REQUIRED=yes` while any dependency-ready row through `BWS-599` remains pending. Use `AUTONOMOUS_GOAL_COMPLETE=yes` only after `BWS-599` is validated and no safe local row remains.
+The canonical command surface is the standardized root automation set:
+
+```text
+zip_codebase.sh
+pull_artifacts_and_zip_codebase.sh
+update_git.sh
+run-autonomous-implementation.sh
+run-paper-evaluation.sh
+run-autonomous-bugfix.sh
+run-paper-autopilot.sh
+run-bugfix-autopilot.sh
+automation.config.sh
+docs/automation/
+.automation/
+```
+
+Use `run-paper-autopilot.sh` for the current `BWS-600` runtime-evidence gate after the operator-approved upstream betting-win API is available. Use `run-autonomous-implementation.sh` only for a future validated implementation/source-fix handoff. `run-paper-evaluation.sh` is the standalone 72-hour paper evaluator; `run-autonomous-bugfix.sh` is the standalone 72-hour read-only audit controller; `run-bugfix-autopilot.sh` is the seven-day parent for broad audit and repair.
+
+`update_git.sh --acp` is the add/commit/push shorthand and preserves `GITHUB_TOKEN` support. `zip_codebase.sh` creates numbered repo-root zips and does not create a manifest. `pull_artifacts_and_zip_codebase.sh` pulls server `artifacts.zip` and then calls local `zip_codebase.sh`; it does not use `automation.config.sh`. `stop-autonomous-run.sh` is intentionally absent.
 
 ## graphify
 

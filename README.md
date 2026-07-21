@@ -41,15 +41,15 @@ BWS must not connect directly to providers, write betting-win `core.*`, treat sn
 
 ## Validated foundation
 
-`BWS-100` through `BWS-593` are validated. The repository has the domain engine, `surebet.*` persistence, immutable intake, explicit export and API convergence passes, a long-running explicit-mode upstream convergence service, long-running scheduler and worker services, read-only API, React cockpit, managed loopback cockpit serving with explicit API-mode build verification, complete product-owned lifecycle ownership, product-owned database lifecycle operations, structured observability surfaces, loopback acceptance, strict runtime handoff packaging, deterministic release packaging, service-owned paper runtime-evidence collection, managed-runtime soak/failure proof, and exact-mode external runtime preflight.
+`BWS-100` through `BWS-599` are validated. The repository has the domain engine, `surebet.*` persistence, immutable intake, explicit export and API convergence passes, a long-running explicit-mode upstream convergence service, long-running scheduler and worker services, read-only API, React cockpit, managed loopback cockpit serving with explicit API-mode build verification, complete product-owned lifecycle ownership, product-owned database lifecycle operations, structured observability surfaces, loopback acceptance, strict runtime handoff packaging, deterministic release packaging, service-owned paper runtime-evidence collection, managed-runtime soak/failure proof, and exact-mode external runtime preflight.
 
-Validated executable and integration composition remains under `packages/bootstrap`; the remaining queue extends that package surface rather than replacing it.
+Validated executable and integration composition remains under `packages/bootstrap`; future implementation work must come from a reviewed source-fix handoff or explicit dependency-ready task, not from a stale safe-local queue.
 
 The safe local operator service boundary is complete. The current source now has long-running explicit-mode upstream convergence, long-running scheduler and worker services, managed loopback cockpit serving, a full product-owned lifecycle owner, integrated root lifecycle/progress/log wrappers, product runtime evidence surfaces, service-owned paper runtime-evidence mode, runtime-evidence paper autopilot inside the owned lifecycle, exact-version upgrade/rollback/recovery proof, deterministic soak/failure evidence, external-runtime preflight, and final clean-room acceptance. The next gate is external `BWS-600` accepted-runtime evidence with a running operator-approved betting-win read-only API. The BWS runtime now fails fast before the long evidence window when the upstream API is unavailable or points at the local BWS API.
 
-## Remaining safe local program
+## Validated safe local program
 
-The binding queue now continues through `BWS-599`:
+The binding safe-local queue is complete through `BWS-599`:
 
 ```text
 BWS-586  logs, metrics, diagnostics and evidence retention (validated)
@@ -91,6 +91,8 @@ npm run validate
 ## Current automation route
 
 The selected controller is now `run-paper-autopilot.sh` for the `BWS-600` runtime-evidence campaign. The safe-local implementation queue through `BWS-599` is complete and the upstream API preflight source fix is present; the remaining blocker is an operator-approved running betting-win read-only API.
+
+The standardized helper surface is active: `zip_codebase.sh` creates numbered repo-root zips without a manifest; `pull_artifacts_and_zip_codebase.sh` pulls server `artifacts.zip` and then calls local `zip_codebase.sh` without reading `automation.config.sh`; `update_git.sh --acp` is the add/commit/push shorthand and preserves `GITHUB_TOKEN` support. `run-autonomous-implementation.sh`, `run-paper-evaluation.sh` and `run-autonomous-bugfix.sh` default to 72-hour standalone ceilings. `run-paper-evaluation.sh` replaces the old 12-hour helper and writes root `artifacts.zip`; `--adaptive` is clamped to 5..60 minutes. `run-autonomous-bugfix.sh` has no proactive/reactive mode flags. `stop-autonomous-run.sh` is intentionally absent.
 
 The protected root-wrapper and paper-controller integration phase is complete. Do not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`; any future protected automation repair requires a reviewed external overlay.
 

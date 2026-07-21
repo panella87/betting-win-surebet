@@ -1,6 +1,6 @@
 # Autonomous bugfix rules: betting-win-surebet
 
-`run-autonomous-bugfix.sh` is a read-only audit and strict implementation-handoff controller. It must not patch app source directly.
+`run-autonomous-bugfix.sh` defaults to a 72-hour ceiling. It is a read-only audit and strict implementation-handoff controller. It must not patch app source directly. It combines retained reactive evidence via `--from-artifacts` with a bounded proactive repo audit in the same run; there are no proactive/reactive mode flags.
 
 Default standalone command after activating Node 20 in the parent shell:
 

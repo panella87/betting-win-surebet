@@ -1,3 +1,9 @@
+## 2026-07-20 - Documentation slimming completion contract
+
+- Marked documentation slimming complete for the active operator map after `docs/023`, `docs/024`, `docs/025`, and `DOCUMENTATION_CHECK_REPORT.md` were removed.
+- Updated documentation validators and regression tests so deleted completion snapshots stay deleted instead of being treated as retained active contracts.
+- Regenerated `SOURCE_MANIFEST.json` from the current repository tree.
+
 ## 2026-07-19 - Documentation slimming part 2
 
 - Merged superseded bootstrap ledgers `docs/014`, `docs/015`, and `docs/017` into `docs/000_documentation_index.md`.

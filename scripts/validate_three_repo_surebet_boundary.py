@@ -10,7 +10,6 @@ REQUIRED_FILES = [
     'docs/020_strategy_data_and_state_ownership.md',
     'docs/021_backtest_paper_live_mode_roadmap.md',
     'docs/022_separate_account_policy.md',
-    'docs/023_legacy_betting_win_surebet_import_manifest.md',
     'docs/legacy/surebet-research/README.md',
     'research/imported-from-betting-win/legacy/surebet/README.md',
     'research/imported-from-betting-win/legacy/surebet/RESEARCH_IMPORT_MANIFEST.json',
@@ -93,13 +92,7 @@ def main() -> None:
             'documentation_index_status=active',
             'archive_is_active_product_authority=no',
             'docs/legacy/surebet-research/',
-        ],
-        'docs/023_legacy_betting_win_surebet_import_manifest.md': [
-            'legacy_surebet_import_status=imported_and_rehomed',
-            'operator_move_status=complete',
-            'source_import_path_present=no',
-            'active_authority=no',
-            'repo_role=surebet_strategy_application',
+            'docs/023_legacy_betting_win_surebet_import_manifest.md',
         ],
         'decisions/ADR-0005-bws-built-on-betting-win-platform.md': [
             'Accepted', 'betting-win', 'read-only', 'BWS',

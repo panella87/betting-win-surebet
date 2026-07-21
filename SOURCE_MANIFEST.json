@@ -1,6 +1,6 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-07-19T07:49:10Z",
+  "generated": "2026-07-21T08:57:35Z",
   "overlay": "bws70-doc-slimming-part2-wave36",
   "files": [
     {
@@ -110,23 +110,23 @@
     },
     {
       "path": "AGENTS.md",
-      "sha256": "a2da49f6c91be618f4a7041ea4103b827c2cebbe01e40ac8f8a1701c1f7eb29d",
-      "size": 7004
+      "sha256": "597fb8b9fd470644249547039eb8dce5bafc17b72f6c63491c52115f100de076",
+      "size": 8239
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "e02ca2e3391f222530c10e146ee604ab475645f7baa64aee53a1ce5c6ad61a82",
-      "size": 62113
+      "sha256": "9351708f3294df74403a574bfd8a9ea5271c045fdeca0aa458a37b75fe871e66",
+      "size": 62562
     },
     {
       "path": "PROJECT_STATUS.md",
-      "sha256": "81e0948d023166660d24c4170a61c6ff7247be1fde00d1e919f8559546cb23df",
-      "size": 3548
+      "sha256": "454d3a3868b59f1df911427eaa95f08ac4fd87bc64fed78f57c94a0abf7a52e8",
+      "size": 3771
     },
     {
       "path": "README.md",
-      "sha256": "536bbbca1005a2f04da8d85feb8a72d16833f0346391cc273841e2af97973bb4",
-      "size": 7107
+      "sha256": "873527c60372419909a4dd8fe00d85e65d2d7a2f2a237c49a71368022170f1ad",
+      "size": 7916
     },
     {
       "path": "STARTER_PACK.md",
@@ -370,8 +370,8 @@
     },
     {
       "path": "docs/000_documentation_index.md",
-      "sha256": "ba5c176c992d459c33f7ed5c650807863a8da9e0934e44773af875acf231a253",
-      "size": 5109
+      "sha256": "b8a0a1413b58fb3dde8b4c6e8a764b8de7e94ff59ad0f0d6aab25565750e1a6d",
+      "size": 5893
     },
     {
       "path": "docs/001_scope_and_boundaries.md",
@@ -467,11 +467,6 @@
       "path": "docs/022_separate_account_policy.md",
       "sha256": "44a10a4e71da948dd84c63179c934b7f2935d52148dc267e5eff7f59b1c9468d",
       "size": 480
-    },
-    {
-      "path": "docs/023_legacy_betting_win_surebet_import_manifest.md",
-      "sha256": "8de78b14b961b6a4bd961eda23e6f35f01e98d28befc80ec65f0fe5094fb378e",
-      "size": 2830
     },
     {
       "path": "docs/026_betting_win_platform_baseline.md",
@@ -580,8 +575,8 @@
     },
     {
       "path": "docs/MASTER_PLAN.md",
-      "sha256": "0939fbeeedb3eb48c40a3e14063f18b1dc07e40798b3f763d9e465cae94aed00",
-      "size": 4940
+      "sha256": "6e8d07dd29f9549531dbb51f3716604df69ca8cf1edbdf744ae53f4dfe634a84",
+      "size": 5022
     },
     {
       "path": "docs/automation/POST_OVERLAY_CLEANUP.md",
@@ -590,13 +585,13 @@
     },
     {
       "path": "docs/automation/PROTECTED_AUTOMATION_FILES.md",
-      "sha256": "61471ab927a19d82a3495313b725de27704dc6f2429ae8362319d11fee8f1ee3",
-      "size": 2657
+      "sha256": "5e36d1b25586f386f5b5f22f44a6b50466ccd4013c051040e62dfa2d16267055",
+      "size": 2727
     },
     {
       "path": "docs/automation/README.md",
-      "sha256": "1a5d25a709b9060b1a21654ec1c2523b8fa81f59927fee263291238863c6e5cb",
-      "size": 6707
+      "sha256": "a0a9ea495df2c10b0635e1a3a1200815983e44219df323703081020d7c05d0f2",
+      "size": 8167
     },
     {
       "path": "docs/automation/SSH_KEY_SETUP.md",
@@ -610,13 +605,13 @@
     },
     {
       "path": "docs/automation/autonomous-bugfix.md",
-      "sha256": "e0378d759695f3a49c3ecea2dd9fec483a4f5a618e6b84658d1c839e1abe0e5d",
-      "size": 3534
+      "sha256": "1362a4cf8c2c1a547d94e2cbb60ff98e4c327cff719a5aacddc34d861206a2c1",
+      "size": 3727
     },
     {
       "path": "docs/automation/autonomous-implementation.md",
-      "sha256": "8238917caaead35446cf72973d5859cb37d6c4a1199adbd40db1446d8bd4ea62",
-      "size": 2699
+      "sha256": "12b703a53c4f0f2e0a0d040026acf8c248b9c16f76fc783c9d25382c61e26654",
+      "size": 2594
     },
     {
       "path": "docs/automation/bugfix-autopilot.md",
@@ -635,13 +630,13 @@
     },
     {
       "path": "docs/automation/paper-evaluation.md",
-      "sha256": "748ac4fbfe487dfb0b16f59384569f85f7fafc3980f24e52fdf305f1709db022",
-      "size": 1160
+      "sha256": "db36a85038ed9550b0bf49a982297d1f4868b752b27b3475317b07767551462c",
+      "size": 1426
     },
     {
       "path": "docs/automation/repo-profile.md",
-      "sha256": "94d8d80068b79341066546c9a678490846db081eb5f7252be6656747d8dee3e0",
-      "size": 1466
+      "sha256": "99941eb019872899b3069c5820d8c0ee45f3ffb340ab3029b4f07eaad3d5b24a",
+      "size": 1967
     },
     {
       "path": "docs/automation/repository-temp-inode-safety.md",
@@ -700,13 +695,13 @@
     },
     {
       "path": "docs/operations/service_run.md",
-      "sha256": "c0992d026bb8324c853af11bf7f56fd2948508a9fc524b5d8cd34cf87390ed55",
-      "size": 1552
+      "sha256": "746dea39b59b2e14792b6bc389bb3c4df93dcba94ba49e08b160fe7d56198bd0",
+      "size": 1863
     },
     {
       "path": "docs/repo_status_current.md",
-      "sha256": "61256089890bcc87418e46130159eb153f7632e5818c26e927b74bf39cd020a0",
-      "size": 11296
+      "sha256": "d445ad09274e15be389704e725f5c811d81278e10301a2a81ababf8782f24fae",
+      "size": 9305
     },
     {
       "path": "graphify_repo_install.sh",
@@ -1585,8 +1580,8 @@
     },
     {
       "path": "scripts/validate_documentation_slimming.py",
-      "sha256": "9f405dd4e1a4ca02bc4751786e19fc95645dae1b43e100a81d2ef9e1426318cb",
-      "size": 3941
+      "sha256": "5a0cdf3f6be338428780e7cf7889e64bcb09eab58576ff7b2b7443eeada3a0b8",
+      "size": 3983
     },
     {
       "path": "scripts/validate_executable_bits.py",
@@ -1640,8 +1635,8 @@
     },
     {
       "path": "scripts/validate_repo.py",
-      "sha256": "fd260ca37c8daf4b89c8571061c2867ef76fe9af6eed064fd9de73c3ace9fdb4",
-      "size": 18258
+      "sha256": "96910f68c517161fe6b3c559683ad24827a55c249f57d863c7657ed1701618da",
+      "size": 18195
     },
     {
       "path": "scripts/validate_shell_local_assignments.py",
@@ -1660,8 +1655,8 @@
     },
     {
       "path": "scripts/validate_three_repo_surebet_boundary.py",
-      "sha256": "c96d7371ad49d3cbb00a9602f7bb1c2693a1771b0a5055645d00f077ffcaf4e8",
-      "size": 6149
+      "sha256": "ae3c88816217df963d0fa047e65f7334fbf552505ace9d81764bb181eb69c0cd",
+      "size": 5834
     },
     {
       "path": "src/adapters/betting-win-export-reader.ts",
@@ -2235,8 +2230,8 @@
     },
     {
       "path": "tests/documentation-slimming-contract.test.ts",
-      "sha256": "bc2283f2848e445f586717b8a894c7f824142343d995b8d59e7989f64360d2b4",
-      "size": 2849
+      "sha256": "6be71311c0dfbd4ff6d6a1cf20f0cfd3156f837d7fca464d3a44492dfca0fa54",
+      "size": 2949
     },
     {
       "path": "tests/equivalence-precheck.test.ts",
@@ -2515,8 +2510,8 @@
     },
     {
       "path": "tests/three-repo-surebet-boundary.test.ts",
-      "sha256": "e492b7a2f640e9d03e7e04fd336c588bca0b707da76ea2c50e8858aedf579568",
-      "size": 1630
+      "sha256": "18c580c89469746388b73e33a692f2494ce11d43b021c0bc8f5777c84128559c",
+      "size": 1749
     },
     {
       "path": "tests/validate-artifact-hygiene.test.ts",

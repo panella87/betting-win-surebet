@@ -10,13 +10,13 @@ REMOVED = [
     'docs/014_sure_001_remaining_hardening_backlog.md',
     'docs/015_local_engine_implementation_backlog.md',
     'docs/017_private_paper_mode_implementation_backlog.md',
+    'docs/023_legacy_betting_win_surebet_import_manifest.md',
     'docs/024_three_repo_documentation_completion_status.md',
     'docs/025_research_archive_completion_status.md',
 ]
 RETAINED = [
     'docs/000_documentation_index.md',
     'docs/repo_status_current.md',
-    'docs/023_legacy_betting_win_surebet_import_manifest.md',
     'docs/028_full_implementation_program.md',
     'docs/029_full_implementation_task_ledger.md',
     'docs/034_remaining_operator_runtime_implementation_program.md',
@@ -60,8 +60,9 @@ def main() -> None:
     for marker in [
         PROGRAM,
         'documentation_index_status=active',
-        'documentation_slimming_phase=phase_2_bootstrap_ledgers_merged',
+        'documentation_slimming_phase=complete',
         'DOCUMENTATION_CHECK_REPORT.md',
+        'docs/023_legacy_betting_win_surebet_import_manifest.md',
         'docs/024_three_repo_documentation_completion_status.md',
         'docs/025_research_archive_completion_status.md',
         'docs/014_sure_001_remaining_hardening_backlog.md',

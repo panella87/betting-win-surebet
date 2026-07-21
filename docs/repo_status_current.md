@@ -18,7 +18,7 @@ execution_gate=closed
 
 ## Binding state
 
-`BWS-100` through `BWS-593` are validated. The previous autonomous campaign truthfully closed `BWS-580`, the latest autonomous campaign closed `BWS-581` by adding a long-running explicit-mode upstream convergence service with durable state, overlap defense, signal-aware shutdown and machine-readable evidence, the follow-on cycle closed `BWS-582` by adding long-running scheduler and worker services with restart-safe state, queue backpressure, lease renewal and graceful drain behavior, the next cycle closed `BWS-583` by serving the built cockpit on loopback through the managed runtime with explicit API-mode build verification, independent readiness reporting and failure-closed asset validation, the following cycle closed `BWS-584` by expanding product-owned lifecycle control to the complete BWS stack with exact multi-role ownership, ordered shutdown, crash recovery and `/proc` identity verification, the next cycle closed `BWS-585` by adding product-owned migration status, backup, restore-verification and bounded retention commands with disposable PostgreSQL proof, the following cycle closed `BWS-586` by adding structured role logs, loopback metrics, read-only diagnostics bundles and an append-only evidence index, the next cycle closed `BWS-587` by wiring the protected root wrappers to the product-owned lifecycle, runtime summary, and structured runtime logs, the following cycle closed `BWS-588` by upgrading paper evaluation to an explicit runtime-evidence controller with exact stack ownership checks and bounded local-only evidence collection, the next cycle closed `BWS-589` by promoting paper autopilot into a runtime-evidence parent that preserves selected upstream mode, runtime campaign identity and source-fix re-evaluation state through atomic child-result handoffs, the following cycle closed `BWS-590` by adding deterministic private release packaging, Node 20 and PostgreSQL preflight, secret-safe environment templating, non-privileged user-service templates and non-mutating install verification with tamper rejection, the following cycle closed `BWS-591` by adding deterministic upgrade planning, checkpointed apply/recovery, rollback-decision classification and disposable restore-bound recovery proof, and the latest cycle closed `BWS-592` plus `BWS-593` by adding deterministic managed-runtime soak evidence, bounded failure injection, cleanup verification, exact-mode runtime preflight, and the external campaign-manifest generator.
+`BWS-100` through `BWS-599` are validated. The earlier autonomous cycles closed `BWS-580`, `BWS-581` and the foundation, domain, persistence, upstream-lock, API, cockpit, long-running service, lifecycle, database, observability, root-wrapper and paper-automation layers through `BWS-589`; later cycles closed deterministic private release packaging, upgrade/rollback/recovery, soak/failure injection, exact-mode external runtime preflight and final local acceptance through `BWS-599`.
 
 The safe-local implementation program is complete through `BWS-599`. The bounded source-fix tranche for the next `BWS-600` runtime-evidence campaign is present. It prevents BWS from treating its own API on `127.0.0.1:4312` as upstream `betting-win` evidence and fails fast before the 72-hour evidence window when the upstream `betting-win` read-only API is unavailable. The remaining application boundary is the externally gated `BWS-600` API runtime-evidence campaign:
 
@@ -38,7 +38,7 @@ final acceptance=validated
 
 The binding queue is `backlog/bws_full_implementation.csv`; the supporting detailed map is `backlog/bws_remaining_safe_local_map.csv`. `BWS-599` is validated and no dependency-ready safe-local `PENDING` row remains. `BWS-600` is the active external operator-approved runtime-evidence gate.
 
-Documentation slimming phase 1 is complete: `docs/000_documentation_index.md` is the compact active map, and stale completion snapshots were removed without deleting BWS-599 carry-forward contracts or legacy research archives.
+Documentation slimming is complete for the active operator map: `docs/000_documentation_index.md` is the compact routing entry point, stale completion snapshots were removed, and BWS-599 carry-forward contracts plus legacy research archives remain retained.
 
 ## Validated upstream facts
 
@@ -60,7 +60,7 @@ api_web_workers=present
 
 The validated source under `packages/bootstrap`, `packages/persistence`, `packages/upstream`, `apps/web` and compatibility `src/` shims includes the domain engine, `surebet.*` persistence, immutable export intake, API-only convergence passes, a long-running explicit-mode upstream convergence service, typed read-only client, bounded private-paper runtime, strategy ledger, read-only API, bounded workers, cockpit, managed loopback cockpit serving, runtime configuration, loopback acceptance, complete full-stack lifecycle evidence and runtime handoff packaging.
 
-## Remaining queue
+## Gate state
 
 ```text
 BWS-581=VALIDATED_LONG_RUNNING_UPSTREAM_SERVICE
@@ -83,7 +83,7 @@ BWS-900=PARKED_EXECUTION
 
 ## Protected automation authorization
 
-The reviewed `BWS-587` through `BWS-589` integration phase is complete. The current release, recovery, soak, preflight and final-acceptance queue authorizes no protected automation changes.
+The reviewed `BWS-587` through `BWS-589` integration phase is complete. The current `BWS-600` runtime-evidence state authorizes no protected automation changes.
 
 ```text
 automation_maintenance_allowed=no

@@ -25,5 +25,6 @@ test('separate strategy state and legacy archive boundaries remain explicit', ()
   assert.match(policy, /shared_bankroll_with_betting-win-betting=no/);
   assert.equal(existsSync(join(ROOT, 'docs/imported-from-betting-win')), false);
   assert.equal(existsSync(join(ROOT, 'docs/legacy/surebet-research/README.md')), true);
-  assert.match(read('docs/023_legacy_betting_win_surebet_import_manifest.md'), /active_authority=no/);
+  assert.equal(existsSync(join(ROOT, 'docs/023_legacy_betting_win_surebet_import_manifest.md')), false);
+  assert.match(read('docs/000_documentation_index.md'), /docs\/023_legacy_betting_win_surebet_import_manifest\.md/);
 });

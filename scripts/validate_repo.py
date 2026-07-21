@@ -51,7 +51,6 @@ REQUIRED = [
         (20, 'strategy_data_and_state_ownership.md'),
         (21, 'backtest_paper_live_mode_roadmap.md'),
         (22, 'separate_account_policy.md'),
-        (23, 'legacy_betting_win_surebet_import_manifest.md'),
         (26, 'betting_win_platform_baseline.md'),
         (27, 'bws_target_architecture.md'),
         (28, 'full_implementation_program.md'),

@@ -68,7 +68,7 @@ automation_maintenance_allowed=no
 allowed_protected_files=none
 ```
 
-Do not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` for `BWS-590` through `BWS-599`. Do not broaden authorization from inside an autonomous cycle.
+Do not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` for the current `BWS-600` runtime-evidence state or any ordinary implementation, paper, or bugfix run. Do not broaden authorization from inside an autonomous cycle.
 
 Executable command lists remain in `automation.config.sh`, `tools/required_executable_paths.js` and `scripts/validate_executable_bits.py`.
 

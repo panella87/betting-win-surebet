@@ -1,26 +1,32 @@
 # Autonomous implementation rules: betting-win-surebet
 
-`run-autonomous-implementation.sh` remains available for future bounded source-fix handoffs in `BWS_FULL_PLATFORM_IMPLEMENTATION_V1`, but it is not selected while no implementation queue is active.
-
-Authority comes from `docs/automation/current-implementation-task.md`, `backlog/bws_full_implementation.csv` and the supporting `backlog/bws_remaining_safe_local_map.csv` when an implementation queue is active. There is no `--task` flag. A separate `--prompt-file` is unnecessary.
-
-The final safe local task was `BWS-599`. It is now validated, so no dependency-ready safe local `PENDING` row remains.
-
-`BWS-100` through `BWS-589` are validated carry-forward foundations, and `BWS-590` adds deterministic release packaging on top of them. These are not authorization for a no-op goal-complete result.
-
-The previously preferred `BWS-592 -> BWS-593` tranche is now validated. The remaining safe sequence is:
-
 ```text
-BWS-599             final clean-room acceptance (validated)
+program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
+current_task=BWS-600
+safe_local_terminal_gate=BWS-599
+selected_controller=run-paper-autopilot.sh
 ```
 
-Allowed work includes deterministic release packaging, platform and private configuration preflight, user-service templates, non-mutating install verification, exact-version upgrade/rollback/recovery, multi-hour loopback soak, bounded failure injection, external campaign-manifest generation and final integrated acceptance.
+`run-autonomous-implementation.sh` defaults to a 72-hour ceiling and is driven by repository docs, `docs/automation/current-implementation-task.md`, validated handoffs, `backlog/bws_full_implementation.csv`, and `backlog/bws_remaining_safe_local_map.csv`. There is no `--task` flag. A separate `--prompt-file` is not part of normal operator routing.
+
+`BWS-100` through `BWS-589` are validated carry-forward foundations inside the wider complete safe-local program through `BWS-599`.
+
+The safe-local implementation queue is complete through `BWS-599`. No dependency-ready safe-local `PENDING` row remains. Use this controller only for a future reviewed source-fix handoff, an explicitly reopened validated queue row, or a standalone task authorized by current repo evidence.
+
+```text
+BWS-100..BWS-580  platform foundation through integrated bounded runtime (validated)
+BWS-581..BWS-589  long-running services, lifecycle, evidence and paper automation (validated)
+BWS-590..BWS-593  release, recovery, soak and external preflight (validated)
+BWS-599           final clean-room acceptance (validated)
+BWS-600           external runtime evidence, selected parent run-paper-autopilot.sh
+BWS-900           separately authorized execution
+```
 
 Forbidden work includes direct provider clients/URLs/credentials, betting-win `core.*` writes, modifying the betting-win checkout, execution paths, public signals and profitability claims.
 
-Use `CONTINUE_REQUIRED=yes` until every safe row through `BWS-599` is validated. Use `AUTONOMOUS_GOAL_COMPLETE=yes` only after `BWS-599` is validated. `BWS-600` may remain blocked and `BWS-900` parked.
+If a future implementation queue is active, use `CONTINUE_REQUIRED=yes` while dependency-ready work remains and `AUTONOMOUS_GOAL_COMPLETE=yes` only when the authorized queue is validated. Do not use a no-op goal-complete result to bypass a source-fix handoff.
 
-Canonical campaign settings include:
+Canonical standalone campaign settings include:
 
 ```text
 --duration 72h
@@ -31,13 +37,9 @@ Canonical campaign settings include:
 --fallback-model none
 ```
 
-The longer cycle timeout allows the required `BWS-592` two-hour soak proof plus setup, recovery and cleanup. Shorter tasks may complete earlier and must advance to the next ready row.
-
 ## Protected automation policy
 
 Task-file automation maintenance is disabled for the current state.
-
-The protected integration phase is complete. The active task source sets:
 
 ```text
 automation_maintenance_allowed=no

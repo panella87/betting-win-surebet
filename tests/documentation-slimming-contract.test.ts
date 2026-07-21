@@ -16,6 +16,7 @@ test('documentation index replaces stale completion snapshots without deleting a
     'docs/014_sure_001_remaining_hardening_backlog.md',
     'docs/015_local_engine_implementation_backlog.md',
     'docs/017_private_paper_mode_implementation_backlog.md',
+    'docs/023_legacy_betting_win_surebet_import_manifest.md',
     'docs/024_three_repo_documentation_completion_status.md',
     'docs/025_research_archive_completion_status.md',
   ]) {
@@ -25,11 +26,12 @@ test('documentation index replaces stale completion snapshots without deleting a
   const index = read('docs/000_documentation_index.md');
   for (const marker of [
     'documentation_index_status=active',
-    'documentation_slimming_phase=phase_2_bootstrap_ledgers_merged',
+    'documentation_slimming_phase=complete',
     'DOCUMENTATION_CHECK_REPORT.md',
     'docs/014_sure_001_remaining_hardening_backlog.md',
     'docs/015_local_engine_implementation_backlog.md',
     'docs/017_private_paper_mode_implementation_backlog.md',
+    'docs/023_legacy_betting_win_surebet_import_manifest.md',
     'docs/024_three_repo_documentation_completion_status.md',
     'docs/025_research_archive_completion_status.md',
     'docs/014_sure_001_remaining_hardening_backlog.md',

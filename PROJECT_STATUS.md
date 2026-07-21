@@ -30,7 +30,7 @@ real_money_execution=BWS-900_PARKED
 - Root lifecycle/progress/log wrappers, service-owned paper evaluation and runtime-evidence paper autopilot.
 - Hardened controller infrastructure with atomic child results, truthful lock finalization and parent-only Telegram routing.
 
-## Remaining safe local work
+## Validated safe local work
 
 ```text
 BWS-590=VALIDATED_RELEASE_DEPLOYMENT
@@ -48,6 +48,8 @@ The short documentation map is `docs/000_documentation_index.md`. Detailed depen
 - `BWS-900` requires separate execution authorization and remains parked.
 
 ## Controller selection
+
+The active controller and helper surface are the standardized repo scripts documented in `docs/automation/README.md`. Obsolete helpers such as `run-paper-evaluation-12h.sh` and `stop-autonomous-run.sh` must remain absent.
 
 ```text
 selected_controller=run-paper-autopilot.sh

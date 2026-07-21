@@ -3,7 +3,7 @@
 ```text
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 documentation_index_status=active
-documentation_slimming_phase=phase_3_completion_status_compaction
+documentation_slimming_phase=complete
 current_external_gate=BWS-600
 safe_local_terminal_gate=BWS-599
 execution_gate=BWS-900
@@ -107,7 +107,7 @@ archive_is_active_product_authority=no
 
 ## Removed in phase 1
 
-The following stale completion snapshots were removed because their current facts are now covered by this index, `docs/repo_status_current.md`, `docs/023_legacy_betting_win_surebet_import_manifest.md`, and the retained archive manifests:
+The following stale completion snapshots were removed because their current facts are now covered by this index, `docs/repo_status_current.md`, the retained archive manifests, and `docs/legacy/surebet-research/README.md`:
 
 ```text
 DOCUMENTATION_CHECK_REPORT.md
@@ -125,9 +125,9 @@ docs/015_local_engine_implementation_backlog.md
 docs/017_private_paper_mode_implementation_backlog.md
 ```
 
-## Next slimming phase
+## Completion state
 
-Next cleanup should be a bounded documentation-only pass. It may compact completed implementation blueprints or duplicate operational prose, but it must not weaken validators, remove active runbooks, delete BWS-599 carry-forward contracts, or change the BWS-600 external runtime gate.
+Documentation slimming is complete for the active operator map. Further compaction of `docs/026` through `docs/046` requires explicit operator approval because those documents preserve implementation contracts, acceptance history, recovery procedures, and the externally gated `BWS-600` runtime-evidence boundary.
 
 
 ## Removed completion-only migration snapshots
@@ -137,5 +137,6 @@ The following documents were completion records, not active contracts. Their inf
 ```text
 removed=
   docs/023_legacy_betting_win_surebet_import_manifest.md
+  docs/024_three_repo_documentation_completion_status.md
   docs/025_research_archive_completion_status.md
 ```
