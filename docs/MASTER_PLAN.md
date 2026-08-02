@@ -1,16 +1,29 @@
 # Master Plan - betting-win-surebet
 
+## B1 implementation program
+
+The current implementation plan is `BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1`, opened by explicit operator approval after the OpenAlex B1 research review. It adds a new BWS-700 series without reopening the validated `BWS-100` through `BWS-599` platform or claiming `BWS-600` runtime evidence.
+
+Primary task source: `docs/automation/current-implementation-task.md`.
+Primary queue: `backlog/bws_b1_cross_venue_implementation.csv`.
+Primary map: `backlog/bws_b1_cross_venue_map.csv`.
+
+
 ## Goal
 
 Build the complete private surebet application on top of the read-only betting-win platform while preserving strict repository ownership, deterministic evidence and fail-closed safety.
 
 ```text
-program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
+program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
+parent_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 repo_role=surebet_strategy_application
 upstream_platform=betting-win
-current_task=BWS-600
+current_task=BWS-700
+current_task_status=READY_FOR_IMPLEMENTATION
+active_implementation_queue=backlog/bws_b1_cross_venue_implementation.csv
 safe_local_terminal_gate=BWS-599
 continuous_runtime_gate=BWS-600
+bws600_current_task=BWS-600
 execution_gate=BWS-900
 ```
 

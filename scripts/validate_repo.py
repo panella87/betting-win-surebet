@@ -72,8 +72,15 @@ REQUIRED = [
         (44, 'soak_failure_injection_implementation_blueprint.md'),
         (45, 'external_runtime_preflight_implementation_blueprint.md'),
         (46, 'final_local_acceptance_implementation_blueprint.md'),
+        (47, 'b1_cross_venue_offline_falsification_program.md'),
+        (48, 'b1_upstream_contract.md'),
+        (49, 'b1_market_equivalence.md'),
+        (50, 'b1_falsification_acceptance.md'),
+        (51, 'b1_implementation_map.md'),
+        (52, 'b1_future_strategy_stubs.md'),
     ]],
     'backlog/README.md', 'backlog/bws_full_implementation.csv',
+    'backlog/bws_b1_cross_venue_implementation.csv', 'backlog/bws_b1_cross_venue_map.csv',
     'config/betting-win.upstream-baseline.json',
     'schemas/betting-win-upstream-lock.v1.schema.json',
     'decisions/ADR-0001-repo-boundary-and-no-provider-connections.md',
@@ -103,6 +110,7 @@ REQUIRED = [
     'scripts/validate_temp_inode_safety.py',
     'scripts/validate_documentation_slimming.py',
     'scripts/validate_betting_win_upstream_contract.py',
+    'scripts/validate_bws_b1_authority.py', 'scripts/validate_bws_b1_boundary.py',
     'scripts/validate_bws_loopback_acceptance.mjs',
     'scripts/build_bws_operator_cockpit.mjs', 'scripts/prepare_bws_test_environment.mjs',
     'scripts/run_betting_win_upstream_lock.mjs',
@@ -187,7 +195,7 @@ def main() -> None:
         'validate:implementation-program', 'validate:remaining-runtime-program', 'validate:loopback-acceptance', 'validate:upstream-boundary',
         'generate:upstream-lock', 'verify:upstream-lock',
         'runtime:start', 'runtime:status', 'runtime:stop',
-        'validate:three-repo-boundary', 'restore:executables', 'regen:source-manifest',
+        'validate:three-repo-boundary', 'validate:bws-b1-authority', 'validate:bws-b1', 'restore:executables', 'regen:source-manifest',
         'zip:codebase', 'autonomous:check', 'autonomous:start', 'autonomous:bugfix',
         'paper:evaluation', 'paper:autopilot', 'bugfix', 'bugfix:autopilot', 'automation:status',
     ]
@@ -204,6 +212,10 @@ def main() -> None:
         fail('package.json validate:starter must invoke validate:loopback-acceptance')
     if 'scripts/validate_temp_inode_safety.py' not in package.get('scripts', {}).get('validate:ops', ''):
         fail('package.json validate:ops must invoke the temp/inode safety validator')
+    if 'scripts/validate_bws_b1_authority.py' not in package.get('scripts', {}).get('validate:ops', ''):
+        fail('package.json validate:ops must invoke the B1 authority validator')
+    if 'scripts/validate_bws_b1_boundary.py' not in package.get('scripts', {}).get('validate:ops', ''):
+        fail('package.json validate:ops must invoke the B1 boundary validator')
     if package.get('bin', {}).get('betting-win-surebet') != './cli.js':
         fail('package.json bin must expose ./cli.js')
 

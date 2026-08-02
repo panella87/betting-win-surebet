@@ -1,19 +1,44 @@
 # Current Repository Status
 
+## Active B1 binding state
+
+The active source implementation route is now `BWS-700` for `BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1`. This is an explicit operator-approved research/offline authority based on the OpenAlex B1 blueprint. It does not supersede the accepted BWS full-platform foundation and does not complete the external `BWS-600` runtime-evidence gate.
+
+```text
+b1_authority=opened
+b1_queue=backlog/bws_b1_cross_venue_implementation.csv
+b1_map=backlog/bws_b1_cross_venue_map.csv
+b1_controller=run-autonomous-implementation.sh
+b1_real_upstream_intake=BWS-710_BLOCKED_UNTIL_BETTING_WIN_CONTRACT
+b1_execution=prohibited
+b1_public_signals=prohibited
+b1_profitability_claims=prohibited
+```
+
+
 ```text
 repo=betting-win-surebet
-program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-status=RUNTIME_EVIDENCE_READY
+program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
+parent_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
+status=B1_IMPLEMENTATION_READY
 repo_role=surebet_strategy_application
 upstream_platform=betting-win
-current_task=BWS-600
-current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
+current_task=BWS-700
+current_task_status=READY_FOR_IMPLEMENTATION
+active_implementation_queue=backlog/bws_b1_cross_venue_implementation.csv
+active_implementation_map=backlog/bws_b1_cross_venue_map.csv
+selected_controller=run-autonomous-implementation.sh
 safe_local_terminal_gate=BWS-599
+external_runtime_gate=BWS-600
+bws600_status=RUNTIME_EVIDENCE_READY
+bws600_current_task=BWS-600
+bws600_current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
 provider_truth_owner=betting-win
 canonical_history_owner=betting-win
 strategy_state_owner=betting-win-surebet
 account_policy=separate_from_betting-win-betting
 execution_gate=closed
+BWS-900=parked
 ```
 
 ## Binding state
@@ -108,11 +133,13 @@ Direct provider connections, provider credentials, betting-win `core.*` writes, 
 ## Standard automation status
 
 ```text
-run_autonomous_implementation=standardized_not_selected_no_known_implementation_queue
+run_autonomous_implementation=standardized_selected_for_bws700_b1_implementation
 run_autonomous_bugfix=standardized_standalone_audit
 run_bugfix_autopilot=standardized_parent_for_broad_audit_and_repair
 run_paper_evaluation=fixture_and_runtime_evidence_validated_bws_588
-run_paper_autopilot=selected_for_bws600_runtime_evidence_after_upstream_api_preflight
+run_paper_autopilot=available_for_bws600_after_upstream_api_preflight
+bws600_run_autonomous_implementation=standardized_not_selected_no_known_implementation_queue
+bws600_run_paper_autopilot=selected_for_bws600_runtime_evidence_after_upstream_api_preflight
 standalone_controller_telegram=enabled_by_default
 autopilot_child_telegram=disabled
 autopilot_parent_telegram=final_only
@@ -148,4 +175,3 @@ The safe-local product implementation remains accepted. The root runtime wrapper
 ## API-only upstream transport
 
 The BWS runtime consumes betting-win only through its accepted read-only API. `BWS_UPSTREAM_MODE` and the file-export runtime selector are removed. Missing upstream API readiness must fail fast before the long BWS runtime-evidence window; there is no automatic file fallback. The BWS local API on `127.0.0.1:4312` is not upstream evidence and cannot satisfy the betting-win API preflight.
-

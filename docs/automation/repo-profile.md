@@ -1,17 +1,17 @@
 # Repo profile: betting-win-surebet
 
 ```text
+repo=betting-win-surebet
+program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
+parent_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 repo_role=surebet_strategy_application
-program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-upstream_platform=betting-win
-current_task=BWS-600
+current_task=BWS-700
+current_task_status=READY_FOR_IMPLEMENTATION
+selected_controller=run-autonomous-implementation.sh
+active_implementation_queue=backlog/bws_b1_cross_venue_implementation.csv
 safe_local_terminal_gate=BWS-599
-node_runtime=20
-package_manager=npm
-language=typescript
-persistence=postgresql_surebet_schema
-provider_connections=prohibited
-execution=prohibited
+bws600_current_task=BWS-600
+bws600_selected_controller=run-paper-autopilot.sh
 ```
 
 ## Standard helper scripts

@@ -1,23 +1,45 @@
 # PROJECT_STATUS
 
+## Active B1 implementation status
+
+The operator has explicitly opened `BWS-700` as a research/offline implementation authority for B1 cross-venue arbitrage falsification. This does not mark `BWS-600` runtime evidence complete and does not authorize execution. The next controller is `run-autonomous-implementation.sh` against `docs/automation/current-implementation-task.md` and the B1 backlog.
+
+The expected implementation outcome is as much dependency-ready B1 source, persistence, API, cockpit and validation work as can be completed safely. The real upstream B1 API intake remains blocked on `betting-win.b1_multi_venue_markets.v1`.
+
+
 ```text
-repo=betting-win-surebet
-program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-status=RUNTIME_EVIDENCE_READY
+program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
+parent_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
+status=B1_IMPLEMENTATION_READY
 repo_role=surebet_strategy_application
-upstream_platform=betting-win
+current_task=BWS-700
+current_task_status=READY_FOR_IMPLEMENTATION
+active_implementation_queue=backlog/bws_b1_cross_venue_implementation.csv
+safe_local_completion_gate=BWS-599
+external_runtime_gate=BWS-600
+bws600_status=RUNTIME_EVIDENCE_READY
+bws600_current_task=BWS-600
+bws600_current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
+selected_controller=run-autonomous-implementation.sh
+bws600_selected_controller=run-paper-autopilot.sh
+execution_gate=closed
+```
+
+
+## Three-repo ownership carry-forward markers
+
+```text
+repo_role=surebet_strategy_application
 provider_truth_owner=betting-win
 canonical_history_owner=betting-win
 strategy_state_owner=betting-win-surebet
 backtesting_owner=betting-win-surebet
 paper_mode_owner=betting-win-surebet
+future_live_decision_owner=betting-win-surebet_after_explicit_gate
 account_policy=separate_from_betting-win-betting
-current_task=BWS-600
-current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
-safe_local_completion_gate=BWS-599
-continuous_private_paper=BWS-600_BLOCKED_UNTIL_OPERATOR_APPROVED_UPSTREAM_API_RUNTIME
-real_money_execution=BWS-900_PARKED
 ```
+
+These markers preserve the accepted three-repo boundary while the new BWS-700 B1 research/offline queue is active.
 
 ## Validated
 
@@ -74,4 +96,3 @@ next_controller=run-paper-autopilot.sh
 ## API-only upstream transport
 
 The BWS runtime consumes betting-win only through its accepted read-only API. `BWS_UPSTREAM_MODE` and the file-export runtime selector are removed. Missing API readiness is a runtime-evidence blocker; there is no automatic file fallback. The root runtime wrapper enforces paper mode, provider-disabled operation, and execution-disabled operation, uses explicit process values before selective `.env` fill, derives internal PostgreSQL settings from the canonical `POSTGRES_*` tuple, uses repo-owned defaults for internal runtime settings, and scrubs retired export and pinned-bundle runtime inputs. It does not invent private-paper manifest content.
-

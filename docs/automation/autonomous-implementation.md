@@ -1,10 +1,19 @@
 # Autonomous implementation rules: betting-win-surebet
 
+## Active BWS-700 authority
+
+The implementation controller is now selected for B1 offline falsification work. It must implement dependency-ready queue rows from `backlog/bws_b1_cross_venue_implementation.csv`, preserve `BWS-100` through `BWS-599`, keep `BWS-600` externally gated, and keep `BWS-900` parked. Real upstream B1 API intake remains blocked until `betting-win.b1_multi_venue_markets.v1` exists.
+
+
 ```text
-program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-current_task=BWS-600
+program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
+parent_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
+current_task=BWS-700
+selected_controller=run-autonomous-implementation.sh
+active_implementation_queue=backlog/bws_b1_cross_venue_implementation.csv
 safe_local_terminal_gate=BWS-599
-selected_controller=run-paper-autopilot.sh
+bws600_current_task=BWS-600
+bws600_selected_controller=run-paper-autopilot.sh
 ```
 
 `run-autonomous-implementation.sh` defaults to a 72-hour ceiling and is driven by repository docs, `docs/automation/current-implementation-task.md`, validated handoffs, `backlog/bws_full_implementation.csv`, and `backlog/bws_remaining_safe_local_map.csv`. There is no `--task` flag. A separate `--prompt-file` is not part of normal operator routing.

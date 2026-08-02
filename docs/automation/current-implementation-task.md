@@ -3,71 +3,104 @@
 Repository: `betting-win-surebet`.
 
 ```text
-program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-current_task=BWS-600
-current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
-active_implementation_queue=none
+program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
+parent_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
+current_task=BWS-700
+current_task_status=READY_FOR_IMPLEMENTATION
+active_implementation_queue=backlog/bws_b1_cross_venue_implementation.csv
+active_implementation_map=backlog/bws_b1_cross_venue_map.csv
+selected_controller=run-autonomous-implementation.sh
+post_overlay_controller=run-autonomous-implementation.sh
 safe_local_terminal_gate=BWS-599
 external_runtime_gate=BWS-600
-post_overlay_controller=run-paper-autopilot.sh
+execution_gate=BWS-900_PARKED
+operator_approval=explicit_2026_08_02
 ```
 
 ## Campaign objective
 
-No local source implementation queue is currently binding.
+Open and implement as much as safely possible from the B1 cross-venue offline falsification program. The controller should start from the documented `BWS-700` queue and continue through the largest dependency-ready cohesive tranche without touching live execution, provider integrations, `betting-win` source state, or protected automation.
 
-The safe-local product queue through `BWS-599` remains validated. The bounded `BWS-600_UPSTREAM_API_PREFLIGHT_SOURCE_FIX` is present in source: BWS now preflights the upstream `betting-win` read-only API before it starts or attaches to the BWS managed stack for `paper-runtime-evidence`.
+The implementation is research/offline/private-paper only. It must build deterministic B1 contracts, equivalence checks, quote synchronization, gross/net spread logic, generalized stake vectors, fill/rejection/timeout simulation, settlement false-positive analysis, offline falsification reports, private read-only API/cockpit surfaces and acceptance/kill criteria where dependencies allow.
 
-The next binding work is the external `BWS-600` runtime-evidence campaign. It may run only after the operator starts and approves the real `betting-win` read-only API. BWS must not start, stop, clone, reset, clean, commit, or otherwise mutate the `betting-win` checkout or service.
-
-Implementation handoff requirement: prove the betting-win committed HEAD remains unchanged, use no placeholder fields, and use no clone or temporary worktree.
-
-```text
-bws600_source_fix=BWS-600_UPSTREAM_API_PREFLIGHT_SOURCE_FIX_PRESENT
-betting_win_api_preflight_required=before_bws_runtime_evidence_window
-bws_local_api_4312_does_not_satisfy_upstream_preflight=true
-run_paper_autopilot_after_source_fix=true
-selected_controller=run-paper-autopilot.sh
-```
-
-`127.0.0.1:4312`, `localhost:4312`, and other loopback aliases for the configured BWS local API are BWS listeners only. They must never be accepted as proof that the upstream `betting-win` API is available.
+The real upstream intake task, `BWS-710`, remains blocked until `betting-win` exposes an accepted read-only `betting-win.b1_multi_venue_markets.v1` resource. The controller may implement local contract skeletons and deterministic fixtures, but fixtures must never be treated as upstream runtime evidence or live readiness.
 
 ## Required reading
 
 1. `AGENTS.md`
-2. `docs/repo_status_current.md`
-3. `docs/automation/README.md`
-4. `docs/034_remaining_operator_runtime_implementation_program.md`
-5. `docs/automation/api-only-upstream.md`
-6. `docs/automation/paper-autopilot.md`
-7. `docs/041_external_runtime_preflight_and_bws600_campaign.md`
-8. `backlog/bws_full_implementation.csv`
-9. `backlog/bws_remaining_safe_local_map.csv`
-10. `docs/042_release_packaging_implementation_blueprint.md`
-11. `docs/043_upgrade_rollback_recovery_implementation_blueprint.md`
-12. `docs/044_soak_failure_injection_implementation_blueprint.md`
-13. `docs/045_external_runtime_preflight_implementation_blueprint.md`
-14. `docs/046_final_local_acceptance_implementation_blueprint.md`
-
-The validated service, database, observability, wrapper and paper-controller contracts in `docs/035` through `docs/041` remain binding carry-forward requirements.
+2. `README.md`
+3. `docs/repo_status_current.md`
+4. `docs/000_documentation_index.md`
+5. `docs/047_b1_cross_venue_offline_falsification_program.md`
+6. `docs/048_b1_upstream_contract.md`
+7. `docs/049_b1_market_equivalence.md`
+8. `docs/050_b1_falsification_acceptance.md`
+9. `docs/051_b1_implementation_map.md`
+10. `docs/052_b1_future_strategy_stubs.md`
+11. `backlog/bws_b1_cross_venue_implementation.csv`
+12. `backlog/bws_b1_cross_venue_map.csv`
+13. `docs/041_external_runtime_preflight_and_bws600_campaign.md`
+14. `backlog/bws_full_implementation.csv`
+15. `backlog/bws_remaining_safe_local_map.csv`
+16. `docs/034_remaining_operator_runtime_implementation_program.md`
+17. `docs/042_release_packaging_implementation_blueprint.md`
+18. `docs/043_upgrade_rollback_recovery_implementation_blueprint.md`
+19. `docs/044_soak_failure_injection_implementation_blueprint.md`
+20. `docs/045_external_runtime_preflight_implementation_blueprint.md`
+21. `docs/046_final_local_acceptance_implementation_blueprint.md`
 
 ## Verified carry-forward state
 
-`BWS-100` through `BWS-599` are validated, including `BWS-592` soak/failure injection, `BWS-593` external runtime preflight, and `BWS-599` final local acceptance. Preserve their contracts. Do not reimplement or weaken validated functionality merely to create work.
-
-`BWS-600` remains externally gated. The source-side fail-fast preflight now improves evidence when the required upstream `betting-win` read-only API is unavailable, malformed, incompatible, non-loopback, credential-bearing, or pointed at the local BWS API.
-
-## Remaining sequence
+Validated safe-local terminal markers retained for existing BWS full-platform validators:
 
 ```text
-BWS-600_UPSTREAM_API_PREFLIGHT_SOURCE_FIX  source implementation present and maintained
-BWS-600_RUNTIME_EVIDENCE                  run paper autopilot after the operator starts/approves the betting-win read-only API
-BWS-900                                   parked until separate execution authorization
+BWS-592=VALIDATED_SOAK_FAILURE_INJECTION
+BWS-593=VALIDATED_EXTERNAL_RUNTIME_PREFLIGHT
+BWS-599=VALIDATED_FINAL_LOCAL_ACCEPTANCE
+```
+
+`BWS-100` through `BWS-599` are validated and must not be reopened. The same-venue standard-binary complete-set platform, API-only upstream runtime contract, private paper runtime, persistence, read-only API, cockpit, observability, release/recovery/soak/final-acceptance and source-manifest discipline are carry-forward foundations.
+
+`BWS-600` remains an external runtime-evidence gate for the accepted platform. It is not the B1 authority and must not be represented as complete unless the operator supplies accepted runtime evidence from a real `betting-win` read-only API.
+
+Carry-forward BWS-600 markers for validators and routing context:
+
+```text
+bws600_current_task=BWS-600
+bws600_current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
+bws600_active_implementation_queue=none
+bws600_selected_controller=run-paper-autopilot.sh
+bws600_safe_local_terminal_gate=BWS-599
+betting_win_api_preflight_required=before_bws_runtime_evidence_window
+run_paper_autopilot_after_source_fix=true
+selected_task_source=docs/041_external_runtime_preflight_and_bws600_campaign.md
+backlog/bws_full_implementation.csv
+backlog/bws_remaining_safe_local_map.csv
+```
+
+
+BWS-600 runtime-evidence carry-forward environment marker for existing validators and operator routing:
+
+```text
+BETTING_WIN_REPO_PATH=existing_read_only_checkout
+bws600_BETTING_WIN_REPO_PATH_required=yes
+```
+
+## Dependency rules
+
+```text
+BWS-700=authority_docs_validators_queue
+BWS-705=local_contract_skeleton_allowed
+BWS-710=blocked_until_accepted_betting_win_b1_multi_venue_api
+BWS-720_through_BWS-790=offline_deterministic_design_allowed_after_local_contract_skeleton
+BWS-800_through_BWS-820=private_reporting_and_evidence_allowed_without_execution
+BWS-830=parked_future_F_design_stub_only
+BWS-840=parked_future_C_G_design_stubs_only
 ```
 
 ## Protected automation authorization
 
-The protected wrapper and paper-controller integration tasks are complete. No protected automation edit is authorized by the current state.
+No protected automation edit is authorized by this B1 implementation task.
 
 ```text
 automation_maintenance_allowed=no
@@ -83,43 +116,49 @@ Rules:
 ## Controller selection
 
 ```text
-selected_controller=run-paper-autopilot.sh
+selected_controller=run-autonomous-implementation.sh
 force_unlock_required=no
-campaign_duration=7d
-paper_child_duration=72h
-implementation_child_duration=72h
+campaign_duration=72h
 recommended_cycle_timeout=6h
+validation_timeout=45m
 ```
 
-Paper autopilot remains the parent because it owns the `paper -> runtime evidence -> source issue -> implementation -> paper` loop. If the new upstream API preflight finds the real `betting-win` API absent or incompatible, the run must fail fast with retained bounded non-secret evidence, not spend 72 hours collecting BWS-only degraded evidence.
+Use the parent implementation controller only. Do not invent `--task` or `--prompt-file`. The task authority is this file plus the B1 docs and backlog files.
 
-## External runtime gate
-
-The operator must provide the real upstream API availability. BWS may probe it through the approved read-only API URL. BWS must not start, stop, or mutate the upstream service.
-
-Required runtime boundary:
+## Safety
 
 ```text
-BETTING_WIN_REPO_PATH=existing_read_only_checkout
-betting_win_checkout_mutation=prohibited
-betting_win_service_start_by_bws=prohibited
-betting_win_service_stop_by_bws=prohibited
-bws_local_api_port_4312=not_upstream_api_evidence
 provider_connections=prohibited
 provider_credentials=prohibited
-direct_betting_win_core_writes=prohibited
+raw_provider_ingestion=prohibited
+betting_win_checkout_mutation=prohibited
+betting_win_core_writes=prohibited
 direct_betting_win_database_reads=prohibited
+file_export_runtime_fallback=prohibited
+fixture_runtime_fallback=prohibited
 execution=prohibited
 public_signals=prohibited
 profitability_claims=prohibited
+BWS-900=parked
+```
+
+Do not clone the betting-win checkout. Do not invent an upstream B1 contract, endpoint, acceptance result or external runtime evidence. If the real upstream B1 API is absent, implement dependency-ready offline surfaces and record the remaining blocker truthfully.
+# BWS-600 carry-forward runtime boundary markers
+
+```text
+betting_win_service_start_by_bws=prohibited
+betting_win_service_stop_by_bws=prohibited
+bws_local_api_port_4312=not_upstream_api_evidence
+direct_betting_win_core_writes=prohibited
+direct_betting_win_database_reads=prohibited
 automatic_upstream_mode_fallback=prohibited
-file_export_fallback=prohibited
 secret_output=prohibited
 pre_existing_service_mutation=prohibited
 ```
+# Upstream lock carry-forward proof markers
 
-Do not clone the betting-win checkout. Do not invent a contract, endpoint, acceptance result or external runtime evidence.
-
-## API-only upstream transport
-
-The BWS runtime consumes betting-win only through its accepted read-only API. `BWS_UPSTREAM_MODE` and the file-export runtime selector are removed. Missing upstream API readiness must fail fast before the long BWS runtime-evidence window; there is no automatic file fallback.
+```text
+prove the betting-win committed HEAD remains unchanged
+no placeholder fields
+no clone or temporary worktree
+```

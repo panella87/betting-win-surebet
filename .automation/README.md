@@ -1,11 +1,19 @@
 # Current product routing
 
+## Active B1 routing
+
+The active source implementation route is `BWS-700` via `run-autonomous-implementation.sh`. Parent paper autopilot remains the BWS-600 runtime-evidence route only after the operator starts and approves the real upstream betting-win read-only API.
+
+
 ```text
-program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-current_task=BWS-600
+program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
+parent_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
+current_task=BWS-700
 safe_local_terminal_gate=BWS-599
+bws600_current_task=BWS-600
 bws600_upstream_api_preflight_source_fix=present
-selected_controller=run-paper-autopilot.sh
+selected_controller=run-autonomous-implementation.sh
+bws600_selected_controller=run-paper-autopilot.sh
 ```
 
 `BWS-100` through `BWS-599` are validated. The `BWS-600` upstream API preflight source fix is present; the active route is the external runtime-evidence parent after the operator starts and approves the betting-win read-only API.

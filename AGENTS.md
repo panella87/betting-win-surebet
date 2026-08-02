@@ -1,5 +1,20 @@
 # Agent Instructions
 
+## Active B1 implementation authority
+
+```text
+program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
+current_task=BWS-700
+selected_controller=run-autonomous-implementation.sh
+active_implementation_queue=backlog/bws_b1_cross_venue_implementation.csv
+bws600_current_task=BWS-600
+safe_local_terminal_gate=BWS-599
+BWS-900=parked
+```
+
+Use the B1 docs and backlog only for deterministic offline/private-paper implementation. Preserve validated same-venue platform behavior, the API-only upstream boundary, no-provider/no-execution contracts, and the external BWS-600 runtime-evidence blocker. B1 fixtures are allowed for deterministic tests but must never be treated as upstream runtime evidence or profitability proof.
+
+
 ## Repository purpose
 
 `betting-win-surebet` is the downstream surebet application built on the `betting-win` provider, data, history, export and read-only query platform.

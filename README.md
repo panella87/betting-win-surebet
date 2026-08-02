@@ -1,11 +1,19 @@
 # betting-win-surebet
 
+## B1 implementation authority
+
+The active implementation authority is now `BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1`. It opens `BWS-700` through `BWS-820` for deterministic offline/private-paper B1 work while preserving `BWS-100` through `BWS-599`, the external `BWS-600` runtime-evidence gate, and parked `BWS-900` execution. The binding queue is `backlog/bws_b1_cross_venue_implementation.csv`; the implementation map is `backlog/bws_b1_cross_venue_map.csv`.
+
+`BWS-710` real upstream intake remains blocked until `betting-win` exposes an accepted read-only `betting-win.b1_multi_venue_markets.v1` resource. Dependency-ready local work may implement contract skeletons, equivalence, gross/net calculations, stake-vector solving, fill/rejection/timeout simulation, settlement false-positive analysis, deterministic offline backtesting, private persistence, read-only reporting and acceptance/kill criteria. Fixtures are not runtime evidence.
+
+
 `betting-win-surebet` is the surebet and complete-set application built on top of the `betting-win` provider, data, history, export and read-only query platform.
 
 It remains a separate downstream repository. It does not fork the provider platform or copy provider adapters. It consumes exact contracts, immutable exports, canonical identifiers, provenance and read-only query/API surfaces. It owns all surebet-specific state and decisions.
 
 ```text
-program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
+program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
+parent_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 repo_role=surebet_strategy_application
 upstream_platform=betting-win
 provider_truth_owner=betting-win
@@ -15,11 +23,15 @@ backtesting_owner=betting-win-surebet
 paper_mode_owner=betting-win-surebet
 future_live_decision_owner=betting-win-surebet_after_explicit_gate
 account_policy=separate_from_betting-win-betting
-current_task=BWS-600
-current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
+current_task=BWS-700
+current_task_status=READY_FOR_IMPLEMENTATION
+active_implementation_queue=backlog/bws_b1_cross_venue_implementation.csv
 safe_local_terminal_gate=BWS-599
 external_runtime_gate=BWS-600
+bws600_current_task=BWS-600
+bws600_current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
 execution_gate=closed
+BWS-900=parked
 ```
 
 ## Upstream surfaces
@@ -108,4 +120,3 @@ See `docs/automation/repository-temp-inode-safety.md`. The maintenance command `
 ## API-only upstream transport
 
 The BWS runtime consumes betting-win only through its accepted read-only API. `BWS_UPSTREAM_MODE` and the file-export runtime selector are removed. Missing API readiness is a runtime-evidence blocker; there is no automatic file fallback. Supported root runtime commands enforce `paper`, provider-disabled, and execution-disabled policy; explicit process connection settings take precedence, `.env` supplies the canonical `POSTGRES_*` tuple, and repo-owned defaults cover internal runtime settings including the standard repo-local schedule path. No private-paper manifest content is synthesized.
-

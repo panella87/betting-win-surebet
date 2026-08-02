@@ -19,6 +19,36 @@ This is the short map for the BWS documentation set. Use it before opening older
 4. `docs/automation/api-only-upstream.md` - binding upstream transport contract.
 5. `docs/041_external_runtime_preflight_and_bws600_campaign.md` - BWS-600 runtime-evidence gate.
 
+
+## Active B1 implementation authority
+
+```text
+program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
+active_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
+current_task=BWS-700
+current_task_status=READY_FOR_IMPLEMENTATION
+active_implementation_queue=backlog/bws_b1_cross_venue_implementation.csv
+bws600_current_task=BWS-600
+bws600_current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
+safe_local_terminal_gate=BWS-599
+BWS-900=parked
+```
+
+Read these B1 documents before starting or auditing the implementation controller:
+
+```text
+docs/047_b1_cross_venue_offline_falsification_program.md
+docs/048_b1_upstream_contract.md
+docs/049_b1_market_equivalence.md
+docs/050_b1_falsification_acceptance.md
+docs/051_b1_implementation_map.md
+docs/052_b1_future_strategy_stubs.md
+backlog/bws_b1_cross_venue_implementation.csv
+backlog/bws_b1_cross_venue_map.csv
+```
+
+The B1 authority is offline/private-paper only. `BWS-710` remains blocked until `betting-win` exposes an accepted read-only `betting-win.b1_multi_venue_markets.v1` resource. `BWS-600` remains the external runtime-evidence gate for the accepted same-venue platform, and `BWS-900` remains parked.
+
 ## Active operating docs
 
 ```text

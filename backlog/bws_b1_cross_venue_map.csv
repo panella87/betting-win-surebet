@@ -1,0 +1,17 @@
+task_id,phase,primary_docs,source_areas,test_or_validator_targets,hard_blockers
+BWS-700,authority,docs/047_b1_cross_venue_offline_falsification_program.md;docs/048_b1_upstream_contract.md;docs/050_b1_falsification_acceptance.md,docs;backlog;scripts,scripts/validate_bws_b1_authority.py;scripts/validate_bws_b1_boundary.py,none
+BWS-705,local_contract_skeleton,docs/048_b1_upstream_contract.md;docs/051_b1_implementation_map.md,packages/bootstrap/src/contracts;tests/fixtures,bws-b1 contract tests;validate_bws_b1_boundary.py,no_runtime_upstream_readiness_claim
+BWS-710,real_upstream_intake,docs/048_b1_upstream_contract.md,packages/bootstrap/src/adapters;packages/bootstrap/src/operations;database/migrations/surebet,bws-b1-upstream-contract tests;validate_bws_b1_upstream_contract.py,accepted_betting_win_b1_multi_venue_api
+BWS-720,identity,docs/049_b1_market_equivalence.md,packages/bootstrap/src/identity;packages/bootstrap/src/contracts,b1-market-equivalence tests;b1-selection-equivalence tests,missing_equivalence_blocks
+BWS-730,quotes_capacity,docs/049_b1_market_equivalence.md,packages/bootstrap/src/quotes,b1-quote-synchronization tests;b1-capacity-model tests,unknown_capacity_or_stale_quote_blocks
+BWS-740,gross_derivation,docs/051_b1_implementation_map.md,packages/bootstrap/src/opportunity,b1-gross-spread tests;b1-cross-venue-derivation tests,incomplete_outcome_set_blocks
+BWS-750,net_economics,docs/050_b1_falsification_acceptance.md,packages/bootstrap/src/economics,b1-net-spread tests;b1-capital-lock tests,unknown_fee_capacity_or_lag_blocks
+BWS-760,solver,docs/051_b1_implementation_map.md,packages/bootstrap/src/solver;packages/bootstrap/src/scenarios,b1-generalized-stake-vector tests;b1-scenario-cashflow tests,rounding_loss_blocks
+BWS-770,fillability,docs/050_b1_falsification_acceptance.md,packages/bootstrap/src/simulation,b1-rejection-model tests;b1-residual-exposure tests,execution_and_unwind_prohibited
+BWS-780,settlement_false_positive,docs/050_b1_falsification_acceptance.md,packages/bootstrap/src/simulation;packages/bootstrap/src/reporting,b1-settlement-replay tests;b1-false-positive-report tests,unknown_settlement_or_void_rule_blocks
+BWS-790,offline_backtest,docs/050_b1_falsification_acceptance.md,packages/bootstrap/src/backtest;packages/bootstrap/src/cli;packages/bootstrap/src/reporting,b1-cross-venue-backtest tests;b1-backtest-report tests,fixture_only_not_runtime_proof
+BWS-800,persistence_workers,docs/051_b1_implementation_map.md,database/migrations/surebet;packages/persistence;packages/bootstrap/src/workers,b1-persistence tests;b1-private-observation-runtime tests,surebet_schema_only
+BWS-810,read_only_api_cockpit,docs/051_b1_implementation_map.md,packages/bootstrap/src/api;apps/web/src,b1-read-only-api tests;b1-operator-cockpit tests,execution_or_public_signal_ui_forbidden
+BWS-820,runtime_evidence_acceptance,docs/050_b1_falsification_acceptance.md,packages/bootstrap/src/operations;packages/bootstrap/src/cli;scripts,b1-runtime-evidence tests;validate_bws_b1_acceptance.py,BWS-900_remains_parked
+BWS-830,future_stub,docs/052_b1_future_strategy_stubs.md,docs only,validate_bws_b1_authority.py,separate_reviewed_authority_required
+BWS-840,future_stub,docs/052_b1_future_strategy_stubs.md,docs only,validate_bws_b1_authority.py,separate_reviewed_authority_required

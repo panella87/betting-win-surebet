@@ -1,11 +1,21 @@
 # Repo automation contract: betting-win-surebet
 
+## Active B1 controller route
+
+`run-autonomous-implementation.sh` is selected for the BWS-700 B1 implementation queue. It remains docs/current-task driven; do not use `--task` and do not use `--prompt-file` for normal routing. The BWS-600 runtime-evidence parent remains available after a real operator-approved betting-win read-only API is running, but it is not the selected route for the B1 implementation overlay.
+
+
 ```text
-program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-current_task=BWS-600
-current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
-selected_controller=run-paper-autopilot.sh
+program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
+parent_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
+current_task=BWS-700
+current_task_status=READY_FOR_IMPLEMENTATION
+selected_controller=run-autonomous-implementation.sh
+active_implementation_queue=backlog/bws_b1_cross_venue_implementation.csv
 safe_local_terminal_gate=BWS-599
+bws600_current_task=BWS-600
+bws600_current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
+bws600_selected_controller=run-paper-autopilot.sh
 bws600_upstream_api_preflight_source_fix=present
 ```
 

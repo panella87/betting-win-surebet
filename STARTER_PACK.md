@@ -1,12 +1,16 @@
 # betting-win-surebet starter pack
 
 ```text
-program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
+repo=betting-win-surebet
 repo_role=surebet_strategy_application
-upstream_platform=betting-win
-current_task=BWS-600
-safe_local_terminal_gate=BWS-599
+program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
+parent_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
+current_task=BWS-700
+selected_controller=run-autonomous-implementation.sh
+active_implementation_queue=backlog/bws_b1_cross_venue_implementation.csv
+bws600_current_task=BWS-600
 current_live_execution_gate=closed
+BWS-900=parked
 ```
 
 Read:
@@ -30,4 +34,4 @@ BWS-593  external-runtime preflight and campaign manifest (validated)
 BWS-599  final local acceptance (validated)
 ```
 
-No safe local implementation row remains. Route to paper autopilot for the active `BWS-600` runtime campaign.
+The full-platform safe-local queue remains complete through `BWS-599`; `BWS-600` remains externally blocked on real betting-win API runtime evidence. The current explicit research/offline source route is `BWS-700` through `run-autonomous-implementation.sh`.

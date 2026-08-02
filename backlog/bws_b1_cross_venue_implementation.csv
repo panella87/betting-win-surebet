@@ -1,0 +1,17 @@
+id,status,depends_on,objective,required_proof
+BWS-700,PENDING,BWS-599,"Open reviewed B1 authority, docs, backlog and validation skeleton","B1 authority docs, queue, current-task pointer and validators pass without runtime/source behavior changes"
+BWS-705,PENDING,BWS-700,Add B1 local contract/type skeleton and deterministic fixture contract,"Versioned local B1 types and fixtures exist, no provider/API/file runtime fallback and no upstream readiness claim"
+BWS-710,BLOCKED,"BWS-705,accepted_betting_win_b1_multi_venue_api",Consume real betting-win B1 read-only API resources,Real betting-win.b1_multi_venue_markets.v1 API accepted; immutable snapshots only; no direct provider or betting-win writes
+BWS-720,PENDING,BWS-705,Implement cross-venue market and selection equivalence model,Unsupported or ambiguous equivalence fails closed with exact B1 blocker codes
+BWS-730,PENDING,BWS-720,"Implement quote synchronization, freshness, capacity and venue limit checks","Quote age, retrieval lag, comparison windows and conservative capacity decisions are recorded per candidate"
+BWS-740,PENDING,BWS-730,Implement cross-venue gross opportunity derivation,"Gross candidates are deterministic and never labeled net, fillable, profitable or executable"
+BWS-750,PENDING,BWS-740,"Implement net economics, fee matrix, quote-age penalties and capital lock","Every accepted net candidate has positive worst-case net after fees, caps, age and capital lock"
+BWS-760,PENDING,BWS-750,Implement generalized stake vector and scenario cash-flow solver,2-way and 3-way complete-market portfolios use integer minor units and fail closed on rounding loss
+BWS-770,PENDING,BWS-760,"Implement fill, rejection, timeout and residual-exposure simulation",Incomplete-leg scenarios report worst-case residual exposure and never attempt unwind/execution
+BWS-780,PENDING,BWS-770,"Implement settlement replay, void-rule mismatch and false-positive analysis",Unknown or mismatched settlement/void rules block and false positives are first-class metrics
+BWS-790,PENDING,BWS-780,Implement deterministic B1 offline backtest/falsification runner,Pinned datasets produce reproducible gross/net/fillable/blocked/falsified reports with no live-readiness claim
+BWS-800,PENDING,BWS-790,"Implement B1 persistence, workers and private observation ledger",Only surebet-owned tables and private records are created; secrets/provider/account data are not persisted
+BWS-810,PENDING,BWS-800,"Implement B1 read-only API, cockpit and reporting",Operator UI/API shows research evidence only and exposes no betting/account/public-signal controls
+BWS-820,PENDING,BWS-810,"Implement B1 runtime evidence, acceptance gates and kill criteria","Accepted, falsified and blocked outcomes are deterministic, redacted and independently reviewable"
+BWS-830,PARKED,"BWS-820,separate_reviewed_authority",Park F probability-constraint arbitrage design stub only,"Prerequisites documented; no active scanner, solver or observation implementation"
+BWS-840,PARKED,separate_reviewed_authority,Park C/G offline microstructure design stubs only,"Prerequisites documented; no quote posting, queue placement, order cancellation, hedging or live in-play execution"

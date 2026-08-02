@@ -19,3 +19,10 @@ The controller selects the first `PENDING` row whose internal dependencies are `
 `BWS-100` through `BWS-590` are validated. Safe local implementation remains from `BWS-591` through the terminal gate `BWS-599`. `BWS-600` is externally blocked and `BWS-900` is separately parked.
 
 Historical SURE ledgers are retained evidence, not routing authority.
+
+
+## BWS-700 B1 implementation queue
+
+`backlog/bws_b1_cross_venue_implementation.csv` is the active operator-approved B1 implementation queue. `backlog/bws_b1_cross_venue_map.csv` maps tasks to docs, source areas, validation targets and hard blockers.
+
+`BWS-710` real upstream intake is intentionally blocked until `betting-win` exposes `betting-win.b1_multi_venue_markets.v1`; dependency-ready local offline surfaces may still be implemented without treating fixtures as runtime evidence.

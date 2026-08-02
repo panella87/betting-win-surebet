@@ -1,3 +1,11 @@
+
+## 2026-08-02 - BWS-700 B1 offline falsification authority overlay
+
+- Opened `BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1` as an explicit operator-approved implementation authority for the OpenAlex B1 cross-venue arbitrage falsification track.
+- Added B1 docs `docs/047` through `docs/052`, the B1 queue/map, and B1 authority/boundary validators.
+- Routed the next source implementation controller to `run-autonomous-implementation.sh` while preserving the accepted `BWS-100` through `BWS-599` platform, external `BWS-600` runtime-evidence gate, and parked `BWS-900` execution gate.
+- Kept real B1 upstream intake blocked until `betting-win` exposes `betting-win.b1_multi_venue_markets.v1`; fixtures may support deterministic offline tests but are not runtime evidence.
+
 ## 2026-07-21 - Standardized automation documentation alignment
 
 - Corrected active paper-evaluation automation docs to name the repo-root `artifacts.zip` output instead of a non-existent `root_artifacts.zip` filename.
