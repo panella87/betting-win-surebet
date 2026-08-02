@@ -28,7 +28,7 @@ EXPECTED_STATUS = {
     'BWS-790': 'VALIDATED',
     'BWS-800': 'VALIDATED',
     'BWS-810': 'VALIDATED',
-    'BWS-820': 'PENDING',
+    'BWS-820': 'VALIDATED',
     'BWS-830': 'PARKED',
     'BWS-840': 'PARKED',
 }

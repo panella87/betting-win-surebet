@@ -12,6 +12,6 @@ BWS-780,VALIDATED,BWS-770,"Implement settlement replay, void-rule mismatch and f
 BWS-790,VALIDATED,BWS-780,Implement deterministic B1 offline backtest/falsification runner,Pinned datasets produce reproducible gross/net/fillable/blocked/falsified reports with no live-readiness claim
 BWS-800,VALIDATED,BWS-790,"Implement B1 persistence, workers and private observation ledger",Only surebet-owned tables and private records are created; secrets/provider/account data are not persisted
 BWS-810,VALIDATED,BWS-800,"Implement B1 read-only API, cockpit and reporting",Operator UI/API shows research evidence only and exposes no betting/account/public-signal controls
-BWS-820,PENDING,BWS-810,"Implement B1 runtime evidence, acceptance gates and kill criteria","Accepted, falsified and blocked outcomes are deterministic, redacted and independently reviewable"
+BWS-820,VALIDATED,BWS-810,"Implement B1 runtime evidence, acceptance gates and kill criteria","Accepted, falsified and blocked outcomes are deterministic, redacted and independently reviewable"
 BWS-830,PARKED,"BWS-820,separate_reviewed_authority",Park F probability-constraint arbitrage design stub only,"Prerequisites documented; no active scanner, solver or observation implementation"
 BWS-840,PARKED,separate_reviewed_authority,Park C/G offline microstructure design stubs only,"Prerequisites documented; no quote posting, queue placement, order cancellation, hedging or live in-play execution"

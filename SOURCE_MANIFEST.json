@@ -1,6 +1,6 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-08-02T16:42:13Z",
+  "generated": "2026-08-02T18:29:07Z",
   "overlay": "bws82-bws700-validation-repair-wave47",
   "files": [
     {
@@ -245,8 +245,8 @@
     },
     {
       "path": "backlog/bws_b1_cross_venue_implementation.csv",
-      "sha256": "7a8fc7df511035091337262eedeeb05ce7b1a5d5766343664d30390a6eee4a75",
-      "size": 3217
+      "sha256": "edc4efcfba09c8623d6f62a90f506471970b851bb8e094ee367225a35d389bf5",
+      "size": 3218
     },
     {
       "path": "backlog/bws_b1_cross_venue_map.csv",
@@ -790,8 +790,8 @@
     },
     {
       "path": "package.json",
-      "sha256": "94df45351466d7ed2ae407fdcdc8e29ecaf7bdf4b3407c2850da48466340e7d3",
-      "size": 8909
+      "sha256": "b1b69ffa6d0b974c3b3ba55f3ec1acffb21e512c3a862e2a7b2d6b5139e5eac0",
+      "size": 9098
     },
     {
       "path": "packages/bootstrap/package.json",
@@ -1022,6 +1022,11 @@
       "path": "packages/bootstrap/src/index.ts",
       "sha256": "39020186803998a562f24ab1df6f57222101a4d415c7cd94a1d35976cf6569d8",
       "size": 6917
+    },
+    {
+      "path": "packages/bootstrap/src/operations/b1-runtime-evidence.ts",
+      "sha256": "80ea2ca2a8b071dc1fdafc614594fac3d642b0416bcf6beec4c515cd707adbe8",
+      "size": 20155
     },
     {
       "path": "packages/bootstrap/src/operations/bws-soak-runtime-integration.ts",
@@ -1784,9 +1789,14 @@
       "size": 10030
     },
     {
+      "path": "scripts/validate_bws_b1_acceptance.py",
+      "sha256": "f31f3f38125c3c308859278c77eeebf0db0c6fd13a1adc88f7e7e3ca797394ca",
+      "size": 3339
+    },
+    {
       "path": "scripts/validate_bws_b1_authority.py",
-      "sha256": "fc8bfee36a4ce9663087c24e356439d29a86ffa5778590bd573622f2d2093d70",
-      "size": 10278
+      "sha256": "226f556c50c666eaf2b5755f88ca61436e3db072466eb03477278d1279d39380",
+      "size": 10280
     },
     {
       "path": "scripts/validate_bws_b1_boundary.py",
@@ -2092,6 +2102,11 @@
       "path": "src/identity/market-group-key.ts",
       "sha256": "bd312f31752aacdc3e3b4f78578c11db0f15e2846a92c2840b153c121fd75870",
       "size": 75
+    },
+    {
+      "path": "src/operations/b1-runtime-evidence.ts",
+      "sha256": "9a4bc2076e09b9ec050a1bcaa3954406b16c4968f0ce282d72dfde4e8a2e7997",
+      "size": 80
     },
     {
       "path": "src/operations/database-lifecycle.ts",
@@ -2502,6 +2517,11 @@
       "path": "tests/b1-residual-exposure.test.ts",
       "sha256": "4055feb0b42cb69d5344172a73a9fe317f54f82d1564020db7e82483fdbeb56d",
       "size": 4783
+    },
+    {
+      "path": "tests/b1-runtime-evidence.test.ts",
+      "sha256": "aebe980faa9efd95c354aace00456a9f93b5952b0e2e29936189dd9d9a68b435",
+      "size": 10364
     },
     {
       "path": "tests/b1-scenario-cashflow.test.ts",
@@ -3015,8 +3035,8 @@
     },
     {
       "path": "update_git.sh",
-      "sha256": "3dc84bbfe27c10e476eec3de1e05af2e98456754e6c0a708e21d0d2fb460623d",
-      "size": 11229
+      "sha256": "da5910a817a304f1dba15bb5b72c212f4fe1288c2c46fe90c1b8b24ca309e63b",
+      "size": 13071
     },
     {
       "path": "watch_progress.sh",
