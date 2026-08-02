@@ -43,11 +43,11 @@ paper_evaluation_script_explicit_interval_clamp=not_enforced_by_current_protecte
 ## Root controllers
 
 ```text
-run-autonomous-implementation.sh  72h default, source-fix handoff only, docs/current-task driven
+run-autonomous-implementation.sh  72h default, selected for current BWS-700 docs/current-task queue
 run-autonomous-bugfix.sh          72h default, standalone read-only audit and handoff
 run-bugfix-autopilot.sh           seven-day broad unattended audit and repair parent
 run-paper-evaluation.sh           72h default, fixture evaluator plus runtime-evidence mode after BWS-588
-run-paper-autopilot.sh            seven-day selected BWS-600 runtime-evidence parent after upstream API preflight source fix
+run-paper-autopilot.sh            seven-day BWS-600 runtime-evidence parent after upstream API readiness and no active implementation queue
 ```
 
-The current product has long-running API convergence, scheduler and worker services, managed loopback cockpit serving, a validated full-stack lifecycle owner, database lifecycle operations, observability, root-wrapper integration, runtime-evidence paper automation, release packaging, upgrade/recovery proof, soak/failure injection, external preflight, final local acceptance, and the BWS-600 upstream API preflight source fix. The active gate is external runtime evidence against an operator-approved betting-win read-only API.
+The current product has long-running API convergence, scheduler and worker services, managed loopback cockpit serving, a validated full-stack lifecycle owner, database lifecycle operations, observability, root-wrapper integration, runtime-evidence paper automation, release packaging, upgrade/recovery proof, soak/failure injection, external preflight, final local acceptance, and the BWS-600 upstream API preflight source fix. The active source implementation route is now BWS-700 B1 offline falsification; external BWS-600 runtime evidence remains a carry-forward gate against an operator-approved betting-win read-only API.

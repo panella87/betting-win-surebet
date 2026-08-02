@@ -16,13 +16,19 @@ BWS-900=parked
 Read:
 
 1. `AGENTS.md`
-2. `docs/000_documentation_index.md`
+2. `docs/automation/current-implementation-task.md`
 3. `docs/repo_status_current.md`
-4. `docs/automation/current-implementation-task.md`
-5. `docs/automation/api-only-upstream.md`
-6. `docs/041_external_runtime_preflight_and_bws600_campaign.md`
-7. `backlog/bws_full_implementation.csv`
-8. `backlog/bws_remaining_safe_local_map.csv`
+4. `docs/000_documentation_index.md`
+5. `docs/047_b1_cross_venue_offline_falsification_program.md`
+6. `docs/048_b1_upstream_contract.md`
+7. `docs/049_b1_market_equivalence.md`
+8. `docs/050_b1_falsification_acceptance.md`
+9. `docs/051_b1_implementation_map.md`
+10. `backlog/bws_b1_cross_venue_implementation.csv`
+11. `backlog/bws_b1_cross_venue_map.csv`
+12. `docs/041_external_runtime_preflight_and_bws600_campaign.md`
+13. `backlog/bws_full_implementation.csv`
+14. `backlog/bws_remaining_safe_local_map.csv`
 
 `BWS-599` is validated. The protected integration phase is complete, so the current campaign does not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`.
 

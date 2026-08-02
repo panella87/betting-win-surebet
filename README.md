@@ -82,15 +82,22 @@ BWS-900  separately authorized execution
 Read in this order:
 
 1. `AGENTS.md`
-2. `docs/000_documentation_index.md`
+2. `docs/automation/current-implementation-task.md`
 3. `docs/repo_status_current.md`
-4. `docs/automation/current-implementation-task.md`
-5. `docs/automation/api-only-upstream.md`
-6. `docs/041_external_runtime_preflight_and_bws600_campaign.md`
-7. `backlog/bws_full_implementation.csv`
-8. `backlog/bws_remaining_safe_local_map.csv`
+4. `docs/000_documentation_index.md`
+5. `docs/047_b1_cross_venue_offline_falsification_program.md`
+6. `docs/048_b1_upstream_contract.md`
+7. `docs/049_b1_market_equivalence.md`
+8. `docs/050_b1_falsification_acceptance.md`
+9. `docs/051_b1_implementation_map.md`
+10. `docs/052_b1_future_strategy_stubs.md`
+11. `backlog/bws_b1_cross_venue_implementation.csv`
+12. `backlog/bws_b1_cross_venue_map.csv`
+13. `docs/041_external_runtime_preflight_and_bws600_campaign.md`
+14. `backlog/bws_full_implementation.csv`
+15. `backlog/bws_remaining_safe_local_map.csv`
 
-Detailed BWS-599 carry-forward contracts and historical blueprints stay discoverable from `docs/000_documentation_index.md`. Historical SURE ledgers remain regression evidence only and do not authorize implementation to stop.
+Detailed BWS-599 carry-forward contracts and historical blueprints stay discoverable from `docs/000_documentation_index.md`. Historical SURE ledgers remain regression evidence only and do not authorize implementation to stop. BWS-600 paper/runtime evidence remains a carry-forward gate, not the selected controller route while BWS-700 is active.
 
 ## Validation
 
@@ -102,7 +109,7 @@ npm run validate
 
 ## Current automation route
 
-The selected controller is now `run-paper-autopilot.sh` for the `BWS-600` runtime-evidence campaign. The safe-local implementation queue through `BWS-599` is complete and the upstream API preflight source fix is present; the remaining blocker is an operator-approved running betting-win read-only API.
+The selected controller is now `run-autonomous-implementation.sh` for the `BWS-700` B1 implementation queue. The source of task authority is `docs/automation/current-implementation-task.md` plus the B1 docs and backlog. `run-paper-autopilot.sh` remains the later BWS-600 runtime-evidence route only after the operator-approved betting-win read-only API is available and the current source implementation route is no longer binding.
 
 The standardized helper surface is active: `zip_codebase.sh` creates numbered repo-root zips without a manifest; `pull_artifacts_and_zip_codebase.sh` pulls server `artifacts.zip` and then calls local `zip_codebase.sh` without reading `automation.config.sh`; `update_git.sh --acp` is the add/commit/push shorthand and preserves `GITHUB_TOKEN` support. `run-autonomous-implementation.sh`, `run-paper-evaluation.sh` and `run-autonomous-bugfix.sh` default to 72-hour standalone ceilings. `run-paper-evaluation.sh` replaces the old 12-hour helper and writes root `artifacts.zip`; the canonical operator flag is `--adaptive`, and active commands must keep explicit observation intervals inside the 5..60 minute policy until a reviewed protected-controller change implements automatic explicit-interval clamping. `run-autonomous-bugfix.sh` has no proactive/reactive mode flags. `stop-autonomous-run.sh` is intentionally absent.
 

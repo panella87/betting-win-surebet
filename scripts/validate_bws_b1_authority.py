@@ -137,6 +137,102 @@ def main() -> None:
     if 'scripts/validate_bws_b1_boundary.py' not in validate_ops:
         fail('package.json validate:ops must include validate_bws_b1_boundary.py')
 
+
+    active_route_expectations = {
+        'README.md': [
+            'The selected controller is now `run-autonomous-implementation.sh` for the `BWS-700` B1 implementation queue.',
+            'BWS-600 paper/runtime evidence remains a carry-forward gate, not the selected controller route while BWS-700 is active.',
+        ],
+        'AGENTS.md': [
+            'The current source implementation gate is `BWS-700` for the reviewed B1 cross-venue offline falsification program.',
+            'Use `run-autonomous-implementation.sh` for the current `BWS-700` B1 implementation queue.',
+        ],
+        'PROJECT_STATUS.md': [
+            'selected_controller=run-autonomous-implementation.sh',
+            'selected_task=BWS-700',
+            'paper_autopilot_selected=not_selected_while_bws700_queue_is_active',
+        ],
+        'docs/repo_status_current.md': [
+            'The active binding queue is `backlog/bws_b1_cross_venue_implementation.csv`',
+            'selected_controller=run-autonomous-implementation.sh',
+            'post_overlay_controller=run-autonomous-implementation.sh',
+        ],
+        'docs/automation/README.md': [
+            'run-autonomous-implementation.sh  selected for current BWS-700 B1 implementation queue',
+            'Paper autopilot remains available for BWS-600 after upstream API readiness',
+        ],
+        'docs/automation/repo-profile.md': [
+            'run-autonomous-implementation.sh  72h default, selected for current BWS-700 docs/current-task queue',
+            'The active source implementation route is now BWS-700 B1 offline falsification',
+        ],
+        'docs/automation/PROTECTED_AUTOMATION_FILES.md': [
+            'current `BWS-700` implementation state',
+            'carry-forward `BWS-600` runtime-evidence state',
+        ],
+        '.automation/README.md': [
+            'the active route is now the BWS-700 implementation parent',
+            'They are the carry-forward path for `BWS-600` after upstream API readiness',
+        ],
+        'backlog/README.md': [
+            '`BWS-100` through `BWS-599` are validated.',
+            '`backlog/bws_b1_cross_venue_implementation.csv` is the active operator-approved B1 implementation queue.',
+        ],
+        'STARTER_PACK.md': [
+            '`backlog/bws_b1_cross_venue_implementation.csv`',
+            '`docs/047_b1_cross_venue_offline_falsification_program.md`',
+        ],
+    }
+    for rel, markers in active_route_expectations.items():
+        text = read(rel)
+        for marker in markers:
+            require(text, marker, rel)
+
+    forbidden_active_route_phrases = {
+        'README.md': [
+            'The selected controller is now `run-paper-autopilot.sh` for the `BWS-600` runtime-evidence campaign.',
+        ],
+        'AGENTS.md': [
+            'Use `run-autonomous-implementation.sh` only for a future validated implementation/source-fix handoff.',
+            'Use `run-paper-autopilot.sh` for the current `BWS-600` runtime-evidence gate',
+            'There is no current safe-local implementation queue.',
+        ],
+        'PROJECT_STATUS.md': [
+            'selected_task=BWS-600',
+            'next_controller=run-paper-autopilot.sh',
+            'paper_autopilot_selected=selected_for_bws600_runtime_evidence_after_upstream_api_preflight',
+        ],
+        'docs/repo_status_current.md': [
+            'The binding queue is `backlog/bws_full_implementation.csv`',
+            'selected_task_source=docs/041_external_runtime_preflight_and_bws600_campaign.md',
+            'post_overlay_controller=run-paper-autopilot.sh',
+            'The next normal route is the BWS-600 runtime-evidence parent',
+        ],
+        'docs/automation/README.md': [
+            'run-autonomous-implementation.sh  selected only for future validated source-fix handoffs',
+            'Paper autopilot is selected because the `BWS-600` runtime-evidence path',
+            'The active gate is `BWS-600` external runtime evidence.',
+        ],
+        'docs/automation/repo-profile.md': [
+            'run-autonomous-implementation.sh  72h default, source-fix handoff only',
+            'The active gate is external runtime evidence against an operator-approved betting-win read-only API.',
+        ],
+        'docs/automation/PROTECTED_AUTOMATION_FILES.md': [
+            'for the current `BWS-600` runtime-evidence state or any ordinary implementation',
+        ],
+        '.automation/README.md': [
+            'the active route is the external runtime-evidence parent after the operator starts',
+            'They are the selected path for `BWS-600`',
+        ],
+        'backlog/README.md': [
+            '`BWS-100` through `BWS-590` are validated.',
+        ],
+    }
+    for rel, phrases in forbidden_active_route_phrases.items():
+        text = read(rel)
+        for phrase in phrases:
+            if phrase in text:
+                fail(f'{rel} still contains stale active-route phrase: {phrase}')
+
     print('validate_bws_b1_authority: ok')
 
 

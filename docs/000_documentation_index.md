@@ -1,9 +1,12 @@
 # 000 - Documentation index
 
 ```text
-program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
+program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
+parent_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 documentation_index_status=active
 documentation_slimming_phase=complete
+current_task=BWS-700
+active_implementation_queue=backlog/bws_b1_cross_venue_implementation.csv
 current_external_gate=BWS-600
 safe_local_terminal_gate=BWS-599
 execution_gate=BWS-900
@@ -15,16 +18,20 @@ This is the short map for the BWS documentation set. Use it before opening older
 
 1. `AGENTS.md` - repository authority, safety boundaries and source-of-truth order.
 2. `docs/repo_status_current.md` - current operational state and controller routing.
-3. `docs/automation/current-implementation-task.md` - active automation task or external blocker.
-4. `docs/automation/api-only-upstream.md` - binding upstream transport contract.
-5. `docs/041_external_runtime_preflight_and_bws600_campaign.md` - BWS-600 runtime-evidence gate.
+3. `docs/automation/current-implementation-task.md` - active BWS-700 task authority.
+4. `docs/047_b1_cross_venue_offline_falsification_program.md` - B1 program authority.
+5. `docs/048_b1_upstream_contract.md` - B1 upstream contract gate.
+6. `backlog/bws_b1_cross_venue_implementation.csv` - active B1 implementation queue.
+7. `backlog/bws_b1_cross_venue_map.csv` - active B1 implementation map.
+8. `docs/automation/api-only-upstream.md` - binding upstream transport contract.
+9. `docs/041_external_runtime_preflight_and_bws600_campaign.md` - carry-forward BWS-600 runtime-evidence gate.
 
 
 ## Active B1 implementation authority
 
 ```text
 program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
-active_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
+parent_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 current_task=BWS-700
 current_task_status=READY_FOR_IMPLEMENTATION
 active_implementation_queue=backlog/bws_b1_cross_venue_implementation.csv

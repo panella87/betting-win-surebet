@@ -74,9 +74,11 @@ The short documentation map is `docs/000_documentation_index.md`. Detailed depen
 The active controller and helper surface are the standardized repo scripts documented in `docs/automation/README.md`. Obsolete helpers such as `run-paper-evaluation-12h.sh` and `stop-autonomous-run.sh` must remain absent.
 
 ```text
-selected_controller=run-paper-autopilot.sh
-selected_task=BWS-600
-paper_autopilot_selected=selected_for_bws600_runtime_evidence_after_upstream_api_preflight
+selected_controller=run-autonomous-implementation.sh
+selected_task=BWS-700
+implementation_queue=backlog/bws_b1_cross_venue_implementation.csv
+paper_autopilot_selected=not_selected_while_bws700_queue_is_active
+bws600_paper_autopilot_route=available_after_operator_approved_upstream_api_and_no_binding_implementation_queue
 bugfix_autopilot_selected=no
 force_unlock_required=no_evidence
 automation_maintenance_allowed=no
@@ -91,7 +93,7 @@ free_inode_preflight=required
 per_run_inode_budget=required
 watchdog=enabled
 cleanup_command=cleanup_automation_temp_inode_residue.sh
-next_controller=run-paper-autopilot.sh
+next_controller=run-autonomous-implementation.sh
 ```
 ## API-only upstream transport
 

@@ -330,12 +330,14 @@ test('paper smoke and compatibility wrappers do not pre-create artifact outputs'
 
 test('status docs record the hardened controller surface', () => {
   const status = read('docs/repo_status_current.md');
-  assertContains(status, 'run_autonomous_implementation=standardized_not_selected_no_known_implementation_queue');
+  assertContains(status, 'run_autonomous_implementation=standardized_selected_for_bws700_b1_implementation');
   assertContains(status, 'run_autonomous_bugfix=standardized_standalone_audit');
   assertContains(status, 'run_bugfix_autopilot=standardized_parent_for_broad_audit_and_repair');
   assertContains(status, 'run_paper_evaluation=fixture_and_runtime_evidence_validated_bws_588');
   assertContains(status, 'run_paper_evaluation=fixture_and_runtime_evidence_validated_bws_588');
-  assertContains(status, 'run_paper_autopilot=selected_for_bws600_runtime_evidence_after_upstream_api_preflight');
+  assertContains(status, 'run_paper_autopilot=available_for_bws600_after_upstream_api_preflight');
+  assertContains(status, 'paper_autopilot=not_selected_while_bws700_queue_is_active');
+  assertContains(status, 'bws600_run_paper_autopilot=selected_for_bws600_runtime_evidence_after_upstream_api_preflight');
   assertContains(status, 'paper_runtime_env_loader=selective_root_wrapper_env');
   assertContains(status, 'paper_runtime_env_precedence=explicit_process_then_dotenv_fill');
   assertContains(status, 'paper_runtime_schedule=operator_approved_repo_local_manifest');

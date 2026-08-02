@@ -16,11 +16,11 @@ bws600_current_task=BWS-600
 bws600_selected_controller=run-paper-autopilot.sh
 ```
 
-`run-autonomous-implementation.sh` defaults to a 72-hour ceiling and is driven by repository docs, `docs/automation/current-implementation-task.md`, validated handoffs, `backlog/bws_full_implementation.csv`, and `backlog/bws_remaining_safe_local_map.csv`. There is no `--task` flag. A separate `--prompt-file` is not part of normal operator routing.
+`run-autonomous-implementation.sh` defaults to a 72-hour ceiling and is driven by repository docs, `docs/automation/current-implementation-task.md`, validated handoffs, and the active queue `backlog/bws_b1_cross_venue_implementation.csv`. The historical `backlog/bws_full_implementation.csv` and `backlog/bws_remaining_safe_local_map.csv` stay as carry-forward context. There is no `--task` flag. A separate `--prompt-file` is not part of normal operator routing.
 
 `BWS-100` through `BWS-589` are validated carry-forward foundations inside the wider complete safe-local program through `BWS-599`.
 
-The safe-local implementation queue is complete through `BWS-599`. No dependency-ready safe-local `PENDING` row remains. Use this controller only for a future reviewed source-fix handoff, an explicitly reopened validated queue row, or a standalone task authorized by current repo evidence.
+The safe-local implementation queue is complete through `BWS-599`. The active dependency-ready implementation work is now the BWS-700 B1 queue opened by `docs/automation/current-implementation-task.md`. Use this controller for that queue and for future reviewed source-fix handoffs; do not reopen the completed safe-local queue.
 
 ```text
 BWS-100..BWS-580  platform foundation through integrated bounded runtime (validated)
@@ -33,7 +33,7 @@ BWS-900           separately authorized execution
 
 Forbidden work includes direct provider clients/URLs/credentials, betting-win `core.*` writes, modifying the betting-win checkout, execution paths, public signals and profitability claims.
 
-If a future implementation queue is active, use `CONTINUE_REQUIRED=yes` while dependency-ready work remains and `AUTONOMOUS_GOAL_COMPLETE=yes` only when the authorized queue is validated. Do not use a no-op goal-complete result to bypass a source-fix handoff.
+For the active BWS-700 implementation queue, use `CONTINUE_REQUIRED=yes` while dependency-ready B1 work remains and `AUTONOMOUS_GOAL_COMPLETE=yes` only when the authorized queue is validated or truthfully blocked. Do not use a no-op goal-complete result to bypass B1 backlog work or a source-fix handoff.
 
 Canonical standalone campaign settings include:
 

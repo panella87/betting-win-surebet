@@ -152,7 +152,7 @@ def main() -> None:
         fail('package.json generate:upstream-lock is missing or non-canonical')
     if scripts.get('verify:upstream-lock') != 'node scripts/run_betting_win_upstream_lock.mjs verify':
         fail('package.json verify:upstream-lock is missing or non-canonical')
-    if scripts.get('validate:upstream-boundary') != 'PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_betting_win_upstream_contract.py && npm run generate:upstream-lock && npm run verify:upstream-lock':
+    if scripts.get('validate:upstream-boundary') != 'PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_betting_win_upstream_contract.py && npm run build && npm run generate:upstream-lock && npm run verify:upstream-lock':
         fail('package.json validate:upstream-boundary is missing or non-canonical')
 
     docs = {

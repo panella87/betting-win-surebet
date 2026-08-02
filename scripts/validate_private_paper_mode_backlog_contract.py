@@ -40,7 +40,7 @@ def main() -> None:
         'docs/018_private_paper_mode_runbook.md': ['current_stage=external_runtime_evidence', 'current_task=BWS-600', 'runtime_upstream_mode=api_only', 'automatic_file_fallback=prohibited', 'BWS-599', 'BWS-600'],
         'docs/automation/paper-evaluation.md': ['current_controller_mode=single_pass_fixture_or_runtime_evidence', 'validated_task=BWS-588', 'SUREBET_PINNED_BUNDLE'],
         'docs/automation/paper-autopilot.md': ['integration_task=BWS-589', 'selected_now=yes_for_runtime_evidence_after_upstream_api_preflight', 'BWS-599', 'BWS-600'],
-        'docs/repo_status_current.md': ['paper_autopilot=selected_for_bws600_runtime_evidence_after_upstream_api_preflight', 'selected_controller=run-paper-autopilot.sh', 'runtime_evidence_failure_stage=bounded_redacted'],
+        'docs/repo_status_current.md': ['bws600_paper_autopilot=available_after_upstream_api_preflight_and_no_binding_implementation_queue', 'bws600_run_paper_autopilot=selected_for_bws600_runtime_evidence_after_upstream_api_preflight', 'selected_controller=run-autonomous-implementation.sh', 'runtime_evidence_failure_stage=bounded_redacted'],
     }.items():
         text = read(rel)
         for marker in markers:

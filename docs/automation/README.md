@@ -21,7 +21,7 @@ bws600_upstream_api_preflight_source_fix=present
 
 `BWS-100` through `BWS-599` are validated carry-forward foundations. The runtime has full product lifecycle ownership, database lifecycle, observability, root wrappers, service-owned paper evaluation, runtime-evidence paper autopilot, release/recovery/soak/preflight proof and final local acceptance.
 
-The safe-local queue through `BWS-599` is complete. `BWS-592` soak/failure injection, `BWS-593` external preflight, and `BWS-599` final acceptance are validated carry-forward surfaces. The active gate is `BWS-600` external runtime evidence.
+The safe-local queue through `BWS-599` is complete. `BWS-592` soak/failure injection, `BWS-593` external preflight, and `BWS-599` final acceptance are validated carry-forward surfaces. The active implementation gate is `BWS-700`; `BWS-600` remains an external runtime-evidence gate, not the selected route.
 
 `BETTING_WIN_REPO_PATH` remains a read-only pointer to the existing betting-win checkout. BWS reads committed `HEAD` through Git objects and must not clone, clean, reset or modify that checkout.
 
@@ -48,14 +48,14 @@ docs/automation/ and .automation/        repo-specific automation behavior and s
 ## Controller selection
 
 ```text
-run-autonomous-implementation.sh  selected only for future validated source-fix handoffs
+run-autonomous-implementation.sh  selected for current BWS-700 B1 implementation queue
 run-autonomous-bugfix.sh          standalone audit only
 run-bugfix-autopilot.sh           broad audit and automatic repair after implementation
 run-paper-evaluation.sh           fixture evaluator plus validated runtime-evidence mode
-run-paper-autopilot.sh            selected runtime-evidence parent for BWS-600
+run-paper-autopilot.sh            later runtime-evidence parent for BWS-600 after upstream API readiness and no active implementation queue
 ```
 
-Paper autopilot is selected because the `BWS-600` runtime-evidence path now has a fail-fast upstream betting-win API availability gate. The remaining blocker is external operator-approved upstream API availability.
+Implementation is selected because the operator opened the BWS-700 B1 authority and queue. Paper autopilot remains available for BWS-600 after upstream API readiness and after the active B1 implementation queue is no longer binding.
 
 ## Exact protected-file policy
 

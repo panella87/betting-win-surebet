@@ -48,7 +48,7 @@ BWS does not duplicate provider collection or canonical history. It may retain i
 
 ## Program
 
-The binding machine-readable queue is `backlog/bws_full_implementation.csv`.
+The active machine-readable queue is `backlog/bws_b1_cross_venue_implementation.csv`; the active map is `backlog/bws_b1_cross_venue_map.csv`. The old full-platform queue, `backlog/bws_full_implementation.csv`, is validated carry-forward history through `BWS-599`.
 
 Primary phases:
 
@@ -74,9 +74,9 @@ Latest validated carry-forward tranche:
 
 ## Continuation
 
-The implementation controller writes `CONTINUE_REQUIRED=yes` while any dependency-ready safe row through `BWS-599` remains `PENDING`. It may write `AUTONOMOUS_GOAL_COMPLETE=yes` only after `BWS-599` is `VALIDATED` and no dependency-ready safe work remains.
+The implementation controller writes `CONTINUE_REQUIRED=yes` while any dependency-ready row in `backlog/bws_b1_cross_venue_implementation.csv` remains `PENDING`. It may write `AUTONOMOUS_GOAL_COMPLETE=yes` only after the authorized BWS-700 queue is validated or truthfully blocked, while preserving `BWS-600` as an external runtime-evidence gate and `BWS-900` as parked.
 
-Completing one bounded task quickly is valid. It does not end the campaign when another dependency-ready row exists.
+Completing one bounded task quickly is valid. It does not end the campaign when another dependency-ready B1 row exists.
 
 ## Validation model
 
@@ -86,11 +86,11 @@ No task may pass by weakening validators, inventing upstream evidence, accepting
 
 ## Automation operating model
 
-- No known safe-local implementation queue remains; `run-autonomous-implementation.sh` is entered only through a validated source-fix handoff.
-- Broad audit and repair remains available through `run-bugfix-autopilot.sh` after the blueprint gate.
-- `run-paper-autopilot.sh` is selected for `BWS-600` runtime evidence after the upstream API preflight source fix. It may run only against an operator-approved betting-win read-only API.
+- `run-autonomous-implementation.sh` is selected for the current BWS-700 B1 implementation queue.
+- Broad audit and repair remains available through `run-bugfix-autopilot.sh` after the BWS-700 implementation route is no longer binding.
+- `run-paper-autopilot.sh` is not selected while the BWS-700 queue is active; it remains the carry-forward `BWS-600` runtime-evidence parent after the upstream API preflight source fix and after no binding implementation queue remains.
 - Standalone audit and paper controllers remain available only for their explicit bounded roles.
 
-The protected wrapper and paper-controller integration phase is complete. The current `BWS-600` runtime-evidence state authorizes no protected automation changes. `docs/000_documentation_index.md` is the compact map for active docs, retained blueprints and archive material. Detailed execution blueprints are `docs/042` through `docs/046`, with machine-readable decomposition in `backlog/bws_remaining_safe_local_map.csv`. Superseded bootstrap ledgers `docs/014`, `docs/015` and `docs/017` are merged into `docs/000_documentation_index.md`.
+The protected wrapper and paper-controller integration phase is complete. The current `BWS-700` implementation state authorizes no protected automation changes. `docs/000_documentation_index.md` is the compact map for active docs, retained blueprints and archive material. Detailed execution blueprints are `docs/042` through `docs/046`, with machine-readable decomposition in `backlog/bws_remaining_safe_local_map.csv`. Superseded bootstrap ledgers `docs/014`, `docs/015` and `docs/017` are merged into `docs/000_documentation_index.md`.
 
 Hardened parent controllers suppress child Telegram messages and send one final parent notification.

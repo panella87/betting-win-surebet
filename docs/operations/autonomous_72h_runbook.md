@@ -1,11 +1,13 @@
 # Autonomous 72-hour implementation runbook
 
-## Completed safe-local campaign
+## Current and carry-forward implementation campaign
 
 ```text
-program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
+program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
+parent_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 controller=run-autonomous-implementation.sh
-current_task=BWS-599_VALIDATED
+current_task=BWS-700
+active_implementation_queue=backlog/bws_b1_cross_venue_implementation.csv
 safe_local_terminal_gate=BWS-599
 canonical_duration=72h
 max_cycles=200
@@ -13,9 +15,9 @@ cycle_timeout=6h
 validation_timeout=45m
 ```
 
-This campaign is retained as the completed BWS-599 implementation runbook. No dependency-ready safe-local `PENDING` row remains; the selected controller is now `run-paper-autopilot.sh` for BWS-600.
+This runbook now applies to the active BWS-700 implementation route. The completed BWS-599 safe-local campaign is retained as carry-forward context; no dependency-ready safe-local `PENDING` row remains. `run-paper-autopilot.sh` is only the later BWS-600 carry-forward runtime-evidence parent after upstream API readiness and after no binding implementation queue remains.
 
-Launch from `~/app_testing/betting-win-surebet` under Node 20. Point `BETTING_WIN_REPO_PATH` to the existing read-only checkout. Do not clone, reset or clean betting-win.
+Launch from `~/app_testing/betting-win-surebet` under Node 20. Point `BETTING_WIN_REPO_PATH` to the existing read-only checkout when a task requires upstream-lock proof. Do not clone, reset or clean betting-win.
 
 The protected integration phase is complete. Do not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`; the active task authorizes no protected automation changes.
 

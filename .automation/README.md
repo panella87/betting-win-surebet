@@ -16,7 +16,7 @@ selected_controller=run-autonomous-implementation.sh
 bws600_selected_controller=run-paper-autopilot.sh
 ```
 
-`BWS-100` through `BWS-599` are validated. The `BWS-600` upstream API preflight source fix is present; the active route is the external runtime-evidence parent after the operator starts and approves the betting-win read-only API.
+`BWS-100` through `BWS-599` are validated. The `BWS-600` upstream API preflight source fix is present, but the active route is now the BWS-700 implementation parent. The external runtime-evidence parent is carry-forward only until the operator starts and approves the betting-win read-only API and no binding implementation queue remains.
 
 # `.automation/`
 
@@ -39,7 +39,7 @@ Parent autopilots pass `TELEGRAM_NOTIFY=0` to children and send one final parent
 
 ## Current maintenance gate
 
-The root-wrapper and paper-controller integration phase is complete. The closed safe-local implementation task contains:
+The root-wrapper and paper-controller integration phase is complete. The active BWS-700 implementation task contains:
 
 ```text
 automation_maintenance_allowed=no
@@ -50,7 +50,7 @@ Do not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`. The blanket manual protected-
 
 ## Current paper limitation
 
-`run-paper-evaluation.sh` and `run-paper-autopilot.sh` expose the validated runtime-evidence lifecycle from `BWS-588` and `BWS-589`. They are the selected path for `BWS-600`; the upstream betting-win API availability gate is now source-side fail-fast and must run before the long runtime-evidence window. The runtime child uses explicit process values before selective `.env` fill, passes the operator-approved repo-local private-paper schedule path, and enforces API-only paper-safe policy before lifecycle status is read. It never substitutes a fixture schedule.
+`run-paper-evaluation.sh` and `run-paper-autopilot.sh` expose the validated runtime-evidence lifecycle from `BWS-588` and `BWS-589`. They are the carry-forward path for `BWS-600` after upstream API readiness and after the active BWS-700 implementation queue is no longer binding; the upstream betting-win API availability gate is source-side fail-fast before the long runtime-evidence window. The runtime child uses explicit process values before selective `.env` fill, passes the operator-approved repo-local private-paper schedule path, and enforces API-only paper-safe policy before lifecycle status is read. It never substitutes a fixture schedule.
 
 ## Repository temp and inode containment
 

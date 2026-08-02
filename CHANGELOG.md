@@ -1,3 +1,15 @@
+## 2026-08-02 - BWS-700 active route reconciliation
+
+- Corrected active README, AGENTS, status and automation docs so `BWS-700` is the selected implementation route after the B1 authority overlay landed.
+- Preserved `BWS-600` as an external runtime-evidence carry-forward gate instead of the selected controller route while the BWS-700 queue is binding.
+- Tightened B1 and repository validators so future route docs cannot regress to paper-autopilot routing while `backlog/bws_b1_cross_venue_implementation.csv` remains active.
+- No application runtime logic, strategy logic, provider boundary, execution policy or root automation script behavior changed.
+
+## 2026-08-02 - Validate ops upstream-boundary build preflight
+
+- Made `validate:upstream-boundary` build the TypeScript graph before generating or verifying the betting-win upstream lock so `npm run validate:ops` no longer depends on stale `dist/` output from an earlier command.
+- Updated the upstream-boundary validator to enforce the new package-script contract.
+- Preserved BWS-700 B1 routing, BWS-600 external runtime-evidence status, BWS-900 parked execution, provider prohibition and read-only upstream boundaries.
 
 ## 2026-08-02 - BWS-700 B1 offline falsification authority overlay
 

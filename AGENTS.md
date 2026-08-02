@@ -77,7 +77,7 @@ invented commit, schema, endpoint, package or acceptance evidence
 
 `BWS-100` through `BWS-599` are validated. `BWS-580` remains the integrated bounded-runtime handoff milestone, and `BWS-599` is the safe-local terminal gate. The repository now has the domain engine, persistence, long-running explicit convergence, scheduler and worker services, API, cockpit, complete product lifecycle, database operations, observability, root wrappers, paper evaluation, runtime-evidence paper autopilot, release/recovery/soak/preflight proof and final local acceptance.
 
-No dependency-ready safe-local implementation row remains. The current gate is external `BWS-600` runtime evidence against an operator-approved running `betting-win` read-only API. `BWS-900` remains separately authorized execution.
+No dependency-ready safe-local implementation row remains in the old full-platform queue. The current source implementation gate is `BWS-700` for the reviewed B1 cross-venue offline falsification program. `BWS-600` remains an external runtime-evidence gate for the accepted platform and must not be marked complete from B1 work. `BWS-900` remains separately authorized execution.
 
 ```text
 BWS-100..BWS-580  platform foundation through integrated bounded runtime (validated)
@@ -92,8 +92,8 @@ BWS-900           separately authorized execution
 
 ## Implementation discipline
 
-- There is no current safe-local implementation queue. Use `run-autonomous-implementation.sh` only for a future reviewed source-fix handoff or explicit dependency-ready task.
-- When an implementation queue exists, work through `backlog/bws_full_implementation.csv` in dependency order.
+- The active implementation queue is `backlog/bws_b1_cross_venue_implementation.csv` for `BWS-700` through `BWS-820`; work through it in dependency order.
+- Preserve `backlog/bws_full_implementation.csv` as validated full-platform carry-forward history. Do not reopen it unless a later reviewed source-fix handoff explicitly does so.
 - Preserve validated solver, completion, exposure, settlement, report, API and cockpit behavior.
 - Use fixed-point integer arithmetic for money, probability, fees, size and exposure.
 - Missing configuration, unknown schema/profile/generation, stale evidence, incomplete scenarios, insufficient depth, conflicting settlement or ambiguous process ownership fail closed.
@@ -105,7 +105,7 @@ BWS-900           separately authorized execution
 
 ## Protected automation policy
 
-Normal product files remain unprotected. The root-wrapper and paper-controller integration phase is complete. The active `BWS-600` state sets `automation_maintenance_allowed=no` and `allowed_protected_files=none`.
+Normal product files remain unprotected. The root-wrapper and paper-controller integration phase is complete. The active `BWS-700` task source sets `automation_maintenance_allowed=no` and `allowed_protected_files=none`.
 
 Do not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`. Any protected automation change is a blocker unless an external overlay first changes the binding task source.
 
@@ -148,7 +148,7 @@ docs/automation/
 .automation/
 ```
 
-Use `run-paper-autopilot.sh` for the current `BWS-600` runtime-evidence gate after the operator-approved upstream betting-win API is available. Use `run-autonomous-implementation.sh` only for a future validated implementation/source-fix handoff. `run-paper-evaluation.sh` is the standalone 72-hour paper evaluator; `run-autonomous-bugfix.sh` is the standalone 72-hour read-only audit controller; `run-bugfix-autopilot.sh` is the seven-day parent for broad audit and repair.
+Use `run-autonomous-implementation.sh` for the current `BWS-700` B1 implementation queue. Use `run-paper-autopilot.sh` later for the `BWS-600` runtime-evidence gate after the operator-approved upstream betting-win API is available and no binding implementation queue remains. `run-paper-evaluation.sh` is the standalone 72-hour paper evaluator; `run-autonomous-bugfix.sh` is the standalone 72-hour read-only audit controller; `run-bugfix-autopilot.sh` is the seven-day parent for broad audit and repair.
 
 `update_git.sh --acp` is the add/commit/push shorthand and preserves `GITHUB_TOKEN` support. `zip_codebase.sh` creates numbered repo-root zips and does not create a manifest. `pull_artifacts_and_zip_codebase.sh` pulls server `artifacts.zip` and then calls local `zip_codebase.sh`; it does not use `automation.config.sh`. `stop-autonomous-run.sh` is intentionally absent.
 
