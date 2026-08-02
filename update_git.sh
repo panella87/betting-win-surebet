@@ -26,6 +26,11 @@ Commands:
   --clone OWNER/REPO TARGET_DIR
   -h, --help
 
+Graphify:
+  If graphify is installed, --acp refreshes the local code-only Graphify graph
+  after a successful commit and push. Missing or failing Graphify only prints a
+  warning.
+
 Auth:
   Reads GITHUB_TOKEN from environment first, then .env.
   Uses GIT_ASKPASS for GitHub HTTPS auth.
@@ -122,9 +127,17 @@ ASKPASS
 }
 
 clear_local_extraheaders_quietly() {
+  local key
   git config --local --unset-all http.extraheader >/dev/null 2>&1 || true
-  git config --local --unset-all http.https://github.com/.extraheader >/dev/null 2>&1 || true
-  git config --local --unset-all http.https://panella87@github.com/.extraheader >/dev/null 2>&1 || true
+  while IFS= read -r key; do
+    [ -n "$key" ] || continue
+    case "$key" in
+      http.*.extraheader) git config --local --unset-all "$key" >/dev/null 2>&1 || true ;;
+      *) ;;
+    esac
+  done <<EOF
+$(git config --local --name-only --get-regexp '^http\..*\.extraheader$' 2>/dev/null || true)
+EOF
 }
 
 git_with_token_if_needed() {
@@ -303,6 +316,54 @@ NODE
   return 0
 }
 
+
+warn_graphify() {
+  printf 'WARNING: %s\n' "$*" >&2
+}
+
+run_graphify_after_acp_nonfatal() {
+  local repo
+
+  repo="$(git rev-parse --show-toplevel 2>/dev/null || pwd -P)"
+
+  if ! command -v graphify >/dev/null 2>&1; then
+    warn_graphify "Graphify not found; skipping post-acp graph refresh"
+    return 0
+  fi
+
+  printf '%s\n' 'GRAPHIFY_AFTER_ACP_REFRESH_START'
+
+  if ! GRAPHIFY_QUERY_LOG_DISABLE=1 graphify . --code-only --no-viz; then
+    warn_graphify "Graphify code-only extraction failed; continuing"
+    return 0
+  fi
+
+  if graphify cluster-only --help 2>/dev/null | grep -q -- '--no-viz'; then
+    if ! GRAPHIFY_QUERY_LOG_DISABLE=1 graphify cluster-only "$repo" --no-label --no-viz; then
+      warn_graphify "Graphify cluster/report generation failed; continuing"
+      return 0
+    fi
+  else
+    if ! GRAPHIFY_QUERY_LOG_DISABLE=1 graphify cluster-only "$repo" --no-label; then
+      warn_graphify "Graphify cluster/report generation failed; continuing"
+      return 0
+    fi
+  fi
+
+  if [ ! -s "$repo/graphify-out/graph.json" ]; then
+    warn_graphify "Graphify refresh finished but graphify-out/graph.json is missing or empty"
+    return 0
+  fi
+
+  if [ ! -s "$repo/graphify-out/GRAPH_REPORT.md" ]; then
+    warn_graphify "Graphify refresh finished but graphify-out/GRAPH_REPORT.md is missing or empty"
+    return 0
+  fi
+
+  printf '%s\n' 'GRAPHIFY_AFTER_ACP_REFRESH_DONE'
+  return 0
+}
+
 clone_repo() {
   local spec="$1" target="$2" token user askpass_file rc
   [ -n "$spec" ] && [ -n "$target" ] || { say_error "--clone requires OWNER/REPO and TARGET_DIR"; return 2; }
@@ -323,7 +384,7 @@ clone_repo() {
 }
 
 main() {
-  local dir do_status=0 do_pull=0 do_push=0 do_acp=0 do_clone=0 clone_spec="" clone_target="" message="" rc=0 status_out
+  local dir do_status=0 do_pull=0 do_push=0 do_acp=0 do_clone=0 clone_spec="" clone_target="" message="" rc=0 status_out acp_committed=0
   dir="$(script_dir)" || { say_error "cannot resolve script directory"; return 1; }
   cd "$dir" || { say_error "cannot cd to script directory: $dir"; return 1; }
 
@@ -378,12 +439,16 @@ main() {
     else
       [ -n "$message" ] || message="$(random_commit_message)"
       git commit -m "$message" || return $?
+      acp_committed=1
     fi
     do_push=1
   fi
 
   if [ "$do_push" = "1" ]; then
     git_with_token_if_needed push || return $?
+    if [ "$do_acp" = "1" ] && [ "$acp_committed" = "1" ]; then
+      run_graphify_after_acp_nonfatal || true
+    fi
   fi
 
   return 0

@@ -1,7 +1,7 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-08-02T14:09:59Z",
-  "overlay": "bws81-bws700-routing-validation-preflight-wave46",
+  "generated": "2026-08-02T16:42:13Z",
+  "overlay": "bws82-bws700-validation-repair-wave47",
   "files": [
     {
       "path": ".automation/README.md",
@@ -115,8 +115,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "99c245dc9ab5e0cfc5b10962d3e32637f1fbfa8968d1e728114029295c5284ff",
-      "size": 65238
+      "sha256": "61b87460154dc07ce75fc97bdb43ff010b82ce4855e61b85ae751a6cd673384b",
+      "size": 65652
     },
     {
       "path": "PROJECT_STATUS.md",
@@ -2940,8 +2940,8 @@
     },
     {
       "path": "tests/surebet-persistence.test.ts",
-      "sha256": "848634c307057aa15b3768586b7768ce07e4083b3a059fedfa12041b1602d376",
-      "size": 18057
+      "sha256": "6b2114923db34c016f32fcb2b008e8284c0be3d2f1354d226e2287a9fed31d3a",
+      "size": 18924
     },
     {
       "path": "tests/telegram-notify-format.test.ts",

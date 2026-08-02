@@ -1,3 +1,9 @@
+## 2026-08-02 - BWS-700 validation repair for B1 migration expansion
+
+- Reconciled the persistence migration regression test with the newly added B1 `surebet.*` migrations.
+- Preserved BWS-700 implementation routing and the BWS-600/BWS-900 gates; this repair does not add provider access, execution, public signals, or profitability claims.
+- Regenerated `SOURCE_MANIFEST.json` for the validation-repair overlay.
+
 ## 2026-08-02 - BWS-700 active route reconciliation
 
 - Corrected active README, AGENTS, status and automation docs so `BWS-700` is the selected implementation route after the B1 authority overlay landed.

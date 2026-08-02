@@ -104,7 +104,7 @@ test('surebet migration loader rejects empty or transaction-managed migration fi
   }
 });
 
-test('surebet migration loader includes the runtime scheduler checkpoint migration in deterministic order', () => {
+test('surebet migration loader includes runtime scheduler and B1 offline falsification migrations in deterministic order', () => {
   const migrations = loadSurebetMigrationFiles(REPO_ROOT);
   assert.deepEqual(
     migrations.map((migration) => migration.migrationName),
@@ -116,6 +116,11 @@ test('surebet migration loader includes the runtime scheduler checkpoint migrati
       '005_create_upstream_export_convergence_checkpoints.sql',
       '006_create_upstream_api_convergence_checkpoints.sql',
       '007_create_private_paper_runtime_scheduler_checkpoints.sql',
+      '008_create_b1_upstream_convergence_checkpoints.sql',
+      '009_create_b1_backtest_runs.sql',
+      '010_create_b1_candidate_snapshots.sql',
+      '011_create_b1_simulation_results.sql',
+      '012_create_b1_private_observation_cycles.sql',
     ],
   );
 });
@@ -133,17 +138,23 @@ test('surebet migrations and repositories pass disposable PostgreSQL idempotency
   createDisposableDatabase(adminConfig, databaseName);
   try {
     const firstApply = applySurebetMigrations(databaseConfig);
-    assert.equal(firstApply.applied.length, 6);
+    assert.equal(firstApply.applied.length, 12);
     assert.equal(firstApply.skipped.length, 0);
 
     const secondApply = applySurebetMigrations(databaseConfig);
     assert.equal(secondApply.applied.length, 0);
-    assert.equal(secondApply.skipped.length, 6);
+    assert.equal(secondApply.skipped.length, 12);
 
     const migratedTables = listUserTables(databaseConfig);
     assert.deepEqual(migratedTables, [
+      'surebet.b1_backtest_runs',
+      'surebet.b1_candidate_snapshots',
+      'surebet.b1_private_observation_cycles',
+      'surebet.b1_simulation_results',
+      'surebet.b1_upstream_convergence_checkpoints',
       'surebet.import_runs',
       'surebet.pinned_strategy_exports',
+      'surebet.private_paper_runtime_scheduler_checkpoints',
       'surebet.schema_migrations',
       'surebet.strategy_ledger_entries',
       'surebet.upstream_api_convergence_checkpoints',
@@ -309,6 +320,12 @@ test('surebet migrations and repositories pass disposable PostgreSQL idempotency
         '004_create_worker_jobs.sql',
         '005_create_upstream_export_convergence_checkpoints.sql',
         '006_create_upstream_api_convergence_checkpoints.sql',
+        '007_create_private_paper_runtime_scheduler_checkpoints.sql',
+        '008_create_b1_upstream_convergence_checkpoints.sql',
+        '009_create_b1_backtest_runs.sql',
+        '010_create_b1_candidate_snapshots.sql',
+        '011_create_b1_simulation_results.sql',
+        '012_create_b1_private_observation_cycles.sql',
       ],
     );
   } finally {
