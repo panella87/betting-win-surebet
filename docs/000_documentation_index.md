@@ -5,8 +5,13 @@ program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
 parent_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 documentation_index_status=active
 documentation_slimming_phase=complete
-current_task=BWS-700
-active_implementation_queue=backlog/bws_b1_cross_venue_implementation.csv
+current_task=BWS-600
+active_implementation_queue=none
+completed_b1_queue=backlog/bws_b1_cross_venue_implementation.csv
+completed_b1_map=backlog/bws_b1_cross_venue_map.csv
+bws700_completion_status=DEPENDENCY_READY_LOCAL_IMPLEMENTATION_COMPLETE
+b1_dependency_ready_local_rows=VALIDATED_THROUGH_BWS-820
+bws710_status=BLOCKED_ACCEPTED_BETTING_WIN_B1_MULTI_VENUE_API_REQUIRED
 current_external_gate=BWS-600
 safe_local_terminal_gate=BWS-599
 execution_gate=BWS-900
@@ -18,7 +23,7 @@ This is the short map for the BWS documentation set. Use it before opening older
 
 1. `AGENTS.md` - repository authority, safety boundaries and source-of-truth order.
 2. `docs/repo_status_current.md` - current operational state and controller routing.
-3. `docs/automation/current-implementation-task.md` - active BWS-700 task authority.
+3. `docs/automation/current-implementation-task.md` - active BWS-600 runtime-evidence routing authority after BWS-700 local completion.
 4. `docs/047_b1_cross_venue_offline_falsification_program.md` - B1 program authority.
 5. `docs/048_b1_upstream_contract.md` - B1 upstream contract gate.
 6. `backlog/bws_b1_cross_venue_implementation.csv` - active B1 implementation queue.
@@ -32,9 +37,9 @@ This is the short map for the BWS documentation set. Use it before opening older
 ```text
 program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
 parent_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-current_task=BWS-700
-current_task_status=READY_FOR_IMPLEMENTATION
-active_implementation_queue=backlog/bws_b1_cross_venue_implementation.csv
+current_task=BWS-600
+current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
+active_implementation_queue=none
 bws600_current_task=BWS-600
 bws600_current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
 safe_local_terminal_gate=BWS-599

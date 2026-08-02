@@ -1,3 +1,9 @@
+
+## 2026-08-02 - BWS-700 post-cycle routing reconciliation
+
+- Marked the dependency-ready BWS-700 B1 local implementation route complete through BWS-820 while preserving the BWS-710 external upstream blocker and parked BWS-830/BWS-840 rows.
+- Repointed active automation status to the carry-forward BWS-600 runtime-evidence parent so the next cycle does not rerun an already-complete implementation queue.
+- Updated validators and focused routing tests for the post-BWS-700 state.
 ## 2026-08-02 - BWS-700 validation repair for B1 migration expansion
 
 - Reconciled the persistence migration regression test with the newly added B1 `surebet.*` migrations.

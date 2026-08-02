@@ -27,9 +27,9 @@ test('full implementation ledger keeps BWS-580 validated and records BWS-599 as 
   }
   assert.match(task, /^program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1$/m);
   assert.match(task, /^parent_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1$/m);
-  assert.match(task, /^current_task=BWS-700$/m);
-  assert.match(task, /^current_task_status=READY_FOR_IMPLEMENTATION$/m);
-  assert.match(task, /^active_implementation_queue=backlog\/bws_b1_cross_venue_implementation\.csv$/m);
+  assert.match(task, /^current_task=BWS-600$/m);
+  assert.match(task, /^current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE$/m);
+  assert.match(task, /^active_implementation_queue=none$/m);
   assert.match(task, /^bws600_current_task=BWS-600$/m);
   assert.match(task, /^bws600_current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE$/m);
   assert.match(task, /^bws600_active_implementation_queue=none$/m);
@@ -37,10 +37,10 @@ test('full implementation ledger keeps BWS-580 validated and records BWS-599 as 
   assert.match(task, /automation_maintenance_allowed=no/);
   assert.match(task, /allowed_protected_files=none/);
   assert.match(task, /backlog\/bws_remaining_safe_local_map\.csv/);
-  assert.match(status, /^selected_controller=run-autonomous-implementation\.sh$/m);
-  assert.match(status, /^paper_autopilot=not_selected_while_bws700_queue_is_active$/m);
+  assert.match(status, /^selected_controller=run-paper-autopilot\.sh$/m);
+  assert.match(status, /^paper_autopilot=selected_after_bws700_dependency_ready_queue_complete$/m);
   assert.match(status, /^bws600_run_paper_autopilot=selected_for_bws600_runtime_evidence_after_upstream_api_preflight$/m);
-  assert.match(status, /^current_task=BWS-700$/m);
+  assert.match(status, /^current_task=BWS-600$/m);
 });
 
 test('full implementation program validator passes the repository contract', () => {

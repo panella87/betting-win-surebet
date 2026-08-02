@@ -1,16 +1,21 @@
-# Current implementation task
+# Current automation task
 
 Repository: `betting-win-surebet`.
 
 ```text
 program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
 parent_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-current_task=BWS-700
-current_task_status=READY_FOR_IMPLEMENTATION
-active_implementation_queue=backlog/bws_b1_cross_venue_implementation.csv
-active_implementation_map=backlog/bws_b1_cross_venue_map.csv
-selected_controller=run-autonomous-implementation.sh
-post_overlay_controller=run-autonomous-implementation.sh
+current_task=BWS-600
+current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
+active_implementation_queue=none
+active_implementation_map=none
+completed_b1_queue=backlog/bws_b1_cross_venue_implementation.csv
+completed_b1_map=backlog/bws_b1_cross_venue_map.csv
+bws700_completion_status=DEPENDENCY_READY_LOCAL_IMPLEMENTATION_COMPLETE
+b1_dependency_ready_local_rows=VALIDATED_THROUGH_BWS-820
+bws710_status=BLOCKED_ACCEPTED_BETTING_WIN_B1_MULTI_VENUE_API_REQUIRED
+selected_controller=run-paper-autopilot.sh
+post_overlay_controller=run-paper-autopilot.sh
 safe_local_terminal_gate=BWS-599
 external_runtime_gate=BWS-600
 execution_gate=BWS-900_PARKED
@@ -19,11 +24,9 @@ operator_approval=explicit_2026_08_02
 
 ## Campaign objective
 
-Open and implement as much as safely possible from the B1 cross-venue offline falsification program. The controller should start from the documented `BWS-700` queue and continue through the largest dependency-ready cohesive tranche without touching live execution, provider integrations, `betting-win` source state, or protected automation.
+The BWS-700 cross-venue offline falsification implementation queue is complete for every dependency-ready local row. `BWS-700`, `BWS-705`, and `BWS-720` through `BWS-820` are validated; `BWS-710` remains externally blocked until `betting-win` exposes an accepted read-only `betting-win.b1_multi_venue_markets.v1` resource; `BWS-830` and `BWS-840` remain parked future strategy stubs requiring separate reviewed authority.
 
-The implementation is research/offline/private-paper only. It must build deterministic B1 contracts, equivalence checks, quote synchronization, gross/net spread logic, generalized stake vectors, fill/rejection/timeout simulation, settlement false-positive analysis, offline falsification reports, private read-only API/cockpit surfaces and acceptance/kill criteria where dependencies allow.
-
-The real upstream intake task, `BWS-710`, remains blocked until `betting-win` exposes an accepted read-only `betting-win.b1_multi_venue_markets.v1` resource. The controller may implement local contract skeletons and deterministic fixtures, but fixtures must never be treated as upstream runtime evidence or live readiness.
+The next selected controller is the carry-forward `BWS-600` runtime-evidence parent, `run-paper-autopilot.sh`, not another implementation pass. The paper route must prove or truthfully block runtime/database convergence against an operator-approved running `betting-win` read-only API. It must not use the local BWS API on `127.0.0.1:4312` as upstream evidence and must not fall back to file exports, fixtures, mocks or synthesized private-paper schedules.
 
 ## Required reading
 
@@ -31,23 +34,21 @@ The real upstream intake task, `BWS-710`, remains blocked until `betting-win` ex
 2. `README.md`
 3. `docs/repo_status_current.md`
 4. `docs/000_documentation_index.md`
-5. `docs/047_b1_cross_venue_offline_falsification_program.md`
-6. `docs/048_b1_upstream_contract.md`
-7. `docs/049_b1_market_equivalence.md`
-8. `docs/050_b1_falsification_acceptance.md`
-9. `docs/051_b1_implementation_map.md`
-10. `docs/052_b1_future_strategy_stubs.md`
-11. `backlog/bws_b1_cross_venue_implementation.csv`
-12. `backlog/bws_b1_cross_venue_map.csv`
-13. `docs/041_external_runtime_preflight_and_bws600_campaign.md`
-14. `backlog/bws_full_implementation.csv`
-15. `backlog/bws_remaining_safe_local_map.csv`
-16. `docs/034_remaining_operator_runtime_implementation_program.md`
-17. `docs/042_release_packaging_implementation_blueprint.md`
-18. `docs/043_upgrade_rollback_recovery_implementation_blueprint.md`
-19. `docs/044_soak_failure_injection_implementation_blueprint.md`
-20. `docs/045_external_runtime_preflight_implementation_blueprint.md`
-21. `docs/046_final_local_acceptance_implementation_blueprint.md`
+5. `docs/041_external_runtime_preflight_and_bws600_campaign.md`
+6. `docs/034_remaining_operator_runtime_implementation_program.md`
+7. `docs/018_private_paper_mode_runbook.md`
+8. `docs/047_b1_cross_venue_offline_falsification_program.md`
+9. `docs/048_b1_upstream_contract.md`
+10. `docs/049_b1_market_equivalence.md`
+11. `docs/050_b1_falsification_acceptance.md`
+12. `docs/051_b1_implementation_map.md`
+13. `docs/052_b1_future_strategy_stubs.md`
+14. `backlog/bws_b1_cross_venue_implementation.csv`
+15. `backlog/bws_b1_cross_venue_map.csv`
+16. `backlog/bws_full_implementation.csv`
+17. `backlog/bws_remaining_safe_local_map.csv`
+18. `docs/042_release_packaging_implementation_blueprint.md`
+19. `docs/046_final_local_acceptance_implementation_blueprint.md`
 
 ## Verified carry-forward state
 
@@ -61,8 +62,6 @@ BWS-599=VALIDATED_FINAL_LOCAL_ACCEPTANCE
 
 `BWS-100` through `BWS-599` are validated and must not be reopened. The same-venue standard-binary complete-set platform, API-only upstream runtime contract, private paper runtime, persistence, read-only API, cockpit, observability, release/recovery/soak/final-acceptance and source-manifest discipline are carry-forward foundations.
 
-`BWS-600` remains an external runtime-evidence gate for the accepted platform. It is not the B1 authority and must not be represented as complete unless the operator supplies accepted runtime evidence from a real `betting-win` read-only API.
-
 Carry-forward BWS-600 markers for validators and routing context:
 
 ```text
@@ -73,11 +72,8 @@ bws600_selected_controller=run-paper-autopilot.sh
 bws600_safe_local_terminal_gate=BWS-599
 betting_win_api_preflight_required=before_bws_runtime_evidence_window
 run_paper_autopilot_after_source_fix=true
-selected_task_source=docs/041_external_runtime_preflight_and_bws600_campaign.md
-backlog/bws_full_implementation.csv
-backlog/bws_remaining_safe_local_map.csv
+selected_task_source=docs/automation/current-implementation-task.md
 ```
-
 
 BWS-600 runtime-evidence carry-forward environment marker for existing validators and operator routing:
 
@@ -89,18 +85,18 @@ bws600_BETTING_WIN_REPO_PATH_required=yes
 ## Dependency rules
 
 ```text
-BWS-700=authority_docs_validators_queue
-BWS-705=local_contract_skeleton_allowed
+BWS-700=validated_authority_docs_validators_queue
+BWS-705=validated_local_contract_skeleton
 BWS-710=blocked_until_accepted_betting_win_b1_multi_venue_api
-BWS-720_through_BWS-790=offline_deterministic_design_allowed_after_local_contract_skeleton
-BWS-800_through_BWS-820=private_reporting_and_evidence_allowed_without_execution
+BWS-720_through_BWS-790=validated_offline_deterministic_design
+BWS-800_through_BWS-820=validated_private_reporting_and_evidence_gates
 BWS-830=parked_future_F_design_stub_only
 BWS-840=parked_future_C_G_design_stubs_only
 ```
 
 ## Protected automation authorization
 
-No protected automation edit is authorized by this B1 implementation task.
+No protected automation edit is authorized by this state.
 
 ```text
 automation_maintenance_allowed=no
@@ -111,19 +107,22 @@ Rules:
 
 - Do not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` for this campaign.
 - Do not edit protected automation files unless a later external overlay explicitly changes this task source and names the exact allowlist.
-- Do not broaden authorization from inside an autonomous cycle.
+- Do not broaden authorization from inside any autonomous cycle.
 
 ## Controller selection
 
 ```text
-selected_controller=run-autonomous-implementation.sh
+selected_controller=run-paper-autopilot.sh
 force_unlock_required=no
-campaign_duration=72h
+campaign_duration=7d
+paper_child_duration=72h
+implementation_child_duration=72h
 recommended_cycle_timeout=6h
-validation_timeout=45m
+recommended_interval=5m
+adaptive=true
 ```
 
-Use the parent implementation controller only. Do not invent `--task` or `--prompt-file`. The task authority is this file plus the B1 docs and backlog files.
+Use the parent paper controller only. Do not invent `--task` or `--prompt-file`. Do not run implementation unless paper evidence creates a valid handoff or `BWS-710` becomes unblocked by an accepted real upstream contract.
 
 ## Safety
 
@@ -142,7 +141,8 @@ profitability_claims=prohibited
 BWS-900=parked
 ```
 
-Do not clone the betting-win checkout. Do not invent an upstream B1 contract, endpoint, acceptance result or external runtime evidence. If the real upstream B1 API is absent, implement dependency-ready offline surfaces and record the remaining blocker truthfully.
+Do not clone the betting-win checkout. Do not invent an upstream B1 contract, endpoint, acceptance result or external runtime evidence. If the real upstream API is absent, record the blocker truthfully.
+
 # BWS-600 carry-forward runtime boundary markers
 
 ```text

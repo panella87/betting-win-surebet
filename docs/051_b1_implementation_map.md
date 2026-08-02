@@ -4,7 +4,7 @@
 program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
 implementation_queue=backlog/bws_b1_cross_venue_implementation.csv
 implementation_map=backlog/bws_b1_cross_venue_map.csv
-selected_controller=run-autonomous-implementation.sh
+selected_controller=run-paper-autopilot.sh
 largest_safe_cohesive_tranche=BWS-700_through_BWS-820_local_offline_surfaces
 real_upstream_intake_gate=BWS-710_BLOCKED_UNTIL_BETTING_WIN_CONTRACT
 ```

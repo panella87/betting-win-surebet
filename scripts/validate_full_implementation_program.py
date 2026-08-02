@@ -183,9 +183,9 @@ def main() -> None:
 
     task = read('docs/automation/current-implementation-task.md')
     for marker in [
-        'current_task=BWS-700', 'current_task_status=READY_FOR_IMPLEMENTATION',
-        'active_implementation_queue=backlog/bws_b1_cross_venue_implementation.csv',
-        'active_implementation_map=backlog/bws_b1_cross_venue_map.csv',
+        'current_task=BWS-600', 'current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE',
+        'active_implementation_queue=none',
+        'active_implementation_map=none',
         'bws600_current_task=BWS-600',
         'bws600_current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE',
         'bws600_active_implementation_queue=none',
@@ -203,16 +203,16 @@ def main() -> None:
 
     status = read('docs/repo_status_current.md')
     for marker in [
-        'status=B1_IMPLEMENTATION_READY', 'current_task=BWS-700',
-        'current_task_status=READY_FOR_IMPLEMENTATION', 'safe_local_terminal_gate=BWS-599',
-        'selected_controller=run-autonomous-implementation.sh',
-        'active_implementation_queue=backlog/bws_b1_cross_venue_implementation.csv',
+        'status=B1_DEPENDENCY_READY_LOCAL_IMPLEMENTATION_COMPLETE', 'current_task=BWS-600',
+        'current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE', 'safe_local_terminal_gate=BWS-599',
+        'selected_controller=run-paper-autopilot.sh',
+        'active_implementation_queue=none',
         'bws600_status=RUNTIME_EVIDENCE_READY',
         'bws600_current_task=BWS-600',
         'bws600_current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE',
         'bws600_paper_autopilot=available_after_upstream_api_preflight_and_no_binding_implementation_queue',
-        'run_autonomous_implementation=standardized_selected_for_bws700_b1_implementation',
-        'run_paper_autopilot=available_for_bws600_after_upstream_api_preflight',
+        'run_autonomous_implementation=available_for_future_reviewed_source_handoff_or_unblocked_bws710',
+        'run_paper_autopilot=standardized_selected_for_bws600_runtime_evidence_after_bws700_local_completion',
         'bws600_run_paper_autopilot=selected_for_bws600_runtime_evidence_after_upstream_api_preflight',
     ]:
         require(status, marker, 'docs/repo_status_current.md')

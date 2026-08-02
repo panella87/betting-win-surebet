@@ -2,7 +2,7 @@
 
 ## B1 implementation authority
 
-The active implementation authority is now `BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1`. It opens `BWS-700` through `BWS-820` for deterministic offline/private-paper B1 work while preserving `BWS-100` through `BWS-599`, the external `BWS-600` runtime-evidence gate, and parked `BWS-900` execution. The binding queue is `backlog/bws_b1_cross_venue_implementation.csv`; the implementation map is `backlog/bws_b1_cross_venue_map.csv`.
+The BWS-700 implementation authority `BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1` is validated through `BWS-820` for dependency-ready local deterministic offline/private-paper B1 work. It preserves `BWS-100` through `BWS-599`, the external `BWS-600` runtime-evidence gate, and parked `BWS-900` execution. The completed B1 queue is `backlog/bws_b1_cross_venue_implementation.csv`; the completed B1 implementation map is `backlog/bws_b1_cross_venue_map.csv`.
 
 `BWS-710` real upstream intake remains blocked until `betting-win` exposes an accepted read-only `betting-win.b1_multi_venue_markets.v1` resource. Dependency-ready local work may implement contract skeletons, equivalence, gross/net calculations, stake-vector solving, fill/rejection/timeout simulation, settlement false-positive analysis, deterministic offline backtesting, private persistence, read-only reporting and acceptance/kill criteria. Fixtures are not runtime evidence.
 
@@ -23,9 +23,14 @@ backtesting_owner=betting-win-surebet
 paper_mode_owner=betting-win-surebet
 future_live_decision_owner=betting-win-surebet_after_explicit_gate
 account_policy=separate_from_betting-win-betting
-current_task=BWS-700
-current_task_status=READY_FOR_IMPLEMENTATION
-active_implementation_queue=backlog/bws_b1_cross_venue_implementation.csv
+current_task=BWS-600
+current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
+active_implementation_queue=none
+completed_b1_queue=backlog/bws_b1_cross_venue_implementation.csv
+completed_b1_map=backlog/bws_b1_cross_venue_map.csv
+bws700_completion_status=DEPENDENCY_READY_LOCAL_IMPLEMENTATION_COMPLETE
+b1_dependency_ready_local_rows=VALIDATED_THROUGH_BWS-820
+bws710_status=BLOCKED_ACCEPTED_BETTING_WIN_B1_MULTI_VENUE_API_REQUIRED
 safe_local_terminal_gate=BWS-599
 external_runtime_gate=BWS-600
 bws600_current_task=BWS-600
@@ -97,7 +102,7 @@ Read in this order:
 14. `backlog/bws_full_implementation.csv`
 15. `backlog/bws_remaining_safe_local_map.csv`
 
-Detailed BWS-599 carry-forward contracts and historical blueprints stay discoverable from `docs/000_documentation_index.md`. Historical SURE ledgers remain regression evidence only and do not authorize implementation to stop. BWS-600 paper/runtime evidence remains a carry-forward gate, not the selected controller route while BWS-700 is active.
+Detailed BWS-599 carry-forward contracts and historical blueprints stay discoverable from `docs/000_documentation_index.md`. Historical SURE ledgers remain regression evidence only and do not authorize implementation to stop. BWS-600 paper/runtime evidence is now the selected route because the BWS-700 dependency-ready local queue is complete.
 
 ## Validation
 
@@ -109,7 +114,7 @@ npm run validate
 
 ## Current automation route
 
-The selected controller is now `run-autonomous-implementation.sh` for the `BWS-700` B1 implementation queue. The source of task authority is `docs/automation/current-implementation-task.md` plus the B1 docs and backlog. `run-paper-autopilot.sh` remains the later BWS-600 runtime-evidence route only after the operator-approved betting-win read-only API is available and the current source implementation route is no longer binding.
+The selected controller is now `run-paper-autopilot.sh` for the carry-forward `BWS-600` runtime-evidence gate after BWS-700 dependency-ready local completion. The source of task authority is `docs/automation/current-implementation-task.md` plus the accepted B1 docs and backlog. `run-paper-autopilot.sh` remains blocked until the operator-approved betting-win read-only API is available, but no dependency-ready BWS-700 source queue remains binding.
 
 The standardized helper surface is active: `zip_codebase.sh` creates numbered repo-root zips without a manifest; `pull_artifacts_and_zip_codebase.sh` pulls server `artifacts.zip` and then calls local `zip_codebase.sh` without reading `automation.config.sh`; `update_git.sh --acp` is the add/commit/push shorthand and preserves `GITHUB_TOKEN` support. `run-autonomous-implementation.sh`, `run-paper-evaluation.sh` and `run-autonomous-bugfix.sh` default to 72-hour standalone ceilings. `run-paper-evaluation.sh` replaces the old 12-hour helper and writes root `artifacts.zip`; the canonical operator flag is `--adaptive`, and active commands must keep explicit observation intervals inside the 5..60 minute policy until a reviewed protected-controller change implements automatic explicit-interval clamping. `run-autonomous-bugfix.sh` has no proactive/reactive mode flags. `stop-autonomous-run.sh` is intentionally absent.
 

@@ -29,17 +29,17 @@ def main() -> None:
     required = {
         'docs/MASTER_PLAN.md': [
             B1_PROGRAM, f'parent_program={PROGRAM}', 'repo_role=surebet_strategy_application', 'upstream_platform=betting-win',
-            'current_task=BWS-700', 'current_task_status=READY_FOR_IMPLEMENTATION',
-            'active_implementation_queue=backlog/bws_b1_cross_venue_implementation.csv',
+            'current_task=BWS-600', 'current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE',
+            'active_implementation_queue=none',
             'safe_local_terminal_gate=BWS-599', 'continuous_runtime_gate=BWS-600',
             'bws600_current_task=BWS-600', 'execution_gate=BWS-900',
             'BWS-581', 'BWS-599', 'backlog/bws_full_implementation.csv',
             'run-autonomous-implementation.sh', 'run-bugfix-autopilot.sh', 'run-paper-autopilot.sh',
         ],
         'docs/repo_status_current.md': [
-            PROGRAM, 'status=B1_IMPLEMENTATION_READY', 'current_task=BWS-700',
+            PROGRAM, 'status=B1_DEPENDENCY_READY_LOCAL_IMPLEMENTATION_COMPLETE', 'current_task=BWS-600',
             'safe_local_terminal_gate=BWS-599',
-            'selected_controller=run-autonomous-implementation.sh',
+            'selected_controller=run-paper-autopilot.sh',
             'bws600_status=RUNTIME_EVIDENCE_READY',
             'bws600_current_task=BWS-600',
             'bws600_current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE',
@@ -63,7 +63,7 @@ def main() -> None:
             'BWS-581', 'BWS-589', 'BWS-599',
         ],
         'docs/012_runbook.md': [
-            'current_task=BWS-700', 'selected_controller=run-autonomous-implementation.sh',
+            'current_task=BWS-600', 'selected_controller=run-paper-autopilot.sh',
             'bws600_current_task=BWS-600', 'bws600_selected_controller=run-paper-autopilot.sh',
             'BWS-599', 'run-paper-autopilot.sh',
         ],

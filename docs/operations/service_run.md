@@ -16,7 +16,7 @@ paper_evaluation=runtime_evidence_mode_validated
 paper_autopilot=carry_forward_for_bws600_after_bws700_queue_and_upstream_api_readiness
 safe_local_terminal_gate=BWS-599_VALIDATED
 external_runtime_gate=BWS-600_BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
-active_source_route=BWS-700_RUN_AUTONOMOUS_IMPLEMENTATION
+active_source_route=NONE_BWS700_DEPENDENCY_READY_LOCAL_COMPLETE
 ```
 
 ## Runtime ownership
@@ -39,4 +39,4 @@ soak, failure injection, external preflight and final local acceptance evidence
 
 Every process requires exact identity, source/config binding, stale-state protection, graceful shutdown and immutable evidence. No process-name or port-based killing is allowed.
 
-The stack remains read-only, private and loopback-only. `BWS-600` requires accepted operator-approved runtime input from the real `betting-win` read-only API; the local BWS API on `127.0.0.1:4312` is not upstream evidence. While the BWS-700 B1 queue is active, the service/runtime runbook is carry-forward context and `run-autonomous-implementation.sh` is the selected source controller. `BWS-900` remains the execution gate.
+The stack remains read-only, private and loopback-only. `BWS-600` requires accepted operator-approved runtime input from the real `betting-win` read-only API; the local BWS API on `127.0.0.1:4312` is not upstream evidence. After BWS-700 dependency-ready local completion, this service/runtime runbook is active carry-forward context for the selected `run-paper-autopilot.sh` route. `BWS-900` remains the execution gate.

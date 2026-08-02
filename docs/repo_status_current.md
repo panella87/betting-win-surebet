@@ -1,14 +1,14 @@
 # Current Repository Status
 
-## Active B1 binding state
+## Active post-B1 binding state
 
-The active source implementation route is now `BWS-700` for `BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1`. This is an explicit operator-approved research/offline authority based on the OpenAlex B1 blueprint. It does not supersede the accepted BWS full-platform foundation and does not complete the external `BWS-600` runtime-evidence gate.
+The `BWS-700` dependency-ready local implementation route for `BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1` is complete through `BWS-820`. This was an explicit operator-approved research/offline authority based on the OpenAlex B1 blueprint. It does not supersede the accepted BWS full-platform foundation and does not complete the external `BWS-600` runtime-evidence gate. The selected route is now the carry-forward `BWS-600` runtime-evidence parent.
 
 ```text
 b1_authority=opened
 b1_queue=backlog/bws_b1_cross_venue_implementation.csv
 b1_map=backlog/bws_b1_cross_venue_map.csv
-b1_controller=run-autonomous-implementation.sh
+b1_controller=complete_dependency_ready_local_implementation
 b1_real_upstream_intake=BWS-710_BLOCKED_UNTIL_BETTING_WIN_CONTRACT
 b1_execution=prohibited
 b1_public_signals=prohibited
@@ -20,14 +20,19 @@ b1_profitability_claims=prohibited
 repo=betting-win-surebet
 program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
 parent_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-status=B1_IMPLEMENTATION_READY
+status=B1_DEPENDENCY_READY_LOCAL_IMPLEMENTATION_COMPLETE
 repo_role=surebet_strategy_application
 upstream_platform=betting-win
-current_task=BWS-700
-current_task_status=READY_FOR_IMPLEMENTATION
-active_implementation_queue=backlog/bws_b1_cross_venue_implementation.csv
-active_implementation_map=backlog/bws_b1_cross_venue_map.csv
-selected_controller=run-autonomous-implementation.sh
+current_task=BWS-600
+current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
+active_implementation_queue=none
+completed_b1_queue=backlog/bws_b1_cross_venue_implementation.csv
+completed_b1_map=backlog/bws_b1_cross_venue_map.csv
+bws700_completion_status=DEPENDENCY_READY_LOCAL_IMPLEMENTATION_COMPLETE
+b1_dependency_ready_local_rows=VALIDATED_THROUGH_BWS-820
+bws710_status=BLOCKED_ACCEPTED_BETTING_WIN_B1_MULTI_VENUE_API_REQUIRED
+active_implementation_map=none
+selected_controller=run-paper-autopilot.sh
 safe_local_terminal_gate=BWS-599
 external_runtime_gate=BWS-600
 bws600_status=RUNTIME_EVIDENCE_READY
@@ -45,7 +50,7 @@ BWS-900=parked
 
 `BWS-100` through `BWS-599` are validated. The earlier autonomous cycles closed `BWS-580`, `BWS-581` and the foundation, domain, persistence, upstream-lock, API, cockpit, long-running service, lifecycle, database, observability, root-wrapper and paper-automation layers through `BWS-589`; later cycles closed deterministic private release packaging, upgrade/rollback/recovery, soak/failure injection, exact-mode external runtime preflight and final local acceptance through `BWS-599`.
 
-The safe-local implementation program is complete through `BWS-599`. The bounded source-fix tranche for the later `BWS-600` runtime-evidence campaign is present. It prevents BWS from treating its own API on `127.0.0.1:4312` as upstream `betting-win` evidence and fails fast before the 72-hour evidence window when the upstream `betting-win` read-only API is unavailable. The current selected source route is the `BWS-700` B1 implementation queue; the BWS-600 API runtime-evidence campaign remains externally gated:
+The safe-local implementation program is complete through `BWS-599`. The bounded source-fix tranche for the `BWS-600` runtime-evidence campaign is present. It prevents BWS from treating its own API on `127.0.0.1:4312` as upstream `betting-win` evidence and fails fast before the 72-hour evidence window when the upstream `betting-win` read-only API is unavailable. The `BWS-700` B1 dependency-ready local implementation queue is complete through `BWS-820`; the selected route is now the externally gated `BWS-600` API runtime-evidence campaign:
 
 ```text
 start.sh=validated_product_owned_lifecycle_start
@@ -61,7 +66,7 @@ external preflight=validated
 final acceptance=validated
 ```
 
-The active binding queue is `backlog/bws_b1_cross_venue_implementation.csv`; the active implementation map is `backlog/bws_b1_cross_venue_map.csv`. The full-platform queue `backlog/bws_full_implementation.csv` and map `backlog/bws_remaining_safe_local_map.csv` are validated carry-forward history through `BWS-599`. `BWS-600` remains an external operator-approved runtime-evidence gate, but it is not the selected controller route while `BWS-700` is active.
+The completed B1 local queue is `backlog/bws_b1_cross_venue_implementation.csv`; the completed B1 implementation map is `backlog/bws_b1_cross_venue_map.csv`. The full-platform queue `backlog/bws_full_implementation.csv` and map `backlog/bws_remaining_safe_local_map.csv` are validated carry-forward history through `BWS-599`. `BWS-600` remains an external operator-approved runtime-evidence gate and is now the selected controller route after BWS-700 dependency-ready local completion.
 
 Documentation slimming is complete for the active operator map: `docs/000_documentation_index.md` is the compact routing entry point, stale completion snapshots were removed, and BWS-599 carry-forward contracts plus legacy research archives remain retained.
 
@@ -108,7 +113,7 @@ BWS-900=PARKED_EXECUTION
 
 ## Protected automation authorization
 
-The reviewed `BWS-587` through `BWS-589` integration phase is complete. The current `BWS-700` B1 implementation task authorizes no protected automation changes.
+The reviewed `BWS-587` through `BWS-589` integration phase is complete. The completed `BWS-700` B1 implementation task authorizes no protected automation changes.
 
 ```text
 automation_maintenance_allowed=no
@@ -120,11 +125,11 @@ Do not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`. Any protected change is a blo
 ## Routing
 
 ```text
-selected_controller=run-autonomous-implementation.sh
+selected_controller=run-paper-autopilot.sh
 selected_task_source=docs/automation/current-implementation-task.md
-active_implementation_queue=backlog/bws_b1_cross_venue_implementation.csv
+active_implementation_queue=none
 force_unlock=no_evidence
-paper_autopilot=not_selected_while_bws700_queue_is_active
+paper_autopilot=selected_after_bws700_dependency_ready_queue_complete
 bws600_paper_autopilot=available_after_upstream_api_preflight_and_no_binding_implementation_queue
 ```
 
@@ -135,11 +140,11 @@ Direct provider connections, provider credentials, betting-win `core.*` writes, 
 ## Standard automation status
 
 ```text
-run_autonomous_implementation=standardized_selected_for_bws700_b1_implementation
+run_autonomous_implementation=available_for_future_reviewed_source_handoff_or_unblocked_bws710
 run_autonomous_bugfix=standardized_standalone_audit
 run_bugfix_autopilot=standardized_parent_for_broad_audit_and_repair
 run_paper_evaluation=fixture_and_runtime_evidence_validated_bws_588
-run_paper_autopilot=available_for_bws600_after_upstream_api_preflight
+run_paper_autopilot=standardized_selected_for_bws600_runtime_evidence_after_bws700_local_completion
 bws600_run_autonomous_implementation=standardized_not_selected_no_known_implementation_queue
 bws600_run_paper_autopilot=selected_for_bws600_runtime_evidence_after_upstream_api_preflight
 standalone_controller_telegram=enabled_by_default
@@ -158,7 +163,7 @@ confirmed_direct_leak_status=fixed_with_node_test_teardown
 startup_byte_and_inode_preflight=enabled
 runtime_capacity_watchdog=enabled
 stale_marker_owned_session_recovery=enabled
-post_overlay_controller=run-autonomous-implementation.sh
+post_overlay_controller=run-paper-autopilot.sh
 paper_runtime_env_loader=selective_root_wrapper_env
 paper_runtime_env_precedence=explicit_process_then_dotenv_fill
 paper_runtime_schedule=operator_approved_repo_local_manifest
@@ -173,7 +178,7 @@ lifecycle_start_child_stdio_diagnostics=enabled
 paper_runtime_startup_child_logs=bounded_redacted
 ```
 
-The safe-local product implementation remains accepted. The root runtime wrapper now treats API transport, paper mode, provider-disabled operation, and execution-disabled operation as controller-owned invariants; private `.env` values provide the canonical `POSTGRES_ADDRESS`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_DB` tuple while repo-owned runtime defaults cover internal intervals, worker identity, API transport, cockpit mode, upstream lock path, and the standard private-paper schedule path. Explicit shell values can override approved non-policy settings; legacy URL-style database variables are rejected. The root wrapper rebuilds the TypeScript runtime and managed cockpit assets immediately before paper-runtime-evidence collection so runtime startup does not rely on stale validation output. Runtime-evidence preflights the upstream betting-win read-only API before starting or attaching the BWS stack, rejects the local BWS API on `127.0.0.1:4312` and loopback aliases as upstream evidence, and retains bounded non-secret blocker evidence when unavailable. Runtime-evidence start records a managed stack once the BWS API health endpoint is observable; blocked readiness is measured inside the evidence window instead of aborting startup. If BWS API health never becomes observable, lifecycle startup now retains bounded per-child stdout/stderr log files and reports redacted log tails with the last health/readiness probes. The runtime-evidence managed-command timeout follows the requested evidence duration plus a fixed 300-second margin. That BWS-600 route is carry-forward only while the active BWS-700 implementation queue is binding; the repository temp/inode guard remains a mandatory startup preflight.
+The safe-local product implementation remains accepted. The root runtime wrapper now treats API transport, paper mode, provider-disabled operation, and execution-disabled operation as controller-owned invariants; private `.env` values provide the canonical `POSTGRES_ADDRESS`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_DB` tuple while repo-owned runtime defaults cover internal intervals, worker identity, API transport, cockpit mode, upstream lock path, and the standard private-paper schedule path. Explicit shell values can override approved non-policy settings; legacy URL-style database variables are rejected. The root wrapper rebuilds the TypeScript runtime and managed cockpit assets immediately before paper-runtime-evidence collection so runtime startup does not rely on stale validation output. Runtime-evidence preflights the upstream betting-win read-only API before starting or attaching the BWS stack, rejects the local BWS API on `127.0.0.1:4312` and loopback aliases as upstream evidence, and retains bounded non-secret blocker evidence when unavailable. Runtime-evidence start records a managed stack once the BWS API health endpoint is observable; blocked readiness is measured inside the evidence window instead of aborting startup. If BWS API health never becomes observable, lifecycle startup now retains bounded per-child stdout/stderr log files and reports redacted log tails with the last health/readiness probes. The runtime-evidence managed-command timeout follows the requested evidence duration plus a fixed 300-second margin. That BWS-600 route is now selected again after BWS-700 dependency-ready local completion; the repository temp/inode guard remains a mandatory startup preflight.
 ## API-only upstream transport
 
 The BWS runtime consumes betting-win only through its accepted read-only API. `BWS_UPSTREAM_MODE` and the file-export runtime selector are removed. Missing upstream API readiness must fail fast before the long BWS runtime-evidence window; there is no automatic file fallback. The BWS local API on `127.0.0.1:4312` is not upstream evidence and cannot satisfy the betting-win API preflight.

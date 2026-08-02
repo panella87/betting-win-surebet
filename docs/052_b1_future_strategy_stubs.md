@@ -34,7 +34,7 @@ private_paper_observation
 
 ## C/G market-making and in-play microstructure
 
-C/G may be BWS-adjacent only as future offline simulation. It is not authorized as live behavior and not part of the current BWS-700 implementation queue.
+C/G may be BWS-adjacent only as future offline simulation. It is not authorized as live behavior and remains parked outside the completed BWS-700 dependency-ready local queue.
 
 Prerequisites:
 

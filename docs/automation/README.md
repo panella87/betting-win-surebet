@@ -8,10 +8,15 @@
 ```text
 program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
 parent_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-current_task=BWS-700
-current_task_status=READY_FOR_IMPLEMENTATION
-selected_controller=run-autonomous-implementation.sh
-active_implementation_queue=backlog/bws_b1_cross_venue_implementation.csv
+current_task=BWS-600
+current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
+selected_controller=run-paper-autopilot.sh
+active_implementation_queue=none
+completed_b1_queue=backlog/bws_b1_cross_venue_implementation.csv
+completed_b1_map=backlog/bws_b1_cross_venue_map.csv
+bws700_completion_status=DEPENDENCY_READY_LOCAL_IMPLEMENTATION_COMPLETE
+b1_dependency_ready_local_rows=VALIDATED_THROUGH_BWS-820
+bws710_status=BLOCKED_ACCEPTED_BETTING_WIN_B1_MULTI_VENUE_API_REQUIRED
 safe_local_terminal_gate=BWS-599
 bws600_current_task=BWS-600
 bws600_current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
@@ -21,7 +26,7 @@ bws600_upstream_api_preflight_source_fix=present
 
 `BWS-100` through `BWS-599` are validated carry-forward foundations. The runtime has full product lifecycle ownership, database lifecycle, observability, root wrappers, service-owned paper evaluation, runtime-evidence paper autopilot, release/recovery/soak/preflight proof and final local acceptance.
 
-The safe-local queue through `BWS-599` is complete. `BWS-592` soak/failure injection, `BWS-593` external preflight, and `BWS-599` final acceptance are validated carry-forward surfaces. The active implementation gate is `BWS-700`; `BWS-600` remains an external runtime-evidence gate, not the selected route.
+The safe-local queue through `BWS-599` is complete. `BWS-592` soak/failure injection, `BWS-593` external preflight, and `BWS-599` final acceptance are validated carry-forward surfaces. The BWS-700 dependency-ready local implementation gate is complete through `BWS-820`; `BWS-600` remains an external runtime-evidence gate and is now the selected route.
 
 `BETTING_WIN_REPO_PATH` remains a read-only pointer to the existing betting-win checkout. BWS reads committed `HEAD` through Git objects and must not clone, clean, reset or modify that checkout.
 
@@ -48,14 +53,14 @@ docs/automation/ and .automation/        repo-specific automation behavior and s
 ## Controller selection
 
 ```text
-run-autonomous-implementation.sh  selected for current BWS-700 B1 implementation queue
+run-autonomous-implementation.sh  available only for future reviewed source handoffs or unblocked BWS-710 intake
 run-autonomous-bugfix.sh          standalone audit only
 run-bugfix-autopilot.sh           broad audit and automatic repair after implementation
 run-paper-evaluation.sh           fixture evaluator plus validated runtime-evidence mode
-run-paper-autopilot.sh            later runtime-evidence parent for BWS-600 after upstream API readiness and no active implementation queue
+run-paper-autopilot.sh            selected runtime-evidence parent for BWS-600 after BWS-700 local completion and upstream API readiness
 ```
 
-Implementation is selected because the operator opened the BWS-700 B1 authority and queue. Paper autopilot remains available for BWS-600 after upstream API readiness and after the active B1 implementation queue is no longer binding.
+Paper autopilot is selected for BWS-600 after BWS-700 dependency-ready local completion. Implementation is available only for a future reviewed source handoff or unblocked BWS-710 intake.
 
 ## Exact protected-file policy
 

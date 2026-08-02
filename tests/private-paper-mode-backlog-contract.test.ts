@@ -22,7 +22,7 @@ test('paper evaluation and paper autopilot are validated and remain ready for th
   assert.match(read('docs/018_private_paper_mode_runbook.md'), /runtime_upstream_mode=api_only/);
   assert.match(read('docs/018_private_paper_mode_runbook.md'), /automatic_file_fallback=prohibited/);
   assert.match(read('docs/repo_status_current.md'), /^bws600_run_paper_autopilot=selected_for_bws600_runtime_evidence_after_upstream_api_preflight$/m);
-  assert.match(read('docs/repo_status_current.md'), /^selected_controller=run-autonomous-implementation\.sh$/m);
+  assert.match(read('docs/repo_status_current.md'), /^selected_controller=run-paper-autopilot\.sh$/m);
   const command = read('commands/run-sure-paper-mode-autonomous.sh');
   assert.match(command, /run-paper-autopilot\.sh/);
   assert.equal(command.includes('DATABASE' + '_URL'), false);

@@ -8,9 +8,14 @@ The implementation controller is now selected for B1 offline falsification work.
 ```text
 program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
 parent_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-current_task=BWS-700
-selected_controller=run-autonomous-implementation.sh
-active_implementation_queue=backlog/bws_b1_cross_venue_implementation.csv
+current_task=BWS-600
+selected_controller=run-paper-autopilot.sh
+active_implementation_queue=none
+completed_b1_queue=backlog/bws_b1_cross_venue_implementation.csv
+completed_b1_map=backlog/bws_b1_cross_venue_map.csv
+bws700_completion_status=DEPENDENCY_READY_LOCAL_IMPLEMENTATION_COMPLETE
+b1_dependency_ready_local_rows=VALIDATED_THROUGH_BWS-820
+bws710_status=BLOCKED_ACCEPTED_BETTING_WIN_B1_MULTI_VENUE_API_REQUIRED
 safe_local_terminal_gate=BWS-599
 bws600_current_task=BWS-600
 bws600_selected_controller=run-paper-autopilot.sh
@@ -20,7 +25,7 @@ bws600_selected_controller=run-paper-autopilot.sh
 
 `BWS-100` through `BWS-589` are validated carry-forward foundations inside the wider complete safe-local program through `BWS-599`.
 
-The safe-local implementation queue is complete through `BWS-599`. The active dependency-ready implementation work is now the BWS-700 B1 queue opened by `docs/automation/current-implementation-task.md`. Use this controller for that queue and for future reviewed source-fix handoffs; do not reopen the completed safe-local queue.
+The safe-local implementation queue is complete through `BWS-599`, and the BWS-700 dependency-ready local queue is validated through `BWS-820`. Use this controller only for future reviewed source-fix handoffs or unblocked BWS-710 intake; do not reopen the completed safe-local or BWS-700 dependency-ready queues.
 
 ```text
 BWS-100..BWS-580  platform foundation through integrated bounded runtime (validated)
@@ -33,7 +38,7 @@ BWS-900           separately authorized execution
 
 Forbidden work includes direct provider clients/URLs/credentials, betting-win `core.*` writes, modifying the betting-win checkout, execution paths, public signals and profitability claims.
 
-For the active BWS-700 implementation queue, use `CONTINUE_REQUIRED=yes` while dependency-ready B1 work remains and `AUTONOMOUS_GOAL_COMPLETE=yes` only when the authorized queue is validated or truthfully blocked. Do not use a no-op goal-complete result to bypass B1 backlog work or a source-fix handoff.
+For any future implementation queue, use `CONTINUE_REQUIRED=yes` while dependency-ready work remains and `AUTONOMOUS_GOAL_COMPLETE=yes` only when the authorized queue is validated or truthfully blocked. The current BWS-700 dependency-ready local queue is already validated through BWS-820.
 
 Canonical standalone campaign settings include:
 

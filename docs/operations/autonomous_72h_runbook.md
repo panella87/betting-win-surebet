@@ -6,8 +6,13 @@
 program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
 parent_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 controller=run-autonomous-implementation.sh
-current_task=BWS-700
-active_implementation_queue=backlog/bws_b1_cross_venue_implementation.csv
+current_task=BWS-600
+active_implementation_queue=none
+completed_b1_queue=backlog/bws_b1_cross_venue_implementation.csv
+completed_b1_map=backlog/bws_b1_cross_venue_map.csv
+bws700_completion_status=DEPENDENCY_READY_LOCAL_IMPLEMENTATION_COMPLETE
+b1_dependency_ready_local_rows=VALIDATED_THROUGH_BWS-820
+bws710_status=BLOCKED_ACCEPTED_BETTING_WIN_B1_MULTI_VENUE_API_REQUIRED
 safe_local_terminal_gate=BWS-599
 canonical_duration=72h
 max_cycles=200
@@ -15,7 +20,7 @@ cycle_timeout=6h
 validation_timeout=45m
 ```
 
-This runbook now applies to the active BWS-700 implementation route. The completed BWS-599 safe-local campaign is retained as carry-forward context; no dependency-ready safe-local `PENDING` row remains. `run-paper-autopilot.sh` is only the later BWS-600 carry-forward runtime-evidence parent after upstream API readiness and after no binding implementation queue remains.
+This runbook is now carry-forward for future reviewed implementation/source-fix handoffs. The BWS-700 dependency-ready local queue is complete through BWS-820, BWS-710 remains externally blocked, and the selected controller has returned to the BWS-600 `run-paper-autopilot.sh` runtime-evidence parent after upstream API readiness.
 
 Launch from `~/app_testing/betting-win-surebet` under Node 20. Point `BETTING_WIN_REPO_PATH` to the existing read-only checkout when a task requires upstream-lock proof. Do not clone, reset or clean betting-win.
 

@@ -2,21 +2,21 @@
 
 ## Active B1 routing
 
-The active source implementation route is `BWS-700` via `run-autonomous-implementation.sh`. Parent paper autopilot remains the BWS-600 runtime-evidence route only after the operator starts and approves the real upstream betting-win read-only API.
+The active source implementation route is closed for dependency-ready BWS-700 work. Parent paper autopilot is now the selected BWS-600 runtime-evidence route after BWS-700 local completion, but it still requires the operator-approved real upstream betting-win read-only API.
 
 
 ```text
 program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
 parent_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-current_task=BWS-700
+current_task=BWS-600
 safe_local_terminal_gate=BWS-599
 bws600_current_task=BWS-600
 bws600_upstream_api_preflight_source_fix=present
-selected_controller=run-autonomous-implementation.sh
+selected_controller=run-paper-autopilot.sh
 bws600_selected_controller=run-paper-autopilot.sh
 ```
 
-`BWS-100` through `BWS-599` are validated. The `BWS-600` upstream API preflight source fix is present, but the active route is now the BWS-700 implementation parent. The external runtime-evidence parent is carry-forward only until the operator starts and approves the betting-win read-only API and no binding implementation queue remains.
+`BWS-100` through `BWS-599` are validated. The `BWS-600` upstream API preflight source fix is present, and the BWS-700 implementation parent is complete for dependency-ready local rows. The external runtime-evidence parent is now the selected route once the operator starts and approves the betting-win read-only API.
 
 # `.automation/`
 
@@ -39,7 +39,7 @@ Parent autopilots pass `TELEGRAM_NOTIFY=0` to children and send one final parent
 
 ## Current maintenance gate
 
-The root-wrapper and paper-controller integration phase is complete. The active BWS-700 implementation task contains:
+The root-wrapper and paper-controller integration phase is complete. The completed BWS-700 implementation task contains:
 
 ```text
 automation_maintenance_allowed=no
@@ -50,7 +50,7 @@ Do not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`. The blanket manual protected-
 
 ## Current paper limitation
 
-`run-paper-evaluation.sh` and `run-paper-autopilot.sh` expose the validated runtime-evidence lifecycle from `BWS-588` and `BWS-589`. They are the carry-forward path for `BWS-600` after upstream API readiness and after the active BWS-700 implementation queue is no longer binding; the upstream betting-win API availability gate is source-side fail-fast before the long runtime-evidence window. The runtime child uses explicit process values before selective `.env` fill, passes the operator-approved repo-local private-paper schedule path, and enforces API-only paper-safe policy before lifecycle status is read. It never substitutes a fixture schedule.
+`run-paper-evaluation.sh` and `run-paper-autopilot.sh` expose the validated runtime-evidence lifecycle from `BWS-588` and `BWS-589`. They are now the selected path for `BWS-600` after BWS-700 local completion, with upstream API readiness still required; the upstream betting-win API availability gate is source-side fail-fast before the long runtime-evidence window. The runtime child uses explicit process values before selective `.env` fill, passes the operator-approved repo-local private-paper schedule path, and enforces API-only paper-safe policy before lifecycle status is read. It never substitutes a fixture schedule.
 
 ## Repository temp and inode containment
 

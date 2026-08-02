@@ -5,13 +5,14 @@ program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
 parent_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 research_authority=B1_CROSS_VENUE_ARBITRAGE_OFFLINE_FALSIFICATION
 operator_approval=explicit_2026_08_02
-current_task=BWS-700
-current_task_status=READY_FOR_IMPLEMENTATION
-active_implementation_queue=backlog/bws_b1_cross_venue_implementation.csv
+bws700_authority_task=BWS-700
+bws700_completion_status=DEPENDENCY_READY_LOCAL_IMPLEMENTATION_COMPLETE
+active_implementation_queue=none
+completed_b1_queue=backlog/bws_b1_cross_venue_implementation.csv
 safe_local_terminal_gate=BWS-599
 external_runtime_gate=BWS-600
 execution_gate=BWS-900_PARKED
-selected_controller=run-autonomous-implementation.sh
+selected_controller=run-paper-autopilot.sh
 ```
 
 ## Purpose

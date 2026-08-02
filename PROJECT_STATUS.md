@@ -2,25 +2,30 @@
 
 ## Active B1 implementation status
 
-The operator has explicitly opened `BWS-700` as a research/offline implementation authority for B1 cross-venue arbitrage falsification. This does not mark `BWS-600` runtime evidence complete and does not authorize execution. The next controller is `run-autonomous-implementation.sh` against `docs/automation/current-implementation-task.md` and the B1 backlog.
+The operator explicitly opened `BWS-700` as a research/offline implementation authority for B1 cross-venue arbitrage falsification, and the dependency-ready local queue is now validated through `BWS-820`. This does not mark `BWS-600` runtime evidence complete and does not authorize execution. The next selected controller is `run-paper-autopilot.sh` for the carry-forward BWS-600 runtime-evidence gate.
 
-The expected implementation outcome is as much dependency-ready B1 source, persistence, API, cockpit and validation work as can be completed safely. The real upstream B1 API intake remains blocked on `betting-win.b1_multi_venue_markets.v1`.
+The real upstream B1 API intake remains blocked on `betting-win.b1_multi_venue_markets.v1`; that blocker is not solved by fixtures or local BWS runtime evidence.
 
 
 ```text
 program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
 parent_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-status=B1_IMPLEMENTATION_READY
+status=B1_DEPENDENCY_READY_LOCAL_IMPLEMENTATION_COMPLETE
 repo_role=surebet_strategy_application
-current_task=BWS-700
-current_task_status=READY_FOR_IMPLEMENTATION
-active_implementation_queue=backlog/bws_b1_cross_venue_implementation.csv
+current_task=BWS-600
+current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
+active_implementation_queue=none
+completed_b1_queue=backlog/bws_b1_cross_venue_implementation.csv
+completed_b1_map=backlog/bws_b1_cross_venue_map.csv
+bws700_completion_status=DEPENDENCY_READY_LOCAL_IMPLEMENTATION_COMPLETE
+b1_dependency_ready_local_rows=VALIDATED_THROUGH_BWS-820
+bws710_status=BLOCKED_ACCEPTED_BETTING_WIN_B1_MULTI_VENUE_API_REQUIRED
 safe_local_completion_gate=BWS-599
 external_runtime_gate=BWS-600
 bws600_status=RUNTIME_EVIDENCE_READY
 bws600_current_task=BWS-600
 bws600_current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
-selected_controller=run-autonomous-implementation.sh
+selected_controller=run-paper-autopilot.sh
 bws600_selected_controller=run-paper-autopilot.sh
 execution_gate=closed
 ```
@@ -39,7 +44,7 @@ future_live_decision_owner=betting-win-surebet_after_explicit_gate
 account_policy=separate_from_betting-win-betting
 ```
 
-These markers preserve the accepted three-repo boundary while the new BWS-700 B1 research/offline queue is active.
+These markers preserve the accepted three-repo boundary after the BWS-700 B1 research/offline dependency-ready queue has been validated.
 
 ## Validated
 
@@ -74,10 +79,10 @@ The short documentation map is `docs/000_documentation_index.md`. Detailed depen
 The active controller and helper surface are the standardized repo scripts documented in `docs/automation/README.md`. Obsolete helpers such as `run-paper-evaluation-12h.sh` and `stop-autonomous-run.sh` must remain absent.
 
 ```text
-selected_controller=run-autonomous-implementation.sh
-selected_task=BWS-700
-implementation_queue=backlog/bws_b1_cross_venue_implementation.csv
-paper_autopilot_selected=not_selected_while_bws700_queue_is_active
+selected_controller=run-paper-autopilot.sh
+selected_task=BWS-600
+implementation_queue=none
+paper_autopilot_selected=selected_after_bws700_dependency_ready_queue_complete
 bws600_paper_autopilot_route=available_after_operator_approved_upstream_api_and_no_binding_implementation_queue
 bugfix_autopilot_selected=no
 force_unlock_required=no_evidence
@@ -93,7 +98,7 @@ free_inode_preflight=required
 per_run_inode_budget=required
 watchdog=enabled
 cleanup_command=cleanup_automation_temp_inode_residue.sh
-next_controller=run-autonomous-implementation.sh
+next_controller=run-paper-autopilot.sh
 ```
 ## API-only upstream transport
 
