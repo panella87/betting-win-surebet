@@ -6,6 +6,7 @@ import { createServer, type IncomingMessage, type ServerResponse } from 'node:ht
 import type { AddressInfo } from 'node:net';
 import {
   SurebetImportRunRepository,
+  SurebetB1BacktestRunRepository,
   SurebetPinnedStrategyExportRepository,
   SurebetPrivatePaperRuntimeSchedulerCheckpointRepository,
   SurebetStrategyLedgerRepository,
@@ -87,6 +88,83 @@ test('BWS read-only query service fails closed on missing private-paper runtime 
   });
   assert.equal(missingAcceptanceState.ok, false);
   assert.equal(missingAcceptanceState.blockers[0]?.code, 'BWS_QUERY_ACCEPTANCE_STATE_REQUIRED');
+});
+
+test('BWS-810 B1 read-only query service returns deterministic research reporting only', () => {
+  const service = createBwsReadOnlyQueryService({
+    ...createStubDependencies(),
+    b1BacktestRuns: Object.freeze({
+      get() {
+        return sampleB1BacktestRunRecord();
+      },
+      list() {
+        return Object.freeze([sampleB1BacktestRunRecord()]);
+      },
+      listCandidates() {
+        return Object.freeze([
+          Object.freeze({
+            blockers: Object.freeze([]),
+            candidate: Object.freeze({ candidateId: 'candidate-b1-001', reportOnly: true }),
+            candidateId: 'candidate-b1-001',
+            candidateSnapshotId: 'run-b1-001:candidate-b1-001',
+            grossSpreadPpm: '5000',
+            insertedAt: TEST_TIMESTAMP,
+            marketEquivalenceKey: 'event-001:market:moneyline',
+            netSpreadPpm: '2500',
+            runId: 'run-b1-001',
+            stage: 'accepted',
+            status: 'accepted',
+            venuePairKey: 'venue-a|venue-b',
+            worstCaseNetMinor: '2',
+          }),
+        ]);
+      },
+      listSimulationResults() {
+        return Object.freeze([
+          Object.freeze({
+            blockers: Object.freeze([]),
+            candidateId: 'candidate-b1-001',
+            falsePositive: false,
+            insertedAt: TEST_TIMESTAMP,
+            residualExposureMinor: '0',
+            result: Object.freeze({ replayKind: 'deterministic_b1_settlement_replay' }),
+            runId: 'run-b1-001',
+            settledNetMinor: '2',
+            simulationKind: 'settlement_replay',
+            simulationResultId: 'run-b1-001:candidate-b1-001:settlement_replay',
+            status: 'accepted',
+          }),
+        ]);
+      },
+    }),
+  } satisfies BwsReadOnlyQueryDependencies, {
+    generatedAt: () => TEST_TIMESTAMP,
+    maxPageSize: 50,
+  });
+  assert.equal(service.ok, true);
+
+  const response = service.value.queryB1BacktestRuns({
+    expand: 'reporting',
+    filters: Object.freeze({
+      offlineFalsificationStatus: 'B1_OFFLINE_RESEARCH_CANDIDATES_OBSERVED',
+    }),
+    pageSize: 1,
+  });
+  assert.equal(response.ok, true);
+  assert.equal(response.value.resource, 'b1_backtest_runs');
+  assert.equal(response.value.page.returnedCount, 1);
+  assert.equal(response.value.page.items[0]?.policy.runtimeEvidence, false);
+  assert.equal(response.value.page.items[0]?.policy.execution, 'forbidden');
+  assert.equal(response.value.page.items[0]?.policy.publicSignals, 'forbidden');
+  assert.equal(
+    response.value.page.items[0]?.policy.upstreamReadiness,
+    'blocked_until_betting_win_b1_multi_venue_markets_v1',
+  );
+  assert.equal(response.value.page.items[0]?.run.runtimeEvidence, false);
+  assert.equal(response.value.page.items[0]?.run.executable, false);
+  assert.equal(response.value.page.items[0]?.run.liveReadiness, 'not_authorized_bws_900_parked');
+  assert.equal(response.value.page.items[0]?.candidateSnapshots.length, 1);
+  assert.equal(response.value.page.items[0]?.simulationResults.length, 1);
 });
 
 test('BWS read-only query service skips unsupported non-api scheduler checkpoints instead of breaking runtime-cycle queries', () => {
@@ -242,6 +320,7 @@ test('BWS read-only query HTTP API returns immutable strategy-ledger and pinned-
     });
 
     const service = createBwsReadOnlyQueryService({
+      b1BacktestRuns: new SurebetB1BacktestRunRepository(database.databaseConfig),
       importRuns: importRunRepository,
       pinnedStrategyExports: pinnedRepository,
       privatePaperSchedulerCheckpoints: schedulerCheckpointRepository,
@@ -541,6 +620,7 @@ test('BWS read-only query HTTP API returns bounded private-paper runtime cycle c
     });
 
     const service = createBwsReadOnlyQueryService({
+      b1BacktestRuns: new SurebetB1BacktestRunRepository(database.databaseConfig),
       importRuns: importRunRepository,
       pinnedStrategyExports: new SurebetPinnedStrategyExportRepository(database.databaseConfig),
       privatePaperSchedulerCheckpoints: schedulerCheckpointRepository,
@@ -622,6 +702,12 @@ function createStubDependencies(): BwsReadOnlyQueryDependencies {
     throw new Error('stub should not be called for fail-closed validation tests');
   };
   return Object.freeze({
+    b1BacktestRuns: Object.freeze({
+      get: fail,
+      list: fail,
+      listCandidates: fail,
+      listSimulationResults: fail,
+    }),
     importRuns: Object.freeze({
       get: fail,
     }),
@@ -647,6 +733,43 @@ function createStubDependencies(): BwsReadOnlyQueryDependencies {
       listCheckpoints: fail,
     }),
   }) as BwsReadOnlyQueryDependencies;
+}
+
+function sampleB1BacktestRunRecord() {
+  return Object.freeze({
+    executable: false,
+    fixtureKind: 'deterministic_b1_multi_venue_fixture' as const,
+    insertedAt: TEST_TIMESTAMP,
+    liveReadiness: 'not_authorized_bws_900_parked' as const,
+    metrics: Object.freeze({
+      candidateCount: 1,
+      falsePositiveRate: Object.freeze({ falsePositiveRateBps: '0', status: 'accepted' }),
+      fillableCandidateCount: 1,
+      grossPositiveCount: 1,
+      marketsCompared: 1,
+      netPositiveCount: 1,
+      uniqueEvents: 1,
+      venuePairs: 1,
+    }),
+    observedAt: TEST_TIMESTAMP,
+    offlineFalsificationStatus: 'B1_OFFLINE_RESEARCH_CANDIDATES_OBSERVED' as const,
+    report: Object.freeze({
+      executable: false,
+      fixtureKind: 'deterministic_b1_multi_venue_fixture',
+      liveReadiness: 'not_authorized_bws_900_parked',
+      reportKind: 'deterministic_b1_cross_venue_backtest_report',
+      runtimeEvidence: false,
+      upstreamReadiness: 'blocked_until_betting_win_b1_multi_venue_markets_v1',
+    }),
+    runHash: '7'.repeat(64),
+    runId: 'run-b1-001',
+    runKind: 'deterministic_b1_cross_venue_offline_backtest' as const,
+    runtimeEvidence: false,
+    sourceManifestHash: '8'.repeat(64),
+    upstreamCheckpointId: 'checkpoint-b1-001',
+    upstreamLockFingerprint: '9'.repeat(64),
+    upstreamReadiness: 'blocked_until_betting_win_b1_multi_venue_markets_v1' as const,
+  });
 }
 
 function hasDisposableDatabaseTestConfig(): boolean {

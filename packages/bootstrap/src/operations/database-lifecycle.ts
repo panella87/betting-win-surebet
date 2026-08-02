@@ -12,6 +12,7 @@ import {
 } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import {
+  SurebetB1BacktestRunRepository,
   SurebetImportRunRepository,
   SurebetPinnedStrategyExportRepository,
   SurebetPrivatePaperRuntimeSchedulerCheckpointRepository,
@@ -1308,6 +1309,7 @@ function readSingleStringValue(
 
 function createReadOnlyQueryDependencies(config: SurebetPersistenceConfig): BwsReadOnlyQueryDependencies {
   return Object.freeze({
+    b1BacktestRuns: new SurebetB1BacktestRunRepository(config),
     importRuns: new SurebetImportRunRepository(config),
     pinnedStrategyExports: new SurebetPinnedStrategyExportRepository(config),
     privatePaperSchedulerCheckpoints: new SurebetPrivatePaperRuntimeSchedulerCheckpointRepository(config),

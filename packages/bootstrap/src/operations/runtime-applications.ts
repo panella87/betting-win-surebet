@@ -43,6 +43,7 @@ import {
   createPrivatePaperRuntimeJobHandler,
 } from '../workers/private-paper-runtime-jobs.js';
 import {
+  SurebetB1BacktestRunRepository,
   SurebetImportRunRepository,
   SurebetPinnedStrategyExportRepository,
   SurebetPrivatePaperRuntimeSchedulerCheckpointRepository,
@@ -709,6 +710,7 @@ function createReadOnlyQueryDependencies(
   config: BwsServiceRuntimeConfig,
 ): BwsReadOnlyQueryDependencies {
   return Object.freeze({
+    b1BacktestRuns: new SurebetB1BacktestRunRepository(config.persistence),
     importRuns: new SurebetImportRunRepository(config.persistence),
     pinnedStrategyExports: new SurebetPinnedStrategyExportRepository(config.persistence),
     privatePaperSchedulerCheckpoints: new SurebetPrivatePaperRuntimeSchedulerCheckpointRepository(config.persistence),

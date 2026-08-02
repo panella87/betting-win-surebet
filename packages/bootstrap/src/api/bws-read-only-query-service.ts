@@ -2,6 +2,14 @@ import { createHash } from 'node:crypto';
 import type { BettingWinUpstreamLock } from '../../../upstream/src/upstream/betting-win-upstream-lock.js';
 import type { SurebetImportRunRecord, SurebetImportRunRepository } from '../../../persistence/src/repositories/import-run-repository.js';
 import type {
+  SurebetB1BacktestRunListFilters,
+  SurebetB1BacktestRunListRequest,
+  SurebetB1BacktestRunRecord,
+  SurebetB1BacktestRunRepository,
+  SurebetB1CandidateSnapshotRecord,
+  SurebetB1SimulationResultRecord,
+} from '../../../persistence/src/repositories/b1-backtest-run-repository.js';
+import type {
   SurebetPrivatePaperRuntimeSchedulerCheckpointListFilters,
   SurebetPrivatePaperRuntimeSchedulerCheckpointListRequest,
   SurebetPrivatePaperRuntimeSchedulerCheckpointRecord,
@@ -118,7 +126,23 @@ export interface BwsPrivatePaperRuntimeCycleQueryRequest {
   readonly pageSize: number;
 }
 
+export interface BwsB1BacktestRunQueryFilters {
+  readonly runId?: string;
+  readonly upstreamCheckpointId?: string;
+  readonly offlineFalsificationStatus?: string;
+  readonly sourceManifestHash?: string;
+  readonly upstreamLockFingerprint?: string;
+}
+
+export interface BwsB1BacktestRunQueryRequest {
+  readonly cursor?: string;
+  readonly expand?: string;
+  readonly filters: BwsB1BacktestRunQueryFilters;
+  readonly pageSize: number;
+}
+
 export interface BwsReadOnlyQueryDependencies {
+  readonly b1BacktestRuns: Pick<SurebetB1BacktestRunRepository, 'get' | 'list' | 'listCandidates' | 'listSimulationResults'>;
   readonly importRuns: Pick<SurebetImportRunRepository, 'get'>;
   readonly pinnedStrategyExports: Pick<SurebetPinnedStrategyExportRepository, 'get' | 'list'>;
   readonly privatePaperSchedulerCheckpoints: Pick<SurebetPrivatePaperRuntimeSchedulerCheckpointRepository, 'list'>;
@@ -212,8 +236,25 @@ export interface BwsPrivatePaperRuntimeCycleItem {
   readonly strategyLedger?: BwsStrategyLedgerItem;
 }
 
+export interface BwsB1BacktestRunItemPolicy {
+  readonly execution: 'forbidden';
+  readonly publicSignals: 'forbidden';
+  readonly runtimeEvidence: false;
+  readonly upstreamReadiness: 'blocked_until_betting_win_b1_multi_venue_markets_v1';
+}
+
+export interface BwsB1BacktestRunItem {
+  readonly candidateSnapshots: readonly SurebetB1CandidateSnapshotRecord[];
+  readonly policy: BwsB1BacktestRunItemPolicy;
+  readonly run: SurebetB1BacktestRunRecord;
+  readonly simulationResults: readonly SurebetB1SimulationResultRecord[];
+}
+
 export interface BwsReadOnlyQueryService {
   readonly boundary: BwsReadOnlyQueryBoundary;
+  queryB1BacktestRuns(
+    request: BwsB1BacktestRunQueryRequest,
+  ): BoundaryResult<BwsReadOnlyQueryResponse<'b1_backtest_runs', BwsB1BacktestRunItem>>;
   queryPinnedStrategyExports(
     request: BwsPinnedStrategyExportQueryRequest,
   ): BoundaryResult<BwsReadOnlyQueryResponse<'pinned_strategy_exports', BwsPinnedStrategyExportItem>>;
@@ -228,7 +269,7 @@ export interface BwsReadOnlyQueryService {
 interface CursorPayload {
   readonly afterId: string;
   readonly filtersSha256: string;
-  readonly resource: 'pinned_strategy_exports' | 'strategy_ledger_entries';
+  readonly resource: 'b1_backtest_runs' | 'pinned_strategy_exports' | 'strategy_ledger_entries';
 }
 
 interface NormalizedStrategyLedgerRequest {
@@ -257,6 +298,13 @@ interface NormalizedPrivatePaperRuntimeCycleRequest {
   readonly pageSize: number;
 }
 
+interface NormalizedB1BacktestRunRequest {
+  readonly afterRunId?: string;
+  readonly expand: 'reporting';
+  readonly filters: SurebetB1BacktestRunListFilters;
+  readonly pageSize: number;
+}
+
 export function describeBwsReadOnlyQueryServiceBoundary(): string {
   return `@betting-win-surebet/bootstrap:${BWS_READ_ONLY_QUERY_SERVICE_PHASE}`;
 }
@@ -282,6 +330,9 @@ export function createBwsReadOnlyQueryService(
 
   const service: BwsReadOnlyQueryService = {
     boundary,
+    queryB1BacktestRuns(request) {
+      return queryB1BacktestRuns(validatedDependencies.value, validatedConfig.value, boundary, request);
+    },
     queryPrivatePaperRuntimeCycles(request) {
       return queryPrivatePaperRuntimeCycles(validatedDependencies.value, validatedConfig.value, boundary, request);
     },
@@ -293,6 +344,55 @@ export function createBwsReadOnlyQueryService(
     },
   };
   return accepted(Object.freeze(service));
+}
+
+function queryB1BacktestRuns(
+  dependencies: BwsReadOnlyQueryDependencies,
+  config: Readonly<BwsReadOnlyQueryServiceConfig>,
+  boundary: BwsReadOnlyQueryBoundary,
+  request: BwsB1BacktestRunQueryRequest,
+): BoundaryResult<BwsReadOnlyQueryResponse<'b1_backtest_runs', BwsB1BacktestRunItem>> {
+  const normalized = validateB1BacktestRunRequest(config, request);
+  if (!normalized.ok) {
+    return normalized;
+  }
+
+  const records = dependencies.b1BacktestRuns.list({
+    ...(normalized.value.afterRunId === undefined ? {} : { afterRunId: normalized.value.afterRunId }),
+    filters: normalized.value.filters,
+    limit: normalized.value.pageSize + 1,
+  } satisfies SurebetB1BacktestRunListRequest);
+  const pageItems = records.slice(0, normalized.value.pageSize);
+  const items: BwsB1BacktestRunItem[] = [];
+  for (const record of pageItems) {
+    const item = expandB1BacktestRunRecord(dependencies, record);
+    if (!item.ok) {
+      return item;
+    }
+    items.push(item.value);
+  }
+
+  const nextCursor = records.length > normalized.value.pageSize
+    ? encodeCursor({
+        afterId: pageItems[pageItems.length - 1]!.runId,
+        filtersSha256: hashCursorScope('b1_backtest_runs', normalized.value.filters),
+        resource: 'b1_backtest_runs',
+      })
+    : undefined;
+
+  return accepted(
+    Object.freeze({
+      boundary,
+      generatedAt: config.generatedAt(),
+      page: Object.freeze({
+        items: Object.freeze(items),
+        ...(nextCursor === undefined ? {} : { nextCursor }),
+        pageSize: normalized.value.pageSize,
+        returnedCount: items.length,
+      }),
+      resource: 'b1_backtest_runs',
+    }),
+  );
 }
 
 function queryStrategyLedger(
@@ -340,6 +440,39 @@ function queryStrategyLedger(
         returnedCount: items.length,
       }),
       resource: 'strategy_ledger_entries',
+    }),
+  );
+}
+
+function expandB1BacktestRunRecord(
+  dependencies: BwsReadOnlyQueryDependencies,
+  record: SurebetB1BacktestRunRecord,
+): BoundaryResult<BwsB1BacktestRunItem> {
+  if (
+    record.runtimeEvidence !== false
+    || record.executable !== false
+    || record.liveReadiness !== 'not_authorized_bws_900_parked'
+    || record.upstreamReadiness !== 'blocked_until_betting_win_b1_multi_venue_markets_v1'
+    || record.fixtureKind !== 'deterministic_b1_multi_venue_fixture'
+  ) {
+    return blocked(
+      'BWS_B1_QUERY_POLICY_INVALID',
+      'B1 read-only reporting requires deterministic offline records with runtime evidence, execution, and live readiness closed.',
+      'B1 backtest records with runtimeEvidence=false, executable=false, and upstream readiness blocked.',
+    );
+  }
+
+  return accepted(
+    Object.freeze({
+      candidateSnapshots: dependencies.b1BacktestRuns.listCandidates(record.runId),
+      policy: Object.freeze({
+        execution: 'forbidden',
+        publicSignals: 'forbidden',
+        runtimeEvidence: false,
+        upstreamReadiness: 'blocked_until_betting_win_b1_multi_venue_markets_v1',
+      }),
+      run: record,
+      simulationResults: dependencies.b1BacktestRuns.listSimulationResults(record.runId),
     }),
   );
 }
@@ -1135,7 +1268,11 @@ function validateDependencies(
   dependencies: BwsReadOnlyQueryDependencies,
 ): BoundaryResult<Readonly<BwsReadOnlyQueryDependencies>> {
   if (
-    typeof dependencies.importRuns?.get !== 'function'
+    typeof dependencies.b1BacktestRuns?.get !== 'function'
+    || typeof dependencies.b1BacktestRuns?.list !== 'function'
+    || typeof dependencies.b1BacktestRuns?.listCandidates !== 'function'
+    || typeof dependencies.b1BacktestRuns?.listSimulationResults !== 'function'
+    || typeof dependencies.importRuns?.get !== 'function'
     || typeof dependencies.pinnedStrategyExports?.get !== 'function'
     || typeof dependencies.pinnedStrategyExports?.list !== 'function'
     || typeof dependencies.privatePaperSchedulerCheckpoints?.list !== 'function'
@@ -1148,11 +1285,78 @@ function validateDependencies(
   ) {
     return blocked(
       'BWS_QUERY_DEPENDENCIES_INVALID',
-      'BWS read-only query service requires explicit persistence dependencies for upstream locks, import runs, pinned exports, scheduler checkpoints, upstream API checkpoints, worker jobs, and strategy ledger queries.',
+      'BWS read-only query service requires explicit persistence dependencies for B1 backtests, upstream locks, import runs, pinned exports, scheduler checkpoints, upstream API checkpoints, worker jobs, and strategy ledger queries.',
       'Explicit surebet.* repository dependencies for the BWS read-only query service.',
     );
   }
   return accepted(Object.freeze(dependencies));
+}
+
+function validateB1BacktestRunRequest(
+  config: Readonly<BwsReadOnlyQueryServiceConfig>,
+  request: BwsB1BacktestRunQueryRequest,
+): BoundaryResult<NormalizedB1BacktestRunRequest> {
+  if (request.expand !== 'reporting') {
+    return blocked(
+      'BWS_B1_QUERY_EXPANSION_REQUIRED',
+      'B1 read-only backtest run queries require expand=reporting.',
+      'Explicit B1 reporting expansion for deterministic offline backtest responses.',
+    );
+  }
+  const pageSize = validatePageSize(config.maxPageSize, request.pageSize);
+  if (!pageSize.ok) {
+    return pageSize;
+  }
+  if (!hasB1BacktestRunScopeFilter(request.filters)) {
+    return blocked(
+      'BWS_B1_QUERY_FILTERS_UNBOUNDED',
+      'B1 read-only backtest run queries require at least one explicit research scope filter.',
+      'A bounded B1 filter such as runId, upstreamCheckpointId, offlineFalsificationStatus, sourceManifestHash, or upstreamLockFingerprint.',
+    );
+  }
+
+  const status = validateOptionalB1OfflineFalsificationStatus(request.filters.offlineFalsificationStatus);
+  if (!status.ok) {
+    return status;
+  }
+  const stringFilters = validateOptionalStringFilters([
+    ['runId', request.filters.runId],
+    ['upstreamCheckpointId', request.filters.upstreamCheckpointId],
+  ]);
+  if (!stringFilters.ok) {
+    return stringFilters;
+  }
+  const hashFilters = validateOptionalSha256Filters([
+    ['sourceManifestHash', request.filters.sourceManifestHash],
+    ['upstreamLockFingerprint', request.filters.upstreamLockFingerprint],
+  ]);
+  if (!hashFilters.ok) {
+    return hashFilters;
+  }
+
+  const filters: SurebetB1BacktestRunListFilters = {};
+  if (status.value !== undefined) {
+    Object.assign(filters, { offlineFalsificationStatus: status.value });
+  }
+  Object.assign(filters, stringFilters.value, hashFilters.value);
+
+  const cursor = decodeCursor(
+    'b1_backtest_runs',
+    hashCursorScope('b1_backtest_runs', filters),
+    request.cursor,
+  );
+  if (!cursor.ok) {
+    return cursor;
+  }
+
+  return accepted(
+    Object.freeze({
+      ...(cursor.value === undefined ? {} : { afterRunId: cursor.value.afterId }),
+      expand: 'reporting',
+      filters: Object.freeze(filters),
+      pageSize: pageSize.value,
+    }),
+  );
 }
 
 function validateStrategyLedgerRequest(
@@ -1404,6 +1608,26 @@ function validateOptionalSourceKind(value: string | undefined): BoundaryResult<S
   return accepted(value);
 }
 
+function validateOptionalB1OfflineFalsificationStatus(
+  value: string | undefined,
+): BoundaryResult<SurebetB1BacktestRunRecord['offlineFalsificationStatus'] | undefined> {
+  if (value === undefined) {
+    return accepted(undefined);
+  }
+  if (
+    value !== 'B1_OFFLINE_RESEARCH_CANDIDATES_OBSERVED'
+    && value !== 'B1_FALSIFIED_NET_EDGE_DISAPPEARED'
+    && value !== 'B1_BLOCKED_UPSTREAM_DATA_INSUFFICIENT'
+  ) {
+    return blocked(
+      'BWS_B1_QUERY_STATUS_INVALID',
+      'B1 read-only backtest run status filters must use a supported offline falsification status.',
+      'Supported B1 offline falsification status filter.',
+    );
+  }
+  return accepted(value);
+}
+
 function validateOptionalStringFilters(
   filters: readonly (readonly [string, string | undefined])[],
 ): BoundaryResult<Readonly<Record<string, string>>> {
@@ -1465,6 +1689,14 @@ function hasPinnedStrategyExportFilter(filters: BwsPinnedStrategyExportQueryFilt
     || filters.upstreamLockRecordId !== undefined;
 }
 
+function hasB1BacktestRunScopeFilter(filters: BwsB1BacktestRunQueryFilters): boolean {
+  return filters.runId !== undefined
+    || filters.upstreamCheckpointId !== undefined
+    || filters.offlineFalsificationStatus !== undefined
+    || filters.sourceManifestHash !== undefined
+    || filters.upstreamLockFingerprint !== undefined;
+}
+
 function toRuntimeCycleSchedulerFilters(
   filters: NormalizedPrivatePaperRuntimeCycleRequest['filters'],
 ): SurebetPrivatePaperRuntimeSchedulerCheckpointListFilters {
@@ -1478,7 +1710,7 @@ function toRuntimeCycleSchedulerFilters(
 
 function hashCursorScope(
   resource: CursorPayload['resource'],
-  filters: SurebetStrategyLedgerListFilters | SurebetPinnedStrategyExportListFilters,
+  filters: SurebetB1BacktestRunListFilters | SurebetStrategyLedgerListFilters | SurebetPinnedStrategyExportListFilters,
 ): string {
   return createHash('sha256')
     .update(stableJsonStringify({ filters, resource }))

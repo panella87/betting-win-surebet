@@ -58,6 +58,13 @@ const PAGE_CHROME: Readonly<Record<string, BwsOperatorCockpitPageChrome>> = Obje
     scopeTitle: 'Blocked candidate evidence',
     searchPlaceholder: 'Search blocker code, candidate id, market id, or stop reason',
   }),
+  '/b1-research': Object.freeze({
+    detailPrompt: 'Choose a B1 run to inspect deterministic offline candidates, simulation results, and closed policy markers.',
+    focusAreas: Object.freeze(['offline falsification', 'B1 upstream blocker', 'no execution or signals']),
+    scopeSummary: 'B1 research rows are deterministic offline reports only and preserve the blocked upstream B1 intake gate.',
+    scopeTitle: 'B1 offline research reports',
+    searchPlaceholder: 'Search run id, falsification status, upstream blocker, or checkpoint',
+  }),
 });
 
 export function readBwsOperatorCockpitPageChrome(

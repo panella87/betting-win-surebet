@@ -5,6 +5,7 @@ import { once } from 'node:events';
 import { createServer } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import {
+  SurebetB1BacktestRunRepository,
   SurebetImportRunRepository,
   SurebetPinnedStrategyExportRepository,
   SurebetPrivatePaperRuntimeSchedulerCheckpointRepository,
@@ -233,6 +234,7 @@ test('loopback acceptance assembles migration, intake, backtest, paper worker, A
     assert.equal(workerResult.value.completedCount, 1);
 
     const service = createBwsReadOnlyQueryService({
+      b1BacktestRuns: new SurebetB1BacktestRunRepository(database.databaseConfig),
       importRuns,
       pinnedStrategyExports: pinnedExports,
       privatePaperSchedulerCheckpoints: schedulerCheckpoints,

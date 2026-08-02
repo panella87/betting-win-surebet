@@ -1,6 +1,6 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-08-02T09:28:48Z",
+  "generated": "2026-08-02T14:09:59Z",
   "overlay": "bws81-bws700-routing-validation-preflight-wave46",
   "files": [
     {
@@ -145,23 +145,23 @@
     },
     {
       "path": "apps/web/src/api/client.ts",
-      "sha256": "811900099cec572a68bd26d2cfb136109164dff1542b7ca5229ae99bc1c30ad7",
-      "size": 46371
+      "sha256": "cb17b7d6a4ebb31c7702d19bb467416b47985a8ead1679c0a525d798bb709fb0",
+      "size": 52420
     },
     {
       "path": "apps/web/src/api/contracts.ts",
-      "sha256": "d0f96f940e6b813dc89eb58eb0a8264eceb86ed2cd150e502abbb5de2e373a43",
-      "size": 4113
+      "sha256": "11c9bcc7cacad4505c7d24f5e66c819723bc9165b1b65c96271b449df2bc3417",
+      "size": 4424
     },
     {
       "path": "apps/web/src/api/mock-data.ts",
-      "sha256": "8736e4c8dc5db87fdf7cc63be0a7d6ce99d13f6d7a08c6c9881401f93c13c813",
-      "size": 23939
+      "sha256": "e3628b8469882cdac11fcbd92e021195a5c8a14ed52f3190c6bbdfd5f48ec233",
+      "size": 27548
     },
     {
       "path": "apps/web/src/api/models.ts",
-      "sha256": "868a27b445917776ab6e7b48bbd37d30c3ad84a1225ede1116a1eaaedec7d556",
-      "size": 29926
+      "sha256": "3b08b0fe2d3559cc1e51bf3f570ea43b3b3c4379234ceaec33abe7d9c1c034c3",
+      "size": 34603
     },
     {
       "path": "apps/web/src/app/data-mode.ts",
@@ -170,8 +170,8 @@
     },
     {
       "path": "apps/web/src/app/page-chrome.ts",
-      "sha256": "a290237f279a99d9ad21e3987fe18a0bb84cbe9ca9beddf12b27e566e70d4917",
-      "size": 4414
+      "sha256": "9572a4053861cf29280cf411c6a54b0b637e4d144cbc9c9e40043cb36137e0f4",
+      "size": 4960
     },
     {
       "path": "apps/web/src/app/process-contract.ts",
@@ -245,8 +245,8 @@
     },
     {
       "path": "backlog/bws_b1_cross_venue_implementation.csv",
-      "sha256": "4ad3a12f4ca1d926957d1316c68243c0649b1f87fe5502aa8d1d540f3399ab39",
-      "size": 3205
+      "sha256": "7a8fc7df511035091337262eedeeb05ce7b1a5d5766343664d30390a6eee4a75",
+      "size": 3217
     },
     {
       "path": "backlog/bws_b1_cross_venue_map.csv",
@@ -342,6 +342,31 @@
       "path": "database/migrations/surebet/007_create_private_paper_runtime_scheduler_checkpoints.sql",
       "sha256": "b0ec918132e247f3265145787e3bf9b30320ae2c415937c0578d373e5ec8be57",
       "size": 1181
+    },
+    {
+      "path": "database/migrations/surebet/008_create_b1_upstream_convergence_checkpoints.sql",
+      "sha256": "33a2287c537afe1aa2a666b14365fa3a3247900d41d4303116fdcecd04b54672",
+      "size": 1265
+    },
+    {
+      "path": "database/migrations/surebet/009_create_b1_backtest_runs.sql",
+      "sha256": "c5b9b66325ca16346c48176236b73dea7fd79f51b5b18aba8ae73d33d7ad12ea",
+      "size": 1575
+    },
+    {
+      "path": "database/migrations/surebet/010_create_b1_candidate_snapshots.sql",
+      "sha256": "83da55cee8bc46ca6f47b8584aaa81c08794a268f5147fc9bef320201a79b78a",
+      "size": 832
+    },
+    {
+      "path": "database/migrations/surebet/011_create_b1_simulation_results.sql",
+      "sha256": "3e748cb212558268e675df42f809ce9e3cd29b8527a83fd9c00c5897341d15fa",
+      "size": 826
+    },
+    {
+      "path": "database/migrations/surebet/012_create_b1_private_observation_cycles.sql",
+      "sha256": "5c4858bb130178460e45226677c6cc74610628badeca3632425c0a0838a474a6",
+      "size": 1529
     },
     {
       "path": "decisions/ADR-0001-repo-boundary-and-no-provider-connections.md",
@@ -765,8 +790,8 @@
     },
     {
       "path": "package.json",
-      "sha256": "373ef7908e8ab45aa11e600c9d4521131daafbcfce114ec3ee236b799334bc3a",
-      "size": 8145
+      "sha256": "94df45351466d7ed2ae407fdcdc8e29ecaf7bdf4b3407c2850da48466340e7d3",
+      "size": 8909
     },
     {
       "path": "packages/bootstrap/package.json",
@@ -800,13 +825,18 @@
     },
     {
       "path": "packages/bootstrap/src/api/bws-read-only-query-http.ts",
-      "sha256": "fbb408be693584300b9a3e00d32a6613d0a5fe433c25b976cb097fcfbc3edd6b",
-      "size": 12354
+      "sha256": "dee96e2cbfd7d7f0007adf56cecde12420f4caadd091aada3b140ee54d026d89",
+      "size": 14234
     },
     {
       "path": "packages/bootstrap/src/api/bws-read-only-query-service.ts",
-      "sha256": "4244b5c58a42111ec4fddc1eb5ff86b97c140e32bc705caaf766b951b9ed8fb9",
-      "size": 59596
+      "sha256": "cbb21f29e8e472e378f4e07a526834a595dad130c153847306d6a5dc3b310bdc",
+      "size": 67942
+    },
+    {
+      "path": "packages/bootstrap/src/backtest/b1-cross-venue-backtest.ts",
+      "sha256": "69d910e1931a6e594b2a1226b30472bf2d1e3fd9ac0b520a12f343336e2d8600",
+      "size": 13274
     },
     {
       "path": "packages/bootstrap/src/backtest/standard-binary-backtest.ts",
@@ -919,6 +949,16 @@
       "size": 18880
     },
     {
+      "path": "packages/bootstrap/src/contracts/b1-local-types.ts",
+      "sha256": "8737347f706543c986618b94b5bf38f31da30f380fb5d7e52f2fe45ec77d0676",
+      "size": 3253
+    },
+    {
+      "path": "packages/bootstrap/src/contracts/betting-win-b1-resource-records.ts",
+      "sha256": "db521f56fa79d1656153ffbb3e122f4c9561f376ffa987e43792941c187b9abe",
+      "size": 22917
+    },
+    {
       "path": "packages/bootstrap/src/contracts/betting-win-contract-imports.ts",
       "sha256": "c8d51f9aa245b0806f2cca5adf597da31ac9f884c719a9aea2fb23873d1300e4",
       "size": 1146
@@ -934,6 +974,41 @@
       "size": 2762
     },
     {
+      "path": "packages/bootstrap/src/economics/b1-capital-lock.ts",
+      "sha256": "32ff42d16b245fd6bbf778c8e1f1ce1001da3e90062f186b5c759219ddb26808",
+      "size": 3659
+    },
+    {
+      "path": "packages/bootstrap/src/economics/b1-fee-matrix.ts",
+      "sha256": "8de38d50fb3f091090f69963337e49c8ab00013491d756d5c000b3507e81e630",
+      "size": 5109
+    },
+    {
+      "path": "packages/bootstrap/src/economics/b1-lateness-penalty.ts",
+      "sha256": "6fd9a4dba24efd5fe19602b7d1a2ae66e3a78fb6a42459374649e77ddfb55abf",
+      "size": 3552
+    },
+    {
+      "path": "packages/bootstrap/src/economics/b1-net-spread.ts",
+      "sha256": "b657b4d66fa4c3bb157c8ae7fd5585e49531c91a033e976251fcf492d9553736",
+      "size": 9264
+    },
+    {
+      "path": "packages/bootstrap/src/identity/b1-market-equivalence.ts",
+      "sha256": "f740171ffc74803fd47b34ad3d430872bc5c29f4ceed6e50134f2d1f98ee9d88",
+      "size": 8148
+    },
+    {
+      "path": "packages/bootstrap/src/identity/b1-selection-equivalence.ts",
+      "sha256": "ac7dcc2ddf2d9bf660931b639e10b6659ffe90ec8115ab80b765884784bc0ae2",
+      "size": 1775
+    },
+    {
+      "path": "packages/bootstrap/src/identity/b1-venue-pair-key.ts",
+      "sha256": "4548941c2925fc2429b1d012d379b8f3dbd32ead39f667b4954de8733c1ce34c",
+      "size": 1303
+    },
+    {
       "path": "packages/bootstrap/src/identity/equivalence-precheck.ts",
       "sha256": "2b1671eb9da1f5a5dfc01b3120bac1c48197f6a6cf07b347f399cc83cf127045",
       "size": 6086
@@ -945,8 +1020,8 @@
     },
     {
       "path": "packages/bootstrap/src/index.ts",
-      "sha256": "750d975c9ca8d8f9e12c0f501f0b9a1249214eeb8c92a21d014b1027c22cbda4",
-      "size": 5508
+      "sha256": "39020186803998a562f24ab1df6f57222101a4d415c7cd94a1d35976cf6569d8",
+      "size": 6917
     },
     {
       "path": "packages/bootstrap/src/operations/bws-soak-runtime-integration.ts",
@@ -955,8 +1030,8 @@
     },
     {
       "path": "packages/bootstrap/src/operations/database-lifecycle.ts",
-      "sha256": "da11109d167013a7c1611f4fb86a1a74d4e7e01138d6e93ad1ba094962a718c6",
-      "size": 51534
+      "sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+      "size": 51632
     },
     {
       "path": "packages/bootstrap/src/operations/external-runtime-preflight.ts",
@@ -1015,8 +1090,8 @@
     },
     {
       "path": "packages/bootstrap/src/operations/runtime-applications.ts",
-      "sha256": "cd2c35f6fa61fb0c3fbb0fc17fa45379185af37c5d4a4c9bb6da01d31f2aaa21",
-      "size": 30542
+      "sha256": "05e25d1f003b4d59fd43a7e65ab7c934cf5a704f4add0bce8117c66098b41971",
+      "size": 30652
     },
     {
       "path": "packages/bootstrap/src/operations/service-runtime.ts",
@@ -1044,6 +1119,16 @@
       "size": 34326
     },
     {
+      "path": "packages/bootstrap/src/opportunity/b1-cross-venue-derivation.ts",
+      "sha256": "e8d441b3d7a9e2df07671227b61c9cdb32c944ddd88d5ac5e83744c5a04e1a93",
+      "size": 13231
+    },
+    {
+      "path": "packages/bootstrap/src/opportunity/b1-gross-spread.ts",
+      "sha256": "cc8df1bfef88310d5fd092f7cd86ebe614b7d292a1a8d241ad274f14b810cd22",
+      "size": 6003
+    },
+    {
       "path": "packages/bootstrap/src/opportunity/standard-binary-derivation.ts",
       "sha256": "04059b7cd11e946fd8f997d215732e514b5d03cf9faaf9ba86bb42910f25d653",
       "size": 2563
@@ -1052,6 +1137,26 @@
       "path": "packages/bootstrap/src/opportunity/standard-binary-stake-solver.ts",
       "sha256": "f485585ca582e0761520f47925b4caf96908c5032dbcadfa9ee266c12595c12d",
       "size": 6536
+    },
+    {
+      "path": "packages/bootstrap/src/quotes/b1-capacity-model.ts",
+      "sha256": "fa2ae13d1a557e09b84bd605e19ffbdb45614fb8037c2b037e867018006dddf7",
+      "size": 4931
+    },
+    {
+      "path": "packages/bootstrap/src/quotes/b1-quote-age-penalty.ts",
+      "sha256": "6b5100f98a7f3500ce5b30e508f333106a7410da87480f873d2612405dedb9e6",
+      "size": 53
+    },
+    {
+      "path": "packages/bootstrap/src/quotes/b1-quote-synchronization.ts",
+      "sha256": "aa369e36fdb44cd0307c054b9ea2501cdcdbb229b61fba26a3dc1aad9a63c071",
+      "size": 7667
+    },
+    {
+      "path": "packages/bootstrap/src/quotes/b1-venue-limit-model.ts",
+      "sha256": "fec8edb8df824f8fabdadeca68603c0249038c79b34980da6ceebbc94f927ad2",
+      "size": 2416
     },
     {
       "path": "packages/bootstrap/src/quotes/fee-cost-model.ts",
@@ -1067,6 +1172,16 @@
       "path": "packages/bootstrap/src/quotes/quote-freshness.ts",
       "sha256": "bbb20546aca4dd8c243bf73a49e7a7b62f702509e421680a011e9542100b49c9",
       "size": 1382
+    },
+    {
+      "path": "packages/bootstrap/src/reporting/b1-backtest-report.ts",
+      "sha256": "4031825ac4dcd37ec65ff89a7dd39fc73d7e8030b007f5808860b8f112b349ef",
+      "size": 11614
+    },
+    {
+      "path": "packages/bootstrap/src/reporting/b1-false-positive-report.ts",
+      "sha256": "55d3a251830501a284214bac6e94a16eb3f194fcce33195df5e3ee37cb985f95",
+      "size": 6429
     },
     {
       "path": "packages/bootstrap/src/reporting/blocker-report.ts",
@@ -1089,6 +1204,16 @@
       "size": 49734
     },
     {
+      "path": "packages/bootstrap/src/scenarios/b1-scenario-cashflow.ts",
+      "sha256": "f0de5dd2b18cc01059fa3e4cd822d81b526ada10b9a70755162098f80bf0c947",
+      "size": 9007
+    },
+    {
+      "path": "packages/bootstrap/src/scenarios/b1-terminal-scenario.ts",
+      "sha256": "4f3ee12a400f4a034a177043213f785df2c6a60f33f8cdd85a84be652401b47c",
+      "size": 2291
+    },
+    {
       "path": "packages/bootstrap/src/scenarios/complete-set.ts",
       "sha256": "bdea2ee4db048e553d69f379ab4599c28bae68e372b2821bacb2a64611c98bac",
       "size": 9072
@@ -1102,6 +1227,26 @@
       "path": "packages/bootstrap/src/scenarios/terminal-scenario.ts",
       "sha256": "c535c3ae751f23c497a38e93a12ef6d007d3d6f32cbaa6d974e57166c0745daf",
       "size": 427
+    },
+    {
+      "path": "packages/bootstrap/src/simulation/b1-leg-completion.ts",
+      "sha256": "837af10b2e53b0612309dcc4e2624d8c49ad59ff805936da2164a272b54c8569",
+      "size": 14077
+    },
+    {
+      "path": "packages/bootstrap/src/simulation/b1-residual-exposure.ts",
+      "sha256": "e182ec90d5faef76348df0b437ef5442236b9c4ca108472eb38b639253c8759e",
+      "size": 8634
+    },
+    {
+      "path": "packages/bootstrap/src/simulation/b1-settlement-replay.ts",
+      "sha256": "4f9f6b8d71cb5effca12f331c076ffd7156192e6d85ee273558fc987fa5d0488",
+      "size": 14558
+    },
+    {
+      "path": "packages/bootstrap/src/simulation/b1-void-rule-replay.ts",
+      "sha256": "509fd4bff1fb751c701307c9218adf49b7098fc349be5b89e79cd43dd218f5e3",
+      "size": 4407
     },
     {
       "path": "packages/bootstrap/src/simulation/leg-completion.ts",
@@ -1129,6 +1274,16 @@
       "size": 21245
     },
     {
+      "path": "packages/bootstrap/src/solver/b1-generalized-stake-vector.ts",
+      "sha256": "558a257e14255e5c5016cc7e5ac34b38041ccd181bf3a1a06e93ab80b711d56f",
+      "size": 17313
+    },
+    {
+      "path": "packages/bootstrap/src/solver/b1-rounding.ts",
+      "sha256": "4aef44efd447ea387fc99a25417bb2b5161b1294049334128806dc7381180d6a",
+      "size": 1396
+    },
+    {
       "path": "packages/bootstrap/src/solver/constraints.ts",
       "sha256": "e108aadf2f2a16ccd9230eccdc09020dd7876cfbfb0c3b037aa8efa8c2b26c90",
       "size": 692
@@ -1147,6 +1302,11 @@
       "path": "packages/bootstrap/src/strategy/strategy-ledger.ts",
       "sha256": "d05e339a5692a9218f2146c153570ee7d9c8d79ae88282e162b7ece0c0cb5dbc",
       "size": 37932
+    },
+    {
+      "path": "packages/bootstrap/src/workers/b1-private-observation-jobs.ts",
+      "sha256": "8c0c0b78edf52a9a30498dd3ea01a8e95f10726b59bac32c7974762996cc58d2",
+      "size": 8976
     },
     {
       "path": "packages/bootstrap/src/workers/bounded-job-worker.ts",
@@ -1175,8 +1335,8 @@
     },
     {
       "path": "packages/persistence/src/index.ts",
-      "sha256": "4a5dd6cb984e45f7545b64b4fb0b229a450e30b9f7d2900c47bd9671658a66b1",
-      "size": 685
+      "sha256": "d68727b6651118d7d5db705ee9f24311257ed8530e927744cd4882ea96d0589d",
+      "size": 886
     },
     {
       "path": "packages/persistence/src/migrations.ts",
@@ -1187,6 +1347,21 @@
       "path": "packages/persistence/src/psql.ts",
       "sha256": "86053cd5690b15a2ba6ea210e3073c3324017d12fb36ec1fe815c84edab50343",
       "size": 9068
+    },
+    {
+      "path": "packages/persistence/src/repositories/b1-backtest-run-repository.ts",
+      "sha256": "26bd126d02625c279392468645801426189218e33fb6079f30a80be4b500b834",
+      "size": 23626
+    },
+    {
+      "path": "packages/persistence/src/repositories/b1-private-observation-repository.ts",
+      "sha256": "a057be720b8d7794b5d3a29cac35879ea555a65f2238e085b98fb7ea730f9941",
+      "size": 11362
+    },
+    {
+      "path": "packages/persistence/src/repositories/b1-upstream-convergence-repository.ts",
+      "sha256": "468cde29f264349925fe65e33d5b7e05fb34390877bb0f2503345154160d6884",
+      "size": 10456
     },
     {
       "path": "packages/persistence/src/repositories/import-run-repository.ts",
@@ -1610,13 +1785,13 @@
     },
     {
       "path": "scripts/validate_bws_b1_authority.py",
-      "sha256": "f68106f5f5c544608bf0d0943bb313b4af2aa7b0a5feeae44fdc0dbeea8f08b6",
-      "size": 10254
+      "sha256": "fc8bfee36a4ce9663087c24e356439d29a86ffa5778590bd573622f2d2093d70",
+      "size": 10278
     },
     {
       "path": "scripts/validate_bws_b1_boundary.py",
-      "sha256": "e02f9d5e69e23982ad7d18110260360f8b3c0fac28b174c4cf1c515e0d651dfc",
-      "size": 2952
+      "sha256": "afb9e03c433290177afd3c2aa921811fb5a7e7e125294e6af2c40da2cb5fcf95",
+      "size": 9493
     },
     {
       "path": "scripts/validate_bws_loopback_acceptance.mjs",
@@ -1695,8 +1870,8 @@
     },
     {
       "path": "scripts/validate_source_manifest.py",
-      "sha256": "db98844e4697b2dfc6686cbbf97ec197065cd12f290519e0d8f4903579c34d61",
-      "size": 4159
+      "sha256": "33fbd429375129a2fddf1b728995b1e3a0ce854995fb3d9fbf3047bb60c2b7f6",
+      "size": 4175
     },
     {
       "path": "scripts/validate_temp_inode_safety.py",
@@ -1742,6 +1917,11 @@
       "path": "src/api/bws-read-only-query-service.ts",
       "sha256": "7844834a44e07db032f9fad357755e5d939931a6cabb176ed7e52bcba12c46b9",
       "size": 81
+    },
+    {
+      "path": "src/backtest/b1-cross-venue-backtest.ts",
+      "sha256": "8f64ce0d51a1e35ae960972f21da956342207bce57ace5068b974f7680a02fb3",
+      "size": 82
     },
     {
       "path": "src/backtest/standard-binary-backtest.ts",
@@ -1844,6 +2024,16 @@
       "size": 449
     },
     {
+      "path": "src/contracts/b1-local-types.ts",
+      "sha256": "37048008d76a6c642e1b05f81c611ce9a24f09e3d7fe756b99978d3b0a65998a",
+      "size": 74
+    },
+    {
+      "path": "src/contracts/betting-win-b1-resource-records.ts",
+      "sha256": "e1f11127cde211bc114604c01def9361a34b55d0475d5ae2bd38f2791863aa06",
+      "size": 91
+    },
+    {
       "path": "src/contracts/betting-win-contract-imports.ts",
       "sha256": "b811271ccec8d58e57ef8d105ae35dba7797a3682428eb555ca271b693fb354a",
       "size": 88
@@ -1857,6 +2047,41 @@
       "path": "src/contracts/local-types.ts",
       "sha256": "fbf658d57653d59d91ab3b4948e81ebde80e5dabab7c50d90015a0fd2a8d8ff8",
       "size": 71
+    },
+    {
+      "path": "src/economics/b1-capital-lock.ts",
+      "sha256": "a154b950e18a0454761b398e8afa41ea49a738f0ca545e1bb94c4bc3aadc3d93",
+      "size": 75
+    },
+    {
+      "path": "src/economics/b1-fee-matrix.ts",
+      "sha256": "dc528370e9bc539f1709a356dc152470112d8afa5ec02e1219e5959e08c6f5b0",
+      "size": 73
+    },
+    {
+      "path": "src/economics/b1-lateness-penalty.ts",
+      "sha256": "b8293047e56c3e53277564f83449d8153579a5edcd93de8bcbb8dbe161592834",
+      "size": 79
+    },
+    {
+      "path": "src/economics/b1-net-spread.ts",
+      "sha256": "420c2a206c7cdeebe3b1645390fb44374280a61c244b9ec10a0b17d22bb3d7a7",
+      "size": 73
+    },
+    {
+      "path": "src/identity/b1-market-equivalence.ts",
+      "sha256": "5ee7a4cabaf03d0ca832f1ed561b8108c8851fcfe45efadc048c12fd87ddc37e",
+      "size": 80
+    },
+    {
+      "path": "src/identity/b1-selection-equivalence.ts",
+      "sha256": "13e6d840254c42bb89761272dc52359e0bfa691717ddd4af97584e7d05db235d",
+      "size": 83
+    },
+    {
+      "path": "src/identity/b1-venue-pair-key.ts",
+      "sha256": "6143ccbae44dbdb9a4c1b0850a89a0752f0d605d1fcc4dfea995e2758eb9e4d3",
+      "size": 76
     },
     {
       "path": "src/identity/equivalence-precheck.ts",
@@ -1959,6 +2184,16 @@
       "size": 88
     },
     {
+      "path": "src/opportunity/b1-cross-venue-derivation.ts",
+      "sha256": "37859275a31a673ad7d889c1a215b35c4d545a82a0aec01f5d03c31490d6bb62",
+      "size": 87
+    },
+    {
+      "path": "src/opportunity/b1-gross-spread.ts",
+      "sha256": "73d0f3a7fc9a26354d1fa167c47f2ba8ff36863373496442a7e4f77431c7a635",
+      "size": 77
+    },
+    {
       "path": "src/opportunity/standard-binary-derivation.ts",
       "sha256": "68e30478957274111ae43aadbbd3b8e20e46ced35687f90ef596b7d19ac6c472",
       "size": 88
@@ -1974,6 +2209,26 @@
       "size": 57
     },
     {
+      "path": "src/quotes/b1-capacity-model.ts",
+      "sha256": "7770d650f1929b6aaac83f0bc4ca6c7cba116452793d2e7b0682350d49f6a496",
+      "size": 74
+    },
+    {
+      "path": "src/quotes/b1-quote-age-penalty.ts",
+      "sha256": "1223fa7c3cbe64e51de4c28bf1e71b1f604bf5de296162b8e7308098f76bf10c",
+      "size": 77
+    },
+    {
+      "path": "src/quotes/b1-quote-synchronization.ts",
+      "sha256": "6c429abddd6057214c4c3937d5a2e137861306400427b69ea50306a41b129915",
+      "size": 81
+    },
+    {
+      "path": "src/quotes/b1-venue-limit-model.ts",
+      "sha256": "e6acaba9bf5d0ebba46b77c2ae1274621ce24224d6c6aafcff5ffc5f6b0b0a8f",
+      "size": 77
+    },
+    {
       "path": "src/quotes/fee-cost-model.ts",
       "sha256": "3ceb2e7ed383391e45fe91723bcf3d413d9fb77aa1c65f30005303b732bbb692",
       "size": 71
@@ -1987,6 +2242,16 @@
       "path": "src/quotes/quote-freshness.ts",
       "sha256": "32bda9bd0336d34d36302df13fbc198d9f302d1fe408e7dc0b26c3ea9311ddb3",
       "size": 72
+    },
+    {
+      "path": "src/reporting/b1-backtest-report.ts",
+      "sha256": "b6e57d60e79babfd51e79fbb8db2e40f30ecdb5db9c71c01fe3f7b15524df455",
+      "size": 78
+    },
+    {
+      "path": "src/reporting/b1-false-positive-report.ts",
+      "sha256": "de7a9a8c1ba81da197bf53fe08b9012bcfe3b8b1b31031aa566ad2248cc70e84",
+      "size": 84
     },
     {
       "path": "src/reporting/blocker-report.ts",
@@ -2009,6 +2274,16 @@
       "size": 79
     },
     {
+      "path": "src/scenarios/b1-scenario-cashflow.ts",
+      "sha256": "570751ca3f105fd9bae29cf723aadecf6013b69ca4c61f2bb5ac63a57c1808f2",
+      "size": 80
+    },
+    {
+      "path": "src/scenarios/b1-terminal-scenario.ts",
+      "sha256": "3b40c0f975e9d083f278e10824bdfcf7d89dd7fc60d5a22117c792aebaa829e5",
+      "size": 80
+    },
+    {
       "path": "src/scenarios/complete-set.ts",
       "sha256": "9e861f9bc194f2edddbb253c2917f9849752fc0af72c6e83ed18c64a2a333792",
       "size": 72
@@ -2022,6 +2297,26 @@
       "path": "src/scenarios/terminal-scenario.ts",
       "sha256": "43af49d45344da71a2d76c945b7b8c4d75c6da5b6d6c459e49e2868ab3433756",
       "size": 77
+    },
+    {
+      "path": "src/simulation/b1-leg-completion.ts",
+      "sha256": "d2061bc37ff722517ab3644ba457167fc875ec03e631b51be402364f7ef36bc0",
+      "size": 78
+    },
+    {
+      "path": "src/simulation/b1-residual-exposure.ts",
+      "sha256": "f6930c3d96e99a95d5da1ba4f136c7093bd4f7c70fa01bdd7d120d8ad5d28f19",
+      "size": 81
+    },
+    {
+      "path": "src/simulation/b1-settlement-replay.ts",
+      "sha256": "be8f2286758dc28d2602dfc1e8925c679dbe1efed551dbefc5b2d2952e6a7ca0",
+      "size": 81
+    },
+    {
+      "path": "src/simulation/b1-void-rule-replay.ts",
+      "sha256": "e18e26546b499a40a7d64710a29b03f3e36de2aff623f2fcff61f426a2d1464d",
+      "size": 80
     },
     {
       "path": "src/simulation/leg-completion.ts",
@@ -2049,6 +2344,16 @@
       "size": 78
     },
     {
+      "path": "src/solver/b1-generalized-stake-vector.ts",
+      "sha256": "13c0c0339e3b55f09bb72c5653ff8617602ae9a39c22eb2b169decf49f182abe",
+      "size": 84
+    },
+    {
+      "path": "src/solver/b1-rounding.ts",
+      "sha256": "e96bbb1afccb293699d300cb3533370d3b85c8338993d49cbf58a63c0628ac90",
+      "size": 68
+    },
+    {
       "path": "src/solver/constraints.ts",
       "sha256": "d4551d60e365e8f193df11ca95ba05614bd85e5191ed3424b49ba8cd155e7e42",
       "size": 68
@@ -2072,6 +2377,11 @@
       "path": "src/upstream/betting-win-upstream-lock.ts",
       "sha256": "01fb9b916a76ce63729eab7426720573fc497c9f88cd296a467a9683ca58807d",
       "size": 356
+    },
+    {
+      "path": "src/workers/b1-private-observation-jobs.ts",
+      "sha256": "6e20ad05ad10a5539fcaf9acbb47dceae351c4fbd444cacf86f64a54ff93ae2f",
+      "size": 85
     },
     {
       "path": "src/workers/bounded-job-worker.ts",
@@ -2119,9 +2429,99 @@
       "size": 24584
     },
     {
+      "path": "tests/b1-capital-lock.test.ts",
+      "sha256": "b1ecc510bd1db683de3e8349a16cace9d0d9d1f06deccddaa9897bd26089e5e5",
+      "size": 1613
+    },
+    {
+      "path": "tests/b1-cross-venue-backtest.test.ts",
+      "sha256": "bffa571534f0b3f2b12381ef8b15a860b6edd72dcfe107b6dc102df4fdedceef",
+      "size": 9624
+    },
+    {
+      "path": "tests/b1-cross-venue-derivation.test.ts",
+      "sha256": "35136e43207de66436208c505f473a57f2d26d48e6720d33cbef72c6bdc56d08",
+      "size": 6494
+    },
+    {
+      "path": "tests/b1-false-positive-report.test.ts",
+      "sha256": "ef70de9884a62146513b09657bda1ad55953534aa663bfd80cc4ef3dfdfb3c7a",
+      "size": 3997
+    },
+    {
+      "path": "tests/b1-generalized-stake-vector.test.ts",
+      "sha256": "147d48b967ead826b2f8153b5822e05ee0aec42d1c8f6b0489ceb4ce33bd85bc",
+      "size": 11857
+    },
+    {
+      "path": "tests/b1-gross-spread.test.ts",
+      "sha256": "fad20795ecc8cc69e50f0cb0ce5504d25641990620840103686565407d8f7cd0",
+      "size": 2366
+    },
+    {
+      "path": "tests/b1-market-equivalence.test.ts",
+      "sha256": "939a490669cc267c652380914c39c0be28d2ed0e4d7d3c4e9390db652e67dbfb",
+      "size": 7618
+    },
+    {
+      "path": "tests/b1-net-spread.test.ts",
+      "sha256": "dbb017246c65d2ee6932c7ede00cea1bc5a02531a5751e1768c8d490dcd9c229",
+      "size": 6729
+    },
+    {
+      "path": "tests/b1-operator-cockpit.test.ts",
+      "sha256": "7263214119661a53a8d55d2999c16a761999d1eda7aa841c9f4488537256272b",
+      "size": 2052
+    },
+    {
+      "path": "tests/b1-persistence.test.ts",
+      "sha256": "0e539ea29a171dd47f347e9eb57fbab6a165c60d1e27929eff337a4dea17c3c8",
+      "size": 5085
+    },
+    {
+      "path": "tests/b1-private-observation-jobs.test.ts",
+      "sha256": "4adf27c447baf89d92398b4090f5ca0687622ce4c5bb31d83c6213ae636987c3",
+      "size": 9582
+    },
+    {
+      "path": "tests/b1-quote-synchronization.test.ts",
+      "sha256": "fea16afb000fd36c499959f81949c9c0d4912cdd9eac2ba8279d8ab12d55c697",
+      "size": 7217
+    },
+    {
+      "path": "tests/b1-read-only-api.test.ts",
+      "sha256": "72c194a3bc5eeb8fead4d5a5c55827e8a9df42c41880a9c2024113d41a699e39",
+      "size": 4148
+    },
+    {
+      "path": "tests/b1-rejection-model.test.ts",
+      "sha256": "adbd57a5260fa9ab7797b818a9f0cb3805308ec91373d9b3462be982855eacda",
+      "size": 11338
+    },
+    {
+      "path": "tests/b1-residual-exposure.test.ts",
+      "sha256": "4055feb0b42cb69d5344172a73a9fe317f54f82d1564020db7e82483fdbeb56d",
+      "size": 4783
+    },
+    {
+      "path": "tests/b1-scenario-cashflow.test.ts",
+      "sha256": "db264d9c2b3a9e15078aa8184ab13d118d5de9126d1e7dc4210a78b507c843c2",
+      "size": 3532
+    },
+    {
+      "path": "tests/b1-settlement-replay.test.ts",
+      "sha256": "164ece4b40b5c265eac05b9bb5b0e766aa86201b6c241198487e2918a91182c3",
+      "size": 9595
+    },
+    {
       "path": "tests/betting-win-adapters.test.ts",
       "sha256": "e1e41403136a23fe492087475f0f174f0e615750a555afe3794424a0283a6a2a",
       "size": 14081
+    },
+    {
+      "path": "tests/betting-win-b1-resource-records.test.ts",
+      "sha256": "4ae8ef83b168e657be2270346b6640fa4b5773665f63b43def5d7950d1d1068d",
+      "size": 3990
     },
     {
       "path": "tests/betting-win-query-client.test.ts",
@@ -2180,8 +2580,8 @@
     },
     {
       "path": "tests/bws-loopback-acceptance.test.ts",
-      "sha256": "59de0d3f2a315f1960f41ca021a4e93a650bde36ea9ca1a91c3b1c239791af53",
-      "size": 21874
+      "sha256": "a3b3358a40ff8862049e5b9de3f533ffeeee3244fdbd131623056db4f468df7d",
+      "size": 21991
     },
     {
       "path": "tests/bws-observability.test.ts",
@@ -2190,8 +2590,8 @@
     },
     {
       "path": "tests/bws-operator-cockpit.test.ts",
-      "sha256": "00d23da894b800ddb55fdeeb360df5b1aa21b702804c9d4e4c10523f36080564",
-      "size": 19859
+      "sha256": "2bfd7cafd6eee309b2d71e52a5d19a4dac5abe6c02fe5389265081a260adb6f2",
+      "size": 21371
     },
     {
       "path": "tests/bws-operator-lifecycle.test.ts",
@@ -2225,8 +2625,8 @@
     },
     {
       "path": "tests/bws-read-only-query-api.test.ts",
-      "sha256": "15bc2e35c68ab02dbb5d7898dc9c5661cf2cf7fb8dbaab3991f7988bc3455f2f",
-      "size": 32186
+      "sha256": "d9f4fbf3be728cbd79d51551fd4a885f172039e3c55e83430541a60f71dd8011",
+      "size": 36948
     },
     {
       "path": "tests/bws-release-packaging.test.ts",
@@ -2240,13 +2640,13 @@
     },
     {
       "path": "tests/bws-runtime-applications.test.ts",
-      "sha256": "dfbad9b151fd7804abaaf0b2025c3c3d96e204a5992d30b4bd44a467ea7a0107",
-      "size": 24433
+      "sha256": "7f89a3572a9748bf8f35dd3beb9bd3d529e4be9cc940182feca1a2e40c6704cf",
+      "size": 24542
     },
     {
       "path": "tests/bws-service-runtime.test.ts",
-      "sha256": "4d8a12f45eb15aaa23c456a51df7039dda843ec075f1655138cdaf9a3434f5a7",
-      "size": 14063
+      "sha256": "2ef8eca58d929ce258f8e0bd880c018b72e4fad6cfaa668c1510972502f20be7",
+      "size": 14235
     },
     {
       "path": "tests/bws-soak-campaign.test.ts",
@@ -2287,6 +2687,11 @@
       "path": "tests/equivalence-precheck.test.ts",
       "sha256": "5d10c93f956ee2efa6fc7b9c78c84de607190dd4191fdbfb7c0579c186149bbc",
       "size": 4511
+    },
+    {
+      "path": "tests/fixtures/b1-local-contract/valid-b1-multi-venue-markets.json",
+      "sha256": "6d38b67bf67d73183e80754618ad03021425f93adb81144129b03b59db4974ac",
+      "size": 4255
     },
     {
       "path": "tests/fixtures/betting-win-exports/.gitkeep",
@@ -2585,8 +2990,8 @@
     },
     {
       "path": "tests/validate-source-manifest.test.ts",
-      "sha256": "280c33e79e1c73045d66767807adf3f31c3c8722a7640e886791a59f6397e93f",
-      "size": 15348
+      "sha256": "c85313b9e0fbd2b7fbfff7ed6240ec5df30078bb190ac47849339aa17908b862",
+      "size": 15763
     },
     {
       "path": "tests/validation-matrix-contract.test.ts",

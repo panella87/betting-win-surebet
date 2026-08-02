@@ -67,7 +67,7 @@
     "validate:api-only-upstream": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_api_only_upstream.py",
     "validate:documentation-slimming": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_documentation_slimming.py",
     "validate:bws-b1-authority": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_bws_b1_authority.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_bws_b1_boundary.py",
-    "validate:bws-b1": "npm run validate:bws-b1-authority"
+    "validate:bws-b1": "npm run validate:bws-b1-authority && npm run build && node --test dist/tests/betting-win-b1-resource-records.test.js dist/tests/b1-market-equivalence.test.js dist/tests/b1-quote-synchronization.test.js dist/tests/b1-gross-spread.test.js dist/tests/b1-cross-venue-derivation.test.js dist/tests/b1-capital-lock.test.js dist/tests/b1-net-spread.test.js dist/tests/b1-scenario-cashflow.test.js dist/tests/b1-generalized-stake-vector.test.js dist/tests/b1-rejection-model.test.js dist/tests/b1-residual-exposure.test.js dist/tests/b1-settlement-replay.test.js dist/tests/b1-false-positive-report.test.js dist/tests/b1-cross-venue-backtest.test.js dist/tests/b1-persistence.test.js dist/tests/b1-private-observation-jobs.test.js dist/tests/b1-read-only-api.test.js dist/tests/b1-operator-cockpit.test.js"
   },
   "devDependencies": {
     "@types/node": "20.12.11",

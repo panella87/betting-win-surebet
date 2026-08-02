@@ -172,6 +172,7 @@ test('source manifest regeneration helper reuses validator inclusion rules and e
     mkdirSync(join(dir, 'runtime', 'evidence'), { recursive: true });
     mkdirSync(join(dir, 'tmp'), { recursive: true });
     mkdirSync(join(dir, '.tmp'), { recursive: true });
+    mkdirSync(join(dir, 'graphify-out', 'cache'), { recursive: true });
     writeFileSync(join(dir, '.env'), 'SECRET=1\n', { encoding: 'utf-8' });
     writeFileSync(join(dir, 'repo.zip'), 'zip bytes\n', { encoding: 'utf-8' });
     writeFileSync(join(dir, 'OVERLAY_MANIFEST.json'), '{"generated":true}\n', { encoding: 'utf-8' });
@@ -194,6 +195,8 @@ test('source manifest regeneration helper reuses validator inclusion rules and e
     writeFileSync(join(dir, 'runtime', 'evidence', 'index.jsonl'), '{"generated":true}\n', { encoding: 'utf-8' });
     writeFileSync(join(dir, 'tmp', 'scratch.txt'), 'tmp dir\n', { encoding: 'utf-8' });
     writeFileSync(join(dir, '.tmp', 'scratch.txt'), 'hidden tmp dir\n', { encoding: 'utf-8' });
+    writeFileSync(join(dir, 'graphify-out', 'graph.json'), '{"generated":true}\n', { encoding: 'utf-8' });
+    writeFileSync(join(dir, 'graphify-out', 'cache', 'ast.json'), '{"generated":true}\n', { encoding: 'utf-8' });
     writeFileSync(join(dir, 'notes.txt'), 'keep me\n', { encoding: 'utf-8' });
 
     execFileSync('python3', ['scripts/regenerate_source_manifest.py'], { cwd: dir, encoding: 'utf-8', stdio: 'pipe' });
@@ -216,6 +219,8 @@ test('source manifest regeneration helper reuses validator inclusion rules and e
     assert.ok(!paths.includes('config/betting-win.upstream.lock.json'));
     assert.ok(!paths.includes('apps/web/node_modules/vite/index.js'));
     assert.ok(!paths.includes('apps/web/dist/bundle.js'));
+    assert.ok(!paths.includes('graphify-out/graph.json'));
+    assert.ok(!paths.includes('graphify-out/cache/ast.json'));
     assert.ok(paths.includes('packages/bootstrap/src/runtime/keep.ts'));
 
     const output = execFileSync('python3', ['scripts/validate_source_manifest.py'], { cwd: dir, encoding: 'utf-8', stdio: 'pipe' });

@@ -1,4 +1,6 @@
 import type {
+  BwsB1BacktestRunItem,
+  BwsB1BacktestRunQueryRequest,
   BwsPrivatePaperRuntimeCycleItem,
   BwsPrivatePaperRuntimeCycleQueryRequest,
   BwsPinnedStrategyExportItem,
@@ -42,7 +44,12 @@ const RUN_KINDS = new Set<SurebetStrategyRunKind>([
 const SETTLEMENT_STATES = new Set<SurebetStrategySettlementState>(['blocked', 'reconciled']);
 const SOURCE_KINDS = new Set<SurebetStrategySourceKind>(['pinned_records', 'read_only_query', 'resource_export']);
 
-type ReadOnlyResponseItem = BwsPrivatePaperRuntimeCycleItem | BwsStrategyLedgerItem | BwsPinnedStrategyExportItem;
+type ReadOnlyResponseItem =
+  | BwsB1BacktestRunItem
+  | BwsPrivatePaperRuntimeCycleItem
+  | BwsStrategyLedgerItem
+  | BwsPinnedStrategyExportItem;
+type BwsReadOnlyApiResource = 'b1_backtest_runs' | 'pinned_strategy_exports' | 'private_paper_runtime_cycles' | 'strategy_ledger_entries';
 
 export type BwsOperatorCockpitFetchResponse = Readonly<{
   ok: boolean;
@@ -59,6 +66,9 @@ export type BwsOperatorCockpitFetchLike = (
 ) => Promise<BwsOperatorCockpitFetchResponse>;
 
 export interface BwsOperatorCockpitApiClient {
+  queryB1BacktestRuns(
+    request: BwsB1BacktestRunQueryRequest,
+  ): Promise<BwsReadOnlyQueryResponse<'b1_backtest_runs', BwsB1BacktestRunItem>>;
   queryPrivatePaperRuntimeCycles(
     request: BwsPrivatePaperRuntimeCycleQueryRequest,
   ): Promise<BwsReadOnlyQueryResponse<'private_paper_runtime_cycles', BwsPrivatePaperRuntimeCycleItem>>;
@@ -554,12 +564,81 @@ function assertPinnedStrategyExportItem(value: unknown, label: string): BwsPinne
   return record as unknown as BwsPinnedStrategyExportItem;
 }
 
+function assertB1BacktestRunItem(value: unknown, label: string): BwsB1BacktestRunItem {
+  const record = requireObjectRecord(value, label);
+  const run = requireObjectRecord(record['run'], `${label}.run`);
+  if (requireNonEmptyString(run['runKind'], `${label}.run.runKind`) !== 'deterministic_b1_cross_venue_offline_backtest') {
+    fail(`${label}.run.runKind must remain deterministic_b1_cross_venue_offline_backtest`);
+  }
+  if (requireBoolean(run['runtimeEvidence'], `${label}.run.runtimeEvidence`) !== false) {
+    fail(`${label}.run.runtimeEvidence must stay false`);
+  }
+  if (requireBoolean(run['executable'], `${label}.run.executable`) !== false) {
+    fail(`${label}.run.executable must stay false`);
+  }
+  if (requireNonEmptyString(run['liveReadiness'], `${label}.run.liveReadiness`) !== 'not_authorized_bws_900_parked') {
+    fail(`${label}.run.liveReadiness must keep BWS-900 parked`);
+  }
+  if (
+    requireNonEmptyString(run['upstreamReadiness'], `${label}.run.upstreamReadiness`)
+    !== 'blocked_until_betting_win_b1_multi_venue_markets_v1'
+  ) {
+    fail(`${label}.run.upstreamReadiness must preserve the upstream B1 blocker`);
+  }
+  requireNonEmptyString(run['runId'], `${label}.run.runId`);
+  requireSha256(run['runHash'], `${label}.run.runHash`);
+  requireSha256(run['sourceManifestHash'], `${label}.run.sourceManifestHash`);
+  requireSha256(run['upstreamLockFingerprint'], `${label}.run.upstreamLockFingerprint`);
+  requireIsoTimestamp(run['observedAt'], `${label}.run.observedAt`);
+  requireIsoTimestamp(run['insertedAt'], `${label}.run.insertedAt`);
+  requireObjectRecord(run['metrics'], `${label}.run.metrics`);
+  requireObjectRecord(run['report'], `${label}.run.report`);
+
+  const policy = requireObjectRecord(record['policy'], `${label}.policy`);
+  if (requireBoolean(policy['runtimeEvidence'], `${label}.policy.runtimeEvidence`) !== false) {
+    fail(`${label}.policy.runtimeEvidence must stay false`);
+  }
+  if (requireNonEmptyString(policy['execution'], `${label}.policy.execution`) !== 'forbidden') {
+    fail(`${label}.policy.execution must be forbidden`);
+  }
+  if (requireNonEmptyString(policy['publicSignals'], `${label}.policy.publicSignals`) !== 'forbidden') {
+    fail(`${label}.policy.publicSignals must be forbidden`);
+  }
+  if (
+    requireNonEmptyString(policy['upstreamReadiness'], `${label}.policy.upstreamReadiness`)
+    !== 'blocked_until_betting_win_b1_multi_venue_markets_v1'
+  ) {
+    fail(`${label}.policy.upstreamReadiness must preserve the upstream B1 blocker`);
+  }
+
+  for (const [index, candidate] of requireArray<unknown>(record['candidateSnapshots'], `${label}.candidateSnapshots`).entries()) {
+    const candidateRecord = requireObjectRecord(candidate, `${label}.candidateSnapshots[${index}]`);
+    requireNonEmptyString(candidateRecord['candidateId'], `${label}.candidateSnapshots[${index}].candidateId`);
+    requireNonEmptyString(candidateRecord['status'], `${label}.candidateSnapshots[${index}].status`);
+    requireNonEmptyString(candidateRecord['stage'], `${label}.candidateSnapshots[${index}].stage`);
+    requireObjectRecord(candidateRecord['candidate'], `${label}.candidateSnapshots[${index}].candidate`);
+  }
+  for (const [index, simulation] of requireArray<unknown>(record['simulationResults'], `${label}.simulationResults`).entries()) {
+    const simulationRecord = requireObjectRecord(simulation, `${label}.simulationResults[${index}]`);
+    requireNonEmptyString(simulationRecord['candidateId'], `${label}.simulationResults[${index}].candidateId`);
+    requireNonEmptyString(simulationRecord['simulationKind'], `${label}.simulationResults[${index}].simulationKind`);
+    requireNonEmptyString(simulationRecord['status'], `${label}.simulationResults[${index}].status`);
+    requireObjectRecord(simulationRecord['result'], `${label}.simulationResults[${index}].result`);
+  }
+  return record as unknown as BwsB1BacktestRunItem;
+}
+
 function assertResponseItems<
-  TResource extends 'pinned_strategy_exports' | 'private_paper_runtime_cycles' | 'strategy_ledger_entries',
+  TResource extends BwsReadOnlyApiResource,
 >(
   resource: TResource,
   items: readonly unknown[],
 ) {
+  if (resource === 'b1_backtest_runs') {
+    return Object.freeze(
+      items.map((item, index) => assertB1BacktestRunItem(item, `page.items[${index}]`)),
+    );
+  }
   if (resource === 'pinned_strategy_exports') {
     return Object.freeze(
       items.map((item, index) => assertPinnedStrategyExportItem(item, `page.items[${index}]`)),
@@ -576,7 +655,7 @@ function assertResponseItems<
 }
 
 function assertReadOnlyQueryResponse<
-  TResource extends 'pinned_strategy_exports' | 'private_paper_runtime_cycles' | 'strategy_ledger_entries',
+  TResource extends BwsReadOnlyApiResource,
   TItem extends ReadOnlyResponseItem,
 >(
   value: unknown,
@@ -743,6 +822,16 @@ function createPrivatePaperRuntimeCycleRequest(
   });
 }
 
+function createB1BacktestRunRequest(): BwsB1BacktestRunQueryRequest {
+  return Object.freeze({
+    expand: 'reporting',
+    filters: Object.freeze({
+      offlineFalsificationStatus: 'B1_OFFLINE_RESEARCH_CANDIDATES_OBSERVED',
+    }),
+    pageSize: 8,
+  });
+}
+
 function buildStrategyLedgerUrl(
   baseUrl: string,
   request: BwsStrategyLedgerQueryRequest,
@@ -761,6 +850,22 @@ function buildStrategyLedgerUrl(
   appendQueryParameter(searchParams, 'sourceManifestHash', request.filters.sourceManifestHash);
   appendQueryParameter(searchParams, 'upstreamLockRecordId', request.filters.upstreamLockRecordId);
   return new URL(`/api/read-only/strategy-ledger?${searchParams.toString()}`, baseUrl).href;
+}
+
+function buildB1BacktestRunsUrl(
+  baseUrl: string,
+  request: BwsB1BacktestRunQueryRequest,
+): string {
+  const searchParams = new URLSearchParams();
+  appendQueryParameter(searchParams, 'pageSize', request.pageSize);
+  appendQueryParameter(searchParams, 'expand', request.expand);
+  appendQueryParameter(searchParams, 'cursor', request.cursor);
+  appendQueryParameter(searchParams, 'offlineFalsificationStatus', request.filters.offlineFalsificationStatus);
+  appendQueryParameter(searchParams, 'runId', request.filters.runId);
+  appendQueryParameter(searchParams, 'sourceManifestHash', request.filters.sourceManifestHash);
+  appendQueryParameter(searchParams, 'upstreamCheckpointId', request.filters.upstreamCheckpointId);
+  appendQueryParameter(searchParams, 'upstreamLockFingerprint', request.filters.upstreamLockFingerprint);
+  return new URL(`/api/read-only/b1/backtest-runs?${searchParams.toString()}`, baseUrl).href;
 }
 
 function buildPinnedStrategyExportsUrl(
@@ -881,6 +986,16 @@ export function createBwsOperatorCockpitApiClient(
   fetchImpl: BwsOperatorCockpitFetchLike = defaultFetchLike(),
 ): BwsOperatorCockpitApiClient {
   return Object.freeze({
+    async queryB1BacktestRuns(
+      request: BwsB1BacktestRunQueryRequest,
+    ) {
+      const path = buildB1BacktestRunsUrl(configuration.apiBaseUrl, request);
+      const response = await readOnlyGetJson<unknown>(path, fetchImpl);
+      return assertReadOnlyQueryResponse<'b1_backtest_runs', BwsB1BacktestRunItem>(
+        response,
+        'b1_backtest_runs',
+      );
+    },
     async queryPrivatePaperRuntimeCycles(
       request: BwsPrivatePaperRuntimeCycleQueryRequest,
     ) {
@@ -932,6 +1047,7 @@ export async function loadBwsOperatorCockpitSnapshot(
         acceptedBacktests: mockSnapshot.acceptedBacktests,
         acceptedPaperRuns: mockSnapshot.acceptedPaperRuns,
         acceptedRuntimeCycles: mockSnapshot.acceptedRuntimeCycles,
+        b1BacktestRuns: mockSnapshot.b1BacktestRuns,
         blockedBacktests: mockSnapshot.blockedBacktests,
         blockedPaperRuns: mockSnapshot.blockedPaperRuns,
         blockedRuntimeCycles: mockSnapshot.blockedRuntimeCycles,
@@ -951,6 +1067,7 @@ export async function loadBwsOperatorCockpitSnapshot(
     blockedPaperRuns,
     acceptedRuntimeCycles,
     blockedRuntimeCycles,
+    b1BacktestRuns,
     pinnedStrategyExports,
   ] = await Promise.all([
     client.queryStrategyLedger(
@@ -971,6 +1088,9 @@ export async function loadBwsOperatorCockpitSnapshot(
     client.queryPrivatePaperRuntimeCycles(
       createPrivatePaperRuntimeCycleRequest('blocked'),
     ),
+    client.queryB1BacktestRuns(
+      createB1BacktestRunRequest(),
+    ),
     request.includePinnedStrategyExports && request.evidenceScope !== undefined
       ? client.queryPinnedStrategyExports(
           Object.freeze({
@@ -986,6 +1106,7 @@ export async function loadBwsOperatorCockpitSnapshot(
     acceptedBacktests,
     acceptedPaperRuns,
     acceptedRuntimeCycles,
+    b1BacktestRuns,
     blockedBacktests,
     blockedPaperRuns,
     blockedRuntimeCycles,

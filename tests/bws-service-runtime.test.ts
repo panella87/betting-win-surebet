@@ -170,6 +170,9 @@ test('BWS read-only HTTP handler surfaces health and readiness snapshots with se
         bwsReadOnlyQueryServiceBoundary: describeBwsReadOnlyQueryServiceBoundary(),
         upstreamReadOnlyQueryClientBoundary: '@betting-win-surebet/bootstrap:BWS-140',
       }),
+      queryB1BacktestRuns() {
+        throw new Error('not used by this test');
+      },
       queryPrivatePaperRuntimeCycles() {
         throw new Error('not used by this test');
       },
@@ -240,6 +243,9 @@ test('BWS read-only HTTP handler fails closed when health/readiness status snaps
       bwsReadOnlyQueryServiceBoundary: describeBwsReadOnlyQueryServiceBoundary(),
       upstreamReadOnlyQueryClientBoundary: '@betting-win-surebet/bootstrap:BWS-140',
     }),
+    queryB1BacktestRuns() {
+      throw new Error('not used by this test');
+    },
     queryPrivatePaperRuntimeCycles() {
       throw new Error('not used by this test');
     },

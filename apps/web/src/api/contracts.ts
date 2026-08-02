@@ -1,4 +1,5 @@
 import type {
+  BwsB1BacktestRunItem,
   BwsPrivatePaperRuntimeCycleItem,
   BwsPinnedStrategyExportItem,
   BwsReadOnlyQueryResponse,
@@ -50,6 +51,12 @@ export const BWS_OPERATOR_COCKPIT_BROWSER_ROUTES = Object.freeze([
     path: '/blockers',
     summary: 'Blocked candidate summaries with explicit blocker codes and stop reasons.',
     title: 'Blockers',
+  },
+  {
+    group: 'B1',
+    path: '/b1-research',
+    summary: 'Deterministic cross-venue offline falsification reports with execution and public signals closed.',
+    title: 'B1 Research',
   },
 ] as const);
 
@@ -111,6 +118,7 @@ export interface BwsOperatorCockpitSnapshot {
   readonly acceptedBacktests: BwsReadOnlyQueryResponse<'strategy_ledger_entries', BwsStrategyLedgerItem>;
   readonly acceptedPaperRuns: BwsReadOnlyQueryResponse<'strategy_ledger_entries', BwsStrategyLedgerItem>;
   readonly acceptedRuntimeCycles: BwsReadOnlyQueryResponse<'private_paper_runtime_cycles', BwsPrivatePaperRuntimeCycleItem>;
+  readonly b1BacktestRuns: BwsReadOnlyQueryResponse<'b1_backtest_runs', BwsB1BacktestRunItem>;
   readonly blockedBacktests: BwsReadOnlyQueryResponse<'strategy_ledger_entries', BwsStrategyLedgerItem>;
   readonly blockedPaperRuns: BwsReadOnlyQueryResponse<'strategy_ledger_entries', BwsStrategyLedgerItem>;
   readonly blockedRuntimeCycles: BwsReadOnlyQueryResponse<'private_paper_runtime_cycles', BwsPrivatePaperRuntimeCycleItem>;

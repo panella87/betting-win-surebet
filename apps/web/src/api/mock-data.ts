@@ -1,4 +1,5 @@
 import type {
+  BwsB1BacktestRunItem,
   BwsPrivatePaperRuntimeCycleItem,
   BwsPinnedStrategyExportItem,
   BwsReadOnlyQueryResponse,
@@ -479,6 +480,94 @@ function pinnedExport(
   });
 }
 
+function b1BacktestResponse(): BwsReadOnlyQueryResponse<'b1_backtest_runs', BwsB1BacktestRunItem> {
+  return Object.freeze({
+    boundary: Object.freeze({
+      automaticFallback: 'forbidden',
+      bwsReadOnlyQueryServiceBoundary: '@betting-win-surebet/bootstrap:BWS-400',
+      upstreamReadOnlyQueryClientBoundary: '@betting-win-surebet/bootstrap:BWS-140',
+    }),
+    generatedAt: MOCK_GENERATED_AT,
+    page: Object.freeze({
+      items: Object.freeze([
+        Object.freeze({
+          candidateSnapshots: Object.freeze([
+            Object.freeze({
+              blockers: Object.freeze([]),
+              candidate: Object.freeze({ candidateId: 'b1-candidate-001', reportOnly: true }),
+              candidateId: 'b1-candidate-001',
+              candidateSnapshotId: 'b1-run-001:b1-candidate-001',
+              grossSpreadPpm: '5000',
+              insertedAt: MOCK_GENERATED_AT,
+              marketEquivalenceKey: 'event-001:moneyline',
+              netSpreadPpm: '2500',
+              runId: 'b1-run-001',
+              stage: 'accepted',
+              status: 'accepted',
+              venuePairKey: 'venue-a|venue-b',
+              worstCaseNetMinor: '2',
+            }),
+          ]),
+          policy: Object.freeze({
+            execution: 'forbidden',
+            publicSignals: 'forbidden',
+            runtimeEvidence: false,
+            upstreamReadiness: 'blocked_until_betting_win_b1_multi_venue_markets_v1',
+          }),
+          run: Object.freeze({
+            executable: false,
+            fixtureKind: 'deterministic_b1_multi_venue_fixture',
+            insertedAt: MOCK_GENERATED_AT,
+            liveReadiness: 'not_authorized_bws_900_parked',
+            metrics: Object.freeze({
+              candidateCount: 1,
+              fillableCandidateCount: 1,
+              grossPositiveCount: 1,
+              marketsCompared: 1,
+              netPositiveCount: 1,
+              uniqueEvents: 1,
+              venuePairs: 1,
+            }),
+            observedAt: MOCK_GENERATED_AT,
+            offlineFalsificationStatus: 'B1_OFFLINE_RESEARCH_CANDIDATES_OBSERVED',
+            report: Object.freeze({
+              reportKind: 'deterministic_b1_cross_venue_backtest_report',
+              runtimeEvidence: false,
+              upstreamReadiness: 'blocked_until_betting_win_b1_multi_venue_markets_v1',
+            }),
+            runHash: '7'.repeat(64),
+            runId: 'b1-run-001',
+            runKind: 'deterministic_b1_cross_venue_offline_backtest',
+            runtimeEvidence: false,
+            sourceManifestHash: '8'.repeat(64),
+            upstreamCheckpointId: 'b1-checkpoint-001',
+            upstreamLockFingerprint: '9'.repeat(64),
+            upstreamReadiness: 'blocked_until_betting_win_b1_multi_venue_markets_v1',
+          }),
+          simulationResults: Object.freeze([
+            Object.freeze({
+              blockers: Object.freeze([]),
+              candidateId: 'b1-candidate-001',
+              falsePositive: false,
+              insertedAt: MOCK_GENERATED_AT,
+              residualExposureMinor: '0',
+              result: Object.freeze({ replayKind: 'deterministic_b1_settlement_replay' }),
+              runId: 'b1-run-001',
+              settledNetMinor: '2',
+              simulationKind: 'settlement_replay',
+              simulationResultId: 'b1-run-001:b1-candidate-001:settlement_replay',
+              status: 'accepted',
+            }),
+          ]),
+        }),
+      ]),
+      pageSize: 8,
+      returnedCount: 1,
+    }),
+    resource: 'b1_backtest_runs',
+  });
+}
+
 export function createMockBwsOperatorCockpitSnapshot(): BwsOperatorCockpitSnapshot {
   const acceptedPaperRuns = strategyResponse([
     strategyEntry({
@@ -555,6 +644,7 @@ export function createMockBwsOperatorCockpitSnapshot(): BwsOperatorCockpitSnapsh
         strategyLedger: acceptedPaperRuns.page.items[0]!,
       }),
     ]),
+    b1BacktestRuns: b1BacktestResponse(),
     blockedBacktests: strategyResponse([
       strategyEntry({
         acceptanceState: 'blocked',

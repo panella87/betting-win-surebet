@@ -8,7 +8,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / 'SOURCE_MANIFEST.json'
 SCHEMA = 'betting-win-surebet-source-manifest-v1'
-SKIP_DIRECTORY_NAMES = {'.git', '.locks', 'artifacts', 'node_modules', 'dist', 'coverage', 'tmp', '.tmp'}
+SKIP_DIRECTORY_NAMES = {'.git', '.locks', 'artifacts', 'node_modules', 'dist', 'coverage', 'tmp', '.tmp', 'graphify-out'}
 SKIP_EXACT = {
     '.env',
     'SOURCE_MANIFEST.json',

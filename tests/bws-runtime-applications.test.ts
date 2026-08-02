@@ -406,6 +406,9 @@ function createQueryServiceStub(): BwsReadOnlyQueryService {
       bwsReadOnlyQueryServiceBoundary: '@betting-win-surebet/bootstrap:BWS-400',
       upstreamReadOnlyQueryClientBoundary: '@betting-win-surebet/bootstrap:BWS-140',
     }),
+    queryB1BacktestRuns() {
+      throw new Error('B1 backtest queries are outside this test scope');
+    },
     queryPrivatePaperRuntimeCycles() {
       throw new Error('private-paper runtime cycle queries are outside this test scope');
     },

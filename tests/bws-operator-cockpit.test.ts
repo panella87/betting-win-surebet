@@ -131,7 +131,7 @@ test('BWS operator cockpit route list preserves the bounded surface required by 
   const routes = listBwsOperatorCockpitRoutes();
   assert.deepEqual(
     routes.map((route) => route.path),
-    ['/', '/opportunities', '/evidence', '/backtests', '/paper-runs', '/exposure', '/blockers'],
+    ['/', '/opportunities', '/evidence', '/backtests', '/paper-runs', '/exposure', '/blockers', '/b1-research'],
   );
 });
 
@@ -153,6 +153,10 @@ test('BWS operator cockpit page models derive overview, evidence, exposure, and 
   const blockers = buildBwsOperatorCockpitPageModel('/blockers', snapshot);
   assert.equal(blockers.rows.length, 2);
   assert.match(blockers.rows[0]?.values['blockerCodes'] ?? '', /QUOTE_FRESHNESS_EXCEEDED|RESIDUAL_EXPOSURE_FLOOR_TRIGGERED/);
+
+  const b1Research = buildBwsOperatorCockpitPageModel('/b1-research', snapshot);
+  assert.equal(b1Research.cards[0]?.value, '1');
+  assert.equal(b1Research.rows[0]?.values['upstreamReadiness'], 'blocked_until_betting_win_b1_multi_venue_markets_v1');
 });
 
 test('BWS operator cockpit evidence cards stay bound to strategy-ledger rows instead of dead-lettered runtime-only cycles', () => {
@@ -234,6 +238,15 @@ test('BWS operator cockpit snapshot loader aggregates the bounded API snapshot w
         },
       });
     }
+    if (url.pathname.endsWith('/b1/backtest-runs')) {
+      return Object.freeze({
+        ok: true,
+        status: 200,
+        async text() {
+          return JSON.stringify(snapshot.b1BacktestRuns);
+        },
+      });
+    }
     if (url.pathname.endsWith('/private-paper-runtime-cycles')) {
       const acceptanceState = url.searchParams.get('acceptanceState');
       const payload = acceptanceState === 'accepted_local_evidence'
@@ -284,11 +297,18 @@ test('BWS operator cockpit snapshot loader aggregates the bounded API snapshot w
   assert.equal(loaded.blockedPaperRuns.page.returnedCount, snapshot.blockedPaperRuns.page.returnedCount);
   assert.equal(loaded.acceptedRuntimeCycles.page.returnedCount, snapshot.acceptedRuntimeCycles.page.returnedCount);
   assert.equal(loaded.blockedRuntimeCycles.page.returnedCount, snapshot.blockedRuntimeCycles.page.returnedCount);
+  assert.equal(loaded.b1BacktestRuns.page.returnedCount, snapshot.b1BacktestRuns.page.returnedCount);
   assert.equal(loaded.pinnedStrategyExports?.page.returnedCount, snapshot.pinnedStrategyExports?.page.returnedCount);
-  assert.equal(requestedUrls.length, 7);
+  assert.equal(requestedUrls.length, 8);
   assert.match(requestedUrls[4] ?? '', /private-paper-runtime-cycles/);
   assert.match(requestedUrls[5] ?? '', /acceptanceState=blocked/);
-  assert.match(requestedUrls[6] ?? '', /providerId=polymarket/);
+  assert.notEqual(requestedUrls[6], undefined);
+  assert.notEqual(requestedUrls[7], undefined);
+  if (requestedUrls[6] === undefined || requestedUrls[7] === undefined) {
+    throw new Error('Expected B1 research and pinned export cockpit requests.');
+  }
+  assert.match(requestedUrls[6], /b1\/backtest-runs/);
+  assert.match(requestedUrls[7], /providerId=polymarket/);
 });
 
 test('BWS operator cockpit models fail closed on ambiguous blocked candidate summaries', () => {
@@ -354,7 +374,9 @@ test('BWS operator cockpit API client builds bounded read-only requests and pars
   const fetchImpl: BwsOperatorCockpitFetchLike = async (input) => {
     requestedUrls.push(input);
     const url = new URL(input);
-    const payload = url.pathname.endsWith('/strategy-ledger')
+    const payload = url.pathname.endsWith('/b1/backtest-runs')
+      ? snapshot.b1BacktestRuns
+      : url.pathname.endsWith('/strategy-ledger')
       ? snapshot.blockedPaperRuns
       : snapshot.pinnedStrategyExports;
     return Object.freeze({
@@ -390,10 +412,24 @@ test('BWS operator cockpit API client builds bounded read-only requests and pars
   });
   assert.equal(evidence.resource, 'pinned_strategy_exports');
 
+  const b1Research = await client.queryB1BacktestRuns({
+    expand: 'reporting',
+    filters: {
+      offlineFalsificationStatus: 'B1_OFFLINE_RESEARCH_CANDIDATES_OBSERVED',
+    },
+    pageSize: 8,
+  });
+  assert.equal(b1Research.resource, 'b1_backtest_runs');
+
   assert.match(requestedUrls[0] ?? '', /acceptanceState=blocked/);
   assert.match(requestedUrls[0] ?? '', /runKind=private_paper_runtime_cycle/);
   assert.match(requestedUrls[1] ?? '', /providerId=polymarket/);
   assert.match(requestedUrls[1] ?? '', /expand=provenance/);
+  assert.notEqual(requestedUrls[2], undefined);
+  if (requestedUrls[2] === undefined) {
+    throw new Error('Expected B1 research cockpit client request.');
+  }
+  assert.match(requestedUrls[2], /offlineFalsificationStatus=B1_OFFLINE_RESEARCH_CANDIDATES_OBSERVED/);
 });
 
 test('BWS operator cockpit API client fails closed on malformed committed-HEAD provenance and ambiguous blocked candidates', async () => {

@@ -2,6 +2,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import { URL } from 'node:url';
 import type { BwsOperationalStatusSnapshot } from '../operations/service-runtime.js';
 import type {
+  BwsB1BacktestRunQueryRequest,
   BwsPrivatePaperRuntimeCycleQueryRequest,
   BwsPinnedStrategyExportQueryRequest,
   BwsReadOnlyQueryResponse,
@@ -11,6 +12,7 @@ import type {
 
 const JSON_CONTENT_TYPE = 'application/json; charset=utf-8';
 
+const B1_BACKTEST_RUNS_PATH = '/api/read-only/b1/backtest-runs';
 const HEALTH_PATH = '/health';
 const PRIVATE_PAPER_RUNTIME_CYCLES_PATH = '/api/read-only/private-paper-runtime-cycles';
 const STRATEGY_LEDGER_PATH = '/api/read-only/strategy-ledger';
@@ -60,6 +62,17 @@ const PRIVATE_PAPER_RUNTIME_CYCLE_QUERY_KEYS = new Set([
   'runtimeId',
   'schedulerCheckpointId',
   'upstreamLockRecordId',
+]);
+
+const B1_BACKTEST_RUN_QUERY_KEYS = new Set([
+  'cursor',
+  'expand',
+  'offlineFalsificationStatus',
+  'pageSize',
+  'runId',
+  'sourceManifestHash',
+  'upstreamCheckpointId',
+  'upstreamLockFingerprint',
 ]);
 
 interface ErrorBody {
@@ -160,6 +173,17 @@ export function createBwsReadOnlyQueryHttpHandler(
         return;
       }
 
+      if (pathname === B1_BACKTEST_RUNS_PATH) {
+        const requestBody = parseB1BacktestRunRequest(requestUrl);
+        const result = service.queryB1BacktestRuns(requestBody);
+        if (!result.ok) {
+          writeBlockedResponse(response, result.blockers[0]);
+          return;
+        }
+        writeJson(response, 200, result.value);
+        return;
+      }
+
       writeJson(response, 404, {
         error: {
           code: 'BWS_QUERY_PATH_NOT_FOUND',
@@ -178,6 +202,29 @@ export function createBwsReadOnlyQueryHttpHandler(
       } satisfies ErrorBody);
     }
   };
+}
+
+function parseB1BacktestRunRequest(url: URL): BwsB1BacktestRunQueryRequest {
+  assertAllowedQueryKeys(url, B1_BACKTEST_RUN_QUERY_KEYS);
+  const cursor = getSingleValue(url, 'cursor');
+  const expand = getSingleValue(url, 'expand');
+  const offlineFalsificationStatus = getSingleValue(url, 'offlineFalsificationStatus');
+  const runId = getSingleValue(url, 'runId');
+  const sourceManifestHash = getSingleValue(url, 'sourceManifestHash');
+  const upstreamCheckpointId = getSingleValue(url, 'upstreamCheckpointId');
+  const upstreamLockFingerprint = getSingleValue(url, 'upstreamLockFingerprint');
+  return Object.freeze({
+    ...(cursor === undefined ? {} : { cursor }),
+    ...(expand === undefined ? {} : { expand }),
+    filters: Object.freeze({
+      ...(offlineFalsificationStatus === undefined ? {} : { offlineFalsificationStatus }),
+      ...(runId === undefined ? {} : { runId }),
+      ...(sourceManifestHash === undefined ? {} : { sourceManifestHash }),
+      ...(upstreamCheckpointId === undefined ? {} : { upstreamCheckpointId }),
+      ...(upstreamLockFingerprint === undefined ? {} : { upstreamLockFingerprint }),
+    }),
+    pageSize: requirePositiveIntegerParam(url, 'pageSize'),
+  });
 }
 
 function parseStrategyLedgerRequest(url: URL): BwsStrategyLedgerQueryRequest {

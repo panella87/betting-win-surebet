@@ -1,4 +1,5 @@
 import type {
+  BwsB1BacktestRunItem,
   BwsPrivatePaperRuntimeCycleItem,
   BwsPinnedStrategyExportItem,
   BwsStrategyLedgerItem,
@@ -546,6 +547,67 @@ function toPinnedExportRows(
   return Object.freeze(items.map((item) => createPinnedExportRow(item)));
 }
 
+function createB1BacktestRunRow(item: BwsB1BacktestRunItem): BwsOperatorCockpitTableRow {
+  const metrics = item.run.metrics as Readonly<Record<string, unknown>>;
+  return createRow(
+    item.run.runId,
+    item.run.runId,
+    Object.freeze({
+      candidateCount: renderValue(metrics['candidateCount']),
+      fillableCandidateCount: renderValue(metrics['fillableCandidateCount']),
+      offlineFalsificationStatus: item.run.offlineFalsificationStatus,
+      observedAt: item.run.observedAt,
+      runId: item.run.runId,
+      simulationCount: renderValue(item.simulationResults.length),
+      upstreamReadiness: item.run.upstreamReadiness,
+    }),
+    Object.freeze([
+      field('Run Id', item.run.runId),
+      field('Run Hash', item.run.runHash),
+      field('Observed At', item.run.observedAt),
+      field('Offline Falsification Status', item.run.offlineFalsificationStatus),
+      field('Source Manifest Hash', item.run.sourceManifestHash),
+      field('Upstream Lock Fingerprint', item.run.upstreamLockFingerprint),
+      field(
+        'Upstream Checkpoint Id',
+        item.run.upstreamCheckpointId === undefined ? 'not_available' : item.run.upstreamCheckpointId,
+      ),
+      field('Runtime Evidence', item.run.runtimeEvidence),
+      field('Executable', item.run.executable),
+      field('Live Readiness', item.run.liveReadiness),
+      field('Policy Execution', item.policy.execution),
+      field('Policy Public Signals', item.policy.publicSignals),
+    ]),
+    Object.freeze([
+      Object.freeze({
+        records: Object.freeze(item.candidateSnapshots.map((candidate) => Object.freeze({
+          blockerCount: renderValue(Array.isArray(candidate.blockers) ? candidate.blockers.length : 'not_available'),
+          candidateId: candidate.candidateId,
+          grossSpreadPpm: candidate.grossSpreadPpm === undefined ? 'not_available' : candidate.grossSpreadPpm,
+          marketEquivalenceKey: candidate.marketEquivalenceKey === undefined ? 'not_available' : candidate.marketEquivalenceKey,
+          netSpreadPpm: candidate.netSpreadPpm === undefined ? 'not_available' : candidate.netSpreadPpm,
+          stage: candidate.stage,
+          status: candidate.status,
+          venuePairKey: candidate.venuePairKey === undefined ? 'not_available' : candidate.venuePairKey,
+          worstCaseNetMinor: candidate.worstCaseNetMinor === undefined ? 'not_available' : candidate.worstCaseNetMinor,
+        }))),
+        title: 'B1 Candidate Snapshots',
+      }),
+      Object.freeze({
+        records: Object.freeze(item.simulationResults.map((simulation) => Object.freeze({
+          candidateId: simulation.candidateId,
+          falsePositive: renderValue(simulation.falsePositive),
+          residualExposureMinor: simulation.residualExposureMinor === undefined ? 'not_available' : simulation.residualExposureMinor,
+          settledNetMinor: simulation.settledNetMinor === undefined ? 'not_available' : simulation.settledNetMinor,
+          simulationKind: simulation.simulationKind,
+          status: simulation.status,
+        }))),
+        title: 'B1 Simulation Results',
+      }),
+    ]),
+  );
+}
+
 export function buildBwsOperatorCockpitPageModel(
   routePath: BwsOperatorCockpitRoutePath,
   snapshot: BwsOperatorCockpitSnapshot,
@@ -710,6 +772,33 @@ export function buildBwsOperatorCockpitPageModel(
         emptyLabel: 'No blocked candidate rows are available in the bounded strategy scopes.',
         note: 'Blocked candidate summaries fail closed if blocker codes are missing or ambiguous.',
         rows: toBlockedCandidateRows(snapshot),
+      });
+    case '/b1-research':
+      return Object.freeze({
+        cards: Object.freeze([
+          createCard('B1 Research Runs', snapshot.b1BacktestRuns.page.returnedCount, 'accent'),
+          createCard(
+            'Candidate Snapshots',
+            snapshot.b1BacktestRuns.page.items.reduce((count, item) => count + item.candidateSnapshots.length, 0),
+          ),
+          createCard(
+            'Simulation Results',
+            snapshot.b1BacktestRuns.page.items.reduce((count, item) => count + item.simulationResults.length, 0),
+          ),
+          createCard('Runtime Evidence', 'false', 'warning'),
+        ]),
+        columns: Object.freeze([
+          Object.freeze({ key: 'runId', label: 'Run Id' }),
+          Object.freeze({ key: 'offlineFalsificationStatus', label: 'Status' }),
+          Object.freeze({ key: 'candidateCount', label: 'Candidates' }),
+          Object.freeze({ key: 'fillableCandidateCount', label: 'Fillable' }),
+          Object.freeze({ key: 'simulationCount', label: 'Simulations' }),
+          Object.freeze({ key: 'upstreamReadiness', label: 'Upstream Readiness' }),
+          Object.freeze({ key: 'observedAt', label: 'Observed At' }),
+        ]),
+        emptyLabel: 'No deterministic B1 offline research runs are available.',
+        note: 'B1 reporting is deterministic offline research only: no runtime-evidence claim, no execution path, and no public signal output.',
+        rows: Object.freeze(snapshot.b1BacktestRuns.page.items.map((item) => createB1BacktestRunRow(item))),
       });
     default:
       fail(`Unsupported BWS cockpit route ${routePath}`);
