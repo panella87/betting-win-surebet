@@ -155,6 +155,22 @@ test('bugfix controller is strict read-only audit and handoff infrastructure', (
 });
 
 
+test('bugfix controller emits terminal implementation handoffs before post-codex validation', () => {
+  const script = read('run-autonomous-bugfix.sh');
+  const requireArtifacts = script.indexOf('automation_require_cycle_artifacts');
+  const readStatus = script.indexOf('read_bugfix_continue_status', requireArtifacts);
+  const terminalCase = script.indexOf('HANDOVER_AUTONOMOUS_IMPLEMENTATION=yes|BLOCKED=yes', readStatus);
+  const deferredMarker = script.indexOf('bugfix_terminal_handoff_validated_before_post_codex_validation', terminalCase);
+  const writeHandoff = script.indexOf('write_implementation_handoff "$cycle_dir"', terminalCase);
+  const postValidation = script.indexOf('automation_run_validations bugfix', requireArtifacts);
+  assert.ok(requireArtifacts >= 0);
+  assert.ok(readStatus > requireArtifacts);
+  assert.ok(terminalCase > readStatus);
+  assert.ok(deferredMarker > terminalCase);
+  assert.ok(writeHandoff > terminalCase);
+  assert.ok(postValidation > writeHandoff);
+});
+
 test('bugfix artifact evidence is resolved before the active run directory exists', () => {
   const script = read('run-autonomous-bugfix.sh');
   const resolveTask = script.indexOf('resolve_task_source');

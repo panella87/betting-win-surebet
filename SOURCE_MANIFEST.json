@@ -1,7 +1,7 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-08-03T16:59:46Z",
-  "overlay": "bws88-bugfix-validation-repair-wave51",
+  "generated": "2026-08-03T19:19:38Z",
+  "overlay": "bws89-bugfix-audit-terminal-handoff-wave52",
   "files": [
     {
       "path": ".automation/README.md",
@@ -115,8 +115,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "2719c14316607b7d98f2efd0dd60815404aa4961770cd906fd1f28c2ee327345",
-      "size": 67703
+      "sha256": "0ada180b0e60183cc9d6e2ee54bb0a9df63f13103a6125f81b4dc0e4f66ec82c",
+      "size": 68205
     },
     {
       "path": "PROJECT_STATUS.md",
@@ -650,13 +650,13 @@
     },
     {
       "path": "docs/automation/PROTECTED_AUTOMATION_FILES.md",
-      "sha256": "40423434a1b62e962c881505610bd8827ba6aff50283b8015ff9b1b2dd4ab8a9",
-      "size": 3008
+      "sha256": "396949a255ab91113f9d41fabf2f065504c5a9b0eaa0416bcb78d56a21c19144",
+      "size": 3232
     },
     {
       "path": "docs/automation/README.md",
-      "sha256": "0348b271d26b3a9ca397ca7e43a37290976e3031e8db8048fdef9fae552d0b60",
-      "size": 10023
+      "sha256": "8287f6a177255d0593510f92c57f58b88163b52fb16ed4ba87f84292061200ff",
+      "size": 10203
     },
     {
       "path": "docs/automation/SSH_KEY_SETUP.md",
@@ -1645,8 +1645,8 @@
     },
     {
       "path": "run-autonomous-bugfix.sh",
-      "sha256": "88d02550216d5a5fdc14b112d5963bfb530c79223d318e0687ced7aa9b7a6891",
-      "size": 44297
+      "sha256": "55d008eb0bbb5d072058ec6c5da181289fbe75a6dfebdfe0d3dbc4e99007de0c",
+      "size": 45790
     },
     {
       "path": "run-autonomous-implementation.sh",
@@ -1780,8 +1780,8 @@
     },
     {
       "path": "scripts/validate_autonomous_controller_contract.py",
-      "sha256": "c4d6bc0619f1e045e87ed8b2c8d89ce84a7b51ac42f3c2264c195d86b3b1709c",
-      "size": 28111
+      "sha256": "15bf003c513742226a601c17be3e5bf3088cf25652c48f091e3380da4b16066a",
+      "size": 28304
     },
     {
       "path": "scripts/validate_betting_win_upstream_contract.py",
@@ -2440,8 +2440,8 @@
     },
     {
       "path": "tests/autonomous-controller-contract.test.ts",
-      "sha256": "348da129ed1852afba4ad95c1afbb0d5f9870593b13330d9a6715fe331481c81",
-      "size": 24640
+      "sha256": "ef5e6dee4a6f85f3c260777fba5ce28365333b01238416ab86628bdbdec61e22",
+      "size": 25635
     },
     {
       "path": "tests/b1-capital-lock.test.ts",

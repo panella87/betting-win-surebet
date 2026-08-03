@@ -3,6 +3,13 @@
 - Allowed `run-bugfix-autopilot.sh` to validate implementation return handoffs that include `RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE` and `RUNTIME_EVIDENCE_CAMPAIGN_RUN_ID`, matching the current `run-autonomous-implementation.sh` return contract.
 - Required those runtime-evidence fields to remain `none` for bugfix-mode returns where runtime evidence is not requested, preserving the separation between bugfix re-audit and paper/runtime-evidence campaigns.
 
+
+## 2026-08-03 - Bugfix audit terminal handoff validation repair
+
+- Fixed `run-autonomous-bugfix.sh` so confirmed-bug implementation handoffs and blocked audit outcomes are read and validated before post-Codex validation can fail on the same known red evidence that justified the handoff.
+- Added controller-contract coverage for terminal bugfix handoffs before post-Codex validation.
+- No provider connection, execution path, public signal, runtime evidence bypass or betting-win mutation was added.
+
 ## 2026-08-03 - Bugfix validation repair for runtime fixture schemas
 
 - Copied the upstream-lock JSON schema into operator-lifecycle and runtime-application temporary repository fixtures so validation mirrors the current runtime preflight contract.

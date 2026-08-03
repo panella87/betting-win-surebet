@@ -812,6 +812,33 @@ main_loop() {
       FINAL_STATUS="BLOCKED=yes"; STOP_REASON="malformed_cycle_artifacts_cycle_${CYCLES_ATTEMPTED}"; exit 2
     fi
 
+    status="$(read_bugfix_continue_status "$cycle_dir/continue_status.txt")" || { FINAL_STATUS="BLOCKED=yes"; STOP_REASON="malformed_continue_status_cycle_${CYCLES_ATTEMPTED}"; exit 2; }
+    case "$status" in
+      HANDOVER_AUTONOMOUS_IMPLEMENTATION=yes|BLOCKED=yes)
+        load_and_validate_request_flags "$cycle_dir/request_flags.txt" "$status" || { FINAL_STATUS="BLOCKED=yes"; STOP_REASON="inconsistent_request_flags_cycle_${CYCLES_ATTEMPTED}"; exit 2; }
+        LAST_VALIDATION_STATUS=not_required_for_terminal_audit_handoff
+        LAST_VALIDATION_EXIT_CODE=not_run
+        {
+          printf '\n\n## Controller validation\n\n'
+          printf 'status=%s\nexit_code=%s\nreason=bugfix_terminal_handoff_validated_before_post_codex_validation\n' "$LAST_VALIDATION_STATUS" "$LAST_VALIDATION_EXIT_CODE"
+        } >> "$cycle_dir/validation_results.md"
+        automation_log "cycle=$CYCLES_ATTEMPTED continue_status=$status campaign_area=$CAMPAIGN_AREA post_codex_validation=deferred_to_implementation_handoff"
+        case "$status" in
+          HANDOVER_AUTONOMOUS_IMPLEMENTATION=yes)
+            FINAL_STATUS="$status"
+            STOP_REASON="confirmed_bugs_require_implementation"
+            if [[ "$HANDOVER_AUTONOMOUS_IMPLEMENTATION" == 1 ]]; then write_implementation_handoff "$cycle_dir" || { FINAL_STATUS="BLOCKED=yes"; STOP_REASON="implementation_handoff_write_failed"; exit 2; }; else STOP_REASON="confirmed_bugs_handoff_not_requested"; fi
+            exit 2
+            ;;
+          BLOCKED=yes)
+            FINAL_STATUS="$status"
+            STOP_REASON="audit_blocked_cycle_${CYCLES_ATTEMPTED}"
+            exit 2
+            ;;
+        esac
+        ;;
+    esac
+
     set +e
     automation_run_validations bugfix "$cycle_dir/controller-validation" "$VALIDATION_TIMEOUT_SECONDS"
     post_validation_rc=$?
@@ -828,7 +855,6 @@ main_loop() {
       printf 'status=%s\nexit_code=%s\nlogs=%s\n' "$LAST_VALIDATION_STATUS" "$LAST_VALIDATION_EXIT_CODE" "$cycle_dir/controller-validation"
     } >> "$cycle_dir/validation_results.md"
 
-    status="$(read_bugfix_continue_status "$cycle_dir/continue_status.txt")" || { FINAL_STATUS="BLOCKED=yes"; STOP_REASON="malformed_continue_status_cycle_${CYCLES_ATTEMPTED}"; exit 2; }
     load_and_validate_request_flags "$cycle_dir/request_flags.txt" "$status" || { FINAL_STATUS="BLOCKED=yes"; STOP_REASON="inconsistent_request_flags_cycle_${CYCLES_ATTEMPTED}"; exit 2; }
     automation_log "cycle=$CYCLES_ATTEMPTED continue_status=$status campaign_area=$CAMPAIGN_AREA"
     case "$status" in
