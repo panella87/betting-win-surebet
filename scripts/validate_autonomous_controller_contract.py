@@ -377,6 +377,8 @@ REQUIRED_FRAGMENTS = {
         'BUGFIX_AUTOPILOT_BLOCKED_CHILD_IDENTITY',
         'BUGFIX_AUTOPILOT_BLOCKED_LOCK_RELEASE',
         'BUGFIX_AUTOPILOT_BLOCKED_CHILD_RESULT',
+        'RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE',
+        'RUNTIME_EVIDENCE_CAMPAIGN_RUN_ID',
         'child_terminal_result_transport=atomic_side_channel_v1',
         'child_stdout_machine_parsing=disabled',
         'AUTOMATION_CHILD_RESULT_FILE=$terminal_result',

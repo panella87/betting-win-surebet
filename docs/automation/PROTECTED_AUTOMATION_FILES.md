@@ -57,7 +57,7 @@ automation.config.sh
 docs/automation/PROTECTED_AUTOMATION_FILES.md
 ```
 
-`run-autonomous-implementation.sh` was required so a runtime-evidence paper handoff could preserve selected upstream mode and campaign identity through the implementation return handoff.
+`run-autonomous-implementation.sh` was required so a runtime-evidence paper handoff could preserve selected upstream mode and campaign identity through the implementation return handoff. The same schema fields are accepted by `run-bugfix-autopilot.sh` when validating a bugfix-mode implementation return handoff; values must remain `none` when runtime evidence is not requested by the bugfix campaign.
 
 ## Current task state
 

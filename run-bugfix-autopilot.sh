@@ -636,7 +636,7 @@ validate_audit_handoff() {
 validate_implementation_handoff() {
   local existing computed source_changed source_valid reaud returned_status returned_reason returned_run_dir
   automation_v2_load_env_strict "$IMPLEMENTATION_HANDOFF_FILE" || return 2
-  validate_loaded_env_keys 'HANDOVER_SCHEMA_VERSION,HANDOVER_KIND,REPOSITORY,CONTROLLER,SOURCE_HANDOFF_FINGERPRINT,RUN_BUGFIX_AUDIT_NEXT,AUTONOMOUS_FINAL_STATUS,AUTONOMOUS_STOP_REASON,AUTONOMOUS_FINAL_EXIT_CODE,IMPLEMENTATION_SOURCE_CHANGED,IMPLEMENTATION_SOURCE_VALIDATION_PASSED,PRIVATE_PAPER_REEVALUATION_REQUIRED,BUGFIX_REAUDIT_REQUIRED,AUDIT_AREA,BUG_IDS,PAPER_SERVICE_SUPPORTED,SERVICE_REFRESH_REQUIRED,RUNTIME_EVIDENCE_REQUIRED,REAL_UPSTREAM_EVALUATION,RUN_DIR,WRITTEN_AT,HANDOVER_FINGERPRINT' || return 2
+  validate_loaded_env_keys 'HANDOVER_SCHEMA_VERSION,HANDOVER_KIND,REPOSITORY,CONTROLLER,SOURCE_HANDOFF_FINGERPRINT,RUN_BUGFIX_AUDIT_NEXT,AUTONOMOUS_FINAL_STATUS,AUTONOMOUS_STOP_REASON,AUTONOMOUS_FINAL_EXIT_CODE,IMPLEMENTATION_SOURCE_CHANGED,IMPLEMENTATION_SOURCE_VALIDATION_PASSED,PRIVATE_PAPER_REEVALUATION_REQUIRED,BUGFIX_REAUDIT_REQUIRED,AUDIT_AREA,BUG_IDS,PAPER_SERVICE_SUPPORTED,SERVICE_REFRESH_REQUIRED,RUNTIME_EVIDENCE_REQUIRED,RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE,RUNTIME_EVIDENCE_CAMPAIGN_RUN_ID,REAL_UPSTREAM_EVALUATION,RUN_DIR,WRITTEN_AT,HANDOVER_FINGERPRINT' || return 2
   [[ "$(automation_v2_env_require HANDOVER_SCHEMA_VERSION)" == 1 ]] || return 2
   [[ "$(automation_v2_env_require HANDOVER_KIND)" == bugfix-mode-after-autonomous-implementation ]] || return 2
   [[ "$(automation_v2_env_require REPOSITORY)" == "${AUTOMATION_REPO_NAME:-betting-win-surebet}" ]] || return 2
@@ -661,6 +661,8 @@ validate_implementation_handoff() {
   [[ "$(automation_v2_env_require PAPER_SERVICE_SUPPORTED)" == 0 ]] || return 2
   [[ "$(automation_v2_env_require SERVICE_REFRESH_REQUIRED)" == 0 ]] || return 2
   [[ "$(automation_v2_env_require RUNTIME_EVIDENCE_REQUIRED)" == 0 ]] || return 2
+  [[ "$(automation_v2_env_require RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE)" == none ]] || return 2
+  [[ "$(automation_v2_env_require RUNTIME_EVIDENCE_CAMPAIGN_RUN_ID)" == none ]] || return 2
   [[ "$(automation_v2_env_require REAL_UPSTREAM_EVALUATION)" == blocked_on_required_upstream_input ]] || return 2
   existing="$(automation_v2_env_require HANDOVER_FINGERPRINT)" || return 2
   computed="$(automation_v2_semantic_env_fingerprint_loaded)" || return 2

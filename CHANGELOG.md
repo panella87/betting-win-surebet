@@ -1,3 +1,8 @@
+## 2026-08-03 - Bugfix autopilot return-handoff schema repair
+
+- Allowed `run-bugfix-autopilot.sh` to validate implementation return handoffs that include `RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE` and `RUNTIME_EVIDENCE_CAMPAIGN_RUN_ID`, matching the current `run-autonomous-implementation.sh` return contract.
+- Required those runtime-evidence fields to remain `none` for bugfix-mode returns where runtime evidence is not requested, preserving the separation between bugfix re-audit and paper/runtime-evidence campaigns.
+
 ## 2026-08-03 - BWS-600 paper route doc preflight correction
 
 - Corrected `docs/automation/README.md` so the active post-BWS-700 route points to `run-paper-autopilot.sh` for the BWS-600 runtime-evidence gate instead of the completed BWS-700 implementation queue.

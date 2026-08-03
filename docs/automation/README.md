@@ -81,7 +81,7 @@ Autonomous cycles may not mutate pre-existing services or user sessions. Bounded
 
 ## Notifications and child results
 
-Parent autopilots launch children with `TELEGRAM_NOTIFY=0` and emit one final parent notification. Standalone controllers retain their own final notification. Parent/child terminal state uses the atomic child-result side channel, never streamed human output.
+Parent autopilots launch children with `TELEGRAM_NOTIFY=0` and emit one final parent notification. Standalone controllers retain their own final notification. Parent/child terminal state uses the atomic child-result side channel, never streamed human output. Bugfix autopilot validates the runtime-evidence identity keys emitted by the implementation return handoff; for ordinary bugfix campaigns they must remain `none`, so source re-audit cannot silently turn into a paper/runtime-evidence campaign.
 
 
 ## Clean validation bootstrap

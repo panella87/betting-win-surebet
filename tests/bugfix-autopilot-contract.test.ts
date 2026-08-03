@@ -76,7 +76,7 @@ test('bugfix autopilot exposes the bounded audit implementation re-audit campaig
     'child_telegram_notifications=suppressed_by_parent', 'parent_telegram_notification=final_only',
     '"TELEGRAM_NOTIFY=0"', 'automation_assert_no_incompatible_locks', 'automation_v2_claim_env_file_atomic',
     'automation_v2_touch_owned_parent_lock', 'refresh_parent_lock_heartbeat()', 'bugfix_child_mutated_source',
-    'unsupported handoff key for schema v1', 'active_child_identity_or_termination_failed', 'parent_budget_exhausted',
+    'unsupported handoff key for schema v1', 'RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE', 'RUNTIME_EVIDENCE_CAMPAIGN_RUN_ID', 'active_child_identity_or_termination_failed', 'parent_budget_exhausted',
     'BUGFIX_AUTOPILOT_BLOCKED_LOCK_RELEASE', 'BUGFIX_AUTOPILOT_BLOCKED_CHILD_RESULT',
     'child_terminal_result_transport=atomic_side_channel_v1', 'child_stdout_machine_parsing=disabled',
     'AUTOMATION_CHILD_RESULT_FILE=$terminal_result', 'automation_v2_validate_child_result_file',
@@ -205,7 +205,7 @@ automation_v2_write_env_atomic "$repo/.automation/bugfix-mode-handover.env" \
   "SOURCE_HANDOFF_FINGERPRINT=$source_fp" 'RUN_BUGFIX_AUDIT_NEXT=yes' 'AUTONOMOUS_FINAL_STATUS=AUTONOMOUS_GOAL_COMPLETE=yes' \
   'AUTONOMOUS_STOP_REASON=stub_fixed' 'AUTONOMOUS_FINAL_EXIT_CODE=0' 'IMPLEMENTATION_SOURCE_CHANGED=yes' 'IMPLEMENTATION_SOURCE_VALIDATION_PASSED=yes' \
   'PRIVATE_PAPER_REEVALUATION_REQUIRED=no' 'BUGFIX_REAUDIT_REQUIRED=yes' "AUDIT_AREA=$area" "BUG_IDS=$bugs" \
-  'PAPER_SERVICE_SUPPORTED=0' 'SERVICE_REFRESH_REQUIRED=0' 'RUNTIME_EVIDENCE_REQUIRED=0' 'REAL_UPSTREAM_EVALUATION=blocked_on_required_upstream_input' \
+  'PAPER_SERVICE_SUPPORTED=0' 'SERVICE_REFRESH_REQUIRED=0' 'RUNTIME_EVIDENCE_REQUIRED=0' 'RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE=none' 'RUNTIME_EVIDENCE_CAMPAIGN_RUN_ID=none' 'REAL_UPSTREAM_EVALUATION=blocked_on_required_upstream_input' \
   "RUN_DIR=$run" 'WRITTEN_AT=2026-01-01T00:00:00Z'
 automation_v2_add_or_verify_fingerprint "$repo/.automation/bugfix-mode-handover.env" >/dev/null
 printf 'final_status=STALE_IMPLEMENTATION_STATUS\nstop_reason=stale_implementation_reason\n'
