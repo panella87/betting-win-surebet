@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import type { AddressInfo } from 'node:net';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -572,6 +572,11 @@ async function createRuntimeFixture(): Promise<{
   const upstreamRoot = join(root, 'betting-win');
   const apiPort = await reserveLoopbackPort();
   mkdirSync(join(repositoryRoot, 'config'), { recursive: true });
+  mkdirSync(join(repositoryRoot, 'schemas'), { recursive: true });
+  copyFileSync(
+    join(process.cwd(), 'schemas', 'betting-win-upstream-lock.v1.schema.json'),
+    join(repositoryRoot, 'schemas', 'betting-win-upstream-lock.v1.schema.json'),
+  );
   mkdirSync(upstreamRoot, { recursive: true });
   writeFileSync(
     join(repositoryRoot, 'config', 'betting-win.upstream.lock.json'),

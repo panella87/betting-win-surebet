@@ -204,6 +204,7 @@ export async function createBwsPaperRuntimeEvidence(
     repositoryRoot,
   });
   const selectedUpstreamMode = requireUpstreamMode(process.env[BWS_UPSTREAM_MODE_ENV]);
+  validateBettingWinUpstreamApiPreflightStaticConfiguration(process.env);
   const getLifecycleStatus = request.getLifecycleStatus ?? getManagedBwsOperatorStackStatus;
   const startLifecycle = request.startLifecycle ?? startManagedBwsOperatorStack;
   const stopLifecycle = request.stopLifecycle ?? stopManagedBwsOperatorStack;
@@ -548,7 +549,7 @@ async function runBettingWinUpstreamApiPreflight(
       upstreamLock: undefined,
     });
   }
-  if (!LOOPBACK_HOSTS.has(parsedBaseUrl.hostname)) {
+  if (!isExplicitLoopbackHost(parsedBaseUrl.hostname)) {
     return createUpstreamApiPreflightFailure({
       configuredBaseUrl,
       error: new Error(`${PAPER_RUNTIME_UPSTREAM_API_BASE_URL_ENV} must stay on an explicit loopback host.`),
@@ -703,6 +704,13 @@ function createUpstreamApiPreflightFailure(request: Readonly<{
   });
 }
 
+function validateBettingWinUpstreamApiPreflightStaticConfiguration(environment: NodeJS.ProcessEnv): void {
+  requirePositiveIntegerFromEnvironment(
+    environment[PAPER_RUNTIME_UPSTREAM_API_TIMEOUT_MS_ENV],
+    PAPER_RUNTIME_UPSTREAM_API_TIMEOUT_MS_ENV,
+  );
+}
+
 function buildLocalRuntimeApiBaseUrl(environment: NodeJS.ProcessEnv): string {
   const apiPort = requirePositiveIntegerFromEnvironment(
     environment[PAPER_RUNTIME_API_PORT_ENV],
@@ -721,9 +729,14 @@ function sameAuthorityAsLocalRuntimeApi(parsedBaseUrl: URL, localRuntimeApiBaseU
     && resolvedPort(parsedBaseUrl) === resolvedPort(localRuntimeUrl);
 }
 
+function isExplicitLoopbackHost(hostname: string): boolean {
+  const normalized = hostname.toLowerCase();
+  return LOOPBACK_HOSTS.has(normalized) || IPV4_MAPPED_IPV6_LOOPBACK_HOSTS.has(normalized);
+}
+
 function normalizeAuthorityHostname(hostname: string): string {
   const normalized = hostname.toLowerCase();
-  return LOOPBACK_HOSTS.has(normalized) || IPV4_MAPPED_IPV6_LOOPBACK_HOSTS.has(normalized)
+  return isExplicitLoopbackHost(normalized)
     ? LOOPBACK_AUTHORITY_HOST
     : normalized;
 }

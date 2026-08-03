@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { once } from 'node:events';
 import { createServer } from 'node:http';
 import type { AddressInfo } from 'node:net';
@@ -412,6 +412,11 @@ async function createRepositoryFixture(repositoryRoot: string, upstreamRoot: str
   mkdirSync(repositoryRoot, { recursive: true });
   mkdirSync(upstreamRoot, { recursive: true });
   mkdirSync(join(repositoryRoot, 'config'), { recursive: true });
+  mkdirSync(join(repositoryRoot, 'schemas'), { recursive: true });
+  copyFileSync(
+    join(process.cwd(), 'schemas', 'betting-win-upstream-lock.v1.schema.json'),
+    join(repositoryRoot, 'schemas', 'betting-win-upstream-lock.v1.schema.json'),
+  );
   writeFileSync(
     join(repositoryRoot, 'package.json'),
     `${JSON.stringify({ name: 'bws-lifecycle-fixture', version: '0.0.0-test' }, null, 2)}\n`,
