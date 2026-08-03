@@ -31,6 +31,7 @@ import {
 } from './upstream-export-convergence.js';
 import {
   BWS_UPSTREAM_LOCK_PATH_ENV,
+  BWS_API_PORT_ENV,
   SUREBET_EXECUTION_ENABLED_ENV,
   SUREBET_PROVIDER_CONNECTIONS_ENV,
   SUREBET_RUNTIME_MODE_ENV,
@@ -64,6 +65,7 @@ export interface BwsUpstreamApiConvergenceEnvironment extends SurebetPersistence
   readonly BWS_UPSTREAM_API_TIMEOUT_MS?: string;
   readonly BWS_UPSTREAM_EXPORT_SELECTION_PATH?: string;
   readonly BWS_UPSTREAM_LOCK_PATH?: string;
+  readonly BWS_API_PORT?: string;
   readonly BWS_UPSTREAM_MODE?: string;
   readonly SUREBET_EXECUTION_ENABLED?: string;
   readonly SUREBET_PINNED_BUNDLE?: string;
@@ -78,6 +80,7 @@ export interface BwsUpstreamApiConvergenceConfig {
   readonly query: Readonly<{
     readonly baseUrl: string;
     readonly contractVersion: string;
+    readonly localBwsApiPort?: number;
     readonly maxPagesPerResource: number;
     readonly pageSize: number;
     readonly retryBackoffMs: number;
@@ -187,6 +190,9 @@ export function resolveBwsUpstreamApiConvergenceConfig(
         environment[BWS_UPSTREAM_API_CONTRACT_VERSION_ENV],
         BWS_UPSTREAM_API_CONTRACT_VERSION_ENV,
       ),
+      ...(environment[BWS_API_PORT_ENV] === undefined
+        ? {}
+        : { localBwsApiPort: requirePositiveIntegerString(environment[BWS_API_PORT_ENV], BWS_API_PORT_ENV) }),
       maxPagesPerResource: requirePositiveIntegerString(
         environment[BWS_UPSTREAM_API_MAX_PAGES_PER_RESOURCE_ENV],
         BWS_UPSTREAM_API_MAX_PAGES_PER_RESOURCE_ENV,
@@ -226,6 +232,7 @@ export async function runBwsUpstreamApiConvergencePass(
     baseUrl: config.query.baseUrl,
     contractVersion: config.query.contractVersion,
     fetchImplementation: request.fetchImplementation ?? globalThis.fetch.bind(globalThis),
+    ...(config.query.localBwsApiPort === undefined ? {} : { localBwsApiPort: config.query.localBwsApiPort }),
     maxPageSize: config.query.pageSize,
     retryBackoffMs: config.query.retryBackoffMs,
     retryLimit: config.query.retryLimit,

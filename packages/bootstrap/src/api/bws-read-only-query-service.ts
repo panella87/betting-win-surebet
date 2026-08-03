@@ -1656,15 +1656,14 @@ function validateOptionalSha256Filters(
     if (value === undefined) {
       continue;
     }
-    const trimmed = value.trim().toLowerCase();
-    if (!/^[0-9a-f]{64}$/.test(trimmed)) {
+    if (!/^[0-9a-f]{64}$/.test(value)) {
       return blocked(
         'BWS_QUERY_FILTER_VALUE_INVALID',
         `BWS read-only query filter ${field} must be a 64-character lower-case SHA-256 value.`,
         `Explicit 64-character lower-case SHA-256 BWS read-only query ${field} filter.`,
       );
     }
-    normalized[field] = trimmed;
+    normalized[field] = value;
   }
   return accepted(Object.freeze(normalized));
 }

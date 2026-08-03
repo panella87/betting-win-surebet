@@ -2,6 +2,7 @@ import { existsSync, realpathSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 import {
   readBettingWinUpstreamLock,
+  verifyBettingWinUpstreamLock,
   type BettingWinUpstreamLock,
 } from '../../../upstream/src/upstream/betting-win-upstream-lock.js';
 import {
@@ -209,7 +210,13 @@ export function resolveBwsServiceRuntimeConfig(
     BWS_UPSTREAM_LOCK_PATH_ENV,
   );
   const upstreamLock = validateUpstreamLockBoundary(
-    readBettingWinUpstreamLock(lockPath, repositoryRoot),
+    verifyBettingWinUpstreamLock(
+      readBettingWinUpstreamLock(lockPath, repositoryRoot),
+      {
+        bettingWinRepoPath: upstreamRepoPath,
+        repositoryRoot,
+      },
+    ),
     upstreamRepoPath,
   );
   const persistence = resolveSurebetPersistenceConfig(environment);
@@ -612,13 +619,17 @@ function requireReadableDirectory(value: string | undefined, name: string): stri
 }
 
 function requireRepositoryFile(repositoryRoot: string, value: string, name: string): string {
-  const resolvedPath = resolve(repositoryRoot, value);
-  const resolvedRoot = resolve(repositoryRoot);
-  if (!(resolvedPath === resolvedRoot || resolvedPath.startsWith(`${resolvedRoot}/`))) {
+  const resolvedRoot = realpathSync(repositoryRoot);
+  const candidatePath = resolve(resolvedRoot, value);
+  if (!(candidatePath === resolvedRoot || candidatePath.startsWith(`${resolvedRoot}/`))) {
     throw new Error(`${name} must stay within the BWS repository root.`);
   }
-  if (!existsSync(resolvedPath) || !statSync(resolvedPath).isFile()) {
+  if (!existsSync(candidatePath) || !statSync(candidatePath).isFile()) {
     throw new Error(`${name} must point to an existing file inside the BWS repository root.`);
+  }
+  const resolvedPath = realpathSync(candidatePath);
+  if (!(resolvedPath === resolvedRoot || resolvedPath.startsWith(`${resolvedRoot}/`))) {
+    throw new Error(`${name} must stay within the BWS repository root.`);
   }
   return resolvedPath;
 }

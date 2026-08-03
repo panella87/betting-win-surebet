@@ -22,6 +22,7 @@ import type { BettingWinUpstreamLock } from '../../../../packages/upstream/src/i
 import {
   BWS_OPERATOR_COCKPIT_API_BASE_URL_ENV,
   BWS_OPERATOR_COCKPIT_DATA_MODE_ENV,
+  normalizeBwsOperatorCockpitApiBaseUrl,
   type BwsOperatorCockpitBrowserConfig,
 } from '../app/data-mode.js';
 import type {
@@ -695,6 +696,9 @@ function assertReadOnlyQueryResponse<
     fail('page.returnedCount must stay between zero and pageSize');
   }
   const returnedCount = returnedCountValue;
+  if (returnedCount !== items.length) {
+    fail(`page.returnedCount ${returnedCount} must match page.items length ${items.length}`);
+  }
   if ((pageRecord['nextCursor'] ?? undefined) !== undefined) {
     requireNonEmptyString(pageRecord['nextCursor'], 'page.nextCursor');
   }
@@ -749,11 +753,10 @@ function normalizeOptionalSha256(value: string | undefined, label: string): stri
   if (value === undefined) {
     return undefined;
   }
-  const trimmed = value.trim().toLowerCase();
-  if (!SHA256_PATTERN.test(trimmed)) {
+  if (!SHA256_PATTERN.test(value)) {
     fail(`${label} must be a 64-character lower-case SHA-256 value`);
   }
-  return trimmed;
+  return value;
 }
 
 export function normalizeBwsOperatorCockpitPinnedExportScope(
@@ -929,22 +932,165 @@ function assertStrategyLedgerResponseMatchesRequest(
   response: BwsReadOnlyQueryResponse<'strategy_ledger_entries', BwsStrategyLedgerItem>,
   request: BwsStrategyLedgerQueryRequest,
 ): BwsReadOnlyQueryResponse<'strategy_ledger_entries', BwsStrategyLedgerItem> {
-  const expectedAcceptanceState = request.filters.acceptanceState;
-  const expectedRunKind = request.filters.runKind;
-
   for (const item of response.page.items) {
-    if (expectedAcceptanceState !== undefined && item.entry.acceptanceState !== expectedAcceptanceState) {
+    if (request.filters.acceptanceState !== undefined && item.entry.acceptanceState !== request.filters.acceptanceState) {
       fail(
-        `strategy_ledger_entries response acceptanceState ${item.entry.acceptanceState} did not match requested ${expectedAcceptanceState}`,
+        `strategy_ledger_entries response acceptanceState ${item.entry.acceptanceState} did not match requested ${request.filters.acceptanceState}`,
       );
     }
-    if (expectedRunKind !== undefined && item.entry.runKind !== expectedRunKind) {
+    if (request.filters.pinnedStrategyExportRecordId !== undefined) {
+      if (item.provenance.pinnedStrategyExport === undefined) {
+        fail('strategy_ledger_entries response missing pinnedStrategyExport provenance for requested pinnedStrategyExportRecordId');
+      }
+      if (item.provenance.pinnedStrategyExport.intakeRecordId !== request.filters.pinnedStrategyExportRecordId) {
+        fail(
+          `strategy_ledger_entries response pinnedStrategyExportRecordId ${item.provenance.pinnedStrategyExport.intakeRecordId} did not match requested ${request.filters.pinnedStrategyExportRecordId}`,
+        );
+      }
+    }
+    if (request.filters.reportId !== undefined && item.entry.reportId !== request.filters.reportId) {
+      fail(`strategy_ledger_entries response reportId ${item.entry.reportId} did not match requested ${request.filters.reportId}`);
+    }
+    if (
+      request.filters.runFingerprintSha256 !== undefined
+      && item.entry.runFingerprintSha256 !== request.filters.runFingerprintSha256
+    ) {
       fail(
-        `strategy_ledger_entries response runKind ${item.entry.runKind} did not match requested ${expectedRunKind}`,
+        `strategy_ledger_entries response runFingerprintSha256 ${item.entry.runFingerprintSha256} did not match requested ${request.filters.runFingerprintSha256}`,
+      );
+    }
+    if (request.filters.runKind !== undefined && item.entry.runKind !== request.filters.runKind) {
+      fail(`strategy_ledger_entries response runKind ${item.entry.runKind} did not match requested ${request.filters.runKind}`);
+    }
+    if (request.filters.runReferenceId !== undefined && item.entry.runReferenceId !== request.filters.runReferenceId) {
+      fail(
+        `strategy_ledger_entries response runReferenceId ${item.entry.runReferenceId} did not match requested ${request.filters.runReferenceId}`,
+      );
+    }
+    if (request.filters.sourceKind !== undefined && item.entry.sourceKind !== request.filters.sourceKind) {
+      fail(`strategy_ledger_entries response sourceKind ${item.entry.sourceKind} did not match requested ${request.filters.sourceKind}`);
+    }
+    if (request.filters.sourceManifestHash !== undefined && item.entry.sourceManifestHash !== request.filters.sourceManifestHash) {
+      fail(
+        `strategy_ledger_entries response sourceManifestHash ${item.entry.sourceManifestHash} did not match requested ${request.filters.sourceManifestHash}`,
+      );
+    }
+    if (
+      request.filters.upstreamLockRecordId !== undefined
+      && item.provenance.upstreamLockRecordId !== request.filters.upstreamLockRecordId
+    ) {
+      fail(
+        `strategy_ledger_entries response upstreamLockRecordId ${item.provenance.upstreamLockRecordId} did not match requested ${request.filters.upstreamLockRecordId}`,
       );
     }
   }
 
+  return response;
+}
+
+function assertB1BacktestRunsResponseMatchesRequest(
+  response: BwsReadOnlyQueryResponse<'b1_backtest_runs', BwsB1BacktestRunItem>,
+  request: BwsB1BacktestRunQueryRequest,
+): BwsReadOnlyQueryResponse<'b1_backtest_runs', BwsB1BacktestRunItem> {
+  for (const item of response.page.items) {
+    if (request.filters.runId !== undefined && item.run.runId !== request.filters.runId) {
+      fail(`b1_backtest_runs response runId ${item.run.runId} did not match requested ${request.filters.runId}`);
+    }
+    if (
+      request.filters.offlineFalsificationStatus !== undefined
+      && item.run.offlineFalsificationStatus !== request.filters.offlineFalsificationStatus
+    ) {
+      fail(
+        `b1_backtest_runs response offlineFalsificationStatus ${item.run.offlineFalsificationStatus} did not match requested ${request.filters.offlineFalsificationStatus}`,
+      );
+    }
+    if (request.filters.sourceManifestHash !== undefined && item.run.sourceManifestHash !== request.filters.sourceManifestHash) {
+      fail(
+        `b1_backtest_runs response sourceManifestHash ${item.run.sourceManifestHash} did not match requested ${request.filters.sourceManifestHash}`,
+      );
+    }
+    if (
+      request.filters.upstreamLockFingerprint !== undefined
+      && item.run.upstreamLockFingerprint !== request.filters.upstreamLockFingerprint
+    ) {
+      fail(
+        `b1_backtest_runs response upstreamLockFingerprint ${item.run.upstreamLockFingerprint} did not match requested ${request.filters.upstreamLockFingerprint}`,
+      );
+    }
+    if (request.filters.upstreamCheckpointId !== undefined && item.run.upstreamCheckpointId !== request.filters.upstreamCheckpointId) {
+      fail(
+        `b1_backtest_runs response upstreamCheckpointId ${item.run.upstreamCheckpointId} did not match requested ${request.filters.upstreamCheckpointId}`,
+      );
+    }
+  }
+  return response;
+}
+
+function assertPrivatePaperRuntimeCyclesResponseMatchesRequest(
+  response: BwsReadOnlyQueryResponse<'private_paper_runtime_cycles', BwsPrivatePaperRuntimeCycleItem>,
+  request: BwsPrivatePaperRuntimeCycleQueryRequest,
+): BwsReadOnlyQueryResponse<'private_paper_runtime_cycles', BwsPrivatePaperRuntimeCycleItem> {
+  for (const item of response.page.items) {
+    if (request.filters.acceptanceState !== undefined && item.acceptanceState !== request.filters.acceptanceState) {
+      fail(
+        `private_paper_runtime_cycles response acceptanceState ${item.acceptanceState} did not match requested ${request.filters.acceptanceState}`,
+      );
+    }
+    if (request.filters.runtimeId !== undefined && item.runtimeId !== request.filters.runtimeId) {
+      fail(`private_paper_runtime_cycles response runtimeId ${item.runtimeId} did not match requested ${request.filters.runtimeId}`);
+    }
+    if (request.filters.queueName !== undefined && item.job.queueName !== request.filters.queueName) {
+      fail(`private_paper_runtime_cycles response queueName ${item.job.queueName} did not match requested ${request.filters.queueName}`);
+    }
+    if (
+      request.filters.schedulerCheckpointId !== undefined
+      && item.provenance.schedulerCheckpoint.schedulerCheckpointId !== request.filters.schedulerCheckpointId
+    ) {
+      fail(
+        `private_paper_runtime_cycles response schedulerCheckpointId ${item.provenance.schedulerCheckpoint.schedulerCheckpointId} did not match requested ${request.filters.schedulerCheckpointId}`,
+      );
+    }
+    if (
+      request.filters.upstreamLockRecordId !== undefined
+      && item.provenance.upstreamLockRecordId !== request.filters.upstreamLockRecordId
+    ) {
+      fail(
+        `private_paper_runtime_cycles response upstreamLockRecordId ${item.provenance.upstreamLockRecordId} did not match requested ${request.filters.upstreamLockRecordId}`,
+      );
+    }
+  }
+  return response;
+}
+
+function assertPinnedStrategyExportsResponseMatchesRequest(
+  response: BwsReadOnlyQueryResponse<'pinned_strategy_exports', BwsPinnedStrategyExportItem>,
+  request: BwsPinnedStrategyExportQueryRequest,
+): BwsReadOnlyQueryResponse<'pinned_strategy_exports', BwsPinnedStrategyExportItem> {
+  for (const item of response.page.items) {
+    if (request.filters.endpointId !== undefined && item.record.endpointId !== request.filters.endpointId) {
+      fail(`pinned_strategy_exports response endpointId ${item.record.endpointId} did not match requested ${request.filters.endpointId}`);
+    }
+    if (request.filters.exportId !== undefined && item.record.exportId !== request.filters.exportId) {
+      fail(`pinned_strategy_exports response exportId ${item.record.exportId} did not match requested ${request.filters.exportId}`);
+    }
+    if (request.filters.importRunId !== undefined && item.record.importRunId !== request.filters.importRunId) {
+      fail(`pinned_strategy_exports response importRunId ${item.record.importRunId} did not match requested ${request.filters.importRunId}`);
+    }
+    if (request.filters.providerId !== undefined && item.record.providerId !== request.filters.providerId) {
+      fail(`pinned_strategy_exports response providerId ${item.record.providerId} did not match requested ${request.filters.providerId}`);
+    }
+    if (request.filters.sourceSha256 !== undefined && item.record.sourceSha256 !== request.filters.sourceSha256) {
+      fail(`pinned_strategy_exports response sourceSha256 ${item.record.sourceSha256} did not match requested ${request.filters.sourceSha256}`);
+    }
+    if (
+      request.filters.upstreamLockRecordId !== undefined
+      && item.provenance.upstreamLockRecordId !== request.filters.upstreamLockRecordId
+    ) {
+      fail(
+        `pinned_strategy_exports response upstreamLockRecordId ${item.provenance.upstreamLockRecordId} did not match requested ${request.filters.upstreamLockRecordId}`,
+      );
+    }
+  }
   return response;
 }
 
@@ -985,41 +1131,51 @@ export function createBwsOperatorCockpitApiClient(
   configuration: Extract<BwsOperatorCockpitBrowserConfig, { dataMode: 'api' }>,
   fetchImpl: BwsOperatorCockpitFetchLike = defaultFetchLike(),
 ): BwsOperatorCockpitApiClient {
+  const apiBaseUrl = normalizeBwsOperatorCockpitApiBaseUrl(configuration.apiBaseUrl);
   return Object.freeze({
     async queryB1BacktestRuns(
       request: BwsB1BacktestRunQueryRequest,
     ) {
-      const path = buildB1BacktestRunsUrl(configuration.apiBaseUrl, request);
+      const path = buildB1BacktestRunsUrl(apiBaseUrl, request);
       const response = await readOnlyGetJson<unknown>(path, fetchImpl);
-      return assertReadOnlyQueryResponse<'b1_backtest_runs', BwsB1BacktestRunItem>(
-        response,
-        'b1_backtest_runs',
+      return assertB1BacktestRunsResponseMatchesRequest(
+        assertReadOnlyQueryResponse<'b1_backtest_runs', BwsB1BacktestRunItem>(
+          response,
+          'b1_backtest_runs',
+        ),
+        request,
       );
     },
     async queryPrivatePaperRuntimeCycles(
       request: BwsPrivatePaperRuntimeCycleQueryRequest,
     ) {
-      const path = buildPrivatePaperRuntimeCyclesUrl(configuration.apiBaseUrl, request);
+      const path = buildPrivatePaperRuntimeCyclesUrl(apiBaseUrl, request);
       const response = await readOnlyGetJson<unknown>(path, fetchImpl);
-      return assertReadOnlyQueryResponse<'private_paper_runtime_cycles', BwsPrivatePaperRuntimeCycleItem>(
-        response,
-        'private_paper_runtime_cycles',
+      return assertPrivatePaperRuntimeCyclesResponseMatchesRequest(
+        assertReadOnlyQueryResponse<'private_paper_runtime_cycles', BwsPrivatePaperRuntimeCycleItem>(
+          response,
+          'private_paper_runtime_cycles',
+        ),
+        request,
       );
     },
     async queryPinnedStrategyExports(
       request: BwsPinnedStrategyExportQueryRequest,
     ) {
-      const path = buildPinnedStrategyExportsUrl(configuration.apiBaseUrl, request);
+      const path = buildPinnedStrategyExportsUrl(apiBaseUrl, request);
       const response = await readOnlyGetJson<unknown>(path, fetchImpl);
-      return assertReadOnlyQueryResponse<'pinned_strategy_exports', BwsPinnedStrategyExportItem>(
-        response,
-        'pinned_strategy_exports',
+      return assertPinnedStrategyExportsResponseMatchesRequest(
+        assertReadOnlyQueryResponse<'pinned_strategy_exports', BwsPinnedStrategyExportItem>(
+          response,
+          'pinned_strategy_exports',
+        ),
+        request,
       );
     },
     async queryStrategyLedger(
       request: BwsStrategyLedgerQueryRequest,
     ) {
-      const path = buildStrategyLedgerUrl(configuration.apiBaseUrl, request);
+      const path = buildStrategyLedgerUrl(apiBaseUrl, request);
       const response = await readOnlyGetJson<unknown>(path, fetchImpl);
       return assertStrategyLedgerResponseMatchesRequest(
         assertReadOnlyQueryResponse<'strategy_ledger_entries', BwsStrategyLedgerItem>(

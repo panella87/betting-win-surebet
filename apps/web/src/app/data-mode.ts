@@ -32,7 +32,7 @@ function readExplicitMode(
   fail(`${BWS_OPERATOR_COCKPIT_DATA_MODE_ENV} must be mock or api`);
 }
 
-function normalizeBaseUrl(value: string | undefined): string {
+export function normalizeBwsOperatorCockpitApiBaseUrl(value: string | undefined): string {
   if (value === undefined || value.trim().length === 0) {
     fail(`${BWS_OPERATOR_COCKPIT_API_BASE_URL_ENV} is required in api mode`);
   }
@@ -51,6 +51,9 @@ function normalizeBaseUrl(value: string | undefined): string {
   }
   if (parsed.search.length > 0 || parsed.hash.length > 0) {
     fail(`${BWS_OPERATOR_COCKPIT_API_BASE_URL_ENV} must not include query or hash components`);
+  }
+  if (parsed.pathname !== '/') {
+    fail(`${BWS_OPERATOR_COCKPIT_API_BASE_URL_ENV} must not include path components`);
   }
   if (!isLoopbackHostname(parsed.hostname)) {
     fail(`${BWS_OPERATOR_COCKPIT_API_BASE_URL_ENV} must stay on an explicit loopback host`);
@@ -73,7 +76,7 @@ export function resolveBwsOperatorCockpitBrowserConfig(
     return Object.freeze({ dataMode });
   }
   return Object.freeze({
-    apiBaseUrl: normalizeBaseUrl(environment[BWS_OPERATOR_COCKPIT_API_BASE_URL_ENV]),
+    apiBaseUrl: normalizeBwsOperatorCockpitApiBaseUrl(environment[BWS_OPERATOR_COCKPIT_API_BASE_URL_ENV]),
     dataMode,
   });
 }

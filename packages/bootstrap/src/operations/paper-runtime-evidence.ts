@@ -1,7 +1,7 @@
 import { mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
-import { readBettingWinUpstreamLock } from '../../../upstream/src/index.js';
+import { readBettingWinUpstreamLock, verifyBettingWinUpstreamLock } from '../../../upstream/src/index.js';
 import { type BwsMigrationStatusResult } from './database-lifecycle.js';
 import {
   collectBwsDiagnosticsBundle,
@@ -25,12 +25,14 @@ const BWS_PAPER_RUNTIME_EVIDENCE_SCHEMA = 'bws.paper_runtime_evidence.v1' as con
 const BETTING_WIN_API_UNAVAILABLE_BLOCKER = 'PAPER_EVALUATION_BLOCKED_BETTING_WIN_API_UNAVAILABLE' as const;
 const LOOPBACK_HOSTS = new Set(['127.0.0.1', '::1', '[::1]', 'localhost']);
 const LOOPBACK_AUTHORITY_HOST = 'loopback';
+const IPV4_MAPPED_IPV6_LOOPBACK_HOSTS = new Set(['[::ffff:7f00:1]', '[::ffff:127.0.0.1]', '::ffff:7f00:1', '::ffff:127.0.0.1']);
 const PAPER_RUNTIME_API_PORT_ENV = 'BWS_API_PORT';
 const PAPER_RUNTIME_UPSTREAM_API_BASE_URL_ENV = 'BWS_UPSTREAM_API_BASE_URL';
 const PAPER_RUNTIME_UPSTREAM_API_CONTRACT_VERSION_ENV = 'BWS_UPSTREAM_API_CONTRACT_VERSION';
 const PAPER_RUNTIME_UPSTREAM_API_TIMEOUT_MS_ENV = 'BWS_UPSTREAM_API_TIMEOUT_MS';
 const PAPER_RUNTIME_UPSTREAM_LOCK_PATH_ENV = 'BWS_UPSTREAM_LOCK_PATH';
 const PAPER_RUNTIME_UPSTREAM_PROBE_PATH = '/contract' as const;
+const BETTING_WIN_REPO_PATH_ENV = 'BETTING_WIN_REPO_PATH';
 const BWS_UPSTREAM_MODE_ENV = 'BWS_UPSTREAM_MODE';
 
 export type BwsPaperRuntimeEvidenceFinalStatus =
@@ -105,7 +107,7 @@ export interface BwsPaperRuntimeEvidenceResult {
   }>;
   readonly runtimeHandoff?: CreateBwsPaperRuntimeHandoffResult;
   readonly schema: typeof BWS_PAPER_RUNTIME_EVIDENCE_SCHEMA;
-  readonly selectedUpstreamMode: 'api' | 'export';
+  readonly selectedUpstreamMode: 'api';
   readonly stackOwnership: 'ambiguous_preserved' | 'attached' | 'started';
   readonly stackStopDisposition:
     | 'attached_stack_preserved'
@@ -423,7 +425,7 @@ function createResult(request: Readonly<{
   readonly maxDurationMs: number;
   readonly runtimeHandoff?: CreateBwsPaperRuntimeHandoffResult;
   readonly samples: readonly BwsPaperRuntimeEvidenceObservationSample[];
-  readonly selectedUpstreamMode: 'api' | 'export';
+  readonly selectedUpstreamMode: 'api';
   readonly stackOwnership: BwsPaperRuntimeEvidenceResult['stackOwnership'];
   readonly stackStopDisposition: BwsPaperRuntimeEvidenceResult['stackStopDisposition'];
   readonly startedAt: string;
@@ -720,7 +722,10 @@ function sameAuthorityAsLocalRuntimeApi(parsedBaseUrl: URL, localRuntimeApiBaseU
 }
 
 function normalizeAuthorityHostname(hostname: string): string {
-  return LOOPBACK_HOSTS.has(hostname) ? LOOPBACK_AUTHORITY_HOST : hostname;
+  const normalized = hostname.toLowerCase();
+  return LOOPBACK_HOSTS.has(normalized) || IPV4_MAPPED_IPV6_LOOPBACK_HOSTS.has(normalized)
+    ? LOOPBACK_AUTHORITY_HOST
+    : normalized;
 }
 
 function resolvedPort(url: URL): string {
@@ -750,7 +755,7 @@ function requireNonEmptyString(value: string | undefined, label: string): string
 function requirePositiveIntegerFromEnvironment(value: string | undefined, label: string): number {
   const normalized = requireNonEmptyString(value, label);
   if (!/^\d+$/.test(normalized)) {
-    throw new Error(`${label} must be a positive integer.`);
+    throw new Error(`${label} must be a positive safe integer.`);
   }
   return requirePositiveInteger(Number.parseInt(normalized, 10), label);
 }
@@ -782,7 +787,14 @@ function readRequiredUpstreamLock(
     environment[PAPER_RUNTIME_UPSTREAM_LOCK_PATH_ENV],
     PAPER_RUNTIME_UPSTREAM_LOCK_PATH_ENV,
   );
-  const upstreamLock = readBettingWinUpstreamLock(join(repositoryRoot, configuredPath), repositoryRoot);
+  const bettingWinRepoPath = requireNonEmptyString(environment[BETTING_WIN_REPO_PATH_ENV], BETTING_WIN_REPO_PATH_ENV);
+  const upstreamLock = verifyBettingWinUpstreamLock(
+    readBettingWinUpstreamLock(join(repositoryRoot, configuredPath), repositoryRoot),
+    {
+      bettingWinRepoPath,
+      repositoryRoot,
+    },
+  );
   return Object.freeze({
     commitSha: upstreamLock.commitSha,
     packageVersion: upstreamLock.packageVersion,
@@ -805,16 +817,16 @@ function redactBoundedMessage(rawMessage: string): string {
     .slice(0, 512);
 }
 
-function requireUpstreamMode(value: string | undefined): 'api' | 'export' {
-  if (value === 'api' || value === 'export') {
+function requireUpstreamMode(value: string | undefined): 'api' {
+  if (value === 'api') {
     return value;
   }
-  throw new Error(`${BWS_UPSTREAM_MODE_ENV} must be exactly api or export.`);
+  throw new Error(`${BWS_UPSTREAM_MODE_ENV} must be exactly api for BWS-600 runtime evidence.`);
 }
 
 function requirePositiveInteger(value: number, label: string): number {
-  if (!Number.isInteger(value) || value <= 0) {
-    throw new Error(`${label} must be a positive integer. Received ${value}.`);
+  if (!Number.isSafeInteger(value) || value <= 0) {
+    throw new Error(`${label} must be a positive safe integer. Received ${value}.`);
   }
   return value;
 }

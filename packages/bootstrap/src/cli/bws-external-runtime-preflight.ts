@@ -45,7 +45,6 @@ export async function runBwsExternalRuntimePreflightCli(
       checkpointId: requireFlagValue(options, '--checkpoint-id'),
       contractVersion: requireFlagValue(options, '--contract-version'),
       expectedUpstreamLockFingerprint: requireFlagValue(options, '--expected-upstream-lock-fingerprint'),
-      inspectContract: options.has('--inspect-contract'),
       maxPagesPerResource: parseIntegerFlagValue(options, '--max-pages-per-resource'),
       mode: 'api' as const,
       pageSize: parseIntegerFlagValue(options, '--page-size'),
@@ -67,7 +66,7 @@ export function printBwsExternalRuntimePreflightHelp(stream: NodeJS.WriteStream 
       '',
       'Fail-closed external runtime preflight and campaign-manifest generation for BWS-593.',
       'common options: --release-dir <dir> --env-file <path> --install-verification-file <path> --migration-status-file <path> --backup-manifest-file <path> --restore-verification-file <path> --soak-manifest-file <path> --soak-state-file <path> --runtime-dir <dir> --evidence-dir <dir> --output-file <path> --campaign-duration-hours <positive-integer> --campaign-max-cycles <positive-integer> --campaign-cycle-timeout-minutes <positive-integer> --minimum-available-bytes <positive-integer> --expected-upstream-lock-fingerprint <sha256>',
-      'API options: --checkpoint-id <token> --api-base-url <url> --contract-version <value> --page-size <positive-integer> --max-pages-per-resource <positive-integer> --timeout-ms <positive-integer> --retry-limit <positive-integer> --retry-backoff-ms <positive-integer> [--inspect-contract] [--api-contract-path </contract>]',
+      'API options: --checkpoint-id <token> --api-base-url <url> --contract-version <value> --page-size <positive-integer> --max-pages-per-resource <positive-integer> --timeout-ms <positive-integer> --retry-limit <positive-integer> --retry-backoff-ms <positive-integer> [--api-contract-path </contract>]',
     ].join('\n'),
   );
 }
@@ -95,8 +94,8 @@ function parseFlags(argv: readonly string[]): ReadonlyMap<string, string | true>
 function parseIntegerFlagValue(flags: ReadonlyMap<string, string | true>, flag: string): number {
   const rawValue = requireFlagValue(flags, flag);
   const parsed = Number.parseInt(rawValue, 10);
-  if (!/^[0-9]+$/.test(rawValue) || !Number.isInteger(parsed) || parsed <= 0) {
-    throw new Error(`${flag} must be a positive integer.`);
+  if (!/^[0-9]+$/.test(rawValue) || !Number.isSafeInteger(parsed) || parsed <= 0) {
+    throw new Error(`${flag} must be a positive safe integer.`);
   }
   return parsed;
 }

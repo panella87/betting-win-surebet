@@ -1,19 +1,44 @@
 import test, { type TestContext } from 'node:test';
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
 import { createServer } from 'node:http';
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import type { AddressInfo } from 'node:net';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import {
   createBwsPaperRuntimeEvidence,
 } from '../packages/bootstrap/src/operations/paper-runtime-evidence.js';
+import {
+  writeBettingWinUpstreamLock,
+} from '../packages/upstream/src/index.js';
 import type { BwsDiagnosticsBundleResult } from '../packages/bootstrap/src/operations/observability.js';
 import type {
   BwsOperatorLifecycleCommandResult,
   BwsOperatorLifecycleManagedProcess,
 } from '../packages/bootstrap/src/operations/operator-lifecycle.js';
 import type { CreateBwsPaperRuntimeHandoffResult } from '../packages/bootstrap/src/operations/paper-runtime-handoff.js';
+
+const REPO_ROOT = process.cwd();
+const FIXED_UPSTREAM_LOCK_VERIFIED_AT = '2026-07-16T00:00:00.000Z';
+const UPSTREAM_LOCK_SCHEMA_PATH = join(REPO_ROOT, 'schemas', 'betting-win-upstream-lock.v1.schema.json');
+const BETTING_WIN_WORKSPACE_PACKAGES = [
+  '@betting-win/contracts',
+  '@betting-win/foundation',
+  '@betting-win/identity',
+  '@betting-win/paper-ledger',
+  '@betting-win/provider-collection',
+  '@betting-win/provider-generation',
+  '@betting-win/query-service',
+  '@betting-win/quotes',
+  '@betting-win/rules',
+  '@betting-win/source-lineage',
+  '@betting-win/evidence-import',
+  '@betting-win/jobs',
+  '@betting-win/api',
+  '@betting-win/web',
+  '@betting-win/workers',
+] as const;
 
 function createManagedProcess(): BwsOperatorLifecycleManagedProcess {
   return Object.freeze({
@@ -252,54 +277,104 @@ function createTestRepositoryRoot(t: TestContext): string {
     });
   });
   mkdirSync(join(root, 'runtime'), { recursive: true });
-  writeTestUpstreamLock(root);
+  writeTestUpstreamLockFixture(root);
   writeEvidenceIndex(root);
   return root;
 }
 
-function writeTestUpstreamLock(repositoryRoot: string): void {
-  mkdirSync(join(repositoryRoot, 'config'), { recursive: true });
+function writeTestUpstreamLockFixture(repositoryRoot: string): void {
+  mkdirSync(join(repositoryRoot, 'schemas'), { recursive: true });
   writeFileSync(
-    join(repositoryRoot, 'config', 'betting-win.upstream.lock.json'),
-    `${JSON.stringify({
-      capabilities: [
-        'exportHistoricalBundle',
-        'getHistoricalQuotes',
-        'getProviderGenerations',
-        'inspectSourceLineage',
-      ],
-      commitSha: '1'.repeat(40),
-      contractAlias: 'betting-win-strategy-export.v1',
-      contractSchema: 'betting-win.strategy-export.v1',
-      gitTreeSha: '2'.repeat(40),
-      packageVersion: '0.48.0',
-      packageVersions: {
-        '@betting-win/provider-collection': '0.48.0',
-      },
-      repository: 'betting-win',
-      repositoryPath: '/tmp/betting-win',
-      schema: 'betting-win-surebet-upstream-lock-v1',
-      sourceFingerprintAlgorithm: 'sha256_git_ls_tree_r_full_tree_head_v1',
-      sourceView: 'committed_git_head',
-      surebetProfile: 'surebet_standard_binary_v0',
-      trackedTreeListingSha256: '3'.repeat(64),
-      verifiedAt: '2026-07-16T00:00:00.000Z',
-    }, null, 2)}\n`,
+    join(repositoryRoot, 'schemas', 'betting-win-upstream-lock.v1.schema.json'),
+    readFileSync(UPSTREAM_LOCK_SCHEMA_PATH, 'utf-8'),
     'utf-8',
   );
+  const upstreamRoot = join(repositoryRoot, 'betting-win');
+  mkdirSync(upstreamRoot, { recursive: true });
+  writeJson(join(upstreamRoot, 'package.json'), {
+    name: 'betting-win',
+    private: true,
+    version: '0.48.0',
+    workspaces: ['packages/*', 'apps/*'],
+  });
+  for (const packageName of BETTING_WIN_WORKSPACE_PACKAGES) {
+    const slug = requireWorkspacePackageSlug(packageName);
+    const workspaceRoot = slug === 'api' || slug === 'web' || slug === 'workers' ? 'apps' : 'packages';
+    const workspacePath = join(upstreamRoot, workspaceRoot, slug);
+    mkdirSync(workspacePath, { recursive: true });
+    writeJson(join(workspacePath, 'package.json'), {
+      name: packageName,
+      private: true,
+      type: 'module',
+      version: '0.48.0',
+    });
+  }
+  const providerCollectionSourcePath = join(upstreamRoot, 'packages', 'provider-collection', 'src');
+  mkdirSync(providerCollectionSourcePath, { recursive: true });
+  writeFileSync(
+    join(providerCollectionSourcePath, 'index.ts'),
+    [
+      'export const downstreamContractFamily = {',
+      "  schema: 'betting-win.strategy-export.v1',",
+      "  canonicalContractAlias: 'betting-win-strategy-export.v1',",
+      "  supportedProfiles: ['predictive_fixture_dataset_v0', 'surebet_standard_binary_v0'],",
+      "  readOnlyFunctions: ['exportHistoricalBundle', 'getHistoricalQuotes', 'getProviderGenerations', 'inspectSourceLineage'],",
+      '};',
+      '',
+    ].join('\n'),
+    'utf-8',
+  );
+  runGit(upstreamRoot, ['init', '-q']);
+  runGit(upstreamRoot, ['config', 'user.name', 'BWS Test']);
+  runGit(upstreamRoot, ['config', 'user.email', 'bws-test@example.com']);
+  runGit(upstreamRoot, ['add', '.']);
+  runGit(upstreamRoot, ['commit', '-q', '-m', 'fixture']);
+  writeBettingWinUpstreamLock({
+    bettingWinRepoPath: upstreamRoot,
+    repositoryRoot,
+    schemaPath: UPSTREAM_LOCK_SCHEMA_PATH,
+    verifiedAt: FIXED_UPSTREAM_LOCK_VERIFIED_AT,
+  });
+}
+
+function requireWorkspacePackageSlug(packageName: string): string {
+  const parts = packageName.split('/');
+  const slug = parts[1];
+  if (parts.length !== 2 || typeof slug !== 'string' || slug.length === 0) {
+    throw new Error(`Invalid betting-win workspace package fixture name: ${packageName}`);
+  }
+  return slug;
+}
+
+function writeJson(path: string, value: unknown): void {
+  writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`, 'utf-8');
+}
+
+function runGit(cwd: string, args: readonly string[]): string {
+  return execFileSync('git', ['-C', cwd, ...args], { encoding: 'utf-8', stdio: 'pipe' });
+}
+
+function commitUpstreamFixtureChange(repositoryRoot: string): void {
+  const upstreamRoot = join(repositoryRoot, 'betting-win');
+  writeFileSync(join(upstreamRoot, 'packages', 'provider-collection', 'src', 'extra.ts'), 'export const changed = true;\n', 'utf-8');
+  runGit(upstreamRoot, ['add', '.']);
+  runGit(upstreamRoot, ['commit', '-q', '-m', 'changed']);
 }
 
 function configureUpstreamApiPreflightEnvironment(
   t: TestContext,
+  repositoryRoot: string,
   values: Readonly<{
     readonly apiBaseUrl: string;
     readonly apiPort?: string;
     readonly contractVersion?: string;
     readonly lockPath?: string;
     readonly timeoutMs?: string;
+    readonly upstreamMode?: string;
   }>,
 ): void {
   const previous = Object.freeze({
+    BETTING_WIN_REPO_PATH: process.env.BETTING_WIN_REPO_PATH,
     BWS_API_PORT: process.env.BWS_API_PORT,
     BWS_UPSTREAM_API_BASE_URL: process.env.BWS_UPSTREAM_API_BASE_URL,
     BWS_UPSTREAM_API_CONTRACT_VERSION: process.env.BWS_UPSTREAM_API_CONTRACT_VERSION,
@@ -308,6 +383,7 @@ function configureUpstreamApiPreflightEnvironment(
     BWS_UPSTREAM_MODE: process.env.BWS_UPSTREAM_MODE,
   });
   t.after(() => {
+    restoreEnvironmentValue('BETTING_WIN_REPO_PATH', previous.BETTING_WIN_REPO_PATH);
     restoreEnvironmentValue('BWS_API_PORT', previous.BWS_API_PORT);
     restoreEnvironmentValue('BWS_UPSTREAM_API_BASE_URL', previous.BWS_UPSTREAM_API_BASE_URL);
     restoreEnvironmentValue('BWS_UPSTREAM_API_CONTRACT_VERSION', previous.BWS_UPSTREAM_API_CONTRACT_VERSION);
@@ -315,12 +391,13 @@ function configureUpstreamApiPreflightEnvironment(
     restoreEnvironmentValue('BWS_UPSTREAM_LOCK_PATH', previous.BWS_UPSTREAM_LOCK_PATH);
     restoreEnvironmentValue('BWS_UPSTREAM_MODE', previous.BWS_UPSTREAM_MODE);
   });
+  process.env.BETTING_WIN_REPO_PATH = join(repositoryRoot, 'betting-win');
   process.env.BWS_API_PORT = values.apiPort ?? '4312';
   process.env.BWS_UPSTREAM_API_BASE_URL = values.apiBaseUrl;
   process.env.BWS_UPSTREAM_API_CONTRACT_VERSION = values.contractVersion ?? '1.0.0';
   process.env.BWS_UPSTREAM_API_TIMEOUT_MS = values.timeoutMs ?? '1000';
   process.env.BWS_UPSTREAM_LOCK_PATH = values.lockPath ?? 'config/betting-win.upstream.lock.json';
-  process.env.BWS_UPSTREAM_MODE = 'api';
+  process.env.BWS_UPSTREAM_MODE = values.upstreamMode ?? 'api';
 }
 
 function restoreEnvironmentValue(name: string, value: string | undefined): void {
@@ -420,7 +497,7 @@ test('paper runtime evidence starts an owned stack, records ready observations, 
     response.statusCode = 404;
     response.end(JSON.stringify({ error: 'not_found' }));
   });
-  configureUpstreamApiPreflightEnvironment(t, { apiBaseUrl: upstreamApiBaseUrl });
+  configureUpstreamApiPreflightEnvironment(t, repositoryRoot, { apiBaseUrl: upstreamApiBaseUrl });
   const observedCalls: string[] = [];
   let statusCallCount = 0;
   const result = await createBwsPaperRuntimeEvidence({
@@ -484,7 +561,8 @@ test('paper runtime evidence starts an owned stack, records ready observations, 
   assert.equal(result.stackStopDisposition, 'stopped_started_stack');
   assert.equal(result.upstreamApiPreflight?.outcome, 'passed');
   assert.equal(result.upstreamApiPreflight?.probePath, '/contract');
-  assert.equal(result.upstreamApiPreflight?.upstreamLock?.commitSha, '1'.repeat(40));
+  assert.match(result.upstreamApiPreflight?.upstreamLock?.commitSha ?? '', /^[0-9a-f]{40}$/);
+  assert.equal(result.upstreamApiPreflight?.upstreamLock?.packageVersion, '0.48.0');
   assert.equal(result.observation.sampleCount, 1);
   assert.equal(result.observation.samples[0]?.runtimeLifecycleState, 'running');
   assert.equal(result.latestRuntimeHandoffFile, 'runtime/bws-paper-runtime-handoff/handoff.json');
@@ -501,7 +579,7 @@ test('paper runtime evidence preserves an attached stack when exact identity and
     response.statusCode = 404;
     response.end(JSON.stringify({ error: 'not_found' }));
   });
-  configureUpstreamApiPreflightEnvironment(t, { apiBaseUrl: upstreamApiBaseUrl });
+  configureUpstreamApiPreflightEnvironment(t, repositoryRoot, { apiBaseUrl: upstreamApiBaseUrl });
   let statusCalls = 0;
   const result = await createBwsPaperRuntimeEvidence({
     collectDiagnostics: async ({ repositoryRoot: root }) => createDiagnosticsBundleResult(root, 'bundle-attached', {
@@ -543,7 +621,7 @@ test('paper runtime evidence preserves an attached stack when exact identity and
 test('paper runtime evidence fails fast when required upstream lock evidence is missing before lifecycle ownership is touched', async (t) => {
   const repositoryRoot = createTestRepositoryRoot(t);
   rmSync(join(repositoryRoot, 'config', 'betting-win.upstream.lock.json'), { force: true });
-  configureUpstreamApiPreflightEnvironment(t, { apiBaseUrl: 'http://127.0.0.1:9999' });
+  configureUpstreamApiPreflightEnvironment(t, repositoryRoot, { apiBaseUrl: 'http://127.0.0.1:9999' });
   let lifecycleTouched = false;
 
   const result = await createBwsPaperRuntimeEvidence({
@@ -570,6 +648,119 @@ test('paper runtime evidence fails fast when required upstream lock evidence is 
   assert.equal(lifecycleTouched, false);
 });
 
+test('paper runtime evidence verifies the configured betting-win checkout against the upstream lock before lifecycle ownership is touched', async (t) => {
+  const repositoryRoot = createTestRepositoryRoot(t);
+  commitUpstreamFixtureChange(repositoryRoot);
+  configureUpstreamApiPreflightEnvironment(t, repositoryRoot, { apiBaseUrl: 'http://127.0.0.1:9999' });
+  let lifecycleTouched = false;
+
+  const result = await createBwsPaperRuntimeEvidence({
+    getLifecycleStatus: async () => {
+      lifecycleTouched = true;
+      return createLifecycleStatus('running');
+    },
+    intervalMs: 1000,
+    maxDurationMs: 2000,
+    repositoryRoot,
+    startLifecycle: async () => {
+      lifecycleTouched = true;
+      throw new Error('start should not be called');
+    },
+  });
+
+  assert.equal(result.finalStatus, 'PAPER_EVALUATION_BLOCKED_RUNTIME_EVIDENCE_COLLECTION_FAILED');
+  assert.equal(result.stopReason, 'betting_win_api_unavailable');
+  assert.equal(result.collectionFailure?.stage, 'upstream_api_preflight');
+  assert.equal(result.upstreamApiPreflight?.failureClass, 'upstream_lock_invalid');
+  assert.match(result.upstreamApiPreflight?.errorMessage ?? '', /does not match the current verified checkout/);
+  assert.equal(result.upstreamApiPreflight?.outcome, 'blocked');
+  assert.equal(result.upstreamApiPreflight?.upstreamLock, undefined);
+  assert.equal(result.observation.sampleCount, 0);
+  assert.equal(lifecycleTouched, false);
+});
+
+test('paper runtime evidence rejects retired export mode before lifecycle ownership is touched', async (t) => {
+  const repositoryRoot = createTestRepositoryRoot(t);
+  configureUpstreamApiPreflightEnvironment(t, repositoryRoot, {
+    apiBaseUrl: 'http://127.0.0.1:4301',
+    upstreamMode: 'export',
+  });
+  let lifecycleTouched = false;
+
+  await assert.rejects(
+    () => createBwsPaperRuntimeEvidence({
+      getLifecycleStatus: async () => {
+        lifecycleTouched = true;
+        return createLifecycleStatus('running');
+      },
+      intervalMs: 1000,
+      maxDurationMs: 2000,
+      repositoryRoot,
+      startLifecycle: async () => {
+        lifecycleTouched = true;
+        throw new Error('start should not be called');
+      },
+    }),
+    /BWS_UPSTREAM_MODE must be exactly api/i,
+  );
+  assert.equal(lifecycleTouched, false);
+});
+
+test('paper runtime evidence rejects unsafe integer request bounds before lifecycle ownership is touched', async () => {
+  const repositoryRoot = process.cwd();
+  let lifecycleTouched = false;
+
+  for (const [bounds, expectedMessage] of [
+    [{ intervalMs: Number.MAX_SAFE_INTEGER + 1, maxDurationMs: 2000 }, /intervalMs must be a positive safe integer/i],
+    [{ intervalMs: 1000, maxDurationMs: Number.MAX_SAFE_INTEGER + 1 }, /maxDurationMs must be a positive safe integer/i],
+  ] as const) {
+    await assert.rejects(
+      () => createBwsPaperRuntimeEvidence({
+        getLifecycleStatus: async () => {
+          lifecycleTouched = true;
+          return createLifecycleStatus('running');
+        },
+        intervalMs: bounds.intervalMs,
+        maxDurationMs: bounds.maxDurationMs,
+        repositoryRoot,
+        startLifecycle: async () => {
+          lifecycleTouched = true;
+          throw new Error('start should not be called');
+        },
+      }),
+      expectedMessage,
+    );
+    assert.equal(lifecycleTouched, false);
+  }
+});
+
+test('paper runtime evidence rejects unsafe integer preflight bounds before lifecycle ownership is touched', async (t) => {
+  const repositoryRoot = createTestRepositoryRoot(t);
+  configureUpstreamApiPreflightEnvironment(t, repositoryRoot, {
+    apiBaseUrl: 'http://127.0.0.1:4301',
+    timeoutMs: '9007199254740993',
+  });
+  let lifecycleTouched = false;
+
+  await assert.rejects(
+    () => createBwsPaperRuntimeEvidence({
+      getLifecycleStatus: async () => {
+        lifecycleTouched = true;
+        return createLifecycleStatus('running');
+      },
+      intervalMs: 1000,
+      maxDurationMs: 2000,
+      repositoryRoot,
+      startLifecycle: async () => {
+        lifecycleTouched = true;
+        throw new Error('start should not be called');
+      },
+    }),
+    /BWS_UPSTREAM_API_TIMEOUT_MS must be a positive safe integer/i,
+  );
+  assert.equal(lifecycleTouched, false);
+});
+
 test('paper runtime evidence fails fast when the upstream API is unavailable before lifecycle ownership is touched', async (t) => {
   const repositoryRoot = createTestRepositoryRoot(t);
   const unavailablePort = await (async () => {
@@ -590,7 +781,7 @@ test('paper runtime evidence fails fast when the upstream API is unavailable bef
     });
     return port;
   })();
-  configureUpstreamApiPreflightEnvironment(t, {
+  configureUpstreamApiPreflightEnvironment(t, repositoryRoot, {
     apiBaseUrl: `http://127.0.0.1:${String(unavailablePort)}`,
   });
   let lifecycleTouched = false;
@@ -647,10 +838,15 @@ test('paper runtime evidence rejects malformed, credential-bearing, non-loopback
       expectedFailureClass: 'bws_local_api_conflict',
       expectedMessage: /must not target the local BWS API/i,
     },
+    {
+      apiBaseUrl: 'http://[::ffff:127.0.0.1]:4312',
+      expectedFailureClass: 'bws_local_api_conflict',
+      expectedMessage: /must not target the local BWS API/i,
+    },
   ] as const;
 
   for (const testCase of cases) {
-    configureUpstreamApiPreflightEnvironment(t, { apiBaseUrl: testCase.apiBaseUrl, apiPort: '4312' });
+    configureUpstreamApiPreflightEnvironment(t, repositoryRoot, { apiBaseUrl: testCase.apiBaseUrl, apiPort: '4312' });
     let lifecycleTouched = false;
     const result = await createBwsPaperRuntimeEvidence({
       getLifecycleStatus: async () => {
@@ -681,7 +877,7 @@ test('paper runtime evidence preserves the stack when ownership is ambiguous', a
     response.statusCode = 404;
     response.end(JSON.stringify({ error: 'not_found' }));
   });
-  configureUpstreamApiPreflightEnvironment(t, { apiBaseUrl: upstreamApiBaseUrl });
+  configureUpstreamApiPreflightEnvironment(t, repositoryRoot, { apiBaseUrl: upstreamApiBaseUrl });
   const result = await createBwsPaperRuntimeEvidence({
     getLifecycleStatus: async () => {
       throw new Error(
@@ -708,7 +904,7 @@ test('paper runtime evidence returns a bounded blocker when the observation wind
     response.statusCode = 404;
     response.end(JSON.stringify({ error: 'not_found' }));
   });
-  configureUpstreamApiPreflightEnvironment(t, { apiBaseUrl: upstreamApiBaseUrl });
+  configureUpstreamApiPreflightEnvironment(t, repositoryRoot, { apiBaseUrl: upstreamApiBaseUrl });
   const result = await createBwsPaperRuntimeEvidence({
     collectDiagnostics: async ({ repositoryRoot: root }) => createDiagnosticsBundleResult(root, 'bundle-blocked', {
       apiStatus: 'blocked',
@@ -752,7 +948,7 @@ test('paper runtime evidence retains a bounded redacted collection-failure stage
     response.statusCode = 404;
     response.end(JSON.stringify({ error: 'not_found' }));
   });
-  configureUpstreamApiPreflightEnvironment(t, { apiBaseUrl: upstreamApiBaseUrl });
+  configureUpstreamApiPreflightEnvironment(t, repositoryRoot, { apiBaseUrl: upstreamApiBaseUrl });
   const databaseUri = `${['post', 'gresql'].join('')}://user:database-secret@127.0.0.1:5432/db`;
   const result = await createBwsPaperRuntimeEvidence({
     collectDiagnostics: async () => {

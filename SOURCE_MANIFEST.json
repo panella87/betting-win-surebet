@@ -1,6 +1,6 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-08-03T11:40:23Z",
+  "generated": "2026-08-03T14:08:20Z",
   "overlay": "bws87-bugfix-autopilot-return-handoff-schema-wave50",
   "files": [
     {
@@ -145,8 +145,8 @@
     },
     {
       "path": "apps/web/src/api/client.ts",
-      "sha256": "cb17b7d6a4ebb31c7702d19bb467416b47985a8ead1679c0a525d798bb709fb0",
-      "size": 52420
+      "sha256": "c842c344e886f1adfa2394c0c67cc24d7017268a84bf9fa524c4786aa32e2238",
+      "size": 60997
     },
     {
       "path": "apps/web/src/api/contracts.ts",
@@ -165,8 +165,8 @@
     },
     {
       "path": "apps/web/src/app/data-mode.ts",
-      "sha256": "9614de266d9f2c2519b735f43807c16dbcf22e64beb2528c4eee196983453d68",
-      "size": 2689
+      "sha256": "0653ee8bd4681fa019f643bda056b360e766e7227d52a3a82582bc60b23e7af3",
+      "size": 2862
     },
     {
       "path": "apps/web/src/app/page-chrome.ts",
@@ -185,8 +185,8 @@
     },
     {
       "path": "apps/web/src/app/shell.tsx",
-      "sha256": "9dda27b998b53ad70bee56db94cbd253be1b644a302d69e693e6c371eb66f5cc",
-      "size": 22543
+      "sha256": "ca853137503ad688e08f287170378fc4ab2aea368d618863037e5f4b5f746189",
+      "size": 22536
     },
     {
       "path": "apps/web/src/app/url-state.ts",
@@ -815,8 +815,8 @@
     },
     {
       "path": "packages/bootstrap/src/adapters/betting-win-query-client.ts",
-      "sha256": "f41cbac2f34414239da88eb1e210b9885cb16b8f9105a7276de583de0f976609",
-      "size": 34407
+      "sha256": "9032cc37ff148624efba48c56f44071a5eed7ec039b83abf04ab4391cde074c4",
+      "size": 36370
     },
     {
       "path": "packages/bootstrap/src/adapters/betting-win-strategy-export-intake.ts",
@@ -825,13 +825,13 @@
     },
     {
       "path": "packages/bootstrap/src/api/bws-read-only-query-http.ts",
-      "sha256": "dee96e2cbfd7d7f0007adf56cecde12420f4caadd091aada3b140ee54d026d89",
-      "size": 14234
+      "sha256": "32733b48a125f8ced9b1e462198cf1e3b9089c403ca8d99caaa0b8110ee0b4ba",
+      "size": 14512
     },
     {
       "path": "packages/bootstrap/src/api/bws-read-only-query-service.ts",
-      "sha256": "cbb21f29e8e472e378f4e07a526834a595dad130c153847306d6a5dc3b310bdc",
-      "size": 67942
+      "sha256": "4e34282371d7cffb04000b19db8723a70ce1f6b54dc1da2f322205cc82d9c945",
+      "size": 67890
     },
     {
       "path": "packages/bootstrap/src/backtest/b1-cross-venue-backtest.ts",
@@ -855,8 +855,8 @@
     },
     {
       "path": "packages/bootstrap/src/cli/bws-external-runtime-preflight.ts",
-      "sha256": "8df353c77360fc6a7f9d3e4f7e8a10843319542c974ac95142f5ce313cb5ea6e",
-      "size": 6749
+      "sha256": "3ddd8c9e0e4a42717aff099355a619e984cb75237f8d9fef589f43a551636755",
+      "size": 6679
     },
     {
       "path": "packages/bootstrap/src/cli/bws-final-local-acceptance.ts",
@@ -875,8 +875,8 @@
     },
     {
       "path": "packages/bootstrap/src/cli/bws-paper-runtime-evidence.ts",
-      "sha256": "7b9ebfdadcec3aa4bd0234c03de1875dc8af10b8faa3038001131a11b250f461",
-      "size": 3129
+      "sha256": "842c4f0e1baf562041df46e39e5a9d85259fce21bf661f6dad5a34e4e99888ca",
+      "size": 3557
     },
     {
       "path": "packages/bootstrap/src/cli/bws-paper-runtime-handoff.ts",
@@ -1040,8 +1040,8 @@
     },
     {
       "path": "packages/bootstrap/src/operations/external-runtime-preflight.ts",
-      "sha256": "d2d622d89453d5b48ed5a157c1c7f3ae5ef0ddb9a633f52a06e156788c5fc2b5",
-      "size": 48030
+      "sha256": "00cd1d72212fc986e11c1e79c202ea20e58c0ba9f9695758bf170635165789fb",
+      "size": 45671
     },
     {
       "path": "packages/bootstrap/src/operations/final-local-acceptance.ts",
@@ -1060,8 +1060,8 @@
     },
     {
       "path": "packages/bootstrap/src/operations/paper-runtime-evidence.ts",
-      "sha256": "35e7cb15cfb90a25b621a8a70aa85cd8959cfee6e94630439d73b2c876e23d19",
-      "size": 33555
+      "sha256": "89d20854390a34aa5b631e2612406f50080b1103696b6d6cb398e869667dbcb6",
+      "size": 34078
     },
     {
       "path": "packages/bootstrap/src/operations/paper-runtime-handoff.ts",
@@ -1070,8 +1070,8 @@
     },
     {
       "path": "packages/bootstrap/src/operations/private-paper-runtime-scheduler.ts",
-      "sha256": "02546f1efba97cd6581b75c2e67ca07c8cb741261ca2db06a63fd10501579e70",
-      "size": 42066
+      "sha256": "d77a71317b94aa3b50980c673bc79b2aa9bc9126b9b6ce71740a15571f558f82",
+      "size": 42946
     },
     {
       "path": "packages/bootstrap/src/operations/private-paper-scheduler-service.ts",
@@ -1100,8 +1100,8 @@
     },
     {
       "path": "packages/bootstrap/src/operations/service-runtime.ts",
-      "sha256": "3d455e72ee1fbc781b608247033b6bde35fa69ba30c9c50434125f25e94ad393",
-      "size": 23517
+      "sha256": "4f7412e99f7a5623cc0d2987946107d89fa45c3e2f86bee61f3cee09ff7c47f9",
+      "size": 23906
     },
     {
       "path": "packages/bootstrap/src/operations/soak-campaign.ts",
@@ -1110,8 +1110,8 @@
     },
     {
       "path": "packages/bootstrap/src/operations/upstream-api-convergence.ts",
-      "sha256": "1d46b2221d720c51f2fe401fc6b82e8d8563a5045f3bd1bcb3f15962307d8777",
-      "size": 38795
+      "sha256": "674aa95d15b4955d8e1ae7fb40f2b941a761a08c93efbb3f6f0bcc23f054542d",
+      "size": 39176
     },
     {
       "path": "packages/bootstrap/src/operations/upstream-convergence-service.ts",
@@ -1675,8 +1675,8 @@
     },
     {
       "path": "schemas/bws-external-runtime-campaign.v1.schema.json",
-      "sha256": "e24991914b76955416ed8150f4491865a9bc45d6755d71a589d0705dda834164",
-      "size": 9187
+      "sha256": "f17192b734d0cce69df70a26815049a5d918ee51da6fd9c32cd98611f935dd90",
+      "size": 9132
     },
     {
       "path": "schemas/bws-release-manifest.v1.schema.json",
@@ -2545,8 +2545,8 @@
     },
     {
       "path": "tests/betting-win-query-client.test.ts",
-      "sha256": "70d2496d7ec19a88628ded518273069de5b7c3d0aac4e2f685ce744255e4ddec",
-      "size": 13783
+      "sha256": "9d000a1bb412f193c7b2fb2fded0e89a5ad446a7c18fa6c43b9894852e5c2de6",
+      "size": 15420
     },
     {
       "path": "tests/betting-win-resource-records.test.ts",
@@ -2590,13 +2590,13 @@
     },
     {
       "path": "tests/bws-external-runtime-preflight.test.ts",
-      "sha256": "9984d74882954372c727ce68e40e8debb64bb4ca648752635de9770591510083",
-      "size": 28016
+      "sha256": "b79523c3c812e3fbb5dd93dc0cd85ad1dcfa0034a2c9e86585292046f5b5d36b",
+      "size": 29513
     },
     {
       "path": "tests/bws-final-local-acceptance.test.ts",
-      "sha256": "cb7f0b082828459c5012d562aaadb91adb2fcb10bd1b86b3b5ffbbd158206329",
-      "size": 33280
+      "sha256": "df4ce5cbbb96be348478c418acc32c7e37dba0324747634d5d1c22d091bbcb87",
+      "size": 33274
     },
     {
       "path": "tests/bws-loopback-acceptance-command.test.ts",
@@ -2615,8 +2615,8 @@
     },
     {
       "path": "tests/bws-operator-cockpit.test.ts",
-      "sha256": "2bfd7cafd6eee309b2d71e52a5d19a4dac5abe6c02fe5389265081a260adb6f2",
-      "size": 21371
+      "sha256": "770a0bef9e0fcd02ce9f89bbeaebdba279156d4b06544783bae52bd2b453bdd3",
+      "size": 28949
     },
     {
       "path": "tests/bws-operator-lifecycle.test.ts",
@@ -2625,8 +2625,8 @@
     },
     {
       "path": "tests/bws-paper-runtime-evidence.test.ts",
-      "sha256": "8027e21da1c6391f41d953f397b03448d5e9aaa5c25a68edff2e80d232413f2e",
-      "size": 29322
+      "sha256": "7fe23a5def79c3f3bf592ec656479dfd7df7e74c94d7f498badac888a4b47dc3",
+      "size": 37179
     },
     {
       "path": "tests/bws-paper-runtime-handoff.test.ts",
@@ -2635,13 +2635,13 @@
     },
     {
       "path": "tests/bws-private-paper-scheduler-service.test.ts",
-      "sha256": "3a8cf9e4eb817a1c5d4107aa8c5490957cbea6bd2f53cdf411c3adf29244f8fd",
+      "sha256": "bc308678abb3e4a8b44e7364c3267b13d40e274d829aa26212a89a6b4281c2a2",
       "size": 17570
     },
     {
       "path": "tests/bws-private-paper-scheduler.test.ts",
-      "sha256": "da40e6e24fd922328ef287ca62e6e2137fb120a374ae4b662e1776f0a0868ae7",
-      "size": 36088
+      "sha256": "0d3a8c37fc2b9bbbd98fb431300abac01f4c0235d4a5e8fa4190b3e7d170e3fd",
+      "size": 37277
     },
     {
       "path": "tests/bws-private-paper-worker-service.test.ts",
@@ -2650,8 +2650,8 @@
     },
     {
       "path": "tests/bws-read-only-query-api.test.ts",
-      "sha256": "d9f4fbf3be728cbd79d51551fd4a885f172039e3c55e83430541a60f71dd8011",
-      "size": 36948
+      "sha256": "7b95540b138287a96cc8606d1e81dd58f97f6a8c66968cb66b237f784f61654e",
+      "size": 39140
     },
     {
       "path": "tests/bws-release-packaging.test.ts",
@@ -2670,8 +2670,8 @@
     },
     {
       "path": "tests/bws-service-runtime.test.ts",
-      "sha256": "2ef8eca58d929ce258f8e0bd880c018b72e4fad6cfaa668c1510972502f20be7",
-      "size": 14235
+      "sha256": "d0b74da9e0e5ec446b66bb56d46dd4696992b262be0afb499e5e96c8192fa892",
+      "size": 14442
     },
     {
       "path": "tests/bws-soak-campaign.test.ts",
@@ -2680,12 +2680,12 @@
     },
     {
       "path": "tests/bws-upstream-api-convergence.test.ts",
-      "sha256": "03ad9793f376615c5ac8ffe4efc5776124d29c9b601301aad57ec4d2c75f6bf2",
-      "size": 30079
+      "sha256": "6fe1d70acfbffccb9801277666038121344c3490a571a284077e334b835090bf",
+      "size": 31301
     },
     {
       "path": "tests/bws-upstream-convergence-service.test.ts",
-      "sha256": "61504aa38418ac6275b361eb4f733d9e9e75dbda93caa47cecf7cdc3ca45b6a3",
+      "sha256": "f603b5c98559b03547a7ff172c4eff8f7319235078652f368e7e79b1a307d6cf",
       "size": 23953
     },
     {

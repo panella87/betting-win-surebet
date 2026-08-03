@@ -300,7 +300,7 @@ test('upstream API convergence config and CLI help stay explicit about api mode 
 
     const baseEnvironment = {
       BETTING_WIN_REPO_PATH: fixture.upstreamRoot,
-      [BWS_UPSTREAM_API_BASE_URL_ENV]: 'http://127.0.0.1:4312',
+      [BWS_UPSTREAM_API_BASE_URL_ENV]: 'http://127.0.0.1:4301',
       [BWS_UPSTREAM_API_CHECKPOINT_ID_ENV]: 'checkpoint-api-001',
       [BWS_UPSTREAM_API_CONTRACT_VERSION_ENV]: '1.0.0',
       [BWS_UPSTREAM_API_MAX_PAGES_PER_RESOURCE_ENV]: '2',
@@ -323,6 +323,33 @@ test('upstream API convergence config and CLI help stay explicit about api mode 
     assert.equal(config.mode, 'api');
     assert.equal(config.query.contractVersion, '1.0.0');
 
+    for (const apiBaseUrl of ['http://127.0.0.1:4312', 'http://localhost:4312', 'http://[::1]:4312']) {
+      const localConfig = resolveBwsUpstreamApiConvergenceConfig({
+        ...baseEnvironment,
+        [BWS_UPSTREAM_API_BASE_URL_ENV]: apiBaseUrl,
+      }, fixture.bwsRoot);
+      const result = await runBwsUpstreamApiConvergencePass({
+        config: localConfig,
+        fetchImplementation: async () => {
+          throw new Error('fetch should not be called for local BWS API authority');
+        },
+      });
+      assert.equal(result.ok, false);
+      assert.equal(result.blockers[0]?.code, 'QUERY_BASE_URL_LOCAL_BWS_API_FORBIDDEN');
+    }
+
+    const configuredLocalConfig = resolveBwsUpstreamApiConvergenceConfig({
+      ...baseEnvironment,
+      BWS_API_PORT: '4301',
+    }, fixture.bwsRoot);
+    const configuredLocalResult = await runBwsUpstreamApiConvergencePass({
+      config: configuredLocalConfig,
+      fetchImplementation: async () => {
+        throw new Error('fetch should not be called for configured local BWS API authority');
+      },
+    });
+    assert.equal(configuredLocalResult.ok, false);
+    assert.equal(configuredLocalResult.blockers[0]?.code, 'QUERY_BASE_URL_LOCAL_BWS_API_FORBIDDEN');
 
     assert.throws(
       () => resolveBwsUpstreamApiConvergenceConfig({

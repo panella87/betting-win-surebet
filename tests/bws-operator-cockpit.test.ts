@@ -71,6 +71,23 @@ test('BWS operator cockpit browser config rejects non-http API URLs, non-loopbac
     new RegExp(`${BWS_OPERATOR_COCKPIT_API_BASE_URL_ENV} must not include query or hash components`),
   );
 
+  assert.throws(
+    () =>
+      createBwsOperatorCockpitApiClient({
+        apiBaseUrl: 'https://cockpit.invalid',
+        dataMode: 'api',
+    }),
+    new RegExp(`${BWS_OPERATOR_COCKPIT_API_BASE_URL_ENV} must stay on an explicit loopback host`),
+  );
+  assert.throws(
+    () =>
+      createBwsOperatorCockpitApiClient({
+        apiBaseUrl: 'http://127.0.0.1:4312/prefix',
+        dataMode: 'api',
+      }),
+    new RegExp(`${BWS_OPERATOR_COCKPIT_API_BASE_URL_ENV} must not include path components`),
+  );
+
   assert.deepEqual(
     resolveBwsOperatorCockpitBrowserConfig({
       [BWS_OPERATOR_COCKPIT_DATA_MODE_ENV]: 'api',
@@ -114,14 +131,28 @@ test('BWS operator cockpit pinned export scope rejects unbounded and malformed f
     }),
     /sourceSha256 must be a 64-character lower-case SHA-256 value/,
   );
+  assert.throws(
+    () => normalizeBwsOperatorCockpitPinnedExportScope({
+      sourceSha256: 'A'.repeat(64),
+    }),
+    /sourceSha256 must be a 64-character lower-case SHA-256 value/,
+  );
+  assert.throws(
+    () => normalizeBwsOperatorCockpitPinnedExportScope({
+      sourceSha256: ` ${'a'.repeat(64)} `,
+    }),
+    /sourceSha256 must be a 64-character lower-case SHA-256 value/,
+  );
 
   assert.deepEqual(
     normalizeBwsOperatorCockpitPinnedExportScope({
       providerId: ' polymarket ',
+      sourceSha256: 'a'.repeat(64),
       upstreamLockRecordId: ' lock-001 ',
     }),
     Object.freeze({
       providerId: 'polymarket',
+      sourceSha256: 'a'.repeat(64),
       upstreamLockRecordId: 'lock-001',
     }),
   );
@@ -389,7 +420,7 @@ test('BWS operator cockpit API client builds bounded read-only requests and pars
   };
 
   const client = createBwsOperatorCockpitApiClient({
-    apiBaseUrl: 'https://cockpit.invalid',
+    apiBaseUrl: 'http://127.0.0.1:4312',
     dataMode: 'api',
   }, fetchImpl);
 
@@ -468,7 +499,7 @@ test('BWS operator cockpit API client fails closed on malformed committed-HEAD p
 
   const malformedProvenanceClient = createBwsOperatorCockpitApiClient(
     {
-      apiBaseUrl: 'https://cockpit.invalid',
+      apiBaseUrl: 'http://127.0.0.1:4312',
       dataMode: 'api',
     },
     async () => Object.freeze({
@@ -494,7 +525,7 @@ test('BWS operator cockpit API client fails closed on malformed committed-HEAD p
 
   const malformedBlockedClient = createBwsOperatorCockpitApiClient(
     {
-      apiBaseUrl: 'https://cockpit.invalid',
+      apiBaseUrl: 'http://127.0.0.1:4312',
       dataMode: 'api',
     },
     async () => Object.freeze({
@@ -520,7 +551,7 @@ test('BWS operator cockpit API client fails closed on malformed committed-HEAD p
 
   const malformedPinnedExportClient = createBwsOperatorCockpitApiClient(
     {
-      apiBaseUrl: 'https://cockpit.invalid',
+      apiBaseUrl: 'http://127.0.0.1:4312',
       dataMode: 'api',
     },
     async () => Object.freeze({
@@ -544,56 +575,202 @@ test('BWS operator cockpit API client fails closed on malformed committed-HEAD p
   );
 });
 
-test('BWS operator cockpit API client fails closed when strategy-ledger rows escape the requested acceptance or run scope', async () => {
+test('BWS operator cockpit API client fails closed when strategy-ledger rows escape the requested scope', async () => {
   const snapshot = createMockBwsOperatorCockpitSnapshot();
-  const mismatchedScope = structuredClone(snapshot.acceptedBacktests);
-  const mismatchedItems = mismatchedScope.page.items as unknown as Array<{
-    entry: {
-      acceptanceState: string;
-      report: {
-        acceptanceState: string;
-        runKind: string;
-      };
-      runKind: string;
-    };
-  }>;
+  const createClient = () =>
+    createBwsOperatorCockpitApiClient(
+      {
+        apiBaseUrl: 'http://127.0.0.1:4312',
+        dataMode: 'api',
+      },
+      async () => Object.freeze({
+        ok: true,
+        status: 200,
+        async text() {
+          return JSON.stringify(snapshot.acceptedBacktests);
+        },
+      }),
+    );
 
-  mismatchedItems[0]!.entry = {
-    ...mismatchedItems[0]!.entry,
-    acceptanceState: 'blocked',
-    report: {
-      ...mismatchedItems[0]!.entry.report,
-      acceptanceState: 'blocked',
-      runKind: 'private_paper_runtime_cycle',
-    },
-    runKind: 'private_paper_runtime_cycle',
+  for (const [filter, expectedMessage] of [
+    [{ acceptanceState: 'blocked' }, /acceptanceState accepted_local_evidence did not match requested blocked/],
+    [{ pinnedStrategyExportRecordId: 'pinned-export-requested' }, /pinnedStrategyExportRecordId intake-001 did not match requested pinned-export-requested/],
+    [{ reportId: 'report-requested' }, /reportId report-backtest-accepted-001 did not match requested report-requested/],
+    [{ runFingerprintSha256: '9'.repeat(64) }, /runFingerprintSha256 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa did not match requested/],
+    [{ runKind: 'private_paper_runtime_cycle' }, /runKind deterministic_standard_binary_backtest did not match requested private_paper_runtime_cycle/],
+    [{ runReferenceId: 'run-reference-requested' }, /runReferenceId backtest-run-001 did not match requested run-reference-requested/],
+    [{ sourceKind: 'read_only_query' }, /sourceKind resource_export did not match requested read_only_query/],
+    [{ sourceManifestHash: 'c'.repeat(64) }, /sourceManifestHash bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb did not match requested/],
+    [{ upstreamLockRecordId: 'lock-requested' }, /upstreamLockRecordId lock-001 did not match requested lock-requested/],
+  ] as const) {
+    await assert.rejects(
+      () => createClient().queryStrategyLedger({
+        expand: 'provenance',
+        filters: filter,
+        pageSize: 8,
+      }),
+      expectedMessage,
+    );
+  }
+});
+
+test('BWS operator cockpit API client fails closed on inconsistent counts and escaped non-strategy scopes', async () => {
+  const snapshot = createMockBwsOperatorCockpitSnapshot();
+  const mismatchedCount = structuredClone(snapshot.pinnedStrategyExports);
+  const mismatchedPinned = structuredClone(snapshot.pinnedStrategyExports);
+  const mismatchedRuntime = structuredClone(snapshot.blockedRuntimeCycles);
+  const mismatchedB1 = structuredClone(snapshot.b1BacktestRuns);
+
+  if (mismatchedCount === undefined || mismatchedPinned === undefined) {
+    throw new Error('Expected pinned export mock response.');
+  }
+  (mismatchedCount.page as { returnedCount: number }).returnedCount = 0;
+
+  const pinnedItems = mismatchedPinned.page.items as unknown as Array<{
+    record: { providerId: string; sourceSha256: string };
+  }>;
+  pinnedItems[0]!.record = {
+    ...pinnedItems[0]!.record,
+    providerId: 'kalshi',
+    sourceSha256: '6'.repeat(64),
   };
 
-  const client = createBwsOperatorCockpitApiClient(
-    {
-      apiBaseUrl: 'https://cockpit.invalid',
-      dataMode: 'api',
-    },
-    async () => Object.freeze({
-      ok: true,
-      status: 200,
-      async text() {
-        return JSON.stringify(mismatchedScope);
+  const b1Items = mismatchedB1.page.items as unknown as Array<{
+    run: { offlineFalsificationStatus: string };
+  }>;
+  b1Items[0]!.run = {
+    ...b1Items[0]!.run,
+    offlineFalsificationStatus: 'B1_SCOPE_MISMATCH',
+  };
+
+  const createClientFor = (payload: unknown) =>
+    createBwsOperatorCockpitApiClient(
+      {
+        apiBaseUrl: 'http://127.0.0.1:4312',
+        dataMode: 'api',
       },
-    }),
-  );
+      async () => Object.freeze({
+        ok: true,
+        status: 200,
+        async text() {
+          return JSON.stringify(payload);
+        },
+      }),
+    );
 
   await assert.rejects(
-    () => client.queryStrategyLedger({
+    () => createClientFor(mismatchedCount).queryPinnedStrategyExports({
       expand: 'provenance',
       filters: {
-        acceptanceState: 'accepted_local_evidence',
-        runKind: 'deterministic_standard_binary_backtest',
+        providerId: 'polymarket',
       },
       pageSize: 8,
     }),
-    /did not match requested accepted_local_evidence/,
+    /page\.returnedCount 0 must match page\.items length 1/,
   );
+
+  await assert.rejects(
+    () => createClientFor(mismatchedPinned).queryPinnedStrategyExports({
+      expand: 'provenance',
+      filters: {
+        providerId: 'polymarket',
+      },
+      pageSize: 8,
+    }),
+    /pinned_strategy_exports response providerId kalshi did not match requested polymarket/,
+  );
+
+  await assert.rejects(
+    () => createClientFor(mismatchedRuntime).queryPrivatePaperRuntimeCycles({
+      expand: 'provenance',
+      filters: {
+        acceptanceState: 'accepted_local_evidence',
+      },
+      pageSize: 8,
+    }),
+    /private_paper_runtime_cycles response acceptanceState blocked did not match requested accepted_local_evidence/,
+  );
+
+  await assert.rejects(
+    () => createClientFor(mismatchedB1).queryB1BacktestRuns({
+      expand: 'reporting',
+      filters: {
+        offlineFalsificationStatus: 'B1_OFFLINE_RESEARCH_CANDIDATES_OBSERVED',
+      },
+      pageSize: 8,
+    }),
+    /b1_backtest_runs response offlineFalsificationStatus B1_SCOPE_MISMATCH did not match requested B1_OFFLINE_RESEARCH_CANDIDATES_OBSERVED/,
+  );
+
+  for (const [filter, expectedMessage] of [
+    [{ runId: 'b1-run-requested' }, /b1_backtest_runs response runId b1-run-001 did not match requested b1-run-requested/],
+    [
+      { sourceManifestHash: 'a'.repeat(64) },
+      /b1_backtest_runs response sourceManifestHash 8888888888888888888888888888888888888888888888888888888888888888 did not match requested/,
+    ],
+    [
+      { upstreamCheckpointId: 'b1-checkpoint-requested' },
+      /b1_backtest_runs response upstreamCheckpointId b1-checkpoint-001 did not match requested b1-checkpoint-requested/,
+    ],
+    [
+      { upstreamLockFingerprint: 'b'.repeat(64) },
+      /b1_backtest_runs response upstreamLockFingerprint 9999999999999999999999999999999999999999999999999999999999999999 did not match requested/,
+    ],
+  ] as const) {
+    await assert.rejects(
+      () => createClientFor(snapshot.b1BacktestRuns).queryB1BacktestRuns({
+        expand: 'reporting',
+        filters: filter,
+        pageSize: 8,
+      }),
+      expectedMessage,
+    );
+  }
+
+  for (const [filter, expectedMessage] of [
+    [{ queueName: 'private-paper-requested' }, /private_paper_runtime_cycles response queueName private-paper did not match requested private-paper-requested/],
+    [{ runtimeId: 'runtime-requested' }, /private_paper_runtime_cycles response runtimeId runtime-001 did not match requested runtime-requested/],
+    [
+      { schedulerCheckpointId: 'scheduler-requested' },
+      /private_paper_runtime_cycles response schedulerCheckpointId scheduler-001 did not match requested scheduler-requested/,
+    ],
+    [
+      { upstreamLockRecordId: 'lock-requested' },
+      /private_paper_runtime_cycles response upstreamLockRecordId lock-001 did not match requested lock-requested/,
+    ],
+  ] as const) {
+    await assert.rejects(
+      () => createClientFor(snapshot.blockedRuntimeCycles).queryPrivatePaperRuntimeCycles({
+        expand: 'provenance',
+        filters: filter,
+        pageSize: 8,
+      }),
+      expectedMessage,
+    );
+  }
+
+  for (const [filter, expectedMessage] of [
+    [{ endpointId: 'endpoint-requested' }, /pinned_strategy_exports response endpointId endpoint-pm-primary did not match requested endpoint-requested/],
+    [
+      { exportId: 'provider-history-export.requested' },
+      /pinned_strategy_exports response exportId provider-history-export\.mock-001 did not match requested provider-history-export\.requested/,
+    ],
+    [{ importRunId: 'import-requested' }, /pinned_strategy_exports response importRunId import-run-001 did not match requested import-requested/],
+    [
+      { sourceSha256: 'a'.repeat(64) },
+      /pinned_strategy_exports response sourceSha256 5555555555555555555555555555555555555555555555555555555555555555 did not match requested/,
+    ],
+    [{ upstreamLockRecordId: 'lock-requested' }, /pinned_strategy_exports response upstreamLockRecordId lock-001 did not match requested lock-requested/],
+  ] as const) {
+    await assert.rejects(
+      () => createClientFor(snapshot.pinnedStrategyExports).queryPinnedStrategyExports({
+        expand: 'provenance',
+        filters: filter,
+        pageSize: 8,
+      }),
+      expectedMessage,
+    );
+  }
 });
 
 test('BWS operator cockpit validation contract includes the web workspace in root validation', () => {

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
@@ -46,7 +46,55 @@ test('private-paper scheduler config fails closed when schedule mode and BWS_UPS
           BWS_PRIVATE_PAPER_SCHEDULE_PATH: schedulePath,
           BWS_WORKER_QUEUE_NAME: 'private-paper',
         } as BwsPrivatePaperSchedulerEnvironment, fixtureDir),
-      /must match BWS_UPSTREAM_MODE=export exactly/,
+      /must be exactly api/i,
+    );
+  } finally {
+    rmSync(fixtureDir, { force: true, recursive: true });
+  }
+});
+
+test('private-paper scheduler config rejects schedule paths outside the repository root and symlink escapes', () => {
+  const fixtureDir = mkdtempSync(join(tmpdir(), 'bws-private-paper-schedule-boundary-'));
+  const repositoryRoot = join(fixtureDir, 'betting-win-surebet');
+  const outsideRoot = join(fixtureDir, 'betting-win-surebet-outside');
+  try {
+    mkdirSync(repositoryRoot, { recursive: true });
+    mkdirSync(outsideRoot, { recursive: true });
+    const outsideSchedulePath = join(outsideRoot, 'schedule.json');
+    writeFileSync(
+      outsideSchedulePath,
+      JSON.stringify({
+        schema: 'bws.private_paper_schedule.v1',
+        mode: 'api',
+        schedulerCheckpointId: 'scheduler-001',
+        runtimeId: 'runtime-001',
+        maxCandidatesPerCycle: 1,
+        retryDelaysMs: [],
+        candidatePlans: [sampleCandidatePlan()],
+      }),
+      { encoding: 'utf-8' },
+    );
+
+    assert.throws(
+      () =>
+        resolveBwsPrivatePaperSchedulerConfig({
+          [BWS_UPSTREAM_MODE_ENV]: 'api',
+          BWS_PRIVATE_PAPER_SCHEDULE_PATH: outsideSchedulePath,
+          BWS_WORKER_QUEUE_NAME: 'private-paper',
+        } as BwsPrivatePaperSchedulerEnvironment, repositoryRoot),
+      /must resolve inside the repository root/,
+    );
+
+    const symlinkPath = join(repositoryRoot, 'schedule-link.json');
+    symlinkSync(outsideSchedulePath, symlinkPath);
+    assert.throws(
+      () =>
+        resolveBwsPrivatePaperSchedulerConfig({
+          [BWS_UPSTREAM_MODE_ENV]: 'api',
+          BWS_PRIVATE_PAPER_SCHEDULE_PATH: symlinkPath,
+          BWS_WORKER_QUEUE_NAME: 'private-paper',
+        } as BwsPrivatePaperSchedulerEnvironment, repositoryRoot),
+      /must resolve inside the repository root/,
     );
   } finally {
     rmSync(fixtureDir, { force: true, recursive: true });
@@ -154,7 +202,7 @@ test('private-paper scheduler suppresses duplicate jobs after restart when the j
   assert.equal(schedulerCheckpoints.get('scheduler-001')?.lastScheduledApiCycleNumber, 1);
 });
 
-test('private-paper scheduler persists one completed export selection into a deterministic pinned-record job without api fallback', async () => {
+test('private-paper scheduler rejects retired export configs before upstream export convergence or job creation', async () => {
   mkdirSync(join(process.cwd(), 'artifacts'), { recursive: true });
   const fixtureDir = mkdtempSync(join(process.cwd(), 'artifacts', 'bws-private-paper-export-scheduler-'));
   const jobs = new InMemoryJobs();
@@ -165,13 +213,15 @@ test('private-paper scheduler persists one completed export selection into a det
       createPinnedStrategyExportRecord('checkpoint-export-001', 'cursor-001', exportFixture),
     ]);
     const config = createExportSchedulerConfig(exportFixture);
+    let upstreamExportTouched = false;
 
     const result = await runBwsPrivatePaperSchedulerPass({
       config,
       jobs,
       pinnedStrategyExports,
-      runUpstreamExportConvergencePass: async () =>
-        accepted(Object.freeze({
+      runUpstreamExportConvergencePass: async () => {
+        upstreamExportTouched = true;
+        return accepted(Object.freeze({
           checkpointId: 'checkpoint-export-001',
           completed: true,
           importRunId: 'import:checkpoint-export-001:cursor-001',
@@ -181,27 +231,16 @@ test('private-paper scheduler persists one completed export selection into a det
           processedCount: 1,
           processedSelectionCursor: 'cursor-001',
           selectionCount: 1,
-        })),
+        }));
+      },
       schedulerCheckpoints,
     });
 
-    assert.equal(result.ok, true);
-    assert.equal(result.value.mode, 'export');
-    assert.equal(result.value.scheduled, true);
-    assert.equal(result.value.scheduledCycleNumber, 1);
-    assert.equal(result.value.completedCycleCount, 1);
-
-    const persistedJob = jobs.get('private-paper:scheduler-001:cycle:1');
-    const payload = persistedJob?.payload as PersistedPrivatePaperRuntimeJobPayload | undefined;
-    assert.equal(payload?.pinnedStrategyExportRecordId, 'pinned-export:checkpoint-export-001:cursor-001');
-    assert.equal(payload?.source.kind, 'pinned_records');
-    assert.equal(payload?.source.exportedAt, exportFixture.exportedAt);
-    assert.equal(Array.isArray(payload?.source.records), true);
-    assert.equal((payload?.source.records.length ?? 0) > 0, true);
-
-    const checkpoint = schedulerCheckpoints.get('scheduler-001');
-    assert.equal(checkpoint?.lastScheduledApiCycleNumber, 1);
-    assert.equal(checkpoint?.lastScheduledSourceId, 'export-selection:checkpoint-export-001:cursor-001');
+    assert.equal(result.ok, false);
+    assert.equal(result.blockers[0]?.code, 'BWS_PRIVATE_PAPER_SCHEDULER_EXPORT_MODE_RETIRED');
+    assert.equal(upstreamExportTouched, false);
+    assert.equal(jobs.get('private-paper:scheduler-001:cycle:1'), undefined);
+    assert.equal(schedulerCheckpoints.get('scheduler-001'), undefined);
   } finally {
     rmSync(fixtureDir, { force: true, recursive: true });
   }
@@ -492,7 +531,7 @@ class InMemoryApiCheckpoints {
   get(checkpointId: string) {
     assert.equal(checkpointId, 'checkpoint-api-001');
     return Object.freeze({
-      apiBaseUrl: 'http://127.0.0.1:4312',
+      apiBaseUrl: 'http://127.0.0.1:4301',
       checkpointId,
       completedCycleCount: this.#completedCycleCount,
       contractVersion: '1.0.0',
@@ -560,7 +599,7 @@ function createUpstreamApiConfig(): BwsUpstreamApiConvergenceConfig {
     mode: 'api',
     persistence: {} as never,
     query: Object.freeze({
-      baseUrl: 'http://127.0.0.1:4312',
+      baseUrl: 'http://127.0.0.1:4301',
       contractVersion: '1.0.0',
       maxPagesPerResource: 2,
       pageSize: 2,
@@ -683,7 +722,7 @@ function createExpectedApiJobPayload(
     runtimeId: 'runtime-001',
     schema: 'bws.private_paper_runtime_job.v1',
     source: Object.freeze({
-      apiBaseUrl: 'http://127.0.0.1:4312',
+      apiBaseUrl: 'http://127.0.0.1:4301',
       contractVersion: '1.0.0',
       exportedAt,
       kind: 'read_only_query',

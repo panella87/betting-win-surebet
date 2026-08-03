@@ -41,6 +41,55 @@ test('read-only query client rejects invalid base URLs and explicit credentialed
   });
   assert.equal(credentialedUrl.ok, false);
   assert.equal(credentialedUrl.blockers[0]?.code, 'QUERY_BASE_URL_CREDENTIALS_FORBIDDEN');
+
+  for (const baseUrl of [
+    'http://127.0.0.1:4312',
+    'http://localhost:4312',
+    'http://[::1]:4312',
+    'http://[::ffff:127.0.0.1]:4312',
+    'http://[::ffff:7f00:1]:4312',
+  ]) {
+    const localBwsApi = createReadOnlyQueryApiClient({
+      baseUrl,
+      contractVersion: '1.0.0',
+      fetchImplementation: globalThis.fetch.bind(globalThis),
+      maxPageSize: 50,
+      retryBackoffMs: 5,
+      retryLimit: 1,
+      timeoutMs: 25,
+      upstreamLock: sampleUpstreamLock(),
+    });
+    assert.equal(localBwsApi.ok, false);
+    assert.equal(localBwsApi.blockers[0]?.code, 'QUERY_BASE_URL_LOCAL_BWS_API_FORBIDDEN');
+  }
+
+  const configuredLocalBwsApi = createReadOnlyQueryApiClient({
+    baseUrl: 'http://localhost:4301',
+    contractVersion: '1.0.0',
+    fetchImplementation: globalThis.fetch.bind(globalThis),
+    localBwsApiPort: 4301,
+    maxPageSize: 50,
+    retryBackoffMs: 5,
+    retryLimit: 1,
+    timeoutMs: 25,
+    upstreamLock: sampleUpstreamLock(),
+  });
+  assert.equal(configuredLocalBwsApi.ok, false);
+  assert.equal(configuredLocalBwsApi.blockers[0]?.code, 'QUERY_BASE_URL_LOCAL_BWS_API_FORBIDDEN');
+
+  const unsafeLocalBwsApiPort = createReadOnlyQueryApiClient({
+    baseUrl: 'http://localhost:4301',
+    contractVersion: '1.0.0',
+    fetchImplementation: globalThis.fetch.bind(globalThis),
+    localBwsApiPort: Number.MAX_SAFE_INTEGER + 1,
+    maxPageSize: 50,
+    retryBackoffMs: 5,
+    retryLimit: 1,
+    timeoutMs: 25,
+    upstreamLock: sampleUpstreamLock(),
+  });
+  assert.equal(unsafeLocalBwsApiPort.ok, false);
+  assert.equal(unsafeLocalBwsApiPort.blockers[0]?.code, 'QUERY_LOCAL_BWS_API_PORT_INVALID');
 });
 
 test('read-only query client rejects unsupported per-resource filter keys before fetch', async () => {

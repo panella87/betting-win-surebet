@@ -210,9 +210,9 @@ function parseB1BacktestRunRequest(url: URL): BwsB1BacktestRunQueryRequest {
   const expand = getSingleValue(url, 'expand');
   const offlineFalsificationStatus = getSingleValue(url, 'offlineFalsificationStatus');
   const runId = getSingleValue(url, 'runId');
-  const sourceManifestHash = getSingleValue(url, 'sourceManifestHash');
+  const sourceManifestHash = getSingleValue(url, 'sourceManifestHash', { preserveExactValue: true });
   const upstreamCheckpointId = getSingleValue(url, 'upstreamCheckpointId');
-  const upstreamLockFingerprint = getSingleValue(url, 'upstreamLockFingerprint');
+  const upstreamLockFingerprint = getSingleValue(url, 'upstreamLockFingerprint', { preserveExactValue: true });
   return Object.freeze({
     ...(cursor === undefined ? {} : { cursor }),
     ...(expand === undefined ? {} : { expand }),
@@ -234,11 +234,11 @@ function parseStrategyLedgerRequest(url: URL): BwsStrategyLedgerQueryRequest {
   const acceptanceState = getSingleValue(url, 'acceptanceState');
   const pinnedStrategyExportRecordId = getSingleValue(url, 'pinnedStrategyExportRecordId');
   const reportId = getSingleValue(url, 'reportId');
-  const runFingerprintSha256 = getSingleValue(url, 'runFingerprintSha256');
+  const runFingerprintSha256 = getSingleValue(url, 'runFingerprintSha256', { preserveExactValue: true });
   const runKind = getSingleValue(url, 'runKind');
   const runReferenceId = getSingleValue(url, 'runReferenceId');
   const sourceKind = getSingleValue(url, 'sourceKind');
-  const sourceManifestHash = getSingleValue(url, 'sourceManifestHash');
+  const sourceManifestHash = getSingleValue(url, 'sourceManifestHash', { preserveExactValue: true });
   const upstreamLockRecordId = getSingleValue(url, 'upstreamLockRecordId');
   return Object.freeze({
     ...(cursor === undefined ? {} : { cursor }),
@@ -266,7 +266,7 @@ function parsePinnedStrategyExportRequest(url: URL): BwsPinnedStrategyExportQuer
   const exportId = getSingleValue(url, 'exportId');
   const importRunId = getSingleValue(url, 'importRunId');
   const providerId = getSingleValue(url, 'providerId');
-  const sourceSha256 = getSingleValue(url, 'sourceSha256');
+  const sourceSha256 = getSingleValue(url, 'sourceSha256', { preserveExactValue: true });
   const upstreamLockRecordId = getSingleValue(url, 'upstreamLockRecordId');
   return Object.freeze({
     ...(cursor === undefined ? {} : { cursor }),
@@ -312,7 +312,11 @@ function assertAllowedQueryKeys(url: URL, allowedKeys: ReadonlySet<string>): voi
   }
 }
 
-function getSingleValue(url: URL, key: string): string | undefined {
+function getSingleValue(
+  url: URL,
+  key: string,
+  options: Readonly<{ preserveExactValue?: boolean }> = Object.freeze({}),
+): string | undefined {
   const values = url.searchParams.getAll(key);
   if (values.length === 0) {
     return undefined;
@@ -324,7 +328,7 @@ function getSingleValue(url: URL, key: string): string | undefined {
   if (value === undefined || value.trim().length === 0) {
     throw new Error(`BWS read-only query parameter ${key} must be non-empty when provided.`);
   }
-  return value.trim();
+  return options.preserveExactValue === true ? value : value.trim();
 }
 
 function requirePositiveIntegerParam(url: URL, key: string): number {

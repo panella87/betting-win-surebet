@@ -6,6 +6,10 @@ const ISO_8601_UTC_MILLISECONDS = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3
 const GIT_SHA_PATTERN = /^[0-9a-f]{40}$/;
 const RETRYABLE_HTTP_STATUSES = new Set([408, 429, 502, 503, 504]);
 const READ_ONLY_QUERY_API_CLIENT_PHASE = 'BWS-140';
+const STANDARD_BWS_API_PORT = '4312';
+const LOOPBACK_AUTHORITY_HOST = 'loopback';
+const LOOPBACK_HOSTS = new Set(['127.0.0.1', '::1', '[::1]', 'localhost']);
+const IPV4_MAPPED_IPV6_LOOPBACK_HOSTS = new Set(['[::ffff:7f00:1]', '[::ffff:127.0.0.1]', '::ffff:7f00:1', '::ffff:127.0.0.1']);
 
 const RESOURCE_ENDPOINT_PATHS = Object.freeze({
   identity: '/query/identity-entities',
@@ -33,6 +37,7 @@ export interface ReadOnlyQueryClientConfig {
   readonly baseUrl: string;
   readonly contractVersion: string;
   readonly fetchImplementation: ReadOnlyQueryFetchLike;
+  readonly localBwsApiPort?: number;
   readonly maxPageSize: number;
   readonly retryBackoffMs: number;
   readonly retryLimit: number;
@@ -267,11 +272,17 @@ function validateClientConfig(config: ReadOnlyQueryClientConfig): BoundaryResult
       'Fetch implementation bound to the read-only betting-win API.',
     );
   }
-  const baseUrlResult = validateReadOnlyBaseUrl(config.baseUrl);
+  const localBwsApiPort = config.localBwsApiPort === undefined
+    ? undefined
+    : validatePositiveInteger(config.localBwsApiPort, 'QUERY_LOCAL_BWS_API_PORT_INVALID', 'Read-only query local BWS API port must be a positive safe integer.');
+  if (localBwsApiPort !== undefined && !localBwsApiPort.ok) {
+    return localBwsApiPort;
+  }
+  const baseUrlResult = validateReadOnlyBaseUrl(config.baseUrl, localBwsApiPort?.value);
   if (!baseUrlResult.ok) {
     return baseUrlResult;
   }
-  const timeoutMs = validatePositiveInteger(config.timeoutMs, 'QUERY_TIMEOUT_INVALID', 'Read-only query timeout must be a positive integer in milliseconds.');
+  const timeoutMs = validatePositiveInteger(config.timeoutMs, 'QUERY_TIMEOUT_INVALID', 'Read-only query timeout must be a positive safe integer in milliseconds.');
   if (!timeoutMs.ok) {
     return timeoutMs;
   }
@@ -282,7 +293,7 @@ function validateClientConfig(config: ReadOnlyQueryClientConfig): BoundaryResult
   const retryBackoffMs = validatePositiveInteger(
     config.retryBackoffMs,
     'QUERY_RETRY_BACKOFF_INVALID',
-    'Read-only query retry backoff must be a positive integer in milliseconds.',
+    'Read-only query retry backoff must be a positive safe integer in milliseconds.',
   );
   if (!retryBackoffMs.ok) {
     return retryBackoffMs;
@@ -290,7 +301,7 @@ function validateClientConfig(config: ReadOnlyQueryClientConfig): BoundaryResult
   const maxPageSize = validatePositiveInteger(
     config.maxPageSize,
     'QUERY_PAGE_SIZE_LIMIT_INVALID',
-    'Read-only query max page size must be a positive integer.',
+    'Read-only query max page size must be a positive safe integer.',
   );
   if (!maxPageSize.ok) {
     return maxPageSize;
@@ -307,6 +318,7 @@ function validateClientConfig(config: ReadOnlyQueryClientConfig): BoundaryResult
       baseUrl: baseUrlResult.value,
       contractVersion: contractRequest.value.contractVersion,
       fetchImplementation: config.fetchImplementation,
+      ...(localBwsApiPort === undefined ? {} : { localBwsApiPort: localBwsApiPort.value }),
       maxPageSize: maxPageSize.value,
       retryBackoffMs: retryBackoffMs.value,
       retryLimit: retryLimit.value,
@@ -316,7 +328,7 @@ function validateClientConfig(config: ReadOnlyQueryClientConfig): BoundaryResult
   );
 }
 
-function validateReadOnlyBaseUrl(baseUrl: string): BoundaryResult<string> {
+export function validateReadOnlyBaseUrl(baseUrl: string, localBwsApiPort?: number): BoundaryResult<string> {
   if (typeof baseUrl !== 'string' || baseUrl.trim().length === 0) {
     return blocked(
       'QUERY_BASE_URL_MISSING',
@@ -357,8 +369,40 @@ function validateReadOnlyBaseUrl(baseUrl: string): BoundaryResult<string> {
       'Clean read-only betting-win API base URL.',
     );
   }
+  if (targetsForbiddenLocalBwsApi(parsed, localBwsApiPort)) {
+    return blocked(
+      'QUERY_BASE_URL_LOCAL_BWS_API_FORBIDDEN',
+      'Read-only query base URL must not target the local BWS API listener as upstream betting-win evidence.',
+      'External read-only betting-win API base URL distinct from the local BWS API.',
+    );
+  }
 
   return accepted(parsed.toString().replace(/\/+$/, ''));
+}
+
+function targetsForbiddenLocalBwsApi(parsed: URL, localBwsApiPort: number | undefined): boolean {
+  if (normalizeAuthorityHostname(parsed.hostname) !== LOOPBACK_AUTHORITY_HOST) {
+    return false;
+  }
+  const port = resolvedPort(parsed);
+  if (port === STANDARD_BWS_API_PORT) {
+    return true;
+  }
+  return localBwsApiPort !== undefined && port === String(localBwsApiPort);
+}
+
+function normalizeAuthorityHostname(hostname: string): string {
+  const normalized = hostname.toLowerCase();
+  return LOOPBACK_HOSTS.has(normalized) || IPV4_MAPPED_IPV6_LOOPBACK_HOSTS.has(normalized)
+    ? LOOPBACK_AUTHORITY_HOST
+    : normalized;
+}
+
+function resolvedPort(url: URL): string {
+  if (url.port.length > 0) {
+    return url.port;
+  }
+  return url.protocol === 'https:' ? '443' : '80';
 }
 
 function validatePageRequest<TResource extends ReadOnlyQueryResource>(
@@ -376,7 +420,7 @@ function validatePageRequest<TResource extends ReadOnlyQueryResource>(
   const pageSize = validatePositiveInteger(
     request.pageSize,
     'QUERY_PAGE_SIZE_INVALID',
-    'Read-only query page size must be a positive integer.',
+    'Read-only query page size must be a positive safe integer.',
   );
   if (!pageSize.ok) {
     return pageSize;
@@ -885,15 +929,15 @@ function isUpstreamLockCompatible(lock: BettingWinUpstreamLock): boolean {
 }
 
 function validatePositiveInteger(value: number, code: string, message: string): BoundaryResult<number> {
-  if (!Number.isInteger(value) || value <= 0) {
-    return blocked(code, message, 'Explicit positive integer configuration.');
+  if (!Number.isSafeInteger(value) || value <= 0) {
+    return blocked(code, message, 'Explicit positive safe integer configuration.');
   }
   return accepted(value);
 }
 
 function validateNonNegativeInteger(value: number, code: string, message: string): BoundaryResult<number> {
-  if (!Number.isInteger(value) || value < 0) {
-    return blocked(code, message, 'Explicit non-negative integer configuration.');
+  if (!Number.isSafeInteger(value) || value < 0) {
+    return blocked(code, message, 'Explicit non-negative safe integer configuration.');
   }
   return accepted(value);
 }

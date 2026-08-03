@@ -25,27 +25,26 @@ const REPO_ROOT = process.cwd();
 const TEST_TIMESTAMP = '2026-07-16T19:00:00.000Z';
 const SEQUENTIAL_TEST_OPTIONS = Object.freeze({ concurrency: false });
 
-test('external runtime preflight builds a deterministic export-mode manifest without leaking secrets', SEQUENTIAL_TEST_OPTIONS, async () => {
+test('external runtime preflight rejects retired export-mode manifests at the exported operation boundary', SEQUENTIAL_TEST_OPTIONS, async () => {
   const fixture = await createFixture();
   try {
-    const first = await createBwsExternalRuntimeCampaignManifest(createExportRequest(fixture));
-    const second = await createBwsExternalRuntimeCampaignManifest(createExportRequest(fixture));
-
-    assert.equal(first.manifest.semanticFingerprint, second.manifest.semanticFingerprint);
-    assert.equal(first.manifest.schema, 'bws.external_runtime_campaign.v1');
-    assert.equal(first.manifest.selectedInput.mode, 'export');
-    assert.equal(first.manifest.policy.selectedMode, 'export');
-    assert.equal(first.manifest.release.semanticFingerprint, fixture.releaseSemanticFingerprint);
-    assert.equal(first.manifest.evidence.soakState.file, resolve(fixture.exportSoakStateFile));
-
-    const payload = readFileSync(first.outputFile, 'utf-8');
-    assert.ok(!payload.includes('super-secret-password'));
-    assert.ok(!payload.includes('credential'));
+    await assert.rejects(
+      () => createBwsExternalRuntimeCampaignManifest(createExportRequest(fixture)),
+      /BWS_UPSTREAM_MODE=api|export mode is retired/i,
+    );
 
     const schema = JSON.parse(readFileSync(join(REPO_ROOT, 'schemas', 'bws-external-runtime-campaign.v1.schema.json'), 'utf-8')) as {
-      properties: { schema: { const: string } };
+      properties: {
+        policy: { properties: { selectedMode: { const: string } } };
+        schema: { const: string };
+        selectedInput: { $ref: string };
+      };
+      $defs: { apiInput: { required: readonly string[] } };
     };
     assert.equal(schema.properties.schema.const, 'bws.external_runtime_campaign.v1');
+    assert.equal(schema.properties.policy.properties.selectedMode.const, 'api');
+    assert.equal(schema.properties.selectedInput.$ref, '#/$defs/apiInput');
+    assert.equal(schema.$defs.apiInput.required.includes('contractInspection'), true);
   } finally {
     fixture.dispose();
   }
@@ -56,6 +55,20 @@ test('external runtime preflight CLI rejects the retired mode selector', async (
   await assert.rejects(
     () => runBwsExternalRuntimePreflightCli(['prepare', '--mode', 'export']),
     /--mode has been removed/,
+  );
+});
+
+test('external runtime preflight CLI rejects unsafe integer flag values before file IO', async () => {
+  await assert.rejects(
+    () =>
+      runBwsExternalRuntimePreflightCli([
+        'prepare',
+        '--backup-manifest-file',
+        'unused.json',
+        '--campaign-cycle-timeout-minutes',
+        '9007199254740993',
+      ]),
+    /--campaign-cycle-timeout-minutes must be a positive safe integer/,
   );
 });
 
@@ -133,7 +146,6 @@ test('external runtime preflight API mode inspects a loopback contract endpoint 
         '1',
         '--retry-backoff-ms',
         '10',
-        '--inspect-contract',
       ],
       REPO_ROOT,
       capture.stream,
@@ -210,7 +222,13 @@ test('external runtime preflight rejects non-loopback API URLs', SEQUENTIAL_TEST
 test('external runtime preflight rejects the local BWS API and loopback aliases as upstream evidence', SEQUENTIAL_TEST_OPTIONS, async () => {
   const fixture = await createFixture();
   try {
-    for (const apiBaseUrl of ['http://127.0.0.1:4312', 'http://localhost:4312']) {
+    for (const apiBaseUrl of [
+      'http://127.0.0.1:4312',
+      'http://localhost:4312',
+      'http://[::1]:4312',
+      'http://[::ffff:127.0.0.1]:4312',
+      'http://[::ffff:7f00:1]:4312',
+    ]) {
       writeApiEnvFile(fixture.apiEnvFile, apiBaseUrl);
       await assert.rejects(
         () =>
@@ -223,6 +241,43 @@ test('external runtime preflight rejects the local BWS API and loopback aliases 
             }),
           }),
         /must not target the local BWS API/i,
+      );
+    }
+  } finally {
+    fixture.dispose();
+  }
+});
+
+test('external runtime preflight rejects unsafe integer operation inputs', SEQUENTIAL_TEST_OPTIONS, async () => {
+  const fixture = await createFixture();
+  try {
+    await assert.rejects(
+      () =>
+        createBwsExternalRuntimeCampaignManifest({
+          ...createApiRequest(fixture),
+          minimumAvailableBytes: Number.MAX_SAFE_INTEGER + 1,
+        }),
+      /minimumAvailableBytes must be a positive safe integer/,
+    );
+  } finally {
+    fixture.dispose();
+  }
+});
+
+test('external runtime preflight rejects API contract paths that can escape the selected API authority', SEQUENTIAL_TEST_OPTIONS, async () => {
+  const fixture = await createFixture();
+  try {
+    for (const apiContractPath of ['//upstream.invalid/contract', '/contract?version=1', '/contract#fragment']) {
+      await assert.rejects(
+        () =>
+          createBwsExternalRuntimeCampaignManifest({
+            ...createApiRequest(fixture),
+            selectedInput: Object.freeze({
+              ...createApiRequest(fixture).selectedInput,
+              apiContractPath,
+            }),
+          }),
+        /apiContractPath must (be a path-only value|not include query or fragment)/,
       );
     }
   } finally {
@@ -246,7 +301,7 @@ test('external runtime preflight rejects install verification evidence for a dif
   }
 });
 
-test('external runtime preflight rejects incomplete soak evidence that does not reach cleanup verification', SEQUENTIAL_TEST_OPTIONS, async () => {
+test('external runtime preflight rejects retired export soak evidence before campaign manifest acceptance', SEQUENTIAL_TEST_OPTIONS, async () => {
   const fixture = await createFixture();
   try {
     await assert.rejects(
@@ -256,14 +311,14 @@ test('external runtime preflight rejects incomplete soak evidence that does not 
           soakManifestFile: fixture.incompleteSoakManifestFile,
           soakStateFile: fixture.incompleteSoakStateFile,
         }),
-      /cleanup_verified|duration budget/i,
+      /BWS_UPSTREAM_MODE=api|export mode is retired/i,
     );
   } finally {
     fixture.dispose();
   }
 });
 
-test('external runtime preflight rejects soak evidence without retained managed runtime wall-clock proof', SEQUENTIAL_TEST_OPTIONS, async () => {
+test('external runtime preflight rejects retired export mode before wall-clock soak evidence can be accepted', SEQUENTIAL_TEST_OPTIONS, async () => {
   const fixture = await createFixture();
   try {
     const state = JSON.parse(readFileSync(fixture.exportSoakStateFile, 'utf-8')) as Record<string, unknown>;
@@ -272,7 +327,7 @@ test('external runtime preflight rejects soak evidence without retained managed 
 
     await assert.rejects(
       () => createBwsExternalRuntimeCampaignManifest(createExportRequest(fixture)),
-      /managed runtime wall-clock proof/i,
+      /BWS_UPSTREAM_MODE=api|export mode is retired/i,
     );
   } finally {
     fixture.dispose();
@@ -334,7 +389,6 @@ function createApiRequest(fixture: Awaited<ReturnType<typeof createFixture>>) {
       checkpointId: 'api-checkpoint-001',
       contractVersion: '1.0.0',
       expectedUpstreamLockFingerprint: fixture.upstreamLockFingerprint,
-      inspectContract: false,
       maxPagesPerResource: 4,
       mode: 'api' as const,
       pageSize: 25,

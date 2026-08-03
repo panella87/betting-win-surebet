@@ -316,7 +316,7 @@ function createUpstreamApiConfig(repositoryRoot: string): BwsUpstreamApiConverge
     mode: 'api',
     persistence: {} as never,
     query: Object.freeze({
-      baseUrl: 'http://127.0.0.1:4312',
+      baseUrl: 'http://127.0.0.1:4301',
       contractVersion: '1.0.0',
       maxPagesPerResource: 2,
       pageSize: 2,

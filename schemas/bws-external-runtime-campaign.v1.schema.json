@@ -121,7 +121,7 @@
         "executionEnabled": { "const": false },
         "providerConnections": { "const": "disabled" },
         "runtimeMode": { "const": "paper" },
-        "selectedMode": { "enum": ["api", "export"] }
+        "selectedMode": { "const": "api" }
       }
     },
     "release": {
@@ -142,10 +142,7 @@
       "const": "bws.external_runtime_campaign.v1"
     },
     "selectedInput": {
-      "oneOf": [
-        { "$ref": "#/$defs/exportInput" },
-        { "$ref": "#/$defs/apiInput" }
-      ]
+      "$ref": "#/$defs/apiInput"
     },
     "semanticFingerprint": {
       "type": "string",
@@ -264,6 +261,7 @@
       "required": [
         "apiBaseUrl",
         "checkpointId",
+        "contractInspection",
         "contractVersion",
         "maxPagesPerResource",
         "mode",

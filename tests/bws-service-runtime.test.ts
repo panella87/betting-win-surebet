@@ -1,11 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdtempSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { once } from 'node:events';
 import { createServer } from 'node:http';
 import type { AddressInfo } from 'node:net';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
 import {
   createBwsOperationalStatusSnapshot,
   redactBwsServiceRuntimeConfig,
@@ -23,7 +22,6 @@ import {
 } from '../packages/bootstrap/src/index.js';
 import { createBwsReadOnlyQueryHttpHandler } from '../src/api/bws-read-only-query-http.js';
 import { describeBwsReadOnlyQueryServiceBoundary } from '../src/api/bws-read-only-query-service.js';
-import type { BettingWinUpstreamLock } from '../packages/upstream/src/upstream/betting-win-upstream-lock.js';
 import {
   BWS_OPERATOR_COCKPIT_DATA_MODE_ENV,
   describeBwsOperatorCockpitProcessDefinition,
@@ -31,6 +29,7 @@ import {
 } from '../apps/web/src/index.js';
 
 const TEST_TIMESTAMP = '2026-07-15T09:15:00.000Z';
+const REPO_ROOT = process.cwd();
 
 test('BWS service runtime config resolves the closed local stack and redacts secrets in observability summaries', () => {
   const fixture = createRuntimeFixture();
@@ -44,7 +43,7 @@ test('BWS service runtime config resolves the closed local stack and redacts sec
     assert.equal(config.processDefinitions.length, 2);
     assert.equal(config.processDefinitions[0]?.role, 'api');
     assert.equal(config.processDefinitions[1]?.role, 'worker');
-    assert.equal(config.upstream.lock.commitSha, sampleUpstreamLock().commitSha);
+    assert.match(config.upstream.lock.commitSha, /^[0-9a-f]{40}$/);
     assert.equal(config.upstream.repoPath, config.upstream.lock.repositoryPath);
 
     const summary = redactBwsServiceRuntimeConfig(config);
@@ -77,15 +76,32 @@ test('BWS service runtime config fails fast on execution enablement and upstream
       /must stay within the BWS repository root/,
     );
 
-    const mismatchedUpstreamRoot = join(fixture.repositoryRoot, '..', 'betting-win-mismatch');
-    mkdirSync(mismatchedUpstreamRoot, { recursive: true });
+    const lockPath = join(fixture.repositoryRoot, fixture.environment[BWS_UPSTREAM_LOCK_PATH_ENV] as string);
+    const outsideDirectory = mkdtempSync(join('/tmp', 'bws-service-runtime-lock-outside-'));
+    const outsideLockPath = join(outsideDirectory, 'betting-win.upstream.lock.json');
+    const symlinkPath = `${lockPath}.symlink`;
+    try {
+      copyFileSync(lockPath, outsideLockPath);
+      symlinkSync(outsideLockPath, symlinkPath);
+      assert.throws(
+        () =>
+          resolveBwsServiceRuntimeConfig({
+            ...fixture.environment,
+            [BWS_UPSTREAM_LOCK_PATH_ENV]: relative(fixture.repositoryRoot, symlinkPath),
+          }, fixture.repositoryRoot),
+        /must stay within the BWS repository root/,
+      );
+    } finally {
+      rmSync(symlinkPath, { force: true });
+      rmSync(outsideDirectory, { force: true, recursive: true });
+    }
+
+    const tamperedLock = JSON.parse(readFileSync(lockPath, 'utf-8')) as Record<string, unknown>;
+    tamperedLock.commitSha = '0'.repeat(40);
+    writeFileSync(lockPath, `${JSON.stringify(tamperedLock, null, 2)}\n`, 'utf-8');
     assert.throws(
-      () =>
-        resolveBwsServiceRuntimeConfig({
-          ...fixture.environment,
-          BETTING_WIN_REPO_PATH: mismatchedUpstreamRoot,
-        }, fixture.repositoryRoot),
-      /BETTING_WIN_REPO_PATH to match the upstream lock repositoryPath exactly/,
+      () => resolveBwsServiceRuntimeConfig(fixture.environment, fixture.repositoryRoot),
+      /betting-win upstream lock does not match the current verified checkout/,
     );
   } finally {
     fixture.dispose();
@@ -292,23 +308,25 @@ function createRuntimeFixture(): {
   readonly dispose: () => void;
   readonly environment: BwsServiceRuntimeEnvironment;
   readonly repositoryRoot: string;
+  readonly upstreamRoot: string;
 } {
-  const root = mkdtempSync(join(tmpdir(), 'bws-service-runtime-'));
-  const repositoryRoot = join(root, 'betting-win-surebet');
-  const upstreamRoot = join(root, 'betting-win');
-  mkdirSync(join(repositoryRoot, 'config'), { recursive: true });
-  mkdirSync(upstreamRoot, { recursive: true });
-  writeFileSync(
-    join(repositoryRoot, 'config', 'betting-win.upstream.lock.json'),
-    `${JSON.stringify(sampleUpstreamLock(upstreamRoot), null, 2)}\n`,
-    'utf-8',
-  );
+  mkdirSync(join(REPO_ROOT, 'artifacts'), { recursive: true });
+  const root = mkdtempSync(join(REPO_ROOT, 'artifacts', 'bws-service-runtime-'));
+  const repositoryRoot = REPO_ROOT;
+  const sourceLockPath = join(REPO_ROOT, 'config', 'betting-win.upstream.lock.json');
+  const sourceLock = JSON.parse(readFileSync(sourceLockPath, 'utf-8')) as { readonly repositoryPath?: unknown };
+  if (typeof sourceLock.repositoryPath !== 'string' || sourceLock.repositoryPath.trim().length === 0) {
+    throw new Error('config/betting-win.upstream.lock.json must contain repositoryPath for service runtime tests.');
+  }
+  const upstreamRoot = sourceLock.repositoryPath;
+  const fixtureLockPath = join(root, 'betting-win.upstream.lock.json');
+  copyFileSync(sourceLockPath, fixtureLockPath);
   return {
     dispose: () => rmSync(root, { force: true, recursive: true }),
     environment: {
       BETTING_WIN_REPO_PATH: upstreamRoot,
       [BWS_API_PORT_ENV]: '4312',
-      [BWS_UPSTREAM_LOCK_PATH_ENV]: 'config/betting-win.upstream.lock.json',
+      [BWS_UPSTREAM_LOCK_PATH_ENV]: relative(repositoryRoot, fixtureLockPath),
       [BWS_WORKER_ID_ENV]: 'worker-bws-500',
       [BWS_WORKER_LEASE_DURATION_MS_ENV]: '30000',
       [BWS_WORKER_QUEUE_NAME_ENV]: 'private-paper',
@@ -322,34 +340,8 @@ function createRuntimeFixture(): {
       SUREBET_PG_USER: 'surebet_user',
     },
     repositoryRoot,
+    upstreamRoot,
   };
-}
-
-function sampleUpstreamLock(repositoryPath: string = '/tmp/betting-win'): BettingWinUpstreamLock {
-  return Object.freeze({
-    schema: 'betting-win-surebet-upstream-lock-v1',
-    repository: 'betting-win',
-    repositoryPath,
-    commitSha: '1'.repeat(40),
-    gitTreeSha: '2'.repeat(40),
-    sourceView: 'committed_git_head',
-    packageVersion: '0.48.0',
-    trackedTreeListingSha256: '3'.repeat(64),
-    sourceFingerprintAlgorithm: 'sha256_git_ls_tree_r_full_tree_head_v1',
-    contractSchema: 'betting-win.strategy-export.v1',
-    contractAlias: 'betting-win-strategy-export.v1',
-    surebetProfile: 'surebet_standard_binary_v0',
-    verifiedAt: TEST_TIMESTAMP,
-    packageVersions: Object.freeze({
-      '@betting-win/provider-collection': '0.48.0',
-    }),
-    capabilities: Object.freeze([
-      'exportHistoricalBundle',
-      'getHistoricalQuotes',
-      'getProviderGenerations',
-      'inspectSourceLineage',
-    ]),
-  });
 }
 
 async function listen(server: ReturnType<typeof createServer>): Promise<void> {

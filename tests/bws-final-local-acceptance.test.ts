@@ -267,7 +267,7 @@ test('final local acceptance manifest binds stage results, soak evidence, and ex
 
     assert.equal(result.schema, 'bws.final_local_acceptance.v1');
     assert.equal(result.release.semanticFingerprint, releaseSemanticFingerprint);
-    assert.equal(result.externalRuntimeCampaign.selectedMode, 'export');
+    assert.equal(result.externalRuntimeCampaign.selectedMode, 'api');
     assert.equal(result.cleanup.verified, true);
     assert.equal(existsSync(outputFile), true);
   } finally {
@@ -839,7 +839,7 @@ function sampleExternalRuntimeCampaignDocument(releaseSemanticFingerprint: strin
       executionEnabled: false,
       providerConnections: 'disabled',
       runtimeMode: 'paper',
-      selectedMode: 'export',
+      selectedMode: 'api',
     },
     release: {
       semanticFingerprint: releaseSemanticFingerprint,

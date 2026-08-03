@@ -15,8 +15,8 @@ export async function runBwsPaperRuntimeEvidenceCli(
   }
 
   const outputPath = readRequiredOption(argv, '--output');
-  const maxDurationMs = Number.parseInt(readRequiredOption(argv, '--max-duration-ms'), 10);
-  const intervalMs = Number.parseInt(readRequiredOption(argv, '--interval-ms'), 10);
+  const maxDurationMs = parsePositiveSafeIntegerOption(argv, '--max-duration-ms');
+  const intervalMs = parsePositiveSafeIntegerOption(argv, '--interval-ms');
   const keepMonitoringWhenReady = argv.includes('--keep-monitoring-when-ready');
   const result = await writeBwsPaperRuntimeEvidence({
     intervalMs,
@@ -34,12 +34,24 @@ export function printBwsPaperRuntimeEvidenceHelp(
 ): void {
   stream.write(
     [
-      'Usage: node dist/packages/bootstrap/src/cli/bws-paper-runtime-evidence.js --output <repo-relative-path> --max-duration-ms <positive-int> --interval-ms <positive-int> [--keep-monitoring-when-ready]',
+      'Usage: node dist/packages/bootstrap/src/cli/bws-paper-runtime-evidence.js --output <repo-relative-path> --max-duration-ms <positive-safe-int> --interval-ms <positive-safe-int> [--keep-monitoring-when-ready]',
       '',
       'Builds strict local-only runtime evidence for BWS paper evaluation by attaching to or starting the validated repo-owned full stack, collecting bounded lifecycle and diagnostics observations, and stopping only the stack instance this command started.',
       'Required environment includes BETTING_WIN_REPO_PATH, BWS_UPSTREAM_LOCK_PATH, BWS_UPSTREAM_API_BASE_URL, BWS_UPSTREAM_API_CONTRACT_VERSION, BWS_UPSTREAM_API_TIMEOUT_MS, BWS_PRIVATE_PAPER_SCHEDULE_PATH, BWS_API_PORT, BWS_WORKER_ID, BWS_WORKER_QUEUE_NAME, BWS_WORKER_LEASE_DURATION_MS, SUREBET_RUNTIME_MODE=paper, SUREBET_PROVIDER_CONNECTIONS=disabled, SUREBET_EXECUTION_ENABLED=false, SUREBET_PG_DATABASE, SUREBET_PG_USER, SUREBET_PG_PORT, and exactly one of SUREBET_PG_HOST or SUREBET_PG_SOCKET_DIRECTORY.',
     ].join('\n'),
   );
+}
+
+function parsePositiveSafeIntegerOption(argv: readonly string[], name: string): number {
+  const rawValue = readRequiredOption(argv, name);
+  if (!/^[0-9]+$/.test(rawValue)) {
+    throw new Error(`${name} must be a positive safe integer.`);
+  }
+  const parsed = Number.parseInt(rawValue, 10);
+  if (!Number.isSafeInteger(parsed) || parsed <= 0) {
+    throw new Error(`${name} must be a positive safe integer.`);
+  }
+  return parsed;
 }
 
 function readRequiredOption(argv: readonly string[], name: string): string {

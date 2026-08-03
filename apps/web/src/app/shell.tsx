@@ -83,7 +83,7 @@ function toEvidenceScope(draft: EvidenceScopeDraft): BwsOperatorCockpitPinnedExp
     ...(draft.exportId.trim().length === 0 ? {} : { exportId: draft.exportId.trim() }),
     ...(draft.importRunId.trim().length === 0 ? {} : { importRunId: draft.importRunId.trim() }),
     ...(draft.providerId.trim().length === 0 ? {} : { providerId: draft.providerId.trim() }),
-    ...(draft.sourceSha256.trim().length === 0 ? {} : { sourceSha256: draft.sourceSha256.trim() }),
+    ...(draft.sourceSha256.trim().length === 0 ? {} : { sourceSha256: draft.sourceSha256 }),
     ...(draft.upstreamLockRecordId.trim().length === 0 ? {} : { upstreamLockRecordId: draft.upstreamLockRecordId.trim() }),
   });
 }

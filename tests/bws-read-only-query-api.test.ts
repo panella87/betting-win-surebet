@@ -72,6 +72,54 @@ test('BWS read-only query service fails closed on missing provenance expansion, 
   });
   assert.equal(pageOverflow.ok, false);
   assert.equal(pageOverflow.blockers[0]?.code, 'BWS_QUERY_PAGE_SIZE_EXCEEDED');
+
+  const uppercaseShaFilter = service.value.queryStrategyLedger({
+    expand: 'provenance',
+    filters: {
+      acceptanceState: 'accepted_local_evidence',
+      runKind: 'deterministic_standard_binary_backtest',
+      sourceManifestHash: 'A'.repeat(64),
+    },
+    pageSize: 1,
+  });
+  assert.equal(uppercaseShaFilter.ok, false);
+  assert.equal(uppercaseShaFilter.blockers[0]?.code, 'BWS_QUERY_FILTER_VALUE_INVALID');
+
+  const whitespaceShaFilter = service.value.queryStrategyLedger({
+    expand: 'provenance',
+    filters: {
+      acceptanceState: 'accepted_local_evidence',
+      runKind: 'deterministic_standard_binary_backtest',
+      sourceManifestHash: ` ${'a'.repeat(64)} `,
+    },
+    pageSize: 1,
+  });
+  assert.equal(whitespaceShaFilter.ok, false);
+  assert.equal(whitespaceShaFilter.blockers[0]?.code, 'BWS_QUERY_FILTER_VALUE_INVALID');
+
+  const acceptingService = createBwsReadOnlyQueryService({
+    ...createStubDependencies(),
+    strategyLedger: Object.freeze({
+      list() {
+        return Object.freeze([]);
+      },
+    }),
+  }, {
+    generatedAt: () => TEST_TIMESTAMP,
+    maxPageSize: 50,
+  });
+  assert.equal(acceptingService.ok, true);
+
+  const lowercaseShaFilter = acceptingService.value.queryStrategyLedger({
+    expand: 'provenance',
+    filters: {
+      acceptanceState: 'accepted_local_evidence',
+      runKind: 'deterministic_standard_binary_backtest',
+      sourceManifestHash: 'a'.repeat(64),
+    },
+    pageSize: 1,
+  });
+  assert.equal(lowercaseShaFilter.ok, true);
 });
 
 test('BWS read-only query service fails closed on missing private-paper runtime cycle acceptance scope', () => {
@@ -235,6 +283,18 @@ test('BWS read-only query HTTP handler applies security headers and returns fail
     };
     assert.equal(body.ok, false);
     assert.equal(body.error.code, 'BWS_QUERY_EXPANSION_REQUIRED');
+
+    const lowercaseSha = 'a'.repeat(64);
+    const whitespaceShaResponse = await fetch(
+      `http://127.0.0.1:${getServerPort(server)}/api/read-only/strategy-ledger?expand=provenance&acceptanceState=accepted_local_evidence&runKind=deterministic_standard_binary_backtest&sourceManifestHash=${encodeURIComponent(` ${lowercaseSha} `)}&pageSize=1`,
+    );
+    assert.equal(whitespaceShaResponse.status, 400);
+    const whitespaceShaBody = await whitespaceShaResponse.json() as {
+      readonly error: { readonly code: string };
+      readonly ok: boolean;
+    };
+    assert.equal(whitespaceShaBody.ok, false);
+    assert.equal(whitespaceShaBody.error.code, 'BWS_QUERY_FILTER_VALUE_INVALID');
   } finally {
     server.close();
     await once(server, 'close');

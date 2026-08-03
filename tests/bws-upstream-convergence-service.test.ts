@@ -453,7 +453,7 @@ function createServiceFixture(): {
       return Object.freeze({
         ...baseEnvironment,
         [BWS_UPSTREAM_MODE_ENV]: 'api',
-        [BWS_UPSTREAM_API_BASE_URL_ENV]: 'http://127.0.0.1:4312',
+        [BWS_UPSTREAM_API_BASE_URL_ENV]: 'http://127.0.0.1:4301',
         [BWS_UPSTREAM_API_CHECKPOINT_ID_ENV]: 'checkpoint-api-001',
         [BWS_UPSTREAM_API_CONTRACT_VERSION_ENV]: '1.0.0',
         [BWS_UPSTREAM_API_MAX_PAGES_PER_RESOURCE_ENV]: '2',
@@ -652,7 +652,7 @@ function createApiServiceConfig(
       user: 'surebet',
     }),
     query: Object.freeze({
-      baseUrl: 'http://127.0.0.1:4312',
+      baseUrl: 'http://127.0.0.1:4301',
       contractVersion: '1.0.0',
       maxPagesPerResource: 2,
       pageSize: 10,

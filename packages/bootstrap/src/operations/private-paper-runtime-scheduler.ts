@@ -1,5 +1,5 @@
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { readFileSync, realpathSync } from 'node:fs';
+import { isAbsolute, relative, resolve } from 'node:path';
 import {
   SurebetImportRunRepository,
   SurebetPinnedStrategyExportRepository,
@@ -128,9 +128,9 @@ export function resolveBwsPrivatePaperSchedulerConfig(
   repositoryRoot: string = process.cwd(),
 ): BwsPrivatePaperSchedulerConfig {
   const requestedMode = environment[BWS_UPSTREAM_MODE_ENV];
-  if (requestedMode !== 'api' && requestedMode !== 'export') {
+  if (requestedMode !== 'api') {
     throw new Error(
-      `${BWS_UPSTREAM_MODE_ENV} must be exactly api or export for the bounded private-paper scheduler; mode fallback remains forbidden.`,
+      `${BWS_UPSTREAM_MODE_ENV} must be exactly api for the bounded private-paper scheduler; export mode is retired for BWS-600 runtime evidence.`,
     );
   }
   const resolvedRepositoryRoot = resolve(repositoryRoot);
@@ -148,6 +148,11 @@ export function resolveBwsPrivatePaperSchedulerConfig(
   const manifest = parseBwsPrivatePaperScheduleManifest(manifestContents, manifestPath);
   if (!manifest.ok) {
     throw new Error(manifest.blockers.map((blocker) => blocker.message).join(' '));
+  }
+  if (manifest.value.mode !== 'api') {
+    throw new Error(
+      `${BWS_PRIVATE_PAPER_SCHEDULE_PATH_ENV} mode must be exactly api for the bounded private-paper scheduler; export mode is retired for BWS-600 runtime evidence.`,
+    );
   }
   if (manifest.value.mode !== requestedMode) {
     throw new Error(
@@ -243,6 +248,13 @@ export async function runBwsPrivatePaperSchedulerPass(
   request: RunBwsPrivatePaperSchedulerPassRequest = {},
 ): Promise<BoundaryResult<BwsPrivatePaperSchedulerPassResult>> {
   const config = request.config ?? resolveBwsPrivatePaperSchedulerConfig(request.environment, request.repositoryRoot);
+  if (isRetiredExportSchedulerConfig(config)) {
+    return blocked(
+      'BWS_PRIVATE_PAPER_SCHEDULER_EXPORT_MODE_RETIRED',
+      'BWS private-paper scheduler requires API-only upstream mode; export mode is retired for BWS-600 runtime evidence.',
+      'Explicit API-mode private-paper scheduler configuration.',
+    );
+  }
   const lockRecordId = buildUpstreamLockRecordId(config.upstream.upstream.lock.commitSha, config.upstream.upstream.lock.gitTreeSha);
   const schedulerCheckpoints = request.schedulerCheckpoints
     ?? new SurebetPrivatePaperRuntimeSchedulerCheckpointRepository(config.persistence);
@@ -366,6 +378,10 @@ export async function runBwsPrivatePaperSchedulerPass(
       schedulerCheckpoints,
     ),
   );
+}
+
+function isRetiredExportSchedulerConfig(config: BwsPrivatePaperSchedulerConfig): boolean {
+  return config.mode === 'export';
 }
 
 export function parseBwsPrivatePaperScheduleManifest(
@@ -882,8 +898,10 @@ async function defaultRunUpstreamExportConvergencePass(
 }
 
 function resolveRepositoryFile(repositoryRoot: string, value: string): string {
-  const resolved = resolve(repositoryRoot, value);
-  if (!resolved.startsWith(repositoryRoot)) {
+  const resolvedRoot = realpathSync(repositoryRoot);
+  const resolved = realpathSync(resolve(resolvedRoot, value));
+  const relativePath = relative(resolvedRoot, resolved);
+  if (relativePath.length === 0 || relativePath.startsWith('..') || isAbsolute(relativePath)) {
     throw new Error(`${BWS_PRIVATE_PAPER_SCHEDULE_PATH_ENV} must resolve inside the repository root.`);
   }
   return resolved;

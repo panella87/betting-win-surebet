@@ -11,8 +11,11 @@ import {
 import { dirname, join, relative, resolve } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
 import { sha256Hex } from '../../../persistence/src/index.js';
-import { readBettingWinUpstreamLock, type BettingWinUpstreamLock } from '../../../upstream/src/index.js';
-import { validatePinnedBettingWinStrategyExportIntake } from '../adapters/betting-win-strategy-export-intake.js';
+import {
+  readBettingWinUpstreamLock,
+  verifyBettingWinUpstreamLock,
+  type BettingWinUpstreamLock,
+} from '../../../upstream/src/index.js';
 import { registerBwsEvidenceArtifact } from './observability.js';
 import type {
   BwsDatabaseBackupManifest,
@@ -41,6 +44,7 @@ const UPSTREAM_LOCK_RELEASE_PATH = 'config/betting-win.upstream.lock.json' as co
 const LOOPBACK_HOST = '127.0.0.1' as const;
 const LOOPBACK_HOSTS = new Set(['127.0.0.1', '::1', '[::1]', 'localhost']);
 const LOOPBACK_AUTHORITY_HOST = 'loopback';
+const IPV4_MAPPED_IPV6_LOOPBACK_HOSTS = new Set(['[::ffff:7f00:1]', '[::ffff:127.0.0.1]', '::ffff:7f00:1', '::ffff:127.0.0.1']);
 const RELEASE_REQUIRED_CHECK = 'non_mutating_preflight_passed' as const;
 const CANONICAL_SOAK_DURATION_MS = 7_200_000;
 const SENSITIVE_KEY_PATTERN = /credential|mnemonic|passphrase|password|private[_ -]?key|secret|seed|token/i;
@@ -222,7 +226,6 @@ export interface CreateBwsExternalRuntimeCampaignManifestRequest {
       readonly checkpointId: string;
       readonly contractVersion: string;
       readonly expectedUpstreamLockFingerprint: string;
-      readonly inspectContract: boolean;
       readonly maxPagesPerResource: number;
       readonly mode: 'api';
       readonly pageSize: number;
@@ -286,7 +289,13 @@ export async function createBwsExternalRuntimeCampaignManifest(
   );
 
   const upstreamLockPath = resolve(releaseDirectory, requireNonEmptyString(environment.get('BWS_UPSTREAM_LOCK_PATH'), 'BWS_UPSTREAM_LOCK_PATH'));
-  const upstreamLock = readBettingWinUpstreamLock(upstreamLockPath, releaseDirectory);
+  const upstreamLock = verifyBettingWinUpstreamLock(
+    readBettingWinUpstreamLock(upstreamLockPath, releaseDirectory),
+    {
+      bettingWinRepoPath: requireNonEmptyString(environment.get('BETTING_WIN_REPO_PATH'), 'BETTING_WIN_REPO_PATH'),
+      repositoryRoot,
+    },
+  );
   const upstreamLockFingerprint = stableObjectFingerprint(upstreamLock);
   if (expectedUpstreamLockFingerprint !== upstreamLockFingerprint) {
     throw new Error('The operator-selected upstream lock fingerprint does not match the release-bundled upstream lock.');
@@ -440,6 +449,7 @@ async function validateApiInput(
   const retryBackoffMs = requirePositiveInteger(input.retryBackoffMs, 'selectedInput.retryBackoffMs');
 
   requireModeSpecificEnvironmentPresence(environment, 'api');
+  ensureApiBaseUrlDoesNotTargetLocalBwsApi(apiBaseUrl, environment);
   validateApiEnvironmentAlignment(environment, {
     apiBaseUrl,
     checkpointId,
@@ -450,7 +460,6 @@ async function validateApiInput(
     retryLimit,
     timeoutMs,
   });
-  ensureApiBaseUrlDoesNotTargetLocalBwsApi(apiBaseUrl, environment);
 
   const manifestBase: Extract<BwsExternalRuntimeCampaignSelectedInput, { readonly mode: 'api' }> = Object.freeze({
     apiBaseUrl,
@@ -463,10 +472,6 @@ async function validateApiInput(
     retryLimit,
     timeoutMs,
   });
-
-  if (input.inspectContract !== true) {
-    return manifestBase;
-  }
 
   const apiContractPath = input.apiContractPath === undefined
     ? '/contract'
@@ -490,54 +495,10 @@ function validateExportInput(
   selectedMode: ExternalRuntimeMode,
   repositoryRoot: string,
 ): Extract<BwsExternalRuntimeCampaignSelectedInput, { readonly mode: 'export' }> {
-  if (selectedMode !== 'export') {
-    throw new Error('External runtime preflight forbids export input when the private environment selects api mode.');
-  }
-  const upstreamLock = readBettingWinUpstreamLock(join(repositoryRoot, 'config', 'betting-win.upstream.lock.json'), repositoryRoot);
-  const intake = validatePinnedBettingWinStrategyExportIntake({
-    expectedSha256: requireSha256(input.expectedSha256, 'selectedInput.expectedSha256'),
-    exportPath: requireNonEmptyString(input.exportPath, 'selectedInput.exportPath'),
-    repositoryRoot,
-    upstreamLock,
-  });
-  if (!intake.ok) {
-    throw new Error(intake.blockers.map((entry) => entry.message).join(' '));
-  }
-
-  const providerGenerationIds = freezeNormalizedTokenArray(
-    input.providerGenerationIds,
-    'selectedInput.providerGenerationIds',
-  );
-  const sourceLineageRecordIds = freezeNormalizedTokenArray(
-    input.sourceLineageRecordIds,
-    'selectedInput.sourceLineageRecordIds',
-  );
-  if (!sameStringArray(providerGenerationIds, intake.value.providerGenerationIds)) {
-    throw new Error('External runtime preflight export input provider generation ids must match the immutable export exactly.');
-  }
-  if (!sameStringArray(sourceLineageRecordIds, intake.value.sourceLineageRecordIds)) {
-    throw new Error('External runtime preflight export input source lineage ids must match the immutable export exactly.');
-  }
-  if (requireNonEmptyString(input.contractSchema, 'selectedInput.contractSchema') !== intake.value.contractSchema) {
-    throw new Error('External runtime preflight export input contractSchema must match the immutable export exactly.');
-  }
-  if (requireNonEmptyString(input.contractAlias, 'selectedInput.contractAlias') !== intake.value.contractAlias) {
-    throw new Error('External runtime preflight export input contractAlias must match the immutable export exactly.');
-  }
-  if (requireNonEmptyString(input.surebetProfile, 'selectedInput.surebetProfile') !== intake.value.surebetProfile) {
-    throw new Error('External runtime preflight export input surebetProfile must match the immutable export exactly.');
-  }
-
-  return Object.freeze({
-    contractAlias: intake.value.contractAlias,
-    contractSchema: intake.value.contractSchema,
-    expectedSha256: intake.value.sourceSha256,
-    exportPath: intake.value.exportPath,
-    mode: 'export',
-    providerGenerationIds,
-    sourceLineageRecordIds,
-    surebetProfile: intake.value.surebetProfile,
-  });
+  void input;
+  void selectedMode;
+  void repositoryRoot;
+  throw new Error('External runtime preflight is API-only; export input is retired for BWS-600 runtime evidence.');
 }
 
 function validateMigrationStatus(migrationStatus: DatabaseMigrationStatusShape): void {
@@ -925,6 +886,12 @@ function normalizeContractPath(path: string): string {
   if (!trimmed.startsWith('/')) {
     throw new Error('selectedInput.apiContractPath must begin with /.');
   }
+  if (trimmed.startsWith('//')) {
+    throw new Error('selectedInput.apiContractPath must be a path-only value and must not override the API authority.');
+  }
+  if (trimmed.includes('?') || trimmed.includes('#')) {
+    throw new Error('selectedInput.apiContractPath must not include query or fragment components.');
+  }
   return trimmed;
 }
 
@@ -948,7 +915,7 @@ function requireHttpUrl(value: string, label: string): string {
   if (parsed.search.length > 0 || parsed.hash.length > 0) {
     throw new Error(`${label} must not include query or fragment components.`);
   }
-  if (!LOOPBACK_HOSTS.has(parsed.hostname)) {
+  if (normalizeAuthorityHostname(parsed.hostname) !== LOOPBACK_AUTHORITY_HOST) {
     throw new Error(`${label} must stay on an explicit loopback host.`);
   }
   return parsed.toString().replace(/\/$/, '');
@@ -972,7 +939,10 @@ function sameAuthority(left: string, right: string): boolean {
 }
 
 function normalizeAuthorityHostname(hostname: string): string {
-  return LOOPBACK_HOSTS.has(hostname) ? LOOPBACK_AUTHORITY_HOST : hostname;
+  const normalized = hostname.toLowerCase();
+  return LOOPBACK_HOSTS.has(normalized) || IPV4_MAPPED_IPV6_LOOPBACK_HOSTS.has(normalized)
+    ? LOOPBACK_AUTHORITY_HOST
+    : normalized;
 }
 
 function resolvedPort(url: URL): string {
@@ -1043,8 +1013,8 @@ function defaultNow(): string {
 
 function requireSelectedMode(environment: ReadonlyMap<string, string>): ExternalRuntimeMode {
   const mode = environment.get('BWS_UPSTREAM_MODE');
-  if (mode !== 'api' && mode !== 'export') {
-    throw new Error('External runtime preflight requires BWS_UPSTREAM_MODE to be exactly api or export.');
+  if (mode !== 'api') {
+    throw new Error('External runtime preflight requires BWS_UPSTREAM_MODE=api; export mode is retired for BWS-600 runtime evidence.');
   }
   return mode;
 }
@@ -1072,8 +1042,8 @@ function requireNonEmptyString(value: unknown, label: string): string {
 }
 
 function requirePositiveInteger(value: unknown, label: string): number {
-  if (typeof value !== 'number' || !Number.isInteger(value) || value <= 0) {
-    throw new Error(`${label} must be a positive integer.`);
+  if (typeof value !== 'number' || !Number.isSafeInteger(value) || value <= 0) {
+    throw new Error(`${label} must be a positive safe integer.`);
   }
   return value;
 }
@@ -1081,9 +1051,13 @@ function requirePositiveInteger(value: unknown, label: string): number {
 function requirePositiveIntegerString(value: unknown, label: string): number {
   const text = requireNonEmptyString(value, label);
   if (!POSITIVE_INTEGER_PATTERN.test(text)) {
-    throw new Error(`${label} must be a base-10 positive integer.`);
+    throw new Error(`${label} must be a base-10 positive safe integer.`);
   }
-  return Number.parseInt(text, 10);
+  const parsed = Number.parseInt(text, 10);
+  if (!Number.isSafeInteger(parsed) || parsed <= 0) {
+    throw new Error(`${label} must be a base-10 positive safe integer.`);
+  }
+  return parsed;
 }
 
 function requireSha256(value: unknown, label: string): string {
@@ -1100,33 +1074,6 @@ function requireToken(value: unknown, label: string): string {
     throw new Error(`${label} must use only ASCII letters, digits, dot, underscore, colon, slash, or hyphen.`);
   }
   return text;
-}
-
-function freezeNormalizedTokenArray(values: readonly string[], label: string): readonly string[] {
-  if (!Array.isArray(values) || values.length === 0) {
-    throw new Error(`${label} must be a non-empty array.`);
-  }
-  const normalized = values.map((value, index) => requireToken(value, `${label}[${index}]`));
-  const duplicates = new Set<string>();
-  for (const token of normalized) {
-    if (duplicates.has(token)) {
-      throw new Error(`${label} must not contain duplicates.`);
-    }
-    duplicates.add(token);
-  }
-  return Object.freeze(normalized);
-}
-
-function sameStringArray(left: readonly string[], right: readonly string[]): boolean {
-  if (left.length !== right.length) {
-    return false;
-  }
-  for (let index = 0; index < left.length; index += 1) {
-    if (left[index] !== right[index]) {
-      return false;
-    }
-  }
-  return true;
 }
 
 function isWithinResolved(parent: string, candidate: string): boolean {
