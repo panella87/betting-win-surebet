@@ -6,6 +6,12 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 SKIP_DIRS = {'.git', 'node_modules', 'dist', 'coverage', 'artifacts'}
+SCAN_INPUTS = ('src', 'tests', 'packages', 'apps', 'package.json', 'tsconfig.json')
+ALLOWED_OCCURRENCES = {
+    ('packages/bootstrap/src/operations/operator-lifecycle.ts', 'direct database environment'),
+    ('packages/persistence/src/psql.ts', 'direct database environment'),
+    ('packages/bootstrap/src/operations/database-lifecycle.ts', 'direct database environment'),
+}
 
 def fail(message: str) -> None:
     print(f"ERROR: {message}", file=sys.stderr)
@@ -35,11 +41,16 @@ PATTERNS = [
     (re.compile(r'ALTER\s+TABLE\s+core\.', re.I), 'core table migration'),
 ]
 
+def is_allowed_occurrence(path: Path, label: str) -> bool:
+    return (path.relative_to(ROOT).as_posix(), label) in ALLOWED_OCCURRENCES
+
 def main() -> None:
-    for path in iter_files('src','tests','package.json','tsconfig.json'):
+    for path in iter_files(*SCAN_INPUTS):
         text = read(path)
         for pattern, label in PATTERNS:
             if pattern.search(text):
+                if is_allowed_occurrence(path, label):
+                    continue
                 fail(f'{label} found in {path.relative_to(ROOT)}')
     print('validate_contract_boundary: ok')
 

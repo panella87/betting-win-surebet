@@ -252,8 +252,41 @@ function createTestRepositoryRoot(t: TestContext): string {
     });
   });
   mkdirSync(join(root, 'runtime'), { recursive: true });
+  writeTestUpstreamLock(root);
   writeEvidenceIndex(root);
   return root;
+}
+
+function writeTestUpstreamLock(repositoryRoot: string): void {
+  mkdirSync(join(repositoryRoot, 'config'), { recursive: true });
+  writeFileSync(
+    join(repositoryRoot, 'config', 'betting-win.upstream.lock.json'),
+    `${JSON.stringify({
+      capabilities: [
+        'exportHistoricalBundle',
+        'getHistoricalQuotes',
+        'getProviderGenerations',
+        'inspectSourceLineage',
+      ],
+      commitSha: '1'.repeat(40),
+      contractAlias: 'betting-win-strategy-export.v1',
+      contractSchema: 'betting-win.strategy-export.v1',
+      gitTreeSha: '2'.repeat(40),
+      packageVersion: '0.48.0',
+      packageVersions: {
+        '@betting-win/provider-collection': '0.48.0',
+      },
+      repository: 'betting-win',
+      repositoryPath: '/tmp/betting-win',
+      schema: 'betting-win-surebet-upstream-lock-v1',
+      sourceFingerprintAlgorithm: 'sha256_git_ls_tree_r_full_tree_head_v1',
+      sourceView: 'committed_git_head',
+      surebetProfile: 'surebet_standard_binary_v0',
+      trackedTreeListingSha256: '3'.repeat(64),
+      verifiedAt: '2026-07-16T00:00:00.000Z',
+    }, null, 2)}\n`,
+    'utf-8',
+  );
 }
 
 function configureUpstreamApiPreflightEnvironment(
@@ -451,6 +484,7 @@ test('paper runtime evidence starts an owned stack, records ready observations, 
   assert.equal(result.stackStopDisposition, 'stopped_started_stack');
   assert.equal(result.upstreamApiPreflight?.outcome, 'passed');
   assert.equal(result.upstreamApiPreflight?.probePath, '/contract');
+  assert.equal(result.upstreamApiPreflight?.upstreamLock?.commitSha, '1'.repeat(40));
   assert.equal(result.observation.sampleCount, 1);
   assert.equal(result.observation.samples[0]?.runtimeLifecycleState, 'running');
   assert.equal(result.latestRuntimeHandoffFile, 'runtime/bws-paper-runtime-handoff/handoff.json');
@@ -502,7 +536,38 @@ test('paper runtime evidence preserves an attached stack when exact identity and
   assert.equal(result.stackOwnership, 'attached');
   assert.equal(result.stackStopDisposition, 'attached_stack_preserved');
   assert.equal(result.upstreamApiPreflight?.outcome, 'passed');
+  assert.equal(result.upstreamApiPreflight?.upstreamLock?.packageVersion, '0.48.0');
   assert.equal(statusCalls, 2);
+});
+
+test('paper runtime evidence fails fast when required upstream lock evidence is missing before lifecycle ownership is touched', async (t) => {
+  const repositoryRoot = createTestRepositoryRoot(t);
+  rmSync(join(repositoryRoot, 'config', 'betting-win.upstream.lock.json'), { force: true });
+  configureUpstreamApiPreflightEnvironment(t, { apiBaseUrl: 'http://127.0.0.1:9999' });
+  let lifecycleTouched = false;
+
+  const result = await createBwsPaperRuntimeEvidence({
+    getLifecycleStatus: async () => {
+      lifecycleTouched = true;
+      return createLifecycleStatus('running');
+    },
+    intervalMs: 1000,
+    maxDurationMs: 2000,
+    repositoryRoot,
+    startLifecycle: async () => {
+      lifecycleTouched = true;
+      throw new Error('start should not be called');
+    },
+  });
+
+  assert.equal(result.finalStatus, 'PAPER_EVALUATION_BLOCKED_RUNTIME_EVIDENCE_COLLECTION_FAILED');
+  assert.equal(result.stopReason, 'betting_win_api_unavailable');
+  assert.equal(result.collectionFailure?.stage, 'upstream_api_preflight');
+  assert.equal(result.upstreamApiPreflight?.failureClass, 'upstream_lock_invalid');
+  assert.equal(result.upstreamApiPreflight?.outcome, 'blocked');
+  assert.equal(result.upstreamApiPreflight?.upstreamLock, undefined);
+  assert.equal(result.observation.sampleCount, 0);
+  assert.equal(lifecycleTouched, false);
 });
 
 test('paper runtime evidence fails fast when the upstream API is unavailable before lifecycle ownership is touched', async (t) => {

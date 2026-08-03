@@ -16,6 +16,13 @@ const RESOURCE_ENDPOINT_PATHS = Object.freeze({
 
 type ReadOnlyQueryResource = (typeof READ_ONLY_QUERY_RESOURCES)[number];
 
+const READ_ONLY_QUERY_FILTER_KEYS = Object.freeze({
+  identity: Object.freeze(['canonicalId', 'entityType', 'provider', 'providerEntityId']),
+  quotes: Object.freeze(['marketId', 'normalizedKind', 'provider', 'providerGenerationId', 'sourceLineageRecordId', 'viewpoint']),
+  rules: Object.freeze(['marketFamilyKey', 'outcomeStructureKey', 'provider', 'ruleProfileId', 'sportId']),
+  settlement: Object.freeze(['finalityStatus', 'marketId', 'provider', 'providerGenerationId', 'sourceLineageRecordId', 'terminalState']),
+} satisfies Record<ReadOnlyQueryResource, readonly string[]>);
+
 export interface ReadOnlyQueryContractRequest {
   readonly contractVersion: string;
   readonly resource: ReadOnlyQueryResource;
@@ -410,6 +417,13 @@ function validateResourceFilters<TResource extends ReadOnlyQueryResource>(
     );
   }
   for (const [key, value] of Object.entries(filters)) {
+    if (!READ_ONLY_QUERY_FILTER_KEYS[resource].includes(key)) {
+      return blocked(
+        'QUERY_FILTER_UNSUPPORTED',
+        `Read-only query filter ${key} is not supported for ${resource}.`,
+        `Supported read-only query filter key for ${resource}.`,
+      );
+    }
     if (typeof value !== 'string' || value.trim().length === 0) {
       return blocked(
         'QUERY_FILTER_VALUE_INVALID',

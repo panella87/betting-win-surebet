@@ -43,6 +43,36 @@ test('read-only query client rejects invalid base URLs and explicit credentialed
   assert.equal(credentialedUrl.blockers[0]?.code, 'QUERY_BASE_URL_CREDENTIALS_FORBIDDEN');
 });
 
+test('read-only query client rejects unsupported per-resource filter keys before fetch', async () => {
+  let fetchTouched = false;
+  const client = createReadOnlyQueryApiClient({
+    baseUrl: 'http://127.0.0.1:9999/read-only',
+    contractVersion: '1.0.0',
+    fetchImplementation: async () => {
+      fetchTouched = true;
+      throw new Error('fetch should not be called');
+    },
+    maxPageSize: 50,
+    retryBackoffMs: 5,
+    retryLimit: 1,
+    timeoutMs: 25,
+    upstreamLock: sampleUpstreamLock(),
+  });
+  assert.equal(client.ok, true);
+
+  const result = await client.value.queryIdentity({
+    filters: {
+      canonicalId: 'market-001',
+      unsupportedSecretToken: 'abc',
+    } as never,
+    pageSize: 1,
+  });
+
+  assert.equal(result.ok, false);
+  assert.equal(result.blockers[0]?.code, 'QUERY_FILTER_UNSUPPORTED');
+  assert.equal(fetchTouched, false);
+});
+
 test('read-only query client negotiates identity queries and validates pagination against loopback fixtures', async () => {
   await withLoopbackServer(async (baseUrl) => {
     const client = createClient(baseUrl);

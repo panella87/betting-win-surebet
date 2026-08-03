@@ -69,7 +69,8 @@ export interface BwsPaperRuntimeEvidenceUpstreamApiPreflight {
     | 'http_status'
     | 'invalid_response'
     | 'invalid_url'
-    | 'network_error';
+    | 'network_error'
+    | 'upstream_lock_invalid';
   readonly httpStatus?: number;
   readonly localRuntimeApiBaseUrl: string;
   readonly noExportFallbackUsed: true;
@@ -494,7 +495,6 @@ async function runBettingWinUpstreamApiPreflight(
     ),
   );
   const localRuntimeApiBaseUrl = buildLocalRuntimeApiBaseUrl(environment);
-  const upstreamLock = readOptionalUpstreamLock(repositoryRoot, environment);
   const contractVersion = requireNonEmptyString(
     environment[PAPER_RUNTIME_UPSTREAM_API_CONTRACT_VERSION_ENV],
     PAPER_RUNTIME_UPSTREAM_API_CONTRACT_VERSION_ENV,
@@ -512,7 +512,7 @@ async function runBettingWinUpstreamApiPreflight(
       failureClass: 'invalid_url',
       localRuntimeApiBaseUrl,
       timeoutMs,
-      upstreamLock,
+      upstreamLock: undefined,
     });
   }
 
@@ -523,7 +523,7 @@ async function runBettingWinUpstreamApiPreflight(
       failureClass: 'invalid_url',
       localRuntimeApiBaseUrl,
       timeoutMs,
-      upstreamLock,
+      upstreamLock: undefined,
     });
   }
   if (parsedBaseUrl.username.length > 0 || parsedBaseUrl.password.length > 0) {
@@ -533,7 +533,7 @@ async function runBettingWinUpstreamApiPreflight(
       failureClass: 'invalid_url',
       localRuntimeApiBaseUrl,
       timeoutMs,
-      upstreamLock,
+      upstreamLock: undefined,
     });
   }
   if (parsedBaseUrl.search.length > 0 || parsedBaseUrl.hash.length > 0) {
@@ -543,7 +543,7 @@ async function runBettingWinUpstreamApiPreflight(
       failureClass: 'invalid_url',
       localRuntimeApiBaseUrl,
       timeoutMs,
-      upstreamLock,
+      upstreamLock: undefined,
     });
   }
   if (!LOOPBACK_HOSTS.has(parsedBaseUrl.hostname)) {
@@ -553,7 +553,7 @@ async function runBettingWinUpstreamApiPreflight(
       failureClass: 'invalid_url',
       localRuntimeApiBaseUrl,
       timeoutMs,
-      upstreamLock,
+      upstreamLock: undefined,
     });
   }
   if (sameAuthorityAsLocalRuntimeApi(parsedBaseUrl, localRuntimeApiBaseUrl)) {
@@ -565,7 +565,21 @@ async function runBettingWinUpstreamApiPreflight(
       failureClass: 'bws_local_api_conflict',
       localRuntimeApiBaseUrl,
       timeoutMs,
-      upstreamLock,
+      upstreamLock: undefined,
+    });
+  }
+
+  let upstreamLock: Readonly<{ readonly commitSha: string; readonly packageVersion: string }>;
+  try {
+    upstreamLock = readRequiredUpstreamLock(repositoryRoot, environment);
+  } catch (error) {
+    return createUpstreamApiPreflightFailure({
+      configuredBaseUrl: stripTrailingSlash(parsedBaseUrl.toString()),
+      error,
+      failureClass: 'upstream_lock_invalid',
+      localRuntimeApiBaseUrl,
+      timeoutMs,
+      upstreamLock: undefined,
     });
   }
 
@@ -760,23 +774,19 @@ function parseApiContractVersion(parsed: Record<string, unknown>): string {
   throw new Error('betting-win upstream API preflight response must contain contractVersion or version.');
 }
 
-function readOptionalUpstreamLock(
+function readRequiredUpstreamLock(
   repositoryRoot: string,
   environment: NodeJS.ProcessEnv,
-): Readonly<{ readonly commitSha: string; readonly packageVersion: string }> | undefined {
-  const configuredPath = environment[PAPER_RUNTIME_UPSTREAM_LOCK_PATH_ENV];
-  if (typeof configuredPath !== 'string' || configuredPath.trim().length === 0) {
-    return undefined;
-  }
-  try {
-    const upstreamLock = readBettingWinUpstreamLock(join(repositoryRoot, configuredPath.trim()), repositoryRoot);
-    return Object.freeze({
-      commitSha: upstreamLock.commitSha,
-      packageVersion: upstreamLock.packageVersion,
-    });
-  } catch {
-    return undefined;
-  }
+): Readonly<{ readonly commitSha: string; readonly packageVersion: string }> {
+  const configuredPath = requireNonEmptyString(
+    environment[PAPER_RUNTIME_UPSTREAM_LOCK_PATH_ENV],
+    PAPER_RUNTIME_UPSTREAM_LOCK_PATH_ENV,
+  );
+  const upstreamLock = readBettingWinUpstreamLock(join(repositoryRoot, configuredPath), repositoryRoot);
+  return Object.freeze({
+    commitSha: upstreamLock.commitSha,
+    packageVersion: upstreamLock.packageVersion,
+  });
 }
 
 function redactBoundedMessage(rawMessage: string): string {

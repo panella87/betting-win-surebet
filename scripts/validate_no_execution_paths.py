@@ -6,6 +6,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 SKIP_DIRS = {'.git', 'node_modules', 'dist', 'coverage', 'artifacts'}
+SCAN_ROOTS = ('src', 'packages', 'apps')
 
 def fail(message: str) -> None:
     print(f"ERROR: {message}", file=sys.stderr)
@@ -28,7 +29,7 @@ def iter_files(*names: str):
             if path.is_file():
                 yield path
 
-PATTERNS = [
+LEGACY_SRC_PATTERNS = [
     (re.compile(r'\bwallet\b', re.I), 'wallet path'),
     (re.compile(r'\bsigner\b', re.I), 'signer path'),
     (re.compile(r'\border(s|ing)?\b', re.I), 'order path'),
@@ -39,10 +40,25 @@ PATTERNS = [
     (re.compile(r'\breal-money\b', re.I), 'real-money path'),
 ]
 
+WORKSPACE_PATTERNS = [
+    (re.compile(r'from\s+[\'\"]([^\'\"]*(wallet|signer|order|transaction|cashout|redemption)[^\'\"]*)[\'\"]', re.I), 'execution import'),
+    (re.compile(r'import\s*\([^)]*[\'\"]([^\'\"]*(wallet|signer|order|transaction|cashout|redemption)[^\'\"]*)[\'\"]', re.I), 'execution dynamic import'),
+    (re.compile(r'require\s*\([^)]*[\'\"]([^\'\"]*(wallet|signer|order|transaction|cashout|redemption)[^\'\"]*)[\'\"]', re.I), 'execution require'),
+    (re.compile(r'\b(create|place|submit|send|execute|sign|broadcast|connect|approve|cancel)[A-Za-z0-9_]*(Order|Orders|Transaction|Transactions|Wallet|Signer|Cashout|Redemption)\b'), 'execution identifier'),
+    (re.compile(r'\b(wallet|signer|order|transaction|cashout|redemption)(Client|Provider|Service|Api|Adapter|Executor|Signer)\b', re.I), 'execution client path'),
+    (re.compile(r'\b(realMoney|real_money|real-money)\b'), 'real-money path'),
+]
+
+def patterns_for(path: Path):
+    relative = path.relative_to(ROOT)
+    if len(relative.parts) > 0 and relative.parts[0] == 'src':
+        return LEGACY_SRC_PATTERNS
+    return WORKSPACE_PATTERNS
+
 def main() -> None:
-    for path in iter_files('src'):
+    for path in iter_files(*SCAN_ROOTS):
         text = read(path)
-        for pattern, label in PATTERNS:
+        for pattern, label in patterns_for(path):
             if pattern.search(text):
                 fail(f'{label} found in executable source {path.relative_to(ROOT)}')
     print('validate_no_execution_paths: ok')
