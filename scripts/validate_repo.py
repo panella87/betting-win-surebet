@@ -246,6 +246,14 @@ def main() -> None:
             if marker not in text:
                 fail(f'{rel} missing required marker: {marker}')
 
+    automation_readme = read(ROOT / 'docs/automation/README.md')
+    for marker in [
+        '`run-autonomous-implementation.sh` is selected for the BWS-700 B1 implementation queue',
+        'not the selected route for the B1 implementation overlay',
+    ]:
+        if marker in automation_readme:
+            fail(f'docs/automation/README.md contains stale route marker: {marker}')
+
     env_example = read(ROOT / '.env.example')
     for marker in ['POSTGRES_ADDRESS=', 'POSTGRES_USER=', 'POSTGRES_PASSWORD=', 'POSTGRES_DB=']:
         if marker not in env_example:

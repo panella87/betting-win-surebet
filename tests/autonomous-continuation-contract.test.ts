@@ -10,6 +10,7 @@ test('autonomous authority records the completed BWS-700 queue and active BWS-60
   const doc = read('docs/automation/autonomous-implementation.md');
   const task = read('docs/automation/current-implementation-task.md');
   const status = read('docs/repo_status_current.md');
+  const automationReadme = read('docs/automation/README.md');
   for (const marker of [
     'BWS_FULL_PLATFORM_IMPLEMENTATION_V1', 'backlog/bws_full_implementation.csv',
     'backlog/bws_remaining_safe_local_map.csv', 'BWS-100', 'BWS-589', 'BWS-590', 'BWS-599',
@@ -32,4 +33,10 @@ test('autonomous authority records the completed BWS-700 queue and active BWS-60
   assert.match(status, /^paper_autopilot=selected_after_bws700_dependency_ready_queue_complete$/m);
   assert.match(status, /^bws600_run_paper_autopilot=selected_for_bws600_runtime_evidence_after_upstream_api_preflight$/m);
   assert.match(status, /safe_local_terminal_gate=BWS-599/);
+  assert.match(automationReadme, /Active post-BWS-700 controller route/);
+  assert.match(automationReadme, /`run-paper-autopilot\.sh` is selected for `BWS-600` runtime evidence/);
+  assert.match(automationReadme, /`run-autonomous-implementation\.sh` is not the selected route now/);
+  assert.match(automationReadme, /truthful upstream API blocker/);
+  assert.doesNotMatch(automationReadme, /`run-autonomous-implementation\.sh` is selected for the BWS-700 B1 implementation queue/);
+  assert.doesNotMatch(automationReadme, /not the selected route for the B1 implementation overlay/);
 });

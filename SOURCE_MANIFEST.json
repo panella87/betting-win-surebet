@@ -1,7 +1,7 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-08-02T19:30:27Z",
-  "overlay": "bws83-bws700-complete-route-to-bws600-wave48",
+  "generated": "2026-08-03T09:37:14Z",
+  "overlay": "bws86-bws600-paper-route-doc-preflight-wave49",
   "files": [
     {
       "path": ".automation/README.md",
@@ -115,8 +115,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "ed694e4842007501154360f3e15157abe6fb74e3aa4a60012ae755575ea9ad19",
-      "size": 66133
+      "sha256": "ad3e1dd74d9f7ff18bdae680aaa466c668d675fc30011280f4950ee588ff55e7",
+      "size": 66728
     },
     {
       "path": "PROJECT_STATUS.md",
@@ -655,8 +655,8 @@
     },
     {
       "path": "docs/automation/README.md",
-      "sha256": "fe087691ef16c5a3f27bd7ef18d6d221c783b1f478985863ddb5a0c2e42f89c4",
-      "size": 9574
+      "sha256": "314a2dfd79a1456fab95a9e69e9af474866e112e0c200ee84add2814a82f5d3c",
+      "size": 9780
     },
     {
       "path": "docs/automation/SSH_KEY_SETUP.md",
@@ -1775,8 +1775,8 @@
     },
     {
       "path": "scripts/validate_autonomous_continuation_contract.py",
-      "sha256": "4321ccf4b0d50d55616416ffcc2b9e75ab807538ab195e1bf79b25b3a35f6529",
-      "size": 3569
+      "sha256": "881edd78af76d3c9cb1197da374ded2d9c4525b384061b30f217dc5f710cf626",
+      "size": 4347
     },
     {
       "path": "scripts/validate_autonomous_controller_contract.py",
@@ -1870,8 +1870,8 @@
     },
     {
       "path": "scripts/validate_repo.py",
-      "sha256": "ee33735e6a18f69f33e42824591ca213d4eb21f4a883ca6d19151fb3a0d3e4d2",
-      "size": 19726
+      "sha256": "8003914641167b265ac4b112ec093226d57f7bf61640bbe6ea0da9dd984924b8",
+      "size": 20110
     },
     {
       "path": "scripts/validate_shell_local_assignments.py",
@@ -2435,8 +2435,8 @@
     },
     {
       "path": "tests/autonomous-continuation-contract.test.ts",
-      "sha256": "a9fd73bbb8599ef5740644cd3d60a83187cd2c6b57d5af09240bb6cebb81da69",
-      "size": 2174
+      "sha256": "16eea0100db4077d76193f98954e5df5938fe66b6cf4312cb2386af1fa0754e2",
+      "size": 2819
     },
     {
       "path": "tests/autonomous-controller-contract.test.ts",

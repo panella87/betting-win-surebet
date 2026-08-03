@@ -1,3 +1,9 @@
+## 2026-08-03 - BWS-600 paper route doc preflight correction
+
+- Corrected `docs/automation/README.md` so the active post-BWS-700 route points to `run-paper-autopilot.sh` for the BWS-600 runtime-evidence gate instead of the completed BWS-700 implementation queue.
+- Added validation/test coverage that rejects the stale BWS-700 selected-controller wording in the active automation README.
+- Preserved the truthful external blocker: if the operator-approved betting-win read-only API is unavailable, paper evidence must stop with an upstream API blocker rather than reopen source implementation.
+
 
 ## 2026-08-02 - BWS-700 post-cycle routing reconciliation
 

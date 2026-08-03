@@ -28,6 +28,7 @@ def main() -> None:
     implementation = read('docs/automation/autonomous-implementation.md')
     task = read('docs/automation/current-implementation-task.md')
     status = read('docs/repo_status_current.md')
+    automation_readme = read('docs/automation/README.md')
 
     for marker in [
         'BWS_FULL_PLATFORM_IMPLEMENTATION_V1', 'backlog/bws_full_implementation.csv',
@@ -65,6 +66,23 @@ def main() -> None:
         'bws600_run_paper_autopilot=selected_for_bws600_runtime_evidence_after_upstream_api_preflight',
     ]:
         require(status, marker, 'docs/repo_status_current.md')
+
+
+    for marker in [
+        'Active post-BWS-700 controller route',
+        '`run-paper-autopilot.sh` is selected for `BWS-600` runtime evidence',
+        '`run-autonomous-implementation.sh` is not the selected route now',
+        'truthful upstream API blocker',
+    ]:
+        require(automation_readme, marker, 'docs/automation/README.md')
+
+    forbidden_readme_markers = [
+        '`run-autonomous-implementation.sh` is selected for the BWS-700 B1 implementation queue',
+        'not the selected route for the B1 implementation overlay',
+    ]
+    for marker in forbidden_readme_markers:
+        if marker in automation_readme:
+            fail(f'docs/automation/README.md contains stale route marker: {marker}')
 
     package = json.loads(read('package.json'))
     validate_ops = package.get('scripts', {}).get('validate:ops', '')
