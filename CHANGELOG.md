@@ -1,5 +1,11 @@
 ## 2026-08-03 - Bugfix fixture upstream-boundary validation repair
 
+## 2026-08-04 - Wave 55 upstream export convergence fixture containment repair
+
+- Repaired legacy upstream-export convergence tests so immutable export fixtures are materialized inside the temporary BWS repository root.
+- Preserved the production containment behavior that rejects pinned strategy export files outside the repository boundary.
+- Regenerated the source manifest after the test-only repair.
+
 ## 2026-08-04 - Bugfix implementation handoff return classification repair
 
 - Repaired `run-autonomous-implementation.sh --handover-bugfix-audit` so source-changing bugfix repairs with controller-managed validation passing return to the bugfix parent for same-area re-audit even when the child-authored continuation marker reports an environment-only block.

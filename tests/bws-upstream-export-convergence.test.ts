@@ -326,12 +326,15 @@ function createConvergenceFixture(entries: readonly BwsUpstreamExportSelectionEn
   mkdirSync(join(repositoryRoot, 'config'), { recursive: true });
   mkdirSync(upstreamRoot, { recursive: true });
 
+  const exportDirectory = join(repositoryRoot, 'config', 'exports');
+  mkdirSync(exportDirectory, { recursive: true });
+
   const materializedEntries = entries.map((entry) => {
     const document = createStrategyExportDocument(
       entry.expectedProviderGenerationIds[0]!,
       entry.expectedSourceLineageRecordIds[0]!,
     );
-    const exportPath = join(root, `${entry.cursor}.json`);
+    const exportPath = join(exportDirectory, `${entry.cursor}.json`);
     const expectedSha256 = writeJsonAndHash(exportPath, document);
     return Object.freeze({
       ...entry,

@@ -1,7 +1,7 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-08-04T10:01:48Z",
-  "overlay": "bws91-bugfix-implementation-return-classification-wave54-cleanup",
+  "generated": "2026-08-04T10:23:04Z",
+  "overlay": "bws93-bugfix-upstream-export-fixture-containment-wave55",
   "files": [
     {
       "path": ".automation/README.md",
@@ -115,8 +115,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "834a39969a8f06578f03e66b8dc0fe748899442e0e2a7f56812b121f0be76df0",
-      "size": 69492
+      "sha256": "67399280862066fe96f39d2381ab31405d9936a28aa9afaa30560daa0a507dfc",
+      "size": 69898
     },
     {
       "path": "PROJECT_STATUS.md",
@@ -2690,8 +2690,8 @@
     },
     {
       "path": "tests/bws-upstream-export-convergence.test.ts",
-      "sha256": "e43ad85451aaf61995945b65cceeeab573a6233c80aa0d2f46fc39406f6783b4",
-      "size": 31833
+      "sha256": "3d2f8b7346c8e8d58ee1729573f1d86ae148c03b2832948e97ab6b28173f7eda",
+      "size": 31965
     },
     {
       "path": "tests/complete-set.test.ts",
