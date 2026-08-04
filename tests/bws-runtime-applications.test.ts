@@ -28,6 +28,7 @@ import {
   type BwsServiceRuntimeConfig,
   type BwsServiceRuntimeEnvironment,
 } from '../packages/bootstrap/src/index.js';
+import { createFixtureBettingWinCheckout, writeFixtureBettingWinUpstreamLock } from './support/betting-win-fixture.js';
 const TEST_TIMESTAMP = '2026-07-15T09:15:00.000Z';
 
 test('read-only API application starts on loopback, serves readiness, and shuts down cleanly before restart', async () => {
@@ -565,7 +566,7 @@ async function createRuntimeFixture(): Promise<{
 }> {
   const root = mkdtempSync(join(tmpdir(), 'bws-runtime-applications-'));
   const repositoryRoot = join(root, 'betting-win-surebet');
-  const upstreamRoot = readCurrentUpstreamRepositoryPath();
+  const upstreamRoot = join(root, 'betting-win');
   const apiPort = await reserveLoopbackPort();
   mkdirSync(join(repositoryRoot, 'config'), { recursive: true });
   mkdirSync(join(repositoryRoot, 'schemas'), { recursive: true });
@@ -573,10 +574,13 @@ async function createRuntimeFixture(): Promise<{
     join(process.cwd(), 'schemas', 'betting-win-upstream-lock.v1.schema.json'),
     join(repositoryRoot, 'schemas', 'betting-win-upstream-lock.v1.schema.json'),
   );
-  copyFileSync(
-    join(process.cwd(), 'config', 'betting-win.upstream.lock.json'),
-    join(repositoryRoot, 'config', 'betting-win.upstream.lock.json'),
-  );
+  createFixtureBettingWinCheckout(upstreamRoot);
+  writeFixtureBettingWinUpstreamLock({
+    allowedBoundaryRoot: root,
+    repositoryRoot,
+    upstreamRoot,
+    verifiedAt: TEST_TIMESTAMP,
+  });
   createManagedCockpitBuild(repositoryRoot, `http://127.0.0.1:${String(apiPort)}`);
   return {
     dispose: () => rmSync(root, { force: true, recursive: true }),
@@ -600,15 +604,6 @@ async function createRuntimeFixture(): Promise<{
   };
 }
 
-function readCurrentUpstreamRepositoryPath(): string {
-  const sourceLock = JSON.parse(
-    readFileSync(join(process.cwd(), 'config', 'betting-win.upstream.lock.json'), 'utf-8'),
-  ) as { readonly repositoryPath?: unknown };
-  if (typeof sourceLock.repositoryPath !== 'string' || sourceLock.repositoryPath.trim().length === 0) {
-    throw new Error('config/betting-win.upstream.lock.json must contain repositoryPath for runtime application tests.');
-  }
-  return sourceLock.repositoryPath;
-}
 
 async function reserveLoopbackPort(): Promise<number> {
   const server = createServer((_request, response) => {

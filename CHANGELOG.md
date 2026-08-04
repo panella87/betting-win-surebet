@@ -1,3 +1,9 @@
+## 2026-08-03 - Bugfix fixture upstream-boundary validation repair
+
+- Repaired operator-lifecycle and runtime-application test fixtures so temporary BWS repositories generate an in-boundary betting-win checkout and matching upstream-lock fixture instead of pointing at the real server checkout from a temporary repository root.
+- Added a shared betting-win fixture helper for tests that need a valid upstream lock while preserving the production boundary that real BWS must only reference an approved sibling betting-win checkout.
+- No production upstream-boundary logic, provider access, execution path, runtime fallback, public signal, betting-win mutation or paper/live policy was weakened.
+
 ## 2026-08-03 - Bugfix autopilot return-handoff schema repair
 
 - Allowed `run-bugfix-autopilot.sh` to validate implementation return handoffs that include `RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE` and `RUNTIME_EVIDENCE_CAMPAIGN_RUN_ID`, matching the current `run-autonomous-implementation.sh` return contract.

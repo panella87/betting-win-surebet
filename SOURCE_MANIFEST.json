@@ -1,7 +1,7 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-08-03T21:01:58Z",
-  "overlay": "bws89-bugfix-audit-terminal-handoff-wave52",
+  "generated": "2026-08-04T06:51:58Z",
+  "overlay": "bws90-bugfix-fixture-boundary-wave53",
   "files": [
     {
       "path": ".automation/README.md",
@@ -115,8 +115,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "0ada180b0e60183cc9d6e2ee54bb0a9df63f13103a6125f81b4dc0e4f66ec82c",
-      "size": 68205
+      "sha256": "ff2039f9730656b2256bd9d8eb1d3e39920700d4cadebc0b27dd2cfc5f01903f",
+      "size": 68900
     },
     {
       "path": "PROJECT_STATUS.md",
@@ -2620,8 +2620,8 @@
     },
     {
       "path": "tests/bws-operator-lifecycle.test.ts",
-      "sha256": "a1f3e1f7935aef771021a02327cc2b257cc6d092e7e212c25265bb33a006058b",
-      "size": 24195
+      "sha256": "9ff676b8907f4f0e8c90952f307c516ae802aef5542083df3bb1228defef1880",
+      "size": 23897
     },
     {
       "path": "tests/bws-paper-runtime-evidence.test.ts",
@@ -2665,8 +2665,8 @@
     },
     {
       "path": "tests/bws-runtime-applications.test.ts",
-      "sha256": "dc911e3388546d879c738f9eecd5c3200761cda01e509e54c8cbd2d600842fb6",
-      "size": 24258
+      "sha256": "c4ed865eaf1900a11d59c6ca969fe5dce5381710bfdde60baa72d51d43e9e8ca",
+      "size": 23910
     },
     {
       "path": "tests/bws-service-runtime.test.ts",
@@ -2962,6 +2962,11 @@
       "path": "tests/strategy-ledger.test.ts",
       "sha256": "d56ee981efc67677ca00473965c84f9821423629b6c58514d128202a6c11a976",
       "size": 11877
+    },
+    {
+      "path": "tests/support/betting-win-fixture.ts",
+      "sha256": "ff4221cc1f123d0045a80d7c624e289dc7d562e82fd6867f9d47c9a705253753",
+      "size": 3454
     },
     {
       "path": "tests/surebet-persistence.test.ts",

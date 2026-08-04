@@ -17,6 +17,7 @@ import {
   type BwsOperatorLifecycleManagedProcessDescriptor,
   type BwsServiceRuntimeEnvironment,
 } from '../packages/bootstrap/src/index.js';
+import { createFixtureBettingWinCheckout, writeFixtureBettingWinUpstreamLock } from './support/betting-win-fixture.js';
 
 const TEST_TIMESTAMP = '2026-07-15T22:10:00.000Z';
 
@@ -236,11 +237,11 @@ async function createLifecycleFixture(options: Readonly<{
 }> {
   const root = mkdtempSync(join(tmpdir(), 'bws-operator-lifecycle-'));
   const repositoryRoot = join(root, 'betting-win-surebet');
-  const upstreamRoot = readCurrentUpstreamRepositoryPath();
+  const upstreamRoot = join(root, 'betting-win');
   const runtimeStateDirectory = join(repositoryRoot, 'runtime-state');
   const signalLogPath = join(repositoryRoot, 'signal-log.txt');
   const startedLogPath = join(repositoryRoot, 'started-log.txt');
-  await createRepositoryFixture(repositoryRoot);
+  await createRepositoryFixture(repositoryRoot, upstreamRoot, root);
   const port = await reserveLoopbackPort();
 
   const roleBootFiles = Object.freeze({
@@ -405,7 +406,7 @@ async function createLifecycleFixture(options: Readonly<{
   });
 }
 
-async function createRepositoryFixture(repositoryRoot: string): Promise<void> {
+async function createRepositoryFixture(repositoryRoot: string, upstreamRoot: string, allowedBoundaryRoot: string): Promise<void> {
   rmSync(repositoryRoot, { recursive: true, force: true });
   mkdirSync(repositoryRoot, { recursive: true });
   mkdirSync(join(repositoryRoot, 'config'), { recursive: true });
@@ -429,20 +430,13 @@ async function createRepositoryFixture(repositoryRoot: string): Promise<void> {
     }, null, 2)}\n`,
     'utf-8',
   );
-  writeFileSync(
-    join(repositoryRoot, 'config', 'betting-win.upstream.lock.json'),
-    readFileSync(join(process.cwd(), 'config', 'betting-win.upstream.lock.json'), 'utf-8'),
-  );
-}
-
-function readCurrentUpstreamRepositoryPath(): string {
-  const sourceLock = JSON.parse(
-    readFileSync(join(process.cwd(), 'config', 'betting-win.upstream.lock.json'), 'utf-8'),
-  ) as { readonly repositoryPath?: unknown };
-  if (typeof sourceLock.repositoryPath !== 'string' || sourceLock.repositoryPath.trim().length === 0) {
-    throw new Error('config/betting-win.upstream.lock.json must contain repositoryPath for lifecycle tests.');
-  }
-  return sourceLock.repositoryPath;
+  createFixtureBettingWinCheckout(upstreamRoot);
+  writeFixtureBettingWinUpstreamLock({
+    allowedBoundaryRoot,
+    repositoryRoot,
+    upstreamRoot,
+    verifiedAt: TEST_TIMESTAMP,
+  });
 }
 
 function createApiStubServiceSource(input: Readonly<{
