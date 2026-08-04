@@ -1352,15 +1352,12 @@ function validateUpstreamLockPath(environment: ReadonlyMap<string, string>, rele
 }
 
 function validateCockpitBinding(environment: ReadonlyMap<string, string>, manifest: BwsReleaseManifest): void {
-  const apiPortValue = environment.get('BWS_API_PORT');
-  if (apiPortValue === undefined || !POSITIVE_INTEGER_PATTERN.test(apiPortValue)) {
-    throw new Error('Release preflight requires BWS_API_PORT to be a base-10 positive integer.');
-  }
+  const apiPort = requireTcpPortString(environment.get('BWS_API_PORT'), 'BWS_API_PORT');
   const cockpitApiBaseUrl = new URL(manifest.cockpit.apiBaseUrl);
   if (cockpitApiBaseUrl.protocol !== 'http:' || cockpitApiBaseUrl.hostname !== LOOPBACK_HOST) {
     throw new Error('Release manifest cockpit API base URL must remain loopback-only.');
   }
-  if (cockpitApiBaseUrl.port !== apiPortValue) {
+  if (cockpitApiBaseUrl.port !== String(apiPort)) {
     throw new Error('Release preflight requires BWS_API_PORT to match the bundled cockpit API base URL.');
   }
 }
@@ -1643,6 +1640,18 @@ function requireNonNegativeInteger(value: unknown, label: string): number {
     throw new Error(`${label} must be a non-negative integer.`);
   }
   return value;
+}
+
+function requireTcpPortString(value: unknown, label: string): number {
+  const text = requireNonEmptyString(value, label);
+  if (!POSITIVE_INTEGER_PATTERN.test(text)) {
+    throw new Error(`${label} must be a base-10 positive integer.`);
+  }
+  const parsed = Number.parseInt(text, 10);
+  if (!Number.isSafeInteger(parsed) || parsed < 1 || parsed > 65535) {
+    throw new Error(`${label} must be a TCP port in the range 1..65535.`);
+  }
+  return parsed;
 }
 
 function requireNonEmptyString(value: unknown, label: string): string {

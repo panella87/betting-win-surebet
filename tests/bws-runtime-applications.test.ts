@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
-import { copyFileSync, mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import type { AddressInfo } from 'node:net';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -28,10 +28,6 @@ import {
   type BwsServiceRuntimeConfig,
   type BwsServiceRuntimeEnvironment,
 } from '../packages/bootstrap/src/index.js';
-import {
-  type BettingWinUpstreamLock,
-} from '../packages/upstream/src/index.js';
-
 const TEST_TIMESTAMP = '2026-07-15T09:15:00.000Z';
 
 test('read-only API application starts on loopback, serves readiness, and shuts down cleanly before restart', async () => {
@@ -569,7 +565,7 @@ async function createRuntimeFixture(): Promise<{
 }> {
   const root = mkdtempSync(join(tmpdir(), 'bws-runtime-applications-'));
   const repositoryRoot = join(root, 'betting-win-surebet');
-  const upstreamRoot = join(root, 'betting-win');
+  const upstreamRoot = readCurrentUpstreamRepositoryPath();
   const apiPort = await reserveLoopbackPort();
   mkdirSync(join(repositoryRoot, 'config'), { recursive: true });
   mkdirSync(join(repositoryRoot, 'schemas'), { recursive: true });
@@ -577,11 +573,9 @@ async function createRuntimeFixture(): Promise<{
     join(process.cwd(), 'schemas', 'betting-win-upstream-lock.v1.schema.json'),
     join(repositoryRoot, 'schemas', 'betting-win-upstream-lock.v1.schema.json'),
   );
-  mkdirSync(upstreamRoot, { recursive: true });
-  writeFileSync(
+  copyFileSync(
+    join(process.cwd(), 'config', 'betting-win.upstream.lock.json'),
     join(repositoryRoot, 'config', 'betting-win.upstream.lock.json'),
-    `${JSON.stringify(sampleUpstreamLock(upstreamRoot), null, 2)}\n`,
-    'utf-8',
   );
   createManagedCockpitBuild(repositoryRoot, `http://127.0.0.1:${String(apiPort)}`);
   return {
@@ -604,6 +598,16 @@ async function createRuntimeFixture(): Promise<{
     }),
     repositoryRoot,
   };
+}
+
+function readCurrentUpstreamRepositoryPath(): string {
+  const sourceLock = JSON.parse(
+    readFileSync(join(process.cwd(), 'config', 'betting-win.upstream.lock.json'), 'utf-8'),
+  ) as { readonly repositoryPath?: unknown };
+  if (typeof sourceLock.repositoryPath !== 'string' || sourceLock.repositoryPath.trim().length === 0) {
+    throw new Error('config/betting-win.upstream.lock.json must contain repositoryPath for runtime application tests.');
+  }
+  return sourceLock.repositoryPath;
 }
 
 async function reserveLoopbackPort(): Promise<number> {
@@ -672,31 +676,4 @@ function createManagedCockpitBuild(repositoryRoot: string, apiBaseUrl: string): 
 
 function escapeForRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-function sampleUpstreamLock(repositoryPath: string): BettingWinUpstreamLock {
-  return Object.freeze({
-    capabilities: Object.freeze([
-      'exportHistoricalBundle',
-      'getHistoricalQuotes',
-      'getProviderGenerations',
-      'inspectSourceLineage',
-    ]),
-    commitSha: '1'.repeat(40),
-    contractAlias: 'betting-win-strategy-export.v1',
-    contractSchema: 'betting-win.strategy-export.v1',
-    gitTreeSha: '2'.repeat(40),
-    packageVersion: '0.48.0',
-    packageVersions: Object.freeze({
-      '@betting-win/provider-collection': '0.48.0',
-    }),
-    repository: 'betting-win',
-    repositoryPath,
-    schema: 'betting-win-surebet-upstream-lock-v1',
-    sourceFingerprintAlgorithm: 'sha256_git_ls_tree_r_full_tree_head_v1',
-    sourceView: 'committed_git_head',
-    surebetProfile: 'surebet_standard_binary_v0',
-    trackedTreeListingSha256: '3'.repeat(64),
-    verifiedAt: TEST_TIMESTAMP,
-  });
 }

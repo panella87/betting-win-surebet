@@ -192,7 +192,7 @@ export function resolveBwsUpstreamApiConvergenceConfig(
       ),
       ...(environment[BWS_API_PORT_ENV] === undefined
         ? {}
-        : { localBwsApiPort: requirePositiveIntegerString(environment[BWS_API_PORT_ENV], BWS_API_PORT_ENV) }),
+        : { localBwsApiPort: requireTcpPortString(environment[BWS_API_PORT_ENV], BWS_API_PORT_ENV) }),
       maxPagesPerResource: requirePositiveIntegerString(
         environment[BWS_UPSTREAM_API_MAX_PAGES_PER_RESOURCE_ENV],
         BWS_UPSTREAM_API_MAX_PAGES_PER_RESOURCE_ENV,
@@ -947,6 +947,14 @@ function requirePositiveIntegerString(value: unknown, name: string): number {
   const parsed = Number.parseInt(value.trim(), 10);
   if (!Number.isSafeInteger(parsed) || parsed <= 0) {
     throw new Error(`${name} must be a base-10 positive integer.`);
+  }
+  return parsed;
+}
+
+function requireTcpPortString(value: unknown, name: string): number {
+  const parsed = requirePositiveIntegerString(value, name);
+  if (parsed > 65535) {
+    throw new Error(`${name} must be a TCP port in the range 1..65535.`);
   }
   return parsed;
 }

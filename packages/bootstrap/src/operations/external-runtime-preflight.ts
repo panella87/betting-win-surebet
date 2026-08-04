@@ -605,7 +605,7 @@ function validateReleaseBinding(
   if (cockpitApiBaseUrl.protocol !== 'http:' || cockpitApiBaseUrl.hostname !== LOOPBACK_HOST) {
     throw new Error('External runtime preflight requires the release cockpit API base URL to remain loopback-only.');
   }
-  const apiPort = requirePositiveIntegerString(environment.get('BWS_API_PORT'), 'BWS_API_PORT');
+  const apiPort = requireTcpPortString(environment.get('BWS_API_PORT'), 'BWS_API_PORT');
   if (cockpitApiBaseUrl.port !== String(apiPort)) {
     throw new Error('External runtime preflight requires BWS_API_PORT to match the release cockpit API base URL port.');
   }
@@ -699,7 +699,7 @@ function validateApiEnvironmentAlignment(
 }
 
 function buildLoopbackApiBaseUrl(environment: ReadonlyMap<string, string>): string {
-  const apiPort = requirePositiveIntegerString(environment.get('BWS_API_PORT'), 'BWS_API_PORT');
+  const apiPort = requireTcpPortString(environment.get('BWS_API_PORT'), 'BWS_API_PORT');
   return `http://${LOOPBACK_HOST}:${String(apiPort)}`;
 }
 
@@ -1056,6 +1056,14 @@ function requirePositiveIntegerString(value: unknown, label: string): number {
   const parsed = Number.parseInt(text, 10);
   if (!Number.isSafeInteger(parsed) || parsed <= 0) {
     throw new Error(`${label} must be a base-10 positive safe integer.`);
+  }
+  return parsed;
+}
+
+function requireTcpPortString(value: unknown, label: string): number {
+  const parsed = requirePositiveIntegerString(value, label);
+  if (parsed > 65535) {
+    throw new Error(`${label} must be a TCP port in the range 1..65535.`);
   }
   return parsed;
 }

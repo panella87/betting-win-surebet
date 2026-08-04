@@ -215,7 +215,7 @@ test('BWS-810 B1 read-only query service returns deterministic research reportin
   assert.equal(response.value.page.items[0]?.simulationResults.length, 1);
 });
 
-test('BWS read-only query service skips unsupported non-api scheduler checkpoints instead of breaking runtime-cycle queries', () => {
+test('BWS read-only query service fails closed on non-api scheduler checkpoints', () => {
   const service = createBwsReadOnlyQueryService({
     ...createStubDependencies(),
     privatePaperSchedulerCheckpoints: Object.freeze({
@@ -224,7 +224,7 @@ test('BWS read-only query service skips unsupported non-api scheduler checkpoint
           Object.freeze({
             configSha256: 'a'.repeat(64),
             insertedAt: TEST_TIMESTAMP,
-            mode: 'export' as const,
+            mode: 'export',
             queueName: 'private-paper',
             runtimeId: 'runtime-export-001',
             schedulerCheckpointId: 'scheduler-export-001',
@@ -236,7 +236,7 @@ test('BWS read-only query service skips unsupported non-api scheduler checkpoint
             lastScheduledJobId: 'private-paper:scheduler-export-001:cycle:1',
             lastScheduledSourceId: 'export-selection:checkpoint-export-001:cursor-001',
           }),
-        ]);
+        ]) as unknown as ReturnType<BwsReadOnlyQueryDependencies['privatePaperSchedulerCheckpoints']['list']>;
       },
     }),
   } satisfies BwsReadOnlyQueryDependencies, {
@@ -252,8 +252,9 @@ test('BWS read-only query service skips unsupported non-api scheduler checkpoint
     }),
     pageSize: 5,
   });
-  assert.equal(response.ok, true);
-  assert.equal(response.value.page.returnedCount, 0);
+  assert.equal(response.ok, false);
+  assert.equal(response.blockers[0]?.code, 'BWS_READ_ONLY_PRIVATE_PAPER_RUNTIME_CYCLE_INVALID');
+  assert.match(response.blockers[0]?.message ?? '', /mode=api/);
 });
 
 test('BWS read-only query HTTP handler applies security headers and returns fail-closed validation errors', async () => {

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
@@ -9,9 +9,9 @@ import {
   blocked,
   createPrivatePaperRuntimeJobHandler,
   type BwsPrivatePaperApiSchedulerConfig,
+  parseBwsPrivatePaperScheduleManifest,
   resolveBwsPrivatePaperSchedulerConfig,
   runBwsPrivatePaperSchedulerPass,
-  type BwsPrivatePaperSchedulerConfig,
   type BwsPrivatePaperSchedulerEnvironment,
   type PersistedPrivatePaperRuntimeJobPayload,
   type SerializablePrivatePaperCandidatePlan,
@@ -28,11 +28,9 @@ import {
   type SurebetPersistenceConfig,
 } from '../packages/persistence/src/index.js';
 import type { BwsUpstreamApiConvergenceConfig } from '../packages/bootstrap/src/operations/upstream-api-convergence.js';
-import type { BwsUpstreamExportConvergenceConfig } from '../packages/bootstrap/src/operations/upstream-export-convergence.js';
 import type { BettingWinUpstreamLock } from '../packages/upstream/src/index.js';
 
 const TEST_TIMESTAMP = '2026-07-15T12:00:00.000Z';
-const SOLVER_READY_BUNDLE = 'tests/fixtures/local-only-export-bundles/solver-ready-resource-export.json';
 
 test('private-paper scheduler config fails closed when schedule mode and BWS_UPSTREAM_MODE disagree', () => {
   const fixtureDir = mkdtempSync(join(tmpdir(), 'bws-private-paper-schedule-config-'));
@@ -202,48 +200,40 @@ test('private-paper scheduler suppresses duplicate jobs after restart when the j
   assert.equal(schedulerCheckpoints.get('scheduler-001')?.lastScheduledApiCycleNumber, 1);
 });
 
-test('private-paper scheduler rejects retired export configs before upstream export convergence or job creation', async () => {
-  mkdirSync(join(process.cwd(), 'artifacts'), { recursive: true });
-  const fixtureDir = mkdtempSync(join(process.cwd(), 'artifacts', 'bws-private-paper-export-scheduler-'));
-  const jobs = new InMemoryJobs();
-  const schedulerCheckpoints = new InMemorySchedulerCheckpoints();
-  try {
-    const exportFixture = createHybridExportFixture(fixtureDir);
-    const pinnedStrategyExports = new InMemoryPinnedStrategyExports([
-      createPinnedStrategyExportRecord('checkpoint-export-001', 'cursor-001', exportFixture),
-    ]);
-    const config = createExportSchedulerConfig(exportFixture);
-    let upstreamExportTouched = false;
+test('private-paper scheduler rejects retired export schedule manifests at the input boundary', () => {
+  const result = parseBwsPrivatePaperScheduleManifest(
+    JSON.stringify({
+      schema: 'bws.private_paper_schedule.v1',
+      mode: 'export',
+      schedulerCheckpointId: 'scheduler-001',
+      runtimeId: 'runtime-001',
+      maxCandidatesPerCycle: 1,
+      retryDelaysMs: [],
+      candidatePlans: [sampleCandidatePlan()],
+    }),
+    'tests/fixtures/scheduler-export-manifest.json',
+  );
 
-    const result = await runBwsPrivatePaperSchedulerPass({
-      config,
-      jobs,
-      pinnedStrategyExports,
-      runUpstreamExportConvergencePass: async () => {
-        upstreamExportTouched = true;
-        return accepted(Object.freeze({
-          checkpointId: 'checkpoint-export-001',
-          completed: true,
-          importRunId: 'import:checkpoint-export-001:cursor-001',
-          mode: 'export',
-          nextSelectionIndex: 1,
-          pinnedStrategyExportRecordId: 'pinned-export:checkpoint-export-001:cursor-001',
-          processedCount: 1,
-          processedSelectionCursor: 'cursor-001',
-          selectionCount: 1,
-        }));
-      },
-      schedulerCheckpoints,
-    });
+  assert.equal(result.ok, false);
+  assert.equal(result.blockers[0]?.code, 'BWS_PRIVATE_PAPER_SCHEDULE_MODE_INVALID');
+  assert.match(result.blockers[0]?.message ?? '', /mode=api/);
+});
 
-    assert.equal(result.ok, false);
-    assert.equal(result.blockers[0]?.code, 'BWS_PRIVATE_PAPER_SCHEDULER_EXPORT_MODE_RETIRED');
-    assert.equal(upstreamExportTouched, false);
-    assert.equal(jobs.get('private-paper:scheduler-001:cycle:1'), undefined);
-    assert.equal(schedulerCheckpoints.get('scheduler-001'), undefined);
-  } finally {
-    rmSync(fixtureDir, { force: true, recursive: true });
-  }
+test('private-paper scheduler checkpoint repository rejects retired export mode before persistence IO', () => {
+  const repository = new SurebetPrivatePaperRuntimeSchedulerCheckpointRepository({} as SurebetPersistenceConfig);
+  assert.throws(
+    () =>
+      repository.create({
+        configSha256: 'a'.repeat(64),
+        mode: 'export',
+        queueName: 'private-paper',
+        runtimeId: 'runtime-001',
+        schedulerCheckpointId: 'scheduler-001',
+        upstreamCheckpointId: 'checkpoint-export-001',
+        upstreamLockRecordId: 'upstream-lock:commit:tree',
+      } as never),
+    /mode=api/,
+  );
 });
 
 test('private-paper scheduler blocks tampered historical import runs that no longer match the selected checkpoint and upstream lock', async () => {
@@ -507,20 +497,6 @@ class InMemoryImportRuns {
   }
 }
 
-class InMemoryPinnedStrategyExports {
-  readonly #records = new Map<string, ReturnType<typeof createPinnedStrategyExportRecord>>();
-
-  constructor(records: readonly ReturnType<typeof createPinnedStrategyExportRecord>[]) {
-    for (const record of records) {
-      this.#records.set(record.intakeRecordId, record);
-    }
-  }
-
-  get(intakeRecordId: string) {
-    return this.#records.get(intakeRecordId);
-  }
-}
-
 class InMemoryApiCheckpoints {
   readonly #completedCycleCount: number;
 
@@ -571,28 +547,6 @@ function createSchedulerConfig(): BwsPrivatePaperApiSchedulerConfig {
   });
 }
 
-function createExportSchedulerConfig(
-  exportFixture: Readonly<{ readonly exportedAt: string; readonly path: string; readonly sha256: string }>,
-): Extract<BwsPrivatePaperSchedulerConfig, { readonly mode: 'export' }> {
-  return Object.freeze({
-    mode: 'export',
-    persistence: {} as never,
-    queueName: 'private-paper',
-    repositoryRoot: process.cwd(),
-    schedule: Object.freeze({
-      candidatePlans: Object.freeze([sampleCandidatePlan()]),
-      configSha256: 'e'.repeat(64),
-      manifestPath: join(process.cwd(), 'tests', 'fixtures', 'scheduler-export-manifest.json'),
-      manifestSha256: 'f'.repeat(64),
-      maxCandidatesPerCycle: 1,
-      retryDelaysMs: Object.freeze([250, 500]),
-      runtimeId: 'runtime-001',
-      schedulerCheckpointId: 'scheduler-001',
-    }),
-    upstream: createUpstreamExportConfig(exportFixture),
-  });
-}
-
 function createUpstreamApiConfig(): BwsUpstreamApiConvergenceConfig {
   return Object.freeze({
     checkpointId: 'checkpoint-api-001',
@@ -608,38 +562,6 @@ function createUpstreamApiConfig(): BwsUpstreamApiConvergenceConfig {
       timeoutMs: 1_000,
     }),
     repositoryRoot: process.cwd(),
-    upstream: Object.freeze({
-      lock: sampleUpstreamLock(),
-      lockPath: 'config/betting-win.upstream.lock.json',
-      repoPath: '/tmp/betting-win',
-    }),
-  });
-}
-
-function createUpstreamExportConfig(
-  exportFixture: Readonly<{ readonly exportedAt: string; readonly path: string; readonly sha256: string }>,
-): BwsUpstreamExportConvergenceConfig {
-  return Object.freeze({
-    mode: 'export',
-    persistence: {} as never,
-    repositoryRoot: process.cwd(),
-    selection: Object.freeze({
-      checkpointId: 'checkpoint-export-001',
-      contractAlias: 'betting-win-strategy-export.v1',
-      contractSchema: 'betting-win.strategy-export.v1',
-      entries: Object.freeze([
-        Object.freeze({
-          cursor: 'cursor-001',
-          expectedProviderGenerationIds: Object.freeze(['generation-510-001']),
-          expectedSha256: exportFixture.sha256,
-          expectedSourceLineageRecordIds: Object.freeze(['lineage-510-001']),
-          exportPath: exportFixture.path,
-        }),
-      ]),
-      manifestPath: join(process.cwd(), 'tests', 'fixtures', 'upstream-export-selection.json'),
-      manifestSha256: '7'.repeat(64),
-      surebetProfile: 'surebet_standard_binary_v0',
-    }),
     upstream: Object.freeze({
       lock: sampleUpstreamLock(),
       lockPath: 'config/betting-win.upstream.lock.json',
@@ -751,113 +673,6 @@ function sampleCandidatePlan(): SerializablePrivatePaperCandidatePlan {
     decisionTimestamp: '2026-07-01T00:00:02.500Z',
     manualKill: false,
     maxQuoteAgeMs: 2_000,
-  });
-}
-
-function createPinnedStrategyExportRecord(
-  checkpointId: string,
-  cursor: string,
-  exportFixture: Readonly<{ readonly exportedAt: string; readonly path: string; readonly sha256: string }>,
-) {
-  return Object.freeze({
-    contractAlias: 'betting-win-strategy-export.v1',
-    contractSchema: 'betting-win.strategy-export.v1',
-    endpointId: 'endpoint-001',
-    exportId: 'provider-history-export.fixture-001.20260715t120000000z.fixture',
-    exportKind: 'pinned_provider_history_bundle',
-    exportProfile: 'provider_history_fixture_bundle_v1',
-    exportedAt: exportFixture.exportedAt,
-    importRunId: `import:${checkpointId}:${cursor}`,
-    importedAt: exportFixture.exportedAt,
-    intakeRecordId: `pinned-export:${checkpointId}:${cursor}`,
-    insertedAt: TEST_TIMESTAMP,
-    normalizedEvidenceIds: Object.freeze(['normalized-510-001']),
-    payloadSha256: '5'.repeat(64),
-    providerGenerationIds: Object.freeze(['generation-510-001']),
-    providerId: 'polymarket',
-    sourceLineageRecordIds: Object.freeze(['lineage-510-001']),
-    sourceLocator: exportFixture.path,
-    sourceSha256: exportFixture.sha256,
-    surebetProfile: 'surebet_standard_binary_v0',
-    upstreamLockRecordId: 'upstream-lock:1111111111111111111111111111111111111111:2222222222222222222222222222222222222222',
-  });
-}
-
-function createHybridExportFixture(
-  fixtureDirectory: string,
-): Readonly<{ readonly exportedAt: string; readonly path: string; readonly sha256: string }> {
-  const baseBundle = JSON.parse(readFileSync(SOLVER_READY_BUNDLE, 'utf-8')) as {
-    readonly exportedAt: string;
-    readonly records: readonly unknown[];
-    readonly reference: {
-      readonly manifestHash: string;
-    };
-  };
-  const payload = Object.freeze({
-    endpointDeclaration: { endpointId: 'endpoint-001' },
-    fixtureDeclaration: { fixtureId: 'fixture-001' },
-    binding: {
-      providerId: 'polymarket',
-      endpointId: 'endpoint-001',
-    },
-    collectionReport: {
-      reportId: 'collection-report-001',
-      normalizedEvidenceIds: ['normalized-510-001'],
-    },
-    rawStore: {
-      observations: [{ observationId: 'observation-001' }],
-      sourceLineageRecords: [{ recordId: 'lineage-510-001', provider: 'polymarket' }],
-      sourceLineageEvents: [{ eventId: 'event-001' }],
-    },
-    quoteStore: {
-      generationResolutions: [{ recordId: 'lineage-510-001', providerGenerationId: 'generation-510-001' }],
-      normalizedEvidence: [
-        {
-          normalizedEvidenceId: 'normalized-510-001',
-          provider: 'polymarket',
-          providerGenerationId: 'generation-510-001',
-          sourceLineageRecordId: 'lineage-510-001',
-        },
-      ],
-      normalizedRejections: [],
-    },
-  });
-  const document = Object.freeze({
-    schema: 'betting-win.export-bundle.v1',
-    reference: Object.freeze({
-      source: 'betting-win',
-      contractVersion: 'v1',
-      manifestHash: baseBundle.reference.manifestHash,
-    }),
-    bundleKind: 'resource_export',
-    records: baseBundle.records,
-    schemaVersion: '1.0.0',
-    phase: 'F2-005F',
-    exportId: 'provider-history-export.fixture-001.20260715t120000000z.fixture',
-    exportProfile: 'provider_history_fixture_bundle_v1',
-    exportKind: 'pinned_provider_history_bundle',
-    exportedAt: baseBundle.exportedAt,
-    fixtureId: 'fixture-001',
-    providerId: 'polymarket',
-    endpointId: 'endpoint-001',
-    transportMode: 'fixture',
-    liveTransportAllowed: false,
-    providerGenerationIds: ['generation-510-001'],
-    sourceLineageRecordIds: ['lineage-510-001'],
-    normalizedEvidenceIds: ['normalized-510-001'],
-    collectionReportSha256: sha256Hex(
-      stableJsonStringify(payload.collectionReport as unknown as JsonValue),
-    ),
-    payloadSha256: sha256Hex(stableJsonStringify(payload as unknown as JsonValue)),
-    payload,
-  });
-  const path = join(fixtureDirectory, 'hybrid-export.json');
-  const contents = JSON.stringify(document, null, 2);
-  writeFileSync(path, `${contents}\n`, 'utf-8');
-  return Object.freeze({
-    exportedAt: baseBundle.exportedAt,
-    path,
-    sha256: sha256Hex(`${contents}\n`),
   });
 }
 
@@ -1009,7 +824,7 @@ interface InMemoryJobRecord {
 
 interface InMemorySchedulerCheckpointCreate {
   readonly configSha256: string;
-  readonly mode: 'api' | 'export';
+  readonly mode: 'api';
   readonly queueName: string;
   readonly runtimeId: string;
   readonly schedulerCheckpointId: string;

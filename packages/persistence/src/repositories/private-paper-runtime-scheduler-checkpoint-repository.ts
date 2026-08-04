@@ -7,7 +7,7 @@ const SHA256_REGEX = /^[0-9a-f]{64}$/;
 
 export interface SurebetPrivatePaperRuntimeSchedulerCheckpointRecord {
   readonly schedulerCheckpointId: string;
-  readonly mode: 'api' | 'export';
+  readonly mode: 'api';
   readonly runtimeId: string;
   readonly queueName: string;
   readonly upstreamCheckpointId: string;
@@ -23,7 +23,7 @@ export interface SurebetPrivatePaperRuntimeSchedulerCheckpointRecord {
 
 export interface SurebetPendingPrivatePaperRuntimeSchedulerCheckpointRecord {
   readonly schedulerCheckpointId: string;
-  readonly mode: 'api' | 'export';
+  readonly mode: 'api';
   readonly runtimeId: string;
   readonly queueName: string;
   readonly upstreamCheckpointId: string;
@@ -55,8 +55,9 @@ export interface SurebetPrivatePaperRuntimeSchedulerCheckpointListRequest {
 
 interface RawSchedulerCheckpointRow extends Omit<
   SurebetPrivatePaperRuntimeSchedulerCheckpointRecord,
-  'lastScheduledApiCycleNumber' | 'lastScheduledAt' | 'lastScheduledJobId' | 'lastScheduledSourceId'
+  'lastScheduledApiCycleNumber' | 'lastScheduledAt' | 'lastScheduledJobId' | 'lastScheduledSourceId' | 'mode'
 > {
+  readonly mode: string;
   readonly lastScheduledApiCycleNumber: number | null;
   readonly lastScheduledAt: string | null;
   readonly lastScheduledJobId: string | null;
@@ -202,12 +203,6 @@ FROM (
   ): SurebetPrivatePaperRuntimeSchedulerCheckpointRecord {
     validateAdvanceRecord(record);
     const existing = this.require(record.schedulerCheckpointId);
-    if (existing.mode !== 'api' && existing.mode !== 'export') {
-      throw new SurebetPersistenceError(
-        'SUREBET_PRIVATE_PAPER_SCHEDULER_CHECKPOINT_INVALID',
-        `Surebet private-paper scheduler checkpoint ${record.schedulerCheckpointId} must remain in an explicit supported mode.`,
-      );
-    }
     if (existing.lastScheduledApiCycleNumber !== record.expectedLastScheduledApiCycleNumber) {
       throw new SurebetPersistenceError(
         'SUREBET_PRIVATE_PAPER_SCHEDULER_CHECKPOINT_STALE',
@@ -260,10 +255,10 @@ function validatePendingRecord(record: SurebetPendingPrivatePaperRuntimeSchedule
   requireNonEmptyString(record.upstreamCheckpointId, 'upstreamCheckpointId');
   requireNonEmptyString(record.upstreamLockRecordId, 'upstreamLockRecordId');
   requireSha256(record.configSha256, 'configSha256');
-  if (record.mode !== 'api' && record.mode !== 'export') {
+  if (record.mode !== 'api') {
     throw new SurebetPersistenceError(
       'SUREBET_PRIVATE_PAPER_SCHEDULER_CHECKPOINT_INVALID',
-      'Surebet private-paper scheduler checkpoints require mode=api or mode=export.',
+      'Surebet private-paper scheduler checkpoints require mode=api.',
     );
   }
 }
@@ -381,10 +376,16 @@ function requirePositiveIntegerValue(value: number, field: string): number {
 }
 
 function normalizeRow(row: RawSchedulerCheckpointRow): SurebetPrivatePaperRuntimeSchedulerCheckpointRecord {
+  if (row.mode !== 'api') {
+    throw new SurebetPersistenceError(
+      'SUREBET_PRIVATE_PAPER_SCHEDULER_CHECKPOINT_INVALID',
+      `Surebet private-paper scheduler checkpoint ${row.schedulerCheckpointId} requires persisted mode=api.`,
+    );
+  }
   return Object.freeze({
     configSha256: row.configSha256,
     insertedAt: row.insertedAt,
-    mode: row.mode === 'export' ? 'export' : 'api',
+    mode: row.mode,
     queueName: row.queueName,
     runtimeId: row.runtimeId,
     schedulerCheckpointId: row.schedulerCheckpointId,

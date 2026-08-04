@@ -551,8 +551,12 @@ function queryPrivatePaperRuntimeCycles(
   }> = [];
 
   for (const schedulerCheckpoint of schedulerCheckpoints) {
-    if (schedulerCheckpoint.mode !== 'api') {
-      continue;
+    if ((schedulerCheckpoint as { readonly mode: unknown }).mode !== 'api') {
+      return blocked(
+        'BWS_READ_ONLY_PRIVATE_PAPER_RUNTIME_CYCLE_INVALID',
+        `BWS read-only private-paper runtime cycles require scheduler checkpoint ${schedulerCheckpoint.schedulerCheckpointId} to persist mode=api.`,
+        'API-only private-paper scheduler checkpoints.',
+      );
     }
     const upperCycleNumber = schedulerCheckpoint.lastScheduledApiCycleNumber ?? 0;
     const lowerCycleNumber = Math.max(

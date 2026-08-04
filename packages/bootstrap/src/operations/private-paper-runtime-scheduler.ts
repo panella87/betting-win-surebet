@@ -2,7 +2,6 @@ import { readFileSync, realpathSync } from 'node:fs';
 import { isAbsolute, relative, resolve } from 'node:path';
 import {
   SurebetImportRunRepository,
-  SurebetPinnedStrategyExportRepository,
   SurebetPrivatePaperRuntimeSchedulerCheckpointRepository,
   SurebetUpstreamApiConvergenceRepository,
   SurebetWorkerJobRepository,
@@ -10,18 +9,10 @@ import {
   stableJsonStringify,
   type JsonValue,
 } from '../../../persistence/src/index.js';
-import { validatePinnedBettingWinBundleIntake } from '../adapters/betting-win-pinned-bundle-intake.js';
-import { validatePinnedBettingWinStrategyExportIntake } from '../adapters/betting-win-strategy-export-intake.js';
 import { accepted, blocked, type BoundaryResult } from '../contracts/local-types.js';
 import {
   BWS_WORKER_QUEUE_NAME_ENV,
 } from './service-runtime.js';
-import {
-  resolveBwsUpstreamExportConvergenceConfig,
-  runBwsUpstreamExportConvergencePass,
-  type BwsUpstreamExportConvergenceConfig,
-  type BwsUpstreamExportConvergencePassResult,
-} from './upstream-export-convergence.js';
 import {
   resolveBwsUpstreamApiConvergenceConfig,
   runBwsUpstreamApiConvergencePass,
@@ -41,7 +32,7 @@ const ID_PATTERN = /^[A-Za-z0-9._:-]+$/;
 const BWS_UPSTREAM_MODE_ENV = 'BWS_UPSTREAM_MODE';
 
 export const BWS_PRIVATE_PAPER_SCHEDULE_PATH_ENV = 'BWS_PRIVATE_PAPER_SCHEDULE_PATH';
-type BwsPrivatePaperSchedulerMode = 'api' | 'export';
+type BwsPrivatePaperSchedulerMode = 'api';
 
 export interface BwsPrivatePaperSchedulerEnvironment extends BwsUpstreamApiConvergenceEnvironment {
   readonly BWS_PRIVATE_PAPER_SCHEDULE_PATH?: string;
@@ -80,28 +71,17 @@ export interface BwsPrivatePaperApiSchedulerConfig extends BwsPrivatePaperSchedu
   readonly upstream: BwsUpstreamApiConvergenceConfig;
 }
 
-export interface BwsPrivatePaperExportSchedulerConfig extends BwsPrivatePaperSchedulerSharedConfig {
-  readonly mode: 'export';
-  readonly upstream: BwsUpstreamExportConvergenceConfig;
-}
-
-export type BwsPrivatePaperSchedulerConfig =
-  | BwsPrivatePaperApiSchedulerConfig
-  | BwsPrivatePaperExportSchedulerConfig;
+export type BwsPrivatePaperSchedulerConfig = BwsPrivatePaperApiSchedulerConfig;
 
 export interface RunBwsPrivatePaperSchedulerPassRequest {
   readonly config?: BwsPrivatePaperSchedulerConfig;
   readonly environment?: BwsPrivatePaperSchedulerEnvironment;
   readonly importRuns?: Pick<SurebetImportRunRepository, 'get'>;
   readonly jobs?: Pick<SurebetWorkerJobRepository, 'create' | 'get'>;
-  readonly pinnedStrategyExports?: Pick<SurebetPinnedStrategyExportRepository, 'get'>;
   readonly repositoryRoot?: string;
   readonly runUpstreamApiConvergencePass?: (
     request: { readonly config: BwsUpstreamApiConvergenceConfig },
   ) => Promise<BoundaryResult<BwsUpstreamApiConvergencePassResult>>;
-  readonly runUpstreamExportConvergencePass?: (
-    request: { readonly config: BwsUpstreamExportConvergenceConfig },
-  ) => Promise<BoundaryResult<BwsUpstreamExportConvergencePassResult>>;
   readonly schedulerCheckpoints?: Pick<
     SurebetPrivatePaperRuntimeSchedulerCheckpointRepository,
     'advance' | 'create' | 'get'
@@ -120,7 +100,7 @@ export interface BwsPrivatePaperSchedulerPassResult {
   readonly duplicateSuppressed?: boolean;
   readonly completedCycleCount: number;
   readonly lastScheduledApiCycleNumber: number;
-  readonly upstreamPass: BwsUpstreamApiConvergencePassResult | BwsUpstreamExportConvergencePassResult;
+  readonly upstreamPass: BwsUpstreamApiConvergencePassResult;
 }
 
 export function resolveBwsPrivatePaperSchedulerConfig(
@@ -160,65 +140,25 @@ export function resolveBwsPrivatePaperSchedulerConfig(
     );
   }
 
-  if (requestedMode === 'api') {
-    const upstream = resolveBwsUpstreamApiConvergenceConfig(environment, repositoryRoot);
-    const configSha256 = sha256Hex(
-      stableJsonStringify(
-        Object.freeze({
-          apiBaseUrl: upstream.query.baseUrl,
-          candidatePlans: manifest.value.candidatePlans,
-          checkpointId: upstream.checkpointId,
-          contractVersion: upstream.query.contractVersion,
-          maxCandidatesPerCycle: manifest.value.maxCandidatesPerCycle,
-          maxPagesPerResource: upstream.query.maxPagesPerResource,
-          mode: 'api',
-          pageSize: upstream.query.pageSize,
-          queueName,
-          retryBackoffMs: upstream.query.retryBackoffMs,
-          retryDelaysMs: manifest.value.retryDelaysMs,
-          retryLimit: upstream.query.retryLimit,
-          runtimeId: manifest.value.runtimeId,
-          schedulerCheckpointId: manifest.value.schedulerCheckpointId,
-          timeoutMs: upstream.query.timeoutMs,
-          upstreamCommitSha: upstream.upstream.lock.commitSha,
-          upstreamGitTreeSha: upstream.upstream.lock.gitTreeSha,
-        }) as unknown as JsonValue,
-      ),
-    );
-
-    return Object.freeze({
-      mode: 'api',
-      persistence: upstream.persistence,
-      queueName,
-      repositoryRoot: resolvedRepositoryRoot,
-      schedule: Object.freeze({
-        candidatePlans: manifest.value.candidatePlans,
-        configSha256,
-        manifestPath,
-        manifestSha256,
-        maxCandidatesPerCycle: manifest.value.maxCandidatesPerCycle,
-        retryDelaysMs: manifest.value.retryDelaysMs,
-        runtimeId: manifest.value.runtimeId,
-        schedulerCheckpointId: manifest.value.schedulerCheckpointId,
-      }),
-      upstream,
-    });
-  }
-
-  const upstream = resolveBwsUpstreamExportConvergenceConfig(environment, repositoryRoot);
+  const upstream = resolveBwsUpstreamApiConvergenceConfig(environment, repositoryRoot);
   const configSha256 = sha256Hex(
     stableJsonStringify(
       Object.freeze({
+        apiBaseUrl: upstream.query.baseUrl,
         candidatePlans: manifest.value.candidatePlans,
-        checkpointId: upstream.selection.checkpointId,
+        checkpointId: upstream.checkpointId,
+        contractVersion: upstream.query.contractVersion,
         maxCandidatesPerCycle: manifest.value.maxCandidatesPerCycle,
-        mode: 'export',
+        maxPagesPerResource: upstream.query.maxPagesPerResource,
+        mode: 'api',
+        pageSize: upstream.query.pageSize,
         queueName,
+        retryBackoffMs: upstream.query.retryBackoffMs,
         retryDelaysMs: manifest.value.retryDelaysMs,
-        selectionManifestSha256: upstream.selection.manifestSha256,
-        selectionPath: upstream.selection.manifestPath,
+        retryLimit: upstream.query.retryLimit,
         runtimeId: manifest.value.runtimeId,
         schedulerCheckpointId: manifest.value.schedulerCheckpointId,
+        timeoutMs: upstream.query.timeoutMs,
         upstreamCommitSha: upstream.upstream.lock.commitSha,
         upstreamGitTreeSha: upstream.upstream.lock.gitTreeSha,
       }) as unknown as JsonValue,
@@ -226,7 +166,7 @@ export function resolveBwsPrivatePaperSchedulerConfig(
   );
 
   return Object.freeze({
-    mode: 'export',
+    mode: 'api',
     persistence: upstream.persistence,
     queueName,
     repositoryRoot: resolvedRepositoryRoot,
@@ -248,13 +188,6 @@ export async function runBwsPrivatePaperSchedulerPass(
   request: RunBwsPrivatePaperSchedulerPassRequest = {},
 ): Promise<BoundaryResult<BwsPrivatePaperSchedulerPassResult>> {
   const config = request.config ?? resolveBwsPrivatePaperSchedulerConfig(request.environment, request.repositoryRoot);
-  if (isRetiredExportSchedulerConfig(config)) {
-    return blocked(
-      'BWS_PRIVATE_PAPER_SCHEDULER_EXPORT_MODE_RETIRED',
-      'BWS private-paper scheduler requires API-only upstream mode; export mode is retired for BWS-600 runtime evidence.',
-      'Explicit API-mode private-paper scheduler configuration.',
-    );
-  }
   const lockRecordId = buildUpstreamLockRecordId(config.upstream.upstream.lock.commitSha, config.upstream.upstream.lock.gitTreeSha);
   const schedulerCheckpoints = request.schedulerCheckpoints
     ?? new SurebetPrivatePaperRuntimeSchedulerCheckpointRepository(config.persistence);
@@ -262,82 +195,32 @@ export async function runBwsPrivatePaperSchedulerPass(
   const schedulerCheckpoint = requireAccepted(
     resolveSchedulerCheckpoint(config, lockRecordId, schedulerCheckpoints),
   );
-  if (config.mode === 'api') {
-    const upstreamPass = await (request.runUpstreamApiConvergencePass ?? defaultRunUpstreamApiConvergencePass)({
-      config: config.upstream,
-    });
-    if (!upstreamPass.ok) {
-      return upstreamPass;
-    }
-
-    const upstreamApiCheckpoints = request.upstreamApiCheckpoints
-      ?? new SurebetUpstreamApiConvergenceRepository(config.persistence);
-    const importRuns = request.importRuns ?? new SurebetImportRunRepository(config.persistence);
-    const apiCheckpoint = upstreamApiCheckpoints.get(config.upstream.checkpointId);
-    if (apiCheckpoint === undefined) {
-      return blocked(
-        'BWS_PRIVATE_PAPER_SCHEDULER_UPSTREAM_CHECKPOINT_MISSING',
-        `BWS private-paper scheduler requires upstream API checkpoint ${config.upstream.checkpointId} after convergence.`,
-        'Persisted upstream API checkpoint for the selected explicit api mode.',
-      );
-    }
-
-    const nextCycleNumber = (schedulerCheckpoint.lastScheduledApiCycleNumber ?? 0) + 1;
-    if (nextCycleNumber > apiCheckpoint.completedCycleCount) {
-      return accepted(
-        Object.freeze({
-          completedCycleCount: apiCheckpoint.completedCycleCount,
-          lastScheduledApiCycleNumber: schedulerCheckpoint.lastScheduledApiCycleNumber ?? 0,
-          mode: 'api',
-          queueName: config.queueName,
-          runtimeId: config.schedule.runtimeId,
-          scheduled: false,
-          schedulerCheckpointId: config.schedule.schedulerCheckpointId,
-          upstreamPass: upstreamPass.value,
-        }),
-      );
-    }
-
-    const completedCycleSource = findCompletedApiCycleSource(
-      config.upstream,
-      lockRecordId,
-      nextCycleNumber,
-      importRuns,
-    );
-    if (!completedCycleSource.ok) {
-      return completedCycleSource;
-    }
-
-    return accepted(
-      scheduleRuntimeJob(
-        config,
-        schedulerCheckpoint,
-        jobs,
-        nextCycleNumber,
-        completedCycleSource.value.exportedAt,
-        completedCycleSource.value.sourceId,
-        buildApiRuntimeJobPayload(config, nextCycleNumber, buildSchedulerCycleId(config.schedule.schedulerCheckpointId, nextCycleNumber), completedCycleSource.value),
-        apiCheckpoint.completedCycleCount,
-        upstreamPass.value,
-        schedulerCheckpoints,
-      ),
-    );
-  }
-
-  const upstreamPass = await (request.runUpstreamExportConvergencePass ?? defaultRunUpstreamExportConvergencePass)({
+  const upstreamPass = await (request.runUpstreamApiConvergencePass ?? defaultRunUpstreamApiConvergencePass)({
     config: config.upstream,
   });
   if (!upstreamPass.ok) {
     return upstreamPass;
   }
 
+  const upstreamApiCheckpoints = request.upstreamApiCheckpoints
+    ?? new SurebetUpstreamApiConvergenceRepository(config.persistence);
+  const importRuns = request.importRuns ?? new SurebetImportRunRepository(config.persistence);
+  const apiCheckpoint = upstreamApiCheckpoints.get(config.upstream.checkpointId);
+  if (apiCheckpoint === undefined) {
+    return blocked(
+      'BWS_PRIVATE_PAPER_SCHEDULER_UPSTREAM_CHECKPOINT_MISSING',
+      `BWS private-paper scheduler requires upstream API checkpoint ${config.upstream.checkpointId} after convergence.`,
+      'Persisted upstream API checkpoint for the selected explicit api mode.',
+    );
+  }
+
   const nextCycleNumber = (schedulerCheckpoint.lastScheduledApiCycleNumber ?? 0) + 1;
-  if (nextCycleNumber > upstreamPass.value.nextSelectionIndex) {
+  if (nextCycleNumber > apiCheckpoint.completedCycleCount) {
     return accepted(
       Object.freeze({
-        completedCycleCount: upstreamPass.value.nextSelectionIndex,
+        completedCycleCount: apiCheckpoint.completedCycleCount,
         lastScheduledApiCycleNumber: schedulerCheckpoint.lastScheduledApiCycleNumber ?? 0,
-        mode: 'export',
+        mode: 'api',
         queueName: config.queueName,
         runtimeId: config.schedule.runtimeId,
         scheduled: false,
@@ -347,13 +230,11 @@ export async function runBwsPrivatePaperSchedulerPass(
     );
   }
 
-  const pinnedStrategyExports = request.pinnedStrategyExports
-    ?? new SurebetPinnedStrategyExportRepository(config.persistence);
-  const completedCycleSource = findCompletedExportCycleSource(
-    config,
+  const completedCycleSource = findCompletedApiCycleSource(
+    config.upstream,
     lockRecordId,
     nextCycleNumber,
-    pinnedStrategyExports,
+    importRuns,
   );
   if (!completedCycleSource.ok) {
     return completedCycleSource;
@@ -367,21 +248,12 @@ export async function runBwsPrivatePaperSchedulerPass(
       nextCycleNumber,
       completedCycleSource.value.exportedAt,
       completedCycleSource.value.sourceId,
-      buildExportRuntimeJobPayload(
-        config,
-        nextCycleNumber,
-        buildSchedulerCycleId(config.schedule.schedulerCheckpointId, nextCycleNumber),
-        completedCycleSource.value,
-      ),
-      upstreamPass.value.nextSelectionIndex,
+      buildApiRuntimeJobPayload(config, nextCycleNumber, buildSchedulerCycleId(config.schedule.schedulerCheckpointId, nextCycleNumber), completedCycleSource.value),
+      apiCheckpoint.completedCycleCount,
       upstreamPass.value,
       schedulerCheckpoints,
     ),
   );
-}
-
-function isRetiredExportSchedulerConfig(config: BwsPrivatePaperSchedulerConfig): boolean {
-  return config.mode === 'export';
 }
 
 export function parseBwsPrivatePaperScheduleManifest(
@@ -413,11 +285,11 @@ export function parseBwsPrivatePaperScheduleManifest(
       'Schedule manifest schema bws.private_paper_schedule.v1.',
     );
   }
-  if (record.mode !== 'api' && record.mode !== 'export') {
+  if (record.mode !== 'api') {
     return blocked(
       'BWS_PRIVATE_PAPER_SCHEDULE_MODE_INVALID',
-      'BWS private-paper schedule manifest must declare mode=api or mode=export.',
-      'Explicit api or export mode in the private-paper schedule manifest.',
+      'BWS private-paper schedule manifest must declare mode=api.',
+      'Explicit api mode in the private-paper schedule manifest.',
     );
   }
 
@@ -533,39 +405,6 @@ function buildApiRuntimeJobPayload(
   });
 }
 
-function buildExportRuntimeJobPayload(
-  config: BwsPrivatePaperExportSchedulerConfig,
-  cycleNumber: number,
-  cycleId: string,
-  source: Readonly<{
-    readonly exportedAt: string;
-    readonly pinnedStrategyExportRecordId: string;
-    readonly records: readonly JsonValue[];
-    readonly sourceId: string;
-    readonly sourceManifestHash: string;
-  }>,
-): PersistedPrivatePaperRuntimeJobPayload {
-  return Object.freeze({
-    candidatePlans: config.schedule.candidatePlans,
-    cycleId,
-    maxCandidatesPerCycle: config.schedule.maxCandidatesPerCycle,
-    pinnedStrategyExportRecordId: source.pinnedStrategyExportRecordId,
-    runtimeId: config.schedule.runtimeId,
-    schema: 'bws.private_paper_runtime_job.v1',
-    source: Object.freeze({
-      exportedAt: source.exportedAt,
-      kind: 'pinned_records',
-      records: source.records,
-      sourceBundleKind: 'resource_export',
-      sourceManifestHash: source.sourceManifestHash,
-    }),
-    upstreamLockRecordId: buildUpstreamLockRecordId(
-      config.upstream.upstream.lock.commitSha,
-      config.upstream.upstream.lock.gitTreeSha,
-    ),
-  });
-}
-
 function findCompletedApiCycleSource(
   config: BwsUpstreamApiConvergenceConfig,
   upstreamLockRecordId: string,
@@ -600,87 +439,6 @@ function findCompletedApiCycleSource(
     'BWS_PRIVATE_PAPER_SCHEDULER_CYCLE_SOURCE_MISSING',
     `BWS private-paper scheduler requires the completed settlement page metadata for API cycle ${cycleNumber}.`,
     'Persisted succeeded settlement-page import run metadata for the completed API cycle.',
-  );
-}
-
-function findCompletedExportCycleSource(
-  config: BwsPrivatePaperExportSchedulerConfig,
-  upstreamLockRecordId: string,
-  cycleNumber: number,
-  pinnedStrategyExports: Pick<SurebetPinnedStrategyExportRepository, 'get'>,
-): BoundaryResult<Readonly<{
-  readonly exportedAt: string;
-  readonly pinnedStrategyExportRecordId: string;
-  readonly records: readonly JsonValue[];
-  readonly sourceId: string;
-  readonly sourceManifestHash: string;
-}>> {
-  const selectionEntry = config.upstream.selection.entries[cycleNumber - 1];
-  if (selectionEntry === undefined) {
-    return blocked(
-      'BWS_PRIVATE_PAPER_SCHEDULER_CYCLE_SOURCE_MISSING',
-      `BWS private-paper scheduler requires explicit export selection ${cycleNumber} inside checkpoint ${config.upstream.selection.checkpointId}.`,
-      'An explicit immutable export selection entry for the scheduled export-mode cycle.',
-    );
-  }
-
-  const pinnedStrategyExportRecordId = buildPinnedStrategyExportRecordId(
-    config.upstream.selection.checkpointId,
-    selectionEntry.cursor,
-  );
-  const pinnedStrategyExport = pinnedStrategyExports.get(pinnedStrategyExportRecordId);
-  if (pinnedStrategyExport === undefined) {
-    return blocked(
-      'BWS_PRIVATE_PAPER_SCHEDULER_CYCLE_SOURCE_MISSING',
-      `BWS private-paper scheduler requires pinned strategy export ${pinnedStrategyExportRecordId} for selection ${selectionEntry.cursor}.`,
-      'Persisted pinned strategy export provenance for the scheduled export-mode cycle.',
-    );
-  }
-  if (pinnedStrategyExport.upstreamLockRecordId !== upstreamLockRecordId) {
-    return blocked(
-      'BWS_PRIVATE_PAPER_SCHEDULER_IMPORT_METADATA_INVALID',
-      `BWS private-paper scheduler requires pinned strategy export ${pinnedStrategyExportRecordId} to remain pinned to the verified upstream lock.`,
-      'Persisted pinned strategy export provenance aligned to the same verified betting-win upstream lock.',
-    );
-  }
-
-  const strategyExportIntake = validatePinnedBettingWinStrategyExportIntake({
-    expectedSha256: selectionEntry.expectedSha256,
-    exportPath: pinnedStrategyExport.sourceLocator,
-    repositoryRoot: config.repositoryRoot,
-    upstreamLock: config.upstream.upstream.lock,
-  });
-  if (!strategyExportIntake.ok) {
-    return strategyExportIntake;
-  }
-  if (
-    strategyExportIntake.value.exportId !== pinnedStrategyExport.exportId
-    || strategyExportIntake.value.exportedAt !== pinnedStrategyExport.exportedAt
-    || strategyExportIntake.value.sourceSha256 !== pinnedStrategyExport.sourceSha256
-  ) {
-    return blocked(
-      'BWS_PRIVATE_PAPER_SCHEDULER_IMPORT_METADATA_INVALID',
-      `BWS private-paper scheduler requires pinned strategy export ${pinnedStrategyExportRecordId} to remain immutable after convergence.`,
-      'Persisted pinned strategy export provenance whose source file, export id, and exportedAt stay unchanged.',
-    );
-  }
-
-  const bundleIntake = validatePinnedBettingWinBundleIntake(
-    pinnedStrategyExport.sourceLocator,
-    config.repositoryRoot,
-  );
-  if (!bundleIntake.ok) {
-    return bundleIntake;
-  }
-
-  return accepted(
-    Object.freeze({
-      exportedAt: bundleIntake.value.bundle.exportedAt,
-      pinnedStrategyExportRecordId,
-      records: bundleIntake.value.bundle.records as readonly JsonValue[],
-      sourceId: `export-selection:${config.upstream.selection.checkpointId}:${selectionEntry.cursor}`,
-      sourceManifestHash: bundleIntake.value.bundle.reference.manifestHash,
-    }),
   );
 }
 
@@ -891,12 +649,6 @@ async function defaultRunUpstreamApiConvergencePass(
   return runBwsUpstreamApiConvergencePass(request);
 }
 
-async function defaultRunUpstreamExportConvergencePass(
-  request: { readonly config: BwsUpstreamExportConvergenceConfig },
-): Promise<BoundaryResult<BwsUpstreamExportConvergencePassResult>> {
-  return runBwsUpstreamExportConvergencePass(request);
-}
-
 function resolveRepositoryFile(repositoryRoot: string, value: string): string {
   const resolvedRoot = realpathSync(repositoryRoot);
   const resolved = realpathSync(resolve(resolvedRoot, value));
@@ -928,12 +680,8 @@ function buildUpstreamLockRecordId(commitSha: string, gitTreeSha: string): strin
   return `upstream-lock:${commitSha}:${gitTreeSha}`;
 }
 
-function buildPinnedStrategyExportRecordId(checkpointId: string, cursor: string): string {
-  return `pinned-export:${checkpointId}:${cursor}`;
-}
-
 function resolveSchedulerUpstreamCheckpointId(config: BwsPrivatePaperSchedulerConfig): string {
-  return config.mode === 'api' ? config.upstream.checkpointId : config.upstream.selection.checkpointId;
+  return config.upstream.checkpointId;
 }
 
 function scheduleRuntimeJob(
@@ -945,7 +693,7 @@ function scheduleRuntimeJob(
   sourceId: string,
   payload: PersistedPrivatePaperRuntimeJobPayload,
   completedCycleCount: number,
-  upstreamPass: BwsUpstreamApiConvergencePassResult | BwsUpstreamExportConvergencePassResult,
+  upstreamPass: BwsUpstreamApiConvergencePassResult,
   schedulerCheckpoints: Pick<SurebetPrivatePaperRuntimeSchedulerCheckpointRepository, 'advance'>,
 ): BwsPrivatePaperSchedulerPassResult {
   const jobId = buildSchedulerJobId(config.schedule.schedulerCheckpointId, cycleNumber);

@@ -220,7 +220,7 @@ export function resolveBwsServiceRuntimeConfig(
     upstreamRepoPath,
   );
   const persistence = resolveSurebetPersistenceConfig(environment);
-  const apiPort = requirePositiveInteger(environment[BWS_API_PORT_ENV], BWS_API_PORT_ENV);
+  const apiPort = requireTcpPort(environment[BWS_API_PORT_ENV], BWS_API_PORT_ENV);
   const workerId = requireNonEmptyString(environment[BWS_WORKER_ID_ENV], BWS_WORKER_ID_ENV);
   const workerQueueName = requireNonEmptyString(environment[BWS_WORKER_QUEUE_NAME_ENV], BWS_WORKER_QUEUE_NAME_ENV);
   const workerLeaseDurationMs = requirePositiveInteger(
@@ -606,6 +606,14 @@ function requirePositiveInteger(value: string | undefined, name: string): number
   const parsed = Number.parseInt(normalized, 10);
   if (!Number.isSafeInteger(parsed) || parsed <= 0) {
     throw new Error(`${name} must be a positive integer.`);
+  }
+  return parsed;
+}
+
+function requireTcpPort(value: string | undefined, name: string): number {
+  const parsed = requirePositiveInteger(value, name);
+  if (parsed > 65535) {
+    throw new Error(`${name} must be a TCP port in the range 1..65535.`);
   }
   return parsed;
 }

@@ -236,11 +236,11 @@ async function createLifecycleFixture(options: Readonly<{
 }> {
   const root = mkdtempSync(join(tmpdir(), 'bws-operator-lifecycle-'));
   const repositoryRoot = join(root, 'betting-win-surebet');
-  const upstreamRoot = join(root, 'betting-win');
+  const upstreamRoot = readCurrentUpstreamRepositoryPath();
   const runtimeStateDirectory = join(repositoryRoot, 'runtime-state');
   const signalLogPath = join(repositoryRoot, 'signal-log.txt');
   const startedLogPath = join(repositoryRoot, 'started-log.txt');
-  await createRepositoryFixture(repositoryRoot, upstreamRoot);
+  await createRepositoryFixture(repositoryRoot);
   const port = await reserveLoopbackPort();
 
   const roleBootFiles = Object.freeze({
@@ -316,8 +316,7 @@ async function createLifecycleFixture(options: Readonly<{
     BWS_UPSTREAM_CONVERGENCE_PASS_TIMEOUT_MS: '1000',
     BWS_UPSTREAM_CONVERGENCE_RETRY_BACKOFF_MS: '100',
     BWS_UPSTREAM_LOCK_PATH: 'config/betting-win.upstream.lock.json',
-    BWS_UPSTREAM_MODE: 'export',
-    BWS_UPSTREAM_EXPORT_SELECTION_PATH: 'config/export-selection.json',
+    BWS_UPSTREAM_MODE: 'api',
     BWS_WORKER_ID: 'worker-test-001',
     BWS_WORKER_LEASE_DURATION_MS: '1000',
     BWS_WORKER_QUEUE_NAME: 'private-paper',
@@ -406,11 +405,9 @@ async function createLifecycleFixture(options: Readonly<{
   });
 }
 
-async function createRepositoryFixture(repositoryRoot: string, upstreamRoot: string): Promise<void> {
+async function createRepositoryFixture(repositoryRoot: string): Promise<void> {
   rmSync(repositoryRoot, { recursive: true, force: true });
-  rmSync(upstreamRoot, { recursive: true, force: true });
   mkdirSync(repositoryRoot, { recursive: true });
-  mkdirSync(upstreamRoot, { recursive: true });
   mkdirSync(join(repositoryRoot, 'config'), { recursive: true });
   mkdirSync(join(repositoryRoot, 'schemas'), { recursive: true });
   copyFileSync(
@@ -434,19 +431,18 @@ async function createRepositoryFixture(repositoryRoot: string, upstreamRoot: str
   );
   writeFileSync(
     join(repositoryRoot, 'config', 'betting-win.upstream.lock.json'),
-    `${JSON.stringify(sampleUpstreamLock(upstreamRoot), null, 2)}\n`,
-    'utf-8',
+    readFileSync(join(process.cwd(), 'config', 'betting-win.upstream.lock.json'), 'utf-8'),
   );
-  writeFileSync(
-    join(repositoryRoot, 'config', 'export-selection.json'),
-    `${JSON.stringify({
-      expectedBundleSha256: 'f'.repeat(64),
-      exportFile: 'exports/selection.json',
-      generatedAt: TEST_TIMESTAMP,
-      schema: 'betting-win-surebet-export-selection.v1',
-    }, null, 2)}\n`,
-    'utf-8',
-  );
+}
+
+function readCurrentUpstreamRepositoryPath(): string {
+  const sourceLock = JSON.parse(
+    readFileSync(join(process.cwd(), 'config', 'betting-win.upstream.lock.json'), 'utf-8'),
+  ) as { readonly repositoryPath?: unknown };
+  if (typeof sourceLock.repositoryPath !== 'string' || sourceLock.repositoryPath.trim().length === 0) {
+    throw new Error('config/betting-win.upstream.lock.json must contain repositoryPath for lifecycle tests.');
+  }
+  return sourceLock.repositoryPath;
 }
 
 function createApiStubServiceSource(input: Readonly<{
@@ -524,28 +520,6 @@ function createIdleStubServiceSource(input: Readonly<{
     "  });",
     "}",
   ].join('\n');
-}
-
-function sampleUpstreamLock(upstreamRoot: string): Record<string, unknown> {
-  return Object.freeze({
-    schema: 'betting-win-surebet-upstream-lock-v1',
-    repository: 'betting-win',
-    repositoryPath: upstreamRoot,
-    sourceView: 'committed_git_head',
-    commitSha: '0123456789abcdef0123456789abcdef01234567',
-    gitTreeSha: '89abcdef0123456789abcdef0123456789abcdef',
-    trackedTreeListingSha256: 'a'.repeat(64),
-    sourceFingerprintAlgorithm: 'sha256_git_ls_tree_r_full_tree_head_v1',
-    packageVersion: '0.48.0',
-    packageVersions: Object.freeze({
-      '@betting-win/provider-collection': '0.48.0',
-    }),
-    contractSchema: 'betting-win.strategy-export.v1',
-    contractAlias: 'betting-win-strategy-export.v1',
-    surebetProfile: 'surebet_standard_binary_v0',
-    capabilities: Object.freeze(['getHistoricalQuotes']),
-    verifiedAt: TEST_TIMESTAMP,
-  });
 }
 
 async function reserveLoopbackPort(): Promise<number> {

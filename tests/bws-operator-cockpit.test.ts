@@ -779,6 +779,10 @@ test('BWS operator cockpit validation contract includes the web workspace in roo
   ) as {
     scripts?: Record<string, string>;
   };
+  const cockpitBuilder = readFileSync(
+    join(process.cwd(), 'scripts', 'build_bws_operator_cockpit.mjs'),
+    'utf-8',
+  );
 
   assert.match(
     packageJson.scripts?.['validate:web'] ?? '',
@@ -792,4 +796,6 @@ test('BWS operator cockpit validation contract includes the web workspace in roo
     packageJson.scripts?.['validate:starter'] ?? '',
     /npm run validate:web/,
   );
+  assert.match(cockpitBuilder, /port > 65535/);
+  assert.match(cockpitBuilder, /BWS_API_PORT must be a TCP port in the range 1\.\.65535/);
 });

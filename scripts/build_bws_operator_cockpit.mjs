@@ -9,9 +9,13 @@ const DIST_DIRECTORY = resolve(REPOSITORY_ROOT, 'dist');
 const COMPILED_WEB_SOURCE_DIRECTORY = resolve(DIST_DIRECTORY, 'apps/web/src');
 const COMPILED_WEB_ENTRY = resolve(COMPILED_WEB_SOURCE_DIRECTORY, 'index.js');
 
-const port = process.env.BWS_API_PORT;
-if (typeof port !== 'string' || !/^\d+$/.test(port) || Number.parseInt(port, 10) <= 0) {
+const portText = process.env.BWS_API_PORT;
+if (typeof portText !== 'string' || !/^\d+$/.test(portText)) {
   throw new Error('BWS_API_PORT must be set to a base-10 positive integer before building the managed cockpit.');
+}
+const port = Number.parseInt(portText, 10);
+if (!Number.isSafeInteger(port) || port < 1 || port > 65535) {
+  throw new Error('BWS_API_PORT must be a TCP port in the range 1..65535 before building the managed cockpit.');
 }
 if (!existsSync(COMPILED_WEB_ENTRY)) {
   throw new Error(
@@ -26,7 +30,7 @@ cpSync(COMPILED_WEB_SOURCE_DIRECTORY, backupSourceDirectory, { recursive: true }
 let buildFailure;
 let restoreFailure;
 try {
-  const apiBaseUrl = `http://127.0.0.1:${port}`;
+  const apiBaseUrl = `http://127.0.0.1:${String(port)}`;
   execFileSync(
     'npm',
     ['run', '--workspace', '@betting-win-surebet/web', 'build'],

@@ -1,6 +1,6 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-08-03T19:19:38Z",
+  "generated": "2026-08-03T21:01:58Z",
   "overlay": "bws89-bugfix-audit-terminal-handoff-wave52",
   "files": [
     {
@@ -830,8 +830,8 @@
     },
     {
       "path": "packages/bootstrap/src/api/bws-read-only-query-service.ts",
-      "sha256": "4e34282371d7cffb04000b19db8723a70ce1f6b54dc1da2f322205cc82d9c945",
-      "size": 67890
+      "sha256": "4072d00cefaaecb330a425c30cf7d63b42b8f4bc891fbd90112c29164ea839a8",
+      "size": 68204
     },
     {
       "path": "packages/bootstrap/src/backtest/b1-cross-venue-backtest.ts",
@@ -1040,8 +1040,8 @@
     },
     {
       "path": "packages/bootstrap/src/operations/external-runtime-preflight.ts",
-      "sha256": "00cd1d72212fc986e11c1e79c202ea20e58c0ba9f9695758bf170635165789fb",
-      "size": 45671
+      "sha256": "98aa33086c15a8aa184bfe1f5bccdcc92b9da371c7b64c5d29260397ec579652",
+      "size": 45910
     },
     {
       "path": "packages/bootstrap/src/operations/final-local-acceptance.ts",
@@ -1070,8 +1070,8 @@
     },
     {
       "path": "packages/bootstrap/src/operations/private-paper-runtime-scheduler.ts",
-      "sha256": "d77a71317b94aa3b50980c673bc79b2aa9bc9126b9b6ce71740a15571f558f82",
-      "size": 42946
+      "sha256": "390274fe20340df9be6138dda08d53d1b96a8ad957984e619be995cfc774f4a2",
+      "size": 32949
     },
     {
       "path": "packages/bootstrap/src/operations/private-paper-scheduler-service.ts",
@@ -1085,8 +1085,8 @@
     },
     {
       "path": "packages/bootstrap/src/operations/release-packaging.ts",
-      "sha256": "bb76800bbf1a7d9a8d2341d9ace9d38cae96ed591c1741167fd40b979aa1edaa",
-      "size": 64974
+      "sha256": "60438a32d889ac7af02c084c361bc5486a714557e0003ebc67a916d72a9cafbb",
+      "size": 65280
     },
     {
       "path": "packages/bootstrap/src/operations/release-upgrade.ts",
@@ -1100,8 +1100,8 @@
     },
     {
       "path": "packages/bootstrap/src/operations/service-runtime.ts",
-      "sha256": "4f7412e99f7a5623cc0d2987946107d89fa45c3e2f86bee61f3cee09ff7c47f9",
-      "size": 23906
+      "sha256": "b64c94866ec42e334180aa90bc3a04a013638fa2776b02701da83440650ecd81",
+      "size": 24149
     },
     {
       "path": "packages/bootstrap/src/operations/soak-campaign.ts",
@@ -1110,8 +1110,8 @@
     },
     {
       "path": "packages/bootstrap/src/operations/upstream-api-convergence.ts",
-      "sha256": "674aa95d15b4955d8e1ae7fb40f2b941a761a08c93efbb3f6f0bcc23f054542d",
-      "size": 39176
+      "sha256": "d924fc5958415d3e34dc1fef79a477ffac2f7b80cdaa551fa571bda255a4409b",
+      "size": 39420
     },
     {
       "path": "packages/bootstrap/src/operations/upstream-convergence-service.ts",
@@ -1380,8 +1380,8 @@
     },
     {
       "path": "packages/persistence/src/repositories/private-paper-runtime-scheduler-checkpoint-repository.ts",
-      "sha256": "aa3c38a639dc31be6231e5c0e729433fc9a1ab474e3833865e9a6aff93d3e4ac",
-      "size": 17106
+      "sha256": "fd997e6c563e93a0055066ae7ffc64173402495429983e0574b6e929aa743489",
+      "size": 16979
     },
     {
       "path": "packages/persistence/src/repositories/strategy-ledger-repository.ts",
@@ -1725,8 +1725,8 @@
     },
     {
       "path": "scripts/build_bws_operator_cockpit.mjs",
-      "sha256": "1eb11cf613b9731226401e5a0274db76fae47d2a9777dcb95ebdae74f72620d8",
-      "size": 2408
+      "sha256": "3da7027ad98c9c610de436d7ab8fcca1c38eccf4da35a8f5bbc586450183f2fb",
+      "size": 2616
     },
     {
       "path": "scripts/bws-root-wrapper-runtime.mjs",
@@ -2615,13 +2615,13 @@
     },
     {
       "path": "tests/bws-operator-cockpit.test.ts",
-      "sha256": "770a0bef9e0fcd02ce9f89bbeaebdba279156d4b06544783bae52bd2b453bdd3",
-      "size": 28949
+      "sha256": "725c1ea9e95a147f7e7e4621541d13f28207c5c95d814284e8639149dab28b55",
+      "size": 29215
     },
     {
       "path": "tests/bws-operator-lifecycle.test.ts",
-      "sha256": "6ed0a09e32c207d33864e840f678706bea5592b6990bdaf8b6d867b22c90c75e",
-      "size": 25109
+      "sha256": "a1f3e1f7935aef771021a02327cc2b257cc6d092e7e212c25265bb33a006058b",
+      "size": 24195
     },
     {
       "path": "tests/bws-paper-runtime-evidence.test.ts",
@@ -2640,8 +2640,8 @@
     },
     {
       "path": "tests/bws-private-paper-scheduler.test.ts",
-      "sha256": "0d3a8c37fc2b9bbbd98fb431300abac01f4c0235d4a5e8fa4190b3e7d170e3fd",
-      "size": 37277
+      "sha256": "a7bd8ef64bf5cd4716af0a4b812d3e4e32dbae44bbe46157a08925425694a587",
+      "size": 29887
     },
     {
       "path": "tests/bws-private-paper-worker-service.test.ts",
@@ -2650,8 +2650,8 @@
     },
     {
       "path": "tests/bws-read-only-query-api.test.ts",
-      "sha256": "7b95540b138287a96cc8606d1e81dd58f97f6a8c66968cb66b237f784f61654e",
-      "size": 39140
+      "sha256": "dcb2233d13b00c13d15dc035c221e8e0acb3fff31d076294f45b725e747ccd49",
+      "size": 39295
     },
     {
       "path": "tests/bws-release-packaging.test.ts",
@@ -2665,13 +2665,13 @@
     },
     {
       "path": "tests/bws-runtime-applications.test.ts",
-      "sha256": "078dd58a762b0e264d93fb1768688d7f292992c70d13af5f778269d67ec46d38",
-      "size": 24805
+      "sha256": "dc911e3388546d879c738f9eecd5c3200761cda01e509e54c8cbd2d600842fb6",
+      "size": 24258
     },
     {
       "path": "tests/bws-service-runtime.test.ts",
-      "sha256": "d0b74da9e0e5ec446b66bb56d46dd4696992b262be0afb499e5e96c8192fa892",
-      "size": 14442
+      "sha256": "79cc4e562e29d81ec0c17a5a86518b6c7c7b9e22bb36f96ed162946fd151283b",
+      "size": 14874
     },
     {
       "path": "tests/bws-soak-campaign.test.ts",
@@ -2680,8 +2680,8 @@
     },
     {
       "path": "tests/bws-upstream-api-convergence.test.ts",
-      "sha256": "6fe1d70acfbffccb9801277666038121344c3490a571a284077e334b835090bf",
-      "size": 31301
+      "sha256": "32ac205f1901de49d942f7005ded95724f8fcdcbd63e289601b227e7aed2368b",
+      "size": 31532
     },
     {
       "path": "tests/bws-upstream-convergence-service.test.ts",

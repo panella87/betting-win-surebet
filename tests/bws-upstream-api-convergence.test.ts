@@ -354,6 +354,14 @@ test('upstream API convergence config and CLI help stay explicit about api mode 
     assert.throws(
       () => resolveBwsUpstreamApiConvergenceConfig({
         ...baseEnvironment,
+        BWS_API_PORT: '65536',
+      }, fixture.bwsRoot),
+      /BWS_API_PORT must be a TCP port in the range 1\.\.65535/,
+    );
+
+    assert.throws(
+      () => resolveBwsUpstreamApiConvergenceConfig({
+        ...baseEnvironment,
         SUREBET_PINNED_BUNDLE: 'tests/fixtures/private-paper-mode-smoke/accepted-local-bundle.json',
       }, fixture.bwsRoot),
       /forbids SUREBET_PINNED_BUNDLE/,

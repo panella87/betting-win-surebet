@@ -108,6 +108,22 @@ test('BWS service runtime config fails fast on execution enablement and upstream
   }
 });
 
+test('BWS service runtime config rejects API ports outside the TCP range', () => {
+  const fixture = createRuntimeFixture();
+  try {
+    assert.throws(
+      () =>
+        resolveBwsServiceRuntimeConfig({
+          ...fixture.environment,
+          [BWS_API_PORT_ENV]: '65536',
+        }, fixture.repositoryRoot),
+      /BWS_API_PORT must be a TCP port in the range 1\.\.65535/,
+    );
+  } finally {
+    fixture.dispose();
+  }
+});
+
 test('BWS operational status snapshots require immutable strategy evidence policy and explicit cockpit process metadata', () => {
   const fixture = createRuntimeFixture();
   try {
