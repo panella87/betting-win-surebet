@@ -10,6 +10,7 @@ const STANDARD_BWS_API_PORT = '4312';
 const LOOPBACK_AUTHORITY_HOST = 'loopback';
 const LOOPBACK_HOSTS = new Set(['127.0.0.1', '::1', '[::1]', 'localhost']);
 const IPV4_MAPPED_IPV6_LOOPBACK_HOSTS = new Set(['[::ffff:7f00:1]', '[::ffff:127.0.0.1]', '::ffff:7f00:1', '::ffff:127.0.0.1']);
+const UNSPECIFIED_LOCAL_HOSTS = new Set(['0.0.0.0', '::', '[::]']);
 
 const RESOURCE_ENDPOINT_PATHS = Object.freeze({
   identity: '/query/identity-entities',
@@ -182,7 +183,15 @@ export function describeReadOnlyQueryApiClientBoundary(): string {
 }
 
 export function buildReadOnlyQueryContractRequest(request: ReadOnlyQueryContractRequest): BoundaryResult<ReadOnlyQueryContractRequest> {
-  if (request.contractVersion.trim().length === 0) {
+  const requestRecord = asRecord(request);
+  if (requestRecord === undefined) {
+    return blocked(
+      'QUERY_CONTRACT_REQUEST_INVALID',
+      'Read-only query contract request must be an object.',
+      'Object-shaped pinned betting-win read-only query contract request.',
+    );
+  }
+  if (typeof request.contractVersion !== 'string' || request.contractVersion.trim().length === 0) {
     return blocked(
       'QUERY_CONTRACT_NOT_PINNED',
       'A pinned betting-win read-only query contract is required before BWS-140.',
@@ -196,7 +205,7 @@ export function buildReadOnlyQueryContractRequest(request: ReadOnlyQueryContract
       'Supported pinned betting-win read-only query resource.',
     );
   }
-  if (request.cursor !== undefined && request.cursor.trim().length === 0) {
+  if (request.cursor !== undefined && (typeof request.cursor !== 'string' || request.cursor.trim().length === 0)) {
     return blocked(
       'QUERY_CURSOR_INVALID',
       'Read-only query cursor must be a non-empty string when provided.',
@@ -258,6 +267,13 @@ async function executeReadOnlyQuery<TResource extends ReadOnlyQueryResource>(
 }
 
 function validateClientConfig(config: ReadOnlyQueryClientConfig): BoundaryResult<Readonly<ReadOnlyQueryClientConfig>> {
+  if (asRecord(config) === undefined) {
+    return blocked(
+      'QUERY_CLIENT_CONFIG_INVALID',
+      'Read-only query client configuration must be an object.',
+      'Object-shaped read-only betting-win query client configuration.',
+    );
+  }
   const contractRequest = buildReadOnlyQueryContractRequest({
     contractVersion: config.contractVersion,
     resource: 'identity',
@@ -393,7 +409,7 @@ function targetsForbiddenLocalBwsApi(parsed: URL, localBwsApiPort: number | unde
 
 function normalizeAuthorityHostname(hostname: string): string {
   const normalized = hostname.toLowerCase();
-  return LOOPBACK_HOSTS.has(normalized) || IPV4_MAPPED_IPV6_LOOPBACK_HOSTS.has(normalized)
+  return LOOPBACK_HOSTS.has(normalized) || IPV4_MAPPED_IPV6_LOOPBACK_HOSTS.has(normalized) || UNSPECIFIED_LOCAL_HOSTS.has(normalized)
     ? LOOPBACK_AUTHORITY_HOST
     : normalized;
 }
@@ -922,6 +938,9 @@ function validateNormalizedItem(item: Readonly<Record<string, unknown>>): Bounda
 }
 
 function isUpstreamLockCompatible(lock: BettingWinUpstreamLock): boolean {
+  if (asRecord(lock) === undefined) {
+    return false;
+  }
   return lock.contractSchema === 'betting-win.strategy-export.v1'
     && lock.contractAlias === 'betting-win-strategy-export.v1'
     && lock.surebetProfile === 'surebet_standard_binary_v0'

@@ -1,6 +1,6 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-08-04T08:07:30Z",
+  "generated": "2026-08-04T10:01:48Z",
   "overlay": "bws91-bugfix-implementation-return-classification-wave54-cleanup",
   "files": [
     {
@@ -190,8 +190,8 @@
     },
     {
       "path": "apps/web/src/app/url-state.ts",
-      "sha256": "072edfea914d385b1cdb51d46903443cf52ea551abecea23f704453b6f182a2d",
-      "size": 2070
+      "sha256": "1507612e1a16f75868d8579401ece2d7df44005eff78ae8000a4e547d4e7cae4",
+      "size": 2236
     },
     {
       "path": "apps/web/src/index.ts",
@@ -805,23 +805,23 @@
     },
     {
       "path": "packages/bootstrap/src/adapters/betting-win-local-bundle-reader.ts",
-      "sha256": "c238613d1716137d7efa9c79100459fc66a5b90ea16024bc6b26ffcf87e1f36c",
-      "size": 3456
+      "sha256": "e2600812f71c4459511e13801420b77cd0c08914960f263a021caa0e5585cb2b",
+      "size": 3839
     },
     {
       "path": "packages/bootstrap/src/adapters/betting-win-pinned-bundle-intake.ts",
-      "sha256": "0838676fc8e59d7f9835813d4dcd8545f4c69fd4385dffceac643a78fdb80dc8",
-      "size": 3844
+      "sha256": "d9e8d31ff73e54523e7e323196498cb025e81632fde478d7e42485fa51dd9aa6",
+      "size": 3919
     },
     {
       "path": "packages/bootstrap/src/adapters/betting-win-query-client.ts",
-      "sha256": "9032cc37ff148624efba48c56f44071a5eed7ec039b83abf04ab4391cde074c4",
-      "size": 36370
+      "sha256": "9eb31eb7a45f230daed407c30cb664da64c2d1be2921eeb2bc13b654d6b19519",
+      "size": 37162
     },
     {
       "path": "packages/bootstrap/src/adapters/betting-win-strategy-export-intake.ts",
-      "sha256": "8b0c306a729ad4ef7175e37a6e0a68d59af39a483f66098f9c34f9de4b2d2780",
-      "size": 34898
+      "sha256": "eae58e87682a9447b365dc1c021cf868631000a642b2cc998590fe4c7c0571c3",
+      "size": 37489
     },
     {
       "path": "packages/bootstrap/src/api/bws-read-only-query-http.ts",
@@ -1205,8 +1205,8 @@
     },
     {
       "path": "packages/bootstrap/src/runtime/private-paper-runtime.ts",
-      "sha256": "a23a87f9d7d938f3c41d37f339ebf09bb4235e1cbd61af5496d6c7d641e1d96d",
-      "size": 49734
+      "sha256": "252e38a52693f3fa598c9ea92a83b184de0c4b29c4ab0bd5c952b750d009c6f5",
+      "size": 50613
     },
     {
       "path": "packages/bootstrap/src/scenarios/b1-scenario-cashflow.ts",
@@ -1330,8 +1330,8 @@
     },
     {
       "path": "packages/persistence/src/config.ts",
-      "sha256": "5bb2b88472ac0b78bb7122ae783294b5eb2de59f8ba5f296e212b2fb073870c8",
-      "size": 3002
+      "sha256": "03cc5a97ec98091f4a47b9f2ac65682ad298b03617185884e75fea0999ecd4cb",
+      "size": 3484
     },
     {
       "path": "packages/persistence/src/errors.ts",
@@ -1655,8 +1655,8 @@
     },
     {
       "path": "run-bugfix-autopilot.sh",
-      "sha256": "7747d2e1eec65c4f7cbdffc55bf44d211ebaa82a3a7fe9d231a15d509424972a",
-      "size": 57489
+      "sha256": "368a82c2f78f8d6a085839ef33bbcf5ae0ee0a7337929f2721ea645472831726",
+      "size": 58264
     },
     {
       "path": "run-paper-autopilot.sh",
@@ -2535,8 +2535,8 @@
     },
     {
       "path": "tests/betting-win-adapters.test.ts",
-      "sha256": "e1e41403136a23fe492087475f0f174f0e615750a555afe3794424a0283a6a2a",
-      "size": 14081
+      "sha256": "27935c2c1c225fe5a0dca0411e6b6d3b261d0a4d9af0303c38acc63d26373c04",
+      "size": 15919
     },
     {
       "path": "tests/betting-win-b1-resource-records.test.ts",
@@ -2545,8 +2545,8 @@
     },
     {
       "path": "tests/betting-win-query-client.test.ts",
-      "sha256": "9d000a1bb412f193c7b2fb2fded0e89a5ad446a7c18fa6c43b9894852e5c2de6",
-      "size": 15420
+      "sha256": "4c4f21ab5d03e6957fac2209ed3495b5e2599b7aeb59276399e03245ef71b60b",
+      "size": 17312
     },
     {
       "path": "tests/betting-win-resource-records.test.ts",
@@ -2555,8 +2555,8 @@
     },
     {
       "path": "tests/betting-win-strategy-export-intake.test.ts",
-      "sha256": "df60108603c307f616bee0f639098bd38d073d29a252f47976c0727796e3a3db",
-      "size": 11155
+      "sha256": "d0adc91a1c8f8393e35388466718ce18052d00629bdbbb29e13583220fb270d4",
+      "size": 15541
     },
     {
       "path": "tests/betting-win-upstream-contract.test.ts",
@@ -2580,8 +2580,8 @@
     },
     {
       "path": "tests/bugfix-autopilot-contract.test.ts",
-      "sha256": "57452c37e70d647d52392ea82932bfa56df4c7faffb7c9cf34c7972a4ba4cd79",
-      "size": 17161
+      "sha256": "7c24c44a0d3a14bb3339745f87947eeef4fdf2e4e545a9fbc29c4fb4153eb30c",
+      "size": 19592
     },
     {
       "path": "tests/bws-database-lifecycle.test.ts",
@@ -2615,8 +2615,8 @@
     },
     {
       "path": "tests/bws-operator-cockpit.test.ts",
-      "sha256": "725c1ea9e95a147f7e7e4621541d13f28207c5c95d814284e8639149dab28b55",
-      "size": 29215
+      "sha256": "ebff35e1adf5a633d34d0410551e0e55e89edc58bfb3e62b554fb11a83ace86c",
+      "size": 29715
     },
     {
       "path": "tests/bws-operator-lifecycle.test.ts",
@@ -2680,8 +2680,8 @@
     },
     {
       "path": "tests/bws-upstream-api-convergence.test.ts",
-      "sha256": "5c8c29993ace8acda05c9e41c251ea04b1b22ba6e2afaf4a8c5df7df58063e37",
-      "size": 34884
+      "sha256": "e01a70d4c56999c26eefa042faa5ec0ac3e785c874d95ee50583624c1fa35508",
+      "size": 34964
     },
     {
       "path": "tests/bws-upstream-convergence-service.test.ts",
@@ -2870,8 +2870,8 @@
     },
     {
       "path": "tests/private-paper-runtime.test.ts",
-      "sha256": "77a7c17391bf8c02e76d5a89ddfeca61e333c80df0c7938e6f45520f6046cdaf",
-      "size": 31944
+      "sha256": "cd0ffb088d55e375e1fe5973f6b63dadf965a6ef8679d2d2c95a327c1350f8c4",
+      "size": 35443
     },
     {
       "path": "tests/quote-capacity.test.ts",
@@ -2970,8 +2970,8 @@
     },
     {
       "path": "tests/surebet-persistence.test.ts",
-      "sha256": "6b2114923db34c016f32fcb2b008e8284c0be3d2f1354d226e2287a9fed31d3a",
-      "size": 18924
+      "sha256": "07590db688047c726e7ed5f59ac80e089dc58aecacec47b5f86cd7735e0d6f1f",
+      "size": 19811
     },
     {
       "path": "tests/telegram-notify-format.test.ts",

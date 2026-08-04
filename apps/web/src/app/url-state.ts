@@ -23,7 +23,11 @@ function requireNonNegativeInteger(value: string | null): number {
   if (!/^\d+$/.test(value)) {
     throw new Error('BWS cockpit page state must be a non-negative integer.');
   }
-  return Number.parseInt(value, 10);
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isSafeInteger(parsed) || parsed < 0) {
+    throw new Error('BWS cockpit page state must be a safe non-negative integer.');
+  }
+  return parsed;
 }
 
 export function readBwsOperatorCockpitUrlState(

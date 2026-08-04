@@ -4,6 +4,7 @@ import { createServer, type IncomingMessage, type ServerResponse } from 'node:ht
 import { once } from 'node:events';
 import type { AddressInfo } from 'node:net';
 import {
+  buildReadOnlyQueryContractRequest,
   createReadOnlyQueryApiClient,
   describeReadOnlyQueryApiClientBoundary,
 } from '../src/adapters/betting-win-query-client.js';
@@ -13,6 +14,27 @@ const TEST_TIMESTAMP = '2026-07-14T10:00:00.000Z';
 
 test('read-only query client exposes the BWS-140 boundary marker', () => {
   assert.equal(describeReadOnlyQueryApiClientBoundary(), '@betting-win-surebet/bootstrap:BWS-140');
+});
+
+test('read-only query client rejects malformed contract versions before config dereference escapes', () => {
+  for (const contractVersion of [undefined, 42, '   ']) {
+    const result = createReadOnlyQueryApiClient({
+      baseUrl: 'http://betting-win-query.test',
+      contractVersion,
+      fetchImplementation: globalThis.fetch.bind(globalThis),
+      maxPageSize: 50,
+      retryBackoffMs: 5,
+      retryLimit: 1,
+      timeoutMs: 25,
+      upstreamLock: sampleUpstreamLock(),
+    } as never);
+    assert.equal(result.ok, false);
+    assert.equal(result.blockers[0]?.code, 'QUERY_CONTRACT_NOT_PINNED');
+  }
+
+  const request = buildReadOnlyQueryContractRequest(undefined as never);
+  assert.equal(request.ok, false);
+  assert.equal(request.blockers[0]?.code, 'QUERY_CONTRACT_REQUEST_INVALID');
 });
 
 test('read-only query client rejects invalid base URLs and explicit credentialed endpoints', () => {
@@ -48,6 +70,8 @@ test('read-only query client rejects invalid base URLs and explicit credentialed
     'http://[::1]:4312',
     'http://[::ffff:127.0.0.1]:4312',
     'http://[::ffff:7f00:1]:4312',
+    'http://0.0.0.0:4312',
+    'http://[::]:4312',
   ]) {
     const localBwsApi = createReadOnlyQueryApiClient({
       baseUrl,
@@ -76,6 +100,35 @@ test('read-only query client rejects invalid base URLs and explicit credentialed
   });
   assert.equal(configuredLocalBwsApi.ok, false);
   assert.equal(configuredLocalBwsApi.blockers[0]?.code, 'QUERY_BASE_URL_LOCAL_BWS_API_FORBIDDEN');
+
+  for (const baseUrl of ['http://0.0.0.0:4301', 'http://[::]:4301']) {
+    const configuredUnspecifiedLocalBwsApi = createReadOnlyQueryApiClient({
+      baseUrl,
+      contractVersion: '1.0.0',
+      fetchImplementation: globalThis.fetch.bind(globalThis),
+      localBwsApiPort: 4301,
+      maxPageSize: 50,
+      retryBackoffMs: 5,
+      retryLimit: 1,
+      timeoutMs: 25,
+      upstreamLock: sampleUpstreamLock(),
+    });
+    assert.equal(configuredUnspecifiedLocalBwsApi.ok, false);
+    assert.equal(configuredUnspecifiedLocalBwsApi.blockers[0]?.code, 'QUERY_BASE_URL_LOCAL_BWS_API_FORBIDDEN');
+  }
+
+  const externalUnspecifiedPort = createReadOnlyQueryApiClient({
+    baseUrl: 'http://0.0.0.0:4302',
+    contractVersion: '1.0.0',
+    fetchImplementation: globalThis.fetch.bind(globalThis),
+    localBwsApiPort: 4301,
+    maxPageSize: 50,
+    retryBackoffMs: 5,
+    retryLimit: 1,
+    timeoutMs: 25,
+    upstreamLock: sampleUpstreamLock(),
+  });
+  assert.equal(externalUnspecifiedPort.ok, true);
 
   const unsafeLocalBwsApiPort = createReadOnlyQueryApiClient({
     baseUrl: 'http://localhost:4301',

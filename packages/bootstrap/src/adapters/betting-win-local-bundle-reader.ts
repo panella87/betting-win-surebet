@@ -9,14 +9,22 @@ export function readLocalBettingWinExportBundle(
   bundlePath: string,
   repoRoot: string = process.cwd(),
 ): BoundaryResult<BettingWinExportBundle> {
-  if (bundlePath.trim().length === 0) {
+  if (typeof bundlePath !== 'string' || bundlePath.trim().length === 0) {
     return blocked(
       'LOCAL_EXPORT_PATH_MISSING',
       'A repo-local export bundle path is required.',
       'Repo-local JSON export bundle path.',
     );
   }
-  if (URL_SCHEME_PREFIX.test(bundlePath)) {
+  if (typeof repoRoot !== 'string' || repoRoot.trim().length === 0) {
+    return blocked(
+      'LOCAL_EXPORT_REPO_ROOT_INVALID',
+      'A repo-local export bundle repository root is required.',
+      'Repository root containing the local export bundle.',
+    );
+  }
+  const trimmedBundlePath = bundlePath.trim();
+  if (URL_SCHEME_PREFIX.test(trimmedBundlePath)) {
     return blocked(
       'LOCAL_EXPORT_REMOTE_URL_FORBIDDEN',
       'Export bundle path must be a repo-local filesystem path, not a URL.',
@@ -24,8 +32,8 @@ export function readLocalBettingWinExportBundle(
     );
   }
 
-  const resolvedRepoRoot = resolve(repoRoot);
-  const resolvedBundlePath = isAbsolute(bundlePath) ? resolve(bundlePath) : resolve(resolvedRepoRoot, bundlePath);
+  const resolvedRepoRoot = resolve(repoRoot.trim());
+  const resolvedBundlePath = isAbsolute(trimmedBundlePath) ? resolve(trimmedBundlePath) : resolve(resolvedRepoRoot, trimmedBundlePath);
 
   if (!isPathInsideRoot(resolvedRepoRoot, resolvedBundlePath)) {
     return blocked(

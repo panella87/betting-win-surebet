@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { validatePinnedBettingWinStrategyExportIntake } from '../src/adapters/betting-win-strategy-export-intake.js';
 import type { BettingWinUpstreamLock } from '../packages/upstream/src/upstream/betting-win-upstream-lock.js';
@@ -33,6 +33,104 @@ test('pinned strategy export intake accepts a hashed immutable export that match
     assert.deepEqual(result.value.normalizedEvidenceIds, ['normalized-001']);
     assert.equal(result.value.rawObservationCount, 1);
     assert.equal(Object.isFrozen(result.value.providerGenerationIds), true);
+  } finally {
+    rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test('pinned strategy export intake rejects malformed public options before dereferencing fields', () => {
+  const malformedOptions = validatePinnedBettingWinStrategyExportIntake(undefined as never);
+  assert.equal(malformedOptions.ok, false);
+  assert.equal(malformedOptions.blockers[0]?.code, 'PINNED_STRATEGY_EXPORT_OPTIONS_INVALID');
+
+  const missingExportPath = validatePinnedBettingWinStrategyExportIntake({
+    expectedSha256: 'a'.repeat(64),
+    repositoryRoot: REPO_ROOT,
+    upstreamLock: sampleUpstreamLock(),
+  } as never);
+  assert.equal(missingExportPath.ok, false);
+  assert.equal(missingExportPath.blockers[0]?.code, 'PINNED_STRATEGY_EXPORT_PATH_MISSING');
+
+  const malformedRepositoryRoot = validatePinnedBettingWinStrategyExportIntake({
+    exportPath: 'tests/fixtures/local-only-export-bundles/valid-resource-export.json',
+    expectedSha256: 'a'.repeat(64),
+    repositoryRoot: 42,
+    upstreamLock: sampleUpstreamLock(),
+  } as never);
+  assert.equal(malformedRepositoryRoot.ok, false);
+  assert.equal(malformedRepositoryRoot.blockers[0]?.code, 'PINNED_STRATEGY_EXPORT_REPOSITORY_ROOT_INVALID');
+
+  const malformedSha = validatePinnedBettingWinStrategyExportIntake({
+    exportPath: 'tests/fixtures/local-only-export-bundles/valid-resource-export.json',
+    expectedSha256: 42,
+    repositoryRoot: REPO_ROOT,
+    upstreamLock: sampleUpstreamLock(),
+  } as never);
+  assert.equal(malformedSha.ok, false);
+  assert.equal(malformedSha.blockers[0]?.code, 'PINNED_STRATEGY_EXPORT_EXPECTED_SHA256_INVALID');
+
+  const malformedLock = validatePinnedBettingWinStrategyExportIntake({
+    exportPath: 'tests/fixtures/local-only-export-bundles/valid-resource-export.json',
+    expectedSha256: 'a'.repeat(64),
+    repositoryRoot: REPO_ROOT,
+    upstreamLock: undefined,
+  } as never);
+  assert.equal(malformedLock.ok, false);
+  assert.equal(malformedLock.blockers[0]?.code, 'PINNED_STRATEGY_EXPORT_UPSTREAM_LOCK_INVALID');
+});
+
+test('pinned strategy export intake rejects paths outside the repository root', () => {
+  const tempDir = createTempDir('strategy-export-containment-');
+
+  try {
+    const repositoryRoot = join(tempDir, 'repo-root');
+    const outsideRoot = join(tempDir, 'outside-root');
+    mkdirSync(repositoryRoot, { recursive: true });
+    mkdirSync(outsideRoot, { recursive: true });
+
+    const exportDocument = createStrategyExportDocument();
+    const outsideExportPath = join(outsideRoot, 'valid-export.json');
+    const sourceSha256 = writeJsonAndHash(outsideExportPath, exportDocument);
+
+    const absoluteOutside = validatePinnedBettingWinStrategyExportIntake({
+      exportPath: outsideExportPath,
+      expectedSha256: sourceSha256,
+      repositoryRoot,
+      upstreamLock: sampleUpstreamLock(),
+    });
+    assert.equal(absoluteOutside.ok, false);
+    assert.equal(absoluteOutside.blockers[0]?.code, 'PINNED_STRATEGY_EXPORT_PATH_OUTSIDE_REPO');
+
+    const traversalOutside = validatePinnedBettingWinStrategyExportIntake({
+      exportPath: join('..', 'outside-root', 'valid-export.json'),
+      expectedSha256: sourceSha256,
+      repositoryRoot,
+      upstreamLock: sampleUpstreamLock(),
+    });
+    assert.equal(traversalOutside.ok, false);
+    assert.equal(traversalOutside.blockers[0]?.code, 'PINNED_STRATEGY_EXPORT_PATH_OUTSIDE_REPO');
+
+    const linkedOutsidePath = join(repositoryRoot, 'linked-outside');
+    symlinkSync(outsideRoot, linkedOutsidePath, 'dir');
+    const symlinkComponent = validatePinnedBettingWinStrategyExportIntake({
+      exportPath: join('linked-outside', 'valid-export.json'),
+      expectedSha256: sourceSha256,
+      repositoryRoot,
+      upstreamLock: sampleUpstreamLock(),
+    });
+    assert.equal(symlinkComponent.ok, false);
+    assert.equal(symlinkComponent.blockers[0]?.code, 'PINNED_STRATEGY_EXPORT_REALPATH_OUTSIDE_REPO');
+
+    const directSymlinkPath = join(repositoryRoot, 'linked-export.json');
+    symlinkSync(outsideExportPath, directSymlinkPath, 'file');
+    const directSymlink = validatePinnedBettingWinStrategyExportIntake({
+      exportPath: 'linked-export.json',
+      expectedSha256: sourceSha256,
+      repositoryRoot,
+      upstreamLock: sampleUpstreamLock(),
+    });
+    assert.equal(directSymlink.ok, false);
+    assert.equal(directSymlink.blockers[0]?.code, 'PINNED_STRATEGY_EXPORT_SYMLINK_FORBIDDEN');
   } finally {
     rmSync(tempDir, { recursive: true, force: true });
   }

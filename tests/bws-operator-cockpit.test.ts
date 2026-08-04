@@ -13,6 +13,7 @@ import {
   loadBwsOperatorCockpitSnapshot,
   listBwsOperatorCockpitRoutes,
   normalizeBwsOperatorCockpitPinnedExportScope,
+  readBwsOperatorCockpitUrlState,
   resolveBwsOperatorCockpitBrowserConfig,
   type BwsOperatorCockpitFetchLike,
 } from '../apps/web/src/index.js';
@@ -117,6 +118,20 @@ test('BWS operator cockpit process metadata stays loopback-only in explicit api 
       purpose: 'operator_cockpit',
     }),
   ]);
+});
+
+test('BWS operator cockpit URL state rejects unsafe page integers', () => {
+  assert.throws(
+    () => readBwsOperatorCockpitUrlState('?page=9007199254740993'),
+    /BWS cockpit page state must be a safe non-negative integer/,
+  );
+
+  assert.throws(
+    () => readBwsOperatorCockpitUrlState(`?page=${'9'.repeat(400)}`),
+    /BWS cockpit page state must be a safe non-negative integer/,
+  );
+
+  assert.equal(readBwsOperatorCockpitUrlState('?page=42').page, 42);
 });
 
 test('BWS operator cockpit pinned export scope rejects unbounded and malformed filters', () => {

@@ -402,7 +402,13 @@ test('upstream API convergence config and CLI help stay explicit about api mode 
       rmSync(outsideLockPath, { force: true });
     }
 
-    for (const apiBaseUrl of ['http://127.0.0.1:4312', 'http://localhost:4312', 'http://[::1]:4312']) {
+    for (const apiBaseUrl of [
+      'http://127.0.0.1:4312',
+      'http://localhost:4312',
+      'http://[::1]:4312',
+      'http://0.0.0.0:4312',
+      'http://[::]:4312',
+    ]) {
       const localConfig = resolveBwsUpstreamApiConvergenceConfig({
         ...baseEnvironment,
         [BWS_UPSTREAM_API_BASE_URL_ENV]: apiBaseUrl,

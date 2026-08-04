@@ -245,6 +245,46 @@ printf 'run_dir=%s\nfinal_status=AUTONOMOUS_GOAL_COMPLETE=yes\nstop_reason=stub_
   }
 });
 
+test('bugfix autopilot rejects contradictory clean audit request flags', () => {
+  const repo = prepareTempRepo();
+  try {
+    writeExecutable(join(repo, 'run-autonomous-bugfix.sh'), `#!/usr/bin/env bash
+set -Eeuo pipefail
+repo=""; area=""; while [[ $# -gt 0 ]]; do case "$1" in --repo-dir) repo="$2"; shift 2;; --campaign-area) area="$2"; shift 2;; *) shift;; esac; done
+. "$repo/.automation/lib/controller_hardening_v2.sh"
+run="$repo/artifacts/autonomous_bugfix_20260101T000006Z"; cycle="$run/cycles/cycle_1"; mkdir -p "$cycle"
+printf 'BUGFIX_AUDIT_COMPLETE=yes\\n' > "$cycle/continue_status.txt"
+printf 'BUGS_FOUND=no\\nHANDOVER_AUTONOMOUS_IMPLEMENTATION_REQUIRED=no\\nNEXT_AUDIT_AREA=none\\nCAMPAIGN_AREA=%s\\nCAMPAIGN_AREA_COMPLETE=yes\\nSOURCE_EVIDENCE_COMPLETE=yes\\nBUG_IDS=STUB-1\\nIMPLEMENTATION_SCOPE=none\\nBUGFIX_MODE_AUTOMATION_MAINTENANCE_ALLOWED=no\\nALLOWED_PROTECTED_FILES=none\\nEXTRA_FLAG=no\\n' "$area" > "$cycle/request_flags.txt"
+automation_v2_publish_child_result "$repo" 'run-autonomous-bugfix.sh' 'stub-bugfix-v1' "$run" 'BUGFIX_AUDIT_COMPLETE=yes' 'stub_clean' 0 1 not_acquired 0 no
+printf 'run_dir=%s\\nfinal_status=BUGFIX_AUDIT_COMPLETE=yes\\nstop_reason=stub_clean\\nfinal_exit_code=0\\ncycles_completed=1\\n' "$run"
+`);
+    writeExecutable(join(repo, 'run-autonomous-implementation.sh'), '#!/usr/bin/env bash\nexit 99\n');
+
+    const result = spawnSync('bash', ['./run-bugfix-autopilot.sh', '--duration', '60', '--bugfix-duration', '30', '--implementation-duration', '30', '--max-rounds', '1', '--model', 'cli-default', '--fallback-model', 'none', '--no-stream'], {
+      cwd: repo,
+      env: { ...process.env, TELEGRAM_NOTIFY: '0' },
+      encoding: 'utf8',
+      timeout: 20000,
+    });
+
+    assert.equal(result.status, 2, `${result.stdout}\n${result.stderr}`);
+    assert.match(result.stdout, /final_status=BUGFIX_AUTOPILOT_BLOCKED_HANDOFF_MISMATCH/);
+    assert.match(result.stdout, /stop_reason=invalid_bugfix_completion_contract/);
+    const runDirMatch = result.stdout.match(/run_dir=(.+)/);
+    assert.ok(runDirMatch);
+    const runDir = runDirMatch[1];
+    if (runDir === undefined) {
+      throw new Error('Expected bugfix autopilot stdout to include run_dir.');
+    }
+    assert.doesNotMatch(
+      readFileSync(join(runDir, 'campaign_coverage.tsv'), 'utf8'),
+      /boundary_and_input_contracts\tclosed/,
+    );
+  } finally {
+    rmSync(repo, { recursive: true, force: true });
+  }
+});
+
 test('bugfix autopilot blocks an audit child that mutates source', () => {
   const repo = prepareTempRepo();
   try {

@@ -21,6 +21,7 @@ import type { BettingWinUpstreamLock } from '../packages/upstream/src/upstream/b
 const REPO_ROOT = process.cwd();
 const TEST_TIMESTAMP = '2026-07-14T10:00:00.000Z';
 const SOLVER_READY_BUNDLE = 'tests/fixtures/local-only-export-bundles/solver-ready-resource-export.json';
+const READ_ONLY_QUERY_RESOURCE_KEYS = Object.freeze(['identity', 'rules', 'quotes', 'settlement'] as const);
 
 test('private paper runtime executes a bounded loopback read-only query cycle', async () => {
   await withLoopbackServer(async (baseUrl) => {
@@ -585,6 +586,84 @@ test('private paper runtime rejects unsupported read-only settlement polling wit
   ]);
 });
 
+test('private paper runtime rejects missing required read-only query requests', async () => {
+  const client = createClient('http://127.0.0.1:9');
+
+  for (const resource of READ_ONLY_QUERY_RESOURCE_KEYS) {
+    const requests = { ...createLoopbackReadOnlyQueryRequests() };
+    delete (requests as Record<string, unknown>)[resource];
+
+    const runtimeResult = await runBoundedPrivatePaperRuntimeCycle({
+      runtimeId: `runtime-missing-request-${resource}`,
+      cycleId: `cycle-missing-request-${resource}`,
+      maxCandidatesPerCycle: 1,
+      upstreamLock: sampleUpstreamLock(),
+      source: {
+        kind: 'read_only_query',
+        exportedAt: '2026-07-01T00:00:03.000Z',
+        sourceManifestHash: 'a'.repeat(64),
+        client,
+        requests,
+        mappers: createLoopbackRecordMappers(),
+      },
+      candidatePlans: [
+        {
+          candidateId: 'market-002',
+          decisionTimestamp: '2026-07-01T00:00:02.500Z',
+          maxQuoteAgeMs: 2_000,
+          manualKill: false,
+          completionEvents: [
+            { legId: 'market-002:yes', type: 'reserve', stakeMinor: 100n, occurredAt: '2026-07-01T00:00:02.600Z' },
+          ],
+        },
+      ],
+    } as PrivatePaperRuntimeRequest);
+
+    assert.equal(runtimeResult.ok, false);
+    assert.equal(runtimeResult.blockers[0]?.code, 'PRIVATE_PAPER_RUNTIME_QUERY_REQUEST_MISSING');
+    assert.match(runtimeResult.blockers[0]?.message ?? '', new RegExp(resource));
+  }
+});
+
+test('private paper runtime rejects missing required read-only query mappers', async () => {
+  const client = createClient('http://127.0.0.1:9');
+
+  for (const resource of READ_ONLY_QUERY_RESOURCE_KEYS) {
+    const mappers = { ...createLoopbackRecordMappers() };
+    delete (mappers as Record<string, unknown>)[resource];
+
+    const runtimeResult = await runBoundedPrivatePaperRuntimeCycle({
+      runtimeId: `runtime-missing-mapper-${resource}`,
+      cycleId: `cycle-missing-mapper-${resource}`,
+      maxCandidatesPerCycle: 1,
+      upstreamLock: sampleUpstreamLock(),
+      source: {
+        kind: 'read_only_query',
+        exportedAt: '2026-07-01T00:00:03.000Z',
+        sourceManifestHash: 'b'.repeat(64),
+        client,
+        requests: createLoopbackReadOnlyQueryRequests(),
+        mappers,
+      },
+      candidatePlans: [
+        {
+          candidateId: 'market-002',
+          decisionTimestamp: '2026-07-01T00:00:02.500Z',
+          maxQuoteAgeMs: 2_000,
+          manualKill: false,
+          completionEvents: [
+            { legId: 'market-002:yes', type: 'reserve', stakeMinor: 100n, occurredAt: '2026-07-01T00:00:02.600Z' },
+          ],
+        },
+      ],
+    } as PrivatePaperRuntimeRequest);
+
+    assert.equal(runtimeResult.ok, false);
+    assert.equal(runtimeResult.blockers[0]?.code, 'PRIVATE_PAPER_RUNTIME_QUERY_MAPPER_MISSING');
+    assert.match(runtimeResult.blockers[0]?.message ?? '', new RegExp(resource));
+  }
+});
+
 function createClient(baseUrl: string) {
   const client = createReadOnlyQueryApiClient({
     baseUrl,
@@ -598,6 +677,15 @@ function createClient(baseUrl: string) {
   });
   assert.equal(client.ok, true);
   return client.value;
+}
+
+function createLoopbackReadOnlyQueryRequests(): Extract<PrivatePaperRuntimeRequest['source'], { kind: 'read_only_query' }>['requests'] {
+  return {
+    identity: { pageSize: 1, maxPages: 1, filters: { canonicalId: 'market-002' } },
+    rules: { pageSize: 1, maxPages: 1, filters: { ruleProfileId: 'rules-002' } },
+    quotes: { pageSize: 1, maxPages: 1, filters: { marketId: 'market-002' } },
+    settlement: { pageSize: 1, maxPages: 1, filters: { marketId: 'market-002' } },
+  };
 }
 
 function createLoopbackRecordMappers(): PrivatePaperReadOnlyQueryRecordMappers {

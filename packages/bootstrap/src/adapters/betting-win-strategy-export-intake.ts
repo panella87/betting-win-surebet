@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { lstatSync, readFileSync, realpathSync, statSync } from 'node:fs';
-import { isAbsolute, resolve } from 'node:path';
+import { isAbsolute, relative, resolve } from 'node:path';
 import type { BettingWinUpstreamLock } from '../../../upstream/src/upstream/betting-win-upstream-lock.js';
 import { accepted, blocked, type BoundaryResult } from '../contracts/local-types.js';
 
@@ -86,24 +86,53 @@ interface StrategyExportDocument {
 export function validatePinnedBettingWinStrategyExportIntake(
   options: ValidatePinnedBettingWinStrategyExportIntakeOptions,
 ): BoundaryResult<PinnedBettingWinStrategyExportIntake> {
+  if (!isObject(options)) {
+    return blocked(
+      'PINNED_STRATEGY_EXPORT_OPTIONS_INVALID',
+      'Pinned strategy export intake options must be an object.',
+      'Object-shaped pinned strategy export intake options.',
+    );
+  }
+
+  const exportPath = requireNonEmptyString(
+    options.exportPath,
+    'PINNED_STRATEGY_EXPORT_PATH_MISSING',
+    'A pinned strategy export file path is required.',
+    'Pinned strategy export JSON file path.',
+  );
+  if (!exportPath.ok) {
+    return exportPath;
+  }
+  const repositoryRoot = requireNonEmptyString(
+    options.repositoryRoot,
+    'PINNED_STRATEGY_EXPORT_REPOSITORY_ROOT_INVALID',
+    'Pinned strategy export intake requires a repository root.',
+    'Repository root containing the pinned strategy export.',
+  );
+  if (!repositoryRoot.ok) {
+    return repositoryRoot;
+  }
+  const expectedSha256 = requireSha256(
+    options.expectedSha256,
+    'PINNED_STRATEGY_EXPORT_EXPECTED_SHA256_INVALID',
+    'Pinned strategy export intake requires expectedSha256 to be 64 hexadecimal characters.',
+    'Expected pinned strategy export SHA-256.',
+  );
+  if (!expectedSha256.ok) {
+    return expectedSha256;
+  }
+
   const upstreamContract = validateUpstreamContract(options.upstreamLock);
   if (!upstreamContract.ok) {
     return upstreamContract;
   }
 
-  const exportFile = readImmutableExportFile(options.exportPath, options.repositoryRoot);
+  const exportFile = readImmutableExportFile(exportPath.value, repositoryRoot.value);
   if (!exportFile.ok) {
     return exportFile;
   }
 
-  if (!SHA256_REGEX.test(options.expectedSha256)) {
-    return blocked(
-      'PINNED_STRATEGY_EXPORT_EXPECTED_SHA256_INVALID',
-      'Pinned strategy export intake requires expectedSha256 to be 64 hexadecimal characters.',
-      'Expected pinned strategy export SHA-256.',
-    );
-  }
-  if (exportFile.value.sourceSha256 !== options.expectedSha256.toLowerCase()) {
+  if (exportFile.value.sourceSha256 !== expectedSha256.value) {
     return blocked(
       'PINNED_STRATEGY_EXPORT_SHA256_MISMATCH',
       'Pinned strategy export SHA-256 does not match the expected immutable digest.',
@@ -154,6 +183,13 @@ export function validatePinnedBettingWinStrategyExportIntake(
 }
 
 function validateUpstreamContract(upstreamLock: BettingWinUpstreamLock): BoundaryResult<undefined> {
+  if (!isObject(upstreamLock)) {
+    return blocked(
+      'PINNED_STRATEGY_EXPORT_UPSTREAM_LOCK_INVALID',
+      'Pinned strategy export intake requires an object-shaped upstream lock.',
+      'Validated betting-win upstream lock for betting-win.strategy-export.v1.',
+    );
+  }
   if (upstreamLock.contractSchema !== BETTING_WIN_STRATEGY_EXPORT_SCHEMA) {
     return blocked(
       'PINNED_STRATEGY_EXPORT_SCHEMA_MISMATCH',
@@ -182,14 +218,23 @@ function readImmutableExportFile(
   exportPath: string,
   repositoryRoot: string,
 ): BoundaryResult<Readonly<{ exportPath: string; parsed: unknown; sourceSha256: string }>> {
-  if (exportPath.trim().length === 0) {
+  if (typeof exportPath !== 'string' || exportPath.trim().length === 0) {
     return blocked(
       'PINNED_STRATEGY_EXPORT_PATH_MISSING',
       'A pinned strategy export file path is required.',
       'Pinned strategy export JSON file path.',
     );
   }
-  if (URL_SCHEME_PREFIX.test(exportPath)) {
+  if (typeof repositoryRoot !== 'string' || repositoryRoot.trim().length === 0) {
+    return blocked(
+      'PINNED_STRATEGY_EXPORT_REPOSITORY_ROOT_INVALID',
+      'Pinned strategy export intake requires a repository root.',
+      'Repository root containing the pinned strategy export.',
+    );
+  }
+  const trimmedExportPath = exportPath.trim();
+  const trimmedRepositoryRoot = repositoryRoot.trim();
+  if (URL_SCHEME_PREFIX.test(trimmedExportPath)) {
     return blocked(
       'PINNED_STRATEGY_EXPORT_REMOTE_URL_FORBIDDEN',
       'Pinned strategy export intake requires a filesystem path, not a URL.',
@@ -197,8 +242,20 @@ function readImmutableExportFile(
     );
   }
 
-  const resolvedPath = isAbsolute(exportPath) ? resolve(exportPath) : resolve(repositoryRoot, exportPath);
+  const resolvedRepositoryRoot = resolve(trimmedRepositoryRoot);
+  const resolvedPath = isAbsolute(trimmedExportPath)
+    ? resolve(trimmedExportPath)
+    : resolve(resolvedRepositoryRoot, trimmedExportPath);
+  if (!isPathInsideRoot(resolvedRepositoryRoot, resolvedPath)) {
+    return blocked(
+      'PINNED_STRATEGY_EXPORT_PATH_OUTSIDE_REPO',
+      'Pinned strategy export path must stay inside the current repository.',
+      'Repo-contained pinned strategy export JSON file path.',
+    );
+  }
+
   try {
+    const repositoryRealPath = realpathSync(resolvedRepositoryRoot);
     const linkStats = lstatSync(resolvedPath);
     if (linkStats.isSymbolicLink()) {
       return blocked(
@@ -218,6 +275,14 @@ function readImmutableExportFile(
     }
 
     const immutablePath = realpathSync(resolvedPath);
+    if (!isPathInsideRoot(repositoryRealPath, immutablePath)) {
+      return blocked(
+        'PINNED_STRATEGY_EXPORT_REALPATH_OUTSIDE_REPO',
+        'Pinned strategy export realpath must stay inside the current repository.',
+        'Repo-contained pinned strategy export JSON file realpath.',
+      );
+    }
+
     let parsed: unknown;
     let contents: string;
     try {
@@ -251,6 +316,11 @@ function readImmutableExportFile(
     }
     throw error;
   }
+}
+
+function isPathInsideRoot(rootPath: string, candidatePath: string): boolean {
+  const relativePath = relative(rootPath, candidatePath);
+  return relativePath.length === 0 || (!relativePath.startsWith('..') && !isAbsolute(relativePath));
 }
 
 function parseStrategyExportDocument(value: unknown): BoundaryResult<StrategyExportDocument> {

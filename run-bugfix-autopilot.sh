@@ -670,17 +670,24 @@ validate_implementation_handoff() {
 }
 
 validate_bugfix_completion_contract() {
-  local cycle_dir flags status key
+  local cycle_dir status clean_request_flags_keys
   cycle_dir="$(find "$LAST_CHILD_RUN_DIR/cycles" -mindepth 1 -maxdepth 1 -type d -name 'cycle_*' -print 2>/dev/null | sort -V | tail -n 1)"
   [[ -n "$cycle_dir" && -f "$cycle_dir/continue_status.txt" && -f "$cycle_dir/request_flags.txt" ]] || return 2
   status="$(grep -v '^[[:space:]]*$' "$cycle_dir/continue_status.txt" | tr -d '\r')"
   [[ "$status" == BUGFIX_AUDIT_COMPLETE=yes ]] || return 2
   automation_v2_load_env_strict "$cycle_dir/request_flags.txt" || return 2
-  [[ "${AUTOMATION_V2_ENV[CAMPAIGN_AREA]-}" == "$CAMPAIGN_ACTIVE_AREA" ]] || return 2
-  [[ "${AUTOMATION_V2_ENV[CAMPAIGN_AREA_COMPLETE]-}" == yes ]] || return 2
-  [[ "${AUTOMATION_V2_ENV[BUGS_FOUND]-}" == no ]] || return 2
-  [[ "${AUTOMATION_V2_ENV[HANDOVER_AUTONOMOUS_IMPLEMENTATION_REQUIRED]-}" == no ]] || return 2
-  [[ "${AUTOMATION_V2_ENV[SOURCE_EVIDENCE_COMPLETE]-}" == yes ]] || return 2
+  clean_request_flags_keys='BUGS_FOUND,HANDOVER_AUTONOMOUS_IMPLEMENTATION_REQUIRED,NEXT_AUDIT_AREA,CAMPAIGN_AREA,CAMPAIGN_AREA_COMPLETE,SOURCE_EVIDENCE_COMPLETE,BUG_IDS,IMPLEMENTATION_SCOPE,BUGFIX_MODE_AUTOMATION_MAINTENANCE_ALLOWED,ALLOWED_PROTECTED_FILES'
+  validate_loaded_env_keys "$clean_request_flags_keys" || return 2
+  [[ "$(automation_v2_env_require BUGS_FOUND)" == no ]] || return 2
+  [[ "$(automation_v2_env_require HANDOVER_AUTONOMOUS_IMPLEMENTATION_REQUIRED)" == no ]] || return 2
+  [[ "$(automation_v2_env_require NEXT_AUDIT_AREA)" == none ]] || return 2
+  [[ "$(automation_v2_env_require CAMPAIGN_AREA)" == "$CAMPAIGN_ACTIVE_AREA" ]] || return 2
+  [[ "$(automation_v2_env_require CAMPAIGN_AREA_COMPLETE)" == yes ]] || return 2
+  [[ "$(automation_v2_env_require SOURCE_EVIDENCE_COMPLETE)" == yes ]] || return 2
+  [[ "$(automation_v2_env_require BUG_IDS)" == none ]] || return 2
+  [[ "$(automation_v2_env_require IMPLEMENTATION_SCOPE)" == none ]] || return 2
+  [[ "$(automation_v2_env_require BUGFIX_MODE_AUTOMATION_MAINTENANCE_ALLOWED)" == no ]] || return 2
+  [[ "$(automation_v2_env_require ALLOWED_PROTECTED_FILES)" == none ]] || return 2
 }
 
 append_round() {

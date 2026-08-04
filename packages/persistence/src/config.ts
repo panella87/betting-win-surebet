@@ -7,6 +7,7 @@ const PORT_MAX = 65535;
 export function resolveSurebetPersistenceConfig(
   environment: SurebetPersistenceEnvironment = process.env as SurebetPersistenceEnvironment,
 ): SurebetPersistenceConfig {
+  requireEnvironmentObject(environment);
   const database = requireNonEmptyString(environment.SUREBET_PG_DATABASE, 'SUREBET_PG_DATABASE');
   const user = requireNonEmptyString(environment.SUREBET_PG_USER, 'SUREBET_PG_USER');
   const port = parseRequiredPort(environment.SUREBET_PG_PORT);
@@ -41,6 +42,17 @@ export function resolveSurebetPersistenceConfig(
   return Object.freeze(config);
 }
 
+function requireEnvironmentObject(
+  environment: SurebetPersistenceEnvironment,
+): asserts environment is SurebetPersistenceEnvironment {
+  if (typeof environment !== 'object' || environment === null || Array.isArray(environment)) {
+    throw new SurebetPersistenceError(
+      'SUREBET_PERSISTENCE_CONFIG_INVALID',
+      'Surebet persistence environment must be a non-null object.',
+    );
+  }
+}
+
 function requireNonEmptyString(value: string | undefined, name: string): string {
   if (typeof value !== 'string' || value.trim().length === 0) {
     throw new SurebetPersistenceError(
@@ -55,10 +67,10 @@ function optionalNonEmptyString(value: string | undefined, name: string): string
   if (value === undefined) {
     return undefined;
   }
-  if (value.trim().length === 0) {
+  if (typeof value !== 'string' || value.trim().length === 0) {
     throw new SurebetPersistenceError(
       'SUREBET_PERSISTENCE_CONFIG_INVALID',
-      `Surebet persistence does not accept an empty ${name} value.`,
+      `Surebet persistence requires ${name} to be an optional non-empty string.`,
     );
   }
   return value.trim();

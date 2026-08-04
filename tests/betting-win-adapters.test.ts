@@ -165,6 +165,26 @@ test('read-only query contract request rejects an unpinned contract version', ()
   ]);
 });
 
+test('read-only query contract request rejects malformed runtime contract fields', () => {
+  for (const request of [
+    { resource: 'quotes' },
+    { contractVersion: 7, resource: 'quotes' },
+  ]) {
+    const result = buildReadOnlyQueryContractRequest(request as never);
+
+    assert.equal(result.ok, false);
+    assert.equal(result.blockers[0]?.code, 'QUERY_CONTRACT_NOT_PINNED');
+  }
+
+  const cursor = buildReadOnlyQueryContractRequest({
+    contractVersion: '0.0.0-test',
+    cursor: 7,
+    resource: 'quotes',
+  } as never);
+  assert.equal(cursor.ok, false);
+  assert.equal(cursor.blockers[0]?.code, 'QUERY_CURSOR_INVALID');
+});
+
 test('read-only query contract request rejects unsupported runtime resources', () => {
   const result = buildReadOnlyQueryContractRequest({
     contractVersion: '0.0.0-test',
@@ -213,6 +233,25 @@ test('local export bundle reader accepts an absolute repo-local fixture path', (
 
   assert.equal(result.ok, true);
   assert.equal(result.value.exportedAt, '2026-07-01T00:00:00.000Z');
+});
+
+test('local export bundle reader and pinned intake reject malformed path arguments', () => {
+  for (const bundlePath of [undefined, 42, '   ']) {
+    const localResult = readLocalBettingWinExportBundle(bundlePath as never, REPO_ROOT);
+    assert.equal(localResult.ok, false);
+    assert.equal(localResult.blockers[0]?.code, 'LOCAL_EXPORT_PATH_MISSING');
+
+    const pinnedResult = validatePinnedBettingWinBundleIntake(bundlePath as never, REPO_ROOT);
+    assert.equal(pinnedResult.ok, false);
+    assert.equal(pinnedResult.blockers[0]?.code, 'LOCAL_EXPORT_PATH_MISSING');
+  }
+
+  const repoRootResult = readLocalBettingWinExportBundle(
+    'tests/fixtures/local-only-export-bundles/valid-resource-export.json',
+    42 as never,
+  );
+  assert.equal(repoRootResult.ok, false);
+  assert.equal(repoRootResult.blockers[0]?.code, 'LOCAL_EXPORT_REPO_ROOT_INVALID');
 });
 
 test('local export bundle reader rejects remote URLs and repo-escaping paths', () => {
@@ -313,6 +352,16 @@ test('pinned bundle intake validator accepts a repo-local bundle with full recor
 
   assert.equal(result.ok, true);
   assert.equal(result.value.bundle.reference.source, 'betting-win');
+  assert.equal(result.value.records.length, 5);
+});
+
+test('pinned bundle intake validator reuses normalized repo-local bundle paths', () => {
+  const result = validatePinnedBettingWinBundleIntake(
+    ' tests/fixtures/local-only-export-bundles/solver-ready-resource-export.json ',
+    ` ${REPO_ROOT} `,
+  );
+
+  assert.equal(result.ok, true);
   assert.equal(result.value.records.length, 5);
 });
 

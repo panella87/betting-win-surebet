@@ -27,6 +27,7 @@ import { solveStandardBinaryStakeVector, type StakeVectorSolution } from '../sol
 
 const ISO_TIMESTAMP_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 const LOWERCASE_SHA256_REGEX = /^[0-9a-f]{64}$/;
+const READ_ONLY_QUERY_RESOURCES = Object.freeze(['identity', 'rules', 'quotes', 'settlement'] as const);
 
 export interface PrivatePaperCandidateRuntimePlan {
   readonly candidateId: string;
@@ -422,9 +423,23 @@ function validateRuntimeSource(
 function validateReadOnlyQueryRequests(
   requests: PrivatePaperRuntimeReadOnlyQuerySource['requests'],
 ): BoundaryResult<undefined> {
-  for (const [resource, request] of Object.entries(requests) as Array<
-    [keyof PrivatePaperRuntimeReadOnlyQuerySource['requests'], PrivatePaperRuntimeReadOnlyQuerySource['requests'][keyof PrivatePaperRuntimeReadOnlyQuerySource['requests']]]
-  >) {
+  if (!isObject(requests)) {
+    return blocked(
+      'PRIVATE_PAPER_RUNTIME_QUERY_REQUESTS_INVALID',
+      'Private paper runtime requires object-shaped read-only query requests.',
+      'Explicit bounded read-only query requests for identity, rules, quotes, and settlement.',
+    );
+  }
+
+  for (const resource of READ_ONLY_QUERY_RESOURCES) {
+    const request = requests[resource];
+    if (!isObject(request)) {
+      return blocked(
+        'PRIVATE_PAPER_RUNTIME_QUERY_REQUEST_MISSING',
+        `Private paper runtime requires an explicit ${resource} read-only query request.`,
+        'Explicit bounded read-only query request for each required resource: identity, rules, quotes, and settlement.',
+      );
+    }
     const pageSize = requirePositiveInteger(
       request.pageSize,
       'PRIVATE_PAPER_RUNTIME_QUERY_PAGE_SIZE_INVALID',
@@ -457,9 +472,16 @@ function validateReadOnlyQueryRequests(
 function validateReadOnlyQueryMappers(
   mappers: PrivatePaperReadOnlyQueryRecordMappers,
 ): BoundaryResult<undefined> {
-  for (const [resource, mapper] of Object.entries(mappers) as Array<
-    [keyof PrivatePaperReadOnlyQueryRecordMappers, PrivatePaperReadOnlyQueryRecordMappers[keyof PrivatePaperReadOnlyQueryRecordMappers]]
-  >) {
+  if (!isObject(mappers)) {
+    return blocked(
+      'PRIVATE_PAPER_RUNTIME_QUERY_MAPPER_MISSING',
+      'Private paper runtime requires object-shaped read-only query record mappers.',
+      'Explicit canonical record mapper for each read-only query resource.',
+    );
+  }
+
+  for (const resource of READ_ONLY_QUERY_RESOURCES) {
+    const mapper = mappers[resource];
     if (typeof mapper !== 'function') {
       return blocked(
         'PRIVATE_PAPER_RUNTIME_QUERY_MAPPER_MISSING',
@@ -1281,6 +1303,10 @@ function requireIsoTimestamp(
     return blocked(code, message, evidenceRequired);
   }
   return accepted(value);
+}
+
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 function requirePositiveInteger(

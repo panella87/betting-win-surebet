@@ -66,6 +66,32 @@ test('surebet persistence config fails closed on missing or ambiguous required s
   });
 });
 
+test('surebet persistence config classifies malformed environment inputs', () => {
+  for (const environment of [null, 'not-an-object', []]) {
+    assert.throws(
+      () => resolveSurebetPersistenceConfig(environment as never),
+      (error: unknown) => error instanceof SurebetPersistenceError && error.code === 'SUREBET_PERSISTENCE_CONFIG_INVALID',
+    );
+  }
+
+  for (const optionalOverride of [
+    { SUREBET_PG_HOST: 42 },
+    { SUREBET_PG_SOCKET_DIRECTORY: 42 },
+    { SUREBET_PG_PASSWORD: 42 },
+  ]) {
+    assert.throws(
+      () =>
+        resolveSurebetPersistenceConfig({
+          SUREBET_PG_DATABASE: 'surebet',
+          SUREBET_PG_USER: 'surebet',
+          SUREBET_PG_PORT: '5432',
+          ...optionalOverride,
+        } as never),
+      (error: unknown) => error instanceof SurebetPersistenceError && error.code === 'SUREBET_PERSISTENCE_CONFIG_INVALID',
+    );
+  }
+});
+
 test('surebet migration loader rejects empty or transaction-managed migration files', () => {
   const tempRoot = mkdtempSync(join(tmpdir(), 'bws-migrations-'));
   try {
