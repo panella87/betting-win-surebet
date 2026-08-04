@@ -176,6 +176,8 @@ REQUIRED_FRAGMENTS = {
         'check_only_validation_failed',
         'AUTONOMOUS_GOAL_COMPLETE=yes',
         'BLOCKED=yes',
+        'bugfix_handoff_validated_source_fix_accepting_for_reaudit=yes',
+        'bugfix_handoff_validated_source_fix_requires_reaudit',
         'exit 3',
         'Activate the repo runtime in the parent shell first',
         'never sources nvm.sh',

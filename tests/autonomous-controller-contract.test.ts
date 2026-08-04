@@ -132,13 +132,34 @@ test('implementation controller exposes canonical flags and telegram wiring', ()
     '--stream','--no-stream','No --task flag is supported','docs/automation/current-implementation-task.md',
     'telegram_notify_send_final "run-autonomous-implementation.sh"','automation_require_cycle_artifacts',
     'automation_read_continue_status','check_only_validation_failed','AUTONOMOUS_GOAL_COMPLETE=yes',
-    'BLOCKED=yes','exit 3','Activate the repo runtime in the parent shell first','never sources nvm.sh','baseline_validation=enabled','strict_handoff_parser=enabled','exact_handoff_protected_allowlist=enabled','task_file_exact_protected_allowlist=enabled','manual_blanket_protected_override=disabled','configure_task_file_protected_policy()','read_optional_task_marker()','strict_schema_v1_key_allowlists=enabled','source_evidence_sha256_verification=enabled','source_fingerprint_reconciliation=enabled','input_handoff_immutable=enabled','machine_readable_final_stdout=enabled','lock_acquisition_before_run_dir=enabled','lock_release_failure_classification=enabled','lock_release_failed_lock_preserved',"printf 'lock_release_status=%s\\n'","printf 'lock_preserved=%s\\n'",'write_consumed_handoff_marker','remove_consumed_handoff_marker',
+    'BLOCKED=yes','bugfix_handoff_validated_source_fix_accepting_for_reaudit=yes','bugfix_handoff_validated_source_fix_requires_reaudit','exit 3','Activate the repo runtime in the parent shell first','never sources nvm.sh','baseline_validation=enabled','strict_handoff_parser=enabled','exact_handoff_protected_allowlist=enabled','task_file_exact_protected_allowlist=enabled','manual_blanket_protected_override=disabled','configure_task_file_protected_policy()','read_optional_task_marker()','strict_schema_v1_key_allowlists=enabled','source_evidence_sha256_verification=enabled','source_fingerprint_reconciliation=enabled','input_handoff_immutable=enabled','machine_readable_final_stdout=enabled','lock_acquisition_before_run_dir=enabled','lock_release_failure_classification=enabled','lock_release_failed_lock_preserved',"printf 'lock_release_status=%s\\n'","printf 'lock_preserved=%s\\n'",'write_consumed_handoff_marker','remove_consumed_handoff_marker',
   ]) assertContains(script, marker);
   assert.doesNotMatch(script, /scripts\/load-node-runtime\.sh/);
   assert.doesNotMatch(script, /source .*nvm/);
   assert.doesNotMatch(script, /protected_changes_allowed=manual_explicit_override/);
   assert.match(script, /AUTOMATION_ALLOW_PROTECTED_CHANGES=1 is forbidden without task-file or handoff authorization/);
   assert.match(script, /Bounded repo-owned loopback child processes may be started only inside task-required tests or validation\./);
+});
+
+
+test('implementation bugfix handoff sends validated source fixes back to bugfix re-audit', () => {
+  const script = read('run-autonomous-implementation.sh');
+  const readStatus = script.indexOf('automation_read_continue_status');
+  const blockedCase = script.indexOf('BLOCKED=yes)', readStatus);
+  const modeCheck = script.indexOf('"$ACTIVE_HANDOFF_MODE" == "bugfix"', blockedCase);
+  const sourceChangedCheck = script.indexOf('"$RUN_SOURCE_CHANGED" == "yes"', modeCheck);
+  const validationCheck = script.indexOf('"$RUN_SOURCE_VALIDATION_PASSED" == "yes"', sourceChangedCheck);
+  const marker = script.indexOf('bugfix_handoff_validated_source_fix_accepting_for_reaudit=yes', validationCheck);
+  const goal = script.indexOf('FINAL_STATUS="AUTONOMOUS_GOAL_COMPLETE=yes"', marker);
+  const reason = script.indexOf('STOP_REASON="bugfix_handoff_validated_source_fix_requires_reaudit"', goal);
+  assert.ok(readStatus >= 0);
+  assert.ok(blockedCase > readStatus);
+  assert.ok(modeCheck > blockedCase);
+  assert.ok(sourceChangedCheck > modeCheck);
+  assert.ok(validationCheck > sourceChangedCheck);
+  assert.ok(marker > validationCheck);
+  assert.ok(goal > marker);
+  assert.ok(reason > goal);
 });
 
 test('bugfix controller is strict read-only audit and handoff infrastructure', () => {

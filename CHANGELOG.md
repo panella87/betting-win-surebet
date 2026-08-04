@@ -1,5 +1,11 @@
 ## 2026-08-03 - Bugfix fixture upstream-boundary validation repair
 
+## 2026-08-04 - Bugfix implementation handoff return classification repair
+
+- Repaired `run-autonomous-implementation.sh --handover-bugfix-audit` so source-changing bugfix repairs with controller-managed validation passing return to the bugfix parent for same-area re-audit even when the child-authored continuation marker reports an environment-only block.
+- Added controller contract coverage and validator markers for the re-audit handoff path.
+- No provider access, execution path, live/paper weakening, betting-win mutation, runtime fallback or database direct-read behavior was added.
+
 - Repaired operator-lifecycle and runtime-application test fixtures so temporary BWS repositories generate an in-boundary betting-win checkout and matching upstream-lock fixture instead of pointing at the real server checkout from a temporary repository root.
 - Added a shared betting-win fixture helper for tests that need a valid upstream lock while preserving the production boundary that real BWS must only reference an approved sibling betting-win checkout.
 - No production upstream-boundary logic, provider access, execution path, runtime fallback, public signal, betting-win mutation or paper/live policy was weakened.

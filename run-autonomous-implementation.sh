@@ -1317,6 +1317,12 @@ EOF_PROMPT
       exit 0
       ;;
     BLOCKED=yes)
+      if [[ "$ACTIVE_HANDOFF_MODE" == "bugfix" && "$RUN_SOURCE_CHANGED" == "yes" && "$RUN_SOURCE_VALIDATION_PASSED" == "yes" ]]; then
+        automation_log "cycle=${CYCLES_ATTEMPTED} continue_status=BLOCKED=yes bugfix_handoff_validated_source_fix_accepting_for_reaudit=yes"
+        FINAL_STATUS="AUTONOMOUS_GOAL_COMPLETE=yes"
+        STOP_REASON="bugfix_handoff_validated_source_fix_requires_reaudit"
+        exit 0
+      fi
       FINAL_STATUS="BLOCKED=yes"
       STOP_REASON="blocked_by_cycle_${CYCLES_ATTEMPTED}"
       exit 2

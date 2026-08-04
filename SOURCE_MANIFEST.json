@@ -1,7 +1,7 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-08-04T07:34:23Z",
-  "overlay": "bws90-bugfix-fixture-boundary-wave53",
+  "generated": "2026-08-04T08:07:30Z",
+  "overlay": "bws91-bugfix-implementation-return-classification-wave54-cleanup",
   "files": [
     {
       "path": ".automation/README.md",
@@ -115,8 +115,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "ff2039f9730656b2256bd9d8eb1d3e39920700d4cadebc0b27dd2cfc5f01903f",
-      "size": 68900
+      "sha256": "834a39969a8f06578f03e66b8dc0fe748899442e0e2a7f56812b121f0be76df0",
+      "size": 69492
     },
     {
       "path": "PROJECT_STATUS.md",
@@ -650,13 +650,13 @@
     },
     {
       "path": "docs/automation/PROTECTED_AUTOMATION_FILES.md",
-      "sha256": "396949a255ab91113f9d41fabf2f065504c5a9b0eaa0416bcb78d56a21c19144",
-      "size": 3232
+      "sha256": "f893bbde52e3526f5aaf041032ed901f2ea4de39bc24f116a66e62e0778c8a74",
+      "size": 3608
     },
     {
       "path": "docs/automation/README.md",
-      "sha256": "8287f6a177255d0593510f92c57f58b88163b52fb16ed4ba87f84292061200ff",
-      "size": 10203
+      "sha256": "cb1e1c9f79df6508637848ba9a7c16db328d7248e627fbcebd6ce867856f88c3",
+      "size": 10591
     },
     {
       "path": "docs/automation/SSH_KEY_SETUP.md",
@@ -1650,8 +1650,8 @@
     },
     {
       "path": "run-autonomous-implementation.sh",
-      "sha256": "efceab5154139176853424c86b9d5a769c06777753621a2411cd4386db1ce278",
-      "size": 63433
+      "sha256": "11e30dbc2ad47d137f0f7f92b78b2ee306c027f8fb7d28041130d5e050d51e44",
+      "size": 63859
     },
     {
       "path": "run-bugfix-autopilot.sh",
@@ -1780,8 +1780,8 @@
     },
     {
       "path": "scripts/validate_autonomous_controller_contract.py",
-      "sha256": "15bf003c513742226a601c17be3e5bf3088cf25652c48f091e3380da4b16066a",
-      "size": 28304
+      "sha256": "591c027b9730f25e98ca17ba47beeda1732464a747c24bf92734e475a7be193f",
+      "size": 28441
     },
     {
       "path": "scripts/validate_betting_win_upstream_contract.py",
@@ -2440,8 +2440,8 @@
     },
     {
       "path": "tests/autonomous-controller-contract.test.ts",
-      "sha256": "ef5e6dee4a6f85f3c260777fba5ce28365333b01238416ab86628bdbdec61e22",
-      "size": 25635
+      "sha256": "3d999cce43f5ec0d443c3c964ae667d7de8a51ec4591375b96d55f04b21382b1",
+      "size": 26947
     },
     {
       "path": "tests/b1-capital-lock.test.ts",

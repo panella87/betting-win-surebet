@@ -75,3 +75,6 @@ Executable command lists remain in `automation.config.sh`, `tools/required_execu
 ## Temp/inode safety protection
 
 `.automation/lib/temp_inode_guard.sh` and `cleanup_automation_temp_inode_residue.sh` are protected automation files. Product implementation cycles may not weaken capacity thresholds, ownership checks, path containment, watchdog behavior, or cleanup boundaries.
+## BWS Wave 54 controller-return repair
+
+`run-autonomous-implementation.sh` remains protected. The Wave 54 change is limited to bugfix-handoff return classification: validated source-changing repairs return to the bugfix parent for same-area re-audit even if the child-authored continuation marker reports an environment-only block after controller-managed validation passed.
