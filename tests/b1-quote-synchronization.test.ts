@@ -76,7 +76,7 @@ test('B1 quote synchronization records quote age, retrieval lag, and comparison 
 
   assert.equal(result.ok, true);
   assert.equal(result.value.equivalence.venuePair.key, 'venue-a::venue-b');
-  assert.equal(result.value.first.quoteAgeMs, 1000n);
+  assert.equal(result.value.first.quoteAgeMs, 1250n);
   assert.equal(result.value.first.retrievalLagMs, 1000n);
   assert.equal(result.value.second.quoteAgeMs, 750n);
   assert.equal(result.value.second.retrievalLagMs, 750n);
@@ -85,9 +85,11 @@ test('B1 quote synchronization records quote age, retrieval lag, and comparison 
 
 test('B1 quote synchronization blocks stale quote age', () => {
   const [first, second] = fixturePair();
-  const stale = cloneRow(first, { quoteAgeMs: 1501n });
 
-  const result = synchronizeB1VenueQuotePair(stale, second, quotePolicy());
+  const result = synchronizeB1VenueQuotePair(first, second, Object.freeze({
+    ...quotePolicy(),
+    maxQuoteAgeMs: 1249n,
+  }));
 
   assert.equal(result.ok, false);
   assert.deepEqual(result.blockers, [
@@ -99,9 +101,33 @@ test('B1 quote synchronization blocks stale quote age', () => {
   ]);
 });
 
+test('B1 quote synchronization rejects understated and overstated quote-age evidence', () => {
+  const [first, second] = fixturePair();
+  const understated = cloneRow(first, { quoteAgeMs: 0n });
+  const overstated = cloneRow(second, { quoteAgeMs: 751n });
+
+  for (const result of [
+    synchronizeB1VenueQuotePair(understated, second, quotePolicy()),
+    synchronizeB1VenueQuotePair(first, overstated, quotePolicy()),
+  ]) {
+
+    assert.equal(result.ok, false);
+    assert.deepEqual(result.blockers, [
+      {
+        code: 'B1_QUOTE_AGE_MISMATCH',
+        message: 'B1 quote age must equal comparison_time_utc minus snapshot_time_utc.',
+        evidenceRequired: 'B1 quote_age_ms consistent with comparison_time_utc and snapshot_time_utc.',
+      },
+    ]);
+  }
+});
+
 test('B1 quote synchronization blocks venue quotes outside the comparison window', () => {
   const [first, second] = fixturePair();
-  const outsideWindow = cloneRow(second, { snapshotTimeUtc: '2026-07-01T00:00:01.600Z' });
+  const outsideWindow = cloneRow(second, {
+    quoteAgeMs: 650n,
+    snapshotTimeUtc: '2026-07-01T00:00:01.600Z',
+  });
 
   const result = synchronizeB1VenueQuotePair(first, outsideWindow, quotePolicy());
 

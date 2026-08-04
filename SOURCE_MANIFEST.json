@@ -1,6 +1,6 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-08-04T06:51:58Z",
+  "generated": "2026-08-04T07:34:23Z",
   "overlay": "bws90-bugfix-fixture-boundary-wave53",
   "files": [
     {
@@ -955,8 +955,8 @@
     },
     {
       "path": "packages/bootstrap/src/contracts/betting-win-b1-resource-records.ts",
-      "sha256": "db521f56fa79d1656153ffbb3e122f4c9561f376ffa987e43792941c187b9abe",
-      "size": 22917
+      "sha256": "641f612a4bbc7dcc8d3c77581923b78857c6489261ddfb652a552902f5fc816f",
+      "size": 24086
     },
     {
       "path": "packages/bootstrap/src/contracts/betting-win-contract-imports.ts",
@@ -1100,8 +1100,8 @@
     },
     {
       "path": "packages/bootstrap/src/operations/service-runtime.ts",
-      "sha256": "b64c94866ec42e334180aa90bc3a04a013638fa2776b02701da83440650ecd81",
-      "size": 24149
+      "sha256": "1ce8e65370e695a729c7b6f0f198587197e8d89b485815b1a99ac04a91278870",
+      "size": 24312
     },
     {
       "path": "packages/bootstrap/src/operations/soak-campaign.ts",
@@ -1110,8 +1110,8 @@
     },
     {
       "path": "packages/bootstrap/src/operations/upstream-api-convergence.ts",
-      "sha256": "d924fc5958415d3e34dc1fef79a477ffac2f7b80cdaa551fa571bda255a4409b",
-      "size": 39420
+      "sha256": "ced15cd885faf9d1cd6ca4eb115f94df74e1bc399ce8cdc32c34bd3c9a5463ae",
+      "size": 40412
     },
     {
       "path": "packages/bootstrap/src/operations/upstream-convergence-service.ts",
@@ -1155,8 +1155,8 @@
     },
     {
       "path": "packages/bootstrap/src/quotes/b1-quote-synchronization.ts",
-      "sha256": "aa369e36fdb44cd0307c054b9ea2501cdcdbb229b61fba26a3dc1aad9a63c071",
-      "size": 7667
+      "sha256": "a9deaf082f995ae19228880ba259d5981f166b73761b3ca2b08069700ae0a8aa",
+      "size": 8025
     },
     {
       "path": "packages/bootstrap/src/quotes/b1-venue-limit-model.ts",
@@ -1310,8 +1310,8 @@
     },
     {
       "path": "packages/bootstrap/src/workers/b1-private-observation-jobs.ts",
-      "sha256": "8c0c0b78edf52a9a30498dd3ea01a8e95f10726b59bac32c7974762996cc58d2",
-      "size": 8976
+      "sha256": "71cd8f6f0f3996ecb02b520dfd166c243f194ef838e1a505c60b3a709a141867",
+      "size": 9493
     },
     {
       "path": "packages/bootstrap/src/workers/bounded-job-worker.ts",
@@ -2495,13 +2495,13 @@
     },
     {
       "path": "tests/b1-private-observation-jobs.test.ts",
-      "sha256": "4adf27c447baf89d92398b4090f5ca0687622ce4c5bb31d83c6213ae636987c3",
-      "size": 9582
+      "sha256": "ad8df5257b620b6111031a2162a3e8075ee70cd91eb013f91da48d57c94fdea3",
+      "size": 10181
     },
     {
       "path": "tests/b1-quote-synchronization.test.ts",
-      "sha256": "fea16afb000fd36c499959f81949c9c0d4912cdd9eac2ba8279d8ab12d55c697",
-      "size": 7217
+      "sha256": "63bf0f4469318f65ccba86020ec9a125d12252f4929b2a7e3f70797258abdf07",
+      "size": 8013
     },
     {
       "path": "tests/b1-read-only-api.test.ts",
@@ -2540,8 +2540,8 @@
     },
     {
       "path": "tests/betting-win-b1-resource-records.test.ts",
-      "sha256": "4ae8ef83b168e657be2270346b6640fa4b5773665f63b43def5d7950d1d1068d",
-      "size": 3990
+      "sha256": "275eb510f45930dd7ec7af152e4ee4e19e7d5a48869724d02ff2e0ce9e581117",
+      "size": 5445
     },
     {
       "path": "tests/betting-win-query-client.test.ts",
@@ -2670,8 +2670,8 @@
     },
     {
       "path": "tests/bws-service-runtime.test.ts",
-      "sha256": "79cc4e562e29d81ec0c17a5a86518b6c7c7b9e22bb36f96ed162946fd151283b",
-      "size": 14874
+      "sha256": "6d6e726a0a688c6d673457287173d07a5359caf9ce4c09dde73b2dcb938d63cc",
+      "size": 18326
     },
     {
       "path": "tests/bws-soak-campaign.test.ts",
@@ -2680,8 +2680,8 @@
     },
     {
       "path": "tests/bws-upstream-api-convergence.test.ts",
-      "sha256": "32ac205f1901de49d942f7005ded95724f8fcdcbd63e289601b227e7aed2368b",
-      "size": 31532
+      "sha256": "5c8c29993ace8acda05c9e41c251ea04b1b22ba6e2afaf4a8c5df7df58063e37",
+      "size": 34884
     },
     {
       "path": "tests/bws-upstream-convergence-service.test.ts",
@@ -2715,7 +2715,7 @@
     },
     {
       "path": "tests/fixtures/b1-local-contract/valid-b1-multi-venue-markets.json",
-      "sha256": "6d38b67bf67d73183e80754618ad03021425f93adb81144129b03b59db4974ac",
+      "sha256": "ef31562a12383e29024fc597d290a9fabe58b1da711262d68161636fa1904fd9",
       "size": 4255
     },
     {

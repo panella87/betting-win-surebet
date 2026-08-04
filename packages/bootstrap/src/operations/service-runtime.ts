@@ -514,14 +514,17 @@ function normalizeUniqueStrings(
   values: readonly string[],
   label: string,
 ): BoundaryResult<Readonly<{ readonly value: readonly string[] }>> {
-  const normalized = values
-    .map((value) => {
-      if (typeof value !== 'string' || value.trim().length === 0) {
-        return undefined;
-      }
-      return value.trim();
-    })
-    .filter((value): value is string => value !== undefined);
+  const normalized: string[] = [];
+  for (const value of values) {
+    if (typeof value !== 'string' || value.trim().length === 0) {
+      return blocked(
+        'BWS_STATUS_WORKER_HANDLERS_INVALID',
+        `BWS operational status requires every ${label} entry to be a non-empty string.`,
+        'A bounded worker handler list without invalid entries.',
+      );
+    }
+    normalized.push(value.trim());
+  }
   if (normalized.length === 0) {
     return blocked(
       'BWS_STATUS_WORKER_HANDLERS_EMPTY',

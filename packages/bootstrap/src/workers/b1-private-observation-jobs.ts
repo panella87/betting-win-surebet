@@ -18,6 +18,7 @@ import type {
 
 const JOB_PAYLOAD_SCHEMA = 'bws.b1_private_observation_job.v1';
 export const B1_PRIVATE_OBSERVATION_JOB_KIND = 'b1_private_observation_cycle_v1' as const;
+const ISO_UTC_TIMESTAMP = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/;
 
 export interface PersistedB1PrivateObservationJobPayload {
   readonly schema: typeof JOB_PAYLOAD_SCHEMA;
@@ -174,6 +175,11 @@ function parseB1PrivateObservationJobPayload(
       evidenceRequired: 'runtimeId, observationCycleId, upstreamCheckpointId, backtestRunId, observedAt and input.',
     });
   }
+  if (!isIsoUtcTimestamp(observedAt)) {
+    return invalidPayload(failedAt, 'B1_PRIVATE_OBSERVATION_OBSERVED_AT_INVALID', {
+      evidenceRequired: 'observedAt must be an ISO-8601 UTC timestamp.',
+    });
+  }
 
   const input = payload.input as B1CrossVenueBacktestInput;
   if (input.fixture.runtimeEvidence !== false) {
@@ -230,6 +236,14 @@ function requireNonEmptyString(value: unknown): string | undefined {
     return undefined;
   }
   return value;
+}
+
+function isIsoUtcTimestamp(value: string): boolean {
+  if (!ISO_UTC_TIMESTAMP.test(value)) {
+    return false;
+  }
+  const parsed = new Date(value);
+  return !Number.isNaN(parsed.valueOf()) && parsed.toISOString() === value;
 }
 
 export type B1PrivateObservationBacktestRunner = (

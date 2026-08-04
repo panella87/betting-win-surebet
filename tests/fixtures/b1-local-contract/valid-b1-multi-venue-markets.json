@@ -43,7 +43,7 @@
       "venue_type": "sportsbook",
       "snapshot_time_utc": "2026-07-01T00:00:01.000Z",
       "retrieved_at_utc": "2026-07-01T00:00:02.000Z",
-      "quote_age_ms": "1000",
+      "quote_age_ms": "1250",
       "decimal_odds": "2.10",
       "price_minor_or_probability_minor": "210000",
       "available_size_minor": "1200000",

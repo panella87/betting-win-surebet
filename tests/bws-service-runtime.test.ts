@@ -17,6 +17,7 @@ import {
   SUREBET_EXECUTION_ENABLED_ENV,
   SUREBET_PROVIDER_CONNECTIONS_ENV,
   SUREBET_RUNTIME_MODE_ENV,
+  type BwsServiceRuntimeConfig,
   type BwsReadOnlyQueryService,
   type BwsServiceRuntimeEnvironment,
 } from '../packages/bootstrap/src/index.js';
@@ -168,9 +169,55 @@ test('BWS operational status snapshots require immutable strategy evidence polic
     });
     assert.equal(invalid.ok, false);
     assert.equal(invalid.blockers[0]?.code, 'BWS_STATUS_STRATEGY_POLICY_INVALID');
+
+    const invalidWorkerHandlers = createBwsOperationalStatusSnapshot({
+      cockpitState: createReadyCockpitState(),
+      cockpitProcessDefinition: describeBwsOperatorCockpitProcessDefinition(cockpitConfig),
+      config,
+      generatedAt: TEST_TIMESTAMP,
+      queryServiceBoundary: describeBwsReadOnlyQueryServiceBoundary(),
+      strategyEvidencePolicy: {
+        liveState: 'not_claimed',
+        privacy: 'private_only',
+        profitabilityState: 'not_reported',
+        publicDistributionState: 'withheld',
+      },
+      workerHandlerKinds: ['private_paper_runtime_cycle_v1', ''],
+    });
+    assert.equal(invalidWorkerHandlers.ok, false);
+    assert.equal(invalidWorkerHandlers.blockers[0]?.code, 'BWS_STATUS_WORKER_HANDLERS_INVALID');
   } finally {
     fixture.dispose();
   }
+});
+
+test('BWS operational status snapshots reject mixed valid and invalid worker handler entries', () => {
+  const cockpitConfig = resolveBwsOperatorCockpitBrowserConfig({
+    [BWS_OPERATOR_COCKPIT_DATA_MODE_ENV]: 'mock',
+  });
+  const snapshot = createBwsOperationalStatusSnapshot({
+    cockpitState: createReadyCockpitState(),
+    cockpitProcessDefinition: describeBwsOperatorCockpitProcessDefinition(cockpitConfig),
+    config: sampleRuntimeConfig(),
+    generatedAt: TEST_TIMESTAMP,
+    queryServiceBoundary: describeBwsReadOnlyQueryServiceBoundary(),
+    strategyEvidencePolicy: {
+      liveState: 'not_claimed',
+      privacy: 'private_only',
+      profitabilityState: 'not_reported',
+      publicDistributionState: 'withheld',
+    },
+    workerHandlerKinds: ['private_paper_runtime_cycle_v1', ''],
+  });
+
+  assert.equal(snapshot.ok, false);
+  assert.deepEqual(snapshot.blockers, [
+    {
+      code: 'BWS_STATUS_WORKER_HANDLERS_INVALID',
+      message: 'BWS operational status requires every worker handler kinds entry to be a non-empty string.',
+      evidenceRequired: 'A bounded worker handler list without invalid entries.',
+    },
+  ]);
 });
 
 test('BWS read-only HTTP handler surfaces health and readiness snapshots with security headers', async () => {
@@ -358,6 +405,53 @@ function createRuntimeFixture(): {
     repositoryRoot,
     upstreamRoot,
   };
+}
+
+function sampleRuntimeConfig(): BwsServiceRuntimeConfig {
+  return Object.freeze({
+    api: Object.freeze({
+      bindHost: '127.0.0.1',
+      port: 4312,
+    }),
+    persistence: Object.freeze({
+      database: 'surebet_local',
+      host: '127.0.0.1',
+      port: 5432,
+      user: 'surebet_user',
+    }),
+    policy: Object.freeze({
+      executionEnabled: false,
+      providerConnections: 'disabled',
+      runtimeMode: 'paper',
+    }),
+    processDefinitions: Object.freeze([]),
+    upstream: Object.freeze({
+      lock: Object.freeze({
+        capabilities: Object.freeze(['exportHistoricalBundle']),
+        commitSha: '1'.repeat(40),
+        contractAlias: 'betting-win-strategy-export.v1',
+        contractSchema: 'betting-win.strategy-export.v1',
+        gitTreeSha: '2'.repeat(40),
+        packageVersion: '0.48.0',
+        packageVersions: Object.freeze({}),
+        repository: 'betting-win',
+        repositoryPath: '/tmp/betting-win',
+        schema: 'betting-win-surebet-upstream-lock-v1',
+        sourceFingerprintAlgorithm: 'sha256_git_ls_tree_r_full_tree_head_v1',
+        sourceView: 'committed_git_head',
+        surebetProfile: 'surebet_standard_binary_v0',
+        trackedTreeListingSha256: '3'.repeat(64),
+        verifiedAt: TEST_TIMESTAMP,
+      }),
+      lockPath: 'config/betting-win.upstream.lock.json',
+      repoPath: '/tmp/betting-win',
+    }),
+    worker: Object.freeze({
+      leaseDurationMs: 30000,
+      queueName: 'private-paper',
+      workerId: 'worker-bws-500',
+    }),
+  });
 }
 
 async function listen(server: ReturnType<typeof createServer>): Promise<void> {

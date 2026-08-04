@@ -188,7 +188,15 @@ function synchronizeB1QuoteRow(
       'B1 retrieved_at_utc at or after snapshot_time_utc.',
     );
   }
-  if (row.quoteAgeMs > policy.maxQuoteAgeMs) {
+  const computedQuoteAgeMs = policy.comparisonEpochMs - snapshotEpochMs.value;
+  if (row.quoteAgeMs !== computedQuoteAgeMs) {
+    return blocked(
+      'B1_QUOTE_AGE_MISMATCH',
+      'B1 quote age must equal comparison_time_utc minus snapshot_time_utc.',
+      'B1 quote_age_ms consistent with comparison_time_utc and snapshot_time_utc.',
+    );
+  }
+  if (computedQuoteAgeMs > policy.maxQuoteAgeMs) {
     return blocked(
       'B1_QUOTE_STALENESS_BLOCK',
       'B1 quote age exceeds the configured freshness threshold.',
@@ -207,7 +215,7 @@ function synchronizeB1QuoteRow(
     row,
     snapshotEpochMs: snapshotEpochMs.value,
     retrievedEpochMs: retrievedEpochMs.value,
-    quoteAgeMs: row.quoteAgeMs,
+    quoteAgeMs: computedQuoteAgeMs,
     retrievalLagMs,
   }));
 }

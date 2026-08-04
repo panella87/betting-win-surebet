@@ -1,3 +1,5 @@
+import { existsSync, realpathSync, statSync } from 'node:fs';
+import { resolve } from 'node:path';
 import {
   SurebetImportRunRepository,
   SurebetUpstreamApiConvergenceRepository,
@@ -166,9 +168,13 @@ export function resolveBwsUpstreamApiConvergenceConfig(
     );
   }
 
-  const resolvedRepositoryRoot = repositoryRoot;
+  const resolvedRepositoryRoot = realpathSync(repositoryRoot);
   const upstreamRepoPath = requireNonEmptyString(environment.BETTING_WIN_REPO_PATH, 'BETTING_WIN_REPO_PATH');
-  const lockPath = requireNonEmptyString(environment[BWS_UPSTREAM_LOCK_PATH_ENV], BWS_UPSTREAM_LOCK_PATH_ENV);
+  const lockPath = requireRepositoryFile(
+    resolvedRepositoryRoot,
+    requireNonEmptyString(environment[BWS_UPSTREAM_LOCK_PATH_ENV], BWS_UPSTREAM_LOCK_PATH_ENV),
+    BWS_UPSTREAM_LOCK_PATH_ENV,
+  );
   const upstreamLock = verifyBettingWinUpstreamLock(
     readBettingWinUpstreamLock(lockPath, resolvedRepositoryRoot),
     {
@@ -930,6 +936,22 @@ function requireNonEmptyString(value: unknown, name: string): string {
     throw new Error(`${name} must be a non-empty string.`);
   }
   return value.trim();
+}
+
+function requireRepositoryFile(repositoryRoot: string, value: string, name: string): string {
+  const resolvedRoot = realpathSync(repositoryRoot);
+  const candidatePath = resolve(resolvedRoot, value);
+  if (!(candidatePath === resolvedRoot || candidatePath.startsWith(`${resolvedRoot}/`))) {
+    throw new Error(`${name} must stay within the BWS repository root.`);
+  }
+  if (!existsSync(candidatePath) || !statSync(candidatePath).isFile()) {
+    throw new Error(`${name} must point to an existing file inside the BWS repository root.`);
+  }
+  const resolvedPath = realpathSync(candidatePath);
+  if (!(resolvedPath === resolvedRoot || resolvedPath.startsWith(`${resolvedRoot}/`))) {
+    throw new Error(`${name} must stay within the BWS repository root.`);
+  }
+  return resolvedPath;
 }
 
 function requireDeterministicId(value: unknown, name: string): string {

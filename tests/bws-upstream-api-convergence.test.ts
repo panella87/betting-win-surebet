@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdtempSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
@@ -287,6 +287,51 @@ test('upstream API convergence rejects mutated checkpoint configuration after in
   }
 });
 
+test('upstream API convergence config rejects lock paths that escape the repository before lock verification', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'bws-api-lock-boundary-'));
+  const repositoryRoot = join(tempRoot, 'betting-win-surebet');
+  const outsideRoot = join(tempRoot, 'outside');
+  try {
+    mkdirSync(join(repositoryRoot, 'config'), { recursive: true });
+    mkdirSync(outsideRoot, { recursive: true });
+    const outsideLockPath = join(outsideRoot, 'betting-win.upstream.lock.json');
+    const symlinkPath = join(repositoryRoot, 'config', 'outside-lock.symlink.json');
+    writeFileSync(outsideLockPath, '{}\n', 'utf-8');
+    symlinkSync(outsideLockPath, symlinkPath);
+    const boundaryEnvironment = {
+      BETTING_WIN_REPO_PATH: join(tempRoot, 'betting-win'),
+      [BWS_UPSTREAM_API_BASE_URL_ENV]: 'http://betting-win-query.test',
+      [BWS_UPSTREAM_API_CHECKPOINT_ID_ENV]: 'checkpoint-api-001',
+      [BWS_UPSTREAM_API_CONTRACT_VERSION_ENV]: '1.0.0',
+      [BWS_UPSTREAM_API_MAX_PAGES_PER_RESOURCE_ENV]: '2',
+      [BWS_UPSTREAM_API_PAGE_SIZE_ENV]: '1',
+      [BWS_UPSTREAM_API_RETRY_BACKOFF_MS_ENV]: '5',
+      [BWS_UPSTREAM_API_RETRY_LIMIT_ENV]: '1',
+      [BWS_UPSTREAM_API_TIMEOUT_MS_ENV]: '1000',
+      [BWS_UPSTREAM_MODE_ENV]: 'api',
+      SUREBET_EXECUTION_ENABLED: 'false',
+      SUREBET_PG_DATABASE: 'surebet',
+      SUREBET_PG_HOST: '127.0.0.1',
+      SUREBET_PG_PORT: '5432',
+      SUREBET_PG_USER: 'surebet',
+      SUREBET_PROVIDER_CONNECTIONS: 'disabled',
+      SUREBET_RUNTIME_MODE: 'paper',
+    } as const;
+
+    for (const lockPath of ['../outside/betting-win.upstream.lock.json', outsideLockPath, 'config/outside-lock.symlink.json']) {
+      assert.throws(
+        () => resolveBwsUpstreamApiConvergenceConfig({
+          ...boundaryEnvironment,
+          [BWS_UPSTREAM_LOCK_PATH_ENV]: lockPath,
+        }, repositoryRoot),
+        /must stay within the BWS repository root/,
+      );
+    }
+  } finally {
+    rmSync(tempRoot, { force: true, recursive: true });
+  }
+});
+
 test('upstream API convergence config and CLI help stay explicit about api mode and forbid fallback inputs or secret-style settings', async () => {
   const fixture = createBettingWinFixture();
   try {
@@ -322,6 +367,40 @@ test('upstream API convergence config and CLI help stay explicit about api mode 
     const config = resolveBwsUpstreamApiConvergenceConfig(baseEnvironment, fixture.bwsRoot);
     assert.equal(config.mode, 'api');
     assert.equal(config.query.contractVersion, '1.0.0');
+
+    assert.throws(
+      () => resolveBwsUpstreamApiConvergenceConfig({
+        ...baseEnvironment,
+        [BWS_UPSTREAM_LOCK_PATH_ENV]: '../outside.lock.json',
+      }, fixture.bwsRoot),
+      /must stay within the BWS repository root/,
+    );
+
+    const lockPath = join(fixture.bwsRoot, baseEnvironment[BWS_UPSTREAM_LOCK_PATH_ENV]);
+    const outsideLockPath = join(fixture.tempRoot, 'betting-win.upstream.lock.outside.json');
+    const symlinkPath = join(fixture.bwsRoot, 'config', 'betting-win.upstream.lock.outside.symlink.json');
+    try {
+      copyFileSync(lockPath, outsideLockPath);
+      assert.throws(
+        () => resolveBwsUpstreamApiConvergenceConfig({
+          ...baseEnvironment,
+          [BWS_UPSTREAM_LOCK_PATH_ENV]: outsideLockPath,
+        }, fixture.bwsRoot),
+        /must stay within the BWS repository root/,
+      );
+
+      symlinkSync(outsideLockPath, symlinkPath);
+      assert.throws(
+        () => resolveBwsUpstreamApiConvergenceConfig({
+          ...baseEnvironment,
+          [BWS_UPSTREAM_LOCK_PATH_ENV]: 'config/betting-win.upstream.lock.outside.symlink.json',
+        }, fixture.bwsRoot),
+        /must stay within the BWS repository root/,
+      );
+    } finally {
+      rmSync(symlinkPath, { force: true });
+      rmSync(outsideLockPath, { force: true });
+    }
 
     for (const apiBaseUrl of ['http://127.0.0.1:4312', 'http://localhost:4312', 'http://[::1]:4312']) {
       const localConfig = resolveBwsUpstreamApiConvergenceConfig({

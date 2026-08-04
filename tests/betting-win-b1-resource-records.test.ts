@@ -30,7 +30,7 @@ test('B1 deterministic fixture parser accepts local contract rows without upstre
   assert.ok(firstRow);
   assert.equal(firstRow.marketEquivalenceKey, 'event-001:moneyline:full-game');
   assert.equal(firstRow.selectionEquivalenceKey, 'event-001:moneyline:home');
-  assert.equal(firstRow.quoteAgeMs, 1000n);
+  assert.equal(firstRow.quoteAgeMs, 1250n);
   assert.equal(firstRow.availableSizeMinor, 1200000n);
 });
 
@@ -101,6 +101,40 @@ test('B1 deterministic fixture parser rejects missing manifest lineage evidence'
       code: 'B1_SOURCE_LINEAGE_RECORD_IDS_MISSING',
       message: 'B1 manifest sourceLineageRecordIds must contain at least one id.',
       evidenceRequired: 'B1 source lineage record ids from betting-win.',
+    },
+  ]);
+});
+
+test('B1 deterministic fixture parser binds manifest lineage ids to row lineage ids', () => {
+  const fixtureWithUnusedManifestLineage = readFixture();
+  const unusedManifest = fixtureWithUnusedManifestLineage.manifest as Record<string, unknown>;
+  unusedManifest.sourceLineageRecordIds = ['lineage-001', 'lineage-002', 'lineage-unused'];
+
+  const unusedResult = parseBettingWinB1DeterministicFixture(fixtureWithUnusedManifestLineage);
+
+  assert.equal(unusedResult.ok, false);
+  assert.deepEqual(unusedResult.blockers, [
+    {
+      code: 'B1_SOURCE_LINEAGE_MANIFEST_ID_UNUSED',
+      message: 'B1 manifest sourceLineageRecordIds must be represented by fixture rows.',
+      evidenceRequired: 'Every manifest source lineage id represented by at least one B1 row.',
+    },
+  ]);
+
+  const fixtureWithUnboundRowLineage = readFixture();
+  const rows = fixtureWithUnboundRowLineage.rows as Array<Record<string, unknown>>;
+  const firstRow = rows[0];
+  assert.ok(firstRow);
+  firstRow.source_lineage_id = 'lineage-not-in-manifest';
+
+  const rowResult = parseBettingWinB1DeterministicFixture(fixtureWithUnboundRowLineage);
+
+  assert.equal(rowResult.ok, false);
+  assert.deepEqual(rowResult.blockers, [
+    {
+      code: 'B1_SOURCE_LINEAGE_ROW_NOT_IN_MANIFEST',
+      message: 'B1 fixture rows must be bound to manifest sourceLineageRecordIds.',
+      evidenceRequired: 'Every row source_lineage_id represented in the B1 manifest lineage ids.',
     },
   ]);
 });

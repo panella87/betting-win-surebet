@@ -30,6 +30,19 @@ test('B1 private observation worker rejects fixture runtime-evidence claims', as
   assert.equal(dependencies.calls.length, 0);
 });
 
+test('B1 private observation worker dead-letters malformed observedAt before persistence calls', async () => {
+  const dependencies = createDependencies();
+  const handler = createB1PrivateObservationJobHandler(dependencies);
+  const payload = Object.freeze({
+    ...(createPayload() as Record<string, JsonValue>),
+    observedAt: 'not-an-iso-timestamp',
+  });
+  const result = await handler.run(createContext(payload));
+  assert.equal(result.outcome, 'dead_letter');
+  assert.equal(result.errorCode, 'B1_PRIVATE_OBSERVATION_OBSERVED_AT_INVALID');
+  assert.equal(dependencies.calls.length, 0);
+});
+
 test('B1 private observation worker persists deterministic offline results', async () => {
   const dependencies = createDependencies();
   const handler = createB1PrivateObservationJobHandler(dependencies);

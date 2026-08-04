@@ -66,6 +66,10 @@ export function parseBettingWinB1DeterministicFixture(value: unknown): BoundaryR
   if (!rows.ok) {
     return rows;
   }
+  const lineageBinding = validateFixtureLineageBinding(manifest.value, rows.value);
+  if (!lineageBinding.ok) {
+    return lineageBinding;
+  }
 
   return accepted(
     Object.freeze({
@@ -225,6 +229,33 @@ export function parseB1MultiVenueMarketRows(value: unknown): BoundaryResult<read
     rows.push(parsed.value);
   }
   return accepted(Object.freeze(rows));
+}
+
+function validateFixtureLineageBinding(
+  manifest: B1MultiVenueManifest,
+  rows: readonly B1MultiVenueMarketRow[],
+): BoundaryResult<undefined> {
+  const manifestLineageIds = new Set(manifest.sourceLineageRecordIds);
+  const rowLineageIds = new Set(rows.map((row) => row.sourceLineageId));
+  for (const rowLineageId of rowLineageIds) {
+    if (!manifestLineageIds.has(rowLineageId)) {
+      return blocked(
+        'B1_SOURCE_LINEAGE_ROW_NOT_IN_MANIFEST',
+        'B1 fixture rows must be bound to manifest sourceLineageRecordIds.',
+        'Every row source_lineage_id represented in the B1 manifest lineage ids.',
+      );
+    }
+  }
+  for (const manifestLineageId of manifestLineageIds) {
+    if (!rowLineageIds.has(manifestLineageId)) {
+      return blocked(
+        'B1_SOURCE_LINEAGE_MANIFEST_ID_UNUSED',
+        'B1 manifest sourceLineageRecordIds must be represented by fixture rows.',
+        'Every manifest source lineage id represented by at least one B1 row.',
+      );
+    }
+  }
+  return accepted(undefined);
 }
 
 export function parseB1MultiVenueMarketRow(value: unknown): BoundaryResult<B1MultiVenueMarketRow> {
