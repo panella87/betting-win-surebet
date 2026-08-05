@@ -122,6 +122,94 @@ test('BWS read-only query service fails closed on missing provenance expansion, 
   assert.equal(lowercaseShaFilter.ok, true);
 });
 
+test('BWS read-only query service fails closed on malformed direct request and filter shapes', () => {
+  const service = createBwsReadOnlyQueryService(createStubDependencies(), {
+    generatedAt: () => TEST_TIMESTAMP,
+    maxPageSize: 50,
+  });
+  assert.equal(service.ok, true);
+
+  const queryMethods = Object.freeze([
+    Object.freeze({
+      missingFiltersRequest: Object.freeze({ expand: 'provenance', pageSize: 1 }),
+      name: 'strategy ledger',
+      nonObjectFiltersRequest: Object.freeze({ expand: 'provenance', filters: 'not-an-object', pageSize: 1 }),
+      query: (request: unknown) => service.value.queryStrategyLedger(request as never),
+    }),
+    Object.freeze({
+      missingFiltersRequest: Object.freeze({ expand: 'provenance', pageSize: 1 }),
+      name: 'pinned strategy exports',
+      nonObjectFiltersRequest: Object.freeze({ expand: 'provenance', filters: 'not-an-object', pageSize: 1 }),
+      query: (request: unknown) => service.value.queryPinnedStrategyExports(request as never),
+    }),
+    Object.freeze({
+      missingFiltersRequest: Object.freeze({ expand: 'provenance', pageSize: 1 }),
+      name: 'private-paper runtime cycles',
+      nonObjectFiltersRequest: Object.freeze({ expand: 'provenance', filters: 'not-an-object', pageSize: 1 }),
+      query: (request: unknown) => service.value.queryPrivatePaperRuntimeCycles(request as never),
+    }),
+    Object.freeze({
+      missingFiltersRequest: Object.freeze({ expand: 'reporting', pageSize: 1 }),
+      name: 'B1 backtest runs',
+      nonObjectFiltersRequest: Object.freeze({ expand: 'reporting', filters: 'not-an-object', pageSize: 1 }),
+      query: (request: unknown) => service.value.queryB1BacktestRuns(request as never),
+    }),
+  ]);
+
+  for (const queryMethod of queryMethods) {
+    const undefinedRequest = queryMethod.query(undefined);
+    assert.equal(undefinedRequest.ok, false, queryMethod.name);
+    assert.equal(undefinedRequest.blockers[0]?.code, 'BWS_QUERY_REQUEST_INVALID', queryMethod.name);
+
+    const nonObjectRequest = queryMethod.query('not-an-object');
+    assert.equal(nonObjectRequest.ok, false, queryMethod.name);
+    assert.equal(nonObjectRequest.blockers[0]?.code, 'BWS_QUERY_REQUEST_INVALID', queryMethod.name);
+
+    const missingFilters = queryMethod.query(queryMethod.missingFiltersRequest);
+    assert.equal(missingFilters.ok, false, queryMethod.name);
+    assert.equal(missingFilters.blockers[0]?.code, 'BWS_QUERY_FILTERS_INVALID', queryMethod.name);
+
+    const nonObjectFilters = queryMethod.query(queryMethod.nonObjectFiltersRequest);
+    assert.equal(nonObjectFilters.ok, false, queryMethod.name);
+    assert.equal(nonObjectFilters.blockers[0]?.code, 'BWS_QUERY_FILTERS_INVALID', queryMethod.name);
+  }
+});
+
+test('BWS read-only query service validates generatedAt at response construction time', () => {
+  const generatedAtValues = [TEST_TIMESTAMP, 'not-an-iso-timestamp'];
+  const service = createBwsReadOnlyQueryService({
+    ...createStubDependencies(),
+    b1BacktestRuns: Object.freeze({
+      get() {
+        return undefined;
+      },
+      list() {
+        return Object.freeze([]);
+      },
+      listCandidates() {
+        return Object.freeze([]);
+      },
+      listSimulationResults() {
+        return Object.freeze([]);
+      },
+    }),
+  }, {
+    generatedAt: () => generatedAtValues.shift()!,
+    maxPageSize: 50,
+  });
+  assert.equal(service.ok, true);
+
+  const response = service.value.queryB1BacktestRuns({
+    expand: 'reporting',
+    filters: Object.freeze({
+      offlineFalsificationStatus: 'B1_OFFLINE_RESEARCH_CANDIDATES_OBSERVED',
+    }),
+    pageSize: 1,
+  });
+  assert.equal(response.ok, false);
+  assert.equal(response.blockers[0]?.code, 'BWS_QUERY_GENERATED_AT_INVALID');
+});
+
 test('BWS read-only query service fails closed on missing private-paper runtime cycle acceptance scope', () => {
   const service = createBwsReadOnlyQueryService(createStubDependencies(), {
     generatedAt: () => TEST_TIMESTAMP,
@@ -255,6 +343,211 @@ test('BWS read-only query service fails closed on non-api scheduler checkpoints'
   assert.equal(response.ok, false);
   assert.equal(response.blockers[0]?.code, 'BWS_READ_ONLY_PRIVATE_PAPER_RUNTIME_CYCLE_INVALID');
   assert.match(response.blockers[0]?.message ?? '', /mode=api/);
+});
+
+test('BWS read-only query service rejects uppercase emitted runtime source hashes before response construction', () => {
+  const service = createBwsReadOnlyQueryService({
+    ...createStubDependencies(),
+    privatePaperSchedulerCheckpoints: Object.freeze({
+      list() {
+        return Object.freeze([
+          Object.freeze({
+            configSha256: 'a'.repeat(64),
+            insertedAt: TEST_TIMESTAMP,
+            lastScheduledApiCycleNumber: 1,
+            mode: 'api',
+            queueName: 'private-paper',
+            runtimeId: 'runtime-001',
+            schedulerCheckpointId: 'scheduler-001',
+            updatedAt: TEST_TIMESTAMP,
+            upstreamCheckpointId: 'checkpoint-api-001',
+            upstreamLockRecordId: 'lock-001',
+          }),
+        ]) as unknown as ReturnType<BwsReadOnlyQueryDependencies['privatePaperSchedulerCheckpoints']['list']>;
+      },
+    }),
+    upstreamApiCheckpoints: Object.freeze({
+      get() {
+        return Object.freeze({
+          checkpointId: 'checkpoint-api-001',
+          maxPagesPerResource: 1,
+          upstreamLockRecordId: 'lock-001',
+        }) as unknown as ReturnType<BwsReadOnlyQueryDependencies['upstreamApiCheckpoints']['get']>;
+      },
+    }),
+    upstreamLocks: Object.freeze({
+      get() {
+        return Object.freeze({
+          insertedAt: TEST_TIMESTAMP,
+          lock: sampleUpstreamLock(),
+          lockRecordId: 'lock-001',
+        }) as unknown as ReturnType<BwsReadOnlyQueryDependencies['upstreamLocks']['get']>;
+      },
+    }),
+    workerJobs: Object.freeze({
+      get() {
+        return Object.freeze({
+          jobId: 'private-paper:scheduler-001:cycle:1',
+          payload: createRuntimeCycleJobPayload('lock-001', 'runtime-001', 'scheduler-001:cycle:1', 'A'.repeat(64)),
+        }) as unknown as ReturnType<BwsReadOnlyQueryDependencies['workerJobs']['get']>;
+      },
+      getDeadLetter() {
+        throw new Error('dead-letter should not be read before sourceManifestHash validation');
+      },
+      listCheckpoints() {
+        throw new Error('checkpoints should not be read before sourceManifestHash validation');
+      },
+    }),
+  }, {
+    generatedAt: () => TEST_TIMESTAMP,
+    maxPageSize: 50,
+  });
+  assert.equal(service.ok, true);
+
+  const response = service.value.queryPrivatePaperRuntimeCycles({
+    expand: 'provenance',
+    filters: Object.freeze({
+      acceptanceState: 'blocked',
+    }),
+    pageSize: 1,
+  });
+  assert.equal(response.ok, false);
+  assert.equal(response.blockers[0]?.code, 'BWS_QUERY_RUNTIME_CYCLE_JOB_INVALID');
+});
+
+test('BWS read-only query service rejects incomplete or mismatched runtime-cycle settlement import provenance', () => {
+  const upstreamLock = sampleUpstreamLock();
+  for (const provenance of [
+    Object.freeze({
+      responseReceivedAt: '2026-07-15T08:50:00.000Z',
+    }),
+    Object.freeze({
+      commitSha: '9'.repeat(40),
+      repository: upstreamLock.repository,
+      resource: 'settlement',
+      responseReceivedAt: '2026-07-15T08:50:00.000Z',
+      sourceView: upstreamLock.sourceView,
+      verifiedAt: upstreamLock.verifiedAt,
+    }),
+  ] as const) {
+    const service = createBwsReadOnlyQueryService({
+      ...createStubDependencies(),
+      importRuns: Object.freeze({
+        get() {
+          return Object.freeze({
+            completedAt: '2026-07-15T08:50:00.000Z',
+            importRunId: 'import:checkpoint-api-001:cycle:1:settlement:page:1',
+            importedRecordCount: 4,
+            insertedAt: TEST_TIMESTAMP,
+            metadata: Object.freeze({
+              checkpointId: 'checkpoint-api-001',
+              cycleNumber: 1,
+              mode: 'api',
+              page: Object.freeze({
+                pageNumber: 1,
+                provenance,
+                resource: 'settlement',
+              }),
+              upstreamLockRecordId: 'lock-001',
+            }),
+            outcome: 'succeeded',
+            requestedAt: '2026-07-15T08:50:00.000Z',
+            sourceKind: 'continuous_read_only_query_page',
+            sourceLocator: 'http://127.0.0.1:4312#checkpoint-api-001:cycle:1:settlement:page:1',
+            startedAt: '2026-07-15T08:50:00.000Z',
+            updatedAt: TEST_TIMESTAMP,
+            upstreamLockRecordId: 'lock-001',
+          }) as unknown as ReturnType<BwsReadOnlyQueryDependencies['importRuns']['get']>;
+        },
+      }),
+      privatePaperSchedulerCheckpoints: Object.freeze({
+        list() {
+          return Object.freeze([
+            Object.freeze({
+              configSha256: 'a'.repeat(64),
+              insertedAt: TEST_TIMESTAMP,
+              lastScheduledApiCycleNumber: 1,
+              mode: 'api',
+              queueName: 'private-paper',
+              runtimeId: 'runtime-001',
+              schedulerCheckpointId: 'scheduler-001',
+              updatedAt: TEST_TIMESTAMP,
+              upstreamCheckpointId: 'checkpoint-api-001',
+              upstreamLockRecordId: 'lock-001',
+            }),
+          ]) as unknown as ReturnType<BwsReadOnlyQueryDependencies['privatePaperSchedulerCheckpoints']['list']>;
+        },
+      }),
+      strategyLedger: Object.freeze({
+        list() {
+          return Object.freeze([]);
+        },
+      }),
+      upstreamApiCheckpoints: Object.freeze({
+        get() {
+          return Object.freeze({
+            checkpointId: 'checkpoint-api-001',
+            maxPagesPerResource: 1,
+            upstreamLockRecordId: 'lock-001',
+          }) as unknown as ReturnType<BwsReadOnlyQueryDependencies['upstreamApiCheckpoints']['get']>;
+        },
+      }),
+      upstreamLocks: Object.freeze({
+        get() {
+          return Object.freeze({
+            insertedAt: TEST_TIMESTAMP,
+            lock: upstreamLock,
+            lockRecordId: 'lock-001',
+          }) as unknown as ReturnType<BwsReadOnlyQueryDependencies['upstreamLocks']['get']>;
+        },
+      }),
+      workerJobs: Object.freeze({
+        get() {
+          return Object.freeze({
+            attemptCount: 1,
+            availableAt: TEST_TIMESTAMP,
+            checkpointCount: 0,
+            insertedAt: TEST_TIMESTAMP,
+            jobId: 'private-paper:scheduler-001:cycle:1',
+            jobKind: 'private_paper_runtime_cycle_v1',
+            payload: createRuntimeCycleJobPayload('lock-001', 'runtime-001', 'scheduler-001:cycle:1', '8'.repeat(64)),
+            payloadSha256: '1'.repeat(64),
+            queueName: 'private-paper',
+            retryDelaysMs: Object.freeze([]),
+            status: 'dead_lettered',
+            updatedAt: TEST_TIMESTAMP,
+          }) as unknown as ReturnType<BwsReadOnlyQueryDependencies['workerJobs']['get']>;
+        },
+        getDeadLetter() {
+          return Object.freeze({
+            checkpointCount: 0,
+            deadLetterReasonCode: 'BWS_PRIVATE_PAPER_RUNTIME_BLOCKED',
+            deadLetterReasonDetails: Object.freeze({ blockers: Object.freeze([]) }),
+            finalAttemptCount: 1,
+            insertedAt: TEST_TIMESTAMP,
+            jobId: 'private-paper:scheduler-001:cycle:1',
+          }) as unknown as ReturnType<BwsReadOnlyQueryDependencies['workerJobs']['getDeadLetter']>;
+        },
+        listCheckpoints() {
+          return Object.freeze([]);
+        },
+      }),
+    }, {
+      generatedAt: () => TEST_TIMESTAMP,
+      maxPageSize: 50,
+    });
+    assert.equal(service.ok, true);
+
+    const response = service.value.queryPrivatePaperRuntimeCycles({
+      expand: 'provenance',
+      filters: Object.freeze({
+        acceptanceState: 'blocked',
+      }),
+      pageSize: 1,
+    });
+    assert.equal(response.ok, false);
+    assert.equal(response.blockers[0]?.code, 'BWS_QUERY_RUNTIME_CYCLE_PROVENANCE_INVALID');
+  }
 });
 
 test('BWS read-only query HTTP handler applies security headers and returns fail-closed validation errors', async () => {
@@ -545,7 +838,12 @@ test('BWS read-only query HTTP API returns bounded private-paper runtime cycle c
           page: Object.freeze({
             pageNumber: 1,
             provenance: Object.freeze({
+              commitSha: lockRecord.lock.commitSha,
+              repository: lockRecord.lock.repository,
+              resource: 'settlement',
               responseReceivedAt: receivedAt,
+              sourceView: lockRecord.lock.sourceView,
+              verifiedAt: lockRecord.lock.verifiedAt,
             }),
             resource: 'settlement',
           }),

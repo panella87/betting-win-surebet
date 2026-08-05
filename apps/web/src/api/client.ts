@@ -151,7 +151,7 @@ function requireOptionalNonEmptyString(value: unknown, label: string): string | 
 }
 
 function requireSha256(value: unknown, label: string): string {
-  const normalized = requireNonEmptyString(value, label).toLowerCase();
+  const normalized = requireNonEmptyString(value, label);
   if (!SHA256_PATTERN.test(normalized)) {
     fail(`${label} must be a 64-character lower-case SHA-256 value`);
   }
@@ -159,7 +159,7 @@ function requireSha256(value: unknown, label: string): string {
 }
 
 function requireCommitSha(value: unknown, label: string): string {
-  const normalized = requireNonEmptyString(value, label).toLowerCase();
+  const normalized = requireNonEmptyString(value, label);
   if (!COMMIT_SHA_PATTERN.test(normalized)) {
     fail(`${label} must be a 40-character lower-case Git identifier`);
   }

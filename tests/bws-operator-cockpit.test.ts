@@ -590,6 +590,89 @@ test('BWS operator cockpit API client fails closed on malformed committed-HEAD p
   );
 });
 
+test('BWS operator cockpit API client rejects uppercase response hashes and Git identifiers without normalizing them', async () => {
+  const snapshot = createMockBwsOperatorCockpitSnapshot();
+
+  const uppercaseCommit = structuredClone(snapshot.acceptedBacktests);
+  const uppercaseCommitItems = uppercaseCommit.page.items as unknown as Array<{
+    entry: {
+      report: {
+        upstream: Record<string, unknown>;
+      };
+    };
+    provenance: {
+      upstreamLock: Record<string, unknown>;
+    };
+  }>;
+  uppercaseCommitItems[0]!.entry.report.upstream = {
+    ...uppercaseCommitItems[0]!.entry.report.upstream,
+    commitSha: 'A'.repeat(40),
+  };
+  uppercaseCommitItems[0]!.provenance.upstreamLock = {
+    ...uppercaseCommitItems[0]!.provenance.upstreamLock,
+    commitSha: 'A'.repeat(40),
+  };
+
+  const uppercaseSha = structuredClone(snapshot.acceptedBacktests);
+  const uppercaseShaItems = uppercaseSha.page.items as unknown as Array<{
+    entry: {
+      report: {
+        upstream: Record<string, unknown>;
+      };
+    };
+    provenance: {
+      upstreamLock: Record<string, unknown>;
+    };
+  }>;
+  uppercaseShaItems[0]!.entry.report.upstream = {
+    ...uppercaseShaItems[0]!.entry.report.upstream,
+    trackedTreeListingSha256: 'B'.repeat(64),
+  };
+  uppercaseShaItems[0]!.provenance.upstreamLock = {
+    ...uppercaseShaItems[0]!.provenance.upstreamLock,
+    trackedTreeListingSha256: 'B'.repeat(64),
+  };
+
+  const createClientFor = (payload: unknown) =>
+    createBwsOperatorCockpitApiClient(
+      {
+        apiBaseUrl: 'http://127.0.0.1:4312',
+        dataMode: 'api',
+      },
+      async () => Object.freeze({
+        ok: true,
+        status: 200,
+        async text() {
+          return JSON.stringify(payload);
+        },
+      }),
+    );
+
+  await assert.rejects(
+    () => createClientFor(uppercaseCommit).queryStrategyLedger({
+      expand: 'provenance',
+      filters: {
+        acceptanceState: 'accepted_local_evidence',
+        runKind: 'deterministic_standard_binary_backtest',
+      },
+      pageSize: 8,
+    }),
+    /commitSha must be a 40-character lower-case Git identifier/,
+  );
+
+  await assert.rejects(
+    () => createClientFor(uppercaseSha).queryStrategyLedger({
+      expand: 'provenance',
+      filters: {
+        acceptanceState: 'accepted_local_evidence',
+        runKind: 'deterministic_standard_binary_backtest',
+      },
+      pageSize: 8,
+    }),
+    /trackedTreeListingSha256 must be a 64-character lower-case SHA-256 value/,
+  );
+});
+
 test('BWS operator cockpit API client fails closed when strategy-ledger rows escape the requested scope', async () => {
   const snapshot = createMockBwsOperatorCockpitSnapshot();
   const createClient = () =>

@@ -889,6 +889,9 @@ function normalizeContractPath(path: string): string {
   if (trimmed.startsWith('//')) {
     throw new Error('selectedInput.apiContractPath must be a path-only value and must not override the API authority.');
   }
+  if (trimmed.includes('\\')) {
+    throw new Error('selectedInput.apiContractPath must be a path-only value and must not override the API authority.');
+  }
   if (trimmed.includes('?') || trimmed.includes('#')) {
     throw new Error('selectedInput.apiContractPath must not include query or fragment components.');
   }

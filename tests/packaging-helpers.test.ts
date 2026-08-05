@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { chmodSync, copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { chmodSync, copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -376,6 +376,173 @@ test('final artifact refresh preserves the published archive when the bounded up
     );
     assert.equal(archivedSummary, 'lock_release_status=not_attempted\n');
     assert.equal(readdirSync(repoDir).some((entry) => entry.startsWith('.artifacts.zip.refresh.')), false);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('final artifact refresh rejects artifact symlinks before publishing archive changes', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'surebet-final-artifact-refresh-symlink-'));
+  const repoDir = join(dir, 'repo');
+  const outsideDir = join(dir, 'outside');
+  const runDir = join(repoDir, 'artifacts', 'autonomous_implementation_test');
+  const archivePath = join(repoDir, 'artifacts.zip');
+  try {
+    mkdirSync(runDir, { recursive: true });
+    mkdirSync(outsideDir, { recursive: true });
+    writeFileSync(join(runDir, 'final-summary.md'), 'lock_release_status=not_attempted\n', { encoding: 'utf-8' });
+    writeFileSync(archivePath, 'published-archive-bytes\n', { encoding: 'utf-8' });
+    writeFileSync(join(outsideDir, 'secret.txt'), 'outside-content\n', { encoding: 'utf-8' });
+    symlinkSync(join(outsideDir, 'secret.txt'), join(runDir, 'linked-secret.txt'));
+    writeFileSync(join(runDir, 'final-summary.md'), 'lock_release_status=released\n', { encoding: 'utf-8' });
+
+    const result = spawnSync(
+      'bash',
+      [
+        '-lc',
+        '. "$RUN_COMMON"; . "$CONTROLLER_HARDENING"; automation_refresh_final_artifacts_zip 30 "$REPO_DIR" "$RUN_DIR"',
+      ],
+      {
+        cwd: repoDir,
+        encoding: 'utf-8',
+        env: {
+          ...process.env,
+          CONTROLLER_HARDENING,
+          REPO_DIR: repoDir,
+          RUN_COMMON,
+          RUN_DIR: runDir,
+        },
+      },
+    );
+    assert.equal(result.status, 2, `${result.stdout}\n${result.stderr}`);
+    assert.match(result.stderr, /must not contain symlinks/u);
+    assert.equal(readFileSync(archivePath, 'utf-8'), 'published-archive-bytes\n');
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('artifact ZIP helpers reject symlinked artifact files and directories', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'surebet-artifact-zip-symlink-'));
+  const repoDir = join(dir, 'repo');
+  const outsideDir = join(dir, 'outside');
+  const runDir = join(repoDir, 'artifacts', 'autonomous_implementation_test');
+  const archivePath = join(repoDir, 'artifacts.zip');
+  try {
+    mkdirSync(runDir, { recursive: true });
+    mkdirSync(outsideDir, { recursive: true });
+    writeFileSync(join(runDir, 'evidence.txt'), 'safe evidence\n', { encoding: 'utf-8' });
+    writeFileSync(join(outsideDir, 'secret.txt'), 'outside-content\n', { encoding: 'utf-8' });
+    symlinkSync(join(outsideDir, 'secret.txt'), join(runDir, 'linked-secret.txt'));
+
+    const sharedFileResult = spawnSync(
+      'bash',
+      [
+        '-lc',
+        '. "$CONTROLLER_HARDENING"; automation_v2_zip_with_timeout 30 "$ARCHIVE_PATH" "$REPO_DIR" artifacts',
+      ],
+      {
+        cwd: repoDir,
+        encoding: 'utf-8',
+        env: {
+          ...process.env,
+          ARCHIVE_PATH: archivePath,
+          CONTROLLER_HARDENING,
+          REPO_DIR: repoDir,
+        },
+      },
+    );
+    assert.equal(sharedFileResult.status, 2, `${sharedFileResult.stdout}\n${sharedFileResult.stderr}`);
+    assert.match(sharedFileResult.stderr, /must not contain symlinks/u);
+    assert.equal(existsSync(archivePath), false);
+
+    rmSync(join(runDir, 'linked-secret.txt'), { force: true });
+    symlinkSync(outsideDir, join(runDir, 'linked-dir'), 'dir');
+
+    const sharedDirResult = spawnSync(
+      'bash',
+      [
+        '-lc',
+        '. "$CONTROLLER_HARDENING"; automation_v2_zip_with_timeout 30 "$ARCHIVE_PATH" "$REPO_DIR" artifacts',
+      ],
+      {
+        cwd: repoDir,
+        encoding: 'utf-8',
+        env: {
+          ...process.env,
+          ARCHIVE_PATH: archivePath,
+          CONTROLLER_HARDENING,
+          REPO_DIR: repoDir,
+        },
+      },
+    );
+    assert.equal(sharedDirResult.status, 2, `${sharedDirResult.stdout}\n${sharedDirResult.stderr}`);
+    assert.match(sharedDirResult.stderr, /must not contain symlinks/u);
+    assert.equal(existsSync(archivePath), false);
+
+    const runDirsArchivePath = join(repoDir, 'run-dirs.zip');
+    const archiveRunDirsResult = spawnSync(
+      'bash',
+      [
+        '-lc',
+        '. "$CONTROLLER_HARDENING"; automation_v2_archive_run_dirs "$RUN_DIRS_ARCHIVE_PATH" "$REPO_DIR" "$RUN_DIR"',
+      ],
+      {
+        cwd: repoDir,
+        encoding: 'utf-8',
+        env: {
+          ...process.env,
+          CONTROLLER_HARDENING,
+          REPO_DIR: repoDir,
+          RUN_DIR: runDir,
+          RUN_DIRS_ARCHIVE_PATH: runDirsArchivePath,
+        },
+      },
+    );
+    assert.equal(archiveRunDirsResult.status, 2, `${archiveRunDirsResult.stdout}\n${archiveRunDirsResult.stderr}`);
+    assert.match(archiveRunDirsResult.stderr, /must not contain symlinks/u);
+    assert.equal(existsSync(runDirsArchivePath), false);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('direct artifact ZIP builder rejects symlinks before publishing artifacts.zip', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'surebet-artifact-zip-builder-symlink-'));
+  const repoDir = join(dir, 'repo');
+  const outsideDir = join(dir, 'outside');
+  const runDir = join(repoDir, 'artifacts', 'autonomous_implementation_test');
+  try {
+    mkdirSync(runDir, { recursive: true });
+    mkdirSync(outsideDir, { recursive: true });
+    writeFileSync(join(outsideDir, 'secret.txt'), 'outside-content\n', { encoding: 'utf-8' });
+    symlinkSync(join(outsideDir, 'secret.txt'), join(runDir, 'linked-secret.txt'));
+
+    const result = spawnSync(
+      'bash',
+      [
+        '-lc',
+        [
+          '. "$RUN_COMMON"',
+          'automation_temp_inode_check_capacity() { return 0; }',
+          'automation_require_command() { command -v "$1" >/dev/null 2>&1; }',
+          'automation_build_artifacts_zip "$RUN_DIR" "$REPO_DIR"',
+        ].join('; '),
+      ],
+      {
+        cwd: repoDir,
+        encoding: 'utf-8',
+        env: {
+          ...process.env,
+          REPO_DIR: repoDir,
+          RUN_COMMON,
+          RUN_DIR: runDir,
+        },
+      },
+    );
+    assert.equal(result.status, 2, `${result.stdout}\n${result.stderr}`);
+    assert.match(result.stderr, /must not contain symlinks/u);
+    assert.equal(existsSync(join(repoDir, 'artifacts.zip')), false);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

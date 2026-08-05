@@ -1,6 +1,6 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-08-04T10:23:04Z",
+  "generated": "2026-08-04T14:08:30Z",
   "overlay": "bws93-bugfix-upstream-export-fixture-containment-wave55",
   "files": [
     {
@@ -10,13 +10,13 @@
     },
     {
       "path": ".automation/lib/controller_hardening_v2.sh",
-      "sha256": "6edcc8172393fc0bc1ffe54bcaec6fd459868ab09afe7340f8e553375a26bdcf",
-      "size": 26678
+      "sha256": "f261016166efe3f9b3940ee7edcd40fbc65585f7940843e56c7046278fa52d6d",
+      "size": 28855
     },
     {
       "path": ".automation/lib/run_common.sh",
-      "sha256": "02dab1df89328ae5d8acac8dda372fe0dac1f8b6b15129e061ba09498a4ab8cf",
-      "size": 35680
+      "sha256": "de161259ed00a1e354780a0a12cbfad5bb3d03f0d0b2eafa1a5222f376b18018",
+      "size": 36645
     },
     {
       "path": ".automation/lib/telegram_notify.sh",
@@ -25,8 +25,8 @@
     },
     {
       "path": ".automation/lib/temp_inode_guard.sh",
-      "sha256": "2a7c28e576fea5c24216c435bbbb206a981427dfbb908f91f6df53e748404c20",
-      "size": 29785
+      "sha256": "d69d3cd6c39df811164c6b8256f20d574350195bd7942edd330c83ff44fd2cc1",
+      "size": 30690
     },
     {
       "path": ".codex/hooks.json",
@@ -145,8 +145,8 @@
     },
     {
       "path": "apps/web/src/api/client.ts",
-      "sha256": "c842c344e886f1adfa2394c0c67cc24d7017268a84bf9fa524c4786aa32e2238",
-      "size": 60997
+      "sha256": "b2573712873de9279bd1f46338412f2a272051bb75f97f9a4b06a5b08f8a53d5",
+      "size": 60969
     },
     {
       "path": "apps/web/src/api/contracts.ts",
@@ -830,8 +830,8 @@
     },
     {
       "path": "packages/bootstrap/src/api/bws-read-only-query-service.ts",
-      "sha256": "4072d00cefaaecb330a425c30cf7d63b42b8f4bc891fbd90112c29164ea839a8",
-      "size": 68204
+      "sha256": "dfab2170d71bfc0213e1e98ed08caf1c2e6ae6119e87fad5e1d7e20f04741bc2",
+      "size": 74129
     },
     {
       "path": "packages/bootstrap/src/backtest/b1-cross-venue-backtest.ts",
@@ -1040,8 +1040,8 @@
     },
     {
       "path": "packages/bootstrap/src/operations/external-runtime-preflight.ts",
-      "sha256": "98aa33086c15a8aa184bfe1f5bccdcc92b9da371c7b64c5d29260397ec579652",
-      "size": 45910
+      "sha256": "744490930a3018b540ec74512b3616bf5ee7b9be66b01f5fd3b5c73d63df1ecc",
+      "size": 46067
     },
     {
       "path": "packages/bootstrap/src/operations/final-local-acceptance.ts",
@@ -1105,13 +1105,13 @@
     },
     {
       "path": "packages/bootstrap/src/operations/soak-campaign.ts",
-      "sha256": "895b4a5c06d3ffb038569fc5742fab6a423b518b2f9e3615d5b71baea371f96c",
-      "size": 86953
+      "sha256": "779c0901b003ad6510608e54136fcb3e5c7dd38f64f07bd5916d49fcafd950a1",
+      "size": 91365
     },
     {
       "path": "packages/bootstrap/src/operations/upstream-api-convergence.ts",
-      "sha256": "ced15cd885faf9d1cd6ca4eb115f94df74e1bc399ce8cdc32c34bd3c9a5463ae",
-      "size": 40412
+      "sha256": "9dfcc0ba7d78dd70e41826e84e635ab26e70a65bef200d2de2a328bbdfd0b6c5",
+      "size": 41430
     },
     {
       "path": "packages/bootstrap/src/operations/upstream-convergence-service.ts",
@@ -1310,8 +1310,8 @@
     },
     {
       "path": "packages/bootstrap/src/workers/b1-private-observation-jobs.ts",
-      "sha256": "71cd8f6f0f3996ecb02b520dfd166c243f194ef838e1a505c60b3a709a141867",
-      "size": 9493
+      "sha256": "ee293ef0e7a3edeef6ef6729c987f477f049523ccd3d0b150b874796e032a5cc",
+      "size": 9857
     },
     {
       "path": "packages/bootstrap/src/workers/bounded-job-worker.ts",
@@ -1655,8 +1655,8 @@
     },
     {
       "path": "run-bugfix-autopilot.sh",
-      "sha256": "368a82c2f78f8d6a085839ef33bbcf5ae0ee0a7337929f2721ea645472831726",
-      "size": 58264
+      "sha256": "688d6b92388ab34675fe2dccac85728ae21ea9b5b254dae66cc12d6c0aa8795e",
+      "size": 59736
     },
     {
       "path": "run-paper-autopilot.sh",
@@ -1770,8 +1770,8 @@
     },
     {
       "path": "scripts/validate_artifact_hygiene.py",
-      "sha256": "ff6d44b90e1299de3bcca729125c121089a8c1293153ac67d3f6e7baf8a2f705",
-      "size": 7779
+      "sha256": "55d2839e96da8979b7ff4f58c249c2890928f6e13ed1c744a205bf64c2ca3234",
+      "size": 9948
     },
     {
       "path": "scripts/validate_autonomous_continuation_contract.py",
@@ -2495,8 +2495,8 @@
     },
     {
       "path": "tests/b1-private-observation-jobs.test.ts",
-      "sha256": "ad8df5257b620b6111031a2162a3e8075ee70cd91eb013f91da48d57c94fdea3",
-      "size": 10181
+      "sha256": "a0c795e5f9558268bc33f8590ecfe1f94dabc2276d4cf69a55df2f93021a3ee9",
+      "size": 11214
     },
     {
       "path": "tests/b1-quote-synchronization.test.ts",
@@ -2580,8 +2580,8 @@
     },
     {
       "path": "tests/bugfix-autopilot-contract.test.ts",
-      "sha256": "7c24c44a0d3a14bb3339745f87947eeef4fdf2e4e545a9fbc29c4fb4153eb30c",
-      "size": 19592
+      "sha256": "3fb04b66119791a4f4dcbaa3391588eb4b8497799b6aec568d621bda147dd422",
+      "size": 28154
     },
     {
       "path": "tests/bws-database-lifecycle.test.ts",
@@ -2590,8 +2590,8 @@
     },
     {
       "path": "tests/bws-external-runtime-preflight.test.ts",
-      "sha256": "b79523c3c812e3fbb5dd93dc0cd85ad1dcfa0034a2c9e86585292046f5b5d36b",
-      "size": 29513
+      "sha256": "3187be91eb1d24782330332165475d0492d0914e213ea6a1e5a717d0af6e62a6",
+      "size": 29576
     },
     {
       "path": "tests/bws-final-local-acceptance.test.ts",
@@ -2615,8 +2615,8 @@
     },
     {
       "path": "tests/bws-operator-cockpit.test.ts",
-      "sha256": "ebff35e1adf5a633d34d0410551e0e55e89edc58bfb3e62b554fb11a83ace86c",
-      "size": 29715
+      "sha256": "62cd9be3a06681c806d3e13b6987be41a5459d94bb779e8413f746603af6a67b",
+      "size": 32195
     },
     {
       "path": "tests/bws-operator-lifecycle.test.ts",
@@ -2650,8 +2650,8 @@
     },
     {
       "path": "tests/bws-read-only-query-api.test.ts",
-      "sha256": "dcb2233d13b00c13d15dc035c221e8e0acb3fff31d076294f45b725e747ccd49",
-      "size": 39295
+      "sha256": "2d1735836cdd6f0101586474931a1c135cb5299e5b9a380dde2aea6c3e02f949",
+      "size": 50921
     },
     {
       "path": "tests/bws-release-packaging.test.ts",
@@ -2675,13 +2675,13 @@
     },
     {
       "path": "tests/bws-soak-campaign.test.ts",
-      "sha256": "9b2c375bd91854f824639b11d882b7b70956d8b294bd5fc31dd7ad1b81ebec52",
-      "size": 56483
+      "sha256": "235ed2d6c97b02660d417c35ba91497d41a427bfe7fb8684908758a2cc922dae",
+      "size": 58496
     },
     {
       "path": "tests/bws-upstream-api-convergence.test.ts",
-      "sha256": "e01a70d4c56999c26eefa042faa5ec0ac3e785c874d95ee50583624c1fa35508",
-      "size": 34964
+      "sha256": "3796a3f611e45080b15feccad3c606e17904ba1ac5a5e8a2a38b966e2882627e",
+      "size": 38795
     },
     {
       "path": "tests/bws-upstream-convergence-service.test.ts",
@@ -2845,8 +2845,8 @@
     },
     {
       "path": "tests/packaging-helpers.test.ts",
-      "sha256": "466a159bf31de14b8898e458b05484f051b01e8c4123f29893d062df2b56ed2f",
-      "size": 24806
+      "sha256": "f08a75dfb1476e6259e99670c6cf584bb306ca9de9c7fbed299b009717e27b0b",
+      "size": 31001
     },
     {
       "path": "tests/paper-autopilot-contract.test.ts",
@@ -2990,8 +2990,8 @@
     },
     {
       "path": "tests/temp-inode-watchdog-race.test.ts",
-      "sha256": "482c37b29006c7dec5642ab4a93e85f486d269cfc1baa99deefbba4fc6bf8615",
-      "size": 7892
+      "sha256": "28c5f84e8fabaf783b52a5802731c02457818c1223cf798fe7dbdd7409ece40c",
+      "size": 9101
     },
     {
       "path": "tests/three-repo-surebet-boundary.test.ts",
@@ -3000,8 +3000,8 @@
     },
     {
       "path": "tests/validate-artifact-hygiene.test.ts",
-      "sha256": "7f891e1fbf285cc596c32fd317236badaac46a7f97cb81ded40ec8bfdcbff2ad",
-      "size": 2625
+      "sha256": "7a6c38a9e66007a89fae4f75c3518b6b3dee70f814a8451b5b158d36806af8dd",
+      "size": 5592
     },
     {
       "path": "tests/validate-fixture-integrity.test.ts",

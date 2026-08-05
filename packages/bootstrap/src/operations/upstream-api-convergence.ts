@@ -637,6 +637,34 @@ function validateExistingImportRun(
       'Persisted API import-run metadata aligned to the checkpoint cursor state.',
     );
   }
+  const provenanceValidation = validateRecoveredImportRunProvenance(
+    importRun,
+    metadata.value.page.provenance,
+    config.upstream.lock,
+  );
+  if (!provenanceValidation.ok) {
+    return provenanceValidation;
+  }
+  return accepted(undefined);
+}
+
+function validateRecoveredImportRunProvenance(
+  importRun: SurebetImportRunRecord,
+  provenance: SurebetUpstreamApiResponseProvenance,
+  upstreamLock: BettingWinUpstreamLock,
+): BoundaryResult<undefined> {
+  if (
+    provenance.commitSha !== upstreamLock.commitSha
+    || provenance.repository !== upstreamLock.repository
+    || provenance.sourceView !== upstreamLock.sourceView
+    || provenance.verifiedAt !== upstreamLock.verifiedAt
+  ) {
+    return blocked(
+      'BWS_UPSTREAM_API_IMPORT_PROVENANCE_MISMATCH',
+      `BWS upstream API import run ${importRun.importRunId} response provenance must match the verified betting-win upstream lock.`,
+      'Recovered API import-run response provenance bound to the verified betting-win upstream lock.',
+    );
+  }
   return accepted(undefined);
 }
 

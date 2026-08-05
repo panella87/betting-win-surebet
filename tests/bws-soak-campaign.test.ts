@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { once } from 'node:events';
 import { createServer } from 'node:http';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join, relative } from 'node:path';
 import { setTimeout as sleepFor } from 'node:timers/promises';
 import { pathToFileURL } from 'node:url';
@@ -118,6 +119,52 @@ test('soak campaign resume rejects mismatched identity inputs', SEQUENTIAL_TEST_
     );
   } finally {
     fixture.dispose();
+  }
+});
+
+test('soak campaign output paths reject symlinked artifact parents before outside writes', SEQUENTIAL_TEST_OPTIONS, async () => {
+  const fixture = createFixture();
+  const outsideDirectory = mkdtempSync(join(tmpdir(), 'bws-soak-outside-parent-'));
+  const linkedCampaignDirectory = join(fixture.tempDirectoryAbsolute, 'linked-campaign');
+  try {
+    symlinkSync(outsideDirectory, linkedCampaignDirectory, 'dir');
+    await assert.rejects(
+      () =>
+        createBwsSoakCampaign({
+          ...createCampaignRequest(fixture),
+          checkpointDirectory: relative(REPO_ROOT, join(linkedCampaignDirectory, 'checkpoints')),
+          manifestOutputFile: relative(REPO_ROOT, join(linkedCampaignDirectory, 'manifest.json')),
+          stateFile: relative(REPO_ROOT, join(linkedCampaignDirectory, 'state.json')),
+        }),
+      /symlink components/i,
+    );
+    assert.equal(existsSync(join(outsideDirectory, 'manifest.json')), false);
+    assert.equal(existsSync(join(outsideDirectory, 'state.json')), false);
+    assert.equal(existsSync(join(outsideDirectory, 'checkpoints')), false);
+  } finally {
+    fixture.dispose();
+    removeDirectoryWithRetries(outsideDirectory);
+  }
+});
+
+test('soak campaign output paths reject dangling output symlinks', SEQUENTIAL_TEST_OPTIONS, async () => {
+  const fixture = createFixture();
+  const outsideDirectory = mkdtempSync(join(tmpdir(), 'bws-soak-outside-file-'));
+  const linkedStateFile = join(fixture.tempDirectoryAbsolute, 'linked-state.json');
+  try {
+    symlinkSync(join(outsideDirectory, 'state.json'), linkedStateFile);
+    await assert.rejects(
+      () =>
+        createBwsSoakCampaign({
+          ...createCampaignRequest(fixture),
+          stateFile: relative(REPO_ROOT, linkedStateFile),
+        }),
+      /symlink components/i,
+    );
+    assert.equal(existsSync(join(outsideDirectory, 'state.json')), false);
+  } finally {
+    fixture.dispose();
+    removeDirectoryWithRetries(outsideDirectory);
   }
 });
 

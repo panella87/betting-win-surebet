@@ -896,6 +896,7 @@ automation_refresh_final_artifacts_zip() {
     printf 'ERROR: artifact refresh repository root must be a non-symlink directory: %s\n' "$root" >&2
     return 2
   }
+  automation_reject_artifact_zip_symlinks "$root" || return $?
   [[ -d "$run_dir" && ! -L "$run_dir" ]] || {
     printf 'ERROR: artifact refresh run directory must be a non-symlink directory: %s\n' "$run_dir" >&2
     return 2
@@ -944,12 +945,33 @@ automation_refresh_final_artifacts_zip() {
   return 0
 }
 
+automation_reject_artifact_zip_symlinks() {
+  local root="${1:?repository root is required}" artifacts_dir="$root/artifacts" symlink_entry
+  [[ -d "$root" && ! -L "$root" ]] || {
+    printf 'ERROR: artifact ZIP repository root must be a non-symlink directory: %s\n' "$root" >&2
+    return 2
+  }
+  [[ -d "$artifacts_dir" && ! -L "$artifacts_dir" ]] || {
+    printf 'ERROR: artifact ZIP source must be a non-symlink directory: %s\n' "$artifacts_dir" >&2
+    return 2
+  }
+  symlink_entry="$(find -P "$artifacts_dir" -mindepth 1 -type l -print -quit 2>/dev/null)" || {
+    printf 'ERROR: failed to scan artifacts for symlinks before ZIP packaging: %s\n' "$artifacts_dir" >&2
+    return 2
+  }
+  if [[ -n "$symlink_entry" ]]; then
+    printf 'ERROR: artifact ZIP source must not contain symlinks: %s\n' "$symlink_entry" >&2
+    return 2
+  fi
+}
+
 automation_build_artifacts_zip() {
   local run_dir="$1" root="$2" zip_tmp timeout_seconds
   [[ -d "$run_dir" ]] || return 0
   [[ -d "$root/artifacts" ]] || return 0
   automation_temp_inode_check_capacity before_artifact_packaging || return $?
   automation_require_command zip
+  automation_reject_artifact_zip_symlinks "$root" || return $?
   timeout_seconds="$(automation_parse_duration_seconds "${AUTOMATION_ZIP_TIMEOUT:-10m}")" || return 2
   zip_tmp="$root/.artifacts.zip.tmp.$$.zip"
   rm -f "$zip_tmp"

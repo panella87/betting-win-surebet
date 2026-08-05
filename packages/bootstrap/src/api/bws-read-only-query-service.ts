@@ -52,6 +52,8 @@ import { describeReadOnlyQueryApiClientBoundary } from '../adapters/betting-win-
 const BWS_READ_ONLY_QUERY_SERVICE_PHASE = 'BWS-400';
 const MAX_CURSOR_BYTES = 512;
 const ISO_8601_UTC_MILLISECONDS = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/;
+const COMMIT_SHA_PATTERN = /^[0-9a-f]{40}$/;
+const SHA256_PATTERN = /^[0-9a-f]{64}$/;
 const PRIVATE_PAPER_RUNTIME_JOB_SCHEMA = 'bws.private_paper_runtime_job.v1';
 const PRIVATE_PAPER_RUNTIME_CYCLE_CHECKPOINT_RETENTION = 3;
 const PRIVATE_PAPER_RUNTIME_CYCLE_SCAN_MULTIPLIER = 4;
@@ -380,10 +382,15 @@ function queryB1BacktestRuns(
       })
     : undefined;
 
+  const generatedAt = validateGeneratedAt(config.generatedAt());
+  if (!generatedAt.ok) {
+    return generatedAt;
+  }
+
   return accepted(
     Object.freeze({
       boundary,
-      generatedAt: config.generatedAt(),
+      generatedAt: generatedAt.value,
       page: Object.freeze({
         items: Object.freeze(items),
         ...(nextCursor === undefined ? {} : { nextCursor }),
@@ -429,10 +436,15 @@ function queryStrategyLedger(
         resource: 'strategy_ledger_entries',
       })
     : undefined;
+  const generatedAt = validateGeneratedAt(config.generatedAt());
+  if (!generatedAt.ok) {
+    return generatedAt;
+  }
+
   return accepted(
     Object.freeze({
       boundary,
-      generatedAt: config.generatedAt(),
+      generatedAt: generatedAt.value,
       page: Object.freeze({
         items: Object.freeze(items),
         ...(nextCursor === undefined ? {} : { nextCursor }),
@@ -511,10 +523,15 @@ function queryPinnedStrategyExports(
         resource: 'pinned_strategy_exports',
       })
     : undefined;
+  const generatedAt = validateGeneratedAt(config.generatedAt());
+  if (!generatedAt.ok) {
+    return generatedAt;
+  }
+
   return accepted(
     Object.freeze({
       boundary,
-      generatedAt: config.generatedAt(),
+      generatedAt: generatedAt.value,
       page: Object.freeze({
         items: Object.freeze(items),
         ...(nextCursor === undefined ? {} : { nextCursor }),
@@ -604,10 +621,15 @@ function queryPrivatePaperRuntimeCycles(
       .map((entry) => entry.item),
   );
 
+  const generatedAt = validateGeneratedAt(config.generatedAt());
+  if (!generatedAt.ok) {
+    return generatedAt;
+  }
+
   return accepted(
     Object.freeze({
       boundary,
-      generatedAt: config.generatedAt(),
+      generatedAt: generatedAt.value,
       page: Object.freeze({
         items,
         pageSize: normalized.value.pageSize,
@@ -635,6 +657,10 @@ function expandStrategyLedgerRecord(
       'Persisted committed-HEAD betting-win upstream lock evidence for every returned strategy ledger entry.',
     );
   }
+  const validatedUpstreamLock = validateResponseUpstreamLock(upstreamLock.lock, `upstream lock ${record.upstreamLockRecordId}`);
+  if (!validatedUpstreamLock.ok) {
+    return validatedUpstreamLock;
+  }
 
   if (record.entry.sourceKind === 'read_only_query') {
     if (record.pinnedStrategyExportRecordId !== undefined) {
@@ -650,7 +676,7 @@ function expandStrategyLedgerRecord(
         insertedAt: record.insertedAt,
         ledgerEntryId: record.ledgerEntryId,
         provenance: Object.freeze({
-          upstreamLock: upstreamLock.lock,
+          upstreamLock: validatedUpstreamLock.value,
           upstreamLockRecordId: record.upstreamLockRecordId,
         }),
       }),
@@ -705,7 +731,7 @@ function expandStrategyLedgerRecord(
       provenance: Object.freeze({
         importRun,
         pinnedStrategyExport,
-        upstreamLock: upstreamLock.lock,
+        upstreamLock: validatedUpstreamLock.value,
         upstreamLockRecordId: record.upstreamLockRecordId,
       }),
     }),
@@ -737,6 +763,10 @@ function expandPinnedStrategyExportRecord(
       'Persisted committed-HEAD betting-win upstream lock evidence for every returned pinned strategy export.',
     );
   }
+  const validatedUpstreamLock = validateResponseUpstreamLock(upstreamLock.lock, `upstream lock ${record.upstreamLockRecordId}`);
+  if (!validatedUpstreamLock.ok) {
+    return validatedUpstreamLock;
+  }
 
   const importRun = dependencies.importRuns.get(record.importRunId);
   if (importRun === undefined) {
@@ -760,7 +790,7 @@ function expandPinnedStrategyExportRecord(
       insertedAt: record.insertedAt,
       provenance: Object.freeze({
         importRun,
-        upstreamLock: upstreamLock.lock,
+        upstreamLock: validatedUpstreamLock.value,
         upstreamLockRecordId: record.upstreamLockRecordId,
       }),
       record,
@@ -797,6 +827,13 @@ function buildPrivatePaperRuntimeCycleItem(
       `BWS private-paper runtime cycle queries require upstream lock ${schedulerCheckpoint.upstreamLockRecordId}.`,
       'Persisted committed-HEAD upstream lock provenance for every returned private-paper runtime cycle.',
     );
+  }
+  const validatedUpstreamLock = validateResponseUpstreamLock(
+    upstreamLock.lock,
+    `upstream lock ${schedulerCheckpoint.upstreamLockRecordId}`,
+  );
+  if (!validatedUpstreamLock.ok) {
+    return validatedUpstreamLock;
   }
 
   const jobId = buildPrivatePaperRuntimeJobId(schedulerCheckpoint.schedulerCheckpointId, cycleNumber);
@@ -848,6 +885,7 @@ function buildPrivatePaperRuntimeCycleItem(
       dependencies,
       schedulerCheckpoint,
       upstreamApiCheckpoint,
+      validatedUpstreamLock.value,
       cycleNumber,
     );
     if (!cycleImportRun.ok) {
@@ -866,7 +904,7 @@ function buildPrivatePaperRuntimeCycleItem(
           ...(cycleImportRun.value === undefined ? {} : { cycleImportRun: cycleImportRun.value }),
           schedulerCheckpoint,
           upstreamApiCheckpoint,
-          upstreamLock: upstreamLock.lock,
+          upstreamLock: validatedUpstreamLock.value,
           upstreamLockRecordId: upstreamLock.lockRecordId,
         }),
         recentCheckpoints: recentCheckpoints.value,
@@ -919,6 +957,7 @@ function buildPrivatePaperRuntimeCycleItem(
     dependencies,
     schedulerCheckpoint,
     upstreamApiCheckpoint,
+    validatedUpstreamLock.value,
     cycleNumber,
   );
   if (!cycleImportRun.ok) {
@@ -936,7 +975,7 @@ function buildPrivatePaperRuntimeCycleItem(
         ...(cycleImportRun.value === undefined ? {} : { cycleImportRun: cycleImportRun.value }),
         schedulerCheckpoint,
         upstreamApiCheckpoint,
-        upstreamLock: upstreamLock.lock,
+        upstreamLock: validatedUpstreamLock.value,
         upstreamLockRecordId: upstreamLock.lockRecordId,
       }),
       recentCheckpoints: recentCheckpoints.value,
@@ -993,6 +1032,7 @@ function findCompletedCycleImportRun(
   dependencies: BwsReadOnlyQueryDependencies,
   schedulerCheckpoint: SurebetPrivatePaperRuntimeSchedulerCheckpointRecord,
   upstreamApiCheckpoint: SurebetUpstreamApiConvergenceCheckpointRecord,
+  upstreamLock: BettingWinUpstreamLock,
   cycleNumber: number,
 ): BoundaryResult<SurebetImportRunRecord | undefined> {
   for (let pageNumber = 1; pageNumber <= upstreamApiCheckpoint.maxPagesPerResource; pageNumber += 1) {
@@ -1010,6 +1050,7 @@ function findCompletedCycleImportRun(
       importRun,
       schedulerCheckpoint.upstreamCheckpointId,
       schedulerCheckpoint.upstreamLockRecordId,
+      upstreamLock,
       cycleNumber,
       pageNumber,
     );
@@ -1027,6 +1068,7 @@ function validateCompletedCycleImportRunMetadata(
   importRun: SurebetImportRunRecord,
   checkpointId: string,
   upstreamLockRecordId: string,
+  upstreamLock: BettingWinUpstreamLock,
   cycleNumber: number,
   pageNumber: number,
 ): BoundaryResult<Readonly<{ readonly hasNextCursor: boolean }>> {
@@ -1054,7 +1096,6 @@ function validateCompletedCycleImportRunMetadata(
     || metadata?.['cycleNumber'] !== cycleNumber
     || page?.['resource'] !== 'settlement'
     || page?.['pageNumber'] !== pageNumber
-    || typeof provenance?.['responseReceivedAt'] !== 'string'
   ) {
     return blocked(
       'BWS_QUERY_RUNTIME_CYCLE_PROVENANCE_INVALID',
@@ -1062,11 +1103,40 @@ function validateCompletedCycleImportRunMetadata(
       'Cycle import-run settlement metadata aligned to the selected checkpoint, page number, and verified upstream lock.',
     );
   }
+  const provenanceValidation = validateRuntimeCycleImportRunProvenance(importRun, provenance, upstreamLock);
+  if (!provenanceValidation.ok) {
+    return provenanceValidation;
+  }
   return accepted(
     Object.freeze({
       hasNextCursor: typeof page['nextCursor'] === 'string' && page['nextCursor'].length > 0,
     }),
   );
+}
+
+function validateRuntimeCycleImportRunProvenance(
+  importRun: SurebetImportRunRecord,
+  provenance: Readonly<Record<string, unknown>> | undefined,
+  upstreamLock: BettingWinUpstreamLock,
+): BoundaryResult<undefined> {
+  if (
+    provenance === undefined
+    || provenance['commitSha'] !== upstreamLock.commitSha
+    || provenance['repository'] !== upstreamLock.repository
+    || provenance['resource'] !== 'settlement'
+    || provenance['sourceView'] !== upstreamLock.sourceView
+    || provenance['verifiedAt'] !== upstreamLock.verifiedAt
+    || typeof provenance['responseReceivedAt'] !== 'string'
+    || !ISO_8601_UTC_MILLISECONDS.test(provenance['responseReceivedAt'])
+    || Number.isNaN(Date.parse(provenance['responseReceivedAt']))
+  ) {
+    return blocked(
+      'BWS_QUERY_RUNTIME_CYCLE_PROVENANCE_INVALID',
+      `BWS runtime cycle import run ${importRun.importRunId} must keep complete settlement response provenance aligned to the verified upstream lock.`,
+      'Complete settlement response provenance bound to the committed-HEAD upstream lock.',
+    );
+  }
+  return accepted(undefined);
 }
 
 function normalizeRuntimeCycleCheckpoints(
@@ -1189,12 +1259,12 @@ function parsePrivatePaperRuntimeJobPayload(
     );
   }
   const sourceManifestHash = typeof source['sourceManifestHash'] === 'string'
-    ? source['sourceManifestHash'].trim().toLowerCase()
+    ? source['sourceManifestHash']
     : undefined;
   const sourceKind = source['kind'];
   if (
     sourceManifestHash === undefined
-    || !/^[0-9a-f]{64}$/.test(sourceManifestHash)
+    || !SHA256_PATTERN.test(sourceManifestHash)
     || (sourceKind !== 'read_only_query' && sourceKind !== 'pinned_records')
   ) {
     return blocked(
@@ -1257,15 +1327,50 @@ function validateConfig(
       'Explicit deterministic generatedAt clock for BWS read-only query responses.',
     );
   }
-  const generatedAt = config.generatedAt();
-  if (!ISO_8601_UTC_MILLISECONDS.test(generatedAt)) {
+  const generatedAt = validateGeneratedAt(config.generatedAt());
+  if (!generatedAt.ok) {
+    return generatedAt;
+  }
+  return accepted(Object.freeze(config));
+}
+
+function validateGeneratedAt(generatedAt: string): BoundaryResult<IsoTimestamp> {
+  if (!ISO_8601_UTC_MILLISECONDS.test(generatedAt) || Number.isNaN(Date.parse(generatedAt))) {
     return blocked(
       'BWS_QUERY_GENERATED_AT_INVALID',
       'BWS read-only query service requires generatedAt to produce an ISO-8601 UTC timestamp.',
       'ISO-8601 UTC generatedAt timestamps for BWS read-only query responses.',
     );
   }
-  return accepted(Object.freeze(config));
+  return accepted(generatedAt);
+}
+
+function validateResponseUpstreamLock(
+  lock: BettingWinUpstreamLock,
+  label: string,
+): BoundaryResult<BettingWinUpstreamLock> {
+  if (!COMMIT_SHA_PATTERN.test(lock.commitSha)) {
+    return blocked(
+      'BWS_QUERY_PROVENANCE_INVALID',
+      `BWS read-only query response ${label} commitSha must be a 40-character lower-case Git identifier.`,
+      'Committed-HEAD upstream lock provenance with exact lower-case Git commit identifiers.',
+    );
+  }
+  if (!COMMIT_SHA_PATTERN.test(lock.gitTreeSha)) {
+    return blocked(
+      'BWS_QUERY_PROVENANCE_INVALID',
+      `BWS read-only query response ${label} gitTreeSha must be a 40-character lower-case Git identifier.`,
+      'Committed-HEAD upstream lock provenance with exact lower-case Git tree identifiers.',
+    );
+  }
+  if (!SHA256_PATTERN.test(lock.trackedTreeListingSha256)) {
+    return blocked(
+      'BWS_QUERY_PROVENANCE_INVALID',
+      `BWS read-only query response ${label} trackedTreeListingSha256 must be a 64-character lower-case SHA-256 value.`,
+      'Committed-HEAD upstream lock provenance with exact lower-case SHA-256 tree listing fingerprints.',
+    );
+  }
+  return accepted(lock);
 }
 
 function validateDependencies(
@@ -1300,6 +1405,10 @@ function validateB1BacktestRunRequest(
   config: Readonly<BwsReadOnlyQueryServiceConfig>,
   request: BwsB1BacktestRunQueryRequest,
 ): BoundaryResult<NormalizedB1BacktestRunRequest> {
+  const requestObject = validateQueryRequestObject(request, 'B1 read-only backtest run');
+  if (!requestObject.ok) {
+    return requestObject;
+  }
   if (request.expand !== 'reporting') {
     return blocked(
       'BWS_B1_QUERY_EXPANSION_REQUIRED',
@@ -1310,6 +1419,10 @@ function validateB1BacktestRunRequest(
   const pageSize = validatePageSize(config.maxPageSize, request.pageSize);
   if (!pageSize.ok) {
     return pageSize;
+  }
+  const filtersObject = validateQueryFiltersObject(request.filters, 'B1 read-only backtest run');
+  if (!filtersObject.ok) {
+    return filtersObject;
   }
   if (!hasB1BacktestRunScopeFilter(request.filters)) {
     return blocked(
@@ -1367,6 +1480,10 @@ function validateStrategyLedgerRequest(
   config: Readonly<BwsReadOnlyQueryServiceConfig>,
   request: BwsStrategyLedgerQueryRequest,
 ): BoundaryResult<NormalizedStrategyLedgerRequest> {
+  const requestObject = validateQueryRequestObject(request, 'strategy ledger');
+  if (!requestObject.ok) {
+    return requestObject;
+  }
   if (request.expand !== 'provenance') {
     return blocked(
       'BWS_QUERY_EXPANSION_REQUIRED',
@@ -1377,6 +1494,10 @@ function validateStrategyLedgerRequest(
   const pageSize = validatePageSize(config.maxPageSize, request.pageSize);
   if (!pageSize.ok) {
     return pageSize;
+  }
+  const filtersObject = validateQueryFiltersObject(request.filters, 'strategy ledger');
+  if (!filtersObject.ok) {
+    return filtersObject;
   }
 
   const acceptanceState = validateAcceptanceState(request.filters.acceptanceState);
@@ -1449,6 +1570,10 @@ function validatePinnedStrategyExportRequest(
   config: Readonly<BwsReadOnlyQueryServiceConfig>,
   request: BwsPinnedStrategyExportQueryRequest,
 ): BoundaryResult<NormalizedPinnedStrategyExportRequest> {
+  const requestObject = validateQueryRequestObject(request, 'pinned strategy export');
+  if (!requestObject.ok) {
+    return requestObject;
+  }
   if (request.expand !== 'provenance') {
     return blocked(
       'BWS_QUERY_EXPANSION_REQUIRED',
@@ -1459,6 +1584,10 @@ function validatePinnedStrategyExportRequest(
   const pageSize = validatePageSize(config.maxPageSize, request.pageSize);
   if (!pageSize.ok) {
     return pageSize;
+  }
+  const filtersObject = validateQueryFiltersObject(request.filters, 'pinned strategy export');
+  if (!filtersObject.ok) {
+    return filtersObject;
   }
   if (!hasPinnedStrategyExportFilter(request.filters)) {
     return blocked(
@@ -1512,6 +1641,10 @@ function validatePrivatePaperRuntimeCycleRequest(
   config: Readonly<BwsReadOnlyQueryServiceConfig>,
   request: BwsPrivatePaperRuntimeCycleQueryRequest,
 ): BoundaryResult<NormalizedPrivatePaperRuntimeCycleRequest> {
+  const requestObject = validateQueryRequestObject(request, 'private-paper runtime cycle');
+  if (!requestObject.ok) {
+    return requestObject;
+  }
   if (request.expand !== 'provenance') {
     return blocked(
       'BWS_QUERY_EXPANSION_REQUIRED',
@@ -1522,6 +1655,10 @@ function validatePrivatePaperRuntimeCycleRequest(
   const pageSize = validatePageSize(config.maxPageSize, request.pageSize);
   if (!pageSize.ok) {
     return pageSize;
+  }
+  const filtersObject = validateQueryFiltersObject(request.filters, 'private-paper runtime cycle');
+  if (!filtersObject.ok) {
+    return filtersObject;
   }
   const acceptanceState = validateAcceptanceState(request.filters.acceptanceState);
   if (!acceptanceState.ok) {
@@ -1553,6 +1690,28 @@ function validatePrivatePaperRuntimeCycleRequest(
       pageSize: pageSize.value,
     }),
   );
+}
+
+function validateQueryRequestObject(value: unknown, resource: string): BoundaryResult<undefined> {
+  if (asRecord(value) === undefined) {
+    return blocked(
+      'BWS_QUERY_REQUEST_INVALID',
+      `BWS read-only ${resource} query request must be a JSON object.`,
+      `Explicit BWS read-only ${resource} query request object.`,
+    );
+  }
+  return accepted(undefined);
+}
+
+function validateQueryFiltersObject(value: unknown, resource: string): BoundaryResult<undefined> {
+  if (asRecord(value) === undefined) {
+    return blocked(
+      'BWS_QUERY_FILTERS_INVALID',
+      `BWS read-only ${resource} query filters must be a JSON object.`,
+      `Explicit BWS read-only ${resource} query filters object.`,
+    );
+  }
+  return accepted(undefined);
 }
 
 function validatePageSize(maxPageSize: number, pageSize: number): BoundaryResult<number> {
@@ -1660,7 +1819,7 @@ function validateOptionalSha256Filters(
     if (value === undefined) {
       continue;
     }
-    if (!/^[0-9a-f]{64}$/.test(value)) {
+    if (!SHA256_PATTERN.test(value)) {
       return blocked(
         'BWS_QUERY_FILTER_VALUE_INVALID',
         `BWS read-only query filter ${field} must be a 64-character lower-case SHA-256 value.`,

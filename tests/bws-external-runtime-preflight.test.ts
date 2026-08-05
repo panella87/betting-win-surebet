@@ -267,7 +267,12 @@ test('external runtime preflight rejects unsafe integer operation inputs', SEQUE
 test('external runtime preflight rejects API contract paths that can escape the selected API authority', SEQUENTIAL_TEST_OPTIONS, async () => {
   const fixture = await createFixture();
   try {
-    for (const apiContractPath of ['//upstream.invalid/contract', '/contract?version=1', '/contract#fragment']) {
+    for (const apiContractPath of [
+      '//upstream.invalid/contract',
+      '/\\upstream.invalid/contract',
+      '/contract?version=1',
+      '/contract#fragment',
+    ]) {
       await assert.rejects(
         () =>
           createBwsExternalRuntimeCampaignManifest({

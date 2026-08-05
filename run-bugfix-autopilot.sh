@@ -572,6 +572,46 @@ validate_loaded_env_keys() {
   done
 }
 
+validate_protected_allowlist() {
+  local csv="$1" item known found
+  local -a items=()
+  local -A seen=()
+  [[ -z "$csv" || "$csv" == none ]] && return 0
+  IFS=',' read -r -a items <<< "$csv"
+  for item in "${items[@]}"; do
+    [[ -n "$item" && "$item" != /* && "$item" != *'..'* && "$item" != *$'\n'* ]] || {
+      echo "ERROR: invalid protected-file allowlist entry: $item" >&2
+      return 2
+    }
+    [[ -z "${seen[$item]+x}" ]] || {
+      echo "ERROR: duplicate protected-file allowlist entry: $item" >&2
+      return 2
+    }
+    seen["$item"]=1
+    found=0
+    for known in "${AUTOMATION_PROTECTED_FILES[@]:-}"; do
+      [[ "$known" == "$item" ]] && found=1
+    done
+    [[ "$found" == 1 ]] || {
+      echo "ERROR: unknown protected-file allowlist entry: $item" >&2
+      return 2
+    }
+  done
+}
+
+validate_bugfix_handoff_protected_authorization() {
+  local maintenance allowlist
+  maintenance="$(automation_v2_env_require BUGFIX_MODE_AUTOMATION_MAINTENANCE_ALLOWED)" || return 2
+  automation_v2_validate_yes_no_value BUGFIX_MODE_AUTOMATION_MAINTENANCE_ALLOWED "$maintenance" || return 2
+  allowlist="$(automation_v2_env_require ALLOWED_PROTECTED_FILES)" || return 2
+  if [[ "$maintenance" == yes ]]; then
+    [[ -n "$allowlist" && "$allowlist" != none ]] || return 2
+    validate_protected_allowlist "$allowlist" || return 2
+  else
+    [[ "$allowlist" == none ]] || return 2
+  fi
+}
+
 prepare_focus_file() {
   local round_dir="$1" phase="$2" focus
   focus="$round_dir/bugfix-focus.md"
@@ -598,6 +638,7 @@ validate_audit_handoff() {
   [[ "$(automation_v2_env_require HANDOVER_SCHEMA_VERSION)" == 1 ]] || return 2
   [[ "$(automation_v2_env_require HANDOVER_KIND)" == autonomous-bugfix-to-autonomous-implementation ]] || return 2
   [[ "$(automation_v2_env_require REPOSITORY)" == "${AUTOMATION_REPO_NAME:-betting-win-surebet}" ]] || return 2
+  [[ "$(automation_v2_env_require CONTROLLER)" == run-autonomous-bugfix.sh ]] || return 2
   [[ "$(automation_v2_env_require RUN_AUTONOMOUS_IMPLEMENTATION_NEXT)" == yes ]] || return 2
   [[ "$(automation_v2_env_require AUTONOMOUS_IMPLEMENTATION_EXPECTED_FLAG)" == --handover-bugfix-audit ]] || return 2
   [[ "$(automation_v2_env_require HANDOVER_AUTONOMOUS_IMPLEMENTATION)" == yes ]] || return 2
@@ -616,7 +657,7 @@ validate_audit_handoff() {
   [[ "$(automation_v2_env_require IMPLEMENTATION_SCOPE)" != none ]] || return 2
   [[ "$(automation_v2_env_require VALIDATION_REQUIRED)" == npm_run_validate ]] || return 2
   [[ "$(automation_v2_env_require BUGFIX_MODE_NOOP_SUCCESS_ALLOWED)" == no ]] || return 2
-  automation_v2_validate_yes_no_value BUGFIX_MODE_AUTOMATION_MAINTENANCE_ALLOWED "$(automation_v2_env_require BUGFIX_MODE_AUTOMATION_MAINTENANCE_ALLOWED)" || return 2
+  validate_bugfix_handoff_protected_authorization || return 2
   CURRENT_BUG_SIGNATURE="$(automation_v2_env_require BUG_SIGNATURE)" || return 2
   [[ "$CURRENT_BUG_SIGNATURE" =~ ^[a-f0-9]{64}$ ]] || return 2
   evidence="$(automation_v2_env_require SOURCE_EVIDENCE_PATH)" || return 2
@@ -640,6 +681,7 @@ validate_implementation_handoff() {
   [[ "$(automation_v2_env_require HANDOVER_SCHEMA_VERSION)" == 1 ]] || return 2
   [[ "$(automation_v2_env_require HANDOVER_KIND)" == bugfix-mode-after-autonomous-implementation ]] || return 2
   [[ "$(automation_v2_env_require REPOSITORY)" == "${AUTOMATION_REPO_NAME:-betting-win-surebet}" ]] || return 2
+  [[ "$(automation_v2_env_require CONTROLLER)" == run-autonomous-implementation.sh ]] || return 2
   [[ "$(automation_v2_env_require SOURCE_HANDOFF_FINGERPRINT)" == "$CURRENT_AUDIT_HANDOFF_FINGERPRINT" ]] || return 2
   [[ "$(automation_v2_env_require RUN_BUGFIX_AUDIT_NEXT)" == yes ]] || return 2
   [[ "$(automation_v2_env_require BUGFIX_REAUDIT_REQUIRED)" == yes ]] || return 2

@@ -30,6 +30,26 @@ test('B1 private observation worker rejects fixture runtime-evidence claims', as
   assert.equal(dependencies.calls.length, 0);
 });
 
+test('B1 private observation worker dead-letters malformed nested fixture input before persistence calls', async () => {
+  for (const input of [
+    Object.freeze({ plans: Object.freeze([]), quotePolicy: Object.freeze({}) }),
+    Object.freeze({ fixture: null, plans: Object.freeze([]), quotePolicy: Object.freeze({}) }),
+    Object.freeze({ fixture: Object.freeze([]), plans: Object.freeze([]), quotePolicy: Object.freeze({}) }),
+    Object.freeze({ fixture: 'not-a-fixture', plans: Object.freeze([]), quotePolicy: Object.freeze({}) }),
+  ] as const) {
+    const dependencies = createDependencies();
+    const handler = createB1PrivateObservationJobHandler(dependencies);
+    const payload = Object.freeze({
+      ...(createPayload() as Record<string, JsonValue>),
+      input,
+    });
+    const result = await handler.run(createContext(payload));
+    assert.equal(result.outcome, 'dead_letter');
+    assert.equal(result.errorCode, 'B1_PRIVATE_OBSERVATION_FIXTURE_INVALID');
+    assert.equal(dependencies.calls.length, 0);
+  }
+});
+
 test('B1 private observation worker dead-letters malformed observedAt before persistence calls', async () => {
   const dependencies = createDependencies();
   const handler = createB1PrivateObservationJobHandler(dependencies);

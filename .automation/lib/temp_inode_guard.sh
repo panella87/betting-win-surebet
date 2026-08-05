@@ -380,8 +380,34 @@ automation_temp_inode_recover_stale() {
 }
 
 _automation_temp_watchdog_event_directory_is_safe() {
-  local directory="${1:?directory required}" real parent
+  local directory="${1:?directory required}" real parent parent_real relative current part
+  local -a directory_parts=()
   [[ -n "${AUTOMATION_TEMP_REPO_REALPATH:-}" && -d "$AUTOMATION_TEMP_REPO_REALPATH" ]] || return 1
+  case "$directory" in
+    "$AUTOMATION_TEMP_REPO_REALPATH"/*) relative="${directory#"$AUTOMATION_TEMP_REPO_REALPATH"/}" ;;
+    *) return 1 ;;
+  esac
+  case "$relative" in
+    ""|.|..|../*|*/../*|*/..) return 1 ;;
+  esac
+  current="$AUTOMATION_TEMP_REPO_REALPATH"
+  IFS=/ read -r -a directory_parts <<< "$relative"
+  for part in "${directory_parts[@]}"; do
+    [[ -n "$part" && "$part" != "." && "$part" != ".." ]] || return 1
+    current="$current/$part"
+    [[ ! -L "$current" ]] || return 1
+    [[ -e "$current" ]] || break
+  done
+  parent="$(dirname -- "$directory")"
+  if [[ ! -e "$parent" ]]; then
+    mkdir -p -- "$parent" 2>/dev/null || return 1
+  fi
+  [[ -d "$parent" && ! -L "$parent" ]] || return 1
+  parent_real="$(realpath -e -- "$parent" 2>/dev/null)" || return 1
+  case "$parent_real/" in
+    "$AUTOMATION_TEMP_REPO_REALPATH"/*/) ;;
+    *) return 1 ;;
+  esac
   mkdir -p -- "$directory" 2>/dev/null || return 1
   [[ -d "$directory" && ! -L "$directory" ]] || return 1
   real="$(realpath -e -- "$directory" 2>/dev/null)" || return 1
@@ -389,7 +415,6 @@ _automation_temp_watchdog_event_directory_is_safe() {
     "$AUTOMATION_TEMP_REPO_REALPATH"/*/) ;;
     *) return 1 ;;
   esac
-  parent="$(dirname -- "$real")"
   [[ "$parent" != / && "$real" != "$AUTOMATION_TEMP_REPO_REALPATH" ]] || return 1
   printf '%s\n' "$real"
 }

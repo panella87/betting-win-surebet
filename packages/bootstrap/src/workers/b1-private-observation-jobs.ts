@@ -181,6 +181,17 @@ function parseB1PrivateObservationJobPayload(
     });
   }
 
+  const inputRecord = payload.input as Record<string, unknown>;
+  if (
+    typeof inputRecord.fixture !== 'object'
+    || inputRecord.fixture === null
+    || Array.isArray(inputRecord.fixture)
+  ) {
+    return invalidPayload(failedAt, 'B1_PRIVATE_OBSERVATION_FIXTURE_INVALID', {
+      evidenceRequired: 'payload.input.fixture must be a JSON object.',
+    });
+  }
+
   const input = payload.input as B1CrossVenueBacktestInput;
   if (input.fixture.runtimeEvidence !== false) {
     return invalidPayload(failedAt, 'B1_PRIVATE_OBSERVATION_RUNTIME_EVIDENCE_FORBIDDEN', {

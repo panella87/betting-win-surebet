@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { execFileSync, spawn, spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { chmodSync, copyFileSync, cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -32,10 +32,19 @@ AUTOMATION_INSTALL_TIMEOUT=60s
 AUTOMATION_ZIP_TIMEOUT=60s
 AUTOMATION_CODEX_CYCLE_TIMEOUT=60s
 AUTOMATION_MAX_CYCLES=2
-AUTOMATION_PROTECTED_FILES=()
 AUTOMATION_VALIDATION_COMMANDS=()
 AUTOMATION_IMPLEMENTATION_VALIDATION_COMMANDS=()
 AUTOMATION_BUGFIX_VALIDATION_COMMANDS=()
+AUTOMATION_PROTECTED_FILES=(
+  "run-bugfix-autopilot.sh"
+  "run-autonomous-bugfix.sh"
+  "run-autonomous-implementation.sh"
+  "automation.config.sh"
+  ".automation/lib/run_common.sh"
+  ".automation/lib/temp_inode_guard.sh"
+  ".automation/lib/controller_hardening_v2.sh"
+  ".automation/lib/telegram_notify.sh"
+)
 `, 'utf8');
   return repo;
 }
@@ -43,6 +52,49 @@ AUTOMATION_BUGFIX_VALIDATION_COMMANDS=()
 function writeExecutable(path: string, body: string): void {
   writeFileSync(path, body, 'utf8');
   chmodSync(path, 0o755);
+}
+
+type AuditHandoffStubOptions = {
+  controller: string;
+  maintenanceAllowed: 'yes' | 'no';
+  allowedProtectedFiles: string;
+};
+
+function writeAuditHandoffBugfixStub(repo: string, options: AuditHandoffStubOptions): void {
+  writeExecutable(join(repo, 'run-autonomous-bugfix.sh'), `#!/usr/bin/env bash
+set -Eeuo pipefail
+repo=""; area=""; while [[ $# -gt 0 ]]; do case "$1" in --repo-dir) repo="$2"; shift 2;; --campaign-area) area="$2"; shift 2;; *) shift;; esac; done
+. "$repo/.automation/lib/run_common.sh"
+. "$repo/.automation/lib/controller_hardening_v2.sh"
+mkdir -p "$repo/artifacts"
+run="$repo/artifacts/autonomous_bugfix_20260101T000010Z"; cycle="$run/cycles/cycle_1"; mkdir -p "$cycle"
+echo 'confirmed bug' > "$cycle/evidence.md"
+hash="$(sha256sum "$cycle/evidence.md" | awk '{print $1}')"
+source_fp="$(automation_v2_source_tree_fingerprint "$repo")"
+bug_sig="$(printf '%s\\n' "AUDIT_AREA=$area" 'BUG_IDS=STUB-1' 'IMPLEMENTATION_SCOPE=fix_stub' | sort | sha256sum | awk '{print $1}')"
+automation_v2_write_env_atomic "$repo/.automation/autonomous-implementation-handover.env" \\
+  'HANDOVER_SCHEMA_VERSION=1' 'HANDOVER_KIND=autonomous-bugfix-to-autonomous-implementation' 'REPOSITORY=betting-win-surebet' 'CONTROLLER=${options.controller}' \\
+  'RUN_AUTONOMOUS_IMPLEMENTATION_NEXT=yes' 'AUTONOMOUS_IMPLEMENTATION_EXPECTED_FLAG=--handover-bugfix-audit' 'HANDOVER_AUTONOMOUS_IMPLEMENTATION=yes' \\
+  "AUDIT_AREA=$area" "AUDIT_SOURCE_FINGERPRINT=$source_fp" 'BUG_IDS=STUB-1' "BUG_SIGNATURE=$bug_sig" 'IMPLEMENTATION_SCOPE=fix_stub' \\
+  'SOURCE_EVIDENCE_PATH=artifacts/autonomous_bugfix_20260101T000010Z/cycles/cycle_1/evidence.md' "SOURCE_EVIDENCE_SHA256=$hash" \\
+  'VALIDATION_REQUIRED=npm_run_validate' 'BUGFIX_MODE_NOOP_SUCCESS_ALLOWED=no' 'BUGFIX_MODE_AUTOMATION_MAINTENANCE_ALLOWED=${options.maintenanceAllowed}' 'ALLOWED_PROTECTED_FILES=${options.allowedProtectedFiles}' \\
+  "RUN_DIR=$run" 'WRITTEN_AT=2026-01-01T00:00:00Z'
+automation_v2_add_or_verify_fingerprint "$repo/.automation/autonomous-implementation-handover.env" >/dev/null
+printf 'HANDOVER_AUTONOMOUS_IMPLEMENTATION=yes\\n' > "$cycle/continue_status.txt"
+printf 'BUGS_FOUND=yes\\nHANDOVER_AUTONOMOUS_IMPLEMENTATION_REQUIRED=yes\\nNEXT_AUDIT_AREA=none\\nCAMPAIGN_AREA=%s\\nCAMPAIGN_AREA_COMPLETE=no\\nSOURCE_EVIDENCE_COMPLETE=yes\\nBUG_IDS=STUB-1\\nIMPLEMENTATION_SCOPE=fix_stub\\nBUGFIX_MODE_AUTOMATION_MAINTENANCE_ALLOWED=${options.maintenanceAllowed}\\nALLOWED_PROTECTED_FILES=${options.allowedProtectedFiles}\\n' "$area" > "$cycle/request_flags.txt"
+automation_v2_publish_child_result "$repo" 'run-autonomous-bugfix.sh' 'stub-bugfix-v1' "$run" 'HANDOVER_AUTONOMOUS_IMPLEMENTATION=yes' 'stub_bug' 2 1 not_acquired 0 no
+printf 'run_dir=%s\\nfinal_status=HANDOVER_AUTONOMOUS_IMPLEMENTATION=yes\\nstop_reason=stub_bug\\nfinal_exit_code=2\\ncycles_completed=1\\n' "$run"
+exit 2
+`);
+}
+
+function runBugfixAutopilot(repo: string, maxRounds: string, timeout: number) {
+  return spawnSync('bash', ['./run-bugfix-autopilot.sh', '--duration', '120', '--bugfix-duration', '30', '--implementation-duration', '30', '--max-rounds', maxRounds, '--max-same-handoff', '2', '--model', 'cli-default', '--fallback-model', 'none', '--no-stream'], {
+    cwd: repo,
+    env: { ...process.env, TELEGRAM_NOTIFY: '0' },
+    encoding: 'utf8',
+    timeout,
+  });
 }
 
 test('bugfix controller exposes strict four-state audit and handoff contract', () => {
@@ -80,6 +132,8 @@ test('bugfix autopilot exposes the bounded audit implementation re-audit campaig
     'BUGFIX_AUTOPILOT_BLOCKED_LOCK_RELEASE', 'BUGFIX_AUTOPILOT_BLOCKED_CHILD_RESULT',
     'child_terminal_result_transport=atomic_side_channel_v1', 'child_stdout_machine_parsing=disabled',
     'AUTOMATION_CHILD_RESULT_FILE=$terminal_result', 'automation_v2_validate_child_result_file',
+    'CONTROLLER)" == run-autonomous-bugfix.sh', 'CONTROLLER)" == run-autonomous-implementation.sh',
+    'validate_bugfix_handoff_protected_authorization()', 'validate_protected_allowlist()',
     "printf 'lock_release_status=%s\\n'", "printf 'lock_preserved=%s\\n'",
   ]) assert.match(script, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   assert.doesNotMatch(script, /run-paper-evaluation\.sh|run-paper-autopilot\.sh|bash \.\/start\.sh|bash \.\/stop\.sh|forever|MongoDB/);
@@ -143,12 +197,111 @@ test('semantic handoff fingerprint ignores volatile evidence path but retains ev
     const b = join(temp, 'b.env');
     writeFileSync(a, 'HANDOVER_KIND=x\nSOURCE_EVIDENCE_PATH=artifacts/run-a/evidence.md\nSOURCE_EVIDENCE_SHA256=abc\nWRITTEN_AT=2026-01-01T00:00:00Z\n', 'utf8');
     writeFileSync(b, 'HANDOVER_KIND=x\nSOURCE_EVIDENCE_PATH=artifacts/run-b/evidence.md\nSOURCE_EVIDENCE_SHA256=abc\nWRITTEN_AT=2026-02-01T00:00:00Z\n', 'utf8');
-    const fingerprint = (file: string): string => execFileSync('bash', ['-lc', '. "$1"; automation_v2_semantic_env_fingerprint "$2"', 'bash', helper, file], { encoding: 'utf8' }).trim();
+    const fingerprint = (file: string): string => {
+      const result = spawnSync('bash', ['-lc', '. "$1"; automation_v2_semantic_env_fingerprint "$2"', 'bash', helper, file], { encoding: 'utf8' });
+      assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
+      return result.stdout.trim();
+    };
     assert.equal(fingerprint(a), fingerprint(b));
     writeFileSync(b, 'HANDOVER_KIND=x\nSOURCE_EVIDENCE_PATH=artifacts/run-b/evidence.md\nSOURCE_EVIDENCE_SHA256=def\nWRITTEN_AT=2026-02-01T00:00:00Z\n', 'utf8');
     assert.notEqual(fingerprint(a), fingerprint(b));
   } finally {
     rmSync(temp, { recursive: true, force: true });
+  }
+});
+
+test('bugfix autopilot rejects invalid audit handoff controller and protected authorization', async (t) => {
+  const variants: Array<{ name: string; options: AuditHandoffStubOptions }> = [
+    {
+      name: 'mismatched audit controller',
+      options: {
+        controller: 'run-autonomous-implementation.sh',
+        maintenanceAllowed: 'no',
+        allowedProtectedFiles: 'none',
+      },
+    },
+    {
+      name: 'disabled maintenance with non-none allowlist',
+      options: {
+        controller: 'run-autonomous-bugfix.sh',
+        maintenanceAllowed: 'no',
+        allowedProtectedFiles: 'run-bugfix-autopilot.sh',
+      },
+    },
+    {
+      name: 'enabled maintenance with none',
+      options: {
+        controller: 'run-autonomous-bugfix.sh',
+        maintenanceAllowed: 'yes',
+        allowedProtectedFiles: 'none',
+      },
+    },
+    {
+      name: 'enabled maintenance with out-of-list protected file',
+      options: {
+        controller: 'run-autonomous-bugfix.sh',
+        maintenanceAllowed: 'yes',
+        allowedProtectedFiles: 'not-protected.sh',
+      },
+    },
+  ];
+
+  for (const variant of variants) {
+    await t.test(variant.name, () => {
+      const repo = prepareTempRepo();
+      try {
+        writeAuditHandoffBugfixStub(repo, variant.options);
+        writeExecutable(join(repo, 'run-autonomous-implementation.sh'), '#!/usr/bin/env bash\necho should-not-run > implementation-ran.txt\nexit 99\n');
+
+        const result = runBugfixAutopilot(repo, '1', 20000);
+
+        assert.equal(result.status, 2, `${result.stdout}\n${result.stderr}`);
+        assert.match(result.stdout, /final_status=BUGFIX_AUTOPILOT_BLOCKED_HANDOFF_MISMATCH/);
+        assert.match(result.stdout, /stop_reason=invalid_audit_handoff/);
+        assert.equal(existsSync(join(repo, 'implementation-ran.txt')), false);
+      } finally {
+        rmSync(repo, { recursive: true, force: true });
+      }
+    });
+  }
+});
+
+test('bugfix autopilot rejects an implementation return handoff from the wrong controller', () => {
+  const repo = prepareTempRepo();
+  try {
+    writeAuditHandoffBugfixStub(repo, {
+      controller: 'run-autonomous-bugfix.sh',
+      maintenanceAllowed: 'no',
+      allowedProtectedFiles: 'none',
+    });
+    writeExecutable(join(repo, 'run-autonomous-implementation.sh'), `#!/usr/bin/env bash
+set -Eeuo pipefail
+repo=""; while [[ $# -gt 0 ]]; do case "$1" in --repo-dir) repo="$2"; shift 2;; *) shift;; esac; done
+. "$repo/.automation/lib/controller_hardening_v2.sh"
+automation_v2_load_env_strict "$repo/.automation/autonomous-implementation-handover.env"
+source_fp="\${AUTOMATION_V2_ENV[HANDOVER_FINGERPRINT]}"; area="\${AUTOMATION_V2_ENV[AUDIT_AREA]}"; bugs="\${AUTOMATION_V2_ENV[BUG_IDS]}"
+echo fixed > "$repo/fixed.txt"
+run="$repo/artifacts/autonomous_implementation_20260101T000011Z"; mkdir -p "$run"
+automation_v2_write_env_atomic "$repo/.automation/bugfix-mode-handover.env" \\
+  'HANDOVER_SCHEMA_VERSION=1' 'HANDOVER_KIND=bugfix-mode-after-autonomous-implementation' 'REPOSITORY=betting-win-surebet' 'CONTROLLER=run-autonomous-bugfix.sh' \\
+  "SOURCE_HANDOFF_FINGERPRINT=$source_fp" 'RUN_BUGFIX_AUDIT_NEXT=yes' 'AUTONOMOUS_FINAL_STATUS=AUTONOMOUS_GOAL_COMPLETE=yes' \\
+  'AUTONOMOUS_STOP_REASON=stub_fixed' 'AUTONOMOUS_FINAL_EXIT_CODE=0' 'IMPLEMENTATION_SOURCE_CHANGED=yes' 'IMPLEMENTATION_SOURCE_VALIDATION_PASSED=yes' \\
+  'PRIVATE_PAPER_REEVALUATION_REQUIRED=no' 'BUGFIX_REAUDIT_REQUIRED=yes' "AUDIT_AREA=$area" "BUG_IDS=$bugs" \\
+  'PAPER_SERVICE_SUPPORTED=0' 'SERVICE_REFRESH_REQUIRED=0' 'RUNTIME_EVIDENCE_REQUIRED=0' 'RUNTIME_EVIDENCE_SELECTED_UPSTREAM_MODE=none' 'RUNTIME_EVIDENCE_CAMPAIGN_RUN_ID=none' 'REAL_UPSTREAM_EVALUATION=blocked_on_required_upstream_input' \\
+  "RUN_DIR=$run" 'WRITTEN_AT=2026-01-01T00:00:00Z'
+automation_v2_add_or_verify_fingerprint "$repo/.automation/bugfix-mode-handover.env" >/dev/null
+automation_v2_publish_child_result "$repo" 'run-autonomous-implementation.sh' 'stub-implementation-v1' "$run" 'AUTONOMOUS_GOAL_COMPLETE=yes' 'stub_fixed' 0 1 not_acquired 0 no
+printf 'run_dir=%s\\nfinal_status=AUTONOMOUS_GOAL_COMPLETE=yes\\nstop_reason=stub_fixed\\nfinal_exit_code=0\\ncycles_completed=1\\n' "$run"
+`);
+
+    const result = runBugfixAutopilot(repo, '2', 30000);
+
+    assert.equal(result.status, 2, `${result.stdout}\n${result.stderr}`);
+    assert.match(result.stdout, /final_status=BUGFIX_AUTOPILOT_BLOCKED_HANDOFF_MISMATCH/);
+    assert.match(result.stdout, /stop_reason=invalid_implementation_return_handoff/);
+    assert.equal(existsSync(join(repo, 'fixed.txt')), true);
+  } finally {
+    rmSync(repo, { recursive: true, force: true });
   }
 });
 
@@ -171,7 +324,7 @@ if [[ "$count" == 1 ]]; then
   source_fp="$(automation_v2_source_tree_fingerprint "$repo")"
   bug_sig="$(printf '%s\n' "AUDIT_AREA=$area" 'BUG_IDS=STUB-1' 'IMPLEMENTATION_SCOPE=fix_stub' | sort | sha256sum | awk '{print $1}')"
   automation_v2_write_env_atomic "$repo/.automation/autonomous-implementation-handover.env" \
-    'HANDOVER_SCHEMA_VERSION=1' 'HANDOVER_KIND=autonomous-bugfix-to-autonomous-implementation' 'REPOSITORY=betting-win-surebet' 'CONTROLLER=stub' \
+    'HANDOVER_SCHEMA_VERSION=1' 'HANDOVER_KIND=autonomous-bugfix-to-autonomous-implementation' 'REPOSITORY=betting-win-surebet' 'CONTROLLER=run-autonomous-bugfix.sh' \
     'RUN_AUTONOMOUS_IMPLEMENTATION_NEXT=yes' 'AUTONOMOUS_IMPLEMENTATION_EXPECTED_FLAG=--handover-bugfix-audit' 'HANDOVER_AUTONOMOUS_IMPLEMENTATION=yes' \
     "AUDIT_AREA=$area" "AUDIT_SOURCE_FINGERPRINT=$source_fp" 'BUG_IDS=STUB-1' "BUG_SIGNATURE=$bug_sig" 'IMPLEMENTATION_SCOPE=fix_stub' \
     "SOURCE_EVIDENCE_PATH=artifacts/autonomous_bugfix_20260101T00000\${count}Z/cycles/cycle_1/evidence.md" "SOURCE_EVIDENCE_SHA256=$hash" \
@@ -201,7 +354,7 @@ source_fp="\${AUTOMATION_V2_ENV[HANDOVER_FINGERPRINT]}"; area="\${AUTOMATION_V2_
 echo fixed > "$repo/fixed.txt"
 run="$repo/artifacts/autonomous_implementation_20260101T000003Z"; mkdir -p "$run"
 automation_v2_write_env_atomic "$repo/.automation/bugfix-mode-handover.env" \
-  'HANDOVER_SCHEMA_VERSION=1' 'HANDOVER_KIND=bugfix-mode-after-autonomous-implementation' 'REPOSITORY=betting-win-surebet' 'CONTROLLER=stub' \
+  'HANDOVER_SCHEMA_VERSION=1' 'HANDOVER_KIND=bugfix-mode-after-autonomous-implementation' 'REPOSITORY=betting-win-surebet' 'CONTROLLER=run-autonomous-implementation.sh' \
   "SOURCE_HANDOFF_FINGERPRINT=$source_fp" 'RUN_BUGFIX_AUDIT_NEXT=yes' 'AUTONOMOUS_FINAL_STATUS=AUTONOMOUS_GOAL_COMPLETE=yes' \
   'AUTONOMOUS_STOP_REASON=stub_fixed' 'AUTONOMOUS_FINAL_EXIT_CODE=0' 'IMPLEMENTATION_SOURCE_CHANGED=yes' 'IMPLEMENTATION_SOURCE_VALIDATION_PASSED=yes' \
   'PRIVATE_PAPER_REEVALUATION_REQUIRED=no' 'BUGFIX_REAUDIT_REQUIRED=yes' "AUDIT_AREA=$area" "BUG_IDS=$bugs" \

@@ -8,6 +8,7 @@ import {
   readFileSync,
   readdirSync,
   rmSync,
+  symlinkSync,
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -198,4 +199,34 @@ _automation_temp_watchdog_loop ${owner.pid} ${startTicks} ${shellQuote(currentBo
   const event = readFileSync(join(runtimeEvents, eventFile), 'utf-8');
   assert.match(event, /reason=measurement_unavailable/u);
   assert.match(event, /action=term_exact_owner_only/u);
+});
+
+test('watchdog event directory validation does not create outside directories through symlinked artifacts', (t) => {
+  const fixture = createFixture(t);
+  const outside = mkdtempSync(join(tmpdir(), 'bws-temp-watchdog-outside-'));
+  t.after(() => rmSync(outside, { recursive: true, force: true, maxRetries: 3, retryDelay: 50 }));
+  symlinkSync(outside, join(fixture.root, 'artifacts'), 'dir');
+
+  const script = `
+set -Eeuo pipefail
+AUTOMATION_REPO_ROOT=${shellQuote(fixture.root)}
+. ${shellQuote(GUARD_PATH)}
+${healthyConfiguration}
+automation_temp_inode_configure
+_automation_temp_prepare_base
+set +e
+_automation_temp_watchdog_event_directory_is_safe "$AUTOMATION_TEMP_REPO_REALPATH/artifacts/temp_inode_watchdog_events"
+rc=$?
+set -e
+printf 'watchdog_helper_rc=%s\\n' "$rc"
+`;
+  const result = spawnSync('bash', ['-c', script], {
+    cwd: fixture.root,
+    encoding: 'utf-8',
+    env: { ...process.env, PATH: `${fixture.fakeBin}:${process.env.PATH ?? ''}` },
+    timeout: 20_000,
+  });
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  assert.match(result.stdout, /watchdog_helper_rc=1/u);
+  assert.equal(existsSync(join(outside, 'temp_inode_watchdog_events')), false);
 });

@@ -1,9 +1,11 @@
 import { createHash } from 'node:crypto';
 import {
   existsSync,
+  lstatSync,
   mkdirSync,
   readdirSync,
   readFileSync,
+  realpathSync,
   renameSync,
   writeFileSync,
 } from 'node:fs';
@@ -622,9 +624,9 @@ export async function createBwsSoakCampaign(
 
   const manifestOutputFile = resolveRepositoryPath(repositoryRoot, request.manifestOutputFile);
   const stateFile = resolveRepositoryPath(repositoryRoot, request.stateFile);
-  mkdirSync(dirname(manifestOutputFile), { recursive: true });
-  mkdirSync(dirname(stateFile), { recursive: true });
-  mkdirSync(resolveRepositoryPath(repositoryRoot, request.checkpointDirectory), { recursive: true });
+  ensureRepositoryDirectory(repositoryRoot, dirname(manifestOutputFile));
+  ensureRepositoryDirectory(repositoryRoot, dirname(stateFile));
+  ensureRepositoryDirectory(repositoryRoot, resolveRepositoryPath(repositoryRoot, request.checkpointDirectory));
 
   if (request.resume) {
     const existingManifest = readBwsSoakCampaignManifest(manifestOutputFile);
@@ -669,8 +671,8 @@ export async function createBwsSoakCampaign(
     updatedAt: createdAt,
   });
 
-  writeJsonFileAtomic(manifestOutputFile, manifest);
-  writeJsonFileAtomic(stateFile, state);
+  writeJsonFileAtomic(repositoryRoot, manifestOutputFile, manifest);
+  writeJsonFileAtomic(repositoryRoot, stateFile, state);
   const initializedCheckpoint = await recordBwsSoakCampaignCheckpoint({
     classification: 'campaign_initialized',
     details: Object.freeze({
@@ -731,10 +733,10 @@ export async function recordBwsSoakCampaignCheckpoint(
   });
 
   const checkpointDirectory = resolveRepositoryPath(repositoryRoot, manifest.checkpoints.checkpointDirectory);
-  mkdirSync(checkpointDirectory, { recursive: true });
+  ensureRepositoryDirectory(repositoryRoot, checkpointDirectory);
   const checkpointFileName = `checkpoint-${String(sequence).padStart(4, '0')}-${classification}.json`;
   const checkpointFile = join(checkpointDirectory, checkpointFileName);
-  writeJsonFileAtomic(checkpointFile, checkpoint);
+  writeJsonFileAtomic(repositoryRoot, checkpointFile, checkpoint);
 
   const nextCompletedCycleCount = classification === 'cycle_observed'
     ? Math.max(state.completedCycleCount, cycleNumber ?? state.completedCycleCount)
@@ -747,7 +749,7 @@ export async function recordBwsSoakCampaignCheckpoint(
     lastCheckpointFingerprint: checkpointFingerprint,
     updatedAt: createdAt,
   });
-  writeJsonFileAtomic(stateFile, nextState);
+  writeJsonFileAtomic(repositoryRoot, stateFile, nextState);
 
   registerEvidenceArtifacts(repositoryRoot, manifest, checkpointFile, stateFile);
 
@@ -968,7 +970,7 @@ export async function executeBwsSoakCampaign(
     stateFile: relative(repositoryRoot, stateFile),
   });
 
-  writeJsonFileAtomic(resultFile, result);
+  writeJsonFileAtomic(repositoryRoot, resultFile, result);
   registerBwsEvidenceArtifact({
     artifactPath: resultFile,
     artifactSchema: SOAK_CAMPAIGN_RESULT_SCHEMA,
@@ -1389,13 +1391,95 @@ function readRequiredFile(repositoryRoot: string, path: string): string {
 function resolveRepositoryPath(repositoryRoot: string, inputPath: string): string {
   const resolved = resolve(repositoryRoot, inputPath);
   const relativePath = relative(repositoryRoot, resolved);
-  if (relativePath.startsWith('..') || relativePath === '') {
+  if (relativePath === '..' || relativePath.startsWith('../') || relativePath === '') {
     if (relativePath === '') {
       throw new Error('Repository-root file paths must not resolve to the repository root.');
     }
     throw new Error(`Resolved repository path escapes the repository root: ${inputPath}`);
   }
+  assertRepositoryRealpathContainment(repositoryRoot, resolved, inputPath);
   return resolved;
+}
+
+function assertRepositoryRealpathContainment(repositoryRoot: string, resolved: string, inputPath: string): void {
+  const repositoryRootStats = lstatSync(repositoryRoot);
+  if (repositoryRootStats.isSymbolicLink() || !repositoryRootStats.isDirectory()) {
+    throw new Error(`Repository root must be a non-symlink directory: ${repositoryRoot}`);
+  }
+  const repositoryRootReal = realpathSync(repositoryRoot);
+  const realRelativePath = relative(repositoryRootReal, resolved);
+  if (realRelativePath === '' || realRelativePath === '..' || realRelativePath.startsWith('../')) {
+    if (realRelativePath === '') {
+      throw new Error('Repository-root file paths must not resolve to the repository root.');
+    }
+    throw new Error(`Resolved repository path escapes the repository root: ${inputPath}`);
+  }
+  const parts = realRelativePath.split('/').filter((part) => part.length > 0);
+  let current = repositoryRootReal;
+  for (const part of parts) {
+    if (part === '.' || part === '..') {
+      throw new Error(`Repository path contains unsafe path segments: ${inputPath}`);
+    }
+    current = join(current, part);
+    let stats;
+    try {
+      stats = lstatSync(current);
+    } catch (error) {
+      if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
+        const parentReal = realpathSync(dirname(current));
+        const parentRelative = relative(repositoryRootReal, parentReal);
+        if (parentRelative === '..' || parentRelative.startsWith('../')) {
+          throw new Error(`Repository path parent escapes the repository root: ${inputPath}`);
+        }
+        return;
+      }
+      throw error;
+    }
+    if (stats.isSymbolicLink()) {
+      throw new Error(`Repository path must not contain symlink components: ${inputPath}`);
+    }
+    const currentReal = realpathSync(current);
+    const currentRelative = relative(repositoryRootReal, currentReal);
+    if (currentRelative === '..' || currentRelative.startsWith('../')) {
+      throw new Error(`Repository path realpath escapes the repository root: ${inputPath}`);
+    }
+  }
+}
+
+function ensureRepositoryDirectory(repositoryRoot: string, directory: string): void {
+  const repositoryRootStats = lstatSync(repositoryRoot);
+  if (repositoryRootStats.isSymbolicLink() || !repositoryRootStats.isDirectory()) {
+    throw new Error(`Repository root must be a non-symlink directory: ${repositoryRoot}`);
+  }
+  const repositoryRootReal = realpathSync(repositoryRoot);
+  const resolvedDirectory = resolve(repositoryRoot, directory);
+  const relativePath = relative(repositoryRootReal, resolvedDirectory);
+  if (relativePath === '') {
+    return;
+  }
+  if (relativePath === '..' || relativePath.startsWith('../')) {
+    throw new Error(`Repository directory escapes the repository root: ${directory}`);
+  }
+  const parts = relativePath.split('/').filter((part) => part.length > 0);
+  let current = repositoryRootReal;
+  for (const part of parts) {
+    if (part === '.' || part === '..') {
+      throw new Error(`Repository directory contains unsafe path segments: ${directory}`);
+    }
+    current = join(current, part);
+    if (!existsSync(current)) {
+      mkdirSync(current);
+    }
+    const stats = lstatSync(current);
+    if (stats.isSymbolicLink() || !stats.isDirectory()) {
+      throw new Error(`Repository directory must not contain symlink or non-directory components: ${directory}`);
+    }
+    const currentReal = realpathSync(current);
+    const currentRelative = relative(repositoryRootReal, currentReal);
+    if (currentRelative === '..' || currentRelative.startsWith('../')) {
+      throw new Error(`Repository directory realpath escapes the repository root: ${directory}`);
+    }
+  }
 }
 
 function requireRecord(value: unknown, label: string): Record<string, unknown> {
@@ -1618,7 +1702,7 @@ function updateSoakCampaignRuntimeEvidenceState(input: Readonly<{
     runtimeEvidence: input.runtimeEvidence,
     updatedAt: requireIsoTimestamp(input.updatedAt, 'runtimeEvidence updatedAt'),
   });
-  writeJsonFileAtomic(input.stateFile, nextState);
+  writeJsonFileAtomic(input.repositoryRoot, input.stateFile, nextState);
   registerEvidenceArtifacts(input.repositoryRoot, input.manifest, input.stateFile);
   return nextState;
 }
@@ -2121,11 +2205,15 @@ function normalizeRelativePath(value: string): string {
   return normalized;
 }
 
-function writeJsonFileAtomic(path: string, value: unknown): void {
-  mkdirSync(dirname(path), { recursive: true });
+function writeJsonFileAtomic(repositoryRoot: string, path: string, value: unknown): void {
+  ensureRepositoryDirectory(repositoryRoot, dirname(path));
+  assertRepositoryRealpathContainment(repositoryRoot, path, relative(repositoryRoot, path));
   const tempPath = `${path}.${process.pid}.tmp`;
-  writeFileSync(tempPath, `${JSON.stringify(value, null, 2)}\n`, 'utf-8');
+  assertRepositoryRealpathContainment(repositoryRoot, tempPath, relative(repositoryRoot, tempPath));
+  writeFileSync(tempPath, `${JSON.stringify(value, null, 2)}\n`, { encoding: 'utf-8', flag: 'wx' });
+  assertRepositoryRealpathContainment(repositoryRoot, tempPath, relative(repositoryRoot, tempPath));
   renameSync(tempPath, path);
+  assertRepositoryRealpathContainment(repositoryRoot, path, relative(repositoryRoot, path));
 }
 
 function defaultNow(): string {

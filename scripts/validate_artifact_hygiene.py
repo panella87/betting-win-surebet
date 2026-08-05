@@ -1,7 +1,9 @@
 from __future__ import annotations
 from pathlib import Path
+from pathlib import PurePosixPath, PureWindowsPath
 import os
 import shutil
+import stat
 import subprocess
 import sys
 import zipfile
@@ -196,17 +198,54 @@ def check_source_tree() -> None:
 def check_zip(zip_path: Path) -> None:
     if not zip_path.is_file():
         fail(f'archive not found: {zip_path}')
+    seen_names: set[str] = set()
+    parent_directories: set[str] = set()
+    file_entries: set[str] = set()
     with zipfile.ZipFile(zip_path) as zf:
         for info in zf.infolist():
-            name = info.filename.rstrip('/')
+            raw_name = info.filename
+            if '\\' in raw_name:
+                fail(f'forbidden backslash path separator in archive: {raw_name}')
+            if any(ord(char) < 32 or ord(char) == 127 for char in raw_name):
+                fail(f'forbidden control character in archive path: {raw_name!r}')
+            is_directory_entry = raw_name.endswith('/')
+            name = raw_name[:-1] if is_directory_entry else raw_name
             if not name:
                 continue
-            parts = Path(name).parts
+            posix_path = PurePosixPath(name)
+            windows_path = PureWindowsPath(name)
+            if posix_path.is_absolute() or windows_path.is_absolute() or windows_path.drive:
+                fail(f'forbidden absolute path in archive: {name}')
+            raw_parts = name.split('/')
+            if any(part == '' or part == '.' for part in raw_parts):
+                fail(f'forbidden empty/current-directory path component in archive: {raw_name}')
+            if any(part == '..' for part in raw_parts):
+                fail(f'forbidden parent-directory traversal in archive: {name}')
+            name = '/'.join(raw_parts)
+            if name in seen_names:
+                fail(f'duplicate path in archive: {name}')
+            for index in range(1, len(raw_parts)):
+                parent = '/'.join(raw_parts[:index])
+                if parent in file_entries:
+                    fail(f'archive path uses file entry as a parent directory: {name}')
+                parent_directories.add(parent)
+            if not is_directory_entry and name in parent_directories:
+                fail(f'archive path collides with child entries: {name}')
+            seen_names.add(name)
+            if not is_directory_entry:
+                file_entries.add(name)
+            mode = info.external_attr >> 16
+            if stat.S_ISLNK(mode):
+                fail(f'forbidden symlink entry in archive: {name}')
+            file_type = stat.S_IFMT(mode)
+            if file_type and not stat.S_ISREG(mode) and not stat.S_ISDIR(mode):
+                fail(f'forbidden special file entry in archive: {name}')
+            parts = tuple(raw_parts)
             if parts and parts[0] in FORBIDDEN_ROOTS:
                 fail(f'forbidden root in archive: {name}')
             if name in FORBIDDEN_EXACT or name in LOCAL_IGNORED_EXACT:
                 fail(f'forbidden exact path in archive: {name}')
-            if is_interrupted_zip_temp(Path(name).name):
+            if is_interrupted_zip_temp(parts[-1]):
                 fail(f'forbidden interrupted zip temp file in archive: {name}')
             if name.endswith(FORBIDDEN_SUFFIXES):
                 fail(f'forbidden generated file in archive: {name}')

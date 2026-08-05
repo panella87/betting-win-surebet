@@ -437,6 +437,68 @@ automation_v2_atomic_copy() {
   mv -f -- "$temp" "$destination"
 }
 
+automation_v2_reject_zip_symlink_entries() {
+  local working_dir=${1:?working directory is required}
+  shift
+  local item path relative current part symlink_entry
+  local -a _automation_v2_zip_parts=()
+  [[ -d "$working_dir" && ! -L "$working_dir" ]] || {
+    printf 'ERROR: ZIP working directory must be a non-symlink directory: %s\n' "$working_dir" >&2
+    return 2
+  }
+  for item in "$@"; do
+    [[ -n "$item" ]] || {
+      printf 'ERROR: ZIP entry path must not be empty.\n' >&2
+      return 2
+    }
+    case "$item" in
+      /*) path="$item" ;;
+      *) path="$working_dir/$item" ;;
+    esac
+    case "$path" in
+      "$working_dir"/*) relative="${path#"$working_dir"/}" ;;
+      *)
+        printf 'ERROR: ZIP entry must stay under working directory: %s\n' "$item" >&2
+        return 2
+        ;;
+    esac
+    case "$relative" in
+      ""|.|..|../*|*/../*|*/..)
+        printf 'ERROR: ZIP entry contains unsafe relative path: %s\n' "$item" >&2
+        return 2
+        ;;
+    esac
+    current="$working_dir"
+    IFS=/ read -r -a _automation_v2_zip_parts <<< "$relative"
+    for part in "${_automation_v2_zip_parts[@]}"; do
+      [[ -n "$part" && "$part" != "." && "$part" != ".." ]] || {
+        printf 'ERROR: ZIP entry contains unsafe path component: %s\n' "$item" >&2
+        return 2
+      }
+      current="$current/$part"
+      if [[ -L "$current" ]]; then
+        printf 'ERROR: ZIP entry must not contain symlinks: %s\n' "$item" >&2
+        return 2
+      fi
+      [[ -e "$current" ]] || break
+    done
+    [[ -e "$path" ]] || {
+      printf 'ERROR: ZIP entry does not exist: %s\n' "$item" >&2
+      return 2
+    }
+    if [[ -d "$path" ]]; then
+      symlink_entry="$(find -P "$path" -mindepth 1 -type l -print -quit 2>/dev/null)" || {
+        printf 'ERROR: failed to scan ZIP entry for symlinks: %s\n' "$item" >&2
+        return 2
+      }
+      if [[ -n "$symlink_entry" ]]; then
+        printf 'ERROR: ZIP entry must not contain symlinks: %s\n' "$symlink_entry" >&2
+        return 2
+      fi
+    fi
+  done
+}
+
 automation_v2_archive_run_dirs() {
   local archive=${1:?archive path is required}
   local repo=${2:?repo is required}
@@ -453,6 +515,7 @@ automation_v2_archive_run_dirs() {
     rels+=("$rel")
   done
   (( ${#rels[@]} > 0 )) || return 0
+  automation_v2_reject_zip_symlink_entries "$repo" "${rels[@]}" || return $?
   (
     cd "$repo"
     zip -q -1 -r "$temp" "${rels[@]}"
@@ -709,6 +772,7 @@ automation_v2_zip_with_timeout() {
   local working_dir=${3:?working directory is required}
   shift 3
   command -v zip >/dev/null 2>&1 || return 127
+  automation_v2_reject_zip_symlink_entries "$working_dir" "$@" || return $?
   (
     cd "$working_dir"
     timeout --signal=TERM --kill-after=10s "$timeout_seconds" zip -q -1 -r "$destination" "$@"
