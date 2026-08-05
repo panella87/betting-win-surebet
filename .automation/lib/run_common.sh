@@ -946,7 +946,9 @@ automation_refresh_final_artifacts_zip() {
 }
 
 automation_reject_artifact_zip_symlinks() {
-  local root="${1:?repository root is required}" artifacts_dir="$root/artifacts" symlink_entry
+  local root artifacts_dir symlink_entry
+  root="${1:?repository root is required}"
+  artifacts_dir="$root/artifacts"
   [[ -d "$root" && ! -L "$root" ]] || {
     printf 'ERROR: artifact ZIP repository root must be a non-symlink directory: %s\n' "$root" >&2
     return 2

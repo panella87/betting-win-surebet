@@ -1,3 +1,9 @@
+## 2026-08-05 - Filesystem safety validation continuation
+
+- Preserved the completed bugfix campaign changes for ZIP-entry validation, artifact ZIP symlink rejection, soak output containment, watchdog event containment, and prior closed-area fixes.
+- Split the dependent local assignments in `automation_reject_artifact_zip_symlinks` so the repository shell-local validator and `set -u` execution contract pass.
+- No provider connection, direct upstream database access, execution path, public signal, or live-readiness claim was added.
+
 ## 2026-08-03 - Bugfix fixture upstream-boundary validation repair
 
 ## 2026-08-04 - Wave 55 upstream export convergence fixture containment repair
