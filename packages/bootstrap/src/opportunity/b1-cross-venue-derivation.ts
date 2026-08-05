@@ -72,6 +72,20 @@ export function deriveB1CrossVenueGrossOpportunityCandidates(
   const rowsByMarket = groupRowsByMarketEquivalence(rows);
   const candidates: B1GrossOpportunityCandidate[] = [];
   for (const [marketEquivalenceKey, marketRows] of sortedEntries(rowsByMarket)) {
+    if (marketRows.some((row) => normalizeVenueId(row.venueOrBookmakerId) === undefined)) {
+      candidates.push(blockedCandidate(
+        `${marketEquivalenceKey}|venue-pair-missing`,
+        marketEquivalenceKey,
+        'venue-pair-missing',
+        [{
+          code: 'B1_VENUE_PAIR_INCOMPLETE',
+          message: 'B1 gross derivation requires non-empty venue evidence for every row.',
+          evidenceRequired: 'B1 rows with non-empty venue_or_bookmaker_id values.',
+        }],
+        marketRows,
+      ));
+      continue;
+    }
     const rowsByVenue = groupRowsByVenue(marketRows);
     const venueIds = Array.from(rowsByVenue.keys()).sort();
     if (venueIds.length < 2) {
@@ -310,10 +324,14 @@ function groupRowsByVenue(
 ): ReadonlyMap<string, readonly B1MultiVenueMarketRow[]> {
   const groups = new Map<string, B1MultiVenueMarketRow[]>();
   for (const row of rows) {
-    let venueRows = groups.get(row.venueOrBookmakerId);
+    const venueId = normalizeVenueId(row.venueOrBookmakerId);
+    if (venueId === undefined) {
+      continue;
+    }
+    let venueRows = groups.get(venueId);
     if (venueRows === undefined) {
       venueRows = [];
-      groups.set(row.venueOrBookmakerId, venueRows);
+      groups.set(venueId, venueRows);
     }
     venueRows.push(row);
   }
@@ -361,13 +379,22 @@ function buildVenuePairKeyForRows(
   if (firstRow === undefined || secondRow === undefined) {
     return 'venue-pair-missing';
   }
-  const ordered = [firstRow.venueOrBookmakerId, secondRow.venueOrBookmakerId].sort();
+  const firstRowVenue = normalizeVenueId(firstRow.venueOrBookmakerId);
+  const secondRowVenue = normalizeVenueId(secondRow.venueOrBookmakerId);
+  if (firstRowVenue === undefined || secondRowVenue === undefined) {
+    return 'venue-pair-missing';
+  }
+  const ordered = [firstRowVenue, secondRowVenue].sort();
   const firstVenue = ordered[0];
   const secondVenue = ordered[1];
   if (firstVenue === undefined || secondVenue === undefined) {
     return 'venue-pair-missing';
   }
   return `${firstVenue}::${secondVenue}`;
+}
+
+function normalizeVenueId(value: unknown): string | undefined {
+  return typeof value === 'string' && value.trim().length > 0 ? value.trim() : undefined;
 }
 
 function maxComparisonWindow(synchronizedQuotePairs: readonly B1SynchronizedQuotePair[]): bigint {

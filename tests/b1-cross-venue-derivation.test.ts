@@ -124,6 +124,31 @@ test('B1 cross-venue derivation blocks incomplete terminal outcome sets', () => 
   ]);
 });
 
+test('B1 cross-venue derivation blocks blank venue ids without whitespace-derived candidate keys', () => {
+  const rows = twoOutcomeGrossRows().map((row) => (
+    row.venueOrBookmakerId === 'venue-b'
+      ? cloneRow(row, { venueOrBookmakerId: '   ' })
+      : row
+  ));
+
+  const result = deriveB1CrossVenueGrossOpportunityCandidates(rows, quotePolicy());
+
+  assert.equal(result.ok, true);
+  assert.equal(result.value.length, 1);
+  const candidate = result.value[0];
+  assert.ok(candidate);
+  assert.equal(candidate.ok, false);
+  assert.equal(candidate.candidateId, 'event-001:moneyline:full-game|venue-pair-missing');
+  assert.equal(candidate.venuePairKey, 'venue-pair-missing');
+  assert.deepEqual(candidate.blockers, [
+    {
+      code: 'B1_VENUE_PAIR_INCOMPLETE',
+      message: 'B1 gross derivation requires non-empty venue evidence for every row.',
+      evidenceRequired: 'B1 rows with non-empty venue_or_bookmaker_id values.',
+    },
+  ]);
+});
+
 test('B1 cross-venue derivation preserves non-positive gross spread as a blocker', () => {
   const rows = twoOutcomeGrossRows().map((row) => {
     if (row.selectionEquivalenceKey === 'event-001:moneyline:away') {

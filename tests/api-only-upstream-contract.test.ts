@@ -1,4 +1,5 @@
 import { enforceBwsApiOnlyProcessEnvironment } from '../packages/bootstrap/src/cli/api-only-upstream.js';
+import { resolveBwsServiceRuntimeConfig } from '../packages/bootstrap/src/operations/service-runtime.js';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
@@ -31,10 +32,47 @@ test('active CLI compatibility environment ignores stale export selection and fi
   const environment: NodeJS.ProcessEnv = {
     BWS_UPSTREAM_MODE: 'export',
     BWS_UPSTREAM_EXPORT_SELECTION_PATH: 'config/obsolete-export.json',
+    BWS_PINNED_EXPORT_PATH: 'config/obsolete-pinned.json',
+    BWS_UPSTREAM_EXPORT_FILE: 'config/obsolete-file.json',
+    BWS_UPSTREAM_EXPORT_PATH: 'config/obsolete-path.json',
+    SUREBET_PINNED_BUNDLE: 'config/obsolete-bundle.json',
   };
   const result = enforceBwsApiOnlyProcessEnvironment(environment);
   assert.equal(result.BWS_UPSTREAM_MODE, 'api');
   assert.equal(result.BWS_UPSTREAM_EXPORT_SELECTION_PATH, undefined);
+  assert.equal(result.BWS_PINNED_EXPORT_PATH, undefined);
+  assert.equal(result.BWS_UPSTREAM_EXPORT_FILE, undefined);
+  assert.equal(result.BWS_UPSTREAM_EXPORT_PATH, undefined);
+  assert.equal(result.SUREBET_PINNED_BUNDLE, undefined);
+});
+
+test('direct service runtime config rejects retired upstream selectors before ambient fallback', () => {
+  for (const environment of [
+    { BWS_UPSTREAM_MODE: 'export' },
+    { BWS_UPSTREAM_EXPORT_SELECTION_PATH: 'config/obsolete-export.json' },
+    { BWS_PINNED_EXPORT_PATH: 'config/obsolete-pinned.json' },
+    { BWS_UPSTREAM_EXPORT_FILE: 'config/obsolete-file.json' },
+    { BWS_UPSTREAM_EXPORT_PATH: 'config/obsolete-path.json' },
+    { SUREBET_PINNED_BUNDLE: 'config/obsolete-bundle.json' },
+  ]) {
+    assert.throws(
+      () => resolveBwsServiceRuntimeConfig(environment as never, repoRoot),
+      /BWS service runtime requires BWS_UPSTREAM_MODE=api|is retired for BWS service runtime/,
+    );
+  }
+});
+
+test('API-only static validator covers direct runtime CLI entry points', () => {
+  const validator = readFileSync(resolve(repoRoot, 'scripts/validate_api_only_upstream.py'), 'utf8');
+  for (const rel of [
+    'packages/bootstrap/src/cli/bws-read-only-api.ts',
+    'packages/bootstrap/src/cli/bws-private-paper-worker.ts',
+    'packages/bootstrap/src/cli/bws-private-paper-worker-service.ts',
+    'packages/bootstrap/src/cli/bws-paper-runtime-handoff.ts',
+    'packages/bootstrap/src/cli/bws-observability.ts',
+  ]) {
+    assert.match(validator, new RegExp(rel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  }
 });
 
 test('root package and CLI expose no export runtime command', () => {

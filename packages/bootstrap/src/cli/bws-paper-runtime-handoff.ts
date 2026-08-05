@@ -1,6 +1,7 @@
 import {
   createBwsPaperRuntimeHandoff,
 } from '../operations/paper-runtime-handoff.js';
+import { enforceBwsApiOnlyProcessEnvironment } from './api-only-upstream.js';
 
 export async function runBwsPaperRuntimeHandoffCli(
   argv: readonly string[],
@@ -12,6 +13,7 @@ export async function runBwsPaperRuntimeHandoffCli(
     return 0;
   }
 
+  enforceBwsApiOnlyProcessEnvironment();
   const result = await createBwsPaperRuntimeHandoff({
     repositoryRoot,
   });

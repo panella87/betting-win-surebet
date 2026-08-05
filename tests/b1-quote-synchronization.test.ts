@@ -101,6 +101,49 @@ test('B1 quote synchronization blocks stale quote age', () => {
   ]);
 });
 
+test('B1 quote synchronization rejects missing bigint policy limits', () => {
+  const [first, second] = fixturePair();
+
+  const result = synchronizeB1VenueQuotePair(first, second, Object.freeze({
+    ...quotePolicy(),
+    maxQuoteAgeMs: undefined,
+  }) as never);
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'B1_QUOTE_AGE_LIMIT_INVALID',
+      message: 'B1 quote synchronization requires a non-negative quote-age limit.',
+      evidenceRequired: 'Non-negative B1 max quote age.',
+    },
+  ]);
+});
+
+test('B1 quote synchronization rejects noncanonical timestamps', () => {
+  const [first, second] = fixturePair();
+
+  for (const [result, code] of [
+    [
+      synchronizeB1VenueQuotePair(first, second, Object.freeze({
+        ...quotePolicy(),
+        comparisonTimeUtc: '2026-07-01',
+      })),
+      'B1_COMPARISON_TIME_INVALID',
+    ],
+    [
+      synchronizeB1VenueQuotePair(cloneRow(first, { snapshotTimeUtc: '2026-07-01' }), second, quotePolicy()),
+      'B1_SNAPSHOT_TIME_INVALID',
+    ],
+    [
+      synchronizeB1VenueQuotePair(first, cloneRow(second, { retrievedAtUtc: '2026-07-01 00:00:02Z' }), quotePolicy()),
+      'B1_RETRIEVED_AT_INVALID',
+    ],
+  ] as const) {
+    assert.equal(result.ok, false);
+    assert.equal(result.blockers[0]?.code, code);
+  }
+});
+
 test('B1 quote synchronization rejects understated and overstated quote-age evidence', () => {
   const [first, second] = fixturePair();
   const understated = cloneRow(first, { quoteAgeMs: 0n });
@@ -169,6 +212,46 @@ test('B1 venue limit and capacity accept observed quote depth inside venue limit
   assert.equal(result.value.observedAvailableSizeMinor, 1200000n);
   assert.equal(result.value.acceptedCapacityMinor, 800000n);
   assert.equal(result.value.requiredStakeMinor, 700000n);
+});
+
+test('B1 venue limit and capacity reject malformed required policy values', () => {
+  const [first] = fixturePair();
+  const blankVenueLimit = normalizeB1VenueLimitPolicy(first, Object.freeze({
+    venueOrBookmakerId: '   ',
+    minStakeMinor: 100000n,
+    maxStakeMinor: 800000n,
+    source: 'upstream_venue_limit',
+  }) as never);
+  assert.equal(blankVenueLimit.ok, false);
+  assert.equal(blankVenueLimit.blockers[0]?.code, 'B1_VENUE_LIMIT_VENUE_MISSING');
+
+  const invalidLimit = normalizeB1VenueLimitPolicy(first, Object.freeze({
+    venueOrBookmakerId: first.venueOrBookmakerId,
+    minStakeMinor: undefined,
+    maxStakeMinor: 800000n,
+    source: 'upstream_venue_limit',
+  }) as never);
+  assert.equal(invalidLimit.ok, false);
+  assert.equal(invalidLimit.blockers[0]?.code, 'B1_VENUE_MIN_STAKE_INVALID');
+
+  const limit = normalizeB1VenueLimitPolicy(first, venueLimit(first, 800000n));
+  assert.equal(limit.ok, true);
+
+  const missingRequiredStake = evaluateB1QuoteCapacity(first, limit.value, Object.freeze({
+    requiredStakeMinor: undefined,
+    allowMissingCapacityProxy: false,
+  }) as never);
+  assert.equal(missingRequiredStake.ok, false);
+  assert.equal(missingRequiredStake.blockers[0]?.code, 'B1_REQUIRED_STAKE_INVALID');
+
+  const noDepth = cloneRow(first, { availableSizeMinor: 0n });
+  const missingProxyCapacity = evaluateB1QuoteCapacity(noDepth, limit.value, Object.freeze({
+    requiredStakeMinor: 700000n,
+    allowMissingCapacityProxy: true,
+    conservativeProxyCapacityMinor: undefined,
+  }) as never);
+  assert.equal(missingProxyCapacity.ok, false);
+  assert.equal(missingProxyCapacity.blockers[0]?.code, 'B1_CAPACITY_PROXY_MISSING');
 });
 
 test('B1 capacity blocks missing depth when no conservative proxy is configured', () => {

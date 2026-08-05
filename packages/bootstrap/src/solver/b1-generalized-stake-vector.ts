@@ -193,7 +193,12 @@ function validateB1GeneralizedStakeVectorPolicy(
       'Explicit B1 generalized stake-vector policy.',
     );
   }
-  if (policy.targetWorstCaseNetMinor < 0n || policy.maximumTotalRoundingLossMinor < 0n) {
+  if (
+    typeof policy.targetWorstCaseNetMinor !== 'bigint'
+    || typeof policy.maximumTotalRoundingLossMinor !== 'bigint'
+    || policy.targetWorstCaseNetMinor < 0n
+    || policy.maximumTotalRoundingLossMinor < 0n
+  ) {
     return blocked(
       'B1_STAKE_VECTOR_POLICY_INVALID',
       'B1 generalized stake-vector policy requires non-negative target net and rounding-loss limits.',
@@ -210,22 +215,27 @@ function validateB1GeneralizedStakeVectorPolicy(
 
   const constraintsByKey = new Map<string, B1NormalizedLegConstraint>();
   for (const constraint of policy.legConstraints) {
-    const key = buildConstraintKey(constraint.selectionEquivalenceKey, constraint.venueOrBookmakerId);
-    if (constraint.selectionEquivalenceKey.length === 0) {
+    if (typeof constraint.selectionEquivalenceKey !== 'string' || constraint.selectionEquivalenceKey.length === 0) {
       return blocked(
         'B1_SELECTION_EQUIVALENCE_MISSING',
         'B1 stake-vector constraints require selection equivalence evidence.',
         'B1 selection_equivalence_key for every stake-vector leg.',
       );
     }
-    if (constraint.venueOrBookmakerId.length === 0) {
+    if (typeof constraint.venueOrBookmakerId !== 'string' || constraint.venueOrBookmakerId.trim().length === 0) {
       return blocked(
         'B1_VENUE_PAIR_INCOMPLETE',
         'B1 stake-vector constraints require venue evidence.',
         'B1 venue_or_bookmaker_id for every stake-vector leg.',
       );
     }
-    if (constraint.minStakeMinor <= 0n || constraint.maxStakeMinor <= 0n) {
+    const key = buildConstraintKey(constraint.selectionEquivalenceKey, constraint.venueOrBookmakerId);
+    if (
+      typeof constraint.minStakeMinor !== 'bigint'
+      || typeof constraint.maxStakeMinor !== 'bigint'
+      || constraint.minStakeMinor <= 0n
+      || constraint.maxStakeMinor <= 0n
+    ) {
       return blocked(
         'B1_STAKE_VECTOR_CAPACITY_INVALID',
         'B1 stake-vector constraints require positive min and max stake limits.',
@@ -239,7 +249,7 @@ function validateB1GeneralizedStakeVectorPolicy(
         'Consistent B1 stake-vector capacity limits.',
       );
     }
-    if (constraint.stakeStepMinor <= 0n) {
+    if (typeof constraint.stakeStepMinor !== 'bigint' || constraint.stakeStepMinor <= 0n) {
       return blocked(
         'B1_STAKE_VECTOR_ROUNDING_STEP_INVALID',
         'B1 generalized stake-vector solving requires a positive stake rounding step.',

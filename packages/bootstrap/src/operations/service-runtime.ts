@@ -37,6 +37,13 @@ export const BWS_WORKER_LEASE_DURATION_MS_ENV = 'BWS_WORKER_LEASE_DURATION_MS';
 export const SUREBET_RUNTIME_MODE_ENV = 'SUREBET_RUNTIME_MODE';
 export const SUREBET_PROVIDER_CONNECTIONS_ENV = 'SUREBET_PROVIDER_CONNECTIONS';
 export const SUREBET_EXECUTION_ENABLED_ENV = 'SUREBET_EXECUTION_ENABLED';
+const RETIRED_UPSTREAM_SELECTOR_KEYS = Object.freeze([
+  'BWS_UPSTREAM_EXPORT_SELECTION_PATH',
+  'BWS_PINNED_EXPORT_PATH',
+  'BWS_UPSTREAM_EXPORT_FILE',
+  'BWS_UPSTREAM_EXPORT_PATH',
+  'SUREBET_PINNED_BUNDLE',
+]);
 
 const SENSITIVE_KEY_PATTERN = /credential|mnemonic|passphrase|password|private[_ -]?key|secret|seed|token/i;
 const SENSITIVE_TEXT_PATTERN = /credential|mnemonic|passphrase|password|private[_ -]?key|secret|seed|token/i;
@@ -48,6 +55,12 @@ export interface BwsServiceRuntimeEnvironment extends SurebetPersistenceEnvironm
   readonly BWS_WORKER_ID?: string;
   readonly BWS_WORKER_QUEUE_NAME?: string;
   readonly BWS_WORKER_LEASE_DURATION_MS?: string;
+  readonly BWS_UPSTREAM_MODE?: string;
+  readonly BWS_UPSTREAM_EXPORT_SELECTION_PATH?: string;
+  readonly BWS_PINNED_EXPORT_PATH?: string;
+  readonly BWS_UPSTREAM_EXPORT_FILE?: string;
+  readonly BWS_UPSTREAM_EXPORT_PATH?: string;
+  readonly SUREBET_PINNED_BUNDLE?: string;
   readonly SUREBET_RUNTIME_MODE?: string;
   readonly SUREBET_PROVIDER_CONNECTIONS?: string;
   readonly SUREBET_EXECUTION_ENABLED?: string;
@@ -191,6 +204,7 @@ export function resolveBwsServiceRuntimeConfig(
   environment: BwsServiceRuntimeEnvironment = process.env as BwsServiceRuntimeEnvironment,
   repositoryRoot: string = process.cwd(),
 ): BwsServiceRuntimeConfig {
+  rejectRetiredUpstreamSelectors(environment);
   const runtimeMode = requireLiteral(environment[SUREBET_RUNTIME_MODE_ENV], SUREBET_RUNTIME_MODE_ENV, 'paper');
   const providerConnections = requireLiteral(
     environment[SUREBET_PROVIDER_CONNECTIONS_ENV],
@@ -256,6 +270,18 @@ export function resolveBwsServiceRuntimeConfig(
   });
 
   return config;
+}
+
+function rejectRetiredUpstreamSelectors(environment: BwsServiceRuntimeEnvironment): void {
+  if (environment.BWS_UPSTREAM_MODE !== undefined && environment.BWS_UPSTREAM_MODE !== 'api') {
+    throw new Error('BWS service runtime requires BWS_UPSTREAM_MODE=api when the legacy selector is present.');
+  }
+  const environmentRecord = environment as Readonly<Record<string, string | undefined>>;
+  for (const key of RETIRED_UPSTREAM_SELECTOR_KEYS) {
+    if (environmentRecord[key] !== undefined) {
+      throw new Error(`${key} is retired for BWS service runtime; use the betting-win read-only API path only.`);
+    }
+  }
 }
 
 export function redactBwsServiceRuntimeConfig(

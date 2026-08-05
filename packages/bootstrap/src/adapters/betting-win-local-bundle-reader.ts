@@ -7,7 +7,7 @@ const URL_SCHEME_PREFIX = /^[a-z][a-z0-9+.-]*:\/\//i;
 
 export function readLocalBettingWinExportBundle(
   bundlePath: string,
-  repoRoot: string = process.cwd(),
+  repoRoot: string,
 ): BoundaryResult<BettingWinExportBundle> {
   if (typeof bundlePath !== 'string' || bundlePath.trim().length === 0) {
     return blocked(

@@ -92,6 +92,34 @@ test('B1 backtest run repository rejects execution readiness before persistence'
   );
 });
 
+test('B1 backtest run repository rejects forged report markers before persistence', () => {
+  const repository = new SurebetB1BacktestRunRepository(SAMPLE_CONFIG);
+  for (const [reportOverrides, code] of [
+    [{ reportKind: 'unexpected_report' }, 'SUREBET_B1_BACKTEST_REPORT_KIND_INVALID'],
+    [{ fixtureKind: 'live_fixture_claim' }, 'SUREBET_B1_FIXTURE_KIND_INVALID'],
+    [{ upstreamReadiness: 'ready' }, 'SUREBET_B1_UPSTREAM_READINESS_FORBIDDEN'],
+  ] as const) {
+    assert.throws(
+      () =>
+        repository.create({
+          observedAt: '2026-08-02T10:00:00.000Z',
+          run: {
+            ...sampleBacktestRun(),
+            report: {
+              ...sampleBacktestRun().report,
+              ...reportOverrides,
+            },
+          },
+          runId: `run-invalid-${code}`,
+        } as unknown as Parameters<typeof repository.create>[0]),
+      (error: unknown) =>
+        error instanceof Error
+        && 'code' in error
+        && error.code === code,
+    );
+  }
+});
+
 test('B1 private observation repository rejects executable cycles before persistence', () => {
   const repository = new SurebetB1PrivateObservationRepository(SAMPLE_CONFIG);
   assert.throws(
@@ -132,5 +160,37 @@ function sampleMetrics() {
     uniqueEvents: 0,
     venuePairs: 0,
     worstCaseNetMinor: 0n,
+  });
+}
+
+function sampleBacktestRun() {
+  return Object.freeze({
+    candidateResults: [],
+    executable: false,
+    liveReadiness: 'not_authorized_bws_900_parked' as const,
+    report: Object.freeze({
+      candidateSummaries: [],
+      executable: false as const,
+      falsePositiveReport: Object.freeze({
+        ok: true as const,
+        value: Object.freeze({
+          falsePositiveCount: 0,
+          falsePositiveRateBps: 0n,
+          observationCount: 1,
+          reportKind: 'deterministic_b1_false_positive_report' as const,
+        }),
+      }),
+      fixtureKind: 'deterministic_b1_multi_venue_fixture' as const,
+      liveReadiness: 'not_authorized_bws_900_parked' as const,
+      metrics: sampleMetrics(),
+      offlineFalsificationStatus: 'B1_BLOCKED_UPSTREAM_DATA_INSUFFICIENT' as const,
+      reportKind: 'deterministic_b1_cross_venue_backtest_report' as const,
+      runHash: '3'.repeat(64),
+      runtimeEvidence: false as const,
+      sourceManifestHash: '4'.repeat(64),
+      upstreamLockFingerprint: '5'.repeat(64),
+      upstreamReadiness: 'blocked_until_betting_win_b1_multi_venue_markets_v1' as const,
+    }),
+    runKind: 'deterministic_b1_cross_venue_offline_backtest' as const,
   });
 }

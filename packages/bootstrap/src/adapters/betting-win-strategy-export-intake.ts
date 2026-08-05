@@ -5,7 +5,7 @@ import type { BettingWinUpstreamLock } from '../../../upstream/src/upstream/bett
 import { accepted, blocked, type BoundaryResult } from '../contracts/local-types.js';
 
 const URL_SCHEME_PREFIX = /^[a-z][a-z0-9+.-]*:\/\//i;
-const SHA256_REGEX = /^[0-9a-f]{64}$/i;
+const SHA256_REGEX = /^[0-9a-f]{64}$/;
 const ISO_TIMESTAMP_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/;
 const PROVIDER_COLLECTION_SCHEMA_VERSION = '1.0.0' as const;
 const PROVIDER_HISTORY_EXPORT_PHASE = 'F2-005F' as const;
@@ -460,6 +460,13 @@ function parseStrategyExportDocument(value: unknown): BoundaryResult<StrategyExp
   }
 
   if (phase === PROVIDER_HISTORY_EXPORT_PHASE) {
+    if (value.rawStoreStateSha256 !== undefined || value.quoteStoreStateSha256 !== undefined) {
+      return blocked(
+        'PINNED_STRATEGY_EXPORT_PHASE_HASH_FIELDS_INVALID',
+        'Pinned strategy export F2-005F documents must not carry store-backed hash fields.',
+        'Pinned strategy export hash fields that match the export phase.',
+      );
+    }
     const collectionReportSha256 = requireSha256(
       value.collectionReportSha256,
       'PINNED_STRATEGY_EXPORT_COLLECTION_REPORT_SHA256_INVALID',
@@ -489,6 +496,13 @@ function parseStrategyExportDocument(value: unknown): BoundaryResult<StrategyExp
   }
 
   if (phase === STORE_BACKED_PROVIDER_HISTORY_EXPORT_PHASE) {
+    if (value.collectionReportSha256 !== undefined) {
+      return blocked(
+        'PINNED_STRATEGY_EXPORT_PHASE_HASH_FIELDS_INVALID',
+        'Pinned strategy export F2-005J documents must not carry collection report hash fields.',
+        'Pinned strategy export hash fields that match the export phase.',
+      );
+    }
     const rawStoreStateSha256 = requireSha256(
       value.rawStoreStateSha256,
       'PINNED_STRATEGY_EXPORT_RAW_STORE_SHA256_INVALID',
@@ -506,6 +520,38 @@ function parseStrategyExportDocument(value: unknown): BoundaryResult<StrategyExp
     );
     if (!quoteStoreStateSha256.ok) {
       return quoteStoreStateSha256;
+    }
+    const rawStore = value.payload.rawStore;
+    if (!isObject(rawStore)) {
+      return blocked(
+        'PINNED_STRATEGY_EXPORT_RAW_STORE_MISSING',
+        'Pinned strategy export payload.rawStore must be a JSON object.',
+        'Pinned strategy export raw store payload.',
+      );
+    }
+    const actualRawStoreStateSha256 = sha256Hex(stableJsonCompact(rawStore));
+    if (actualRawStoreStateSha256 !== rawStoreStateSha256.value) {
+      return blocked(
+        'PINNED_STRATEGY_EXPORT_RAW_STORE_SHA256_MISMATCH',
+        'Pinned strategy export rawStoreStateSha256 does not match payload.rawStore content.',
+        'Pinned strategy export whose raw store SHA-256 matches the immutable content.',
+      );
+    }
+    const quoteStore = value.payload.quoteStore;
+    if (!isObject(quoteStore)) {
+      return blocked(
+        'PINNED_STRATEGY_EXPORT_QUOTE_STORE_MISSING',
+        'Pinned strategy export payload.quoteStore must be a JSON object.',
+        'Pinned strategy export quote store payload.',
+      );
+    }
+    const actualQuoteStoreStateSha256 = sha256Hex(stableJsonCompact(quoteStore));
+    if (actualQuoteStoreStateSha256 !== quoteStoreStateSha256.value) {
+      return blocked(
+        'PINNED_STRATEGY_EXPORT_QUOTE_STORE_SHA256_MISMATCH',
+        'Pinned strategy export quoteStoreStateSha256 does not match payload.quoteStore content.',
+        'Pinned strategy export whose quote store SHA-256 matches the immutable content.',
+      );
     }
   }
 
@@ -727,17 +773,45 @@ function validateStrategyExportPayload(
     );
   }
 
-  const generationIds = [
-    ...generationResolutions.value
-      .map((resolution) => resolution.providerGenerationId)
-      .filter((entry): entry is string => typeof entry === 'string' && entry.trim().length > 0),
-    ...normalizedEvidence.value
-      .map((evidence) => evidence.providerGenerationId)
-      .filter((entry): entry is string => typeof entry === 'string' && entry.trim().length > 0),
-    ...normalizedRejections.value
-      .map((rejection) => rejection.providerGenerationId)
-      .filter((entry): entry is string => typeof entry === 'string' && entry.trim().length > 0),
-  ];
+  const generationIds: string[] = [];
+  const resolvedGenerationIds: string[] = [];
+  for (const generationResolution of generationResolutions.value) {
+    const providerGenerationId = requireGenerationReference(generationResolution, 'generation resolution');
+    if (!providerGenerationId.ok) {
+      return providerGenerationId;
+    }
+    resolvedGenerationIds.push(providerGenerationId.value);
+    generationIds.push(providerGenerationId.value);
+  }
+  const resolvedGenerationIdSet = new Set(resolvedGenerationIds);
+  for (const evidence of normalizedEvidence.value) {
+    const providerGenerationId = requireGenerationReference(evidence, 'normalized evidence');
+    if (!providerGenerationId.ok) {
+      return providerGenerationId;
+    }
+    if (!resolvedGenerationIdSet.has(providerGenerationId.value)) {
+      return blocked(
+        'PINNED_STRATEGY_EXPORT_PROVIDER_GENERATION_REFERENCE_MISSING',
+        'Pinned strategy export normalized evidence must reference a resolved provider generation id.',
+        'Pinned strategy export normalized evidence backed by generation resolutions.',
+      );
+    }
+    generationIds.push(providerGenerationId.value);
+  }
+  for (const rejection of normalizedRejections.value) {
+    const providerGenerationId = requireGenerationReference(rejection, 'normalized rejection');
+    if (!providerGenerationId.ok) {
+      return providerGenerationId;
+    }
+    if (!resolvedGenerationIdSet.has(providerGenerationId.value)) {
+      return blocked(
+        'PINNED_STRATEGY_EXPORT_PROVIDER_GENERATION_REFERENCE_MISSING',
+        'Pinned strategy export normalized rejections must reference a resolved provider generation id.',
+        'Pinned strategy export normalized rejections backed by generation resolutions.',
+      );
+    }
+    generationIds.push(providerGenerationId.value);
+  }
   if (generationIds.length === 0) {
     return blocked(
       'PINNED_STRATEGY_EXPORT_PROVIDER_GENERATIONS_MISSING',
@@ -843,6 +917,21 @@ function validateStrategyExportPayload(
   );
 }
 
+function requireGenerationReference(
+  record: Readonly<Record<string, unknown>>,
+  label: string,
+): BoundaryResult<string> {
+  const providerGenerationId = record.providerGenerationId;
+  if (typeof providerGenerationId !== 'string' || providerGenerationId.trim().length === 0) {
+    return blocked(
+      'PINNED_STRATEGY_EXPORT_PROVIDER_GENERATION_ID_MISSING',
+      `Pinned strategy export ${label} records must contain a non-empty providerGenerationId.`,
+      'Pinned strategy export with provider generation provenance on every normalized record.',
+    );
+  }
+  return accepted(providerGenerationId.trim());
+}
+
 function requireNonEmptyString(
   value: unknown,
   code: string,
@@ -891,7 +980,7 @@ function requireSha256(
   if (typeof value !== 'string' || !SHA256_REGEX.test(value)) {
     return blocked(code, message, evidenceRequired);
   }
-  return accepted(value.toLowerCase());
+  return accepted(value);
 }
 
 function requireStringArray(

@@ -252,6 +252,20 @@ test('local export bundle reader and pinned intake reject malformed path argumen
   );
   assert.equal(repoRootResult.ok, false);
   assert.equal(repoRootResult.blockers[0]?.code, 'LOCAL_EXPORT_REPO_ROOT_INVALID');
+
+  const missingLocalRepoRoot = readLocalBettingWinExportBundle(
+    'tests/fixtures/local-only-export-bundles/valid-resource-export.json',
+    undefined as never,
+  );
+  assert.equal(missingLocalRepoRoot.ok, false);
+  assert.equal(missingLocalRepoRoot.blockers[0]?.code, 'LOCAL_EXPORT_REPO_ROOT_INVALID');
+
+  const missingPinnedRepoRoot = validatePinnedBettingWinBundleIntake(
+    'tests/fixtures/local-only-export-bundles/solver-ready-resource-export.json',
+    undefined as never,
+  );
+  assert.equal(missingPinnedRepoRoot.ok, false);
+  assert.equal(missingPinnedRepoRoot.blockers[0]?.code, 'LOCAL_EXPORT_REPO_ROOT_INVALID');
 });
 
 test('local export bundle reader rejects remote URLs and repo-escaping paths', () => {

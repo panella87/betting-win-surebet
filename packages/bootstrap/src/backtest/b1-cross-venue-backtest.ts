@@ -1,6 +1,6 @@
 import type { Blocker, BoundaryResult } from '../contracts/local-types.js';
 import { accepted, blocked } from '../contracts/local-types.js';
-import type { B1DeterministicFixture } from '../contracts/b1-local-types.js';
+import type { B1DeterministicFixture, B1MultiVenueMarketRow } from '../contracts/b1-local-types.js';
 import { deriveB1CrossVenueGrossOpportunityCandidates, type B1GrossOpportunityCandidate } from '../opportunity/b1-cross-venue-derivation.js';
 import type { B1QuoteSynchronizationPolicy } from '../quotes/b1-quote-synchronization.js';
 import { solveB1GeneralizedStakeVector, type B1GeneralizedStakeVectorPolicy } from '../solver/b1-generalized-stake-vector.js';
@@ -150,6 +150,20 @@ function validateB1CrossVenueBacktestInput(input: B1CrossVenueBacktestInput): Bo
       'Explicit B1 cross-venue backtest input.',
     );
   }
+  if (typeof input.fixture !== 'object' || input.fixture === null) {
+    return blocked(
+      'B1_BACKTEST_FIXTURE_MISSING',
+      'B1 deterministic offline backtesting requires an explicit fixture object.',
+      'Explicit B1 deterministic fixture input.',
+    );
+  }
+  if (input.fixture.fixtureKind !== 'deterministic_b1_multi_venue_fixture') {
+    return blocked(
+      'B1_BACKTEST_FIXTURE_KIND_INVALID',
+      'B1 deterministic offline backtesting requires the deterministic B1 fixture kind.',
+      'B1 deterministic fixtureKind marker.',
+    );
+  }
   if (input.fixture.runtimeEvidence !== false) {
     return blocked(
       'B1_BACKTEST_FIXTURE_RUNTIME_EVIDENCE_FORBIDDEN',
@@ -164,11 +178,36 @@ function validateB1CrossVenueBacktestInput(input: B1CrossVenueBacktestInput): Bo
       'B1 fixture upstreamReadiness blocked until betting-win exposes the accepted B1 resource.',
     );
   }
+  if (!Array.isArray(input.fixture.rows)) {
+    return blocked(
+      'B1_BACKTEST_ROWS_INVALID',
+      'B1 deterministic offline backtesting requires fixture rows as an array.',
+      'B1 deterministic fixture rows array.',
+    );
+  }
   if (input.fixture.rows.length === 0) {
     return blocked(
       'B1_BACKTEST_ROWS_EMPTY',
       'B1 deterministic offline backtesting requires at least one fixture row.',
       'B1 deterministic fixture rows.',
+    );
+  }
+  const rowsValidation = validateB1BacktestFixtureRows(input.fixture.rows);
+  if (!rowsValidation.ok) {
+    return rowsValidation;
+  }
+  if (
+    typeof input.fixture.manifest !== 'object'
+    || input.fixture.manifest === null
+    || typeof input.fixture.manifest.sourceManifestHash !== 'string'
+    || input.fixture.manifest.sourceManifestHash.trim().length === 0
+    || typeof input.fixture.manifest.upstreamLockFingerprint !== 'string'
+    || input.fixture.manifest.upstreamLockFingerprint.trim().length === 0
+  ) {
+    return blocked(
+      'B1_BACKTEST_FIXTURE_MANIFEST_INVALID',
+      'B1 deterministic offline backtesting requires fixture manifest provenance.',
+      'B1 fixture manifest with source manifest hash and upstream lock fingerprint.',
     );
   }
   if (!Array.isArray(input.plans) || input.plans.length === 0) {
@@ -178,6 +217,61 @@ function validateB1CrossVenueBacktestInput(input: B1CrossVenueBacktestInput): Bo
       'B1 backtest plans for derived gross candidates.',
     );
   }
+  if (typeof input.quotePolicy !== 'object' || input.quotePolicy === null) {
+    return blocked(
+      'B1_BACKTEST_QUOTE_POLICY_MISSING',
+      'B1 deterministic offline backtesting requires an explicit quote synchronization policy.',
+      'Explicit B1 quote synchronization policy.',
+    );
+  }
+  return accepted(undefined);
+}
+
+function validateB1BacktestFixtureRows(rows: readonly B1MultiVenueMarketRow[]): BoundaryResult<undefined> {
+  for (const row of rows) {
+    if (typeof row !== 'object' || row === null) {
+      return blocked(
+        'B1_BACKTEST_ROW_INVALID',
+        'B1 deterministic offline backtesting requires object-shaped fixture rows.',
+        'Object-shaped B1 deterministic fixture rows.',
+      );
+    }
+    for (const field of [
+      'canonicalEventId',
+      'marketEquivalenceKey',
+      'selectionEquivalenceKey',
+      'venueOrBookmakerId',
+      'marketType',
+      'period',
+      'lineValue',
+      'currency',
+      'settlementRuleVersion',
+      'voidRuleId',
+      'outcomeName',
+      'outcomeSide',
+      'snapshotTimeUtc',
+      'retrievedAtUtc',
+      'decimalOdds',
+      'marketStatus',
+    ] as const) {
+      if (typeof row[field] !== 'string' || row[field].trim().length === 0) {
+        return blocked(
+          'B1_BACKTEST_ROW_INVALID',
+          'B1 deterministic offline backtesting requires complete non-empty fixture row identity and quote fields.',
+          'B1 deterministic fixture rows with non-empty market, selection, venue and quote identity fields.',
+        );
+      }
+    }
+    for (const field of ['quoteAgeMs', 'priceMinorOrProbabilityMinor', 'availableSizeMinor'] as const) {
+      if (typeof row[field] !== 'bigint') {
+        return blocked(
+          'B1_BACKTEST_ROW_INVALID',
+          'B1 deterministic offline backtesting requires bigint quote fields.',
+          'B1 deterministic fixture rows with bigint quote age, price and capacity fields.',
+        );
+      }
+    }
+  }
   return accepted(undefined);
 }
 
@@ -186,12 +280,23 @@ function indexBacktestPlans(
 ): BoundaryResult<ReadonlyMap<string, B1CrossVenueBacktestPlan>> {
   const indexed = new Map<string, B1CrossVenueBacktestPlan>();
   for (const plan of plans) {
-    if (plan.candidateId.trim().length === 0) {
+    if (typeof plan !== 'object' || plan === null) {
+      return blocked(
+        'B1_BACKTEST_PLAN_INVALID',
+        'B1 deterministic offline backtesting requires object-shaped candidate plans.',
+        'Object-shaped B1 backtest plans.',
+      );
+    }
+    if (typeof plan.candidateId !== 'string' || plan.candidateId.trim().length === 0) {
       return blocked(
         'B1_BACKTEST_PLAN_CANDIDATE_ID_MISSING',
         'B1 deterministic offline backtesting requires non-empty plan candidate ids.',
         'B1 backtest plan candidate id.',
       );
+    }
+    const planShape = validateBacktestPlanShape(plan);
+    if (!planShape.ok) {
+      return planShape;
     }
     if (indexed.has(plan.candidateId)) {
       return blocked(
@@ -203,6 +308,63 @@ function indexBacktestPlans(
     indexed.set(plan.candidateId, plan);
   }
   return accepted(indexed);
+}
+
+function validateBacktestPlanShape(plan: B1CrossVenueBacktestPlan): BoundaryResult<undefined> {
+  if (
+    typeof plan.stakeVectorPolicy !== 'object'
+    || plan.stakeVectorPolicy === null
+    || !Array.isArray(plan.stakeVectorPolicy.legConstraints)
+  ) {
+    return blocked(
+      'B1_STAKE_VECTOR_POLICY_MISSING',
+      'B1 generalized stake-vector solving requires an explicit policy with leg constraints.',
+      'B1 generalized stake-vector policy with legConstraints.',
+    );
+  }
+  if (typeof plan.feeMatrix !== 'object' || plan.feeMatrix === null || !Array.isArray(plan.feeMatrix.entries)) {
+    return blocked(
+      'B1_FEE_MATRIX_MISSING',
+      'B1 net economics requires an explicit fee matrix.',
+      'B1 fee matrix entries for selected venue outcomes.',
+    );
+  }
+  if (typeof plan.quoteAgePenaltyPolicy !== 'object' || plan.quoteAgePenaltyPolicy === null) {
+    return blocked(
+      'B1_QUOTE_AGE_PENALTY_POLICY_MISSING',
+      'B1 net economics requires an explicit quote-age penalty policy.',
+      'Explicit B1 quote-age penalty policy.',
+    );
+  }
+  if (typeof plan.capitalLockPolicy !== 'object' || plan.capitalLockPolicy === null) {
+    return blocked(
+      'B1_CAPITAL_LOCK_POLICY_MISSING',
+      'B1 net economics requires an explicit capital lock policy.',
+      'Explicit B1 capital lock policy.',
+    );
+  }
+  if (!Array.isArray(plan.fillabilityEvents)) {
+    return blocked(
+      'B1_FILLABILITY_INPUT_MISSING',
+      'B1 fillability simulation requires explicit fillability events.',
+      'B1 fillability event array.',
+    );
+  }
+  if (typeof plan.maxResidualExposureMinor !== 'bigint' || plan.maxResidualExposureMinor < 0n) {
+    return blocked(
+      'B1_RESIDUAL_EXPOSURE_LIMIT_INVALID',
+      'B1 fillability simulation requires a non-negative residual exposure limit.',
+      'Non-negative B1 max residual exposure minor units.',
+    );
+  }
+  if (!Array.isArray(plan.settlementRecords)) {
+    return blocked(
+      'B1_BACKTEST_PLAN_SETTLEMENT_RECORDS_INVALID',
+      'B1 deterministic offline backtesting requires explicit settlement replay records for every candidate plan.',
+      'B1 backtest plan settlementRecords array.',
+    );
+  }
+  return accepted(undefined);
 }
 
 function runCandidateBacktest(

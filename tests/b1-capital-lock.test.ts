@@ -30,6 +30,24 @@ test('B1 capital lock blocks missing explicit policy', () => {
   ]);
 });
 
+test('B1 capital lock rejects missing bigint policy fields', () => {
+  for (const [field, code] of [
+    ['lockDurationMs', 'B1_CAPITAL_LOCK_DURATION_INVALID'],
+    ['annualizedCostBps', 'B1_CAPITAL_LOCK_BPS_INVALID'],
+    ['capitalBufferBps', 'B1_CAPITAL_BUFFER_BPS_INVALID'],
+  ] as const) {
+    const result = calculateB1CapitalLockCharge(10_000n, 50n, 10n, Object.freeze({
+      lockDurationMs: 86_400_000n,
+      annualizedCostBps: 1_000n,
+      capitalBufferBps: 100n,
+      [field]: undefined,
+    }) as never);
+
+    assert.equal(result.ok, false);
+    assert.equal(result.blockers[0]?.code, code);
+  }
+});
+
 test('B1 capital lock blocks negative carrying-cost inputs', () => {
   const result = calculateB1CapitalLockCharge(10_000n, -1n, 10n, Object.freeze({
     lockDurationMs: 86_400_000n,

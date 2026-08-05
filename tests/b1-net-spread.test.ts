@@ -163,6 +163,25 @@ test('B1 net economics blocks quote-age policy breaches', () => {
   ]);
 });
 
+test('B1 net economics rejects missing bigint quote-age policy fields', () => {
+  const result = evaluateB1NetEconomics(acceptedGrossCandidate(), netPolicy({
+    quoteAgePenaltyPolicy: Object.freeze({
+      maxAcceptedQuoteAgeMs: undefined,
+      penaltyBpsPerSecond: 0n,
+      fixedPenaltyMinor: 0n,
+    }) as never,
+  }));
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'B1_QUOTE_AGE_PENALTY_LIMIT_INVALID',
+      message: 'B1 quote-age penalty policy requires a non-negative quote-age limit.',
+      evidenceRequired: 'Non-negative B1 max accepted quote age.',
+    },
+  ]);
+});
+
 test('B1 net economics blocks non-positive worst-case net after costs', () => {
   const result = evaluateB1NetEconomics(acceptedGrossCandidate(), netPolicy({
     feeMatrix: Object.freeze({

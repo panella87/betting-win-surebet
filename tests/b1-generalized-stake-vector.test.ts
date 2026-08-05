@@ -201,6 +201,39 @@ test('B1 generalized stake-vector solver fails closed on explicit rounding-loss 
   ]);
 });
 
+test('B1 generalized stake-vector solver rejects malformed bigint policy fields', () => {
+  const missingTargetPolicy = Object.freeze({
+    ...twoWayPolicy(),
+    targetWorstCaseNetMinor: undefined,
+  });
+  const missingTarget = solveB1GeneralizedStakeVector(acceptedTwoWayGrossCandidate(), missingTargetPolicy as never);
+  assert.equal(missingTarget.ok, false);
+  assert.equal(missingTarget.blockers[0]?.code, 'B1_STAKE_VECTOR_POLICY_INVALID');
+
+  const missingConstraintCapacityPolicy = Object.freeze({
+    ...twoWayPolicy(),
+    legConstraints: Object.freeze([
+      Object.freeze({
+        selectionEquivalenceKey: 'event-001:moneyline:away',
+        venueOrBookmakerId: 'venue-b',
+        minStakeMinor: undefined,
+        maxStakeMinor: 50_000n,
+        stakeStepMinor: 1n,
+      }),
+      Object.freeze({
+        selectionEquivalenceKey: 'event-001:moneyline:home',
+        venueOrBookmakerId: 'venue-a',
+        minStakeMinor: 10_000n,
+        maxStakeMinor: 50_000n,
+        stakeStepMinor: 1n,
+      }),
+    ]),
+  });
+  const missingConstraintCapacity = solveB1GeneralizedStakeVector(acceptedTwoWayGrossCandidate(), missingConstraintCapacityPolicy as never);
+  assert.equal(missingConstraintCapacity.ok, false);
+  assert.equal(missingConstraintCapacity.blockers[0]?.code, 'B1_STAKE_VECTOR_CAPACITY_INVALID');
+});
+
 test('B1 generalized stake-vector solver blocks unsupported outcome cardinality', () => {
   const result = solveB1GeneralizedStakeVector(fourWayGrossCandidate(), Object.freeze({
     legConstraints: Object.freeze([

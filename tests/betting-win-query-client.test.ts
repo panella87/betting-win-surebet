@@ -363,6 +363,26 @@ test('read-only query client rejects missing normalized-record provenance and in
     assert.equal(missingProvenance.ok, false);
     assert.equal(missingProvenance.blockers[0]?.code, 'QUERY_PROVENANCE_INVALID');
 
+    const missingGeneration = await client.value.querySettlement({
+      filters: {
+        marketId: 'market-001',
+        provider: 'polymarket',
+      },
+      pageSize: 1,
+    });
+    assert.equal(missingGeneration.ok, false);
+    assert.equal(missingGeneration.blockers[0]?.code, 'QUERY_PROVENANCE_INVALID');
+
+    const missingIdentityGeneration = await client.value.queryIdentity({
+      filters: {
+        entityType: 'sport',
+        provider: 'polymarket',
+      },
+      pageSize: 1,
+    });
+    assert.equal(missingIdentityGeneration.ok, false);
+    assert.equal(missingIdentityGeneration.blockers[0]?.code, 'QUERY_PROVENANCE_INVALID');
+
     const incompatibleResource = await client.value.queryIdentity({
       filters: {
         entityType: 'sport',
@@ -383,6 +403,45 @@ test('read-only query client rejects missing normalized-record provenance and in
                 providerGenerationId: 'pm-gen-001',
               },
               recordType: 'evidence',
+            },
+          ],
+          pageSize: 1,
+          returnedCount: 1,
+        },
+      }));
+      return;
+    }
+    if (requestCount === 2) {
+      writeJson(response, 200, createEnvelope('settlement', {
+        page: {
+          items: [
+            {
+              normalizedRejection: {
+                provider: 'polymarket',
+                sourceLineageRecordId: 'record-settlement-001',
+              },
+              recordType: 'rejection',
+            },
+          ],
+          pageSize: 1,
+          returnedCount: 1,
+        },
+      }));
+      return;
+    }
+    if (requestCount === 3) {
+      writeJson(response, 200, createEnvelope('identity', {
+        page: {
+          items: [
+            {
+              canonicalId: 'sport.soccer',
+              entityType: 'sport',
+              providerReferences: [
+                {
+                  provider: 'polymarket',
+                  sourceLineageRecordId: 'record-identity-001',
+                },
+              ],
             },
           ],
           pageSize: 1,

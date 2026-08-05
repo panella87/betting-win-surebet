@@ -9,6 +9,8 @@ import {
   runDeterministicB1CrossVenueBacktest,
   type B1CrossVenueBacktestPlan,
 } from '../src/backtest/b1-cross-venue-backtest.js';
+import { createB1FalsePositiveReport } from '../src/reporting/b1-false-positive-report.js';
+import { createB1BacktestReport } from '../src/reporting/b1-backtest-report.js';
 
 const FIXTURE_PATH = 'tests/fixtures/b1-local-contract/valid-b1-multi-venue-markets.json';
 const CANDIDATE_ID = 'event-001:moneyline:full-game|venue-a::venue-b';
@@ -59,6 +61,134 @@ test('B1 cross-venue backtest fails closed when an accepted gross candidate has 
       evidenceRequired: 'B1 backtest plans for derived gross candidates.',
     },
   ]);
+});
+
+test('B1 cross-venue backtest rejects malformed input without uncaught dereferences', () => {
+  for (const [input, code] of [
+    [{ quotePolicy: {}, plans: [] }, 'B1_BACKTEST_FIXTURE_MISSING'],
+    [{ fixture: null, quotePolicy: quotePolicy(), plans: [backtestPlan()] }, 'B1_BACKTEST_FIXTURE_MISSING'],
+    [{
+      fixture: {
+        fixtureKind: 'deterministic_b1_multi_venue_fixture',
+        runtimeEvidence: false,
+        upstreamReadiness: 'blocked_until_betting_win_b1_multi_venue_markets_v1',
+        rows: 'not-array',
+      },
+      quotePolicy: quotePolicy(),
+      plans: [backtestPlan()],
+    }, 'B1_BACKTEST_ROWS_INVALID'],
+    [{
+      fixture: { ...twoOutcomeFixture(), fixtureKind: 'live_fixture_claim' },
+      quotePolicy: quotePolicy(),
+      plans: [backtestPlan()],
+    }, 'B1_BACKTEST_FIXTURE_KIND_INVALID'],
+    [{
+      fixture: { ...twoOutcomeFixture(), rows: [{}] },
+      quotePolicy: quotePolicy(),
+      plans: [backtestPlan()],
+    }, 'B1_BACKTEST_ROW_INVALID'],
+    [{
+      fixture: twoOutcomeFixture(),
+      quotePolicy: undefined,
+      plans: [backtestPlan()],
+    }, 'B1_BACKTEST_QUOTE_POLICY_MISSING'],
+    [{
+      fixture: twoOutcomeFixture(),
+      quotePolicy: quotePolicy(),
+      plans: 'not-array',
+    }, 'B1_BACKTEST_PLANS_MISSING'],
+    [{
+      fixture: twoOutcomeFixture(),
+      quotePolicy: quotePolicy(),
+      plans: [undefined],
+    }, 'B1_BACKTEST_PLAN_INVALID'],
+    [{
+      fixture: twoOutcomeFixture(),
+      quotePolicy: quotePolicy(),
+      plans: [{ ...backtestPlan(), candidateId: '   ' }],
+    }, 'B1_BACKTEST_PLAN_CANDIDATE_ID_MISSING'],
+    [{
+      fixture: twoOutcomeFixture(),
+      quotePolicy: quotePolicy(),
+      plans: [{ ...backtestPlan(), settlementRecords: undefined }],
+    }, 'B1_BACKTEST_PLAN_SETTLEMENT_RECORDS_INVALID'],
+    [{
+      fixture: twoOutcomeFixture(),
+      quotePolicy: quotePolicy(),
+      plans: [{ ...backtestPlan(), maxResidualExposureMinor: undefined }],
+    }, 'B1_RESIDUAL_EXPOSURE_LIMIT_INVALID'],
+    [{
+      fixture: twoOutcomeFixture(),
+      quotePolicy: quotePolicy(),
+      plans: [{ ...backtestPlan(), fillabilityEvents: undefined }],
+    }, 'B1_FILLABILITY_INPUT_MISSING'],
+  ] as const) {
+    const result = runDeterministicB1CrossVenueBacktest(input as never);
+
+    assert.equal(result.ok, false);
+    assert.equal(result.blockers[0]?.code, code);
+  }
+});
+
+test('B1 backtest report rejects invalid safety markers and source hashes', () => {
+  const falsePositiveReport = createB1FalsePositiveReport(Object.freeze([
+    Object.freeze({
+      candidateId: CANDIDATE_ID,
+      settlementStatus: 'accepted' as const,
+      settledNetMinor: 100n,
+      falsePositive: false,
+    }),
+  ]));
+  assert.equal(falsePositiveReport.ok, true);
+  const validInput = Object.freeze({
+    sourceManifestHash: 'a'.repeat(64),
+    upstreamLockFingerprint: 'b'.repeat(64),
+    fixtureKind: 'deterministic_b1_multi_venue_fixture' as const,
+    runtimeEvidence: false as const,
+    upstreamReadiness: 'blocked_until_betting_win_b1_multi_venue_markets_v1' as const,
+    uniqueEventIds: Object.freeze(['event-001']),
+    falsePositiveReport,
+    candidateSummaries: Object.freeze([
+      Object.freeze({
+        candidateId: CANDIDATE_ID,
+        status: 'accepted' as const,
+        stage: 'accepted' as const,
+        canonicalEventId: 'event-001',
+        marketEquivalenceKey: 'event-001:moneyline:full-game',
+        venuePairKey: 'venue-a::venue-b',
+        grossSpreadPpm: 1_000n,
+        netSpreadPpm: 900n,
+        worstCaseNetMinor: 100n,
+        settledNetMinor: 100n,
+        falsePositive: false,
+      }),
+    ]),
+  });
+  const validCandidateSummary = validInput.candidateSummaries[0];
+  assert.ok(validCandidateSummary);
+
+  for (const [overrides, code] of [
+    [{ sourceManifestHash: 'not-a-hash' }, 'B1_BACKTEST_SOURCE_MANIFEST_HASH_INVALID'],
+    [{ upstreamLockFingerprint: 'not-a-hash' }, 'B1_BACKTEST_UPSTREAM_LOCK_FINGERPRINT_INVALID'],
+    [{ fixtureKind: 'live_fixture_claim' }, 'B1_BACKTEST_FIXTURE_KIND_INVALID'],
+    [{ runtimeEvidence: true }, 'B1_BACKTEST_RUNTIME_EVIDENCE_FORBIDDEN'],
+    [{ upstreamReadiness: 'ready' }, 'B1_BACKTEST_UPSTREAM_READINESS_INVALID'],
+    [{ uniqueEventIds: ['event-001', ''] }, 'B1_BACKTEST_UNIQUE_EVENT_ID_INVALID'],
+    [{ candidateSummaries: [{ ...validCandidateSummary, stage: 'gross' }] }, 'B1_BACKTEST_CANDIDATE_STAGE_INVALID'],
+    [{ candidateSummaries: [{ ...validCandidateSummary, grossSpreadPpm: '1000' }] }, 'B1_BACKTEST_ACCEPTED_CANDIDATE_METRICS_MISSING'],
+    [{ candidateSummaries: [{ ...validCandidateSummary, venuePairKey: '   ' }] }, 'B1_BACKTEST_CANDIDATE_MARKER_INVALID'],
+    [{ candidateSummaries: [{ ...validCandidateSummary, canonicalEventId: undefined }] }, 'B1_BACKTEST_CANDIDATE_MARKER_INVALID'],
+    [{ candidateSummaries: [{ ...validCandidateSummary, marketEquivalenceKey: undefined }] }, 'B1_BACKTEST_CANDIDATE_MARKER_INVALID'],
+    [{ candidateSummaries: [{ ...validCandidateSummary, venuePairKey: undefined }] }, 'B1_BACKTEST_CANDIDATE_MARKER_INVALID'],
+  ] as const) {
+    const result = createB1BacktestReport(Object.freeze({
+      ...validInput,
+      ...overrides,
+    }) as never);
+
+    assert.equal(result.ok, false);
+    assert.equal(result.blockers[0]?.code, code);
+  }
 });
 
 test('B1 cross-venue backtest records settlement blockers as false-positive denominator blockers', () => {

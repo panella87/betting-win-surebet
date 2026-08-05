@@ -43,7 +43,7 @@ export function evaluateB1QuoteCapacity(
       'B1 venue limit evidence matching venue_or_bookmaker_id.',
     );
   }
-  if (policy.requiredStakeMinor <= 0n) {
+  if (typeof policy.requiredStakeMinor !== 'bigint' || policy.requiredStakeMinor <= 0n) {
     return blocked(
       'B1_REQUIRED_STAKE_INVALID',
       'B1 capacity evaluation requires a positive required stake.',
@@ -125,7 +125,7 @@ function resolveCapacity(
       'B1 available_size_minor evidence or explicit conservative proxy capacity.',
     );
   }
-  if (policy.conservativeProxyCapacityMinor === undefined || policy.conservativeProxyCapacityMinor <= 0n) {
+  if (typeof policy.conservativeProxyCapacityMinor !== 'bigint' || policy.conservativeProxyCapacityMinor <= 0n) {
     return blocked(
       'B1_CAPACITY_PROXY_MISSING',
       'B1 missing-capacity proxy mode requires a positive conservative capacity.',

@@ -32,6 +32,13 @@ export function normalizeB1VenueLimitPolicy(
       'Explicit B1 venue limit policy.',
     );
   }
+  if (typeof policy.venueOrBookmakerId !== 'string' || policy.venueOrBookmakerId.trim().length === 0) {
+    return blocked(
+      'B1_VENUE_LIMIT_VENUE_MISSING',
+      'B1 venue limit policy requires a non-empty venue.',
+      'B1 venue_or_bookmaker_id for venue limit evidence.',
+    );
+  }
   if (policy.venueOrBookmakerId !== row.venueOrBookmakerId) {
     return blocked(
       'B1_VENUE_LIMIT_VENUE_MISMATCH',
@@ -46,14 +53,14 @@ export function normalizeB1VenueLimitPolicy(
       'B1 upstream venue limit or explicit conservative operator cap.',
     );
   }
-  if (policy.minStakeMinor <= 0n) {
+  if (typeof policy.minStakeMinor !== 'bigint' || policy.minStakeMinor <= 0n) {
     return blocked(
       'B1_VENUE_MIN_STAKE_INVALID',
       'B1 venue minimum stake must be positive.',
       'Positive B1 venue minimum stake.',
     );
   }
-  if (policy.maxStakeMinor <= 0n) {
+  if (typeof policy.maxStakeMinor !== 'bigint' || policy.maxStakeMinor <= 0n) {
     return blocked(
       'B1_VENUE_MAX_STAKE_INVALID',
       'B1 venue maximum stake must be positive.',

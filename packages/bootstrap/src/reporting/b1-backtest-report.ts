@@ -84,6 +84,24 @@ export interface B1BacktestReport {
 }
 
 export function createB1BacktestReport(input: B1BacktestReportInput): BoundaryResult<B1BacktestReport> {
+  if (typeof input !== 'object' || input === null) {
+    return blocked(
+      'B1_BACKTEST_REPORT_INPUT_INVALID',
+      'B1 deterministic offline backtest report requires an explicit input object.',
+      'Object-shaped B1 backtest report input.',
+    );
+  }
+  const markerValidation = validateReportMarkers(input);
+  if (!markerValidation.ok) {
+    return markerValidation;
+  }
+  if (!Array.isArray(input.candidateSummaries)) {
+    return blocked(
+      'B1_BACKTEST_CANDIDATES_INVALID',
+      'B1 deterministic offline backtesting requires candidate summaries as an array.',
+      'B1 candidate summary array.',
+    );
+  }
   if (input.candidateSummaries.length === 0) {
     return blocked(
       'B1_BACKTEST_CANDIDATES_EMPTY',
@@ -101,9 +119,14 @@ export function createB1BacktestReport(input: B1BacktestReportInput): BoundaryRe
     normalizedCandidateSummaries.push(normalized.value);
   }
 
+  const uniqueEventIds = normalizeUniqueEventIds(input.uniqueEventIds);
+  if (!uniqueEventIds.ok) {
+    return uniqueEventIds;
+  }
+
   const metrics = calculateMetrics(
     normalizedCandidateSummaries,
-    Object.freeze([...new Set(input.uniqueEventIds)]),
+    uniqueEventIds.value,
     input.falsePositiveReport,
   );
   const reportWithoutHash = Object.freeze({
@@ -127,10 +150,108 @@ export function createB1BacktestReport(input: B1BacktestReportInput): BoundaryRe
   }));
 }
 
+function validateReportMarkers(input: B1BacktestReportInput): BoundaryResult<undefined> {
+  if (!isSha256(input.sourceManifestHash)) {
+    return blocked(
+      'B1_BACKTEST_SOURCE_MANIFEST_HASH_INVALID',
+      'B1 deterministic offline backtest report requires a 64-hex source manifest hash.',
+      'B1 source manifest SHA-256 hash.',
+    );
+  }
+  if (!isSha256(input.upstreamLockFingerprint)) {
+    return blocked(
+      'B1_BACKTEST_UPSTREAM_LOCK_FINGERPRINT_INVALID',
+      'B1 deterministic offline backtest report requires a 64-hex upstream lock fingerprint.',
+      'B1 upstream lock fingerprint SHA-256 hash.',
+    );
+  }
+  if (input.fixtureKind !== 'deterministic_b1_multi_venue_fixture') {
+    return blocked(
+      'B1_BACKTEST_FIXTURE_KIND_INVALID',
+      'B1 deterministic offline backtest report requires the deterministic B1 fixture kind.',
+      'B1 deterministic fixtureKind marker.',
+    );
+  }
+  if (input.runtimeEvidence !== false) {
+    return blocked(
+      'B1_BACKTEST_RUNTIME_EVIDENCE_FORBIDDEN',
+      'B1 deterministic offline backtest report must not claim runtime evidence.',
+      'B1 report with runtimeEvidence=false.',
+    );
+  }
+  if (input.upstreamReadiness !== 'blocked_until_betting_win_b1_multi_venue_markets_v1') {
+    return blocked(
+      'B1_BACKTEST_UPSTREAM_READINESS_INVALID',
+      'B1 deterministic offline backtest report must preserve the real upstream B1 API blocker.',
+      'B1 upstreamReadiness blocked until betting-win exposes the accepted B1 resource.',
+    );
+  }
+  if (!Array.isArray(input.uniqueEventIds)) {
+    return blocked(
+      'B1_BACKTEST_UNIQUE_EVENTS_INVALID',
+      'B1 deterministic offline backtest report requires unique event ids as an array.',
+      'B1 unique event id array.',
+    );
+  }
+  if (
+    typeof input.falsePositiveReport !== 'object'
+    || input.falsePositiveReport === null
+    || typeof input.falsePositiveReport.ok !== 'boolean'
+  ) {
+    return blocked(
+      'B1_BACKTEST_FALSE_POSITIVE_REPORT_INVALID',
+      'B1 deterministic offline backtest report requires a validated false-positive report boundary result.',
+      'Validated B1 false-positive report boundary result.',
+    );
+  }
+  if (input.falsePositiveReport.ok) {
+    if (
+      typeof input.falsePositiveReport.value !== 'object'
+      || input.falsePositiveReport.value === null
+      || typeof input.falsePositiveReport.value.falsePositiveRateBps !== 'bigint'
+    ) {
+      return blocked(
+        'B1_BACKTEST_FALSE_POSITIVE_REPORT_INVALID',
+        'B1 deterministic offline backtest report requires accepted false-positive metrics.',
+        'Accepted B1 false-positive report with bigint rate metrics.',
+      );
+    }
+  } else if (!Array.isArray(input.falsePositiveReport.blockers)) {
+    return blocked(
+      'B1_BACKTEST_FALSE_POSITIVE_REPORT_INVALID',
+      'B1 deterministic offline backtest report requires blocker evidence for blocked false-positive reports.',
+      'Blocked B1 false-positive report with blockers.',
+    );
+  }
+  return accepted(undefined);
+}
+
+function normalizeUniqueEventIds(uniqueEventIds: readonly string[]): BoundaryResult<readonly string[]> {
+  const normalized: string[] = [];
+  for (const eventId of uniqueEventIds) {
+    if (typeof eventId !== 'string' || eventId.trim().length === 0) {
+      return blocked(
+        'B1_BACKTEST_UNIQUE_EVENT_ID_INVALID',
+        'B1 deterministic offline backtest report requires non-empty unique event ids.',
+        'B1 unique event ids without blank or invalid values.',
+      );
+    }
+    normalized.push(eventId.trim());
+  }
+  return accepted(Object.freeze([...new Set(normalized)]));
+}
+
 function normalizeCandidateSummary(
   candidate: B1BacktestReportCandidateSummary,
 ): BoundaryResult<B1BacktestReportCandidateSummary> {
-  if (candidate.candidateId.trim().length === 0) {
+  if (typeof candidate !== 'object' || candidate === null) {
+    return blocked(
+      'B1_BACKTEST_CANDIDATE_INVALID',
+      'B1 deterministic offline backtesting requires object-shaped candidate summaries.',
+      'Object-shaped B1 candidate summary.',
+    );
+  }
+  if (typeof candidate.candidateId !== 'string' || candidate.candidateId.trim().length === 0) {
     return blocked(
       'B1_BACKTEST_CANDIDATE_ID_MISSING',
       'B1 deterministic offline backtesting requires stable non-empty candidate ids.',
@@ -138,6 +259,17 @@ function normalizeCandidateSummary(
     );
   }
   if (candidate.status === 'blocked') {
+    const markerValidation = validateCandidateMarkers(candidate, false);
+    if (!markerValidation.ok) {
+      return markerValidation;
+    }
+    if (candidate.stage === 'accepted') {
+      return blocked(
+        'B1_BACKTEST_CANDIDATE_STAGE_INVALID',
+        'Blocked B1 backtest candidates must carry the blocked stage that produced blocker evidence.',
+        'Blocked B1 candidate summary with a non-accepted stage.',
+      );
+    }
     if (candidate.blockers === undefined || candidate.blockers.length === 0) {
       return blocked(
         'B1_BACKTEST_BLOCKED_CANDIDATE_EVIDENCE_MISSING',
@@ -147,7 +279,9 @@ function normalizeCandidateSummary(
     }
     return accepted(Object.freeze({
       ...candidate,
+      candidateId: candidate.candidateId.trim(),
       blockers: Object.freeze(candidate.blockers.map((blocker) => Object.freeze({ ...blocker }))),
+      ...markerValidation.value,
     }));
   }
   if (candidate.status !== 'accepted') {
@@ -157,12 +291,23 @@ function normalizeCandidateSummary(
       'B1 candidate status accepted or blocked.',
     );
   }
+  if (candidate.stage !== 'accepted') {
+    return blocked(
+      'B1_BACKTEST_CANDIDATE_STAGE_INVALID',
+      'Accepted B1 backtest candidates must carry the accepted stage marker.',
+      'Accepted B1 candidate summary with stage=accepted.',
+    );
+  }
+  const markerValidation = validateCandidateMarkers(candidate, true);
+  if (!markerValidation.ok) {
+    return markerValidation;
+  }
   if (
-    candidate.grossSpreadPpm === undefined
-    || candidate.netSpreadPpm === undefined
-    || candidate.worstCaseNetMinor === undefined
-    || candidate.settledNetMinor === undefined
-    || candidate.falsePositive === undefined
+    typeof candidate.grossSpreadPpm !== 'bigint'
+    || typeof candidate.netSpreadPpm !== 'bigint'
+    || typeof candidate.worstCaseNetMinor !== 'bigint'
+    || typeof candidate.settledNetMinor !== 'bigint'
+    || typeof candidate.falsePositive !== 'boolean'
   ) {
     return blocked(
       'B1_BACKTEST_ACCEPTED_CANDIDATE_METRICS_MISSING',
@@ -177,7 +322,48 @@ function normalizeCandidateSummary(
       'Accepted B1 backtest candidate without blockers.',
     );
   }
-  return accepted(Object.freeze({ ...candidate }));
+  return accepted(Object.freeze({
+    ...candidate,
+    candidateId: candidate.candidateId.trim(),
+    ...markerValidation.value,
+  }));
+}
+
+function validateCandidateMarkers(
+  candidate: B1BacktestReportCandidateSummary,
+  requireAllMarkers: boolean,
+): BoundaryResult<Partial<B1BacktestReportCandidateSummary>> {
+  const normalized: {
+    canonicalEventId?: string;
+    marketEquivalenceKey?: string;
+    venuePairKey?: string;
+  } = {};
+  for (const field of ['canonicalEventId', 'marketEquivalenceKey', 'venuePairKey'] as const) {
+    const value = candidate[field];
+    if (value === undefined) {
+      if (requireAllMarkers) {
+        return blocked(
+          'B1_BACKTEST_CANDIDATE_MARKER_INVALID',
+          'B1 backtest candidate summary markers must be present as non-empty strings.',
+          'Required non-empty B1 candidate canonical event, market equivalence and venue pair markers.',
+        );
+      }
+      continue;
+    }
+    if (typeof value !== 'string' || value.trim().length === 0) {
+      return blocked(
+        'B1_BACKTEST_CANDIDATE_MARKER_INVALID',
+        requireAllMarkers
+          ? 'B1 backtest candidate summary markers must be present as non-empty strings.'
+          : 'B1 backtest candidate summary markers must be non-empty strings when present.',
+        requireAllMarkers
+          ? 'Required non-empty B1 candidate canonical event, market equivalence and venue pair markers.'
+          : 'Non-empty B1 candidate canonical event, market equivalence and venue pair markers.',
+      );
+    }
+    normalized[field] = value.trim();
+  }
+  return accepted(Object.freeze(normalized));
 }
 
 function calculateMetrics(
@@ -291,6 +477,10 @@ function minimumOptionalBigInt(values: readonly (bigint | undefined)[]): bigint 
 
 function isPresentString(value: string | undefined): value is string {
   return value !== undefined && value.length > 0;
+}
+
+function isSha256(value: unknown): value is string {
+  return typeof value === 'string' && /^[0-9a-f]{64}$/i.test(value);
 }
 
 function stableJson(value: unknown): string {

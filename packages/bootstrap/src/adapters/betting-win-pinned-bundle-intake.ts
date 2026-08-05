@@ -35,7 +35,7 @@ export interface PinnedBettingWinBundleIntake {
 
 export function validatePinnedBettingWinBundleIntake(
   bundlePath: string,
-  repoRoot: string = process.cwd(),
+  repoRoot: string,
 ): BoundaryResult<PinnedBettingWinBundleIntake> {
   const bundle = readLocalBettingWinExportBundle(bundlePath, repoRoot);
   if (!bundle.ok) {

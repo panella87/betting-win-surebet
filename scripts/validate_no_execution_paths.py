@@ -6,7 +6,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 SKIP_DIRS = {'.git', 'node_modules', 'dist', 'coverage', 'artifacts'}
-SCAN_ROOTS = ('src', 'packages', 'apps')
+SCAN_ROOTS = ('src', 'packages', 'apps', 'package.json', 'cli.js', 'scripts/bws-root-wrapper-runtime.mjs')
 
 def fail(message: str) -> None:
     print(f"ERROR: {message}", file=sys.stderr)

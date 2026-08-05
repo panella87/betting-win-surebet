@@ -1,6 +1,7 @@
 import {
   runBwsWorkerApplication,
 } from '../operations/runtime-applications.js';
+import { enforceBwsApiOnlyProcessEnvironment } from './api-only-upstream.js';
 
 export async function runBwsPrivatePaperWorkerCli(
   argv: readonly string[],
@@ -12,6 +13,7 @@ export async function runBwsPrivatePaperWorkerCli(
     return 0;
   }
 
+  enforceBwsApiOnlyProcessEnvironment();
   await runBwsWorkerApplication({
     repositoryRoot,
   });

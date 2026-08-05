@@ -2,6 +2,7 @@ import {
   getBwsPrivatePaperWorkerServiceStatus,
   runBwsPrivatePaperWorkerService,
 } from '../operations/private-paper-worker-service.js';
+import { enforceBwsApiOnlyProcessEnvironment } from './api-only-upstream.js';
 
 export async function runBwsPrivatePaperWorkerServiceCli(
   argv: readonly string[],
@@ -16,6 +17,7 @@ export async function runBwsPrivatePaperWorkerServiceCli(
   if (command !== 'run' && command !== 'status') {
     throw new Error('Usage: bws-private-paper-worker-service <run|status>');
   }
+  enforceBwsApiOnlyProcessEnvironment();
   const result = command === 'run'
     ? await runBwsPrivatePaperWorkerService({ repositoryRoot })
     : getBwsPrivatePaperWorkerServiceStatus({ repositoryRoot });

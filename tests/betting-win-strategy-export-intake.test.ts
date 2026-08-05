@@ -69,6 +69,15 @@ test('pinned strategy export intake rejects malformed public options before dere
   assert.equal(malformedSha.ok, false);
   assert.equal(malformedSha.blockers[0]?.code, 'PINNED_STRATEGY_EXPORT_EXPECTED_SHA256_INVALID');
 
+  const uppercaseSha = validatePinnedBettingWinStrategyExportIntake({
+    exportPath: 'tests/fixtures/local-only-export-bundles/valid-resource-export.json',
+    expectedSha256: 'A'.repeat(64),
+    repositoryRoot: REPO_ROOT,
+    upstreamLock: sampleUpstreamLock(),
+  });
+  assert.equal(uppercaseSha.ok, false);
+  assert.equal(uppercaseSha.blockers[0]?.code, 'PINNED_STRATEGY_EXPORT_EXPECTED_SHA256_INVALID');
+
   const malformedLock = validatePinnedBettingWinStrategyExportIntake({
     exportPath: 'tests/fixtures/local-only-export-bundles/valid-resource-export.json',
     expectedSha256: 'a'.repeat(64),
@@ -215,6 +224,195 @@ test('pinned strategy export intake rejects generation and lineage mismatches', 
   }
 });
 
+test('pinned strategy export intake rejects store-backed hash mismatches', () => {
+  const tempDir = createTempDir('strategy-export-store-hash-');
+
+  try {
+    for (const testCase of [
+      {
+        fileName: 'raw-store-mismatch.json',
+        document: createStoreBackedStrategyExportDocument({
+          rawStoreStateSha256: 'f'.repeat(64),
+        }),
+        code: 'PINNED_STRATEGY_EXPORT_RAW_STORE_SHA256_MISMATCH',
+      },
+      {
+        fileName: 'quote-store-mismatch.json',
+        document: createStoreBackedStrategyExportDocument({
+          quoteStoreStateSha256: 'f'.repeat(64),
+        }),
+        code: 'PINNED_STRATEGY_EXPORT_QUOTE_STORE_SHA256_MISMATCH',
+      },
+    ]) {
+      const exportPath = join(tempDir, testCase.fileName);
+      const sourceSha256 = writeJsonAndHash(exportPath, testCase.document);
+      const result = validatePinnedBettingWinStrategyExportIntake({
+        exportPath,
+        expectedSha256: sourceSha256,
+        repositoryRoot: REPO_ROOT,
+        upstreamLock: sampleUpstreamLock(),
+      });
+
+      assert.equal(result.ok, false);
+      assert.equal(result.blockers[0]?.code, testCase.code);
+    }
+  } finally {
+    rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test('pinned strategy export intake rejects noncanonical and phase-inapplicable hash fields', () => {
+  const tempDir = createTempDir('strategy-export-hash-shape-');
+
+  try {
+    const payload = createStrategyExportPayload();
+    for (const testCase of [
+      {
+        fileName: 'payload-uppercase.json',
+        document: createStrategyExportDocument({
+          payloadSha256: sha256Hex(stableJsonCompact(payload)).toUpperCase(),
+          payload,
+        }),
+        code: 'PINNED_STRATEGY_EXPORT_PAYLOAD_SHA256_INVALID',
+      },
+      {
+        fileName: 'fixture-with-store-hashes.json',
+        document: createStrategyExportDocument({
+          rawStoreStateSha256: sha256Hex(stableJsonCompact(payload.rawStore)),
+          quoteStoreStateSha256: sha256Hex(stableJsonCompact(payload.quoteStore)),
+          payload,
+        }),
+        code: 'PINNED_STRATEGY_EXPORT_PHASE_HASH_FIELDS_INVALID',
+      },
+      {
+        fileName: 'store-with-collection-hash.json',
+        document: createStoreBackedStrategyExportDocument({
+          collectionReportSha256: sha256Hex(stableJsonCompact(payload.collectionReport)),
+          payload,
+        }),
+        code: 'PINNED_STRATEGY_EXPORT_PHASE_HASH_FIELDS_INVALID',
+      },
+      {
+        fileName: 'store-uppercase-raw-hash.json',
+        document: createStoreBackedStrategyExportDocument({
+          rawStoreStateSha256: sha256Hex(stableJsonCompact(payload.rawStore)).toUpperCase(),
+          payload,
+        }),
+        code: 'PINNED_STRATEGY_EXPORT_RAW_STORE_SHA256_INVALID',
+      },
+    ]) {
+      const exportPath = join(tempDir, testCase.fileName);
+      const sourceSha256 = writeJsonAndHash(exportPath, testCase.document);
+      const result = validatePinnedBettingWinStrategyExportIntake({
+        exportPath,
+        expectedSha256: sourceSha256,
+        repositoryRoot: REPO_ROOT,
+        upstreamLock: sampleUpstreamLock(),
+      });
+
+      assert.equal(result.ok, false);
+      assert.equal(result.blockers[0]?.code, testCase.code);
+    }
+  } finally {
+    rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test('pinned strategy export intake rejects missing provider generation provenance on every normalized record', () => {
+  const tempDir = createTempDir('strategy-export-generation-required-');
+
+  try {
+    const basePayload = createStrategyExportPayload();
+    const quoteStore = basePayload.quoteStore as {
+      generationResolutions: Record<string, unknown>[];
+      normalizedEvidence: Record<string, unknown>[];
+      normalizedRejections: Record<string, unknown>[];
+    };
+    for (const testCase of [
+      {
+        fileName: 'generation-resolution-missing.json',
+        payload: {
+          ...basePayload,
+          quoteStore: {
+            ...quoteStore,
+            generationResolutions: [{ recordId: 'record-001' }],
+          },
+        },
+      },
+      {
+        fileName: 'normalized-evidence-missing.json',
+        payload: {
+          ...basePayload,
+          quoteStore: {
+            ...quoteStore,
+            normalizedEvidence: [
+              {
+                normalizedEvidenceId: 'normalized-001',
+                sourceLineageRecordId: 'record-001',
+                provider: 'polymarket',
+              },
+            ],
+          },
+        },
+      },
+      {
+        fileName: 'normalized-rejection-blank.json',
+        payload: {
+          ...basePayload,
+          quoteStore: {
+            ...quoteStore,
+            normalizedEvidence: [],
+            normalizedRejections: [
+              {
+                rejectionId: 'rejection-001',
+                sourceLineageRecordId: 'record-001',
+                provider: 'polymarket',
+                providerGenerationId: '   ',
+              },
+            ],
+          },
+        },
+      },
+      {
+        fileName: 'normalized-evidence-unresolved-generation.json',
+        payload: {
+          ...basePayload,
+          quoteStore: {
+            ...quoteStore,
+            normalizedEvidence: [
+              {
+                normalizedEvidenceId: 'normalized-001',
+                sourceLineageRecordId: 'record-001',
+                provider: 'polymarket',
+                providerGenerationId: 'generation-id-999',
+              },
+            ],
+          },
+        },
+        code: 'PINNED_STRATEGY_EXPORT_PROVIDER_GENERATION_REFERENCE_MISSING',
+      },
+    ]) {
+      const document = createStrategyExportDocument({
+        normalizedEvidenceIds: testCase.fileName === 'normalized-rejection-blank.json' ? [] : ['normalized-001'],
+        payload: testCase.payload,
+      });
+      const exportPath = join(tempDir, testCase.fileName);
+      const sourceSha256 = writeJsonAndHash(exportPath, document);
+      const result = validatePinnedBettingWinStrategyExportIntake({
+        exportPath,
+        expectedSha256: sourceSha256,
+        repositoryRoot: REPO_ROOT,
+        upstreamLock: sampleUpstreamLock(),
+      });
+
+      assert.equal(result.ok, false);
+      assert.equal(result.blockers[0]?.code, testCase.code ?? 'PINNED_STRATEGY_EXPORT_PROVIDER_GENERATION_ID_MISSING');
+    }
+  } finally {
+    rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
 test('pinned strategy export intake rejects duplicate lineage ids and invalid export profiles', () => {
   const tempDir = createTempDir('strategy-export-duplicate-');
 
@@ -291,6 +489,23 @@ function createStrategyExportDocument(
     payload,
     ...overrides,
   };
+}
+
+function createStoreBackedStrategyExportDocument(
+  overrides: Partial<Record<string, unknown>> = {},
+): Record<string, unknown> {
+  const payload = typeof overrides.payload === 'object' && overrides.payload !== null
+    ? overrides.payload as Record<string, unknown>
+    : createStrategyExportPayload();
+  return createStrategyExportDocument({
+    phase: 'F2-005J',
+    exportProfile: 'provider_history_store_backed_fixture_bundle_v1',
+    collectionReportSha256: undefined,
+    rawStoreStateSha256: sha256Hex(stableJsonCompact(payload.rawStore)),
+    quoteStoreStateSha256: sha256Hex(stableJsonCompact(payload.quoteStore)),
+    payload,
+    ...overrides,
+  });
 }
 
 function createStrategyExportPayload(): Record<string, unknown> {

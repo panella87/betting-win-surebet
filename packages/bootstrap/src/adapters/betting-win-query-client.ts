@@ -854,10 +854,14 @@ function validateIdentityItem(item: Readonly<Record<string, unknown>>): Boundary
   }
   for (const providerReference of providerReferences) {
     const referenceRecord = asRecord(providerReference);
-    if (referenceRecord === undefined || requireStringField(referenceRecord['sourceLineageRecordId']) === undefined) {
+    if (
+      referenceRecord === undefined
+      || requireStringField(referenceRecord['sourceLineageRecordId']) === undefined
+      || requireStringField(referenceRecord['providerGeneration']) === undefined
+    ) {
       return blocked(
         'QUERY_PROVENANCE_INVALID',
-        'Identity query provider references must include source lineage record ids.',
+        'Identity query provider references must include source lineage and provider generation provenance.',
         'Identity provider reference provenance.',
       );
     }
@@ -907,10 +911,14 @@ function validateNormalizedItem(item: Readonly<Record<string, unknown>>): Bounda
   }
   if (recordType === 'evidence') {
     const normalizedEvidence = asRecord(item['normalizedEvidence']);
-    if (normalizedEvidence === undefined || requireStringField(normalizedEvidence['sourceLineageRecordId']) === undefined) {
+    if (
+      normalizedEvidence === undefined
+      || requireStringField(normalizedEvidence['sourceLineageRecordId']) === undefined
+      || requireStringField(normalizedEvidence['providerGenerationId']) === undefined
+    ) {
       return blocked(
         'QUERY_PROVENANCE_INVALID',
-        'Normalized evidence items must include source lineage record provenance.',
+        'Normalized evidence items must include source lineage and provider generation provenance.',
         'Normalized evidence provenance from the read-only betting-win API.',
       );
     }
@@ -922,10 +930,14 @@ function validateNormalizedItem(item: Readonly<Record<string, unknown>>): Bounda
     );
   }
   const normalizedRejection = asRecord(item['normalizedRejection']);
-  if (normalizedRejection === undefined || requireStringField(normalizedRejection['sourceLineageRecordId']) === undefined) {
+  if (
+    normalizedRejection === undefined
+    || requireStringField(normalizedRejection['sourceLineageRecordId']) === undefined
+    || requireStringField(normalizedRejection['providerGenerationId']) === undefined
+  ) {
     return blocked(
       'QUERY_PROVENANCE_INVALID',
-      'Normalized rejection items must include source lineage record provenance.',
+      'Normalized rejection items must include source lineage and provider generation provenance.',
       'Normalized rejection provenance from the read-only betting-win API.',
     );
   }
@@ -962,7 +974,7 @@ function validateNonNegativeInteger(value: number, code: string, message: string
 }
 
 function requireStringField(value: unknown): string | undefined {
-  return typeof value === 'string' && value.length > 0 ? value : undefined;
+  return typeof value === 'string' && value.trim().length > 0 ? value.trim() : undefined;
 }
 
 function requireIntegerField(value: unknown): number | undefined {

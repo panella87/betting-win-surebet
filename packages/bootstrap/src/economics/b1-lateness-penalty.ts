@@ -74,21 +74,21 @@ export function normalizeB1QuoteAgePenaltyPolicy(
       'Explicit B1 quote-age penalty policy.',
     );
   }
-  if (policy.maxAcceptedQuoteAgeMs < 0n) {
+  if (typeof policy.maxAcceptedQuoteAgeMs !== 'bigint' || policy.maxAcceptedQuoteAgeMs < 0n) {
     return blocked(
       'B1_QUOTE_AGE_PENALTY_LIMIT_INVALID',
       'B1 quote-age penalty policy requires a non-negative quote-age limit.',
       'Non-negative B1 max accepted quote age.',
     );
   }
-  if (policy.penaltyBpsPerSecond < 0n) {
+  if (typeof policy.penaltyBpsPerSecond !== 'bigint' || policy.penaltyBpsPerSecond < 0n) {
     return blocked(
       'B1_QUOTE_AGE_PENALTY_BPS_INVALID',
       'B1 quote-age penalty basis points must be non-negative integer units.',
       'Non-negative B1 quote-age penalty basis points per second.',
     );
   }
-  if (policy.fixedPenaltyMinor < 0n) {
+  if (typeof policy.fixedPenaltyMinor !== 'bigint' || policy.fixedPenaltyMinor < 0n) {
     return blocked(
       'B1_QUOTE_AGE_FIXED_PENALTY_INVALID',
       'B1 quote-age fixed penalty must be non-negative minor units.',

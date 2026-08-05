@@ -9,6 +9,8 @@ import {
   type B1MarketEquivalence,
 } from '../identity/b1-market-equivalence.js';
 
+const ISO_8601_UTC_MILLISECONDS = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+
 export interface B1QuoteSynchronizationPolicy {
   readonly comparisonTimeUtc: string;
   readonly maxQuoteAgeMs: bigint;
@@ -103,21 +105,21 @@ function normalizeB1QuoteSynchronizationPolicy(
   if (!comparisonEpochMs.ok) {
     return comparisonEpochMs;
   }
-  if (policy.maxQuoteAgeMs < 0n) {
+  if (typeof policy.maxQuoteAgeMs !== 'bigint' || policy.maxQuoteAgeMs < 0n) {
     return blocked(
       'B1_QUOTE_AGE_LIMIT_INVALID',
       'B1 quote synchronization requires a non-negative quote-age limit.',
       'Non-negative B1 max quote age.',
     );
   }
-  if (policy.maxRetrievalLagMs < 0n) {
+  if (typeof policy.maxRetrievalLagMs !== 'bigint' || policy.maxRetrievalLagMs < 0n) {
     return blocked(
       'B1_RETRIEVAL_LAG_LIMIT_INVALID',
       'B1 quote synchronization requires a non-negative retrieval-lag limit.',
       'Non-negative B1 max retrieval lag.',
     );
   }
-  if (policy.maxComparisonWindowMs < 0n) {
+  if (typeof policy.maxComparisonWindowMs !== 'bigint' || policy.maxComparisonWindowMs < 0n) {
     return blocked(
       'B1_COMPARISON_WINDOW_INVALID',
       'B1 quote synchronization requires a non-negative comparison window.',
@@ -226,11 +228,11 @@ function parseIsoEpochMs(
   message: string,
   evidenceRequired: string,
 ): BoundaryResult<bigint> {
-  if (typeof value !== 'string') {
+  if (typeof value !== 'string' || !ISO_8601_UTC_MILLISECONDS.test(value)) {
     return blocked(code, message, evidenceRequired);
   }
   const parsed = Date.parse(value);
-  if (!Number.isFinite(parsed)) {
+  if (!Number.isFinite(parsed) || new Date(parsed).toISOString() !== value) {
     return blocked(code, message, evidenceRequired);
   }
   return accepted(BigInt(parsed));

@@ -153,6 +153,22 @@ test('B1 venue pair key fails closed on same venue comparison', () => {
   ]);
 });
 
+test('B1 venue pair key fails closed on blank venue ids', () => {
+  const [first, second] = fixturePair();
+  const blankVenue = cloneRow(first, { venueOrBookmakerId: '   ' });
+
+  const result = createB1VenuePairKey(blankVenue, second);
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'B1_VENUE_PAIR_INCOMPLETE',
+      message: 'B1 venue pair key requires two non-empty venues.',
+      evidenceRequired: 'Two non-empty venue_or_bookmaker_id values.',
+    },
+  ]);
+});
+
 test('B1 outcome-set equivalence accepts every terminal outcome across two venues', () => {
   const [homeA, homeB] = fixturePair();
   const awayA = cloneRow(homeA, {

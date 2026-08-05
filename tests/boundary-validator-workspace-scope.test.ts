@@ -45,6 +45,64 @@ test('boundary validators scan active packages and apps workspace source', (t) =
   assert.match(combinedOutput(executionResult), /execution identifier found in executable source packages\/example\/src\/index\.ts/);
 });
 
+test('boundary validators scan root executable and runtime wrapper surfaces', (t) => {
+  const providerFixture = createValidatorFixture(t, 'validate_no_provider_connections.py');
+  const providerUrl = ['https://', 'poly', 'market.example/private'].join('');
+  writeFileSync(
+    join(providerFixture.root, 'cli.js'),
+    `export const forbidden = ${JSON.stringify(providerUrl)};\n`,
+    'utf-8',
+  );
+  const providerResult = runValidator(providerFixture.root, 'validate_no_provider_connections.py');
+  assert.notEqual(providerResult.status, 0);
+  assert.match(combinedOutput(providerResult), /provider URL found in cli\.js/);
+
+  const providerPackageFixture = createValidatorFixture(t, 'validate_no_provider_connections.py');
+  writeJson(join(providerPackageFixture.root, 'package.json'), {
+    dependencies: {},
+    devDependencies: {},
+    name: 'boundary-validator-fixture',
+    optionalDependencies: {},
+    private: true,
+    scripts: {
+      probe: `node -e ${JSON.stringify(providerUrl)}`,
+    },
+    version: '1.0.0',
+    workspaces: ['packages/*', 'apps/*'],
+  });
+  const providerPackageResult = runValidator(providerPackageFixture.root, 'validate_no_provider_connections.py');
+  assert.notEqual(providerPackageResult.status, 0);
+  assert.match(combinedOutput(providerPackageResult), /provider URL found in package\.json/);
+
+  const executionFixture = createValidatorFixture(t, 'validate_no_execution_paths.py');
+  mkdirSync(join(executionFixture.root, 'scripts'), { recursive: true });
+  writeFileSync(
+    join(executionFixture.root, 'scripts', 'bws-root-wrapper-runtime.mjs'),
+    'export function createOrder(): void {}\n',
+    'utf-8',
+  );
+  const executionResult = runValidator(executionFixture.root, 'validate_no_execution_paths.py');
+  assert.notEqual(executionResult.status, 0);
+  assert.match(combinedOutput(executionResult), /execution identifier found in executable source scripts\/bws-root-wrapper-runtime\.mjs/);
+
+  const executionPackageFixture = createValidatorFixture(t, 'validate_no_execution_paths.py');
+  writeJson(join(executionPackageFixture.root, 'package.json'), {
+    dependencies: {},
+    devDependencies: {},
+    name: 'boundary-validator-fixture',
+    optionalDependencies: {},
+    private: true,
+    scripts: {
+      probe: 'node -e "createOrder()"',
+    },
+    version: '1.0.0',
+    workspaces: ['packages/*', 'apps/*'],
+  });
+  const executionPackageResult = runValidator(executionPackageFixture.root, 'validate_no_execution_paths.py');
+  assert.notEqual(executionPackageResult.status, 0);
+  assert.match(combinedOutput(executionPackageResult), /execution identifier found in executable source package\.json/);
+});
+
 test('boundary validators accept clean active workspace source fixtures', (t) => {
   for (const validator of [
     'validate_no_provider_connections.py',

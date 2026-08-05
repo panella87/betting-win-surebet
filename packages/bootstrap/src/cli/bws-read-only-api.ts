@@ -11,6 +11,7 @@ import {
 import {
   startBwsReadOnlyApiApplication,
 } from '../operations/runtime-applications.js';
+import { enforceBwsApiOnlyProcessEnvironment } from './api-only-upstream.js';
 
 export async function runBwsReadOnlyApiCli(
   argv: readonly string[],
@@ -22,6 +23,7 @@ export async function runBwsReadOnlyApiCli(
     return 0;
   }
 
+  enforceBwsApiOnlyProcessEnvironment();
   const config = resolveBwsServiceRuntimeConfig(process.env as BwsServiceRuntimeEnvironment, repositoryRoot);
   const apiBaseUrl = `http://${config.api.bindHost}:${config.api.port}`;
   const cockpitConfig = resolveBwsOperatorCockpitBrowserConfig({

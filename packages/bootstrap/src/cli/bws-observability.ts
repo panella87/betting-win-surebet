@@ -1,6 +1,7 @@
 import {
   collectBwsDiagnosticsBundle,
 } from '../operations/observability.js';
+import { enforceBwsApiOnlyProcessEnvironment } from './api-only-upstream.js';
 
 export async function runBwsObservabilityCli(
   argv: readonly string[],
@@ -15,6 +16,7 @@ export async function runBwsObservabilityCli(
   if (command !== 'diagnostics') {
     throw new Error(`Unknown BWS observability command: ${command}`);
   }
+  enforceBwsApiOnlyProcessEnvironment();
   const result = await collectBwsDiagnosticsBundle({ repositoryRoot });
   stdout.write(`${JSON.stringify(result, null, 2)}\n`);
   return 0;

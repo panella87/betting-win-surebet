@@ -474,6 +474,15 @@ function validateCreateRecord(record: SurebetB1BacktestRunCreateRecord): void {
   if (record.run.runKind !== 'deterministic_b1_cross_venue_offline_backtest') {
     throw new SurebetPersistenceError('SUREBET_B1_BACKTEST_RUN_KIND_INVALID', 'B1 backtest runs require the deterministic offline kind.');
   }
+  if (record.run.report.reportKind !== 'deterministic_b1_cross_venue_backtest_report') {
+    throw new SurebetPersistenceError('SUREBET_B1_BACKTEST_REPORT_KIND_INVALID', 'B1 backtest persistence requires the deterministic offline report kind.');
+  }
+  if (record.run.report.fixtureKind !== 'deterministic_b1_multi_venue_fixture') {
+    throw new SurebetPersistenceError('SUREBET_B1_FIXTURE_KIND_INVALID', 'B1 backtest persistence requires deterministic B1 fixture markers.');
+  }
+  if (record.run.report.upstreamReadiness !== 'blocked_until_betting_win_b1_multi_venue_markets_v1') {
+    throw new SurebetPersistenceError('SUREBET_B1_UPSTREAM_READINESS_FORBIDDEN', 'B1 backtest persistence must preserve the upstream B1 API blocker.');
+  }
   if (record.run.executable !== false || record.run.report.executable !== false) {
     throw new SurebetPersistenceError('SUREBET_B1_EXECUTION_FORBIDDEN', 'B1 backtest persistence requires executable=false.');
   }

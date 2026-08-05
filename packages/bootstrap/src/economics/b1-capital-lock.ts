@@ -78,21 +78,21 @@ export function normalizeB1CapitalLockPolicy(
       'Explicit B1 capital lock policy.',
     );
   }
-  if (policy.lockDurationMs < 0n) {
+  if (typeof policy.lockDurationMs !== 'bigint' || policy.lockDurationMs < 0n) {
     return blocked(
       'B1_CAPITAL_LOCK_DURATION_INVALID',
       'B1 capital lock duration must be non-negative milliseconds.',
       'Non-negative B1 capital lock duration.',
     );
   }
-  if (policy.annualizedCostBps < 0n) {
+  if (typeof policy.annualizedCostBps !== 'bigint' || policy.annualizedCostBps < 0n) {
     return blocked(
       'B1_CAPITAL_LOCK_BPS_INVALID',
       'B1 annualized capital lock cost must be non-negative basis points.',
       'Non-negative B1 annualized capital lock cost basis points.',
     );
   }
-  if (policy.capitalBufferBps < 0n) {
+  if (typeof policy.capitalBufferBps !== 'bigint' || policy.capitalBufferBps < 0n) {
     return blocked(
       'B1_CAPITAL_BUFFER_BPS_INVALID',
       'B1 capital buffer must be non-negative basis points.',
