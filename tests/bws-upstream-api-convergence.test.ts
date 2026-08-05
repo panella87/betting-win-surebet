@@ -682,7 +682,7 @@ function createIdentityItem() {
     providerReferences: Object.freeze([
       Object.freeze({
         provider: 'polymarket',
-        providerGenerationId: 'generation-id-001',
+        providerGeneration: 'generation-id-001',
         sourceLineageRecordId: 'identity-lineage-001',
       }),
     ]),

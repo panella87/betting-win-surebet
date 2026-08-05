@@ -1,7 +1,7 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-08-05T10:41:36Z",
-  "overlay": "bws94-bugfix-filesystem-safety-validation-repair-wave56",
+  "generated": "2026-08-05T11:10:04Z",
+  "overlay": "bws95-bugfix-boundary-validation-long-campaign-wave57",
   "files": [
     {
       "path": ".automation/README.md",
@@ -115,8 +115,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "277b38bfc620dcc1a4ba0de66da367dbac460aad2ffaaecbd07c895817228529",
-      "size": 70436
+      "sha256": "19d0cf5680f7b4823cbe7515fbaf60dcbbd687376f808dd56707defc9d40bf6e",
+      "size": 71230
     },
     {
       "path": "PROJECT_STATUS.md",
@@ -2675,13 +2675,13 @@
     },
     {
       "path": "tests/bws-soak-campaign.test.ts",
-      "sha256": "235ed2d6c97b02660d417c35ba91497d41a427bfe7fb8684908758a2cc922dae",
-      "size": 58496
+      "sha256": "7593f1248aa0b9df080d8017a313f4b22eb7a9009a0820a8fef5b6ae0233b8db",
+      "size": 58493
     },
     {
       "path": "tests/bws-upstream-api-convergence.test.ts",
-      "sha256": "3796a3f611e45080b15feccad3c606e17904ba1ac5a5e8a2a38b966e2882627e",
-      "size": 38795
+      "sha256": "e80150929e5d027ce9bbc5705c6beb42294a60ff203d13d03d3e6930f87155c1",
+      "size": 38793
     },
     {
       "path": "tests/bws-upstream-convergence-service.test.ts",
@@ -2870,8 +2870,8 @@
     },
     {
       "path": "tests/private-paper-runtime.test.ts",
-      "sha256": "cd0ffb088d55e375e1fe5973f6b63dadf965a6ef8679d2d2c95a327c1350f8c4",
-      "size": 35443
+      "sha256": "93edf430d20eb63a5e60cd743f5a7fcc4964b31940a4164b3810849b9be5662d",
+      "size": 35621
     },
     {
       "path": "tests/quote-capacity.test.ts",

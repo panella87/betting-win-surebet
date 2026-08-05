@@ -1,3 +1,10 @@
+## 2026-08-05 - Boundary audit continuation and long-campaign validation repair
+
+- Preserved the latest validated source hardening for pinned strategy/API provenance, API-only runtime selectors, B1 policy guards, report/backtest inputs, venue identifiers, and static boundary scanning.
+- Repaired the remaining full-suite fixture regressions by using `BWS_UPSTREAM_MODE=api`, the canonical identity `providerGeneration` field, and explicit normalized-evidence `providerGenerationId` values.
+- Kept production fail-closed boundary, provenance, provider, execution, and runtime-evidence policies unchanged.
+- The next unattended bugfix campaign may use a larger bounded repair budget through existing environment overrides; validation remains mandatory and no blocker is converted into success.
+
 ## 2026-08-05 - Filesystem safety validation continuation
 
 - Preserved the completed bugfix campaign changes for ZIP-entry validation, artifact ZIP symlink rejection, soak output containment, watchdog event containment, and prior closed-area fixes.

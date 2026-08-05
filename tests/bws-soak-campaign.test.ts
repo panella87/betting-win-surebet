@@ -1326,7 +1326,7 @@ async function createRuntimeLifecycleFixture(baseDirectoryAbsolute: string): Pro
     BWS_UPSTREAM_CONVERGENCE_PASS_TIMEOUT_MS: '1000',
     BWS_UPSTREAM_CONVERGENCE_RETRY_BACKOFF_MS: '100',
     BWS_UPSTREAM_LOCK_PATH: 'config/betting-win.upstream.lock.json',
-    BWS_UPSTREAM_MODE: 'export',
+    BWS_UPSTREAM_MODE: 'api',
     BWS_WORKER_ID: 'worker-test-001',
     BWS_WORKER_LEASE_DURATION_MS: '1000',
     BWS_WORKER_QUEUE_NAME: 'private-paper',
