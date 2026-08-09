@@ -15,7 +15,7 @@ test('standard automation root scripts and shared helpers are installed', () => 
     'zip_codebase.sh','pull_artifacts_and_zip_codebase.sh','update_git.sh',
     'check_progress.sh','watch_progress.sh','open_log.sh','start.sh','stop.sh',
     'run-autonomous-implementation.sh','run-paper-evaluation.sh','run-paper-autopilot.sh','run-autonomous-bugfix.sh','run-bugfix-autopilot.sh',
-    'automation.config.sh','.automation/lib/run_common.sh','.automation/lib/controller_hardening_v2.sh','.automation/lib/telegram_notify.sh','.automation/README.md',
+    'automation.config.sh','cleanup_automation_artifact_residue.sh','.automation/lib/run_common.sh','.automation/lib/controller_hardening_v2.sh','.automation/lib/telegram_notify.sh','.automation/README.md',
   ]) {
     assert.equal(existsSync(join(REPO_ROOT, rel)), true, `${rel} should exist`);
   }
@@ -26,6 +26,10 @@ test('standard automation root scripts and shared helpers are installed', () => 
   assert.match(read('.automation/lib/run_common.sh'), /automation_assert_no_incompatible_locks\(\)/);
   assert.match(read('.automation/lib/run_common.sh'), /automation_run_managed_argv\(\)/);
   assert.match(read('.automation/lib/run_common.sh'), /automation_terminate_process_group\(\)/);
+  assert.match(read('.automation/lib/run_common.sh'), /automation_cleanup_transient_artifact_residue\(\)/);
+  assert.match(read('.automation/lib/run_common.sh'), /automation_artifact_residue_name_is_transient\(\)/);
+  assert.match(read('cleanup_automation_artifact_residue.sh'), /--rebuild-artifacts-zip/);
+  assert.match(read('cleanup_automation_artifact_residue.sh'), /AUTOMATION_ARTIFACT_RESIDUE_CLEANUP_OK/);
   assert.match(read('.automation/lib/run_common.sh'), /zip -q -1 -r "\$zip_tmp" artifacts/);
   assertContains(read('.automation/lib/run_common.sh'), 'root_real="$(realpath -e -- "$root")"');
   assertContains(read('.automation/lib/run_common.sh'), 'automation_v2_zip_with_timeout "$timeout_seconds" "$tmp" "$root_real" "${entries[@]}"');
@@ -67,7 +71,7 @@ test('daily git and packaging helpers match the standardized contract', () => {
 });
 
 
-test('all root controllers package the complete repo artifacts directory', () => {
+test('all root controllers package the complete retained artifact evidence directory', () => {
   for (const rel of [
     'run-autonomous-implementation.sh',
     'run-autonomous-bugfix.sh',

@@ -22,6 +22,7 @@ automation.config.sh
 .automation/lib/temp_inode_guard.sh
 .automation/lib/telegram_notify.sh
 cleanup_automation_temp_inode_residue.sh
+cleanup_automation_artifact_residue.sh
 docs/automation/PROTECTED_AUTOMATION_FILES.md
 ```
 
@@ -78,3 +79,7 @@ Executable command lists remain in `automation.config.sh`, `tools/required_execu
 ## BWS Wave 54 controller-return repair
 
 `run-autonomous-implementation.sh` remains protected. The Wave 54 change is limited to bugfix-handoff return classification: validated source-changing repairs return to the bugfix parent for same-area re-audit even if the child-authored continuation marker reports an environment-only block after controller-managed validation passed.
+
+## Artifact residue cleanup protection
+
+`cleanup_automation_artifact_residue.sh`, `.automation/lib/run_common.sh`, and `.automation/lib/controller_hardening_v2.sh` enforce the retained-artifact boundary. They may remove only explicitly allowlisted test/release scratch families. Canonical controller run directories, handoffs, private-paper reports, runtime evidence, watchdog events, and operator evidence must not be selected by cleanup. Full and incremental artifact packaging clean transient residue before symlink validation so a failed test fixture cannot block an otherwise validated controller result.

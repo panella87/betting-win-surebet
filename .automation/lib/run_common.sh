@@ -903,6 +903,105 @@ automation_require_cycle_artifacts() {
   [[ "$missing" == "0" ]]
 }
 
+automation_artifact_residue_name_is_transient() {
+  local name="${1:-}"
+  case "$name" in
+    test-tmp|release-upgrade-tests|final-local-acceptance-release|manual-release-safety|manual-release-success|bws-release-output-link|paper-preflight-symlink-test)
+      return 0
+      ;;
+    bws-release-package-*|bws-external-runtime-preflight-*|bws-service-runtime-*|bws-soak-campaign-*|symlink-output-*|nested-symlink-output-*|batch-symlink-output-*|batch-nested-symlink-output-*|local-reader-symlink-*|pinned-intake-*|corrected-settlement-input-*)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+automation_cleanup_transient_artifact_residue() {
+  local root="${1:?repository root is required}"
+  local mode="${2:-plan}"
+  local min_age_seconds="${3:-3600}"
+  local root_real artifacts_dir artifacts_real candidate name mtime age_seconds now_epoch
+  local candidate_kib=0 candidate_count=0 selected_count=0 removed_count=0 reclaimed_kib=0
+
+  case "$mode" in plan|apply) ;; *)
+    printf 'ERROR: artifact cleanup mode must be plan or apply; got %q.\n' "$mode" >&2
+    return 2
+    ;;
+  esac
+  [[ "$min_age_seconds" =~ ^[0-9]+$ ]] || {
+    printf 'ERROR: artifact cleanup minimum age must be a non-negative integer; got %q.\n' "$min_age_seconds" >&2
+    return 2
+  }
+  [[ -d "$root" && ! -L "$root" ]] || {
+    printf 'ERROR: artifact cleanup repository root must be a non-symlink directory: %s\n' "$root" >&2
+    return 2
+  }
+  root_real="$(realpath -e -- "$root")" || return 2
+  artifacts_dir="$root_real/artifacts"
+  if [[ ! -e "$artifacts_dir" ]]; then
+    printf 'artifact_cleanup_candidates=0\nartifact_cleanup_selected=0\nartifact_cleanup_removed=0\nartifact_cleanup_reclaimed_kib=0\n'
+    return 0
+  fi
+  [[ -d "$artifacts_dir" && ! -L "$artifacts_dir" ]] || {
+    printf 'ERROR: artifact cleanup source must be a non-symlink directory: %s\n' "$artifacts_dir" >&2
+    return 2
+  }
+  artifacts_real="$(realpath -e -- "$artifacts_dir")" || return 2
+  [[ "$artifacts_real" == "$root_real/artifacts" ]] || {
+    printf 'ERROR: artifact cleanup source resolved outside the canonical repository artifacts directory: %s\n' "$artifacts_real" >&2
+    return 2
+  }
+
+  now_epoch="$(date +%s)"
+  while IFS= read -r -d '' candidate; do
+    candidate_count=$((candidate_count + 1))
+    name="${candidate##*/}"
+    automation_artifact_residue_name_is_transient "$name" || continue
+    case "$candidate" in "$artifacts_real"/*) ;; *)
+      printf 'ERROR: artifact cleanup candidate escaped canonical artifacts root: %s\n' "$candidate" >&2
+      return 2
+      ;;
+    esac
+    mtime="$(stat -c '%Y' -- "$candidate" 2>/dev/null)" || {
+      printf 'ERROR: artifact cleanup could not stat candidate: %s\n' "$candidate" >&2
+      return 2
+    }
+    age_seconds=$((now_epoch - mtime))
+    (( age_seconds < 0 )) && age_seconds=0
+    (( age_seconds >= min_age_seconds )) || continue
+    selected_count=$((selected_count + 1))
+    if [[ -L "$candidate" ]]; then
+      candidate_kib=0
+    else
+      candidate_kib="$(du -sk -x -- "$candidate" 2>/dev/null | awk 'NR == 1 { print $1 }')"
+      [[ "$candidate_kib" =~ ^[0-9]+$ ]] || candidate_kib=0
+    fi
+    printf 'artifact_cleanup_candidate=%s age_seconds=%s size_kib=%s\n' "artifacts/$name" "$age_seconds" "$candidate_kib"
+    if [[ "$mode" == "apply" ]]; then
+      if [[ -L "$candidate" ]]; then
+        rm -f -- "$candidate"
+      elif [[ -d "$candidate" ]]; then
+        rm -rf --one-file-system -- "$candidate"
+      else
+        rm -f -- "$candidate"
+      fi
+      [[ ! -e "$candidate" && ! -L "$candidate" ]] || {
+        printf 'ERROR: artifact cleanup failed to remove candidate: %s\n' "$candidate" >&2
+        return 2
+      }
+      removed_count=$((removed_count + 1))
+      reclaimed_kib=$((reclaimed_kib + candidate_kib))
+    fi
+  done < <(find -P "$artifacts_real" -mindepth 1 -maxdepth 1 -print0)
+
+  printf 'artifact_cleanup_candidates=%s\n' "$candidate_count"
+  printf 'artifact_cleanup_selected=%s\n' "$selected_count"
+  printf 'artifact_cleanup_removed=%s\n' "$removed_count"
+  printf 'artifact_cleanup_reclaimed_kib=%s\n' "$reclaimed_kib"
+}
+
 automation_refresh_final_artifacts_zip() {
   local timeout_seconds="${1:?timeout seconds are required}"
   local root="${2:?repository root is required}"
@@ -920,6 +1019,7 @@ automation_refresh_final_artifacts_zip() {
   }
   root_real="$(realpath -e -- "$root")" || return 2
   archive="$root_real/artifacts.zip"
+  automation_cleanup_transient_artifact_residue "$root_real" apply 0 || return $?
   automation_reject_artifact_zip_symlinks "$root_real" || return $?
   [[ -d "$run_dir" && ! -L "$run_dir" ]] || {
     printf 'ERROR: artifact refresh run directory must be a non-symlink directory: %s\n' "$run_dir" >&2
@@ -985,8 +1085,11 @@ automation_prune_artifact_zip_vcs_metadata() {
     printf 'ERROR: artifact ZIP archive must be a non-symlink regular file: %s\n' "$archive" >&2
     return 2
   }
-  zip -q -d "$archive" '.git' '.git/*' '*/.git' '*/.git/*' '.hg' '.hg/*' '*/.hg' '*/.hg/*' '.svn' '.svn/*' '*/.svn' '*/.svn/*' >/dev/null 2>&1
-  rc=$?
+  if zip -q -d "$archive" '.git' '.git/*' '*/.git' '*/.git/*' '.hg' '.hg/*' '*/.hg' '*/.hg/*' '.svn' '.svn/*' '*/.svn' '*/.svn/*' >/dev/null 2>&1; then
+    rc=0
+  else
+    rc=$?
+  fi
   case "$rc" in
     0|12) return 0 ;;
     *) return "$rc" ;;
@@ -1030,6 +1133,7 @@ automation_build_artifacts_zip() {
   esac
   automation_temp_inode_check_capacity before_artifact_packaging || return $?
   automation_require_command zip
+  automation_cleanup_transient_artifact_residue "$root_real" apply 0 || return $?
   automation_reject_artifact_zip_symlinks "$root_real" || return $?
   timeout_seconds="$(automation_parse_duration_seconds "${AUTOMATION_ZIP_TIMEOUT:-10m}")" || return 2
   zip_tmp="$root_real/.artifacts.zip.tmp.$$.zip"

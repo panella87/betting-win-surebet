@@ -9,6 +9,7 @@ export const REQUIRED_EXECUTABLE_PATHS = Object.freeze([
   'pull_artifacts_and_zip_codebase.sh',
   'zip_codebase.sh',
   'cleanup_automation_temp_inode_residue.sh',
+  'cleanup_automation_artifact_residue.sh',
   'run-autonomous-implementation.sh',
   'run-paper-evaluation.sh',
   'run-paper-autopilot.sh',

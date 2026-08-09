@@ -527,8 +527,11 @@ automation_v2_prune_zip_vcs_metadata() {
     printf 'ERROR: ZIP archive must be a non-symlink regular file: %s\n' "$archive" >&2
     return 2
   }
-  zip -q -d "$archive" '.git' '.git/*' '*/.git' '*/.git/*' '.hg' '.hg/*' '*/.hg' '*/.hg/*' '.svn' '.svn/*' '*/.svn' '*/.svn/*' >/dev/null 2>&1
-  rc=$?
+  if zip -q -d "$archive" '.git' '.git/*' '*/.git' '*/.git/*' '.hg' '.hg/*' '*/.hg' '*/.hg/*' '.svn' '.svn/*' '*/.svn' '*/.svn/*' >/dev/null 2>&1; then
+    rc=0
+  else
+    rc=$?
+  fi
   case "$rc" in
     0|12) return 0 ;;
     *) return "$rc" ;;
@@ -811,6 +814,9 @@ automation_v2_zip_with_timeout() {
   shift 3
   command -v zip >/dev/null 2>&1 || return 127
   automation_v2_validate_zip_destination "$working_dir" "$destination" || return $?
+  if [[ "$#" -eq 1 && "$1" == "artifacts" ]] && declare -F automation_cleanup_transient_artifact_residue >/dev/null 2>&1; then
+    automation_cleanup_transient_artifact_residue "$working_dir" apply 0 || return $?
+  fi
   automation_v2_reject_zip_symlink_entries "$working_dir" "$@" || return $?
   (
     cd "$working_dir"

@@ -27,6 +27,8 @@ test('validate_repo requires the full implementation and upstream contract surfa
     'scripts/run_betting_win_upstream_lock.mjs',
     'scripts/build_bws_operator_cockpit.mjs',
     'scripts/prepare_bws_test_environment.mjs',
+    'cleanup_automation_artifact_residue.sh',
+    'docs/automation/artifact-retention-and-cleanup.md',
     'prepare:test-runtime',
     'npm run --workspace @betting-win-surebet/web typecheck && BWS_API_PORT=4312 npm run build:runtime-cockpit',
     'tests/full-implementation-program-contract.test.ts',

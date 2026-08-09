@@ -92,7 +92,7 @@ The managed cockpit build replaces browser assets but atomically preserves `dist
 
 ## Evidence packaging
 
-All root controllers archive the complete `artifacts/` directory with fast standard ZIP compression and refresh the current final summary after lock classification. Repo-local temporary files are used instead of relying on writable `/tmp`.
+All root controllers archive the complete retained-evidence portion of `artifacts/` with fast standard ZIP compression and refresh the current final summary after lock classification. Before full or incremental packaging, explicit test/release scratch families are removed by `cleanup_automation_artifact_residue.sh`; canonical controller runs, handoffs, private-paper reports, runtime evidence, watchdog events, and operator evidence are preserved. Repo-local temporary files are used instead of relying on writable `/tmp`.
 
 For status, inspect machine-readable retained evidence. Do not infer success from elapsed time or exit code alone.
 
@@ -115,3 +115,7 @@ The supported root runtime path enforces `SUREBET_RUNTIME_MODE=paper`, `SUREBET_
 
 The centralized temp/inode guard no longer treats a single `du` traversal race as a controller failure. Sustained unusable measurements and genuine capacity breaches remain fail-closed and exact-owner scoped.
 Bugfix handoff completion rule: when `run-autonomous-implementation.sh --handover-bugfix-audit` changes source and its controller-managed validation passes, a child-authored `BLOCKED=yes` caused by environment-only validation constraints is returned to the bugfix parent as `AUTONOMOUS_GOAL_COMPLETE=yes` with re-audit required. The parent still re-audits the same area before advancing.
+
+## Artifact retention and cleanup
+
+See `docs/automation/artifact-retention-and-cleanup.md`. The cleanup command defaults to plan mode. Destructive cleanup requires `--apply`, uses an explicit top-level allowlist, never follows symlinks, and can atomically rebuild root `artifacts.zip`. Packaging invokes the same cleanup policy automatically to prevent transient test fixtures from blocking terminal artifact publication.

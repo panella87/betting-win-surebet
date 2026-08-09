@@ -1,3 +1,11 @@
+## 2026-08-09 - Artifact residue retention and packaging repair
+
+- Added a plan-first, allowlist-only artifact cleanup command with optional atomic `artifacts.zip` rebuild.
+- Preserved all canonical controller, handoff, paper, runtime-evidence, watchdog and operator-evidence directories while removing only test/release scratch families.
+- Integrated transient cleanup before full and incremental artifact packaging so intentionally created test symlinks cannot block validated controller results.
+- Made VCS-metadata pruning tolerate the normal “nothing to delete” ZIP result under controller/root-script `errexit`, preserving atomic archive publication when retained evidence has no embedded VCS metadata.
+- Added executable, protected-file, documentation, validator and packaging regression coverage.
+
 ## 2026-08-09 - Final artifact refresh canonical-root contract alignment
 
 - Aligned the protected automation validator with the hardened `automation_refresh_final_artifacts_zip` implementation, which canonicalizes the repository root with `realpath` and passes `root_real` to the bounded ZIP helper.

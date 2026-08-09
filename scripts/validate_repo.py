@@ -22,7 +22,7 @@ REQUIRED = [
     '.gitignore', '.gitattributes', '.env.example', '.nvmrc', 'cli.js',
     'start.sh', 'stop.sh', 'check_progress.sh', 'watch_progress.sh', 'open_log.sh',
     'update_git.sh', 'pull_artifacts_and_zip_codebase.sh', 'zip_codebase.sh',
-    'cleanup_automation_temp_inode_residue.sh',
+    'cleanup_automation_temp_inode_residue.sh', 'cleanup_automation_artifact_residue.sh',
     'run-autonomous-implementation.sh', 'run-paper-evaluation.sh', 'run-paper-autopilot.sh',
     'run-autonomous-bugfix.sh', 'run-bugfix-autopilot.sh', 'automation.config.sh',
     '.automation/lib/run_common.sh', '.automation/lib/controller_hardening_v2.sh',
@@ -34,7 +34,7 @@ REQUIRED = [
     'docs/automation/autonomous-bugfix.md', 'docs/automation/bugfix-autopilot.md',
     'docs/automation/current-implementation-task.md', 'docs/automation/SSH_KEY_SETUP.md',
     'docs/automation/POST_OVERLAY_CLEANUP.md', 'docs/automation/telegram-notifications.md',
-    'docs/automation/repository-temp-inode-safety.md',
+    'docs/automation/repository-temp-inode-safety.md', 'docs/automation/artifact-retention-and-cleanup.md',
     'docs/MASTER_PLAN.md', 'docs/repo_status_current.md', 'docs/autonomous_loop_contract.md',
     'docs/operations/autonomous_72h_runbook.md', 'docs/operations/service_run.md',
     *[f'docs/{number:03d}_{name}' for number, name in [

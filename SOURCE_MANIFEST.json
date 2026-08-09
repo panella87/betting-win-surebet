@@ -1,22 +1,22 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-08-09T04:36:32Z",
-  "overlay": "bws96-bugfix-artifact-refresh-canonical-root-wave58",
+  "generated": "2026-08-09T07:37:58Z",
+  "overlay": "bws97-artifact-retention-cleanup-wave59",
   "files": [
     {
       "path": ".automation/README.md",
-      "sha256": "535722ea8a01969eb573a30f8f1790168d78d5bbbaef24f52b80c55a5149bc51",
-      "size": 3956
+      "sha256": "b11e7c42df32a3f5886d748a6216e90756af608a71375889bc11e928d60b3afb",
+      "size": 4192
     },
     {
       "path": ".automation/lib/controller_hardening_v2.sh",
-      "sha256": "d3244cd38775c6dd399f494bc7a2deef37a783d3942371a14b24082557c1d315",
-      "size": 31329
+      "sha256": "9aa4397ff89b856546510ee39689c546f8161e80d5b337ae8f1c3f421cd081b8",
+      "size": 31579
     },
     {
       "path": ".automation/lib/run_common.sh",
-      "sha256": "6fcef5bd64b4af2ec5c4fc9d5b2c0d57c8a0b31676dccdb3db3dbb565e08b3d3",
-      "size": 40127
+      "sha256": "de2619d4d51ce680a9d22e5e12022b3bad664d203fb1bb5834876ebf651fd68a",
+      "size": 44430
     },
     {
       "path": ".automation/lib/telegram_notify.sh",
@@ -115,8 +115,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "519e142db40fb00d05e5eca00756f59b8601e5b5914467e533473558ccf0ce01",
-      "size": 71807
+      "sha256": "b3d68b15e5a3e9b642b1b52e95178da6c81598de02a9118d57d32d73ac041e4a",
+      "size": 72617
     },
     {
       "path": "PROJECT_STATUS.md",
@@ -235,8 +235,8 @@
     },
     {
       "path": "automation.config.sh",
-      "sha256": "5bf290be620d57c652a3627d13e48576d19e938bebca3f509195927f0030b2b4",
-      "size": 5109
+      "sha256": "67b4bc779c586d5318ce66bc5e35dd1e0b643ebb6cc5b85c2f21082a97e74ead",
+      "size": 5189
     },
     {
       "path": "backlog/README.md",
@@ -267,6 +267,11 @@
       "path": "check_progress.sh",
       "sha256": "26bb85d1ff30c852af5370c158ff00c62b6e87a54a11f870983273b7a0cb6cdb",
       "size": 4262
+    },
+    {
+      "path": "cleanup_automation_artifact_residue.sh",
+      "sha256": "cecce1b4a67d52667253de1bff1102e9873f3db057a3def5036ff00ecc60acd7",
+      "size": 3939
     },
     {
       "path": "cleanup_automation_temp_inode_residue.sh",
@@ -405,8 +410,8 @@
     },
     {
       "path": "docs/000_documentation_index.md",
-      "sha256": "55c7c475de12daf578f4743b2333f71e451094e9ae8111fb94104f03ebc0fe1d",
-      "size": 7795
+      "sha256": "cddbaf7cd29c3bca832fb48e5a2dc51ae10b5c57ccd90f93d2a5944349a399dc",
+      "size": 7845
     },
     {
       "path": "docs/001_scope_and_boundaries.md",
@@ -650,13 +655,13 @@
     },
     {
       "path": "docs/automation/PROTECTED_AUTOMATION_FILES.md",
-      "sha256": "f893bbde52e3526f5aaf041032ed901f2ea4de39bc24f116a66e62e0778c8a74",
-      "size": 3608
+      "sha256": "d284cb08c14ee18263382f24c2be049ad051bde4b983412a1eaea3fe0cd5c037",
+      "size": 4258
     },
     {
       "path": "docs/automation/README.md",
-      "sha256": "cb1e1c9f79df6508637848ba9a7c16db328d7248e627fbcebd6ce867856f88c3",
-      "size": 10591
+      "sha256": "5285d7d732ff21b08fadf6dcf02d8fe568a5bf9d82849ae82fa4fd165d1220aa",
+      "size": 11299
     },
     {
       "path": "docs/automation/SSH_KEY_SETUP.md",
@@ -667,6 +672,11 @@
       "path": "docs/automation/api-only-upstream.md",
       "sha256": "18b82e6ece6957fb4d81ea23dd1de1932f679d798c2fdfcebe1aba511f4dd490",
       "size": 3066
+    },
+    {
+      "path": "docs/automation/artifact-retention-and-cleanup.md",
+      "sha256": "9e0b95a580a5d013919fb2e80a7daeaae27f917f58d4cb7b0153c5d8888a4efb",
+      "size": 3003
     },
     {
       "path": "docs/automation/autonomous-bugfix.md",
@@ -680,8 +690,8 @@
     },
     {
       "path": "docs/automation/bugfix-autopilot.md",
-      "sha256": "38d86c1fdd383e332afffdf4e9370479c3932d7681d7a5abca988f6c750aec35",
-      "size": 4146
+      "sha256": "576beed47d16e393f05bfbd60fd06e711a74ea5a94b69ed90b28f7cdac493dde",
+      "size": 4334
     },
     {
       "path": "docs/automation/current-implementation-task.md",
@@ -1780,8 +1790,8 @@
     },
     {
       "path": "scripts/validate_autonomous_controller_contract.py",
-      "sha256": "1b8fd32019102bb7e67b695c6d555b0f073e04ddab3a0bd2ba43a0701b961d63",
-      "size": 28495
+      "sha256": "5b4a604dc59b929a12bafaa8e7111e6b617bd7bf7044eaf94b7d6d3817fc769b",
+      "size": 29296
     },
     {
       "path": "scripts/validate_betting_win_upstream_contract.py",
@@ -1820,8 +1830,8 @@
     },
     {
       "path": "scripts/validate_executable_bits.py",
-      "sha256": "0ad3a7ca56d7fd3180e3f849b5183f7386f9bd2cb8b394b6bd895c5855468d52",
-      "size": 1652
+      "sha256": "1c12dfba6da59560b91ba9b41776bea31c77959a5a3cffd58bb84168ea315d66",
+      "size": 1698
     },
     {
       "path": "scripts/validate_fixture_integrity.py",
@@ -1870,8 +1880,8 @@
     },
     {
       "path": "scripts/validate_repo.py",
-      "sha256": "8003914641167b265ac4b112ec093226d57f7bf61640bbe6ea0da9dd984924b8",
-      "size": 20110
+      "sha256": "b3c8fc7eb9e61da7ae45eb2b3f130a8f486c252f7109c644e7f90f1cebadb904",
+      "size": 20205
     },
     {
       "path": "scripts/validate_shell_local_assignments.py",
@@ -2440,8 +2450,8 @@
     },
     {
       "path": "tests/autonomous-controller-contract.test.ts",
-      "sha256": "73a308603846c932737fb9c3658328670cdda8ed73cdf4532d8c1becc050b9d8",
-      "size": 27191
+      "sha256": "5d4f0850254cf17f77c530a9739644c822542abdc6b37d6ec2f8921ae5d008cf",
+      "size": 27657
     },
     {
       "path": "tests/b1-capital-lock.test.ts",
@@ -2845,8 +2855,8 @@
     },
     {
       "path": "tests/packaging-helpers.test.ts",
-      "sha256": "78bdc44fee6ae5afd18afde2d0de21c17626101d921af12927c658db91f6e722",
-      "size": 44120
+      "sha256": "2523891656f1a57267d5d2e09f345987605807cd928dcb90d1997e9ef7f003ea",
+      "size": 47496
     },
     {
       "path": "tests/paper-autopilot-contract.test.ts",
@@ -3010,8 +3020,8 @@
     },
     {
       "path": "tests/validate-repo-contract.test.ts",
-      "sha256": "1544eb8399129a1cb767163ed80df89c344cb6b6bac2f4dc3ca3bafcf1ccf22f",
-      "size": 2478
+      "sha256": "98e7229618dda9c6f6071f12f6077f1fd89b1e21f039cf1025e7227067900454",
+      "size": 2581
     },
     {
       "path": "tests/validate-shell-local-assignments.test.ts",
@@ -3035,8 +3045,8 @@
     },
     {
       "path": "tools/required_executable_paths.js",
-      "sha256": "cb7d09643989ee8bbc4af1e5475be9afb9a9d90fb94e72fc53c0bb347f13cce4",
-      "size": 822
+      "sha256": "ea07de4b9d11fdbd155f3076712c7d747bc84f17c15085d24addd1fb18cd2518",
+      "size": 866
     },
     {
       "path": "tsconfig.json",

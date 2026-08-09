@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SHELL_FILES = [
     'zip_codebase.sh', 'pull_artifacts_and_zip_codebase.sh', 'update_git.sh',
     'check_progress.sh', 'watch_progress.sh', 'open_log.sh', 'start.sh', 'stop.sh',
+    'cleanup_automation_artifact_residue.sh',
     'run-autonomous-implementation.sh', 'run-paper-evaluation.sh', 'run-paper-autopilot.sh', 'run-autonomous-bugfix.sh', 'run-bugfix-autopilot.sh',
     'automation.config.sh', '.automation/lib/run_common.sh', '.automation/lib/controller_hardening_v2.sh', '.automation/lib/telegram_notify.sh',
 ]
@@ -119,6 +120,8 @@ REQUIRED_FRAGMENTS = {
         'file_mtime',
         'zip -q -1 -r',
         'runtime|runtime/*',
+        'automation_cleanup_transient_artifact_residue',
+        '[[ "$#" -eq 1 && "$1" == "artifacts" ]]',
     ],
     '.automation/lib/run_common.sh': [
         'automation_acquire_lock()',
@@ -128,6 +131,9 @@ REQUIRED_FRAGMENTS = {
         'automation_force_unlock()',
         'automation_build_artifacts_zip()',
         'automation_refresh_final_artifacts_zip()',
+        'automation_artifact_residue_name_is_transient()',
+        'automation_cleanup_transient_artifact_residue()',
+        'artifact_cleanup_candidate=',
         'root_real="$(realpath -e -- "$root")"',
         'automation_v2_zip_with_timeout "$timeout_seconds" "$tmp" "$root_real" "${entries[@]}"',
         'zip -q -1 -r "$zip_tmp" artifacts',
@@ -145,6 +151,15 @@ REQUIRED_FRAGMENTS = {
         'kill -TERM',
         'missing continue status file',
         'unknown continue status',
+    ],
+    'cleanup_automation_artifact_residue.sh': [
+        '--apply',
+        '--plan',
+        '--min-age-seconds',
+        '--rebuild-artifacts-zip',
+        'AUTOMATION_ARTIFACT_RESIDUE_CLEANUP_OK',
+        'automation_cleanup_transient_artifact_residue',
+        'automation_v2_zip_with_timeout',
     ],
     'run-autonomous-implementation.sh': [
         'automation_v2_publish_child_result',
@@ -483,7 +498,8 @@ REQUIRED_FRAGMENTS = {
         'blanket manual override is disabled',
         'TELEGRAM_NOTIFY=0',
         'atomic child-result side channel',
-        'complete `artifacts/` directory',
+        'complete retained-evidence portion of `artifacts/`',
+        'artifact-retention-and-cleanup.md',
         'writable `/tmp`',
     ],
     'docs/automation/autonomous-implementation.md': [
@@ -530,6 +546,8 @@ REQUIRED_FRAGMENTS = {
         '.automation/lib/telegram_notify.sh',
         'check_progress.sh',
         'run-paper-autopilot.sh',
+        'cleanup_automation_artifact_residue.sh',
+        'Artifact residue cleanup protection',
         'Exact authorization contract',
         'AUTOMATION_ALLOW_PROTECTED_CHANGES=1',
         'allowed_protected_files=<one exact comma-separated list>',
@@ -544,7 +562,7 @@ REQUIRED_FRAGMENTS = {
         '.automation/lib/controller_hardening_v2.sh',
         '.automation/lib/telegram_notify.sh',
         'TELEGRAM_NOTIFY=0',
-        'complete `artifacts/` tree',
+        'complete retained-evidence tree under `artifacts/`',
         'blanket manual protected-file override is disabled',
     ],
     'docs/repo_status_current.md': [

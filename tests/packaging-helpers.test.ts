@@ -196,6 +196,7 @@ function makeSourceHandoffFixture(): { dir: string; repoDir: string; archivePath
     'pull_artifacts_and_zip_codebase.sh',
     'zip_codebase.sh',
     'cleanup_automation_temp_inode_residue.sh',
+    'cleanup_automation_artifact_residue.sh',
     'run-autonomous-implementation.sh',
     'run-paper-evaluation.sh',
     'run-paper-autopilot.sh',
@@ -1040,5 +1041,80 @@ test('source handoff archive rejects included source symlinks and non-artifact o
     assert.match(outputResult.stderr, /output path must be a safe repo-relative artifacts path|output archive must be under artifacts/u);
   } finally {
     rmSync(fixture.dir, { recursive: true, force: true });
+  }
+});
+
+test('artifact residue cleanup removes only allowlisted scratch and preserves controller evidence', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'surebet-artifact-residue-cleanup-'));
+  const repoDir = join(dir, 'repo');
+  const artifactsDir = join(repoDir, 'artifacts');
+  const runDir = join(artifactsDir, 'bugfix_autopilot_20260809T000000Z');
+  const privatePaperDir = join(artifactsDir, 'private-paper-mode');
+  const testTmpDir = join(artifactsDir, 'test-tmp', 'negative-symlink-fixture');
+  const releaseDir = join(artifactsDir, 'bws-release-package-ABC123');
+  const unknownDir = join(artifactsDir, 'operator-evidence-custom');
+  const outsideFile = join(dir, 'outside.txt');
+  const archivePath = join(repoDir, 'artifacts.zip');
+
+  try {
+    mkdirSync(runDir, { recursive: true });
+    mkdirSync(privatePaperDir, { recursive: true });
+    mkdirSync(testTmpDir, { recursive: true });
+    mkdirSync(releaseDir, { recursive: true });
+    mkdirSync(unknownDir, { recursive: true });
+    writeFileSync(join(runDir, 'final_summary.txt'), 'final_status=TEST\n', 'utf-8');
+    writeFileSync(join(privatePaperDir, 'report.json'), '{}\n', 'utf-8');
+    writeFileSync(join(releaseDir, 'release.txt'), 'scratch\n', 'utf-8');
+    writeFileSync(join(unknownDir, 'evidence.txt'), 'preserve\n', 'utf-8');
+    writeFileSync(outsideFile, 'outside\n', 'utf-8');
+    symlinkSync(outsideFile, join(testTmpDir, 'outside-link.txt'));
+
+    const planResult = spawnSync(
+      'bash',
+      ['-lc', '. "$RUN_COMMON"; automation_cleanup_transient_artifact_residue "$REPO_DIR" plan 0'],
+      {
+        cwd: repoDir,
+        encoding: 'utf-8',
+        env: { ...process.env, REPO_DIR: repoDir, RUN_COMMON },
+      },
+    );
+    assert.equal(planResult.status, 0, `${planResult.stdout}\n${planResult.stderr}`);
+    assert.match(planResult.stdout, /artifact_cleanup_selected=2/u);
+    assert.equal(existsSync(testTmpDir), true);
+    assert.equal(existsSync(releaseDir), true);
+
+    const packageResult = spawnSync(
+      'bash',
+      [
+        '-lc',
+        'set -euo pipefail; . "$RUN_COMMON"; . "$CONTROLLER_HARDENING"; automation_v2_zip_with_timeout 30 "$ARCHIVE_PATH" "$REPO_DIR" artifacts',
+      ],
+      {
+        cwd: repoDir,
+        encoding: 'utf-8',
+        env: {
+          ...process.env,
+          ARCHIVE_PATH: archivePath,
+          CONTROLLER_HARDENING,
+          REPO_DIR: repoDir,
+          RUN_COMMON,
+        },
+      },
+    );
+    assert.equal(packageResult.status, 0, `${packageResult.stdout}\n${packageResult.stderr}`);
+    assert.equal(existsSync(testTmpDir), false);
+    assert.equal(existsSync(releaseDir), false);
+    assert.equal(existsSync(runDir), true);
+    assert.equal(existsSync(privatePaperDir), true);
+    assert.equal(existsSync(unknownDir), true);
+
+    const entries = listZipEntries(archivePath);
+    assert.ok(entries.includes('artifacts/bugfix_autopilot_20260809T000000Z/final_summary.txt'));
+    assert.ok(entries.includes('artifacts/private-paper-mode/report.json'));
+    assert.ok(entries.includes('artifacts/operator-evidence-custom/evidence.txt'));
+    assert.ok(!entries.some((entry) => entry.startsWith('artifacts/test-tmp')));
+    assert.ok(!entries.some((entry) => entry.startsWith('artifacts/bws-release-package-')));
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
   }
 });

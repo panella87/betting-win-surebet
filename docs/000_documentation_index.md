@@ -72,6 +72,7 @@ docs/018_private_paper_mode_runbook.md
 docs/automation/README.md
 docs/automation/paper-autopilot.md
 docs/automation/repository-temp-inode-safety.md
+docs/automation/artifact-retention-and-cleanup.md
 docs/operations/autonomous_72h_runbook.md
 docs/operations/service_run.md
 ```
