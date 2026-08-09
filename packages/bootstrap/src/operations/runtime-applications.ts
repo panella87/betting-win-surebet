@@ -546,7 +546,15 @@ function createManagedRuntimeRequestHandler(
   getMetricsSnapshot: () => unknown,
 ): (request: IncomingMessage, response: ServerResponse<IncomingMessage>) => Promise<void> {
   return async (request, response) => {
-    const requestUrl = new URL(request.url ?? '/', 'http://127.0.0.1');
+    let requestUrl: URL;
+    try {
+      requestUrl = parseManagedRuntimeRequestUrl(request.url);
+    } catch (error) {
+      await recordManagedRequestMetrics(metricsCollector, 'cockpit', response, async () => {
+        writeManagedRuntimeInvalidRequest(response, error);
+      });
+      return;
+    }
     const pathname = trimTrailingSlash(requestUrl.pathname);
     if (pathname === '/health' || pathname === '/readiness' || pathname.startsWith('/api/')) {
       const kind = pathname === '/health'
@@ -589,6 +597,29 @@ function createManagedRuntimeRequestHandler(
       serveManagedCockpitAsset(response, cockpitBuildDirectory, requestUrl.pathname);
     });
   };
+}
+
+function parseManagedRuntimeRequestUrl(rawUrl: string | undefined): URL {
+  if (rawUrl === undefined) {
+    throw new Error('Managed runtime request URL is required.');
+  }
+  return new URL(rawUrl, 'http://127.0.0.1');
+}
+
+function writeManagedRuntimeInvalidRequest(
+  response: ServerResponse<IncomingMessage>,
+  error: unknown,
+): void {
+  const message = error instanceof Error ? error.message : String(error);
+  response.statusCode = 400;
+  applyManagedCockpitHeaders(response, 'application/json; charset=utf-8');
+  response.end(`${JSON.stringify({
+    error: {
+      code: 'BWS_MANAGED_RUNTIME_REQUEST_INVALID',
+      message,
+    },
+    ok: false,
+  })}\n`);
 }
 
 function serveManagedCockpitAsset(

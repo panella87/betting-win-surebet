@@ -41,12 +41,16 @@ automation_v2_safe_repo_path() {
   local repo=${1:?repo is required}
   local candidate=${2:?path is required}
   local must_exist=${3:-yes}
-  local repo_real candidate_real
+  local repo_real candidate_input candidate_real
   repo_real=$(realpath -e -- "$repo") || return 2
+  case "$candidate" in
+    /*) candidate_input="$candidate" ;;
+    *) candidate_input="$repo_real/$candidate" ;;
+  esac
   if [[ "$must_exist" == yes ]]; then
-    candidate_real=$(realpath -e -- "$candidate") || return 2
+    candidate_real=$(realpath -e -- "$candidate_input") || return 2
   else
-    candidate_real=$(realpath -m -- "$candidate") || return 2
+    candidate_real=$(realpath -m -- "$candidate_input") || return 2
   fi
   case "$candidate_real" in
     "$repo_real"|"$repo_real"/*) printf '%s\n' "$candidate_real" ;;
@@ -499,12 +503,45 @@ automation_v2_reject_zip_symlink_entries() {
   done
 }
 
+automation_v2_validate_zip_destination() {
+  local working_dir=${1:?working directory is required}
+  local destination=${2:?destination is required}
+  local working_real destination_real parent_real
+  [[ -d "$working_dir" && ! -L "$working_dir" ]] || {
+    printf 'ERROR: ZIP working directory must be a non-symlink directory: %s\n' "$working_dir" >&2
+    return 2
+  }
+  working_real=$(realpath -e -- "$working_dir") || return 2
+  destination_real=$(automation_v2_safe_repo_path "$working_real" "$destination" no) || return 2
+  parent_real=$(realpath -e -- "$(dirname -- "$destination_real")") || return 2
+  [[ ! -L "$destination" && "$parent_real" == "$(dirname -- "$destination_real")" && ! -L "$destination_real" ]] || {
+    printf 'ERROR: ZIP destination must have a canonical non-symlink parent: %s\n' "$destination" >&2
+    return 2
+  }
+}
+
+automation_v2_prune_zip_vcs_metadata() {
+  local archive=${1:?archive path is required}
+  local rc
+  [[ -f "$archive" && ! -L "$archive" ]] || {
+    printf 'ERROR: ZIP archive must be a non-symlink regular file: %s\n' "$archive" >&2
+    return 2
+  }
+  zip -q -d "$archive" '.git' '.git/*' '*/.git' '*/.git/*' '.hg' '.hg/*' '*/.hg' '*/.hg/*' '.svn' '.svn/*' '*/.svn' '*/.svn/*' >/dev/null 2>&1
+  rc=$?
+  case "$rc" in
+    0|12) return 0 ;;
+    *) return "$rc" ;;
+  esac
+}
+
 automation_v2_archive_run_dirs() {
   local archive=${1:?archive path is required}
   local repo=${2:?repo is required}
   shift 2
   local temp item rel
   command -v zip >/dev/null 2>&1 || return 127
+  automation_v2_validate_zip_destination "$repo" "$archive" || return $?
   temp="${archive}.tmp.$$"
   rm -f -- "$temp"
   local -a rels=()
@@ -518,8 +555,9 @@ automation_v2_archive_run_dirs() {
   automation_v2_reject_zip_symlink_entries "$repo" "${rels[@]}" || return $?
   (
     cd "$repo"
-    zip -q -1 -r "$temp" "${rels[@]}"
+    zip -q -1 -r "$temp" "${rels[@]}" -x 'artifacts/.git/*' 'artifacts/.git' 'artifacts/*/.git/*' 'artifacts/*/.git' 'artifacts/**/.git/*' 'artifacts/**/.git' 'artifacts/.hg/*' 'artifacts/.hg' 'artifacts/*/.hg/*' 'artifacts/*/.hg' 'artifacts/**/.hg/*' 'artifacts/**/.hg' 'artifacts/.svn/*' 'artifacts/.svn' 'artifacts/*/.svn/*' 'artifacts/*/.svn' 'artifacts/**/.svn/*' 'artifacts/**/.svn'
   ) || { rm -f -- "$temp"; return 2; }
+  automation_v2_prune_zip_vcs_metadata "$temp" || { rm -f -- "$temp"; return 2; }
   mv -f -- "$temp" "$archive"
 }
 
@@ -772,9 +810,11 @@ automation_v2_zip_with_timeout() {
   local working_dir=${3:?working directory is required}
   shift 3
   command -v zip >/dev/null 2>&1 || return 127
+  automation_v2_validate_zip_destination "$working_dir" "$destination" || return $?
   automation_v2_reject_zip_symlink_entries "$working_dir" "$@" || return $?
   (
     cd "$working_dir"
-    timeout --signal=TERM --kill-after=10s "$timeout_seconds" zip -q -1 -r "$destination" "$@"
-  )
+    timeout --signal=TERM --kill-after=10s "$timeout_seconds" zip -q -1 -r "$destination" "$@" -x 'artifacts/.git/*' 'artifacts/.git' 'artifacts/*/.git/*' 'artifacts/*/.git' 'artifacts/**/.git/*' 'artifacts/**/.git' 'artifacts/.hg/*' 'artifacts/.hg' 'artifacts/*/.hg/*' 'artifacts/*/.hg' 'artifacts/**/.hg/*' 'artifacts/**/.hg' 'artifacts/.svn/*' 'artifacts/.svn' 'artifacts/*/.svn/*' 'artifacts/*/.svn' 'artifacts/**/.svn/*' 'artifacts/**/.svn'
+  ) || return $?
+  automation_v2_prune_zip_vcs_metadata "$destination"
 }

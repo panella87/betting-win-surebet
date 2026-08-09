@@ -28,14 +28,14 @@ export function calculateB1QuoteAgePenalty(
   if (!normalizedPolicy.ok) {
     return normalizedPolicy;
   }
-  if (quoteAgeMs < 0n) {
+  if (typeof quoteAgeMs !== 'bigint' || quoteAgeMs < 0n) {
     return blocked(
       'B1_QUOTE_AGE_INVALID',
       'B1 quote-age penalty requires non-negative quote age.',
       'Non-negative B1 quote_age_ms evidence.',
     );
   }
-  if (stakeMinor <= 0n) {
+  if (typeof stakeMinor !== 'bigint' || stakeMinor <= 0n) {
     return blocked(
       'B1_STAKE_NOT_POSITIVE',
       'B1 quote-age penalty requires a positive stake assumption.',

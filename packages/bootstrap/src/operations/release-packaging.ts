@@ -5,12 +5,14 @@ import {
   chmodSync,
   copyFileSync,
   existsSync,
+  lstatSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
   readdirSync,
   renameSync,
   rmSync,
+  realpathSync,
   statSync,
   statfsSync,
   writeFileSync,
@@ -376,13 +378,14 @@ export async function createBwsReleasePackage(
   request: CreateBwsReleasePackageRequest,
 ): Promise<BwsReleasePackageResult> {
   const repositoryRoot = request.repositoryRoot === undefined ? process.cwd() : resolve(request.repositoryRoot);
-  const outputDirectory = resolve(request.outputDirectory);
+  const outputDirectory = resolveReleaseOutputDirectory(repositoryRoot, request.outputDirectory);
   const now = request.now === undefined ? defaultNow : request.now;
   const runCommand = request.runCommand === undefined ? runCommandSync : request.runCommand;
   const createdAt = requireIsoTimestamp(now(), 'createdAt');
   const allowOverwrite = request.allowOverwrite === true;
 
   mkdirSync(outputDirectory, { recursive: true });
+  rejectExistingPathSymlinkSegments(repositoryRoot, outputDirectory, 'release output directory');
   const sourceManifest = readSourceManifest(repositoryRoot);
   const sourceManifestContents = readRequiredFile(repositoryRoot, SOURCE_MANIFEST_PATH);
   const sourceManifestSha256 = sha256Hex(sourceManifestContents);
@@ -550,10 +553,10 @@ export async function createBwsReleasePackage(
       semanticFingerprint,
     });
     writeJsonFile(stagingResultFile, result);
-    commitOutputTarget(stagingReleaseDirectory, finalReleaseDirectory, allowOverwrite);
-    commitOutputTarget(stagingArchiveFile, finalArchiveFile, allowOverwrite);
-    commitOutputTarget(stagingArchiveSha256File, finalArchiveSha256File, allowOverwrite);
-    commitOutputTarget(stagingResultFile, finalResultFile, allowOverwrite);
+    commitOutputTarget(stagingReleaseDirectory, finalReleaseDirectory, outputDirectory, allowOverwrite);
+    commitOutputTarget(stagingArchiveFile, finalArchiveFile, outputDirectory, allowOverwrite);
+    commitOutputTarget(stagingArchiveSha256File, finalArchiveSha256File, outputDirectory, allowOverwrite);
+    commitOutputTarget(stagingResultFile, finalResultFile, outputDirectory, allowOverwrite);
     const publishedEvidenceEntries = registerReleaseEvidence(repositoryRoot, releaseId, semanticFingerprint, [
       join(finalReleaseDirectory, RELEASE_MANIFEST_FILE),
       finalArchiveSha256File,
@@ -957,9 +960,21 @@ function copyPayloadFiles(
   payloadFiles: readonly ReleaseFileEntry[],
 ): void {
   for (const entry of payloadFiles) {
-    const sourcePath = join(repositoryRoot, entry.path);
-    const targetPath = join(releaseDirectory, entry.path);
+    const relativePath = normalizeRelativePath(entry.path);
+    const sourcePath = join(repositoryRoot, relativePath);
+    const targetPath = join(releaseDirectory, relativePath);
+    if (!isWithinResolved(repositoryRoot, sourcePath)) {
+      throw new Error(`Release payload source escapes repository: ${relativePath}`);
+    }
+    ensureFile(sourcePath, relativePath, repositoryRoot);
+    if (!isWithinResolved(releaseDirectory, targetPath)) {
+      throw new Error(`Release payload target escapes release directory: ${relativePath}`);
+    }
     mkdirSync(dirname(targetPath), { recursive: true });
+    rejectExistingPathSymlinkSegments(releaseDirectory, dirname(targetPath), 'release payload target directory');
+    if (existsSync(targetPath) && lstatSync(targetPath).isSymbolicLink()) {
+      throw new Error(`Release payload target must not be a symlink: ${relativePath}`);
+    }
     copyFileSync(sourcePath, targetPath);
     chmodSync(targetPath, parseInt(entry.mode, 8));
   }
@@ -1054,7 +1069,7 @@ function mergeFileInventories(...inventories: readonly (readonly ReleaseFileEntr
 function createReleaseFileEntry(repositoryRoot: string, relativePath: string): ReleaseFileEntry {
   const normalizedRelativePath = normalizeRelativePath(relativePath);
   const absolutePath = join(repositoryRoot, normalizedRelativePath);
-  const stats = ensureFile(absolutePath, normalizedRelativePath);
+  const stats = ensureFile(absolutePath, normalizedRelativePath, repositoryRoot);
   return Object.freeze({
     mode: normalizedReleaseMode(stats),
     path: normalizedRelativePath,
@@ -1185,17 +1200,18 @@ function toSemanticFingerprintDescriptor(content: ReleaseContentDescriptor): Rel
 
 function verifyInventoryMatchesRelease(releaseDirectory: string, inventory: readonly ReleaseFileEntry[]): void {
   for (const entry of inventory) {
-    const absolutePath = join(releaseDirectory, entry.path);
-    const stats = ensureFile(absolutePath, entry.path);
+    const relativePath = normalizeRelativePath(entry.path);
+    const absolutePath = join(releaseDirectory, relativePath);
+    const stats = ensureFile(absolutePath, relativePath, releaseDirectory);
     const actualSha256 = fileSha256(absolutePath);
     if (actualSha256 !== entry.sha256) {
-      throw new Error(`Release file checksum mismatch for ${entry.path}.`);
+      throw new Error(`Release file checksum mismatch for ${relativePath}.`);
     }
     if (stats.size !== entry.size) {
-      throw new Error(`Release file size mismatch for ${entry.path}.`);
+      throw new Error(`Release file size mismatch for ${relativePath}.`);
     }
     if (hasExecutableMode(entry.mode) !== isExecutableMode(stats)) {
-      throw new Error(`Release file executability mismatch for ${entry.path}.`);
+      throw new Error(`Release file executability mismatch for ${relativePath}.`);
     }
   }
 }
@@ -1208,7 +1224,21 @@ function assertOutputTargetsAvailable(targets: readonly string[], allowOverwrite
   }
 }
 
-function commitOutputTarget(sourcePath: string, targetPath: string, allowOverwrite: boolean): void {
+function commitOutputTarget(sourcePath: string, targetPath: string, outputDirectory: string, allowOverwrite: boolean): void {
+  if (!isWithinResolved(outputDirectory, sourcePath)) {
+    throw new Error(`Release staging output escapes output directory: ${sourcePath}`);
+  }
+  if (!isWithinResolved(outputDirectory, targetPath)) {
+    throw new Error(`Release final output escapes output directory: ${targetPath}`);
+  }
+  rejectExistingPathSymlinkSegments(outputDirectory, dirname(sourcePath), 'release staging output path');
+  rejectExistingPathSymlinkSegments(outputDirectory, dirname(targetPath), 'release final output path');
+  if (existsSync(sourcePath) && lstatSync(sourcePath).isSymbolicLink()) {
+    throw new Error(`Release staging output must not be a symlink: ${sourcePath}`);
+  }
+  if (existsSync(targetPath) && lstatSync(targetPath).isSymbolicLink()) {
+    throw new Error(`Release final output must not be a symlink: ${targetPath}`);
+  }
   if (existsSync(targetPath) && allowOverwrite) {
     rmSync(targetPath, { force: true, recursive: true });
   }
@@ -1273,10 +1303,33 @@ function listArchiveEntries(archivePath: string, runCommand: CommandRunner): rea
       '-c',
       [
         'import json',
+        'import re',
         'import sys',
         'import tarfile',
         'with tarfile.open(sys.argv[1], "r:gz") as archive:',
-        '    names = sorted(name for name in archive.getnames() if name and name != ".")',
+        '    names = []',
+        '    for member in archive.getmembers():',
+        '        name = member.name.rstrip("/")',
+        '        if not name or name == ".":',
+        '            continue',
+        '        parts = name.split("/")',
+        '        if (',
+        '            name.startswith("/")',
+        '            or name in {".", ".."}',
+        '            or name.startswith("../")',
+        '            or name.startswith("./")',
+        '            or name.startswith("//")',
+        '            or re.match(r"^[A-Za-z]:", name)',
+        '            or "/../" in name',
+        '            or name.endswith("/..")',
+        '            or "/./" in name',
+        '            or any(part in {"", ".", "..", ".git", ".hg", ".svn"} for part in parts)',
+        '        ):',
+        '            raise SystemExit(f"unsafe release archive member path: {member.name}")',
+        '        if not member.isfile():',
+        '            raise SystemExit(f"release archive member must be a regular file: {member.name}")',
+        '        names.append(name)',
+        '    names = sorted(names)',
         '    print(json.dumps(names))',
       ].join('\n'),
       archivePath,
@@ -1496,6 +1549,9 @@ function walkDirectoryFilesRecursive(root: string, current: string, entries: str
     .sort((left, right) => left.name.localeCompare(right.name));
   for (const child of children) {
     const absolutePath = join(current, child.name);
+    if (child.isSymbolicLink()) {
+      throw new Error(`Release directory inventory must not contain symlinks: ${relative(root, absolutePath)}`);
+    }
     if (child.isDirectory()) {
       walkDirectoryFilesRecursive(root, absolutePath, entries);
       continue;
@@ -1586,15 +1642,61 @@ function ensureDirectoryWritable(path: string, label: string): void {
   accessSync(path, fsConstants.W_OK | fsConstants.X_OK);
 }
 
-function ensureFile(path: string, label: string): Stats {
+function ensureFile(path: string, label: string, boundaryRoot?: string): Stats {
   if (!existsSync(path)) {
     throw new Error(`Required release file does not exist: ${label}`);
   }
-  const stats = statSync(path);
+  if (boundaryRoot !== undefined) {
+    rejectExistingPathSymlinkSegments(boundaryRoot, path, `Required release path ${label}`);
+  }
+  const stats = lstatSync(path);
+  if (stats.isSymbolicLink()) {
+    throw new Error(`Required release path must not be a symlink: ${label}`);
+  }
   if (!stats.isFile()) {
     throw new Error(`Required release path must be a file: ${label}`);
   }
+  if (boundaryRoot !== undefined) {
+    const realRoot = realpathSync(boundaryRoot);
+    const realPath = realpathSync(path);
+    if (!(realPath === realRoot || realPath.startsWith(`${realRoot}/`))) {
+      throw new Error(`Required release path escapes repository: ${label}`);
+    }
+  }
   return stats;
+}
+
+function resolveReleaseOutputDirectory(repositoryRoot: string, requestedDirectory: string): string {
+  const root = resolve(repositoryRoot);
+  const outputDirectory = resolve(root, requestedDirectory);
+  const artifactsRoot = resolve(root, 'artifacts');
+  if (!(outputDirectory === artifactsRoot || outputDirectory.startsWith(`${artifactsRoot}/`))) {
+    throw new Error(`Release output directory must stay under repository artifacts: ${requestedDirectory}`);
+  }
+  rejectExistingPathSymlinkSegments(root, outputDirectory, 'release output directory');
+  return outputDirectory;
+}
+
+function rejectExistingPathSymlinkSegments(boundaryRoot: string, targetPath: string, label: string): void {
+  const root = resolve(boundaryRoot);
+  const target = resolve(targetPath);
+  if (!(target === root || target.startsWith(`${root}/`))) {
+    throw new Error(`${label} escapes repository: ${targetPath}`);
+  }
+  const relativePath = target.slice(root.length).replace(/^\//u, '');
+  let current = root;
+  for (const part of relativePath.split('/')) {
+    if (part.length === 0) {
+      continue;
+    }
+    current = join(current, part);
+    if (!existsSync(current)) {
+      break;
+    }
+    if (lstatSync(current).isSymbolicLink()) {
+      throw new Error(`${label} must not contain symlinks: ${current}`);
+    }
+  }
 }
 
 function findReleaseFileEntry(inventory: readonly ReleaseFileEntry[], relativePath: string): ReleaseFileEntry {
@@ -1609,7 +1711,7 @@ function findReleaseFileEntry(inventory: readonly ReleaseFileEntry[], relativePa
 function readRequiredFile(repositoryRoot: string, relativePath: string): string {
   const normalizedRelativePath = normalizeRelativePath(relativePath);
   const absolutePath = join(repositoryRoot, normalizedRelativePath);
-  ensureFile(absolutePath, normalizedRelativePath);
+  ensureFile(absolutePath, normalizedRelativePath, repositoryRoot);
   return readFileSync(absolutePath, 'utf-8');
 }
 
@@ -1669,7 +1771,28 @@ function requireObject(value: unknown, label: string): Record<string, unknown> {
 }
 
 function normalizeRelativePath(value: string): string {
-  return value.replaceAll('\\', '/').replace(/^\.\//, '');
+  const normalized = value.replaceAll('\\', '/');
+  if (
+    normalized.length === 0
+    || normalized === '.'
+    || normalized === '..'
+    || normalized.startsWith('/')
+    || normalized.startsWith('./')
+    || normalized.startsWith('../')
+    || normalized.startsWith('//')
+    || /^[A-Za-z]:/u.test(normalized)
+    || normalized.includes('/../')
+    || normalized.endsWith('/..')
+    || normalized.includes('/./')
+    || /[\u0000-\u001f]/u.test(normalized)
+  ) {
+    throw new Error(`Path must be a strict relative path: ${value}`);
+  }
+  const parts = normalized.split('/');
+  if (parts.some((part) => part.length === 0 || part === '.' || part === '..' || part === '.git' || part === '.hg' || part === '.svn')) {
+    throw new Error(`Path contains an unsafe component: ${value}`);
+  }
+  return normalized;
 }
 
 function sanitizeReleaseToken(value: string): string {

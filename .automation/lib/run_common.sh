@@ -563,12 +563,29 @@ automation_run_managed_argv() {
 }
 
 automation_create_run_dir() {
-  local slug="$1" stamp
+  local slug="$1" stamp artifacts_dir artifacts_real run_dir_real
+  [[ "$slug" =~ ^[A-Za-z0-9._-]+$ && "$slug" != "." && "$slug" != ".." ]] || automation_die "automation run directory slug must be a safe basename: $slug" 42
   automation_temp_inode_bootstrap "$slug" || automation_die "temporary-file and inode-safety bootstrap failed" 42
   stamp="$(date -u +%Y%m%dT%H%M%SZ)"
-  mkdir -p "$AUTOMATION_REPO_ROOT/artifacts"
-  AUTOMATION_RUN_DIR="$AUTOMATION_REPO_ROOT/artifacts/${slug}_${stamp}"
+  [[ -d "$AUTOMATION_REPO_ROOT" && ! -L "$AUTOMATION_REPO_ROOT" ]] || automation_die "repository root must be a non-symlink directory: $AUTOMATION_REPO_ROOT" 42
+  artifacts_dir="$AUTOMATION_REPO_ROOT/artifacts"
+  if [[ -e "$artifacts_dir" && ! -d "$artifacts_dir" ]]; then
+    automation_die "artifacts path must be a directory: $artifacts_dir" 42
+  fi
+  if [[ -L "$artifacts_dir" ]]; then
+    automation_die "artifacts directory must not be a symlink: $artifacts_dir" 42
+  fi
+  mkdir -p "$artifacts_dir"
+  [[ -d "$artifacts_dir" && ! -L "$artifacts_dir" ]] || automation_die "artifacts directory must be repo-local and non-symlink: $artifacts_dir" 42
+  artifacts_real="$(realpath -e -- "$artifacts_dir")" || automation_die "artifacts directory must have a canonical repo-local path: $artifacts_dir" 42
+  AUTOMATION_RUN_DIR="$artifacts_dir/${slug}_${stamp}"
+  run_dir_real="$(realpath -m -- "$AUTOMATION_RUN_DIR")" || automation_die "run directory must have a canonical repo-local path: $AUTOMATION_RUN_DIR" 42
+  case "$run_dir_real" in
+    "$artifacts_real"/*) ;;
+    *) automation_die "run directory must stay under repo-local artifacts: $AUTOMATION_RUN_DIR" 42 ;;
+  esac
   mkdir -p "$AUTOMATION_RUN_DIR"
+  [[ -d "$AUTOMATION_RUN_DIR" && ! -L "$AUTOMATION_RUN_DIR" ]] || automation_die "run directory must be repo-local and non-symlink: $AUTOMATION_RUN_DIR" 42
   AUTOMATION_CONTROLLER_LOG="$AUTOMATION_RUN_DIR/controller.log"
   : > "$AUTOMATION_CONTROLLER_LOG"
 }
@@ -707,6 +724,11 @@ automation_source_tree_fingerprint() {
   while IFS= read -r -d '' rel; do
     rel="${rel#./}"
     automation_source_path_is_excluded "$rel" && continue
+    if [[ -L "$root/$rel" ]]; then
+      echo "ERROR: source fingerprint input must not contain symlinks: $rel" >&2
+      rm -f "$list_file" "$payload_file"
+      return 2
+    fi
     [[ -f "$root/$rel" ]] || continue
     digest="$(sha256sum -- "$root/$rel")" || {
       rm -f "$list_file" "$payload_file"
@@ -885,7 +907,7 @@ automation_refresh_final_artifacts_zip() {
   local timeout_seconds="${1:?timeout seconds are required}"
   local root="${2:?repository root is required}"
   local run_dir="${3:?run directory is required}"
-  local archive="$root/artifacts.zip" relative_run tmp entry rc=0
+  local root_real run_dir_real archive relative_run tmp entry rc=0
   local -a entries=()
 
   [[ "$timeout_seconds" =~ ^[1-9][0-9]*$ ]] || {
@@ -896,15 +918,18 @@ automation_refresh_final_artifacts_zip() {
     printf 'ERROR: artifact refresh repository root must be a non-symlink directory: %s\n' "$root" >&2
     return 2
   }
-  automation_reject_artifact_zip_symlinks "$root" || return $?
+  root_real="$(realpath -e -- "$root")" || return 2
+  archive="$root_real/artifacts.zip"
+  automation_reject_artifact_zip_symlinks "$root_real" || return $?
   [[ -d "$run_dir" && ! -L "$run_dir" ]] || {
     printf 'ERROR: artifact refresh run directory must be a non-symlink directory: %s\n' "$run_dir" >&2
     return 2
   }
-  case "$run_dir" in
-    "$root"/artifacts/*) relative_run="${run_dir#"$root"/}" ;;
+  run_dir_real="$(realpath -e -- "$run_dir")" || return 2
+  case "$run_dir_real" in
+    "$root_real"/artifacts/*) relative_run="${run_dir_real#"$root_real"/}" ;;
     *)
-      printf 'ERROR: artifact refresh run directory must stay under %s/artifacts: %s\n' "$root" "$run_dir" >&2
+      printf 'ERROR: artifact refresh run directory must stay under %s/artifacts: %s\n' "$root_real" "$run_dir" >&2
       return 2
       ;;
   esac
@@ -923,7 +948,11 @@ automation_refresh_final_artifacts_zip() {
     return 2
   }
 
-  tmp="$root/.artifacts.zip.refresh.$$.zip"
+  tmp="$root_real/.artifacts.zip.refresh.$$.zip"
+  if [[ -L "$tmp" ]]; then
+    printf 'ERROR: artifact refresh temp archive must not be a symlink: %s\n' "$tmp" >&2
+    return 2
+  fi
   rm -f -- "$tmp"
   if ! cp --reflink=auto -- "$archive" "$tmp" 2>/dev/null; then
     cp -- "$archive" "$tmp" || {
@@ -931,7 +960,12 @@ automation_refresh_final_artifacts_zip() {
       return 1
     }
   fi
-  if automation_v2_zip_with_timeout "$timeout_seconds" "$tmp" "$root" "${entries[@]}"; then
+  automation_prune_artifact_zip_vcs_metadata "$tmp" || {
+    rc=$?
+    rm -f -- "$tmp"
+    return "$rc"
+  }
+  if automation_v2_zip_with_timeout "$timeout_seconds" "$tmp" "$root_real" "${entries[@]}"; then
     rc=0
   else
     rc=$?
@@ -943,6 +977,20 @@ automation_refresh_final_artifacts_zip() {
     return 1
   fi
   return 0
+}
+
+automation_prune_artifact_zip_vcs_metadata() {
+  local archive="${1:?archive path is required}" rc
+  [[ -f "$archive" && ! -L "$archive" ]] || {
+    printf 'ERROR: artifact ZIP archive must be a non-symlink regular file: %s\n' "$archive" >&2
+    return 2
+  }
+  zip -q -d "$archive" '.git' '.git/*' '*/.git' '*/.git/*' '.hg' '.hg/*' '*/.hg' '*/.hg/*' '.svn' '.svn/*' '*/.svn' '*/.svn/*' >/dev/null 2>&1
+  rc=$?
+  case "$rc" in
+    0|12) return 0 ;;
+    *) return "$rc" ;;
+  esac
 }
 
 automation_reject_artifact_zip_symlinks() {
@@ -968,22 +1016,40 @@ automation_reject_artifact_zip_symlinks() {
 }
 
 automation_build_artifacts_zip() {
-  local run_dir="$1" root="$2" zip_tmp timeout_seconds
+  local run_dir="$1" root="$2" root_real run_dir_real zip_tmp timeout_seconds
   [[ -d "$run_dir" ]] || return 0
   [[ -d "$root/artifacts" ]] || return 0
+  root_real="$(realpath -e -- "$root")" || return 2
+  run_dir_real="$(realpath -e -- "$run_dir")" || return 2
+  case "$run_dir_real" in
+    "$root_real"/artifacts/*) ;;
+    *)
+      printf 'ERROR: artifact ZIP run directory must stay under %s/artifacts: %s\n' "$root_real" "$run_dir" >&2
+      return 2
+      ;;
+  esac
   automation_temp_inode_check_capacity before_artifact_packaging || return $?
   automation_require_command zip
-  automation_reject_artifact_zip_symlinks "$root" || return $?
+  automation_reject_artifact_zip_symlinks "$root_real" || return $?
   timeout_seconds="$(automation_parse_duration_seconds "${AUTOMATION_ZIP_TIMEOUT:-10m}")" || return 2
-  zip_tmp="$root/.artifacts.zip.tmp.$$.zip"
+  zip_tmp="$root_real/.artifacts.zip.tmp.$$.zip"
+  if [[ -L "$zip_tmp" ]]; then
+    printf 'ERROR: artifact ZIP temp archive must not be a symlink: %s\n' "$zip_tmp" >&2
+    return 2
+  fi
   rm -f "$zip_tmp"
-  (cd "$root" && timeout --signal=TERM --kill-after=10s "${timeout_seconds}s" zip -q -1 -r "$zip_tmp" artifacts) || {
+  (cd "$root_real" && timeout --signal=TERM --kill-after=10s "${timeout_seconds}s" zip -q -1 -r "$zip_tmp" artifacts -x 'artifacts/.git/*' 'artifacts/.git' 'artifacts/*/.git/*' 'artifacts/*/.git' 'artifacts/**/.git/*' 'artifacts/**/.git' 'artifacts/.hg/*' 'artifacts/.hg' 'artifacts/*/.hg/*' 'artifacts/*/.hg' 'artifacts/**/.hg/*' 'artifacts/**/.hg' 'artifacts/.svn/*' 'artifacts/.svn' 'artifacts/*/.svn/*' 'artifacts/*/.svn' 'artifacts/**/.svn') || {
     local rc=$?
     rm -f -- "$zip_tmp"
     return "$rc"
   }
-  mv "$zip_tmp" "$root/artifacts.zip"
-  automation_log "artifacts_zip_created path=$root/artifacts.zip"
+  automation_prune_artifact_zip_vcs_metadata "$zip_tmp" || {
+    local rc=$?
+    rm -f -- "$zip_tmp"
+    return "$rc"
+  }
+  mv "$zip_tmp" "$root_real/artifacts.zip"
+  automation_log "artifacts_zip_created path=$root_real/artifacts.zip"
 }
 
 automation_latest_evidence_hint() {

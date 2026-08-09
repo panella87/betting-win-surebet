@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { chmodSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import {
   createBwsFinalLocalAcceptanceCleanupResult,
@@ -328,7 +328,9 @@ async function getReleaseFixture(): Promise<ReleaseFixture> {
   }
   cachedReleaseFixture = (async () => {
     await ensureRuntimeCockpitBuild();
-    const outputDirectory = mkdtempSync('/tmp/bws-final-acceptance-release-');
+    const releaseArtifactRoot = join(REPO_ROOT, 'artifacts', 'final-local-acceptance-release');
+    mkdirSync(releaseArtifactRoot, { recursive: true });
+    const outputDirectory = mkdtempSync(join(releaseArtifactRoot, 'release-'));
     const result = await createBwsReleasePackage({
       outputDirectory,
       repositoryRoot: REPO_ROOT,

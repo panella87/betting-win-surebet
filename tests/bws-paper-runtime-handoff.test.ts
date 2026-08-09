@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
@@ -76,6 +76,71 @@ test('paper runtime handoff fails closed when lifecycle status is not healthy an
         repositoryRoot,
       }),
       /requires a healthy runtime status probe/,
+    );
+  } finally {
+    rmSync(repositoryRoot, { recursive: true, force: true });
+  }
+});
+
+test('paper runtime handoff rejects unsafe source archive paths before packaging', async () => {
+  const repositoryRoot = mkdtempSync(join(tmpdir(), 'bws-paper-runtime-handoff-paths-'));
+  const outsideDirectory = mkdtempSync(join(tmpdir(), 'bws-paper-runtime-handoff-outside-'));
+  try {
+    mkdirSync(join(repositoryRoot, 'artifacts'), { recursive: true });
+    symlinkSync(outsideDirectory, join(repositoryRoot, 'artifacts', 'linked-output'), 'dir');
+
+    await assert.rejects(
+      () => createBwsPaperRuntimeHandoff({
+        archiveFilePath: 'artifacts/linked-output/source.tar.gz',
+        createSourceHandoffArchive() {
+          throw new Error('archive creation must not run for a symlinked output parent');
+        },
+        lifecycleStatus: sampleLifecycleStatus(),
+        now: () => TEST_TIMESTAMP,
+        repositoryRoot,
+      }),
+      /must not contain symlinks/u,
+    );
+    assert.equal(existsSync(join(outsideDirectory, 'source.tar.gz')), false);
+
+    await assert.rejects(
+      () => createBwsPaperRuntimeHandoff({
+        archiveFilePath: 'runtime/source.tar.gz',
+        createSourceHandoffArchive() {
+          throw new Error('archive creation must not run for a non-artifact output path');
+        },
+        lifecycleStatus: sampleLifecycleStatus(),
+        now: () => TEST_TIMESTAMP,
+        repositoryRoot,
+      }),
+      /must stay under repository artifacts/u,
+    );
+  } finally {
+    rmSync(repositoryRoot, { recursive: true, force: true });
+    rmSync(outsideDirectory, { recursive: true, force: true });
+  }
+});
+
+test('paper runtime handoff rejects mismatched injected source archive records', async () => {
+  const repositoryRoot = mkdtempSync(join(tmpdir(), 'bws-paper-runtime-handoff-record-'));
+  try {
+    await assert.rejects(
+      () => createBwsPaperRuntimeHandoff({
+        archiveFilePath: 'artifacts/bws-paper-runtime-handoff/source.tar.gz',
+        createSourceHandoffArchive({ outputPath }) {
+          mkdirSync(join(repositoryRoot, 'artifacts', 'bws-paper-runtime-handoff'), { recursive: true });
+          writeFileSync(outputPath, 'runtime handoff archive bytes\n', 'utf-8');
+          return Object.freeze({
+            archiveFile: 'artifacts/bws-paper-runtime-handoff/other.tar.gz',
+            sha256: createHash('sha256').update('runtime handoff archive bytes\n').digest('hex'),
+            sizeBytes: Buffer.byteLength('runtime handoff archive bytes\n'),
+          });
+        },
+        lifecycleStatus: sampleLifecycleStatus(),
+        now: () => TEST_TIMESTAMP,
+        repositoryRoot,
+      }),
+      /must match the requested archive path/u,
     );
   } finally {
     rmSync(repositoryRoot, { recursive: true, force: true });

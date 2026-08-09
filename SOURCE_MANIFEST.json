@@ -1,6 +1,6 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-08-05T11:10:04Z",
+  "generated": "2026-08-05T19:01:33Z",
   "overlay": "bws95-bugfix-boundary-validation-long-campaign-wave57",
   "files": [
     {
@@ -10,13 +10,13 @@
     },
     {
       "path": ".automation/lib/controller_hardening_v2.sh",
-      "sha256": "f261016166efe3f9b3940ee7edcd40fbc65585f7940843e56c7046278fa52d6d",
-      "size": 28855
+      "sha256": "d3244cd38775c6dd399f494bc7a2deef37a783d3942371a14b24082557c1d315",
+      "size": 31329
     },
     {
       "path": ".automation/lib/run_common.sh",
-      "sha256": "f51f278e00e8676b0917c952b3dce963b4ebb7399cf94f55a8ca3a76b2d365c7",
-      "size": 36668
+      "sha256": "6fcef5bd64b4af2ec5c4fc9d5b2c0d57c8a0b31676dccdb3db3dbb565e08b3d3",
+      "size": 40127
     },
     {
       "path": ".automation/lib/telegram_notify.sh",
@@ -145,8 +145,8 @@
     },
     {
       "path": "apps/web/src/api/client.ts",
-      "sha256": "b2573712873de9279bd1f46338412f2a272051bb75f97f9a4b06a5b08f8a53d5",
-      "size": 60969
+      "sha256": "65eccebb1b7f2cd2a38cddded8eac69b592133b8ccd6d7be55486756844ffe81",
+      "size": 62681
     },
     {
       "path": "apps/web/src/api/contracts.ts",
@@ -155,8 +155,8 @@
     },
     {
       "path": "apps/web/src/api/mock-data.ts",
-      "sha256": "e3628b8469882cdac11fcbd92e021195a5c8a14ed52f3190c6bbdfd5f48ec233",
-      "size": 27548
+      "sha256": "17fe530d64bbae547a9098d520cb0949bac168d22b3a38e705a53e8afb4c1f7c",
+      "size": 27728
     },
     {
       "path": "apps/web/src/api/models.ts",
@@ -815,8 +815,8 @@
     },
     {
       "path": "packages/bootstrap/src/adapters/betting-win-query-client.ts",
-      "sha256": "0df5a36f73a4c63ae82e7256e073d1dfa82a27fe6577a53a0a299a1faf715f24",
-      "size": 37534
+      "sha256": "d822ad5f70e5d18a4ab103748c428146c31e7fed692c17fffa3ec69cd6d234c4",
+      "size": 39043
     },
     {
       "path": "packages/bootstrap/src/adapters/betting-win-strategy-export-intake.ts",
@@ -825,13 +825,13 @@
     },
     {
       "path": "packages/bootstrap/src/api/bws-read-only-query-http.ts",
-      "sha256": "32733b48a125f8ced9b1e462198cf1e3b9089c403ca8d99caaa0b8110ee0b4ba",
-      "size": 14512
+      "sha256": "fc644a168e07d1afa63d84fa85582cda9c37994b2b4d66ea7366c1f442c7ac17",
+      "size": 15039
     },
     {
       "path": "packages/bootstrap/src/api/bws-read-only-query-service.ts",
-      "sha256": "dfab2170d71bfc0213e1e98ed08caf1c2e6ae6119e87fad5e1d7e20f04741bc2",
-      "size": 74129
+      "sha256": "1789b958f88d6bf98cebd2c317a9a817ba7b408cb9f119d71e120379ba7ffc9c",
+      "size": 76916
     },
     {
       "path": "packages/bootstrap/src/backtest/b1-cross-venue-backtest.ts",
@@ -855,8 +855,8 @@
     },
     {
       "path": "packages/bootstrap/src/cli/bws-external-runtime-preflight.ts",
-      "sha256": "3ddd8c9e0e4a42717aff099355a619e984cb75237f8d9fef589f43a551636755",
-      "size": 6679
+      "sha256": "b80f4c97e958b67c3901c53cbfaa5aa6687697c6416b28f4a12a61b73ab052aa",
+      "size": 7653
     },
     {
       "path": "packages/bootstrap/src/cli/bws-final-local-acceptance.ts",
@@ -875,8 +875,8 @@
     },
     {
       "path": "packages/bootstrap/src/cli/bws-paper-runtime-evidence.ts",
-      "sha256": "842c4f0e1baf562041df46e39e5a9d85259fce21bf661f6dad5a34e4e99888ca",
-      "size": 3557
+      "sha256": "cd8b60ede9c77dc08a7f575115cd8dac3bad1fdbeac595d4046b2100d4d11de1",
+      "size": 3567
     },
     {
       "path": "packages/bootstrap/src/cli/bws-paper-runtime-handoff.ts",
@@ -975,18 +975,18 @@
     },
     {
       "path": "packages/bootstrap/src/economics/b1-capital-lock.ts",
-      "sha256": "f26c93015618f22db8366318b035c4072d4e2b66273fec6438f40f4275a98cf3",
-      "size": 3799
+      "sha256": "5f74dcde80a30a7243ce56965b23361c6d7c4b0977eab144fb1980486bcfa5a3",
+      "size": 3929
     },
     {
       "path": "packages/bootstrap/src/economics/b1-fee-matrix.ts",
-      "sha256": "8de38d50fb3f091090f69963337e49c8ab00013491d756d5c000b3507e81e630",
-      "size": 5109
+      "sha256": "081e148be8c1e3ffce089cca44c14cb16fa94ee25ae06a320d422b23e9e37175",
+      "size": 5470
     },
     {
       "path": "packages/bootstrap/src/economics/b1-lateness-penalty.ts",
-      "sha256": "6548165278a75232e362f816a3f9c9120d45189948b74a83707e7951ae775705",
-      "size": 3702
+      "sha256": "5ebdeb74a8e21d37c102c7925cf377ba2dd06a35a46976756fa6e68bb9fa2d91",
+      "size": 3770
     },
     {
       "path": "packages/bootstrap/src/economics/b1-net-spread.ts",
@@ -1040,8 +1040,8 @@
     },
     {
       "path": "packages/bootstrap/src/operations/external-runtime-preflight.ts",
-      "sha256": "744490930a3018b540ec74512b3616bf5ee7b9be66b01f5fd3b5c73d63df1ecc",
-      "size": 46067
+      "sha256": "447b31ee54d27050e191a8542b92d3646fdabdb2550a22862375859c2e73cae0",
+      "size": 46080
     },
     {
       "path": "packages/bootstrap/src/operations/final-local-acceptance.ts",
@@ -1050,8 +1050,8 @@
     },
     {
       "path": "packages/bootstrap/src/operations/observability.ts",
-      "sha256": "602d560aba52ab3c6076e9792a22ecade770c1ff33545d03d5dfbc8259a297fc",
-      "size": 41516
+      "sha256": "ab2024a942781e074e1d719a7d368814cf1173fb524c567d2d894ab2ef8c3923",
+      "size": 42388
     },
     {
       "path": "packages/bootstrap/src/operations/operator-lifecycle.ts",
@@ -1060,13 +1060,13 @@
     },
     {
       "path": "packages/bootstrap/src/operations/paper-runtime-evidence.ts",
-      "sha256": "3a3cef7ef4922f64363ff7ce37d0bfd5890aea625afb0836062a4078b90bef63",
-      "size": 34573
+      "sha256": "b076850f3f8cb4a1a1b092a72bbd36a906b3a35b2434112152757416e6735e4a",
+      "size": 39271
     },
     {
       "path": "packages/bootstrap/src/operations/paper-runtime-handoff.ts",
-      "sha256": "90aef2b7ad44d4888d7bc6eba5f02e76e28d7ad5991a90d7a2470363f3c57d81",
-      "size": 10944
+      "sha256": "040a246b77086a11e93c33a70ee7cc85078e1f0334d12de8ce7db13b8d5b5c4b",
+      "size": 14105
     },
     {
       "path": "packages/bootstrap/src/operations/private-paper-runtime-scheduler.ts",
@@ -1085,8 +1085,8 @@
     },
     {
       "path": "packages/bootstrap/src/operations/release-packaging.ts",
-      "sha256": "60438a32d889ac7af02c084c361bc5486a714557e0003ebc67a916d72a9cafbb",
-      "size": 65280
+      "sha256": "264cf3e3288602f0649c75db06697836bb9c9b6e9ffa88ff75fde01c23d26a05",
+      "size": 71022
     },
     {
       "path": "packages/bootstrap/src/operations/release-upgrade.ts",
@@ -1095,8 +1095,8 @@
     },
     {
       "path": "packages/bootstrap/src/operations/runtime-applications.ts",
-      "sha256": "05e25d1f003b4d59fd43a7e65ab7c934cf5a704f4add0bce8117c66098b41971",
-      "size": 30652
+      "sha256": "216b980403a59909b07a27fb475d22cf6ee35b41364fd0bb46c510d17d9e0322",
+      "size": 31550
     },
     {
       "path": "packages/bootstrap/src/operations/service-runtime.ts",
@@ -1285,8 +1285,8 @@
     },
     {
       "path": "packages/bootstrap/src/solver/b1-rounding.ts",
-      "sha256": "4aef44efd447ea387fc99a25417bb2b5161b1294049334128806dc7381180d6a",
-      "size": 1396
+      "sha256": "32275d20e5de782278e33df95e94e207bee5b662a3fd23fb695ab98bed0ac281",
+      "size": 1466
     },
     {
       "path": "packages/bootstrap/src/solver/constraints.ts",
@@ -1735,8 +1735,8 @@
     },
     {
       "path": "scripts/create-source-handoff-archive.sh",
-      "sha256": "4d1e2ad7efce2840985483ef7b209219005312a1cf89c1122e4953a7006e0273",
-      "size": 1535
+      "sha256": "3636462392c76a66fae28b84eafd04a7a7db689e63d815bc82855b58f86e2f49",
+      "size": 4069
     },
     {
       "path": "scripts/load-node-runtime.sh",
@@ -1750,8 +1750,8 @@
     },
     {
       "path": "scripts/regenerate_source_manifest.py",
-      "sha256": "71ba3524dcda94104322509e3f7e219bf2ada8ed7c4a5f7a5f7ae72866314db4",
-      "size": 1539
+      "sha256": "a8bddfe398f3be7f764f2efa0a844f32389967edb99b9c6b6ef0bdf105d7fc15",
+      "size": 1562
     },
     {
       "path": "scripts/restore-required-executable-bits.js",
@@ -1880,8 +1880,8 @@
     },
     {
       "path": "scripts/validate_source_manifest.py",
-      "sha256": "33fbd429375129a2fddf1b728995b1e3a0ce854995fb3d9fbf3047bb60c2b7f6",
-      "size": 4175
+      "sha256": "0c6e647ef59e07c62d9b6eaf4c04011ec4ea0ddf112aef9484d7aa5d9fde7352",
+      "size": 5385
     },
     {
       "path": "scripts/validate_temp_inode_safety.py",
@@ -2445,8 +2445,8 @@
     },
     {
       "path": "tests/b1-capital-lock.test.ts",
-      "sha256": "f1e234fa09ef4dba8dc62cf21226364946435431ca7af4db3b9a0974b697eb55",
-      "size": 2228
+      "sha256": "331250c1e354ce9f4aa515b943574147b6385088c11d4b6b54a05c04818581f3",
+      "size": 2881
     },
     {
       "path": "tests/b1-cross-venue-backtest.test.ts",
@@ -2465,8 +2465,8 @@
     },
     {
       "path": "tests/b1-generalized-stake-vector.test.ts",
-      "sha256": "9007ac0b7cfe782de11d5c8207190174110158d0c7f224d15df2bd790a9bbbd7",
-      "size": 13181
+      "sha256": "333048ca69344cc8ed94b56518cf2a84ad15cac76aebd7e004e3938ce7a2433b",
+      "size": 13736
     },
     {
       "path": "tests/b1-gross-spread.test.ts",
@@ -2480,8 +2480,8 @@
     },
     {
       "path": "tests/b1-net-spread.test.ts",
-      "sha256": "d4b883286596177d20eb009348957a9a9260df8ca78c7c543215db8b2bd48310",
-      "size": 7355
+      "sha256": "99808a0cea16c8c856548432d5f756491acacf3b374ca7bec5fde1f6eb7eaacb",
+      "size": 10856
     },
     {
       "path": "tests/b1-operator-cockpit.test.ts",
@@ -2545,8 +2545,8 @@
     },
     {
       "path": "tests/betting-win-query-client.test.ts",
-      "sha256": "364c47e02c91b763ccd4ff130d67dc2f80d0ae9da21bede44af30ee92707d33e",
-      "size": 18954
+      "sha256": "9f41e8a2c7be4b34fe5d927b1b6d3caac3190032ede704c77735e9407c47abb7",
+      "size": 20836
     },
     {
       "path": "tests/betting-win-resource-records.test.ts",
@@ -2590,13 +2590,13 @@
     },
     {
       "path": "tests/bws-external-runtime-preflight.test.ts",
-      "sha256": "3187be91eb1d24782330332165475d0492d0914e213ea6a1e5a717d0af6e62a6",
-      "size": 29576
+      "sha256": "3226b2e42863b78dd20823cf028c3c0dbf07e62ecc7f85d723df3a9cd9c8902d",
+      "size": 30820
     },
     {
       "path": "tests/bws-final-local-acceptance.test.ts",
-      "sha256": "df4ce5cbbb96be348478c418acc32c7e37dba0324747634d5d1c22d091bbcb87",
-      "size": 33274
+      "sha256": "123103f3e0305dfbe7aebf0553ddad3657e7ef55067764e707a30a1eed3852f1",
+      "size": 33439
     },
     {
       "path": "tests/bws-loopback-acceptance-command.test.ts",
@@ -2615,8 +2615,8 @@
     },
     {
       "path": "tests/bws-operator-cockpit.test.ts",
-      "sha256": "62cd9be3a06681c806d3e13b6987be41a5459d94bb779e8413f746603af6a67b",
-      "size": 32195
+      "sha256": "a6c738fbfa3b56c984ffcea21af4e144c85e06b5b85c64fd1d8edaa1981f8846",
+      "size": 34399
     },
     {
       "path": "tests/bws-operator-lifecycle.test.ts",
@@ -2625,13 +2625,13 @@
     },
     {
       "path": "tests/bws-paper-runtime-evidence.test.ts",
-      "sha256": "7fe23a5def79c3f3bf592ec656479dfd7df7e74c94d7f498badac888a4b47dc3",
-      "size": 37179
+      "sha256": "83821fdcf993b356c68dd9f2cb6d56598a5bf45f6429bcc5ddeb2d314bd10afd",
+      "size": 45211
     },
     {
       "path": "tests/bws-paper-runtime-handoff.test.ts",
-      "sha256": "20ed90b7728f462c3d0a32a9b64eda46202b9784704fde6d01108dca00a2ffe5",
-      "size": 12243
+      "sha256": "3d94293bcd71e96719a2dc1f5496cd8ab89d3192e508f8405104a1d02ddda5df",
+      "size": 14959
     },
     {
       "path": "tests/bws-private-paper-scheduler-service.test.ts",
@@ -2650,23 +2650,23 @@
     },
     {
       "path": "tests/bws-read-only-query-api.test.ts",
-      "sha256": "2d1735836cdd6f0101586474931a1c135cb5299e5b9a380dde2aea6c3e02f949",
-      "size": 50921
+      "sha256": "5eb2fefaf4c07411f08cbeb134223f389c8e07cc055dbf13b9e0c02a5b563c41",
+      "size": 57786
     },
     {
       "path": "tests/bws-release-packaging.test.ts",
-      "sha256": "5f5ca35ecbfbc0b42ef4ed943943ed6a73f0e3eb37011e2bce735a95fa6ee556",
-      "size": 12836
+      "sha256": "9f1eaf8954ddc893e4672d20668408d901bd2a60a08bd616e4b627d55e8fa78c",
+      "size": 25032
     },
     {
       "path": "tests/bws-release-upgrade.test.ts",
-      "sha256": "5abd8be1b5a549c6e917b647eabcc7d5c4114778519f705859eee2c45034296d",
-      "size": 33805
+      "sha256": "1c3297ba6954979c58d07763a0a1ddacd1e4b80656ad4e090ff3a943346d7af8",
+      "size": 34191
     },
     {
       "path": "tests/bws-runtime-applications.test.ts",
-      "sha256": "c4ed865eaf1900a11d59c6ca969fe5dce5381710bfdde60baa72d51d43e9e8ca",
-      "size": 23910
+      "sha256": "f4f7e24c582054808d8eb92b0217162956942ce50b63d9705e4ccc18d7360599",
+      "size": 32224
     },
     {
       "path": "tests/bws-service-runtime.test.ts",
@@ -2845,8 +2845,8 @@
     },
     {
       "path": "tests/packaging-helpers.test.ts",
-      "sha256": "f08a75dfb1476e6259e99670c6cf584bb306ca9de9c7fbed299b009717e27b0b",
-      "size": 31001
+      "sha256": "78bdc44fee6ae5afd18afde2d0de21c17626101d921af12927c658db91f6e722",
+      "size": 44120
     },
     {
       "path": "tests/paper-autopilot-contract.test.ts",
@@ -3020,8 +3020,8 @@
     },
     {
       "path": "tests/validate-source-manifest.test.ts",
-      "sha256": "c85313b9e0fbd2b7fbfff7ed6240ec5df30078bb190ac47849339aa17908b862",
-      "size": 15763
+      "sha256": "38c508ad9d11b9ef2608cb8c88b8843481c9fecde20de260bd47423c227e4a2f",
+      "size": 19358
     },
     {
       "path": "tests/validation-matrix-contract.test.ts",
@@ -3055,8 +3055,8 @@
     },
     {
       "path": "zip_codebase.sh",
-      "sha256": "c48b29e0b9a5b8b3c14b77fd779c508438875589f5a7bba2cc5e23c60a6a3e14",
-      "size": 6906
+      "sha256": "3e6b430cf99c7566b3b548458977872aa192be49a12d3e81888e9c2ec298ec26",
+      "size": 10371
     }
   ]
 }

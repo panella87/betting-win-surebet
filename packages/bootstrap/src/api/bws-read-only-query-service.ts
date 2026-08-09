@@ -58,6 +58,41 @@ const PRIVATE_PAPER_RUNTIME_JOB_SCHEMA = 'bws.private_paper_runtime_job.v1';
 const PRIVATE_PAPER_RUNTIME_CYCLE_CHECKPOINT_RETENTION = 3;
 const PRIVATE_PAPER_RUNTIME_CYCLE_SCAN_MULTIPLIER = 4;
 const PRIVATE_PAPER_RUNTIME_CYCLE_SCHEDULER_RETENTION = 8;
+const QUERY_REQUEST_KEYS = new Set(['cursor', 'expand', 'filters', 'pageSize']);
+const PRIVATE_PAPER_RUNTIME_CYCLE_REQUEST_KEYS = new Set(['expand', 'filters', 'pageSize']);
+const B1_BACKTEST_RUN_FILTER_KEYS = new Set([
+  'offlineFalsificationStatus',
+  'runId',
+  'sourceManifestHash',
+  'upstreamCheckpointId',
+  'upstreamLockFingerprint',
+]);
+const PINNED_STRATEGY_EXPORT_FILTER_KEYS = new Set([
+  'endpointId',
+  'exportId',
+  'importRunId',
+  'providerId',
+  'sourceSha256',
+  'upstreamLockRecordId',
+]);
+const PRIVATE_PAPER_RUNTIME_CYCLE_FILTER_KEYS = new Set([
+  'acceptanceState',
+  'queueName',
+  'runtimeId',
+  'schedulerCheckpointId',
+  'upstreamLockRecordId',
+]);
+const STRATEGY_LEDGER_FILTER_KEYS = new Set([
+  'acceptanceState',
+  'pinnedStrategyExportRecordId',
+  'reportId',
+  'runFingerprintSha256',
+  'runKind',
+  'runReferenceId',
+  'sourceKind',
+  'sourceManifestHash',
+  'upstreamLockRecordId',
+]);
 
 export interface BwsReadOnlyQueryBoundary {
   readonly automaticFallback: 'forbidden';
@@ -1313,6 +1348,13 @@ function parsePrivatePaperRuntimeJobId(
 function validateConfig(
   config: BwsReadOnlyQueryServiceConfig,
 ): BoundaryResult<Readonly<BwsReadOnlyQueryServiceConfig>> {
+  if (asRecord(config) === undefined) {
+    return blocked(
+      'BWS_QUERY_CONFIG_INVALID',
+      'BWS read-only query service configuration must be an object.',
+      'Object-shaped BWS read-only query service configuration.',
+    );
+  }
   if (!Number.isSafeInteger(config.maxPageSize) || config.maxPageSize <= 0) {
     return blocked(
       'BWS_QUERY_PAGE_SIZE_BOUND_INVALID',
@@ -1376,6 +1418,13 @@ function validateResponseUpstreamLock(
 function validateDependencies(
   dependencies: BwsReadOnlyQueryDependencies,
 ): BoundaryResult<Readonly<BwsReadOnlyQueryDependencies>> {
+  if (asRecord(dependencies) === undefined) {
+    return blocked(
+      'BWS_QUERY_DEPENDENCIES_INVALID',
+      'BWS read-only query service requires explicit persistence dependencies for B1 backtests, upstream locks, import runs, pinned exports, scheduler checkpoints, upstream API checkpoints, worker jobs, and strategy ledger queries.',
+      'Explicit surebet.* repository dependencies for the BWS read-only query service.',
+    );
+  }
   if (
     typeof dependencies.b1BacktestRuns?.get !== 'function'
     || typeof dependencies.b1BacktestRuns?.list !== 'function'
@@ -1405,7 +1454,7 @@ function validateB1BacktestRunRequest(
   config: Readonly<BwsReadOnlyQueryServiceConfig>,
   request: BwsB1BacktestRunQueryRequest,
 ): BoundaryResult<NormalizedB1BacktestRunRequest> {
-  const requestObject = validateQueryRequestObject(request, 'B1 read-only backtest run');
+  const requestObject = validateQueryRequestObject(request, 'B1 read-only backtest run', QUERY_REQUEST_KEYS);
   if (!requestObject.ok) {
     return requestObject;
   }
@@ -1420,7 +1469,7 @@ function validateB1BacktestRunRequest(
   if (!pageSize.ok) {
     return pageSize;
   }
-  const filtersObject = validateQueryFiltersObject(request.filters, 'B1 read-only backtest run');
+  const filtersObject = validateQueryFiltersObject(request.filters, 'B1 read-only backtest run', B1_BACKTEST_RUN_FILTER_KEYS);
   if (!filtersObject.ok) {
     return filtersObject;
   }
@@ -1480,7 +1529,7 @@ function validateStrategyLedgerRequest(
   config: Readonly<BwsReadOnlyQueryServiceConfig>,
   request: BwsStrategyLedgerQueryRequest,
 ): BoundaryResult<NormalizedStrategyLedgerRequest> {
-  const requestObject = validateQueryRequestObject(request, 'strategy ledger');
+  const requestObject = validateQueryRequestObject(request, 'strategy ledger', QUERY_REQUEST_KEYS);
   if (!requestObject.ok) {
     return requestObject;
   }
@@ -1495,7 +1544,7 @@ function validateStrategyLedgerRequest(
   if (!pageSize.ok) {
     return pageSize;
   }
-  const filtersObject = validateQueryFiltersObject(request.filters, 'strategy ledger');
+  const filtersObject = validateQueryFiltersObject(request.filters, 'strategy ledger', STRATEGY_LEDGER_FILTER_KEYS);
   if (!filtersObject.ok) {
     return filtersObject;
   }
@@ -1570,7 +1619,7 @@ function validatePinnedStrategyExportRequest(
   config: Readonly<BwsReadOnlyQueryServiceConfig>,
   request: BwsPinnedStrategyExportQueryRequest,
 ): BoundaryResult<NormalizedPinnedStrategyExportRequest> {
-  const requestObject = validateQueryRequestObject(request, 'pinned strategy export');
+  const requestObject = validateQueryRequestObject(request, 'pinned strategy export', QUERY_REQUEST_KEYS);
   if (!requestObject.ok) {
     return requestObject;
   }
@@ -1585,7 +1634,7 @@ function validatePinnedStrategyExportRequest(
   if (!pageSize.ok) {
     return pageSize;
   }
-  const filtersObject = validateQueryFiltersObject(request.filters, 'pinned strategy export');
+  const filtersObject = validateQueryFiltersObject(request.filters, 'pinned strategy export', PINNED_STRATEGY_EXPORT_FILTER_KEYS);
   if (!filtersObject.ok) {
     return filtersObject;
   }
@@ -1641,7 +1690,7 @@ function validatePrivatePaperRuntimeCycleRequest(
   config: Readonly<BwsReadOnlyQueryServiceConfig>,
   request: BwsPrivatePaperRuntimeCycleQueryRequest,
 ): BoundaryResult<NormalizedPrivatePaperRuntimeCycleRequest> {
-  const requestObject = validateQueryRequestObject(request, 'private-paper runtime cycle');
+  const requestObject = validateQueryRequestObject(request, 'private-paper runtime cycle', PRIVATE_PAPER_RUNTIME_CYCLE_REQUEST_KEYS);
   if (!requestObject.ok) {
     return requestObject;
   }
@@ -1656,7 +1705,7 @@ function validatePrivatePaperRuntimeCycleRequest(
   if (!pageSize.ok) {
     return pageSize;
   }
-  const filtersObject = validateQueryFiltersObject(request.filters, 'private-paper runtime cycle');
+  const filtersObject = validateQueryFiltersObject(request.filters, 'private-paper runtime cycle', PRIVATE_PAPER_RUNTIME_CYCLE_FILTER_KEYS);
   if (!filtersObject.ok) {
     return filtersObject;
   }
@@ -1692,24 +1741,53 @@ function validatePrivatePaperRuntimeCycleRequest(
   );
 }
 
-function validateQueryRequestObject(value: unknown, resource: string): BoundaryResult<undefined> {
-  if (asRecord(value) === undefined) {
+function validateQueryRequestObject(value: unknown, resource: string, allowedKeys: ReadonlySet<string>): BoundaryResult<undefined> {
+  const record = asRecord(value);
+  if (record === undefined) {
     return blocked(
       'BWS_QUERY_REQUEST_INVALID',
       `BWS read-only ${resource} query request must be a JSON object.`,
       `Explicit BWS read-only ${resource} query request object.`,
     );
   }
+  const keys = validateAllowedObjectKeys(record, allowedKeys, resource, 'request', 'BWS_QUERY_REQUEST_INVALID');
+  if (!keys.ok) {
+    return keys;
+  }
   return accepted(undefined);
 }
 
-function validateQueryFiltersObject(value: unknown, resource: string): BoundaryResult<undefined> {
-  if (asRecord(value) === undefined) {
+function validateQueryFiltersObject(value: unknown, resource: string, allowedKeys: ReadonlySet<string>): BoundaryResult<undefined> {
+  const record = asRecord(value);
+  if (record === undefined) {
     return blocked(
       'BWS_QUERY_FILTERS_INVALID',
       `BWS read-only ${resource} query filters must be a JSON object.`,
       `Explicit BWS read-only ${resource} query filters object.`,
     );
+  }
+  const keys = validateAllowedObjectKeys(record, allowedKeys, resource, 'filter', 'BWS_QUERY_FILTERS_INVALID');
+  if (!keys.ok) {
+    return keys;
+  }
+  return accepted(undefined);
+}
+
+function validateAllowedObjectKeys(
+  record: Readonly<Record<string, unknown>>,
+  allowedKeys: ReadonlySet<string>,
+  resource: string,
+  label: 'filter' | 'request',
+  code: string,
+): BoundaryResult<undefined> {
+  for (const key of Object.keys(record)) {
+    if (!allowedKeys.has(key)) {
+      return blocked(
+        code,
+        `BWS read-only ${resource} query ${label} key ${key} is not supported.`,
+        `Supported BWS read-only ${resource} query ${label} keys.`,
+      );
+    }
   }
   return accepted(undefined);
 }

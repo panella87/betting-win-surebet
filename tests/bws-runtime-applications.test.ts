@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createServer } from 'node:http';
+import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
+import { EventEmitter } from 'node:events';
 import { copyFileSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import type { AddressInfo } from 'node:net';
 import { join } from 'node:path';
@@ -15,6 +16,7 @@ import {
   SUREBET_PROVIDER_CONNECTIONS_ENV,
   SUREBET_RUNTIME_MODE_ENV,
   accepted,
+  createBwsApiRequestMetricsCollector,
   resolveBwsServiceRuntimeConfig,
   runBwsPrivatePaperWorkerCli,
   runBwsReadOnlyApiCli,
@@ -249,6 +251,82 @@ test('read-only API application fails closed when the managed cockpit build is m
         `Managed cockpit build targets http://127\\.0\\.0\\.1:9999 but the runtime serves ${escapeForRegExp(runtimeBaseUrl)}`,
       ),
     );
+  } finally {
+    fixture.dispose();
+  }
+});
+
+test('managed runtime HTTP boundary returns bounded JSON 400 for missing and malformed raw request URLs', async () => {
+  const fixture = createRuntimeHttpBoundaryFixture();
+  try {
+    const config = fixture.config;
+    const queryService = createQueryServiceStub();
+    const metricsCollector = createBwsApiRequestMetricsCollector();
+    let managedListener: ((request: IncomingMessage, response: ServerResponse<IncomingMessage>) => void | Promise<void>) | undefined;
+
+    const application = await startBwsReadOnlyApiApplication({
+      applyMigrations() {
+        return Object.freeze({ applied: Object.freeze([]), skipped: Object.freeze([]) });
+      },
+      cockpitProcessDefinition: createCockpitProcessDefinition(config),
+      config,
+      metricsCollector,
+      queryService,
+      repositoryRoot: fixture.repositoryRoot,
+      signalRegistrar: createSignalCapture().registrar,
+      startHttpServer(listener) {
+        const requestListener = listener as (request: IncomingMessage, response: ServerResponse<IncomingMessage>) => void | Promise<void>;
+        managedListener = requestListener;
+        return createNoSocketHttpServer();
+      },
+    });
+
+    try {
+      if (managedListener === undefined) {
+        throw new Error('Managed runtime listener was not captured.');
+      }
+
+      const missingUrl = createJsonResponseCapture();
+      await managedListener({ method: 'GET' } as IncomingMessage, missingUrl.response);
+      assert.equal(missingUrl.response.statusCode, 400);
+      assert.equal(missingUrl.headers['cache-control'], 'no-store');
+      assert.equal(missingUrl.headers['content-type'], 'application/json; charset=utf-8');
+      assert.equal(missingUrl.headers['x-content-type-options'], 'nosniff');
+      assert.equal(missingUrl.headers['x-frame-options'], 'DENY');
+      assert.equal(missingUrl.headers['referrer-policy'], 'no-referrer');
+      assert.equal(missingUrl.headers['content-security-policy'], "default-src 'self'; connect-src 'self'; img-src 'self' data:; script-src 'self'; style-src 'self'; base-uri 'none'; frame-ancestors 'none'; object-src 'none'");
+      const missingBody = JSON.parse(missingUrl.readBody()) as {
+        readonly error: { readonly code: string; readonly message: string };
+        readonly ok: boolean;
+      };
+      assert.equal(missingBody.ok, false);
+      assert.equal(missingBody.error.code, 'BWS_MANAGED_RUNTIME_REQUEST_INVALID');
+      assert.equal(missingBody.error.message, 'Managed runtime request URL is required.');
+
+      const malformedUrl = createJsonResponseCapture();
+      await managedListener({ method: 'GET', url: 'http://[::1' } as IncomingMessage, malformedUrl.response);
+      assert.equal(malformedUrl.response.statusCode, 400);
+      assert.equal(malformedUrl.headers['content-type'], 'application/json; charset=utf-8');
+      const malformedBody = JSON.parse(malformedUrl.readBody()) as {
+        readonly error: { readonly code: string; readonly message: string };
+        readonly ok: boolean;
+      };
+      assert.equal(malformedBody.ok, false);
+      assert.equal(malformedBody.error.code, 'BWS_MANAGED_RUNTIME_REQUEST_INVALID');
+      assert.match(malformedBody.error.message, /Invalid URL/);
+
+      const metrics = metricsCollector.snapshot();
+      assert.equal(metrics.cockpit.requestCount, 2);
+      assert.equal(metrics.cockpit.errorCount, 2);
+      assert.equal(metrics.cockpit.lastStatusCode, 400);
+      assert.equal(metrics.api.requestCount, 0);
+      assert.equal(metrics.health.requestCount, 0);
+      assert.doesNotMatch(missingUrl.readBody(), /BWS Operator Cockpit/);
+      assert.doesNotMatch(malformedUrl.readBody(), /BWS Operator Cockpit/);
+    } finally {
+      await application.close();
+      await application.closed;
+    }
   } finally {
     fixture.dispose();
   }
@@ -498,6 +576,40 @@ function createLogCapture(): {
   });
 }
 
+function createJsonResponseCapture(): {
+  readonly headers: Record<string, number | string | readonly string[]>;
+  readonly response: ServerResponse<IncomingMessage>;
+  readBody(): string;
+} {
+  const headers: Record<string, number | string | readonly string[]> = {};
+  let payload = '';
+  const response = {
+    statusCode: 0,
+    end(chunk?: string | Uint8Array) {
+      if (chunk !== undefined) {
+        payload += typeof chunk === 'string' ? chunk : Buffer.from(chunk).toString('utf-8');
+      }
+      return response as ServerResponse<IncomingMessage>;
+    },
+    setHeader(name: string, value: number | string | readonly string[]) {
+      headers[name.toLowerCase()] = value;
+      return response as ServerResponse<IncomingMessage>;
+    },
+    write(chunk: string | Uint8Array) {
+      payload += typeof chunk === 'string' ? chunk : Buffer.from(chunk).toString('utf-8');
+      return true;
+    },
+  } as ServerResponse<IncomingMessage>;
+
+  return Object.freeze({
+    headers,
+    readBody() {
+      return payload;
+    },
+    response,
+  });
+}
+
 function createWorkerJobsStub() {
   return Object.freeze({
     claimNext() {
@@ -564,10 +676,88 @@ async function createRuntimeFixture(): Promise<{
   readonly environment: BwsServiceRuntimeEnvironment;
   readonly repositoryRoot: string;
 }> {
+  return createRuntimeFixtureWithApiPort(await reserveLoopbackPort());
+}
+
+function createRuntimeHttpBoundaryFixture(): {
+  readonly config: BwsServiceRuntimeConfig;
+  readonly dispose: () => void;
+  readonly repositoryRoot: string;
+} {
+  const root = mkdtempSync(join(tmpdir(), 'bws-runtime-http-boundary-'));
+  const repositoryRoot = join(root, 'betting-win-surebet');
+  const upstreamRoot = join(root, 'betting-win');
+  const apiPort = 43121;
+  mkdirSync(upstreamRoot, { recursive: true });
+  createManagedCockpitBuild(repositoryRoot, `http://127.0.0.1:${String(apiPort)}`);
+  const config = Object.freeze({
+    api: Object.freeze({
+      bindHost: '127.0.0.1',
+      port: apiPort,
+    }),
+    persistence: Object.freeze({
+      database: 'surebet_local',
+      host: '127.0.0.1',
+      password: 'super-secret-password',
+      port: 5432,
+      user: 'surebet_user',
+    }),
+    policy: Object.freeze({
+      executionEnabled: false,
+      providerConnections: 'disabled',
+      runtimeMode: 'paper',
+    }),
+    processDefinitions: Object.freeze([]),
+    upstream: Object.freeze({
+      lock: Object.freeze({
+        capabilities: Object.freeze([
+          'exportHistoricalBundle',
+          'getHistoricalQuotes',
+          'getProviderGenerations',
+          'inspectSourceLineage',
+        ]),
+        commitSha: '1'.repeat(40),
+        contractAlias: 'betting-win-strategy-export.v1',
+        contractSchema: 'betting-win.strategy-export.v1',
+        gitTreeSha: '2'.repeat(40),
+        packageVersion: '0.48.0',
+        packageVersions: Object.freeze({
+          '@betting-win/provider-collection': '0.48.0',
+        }),
+        repository: 'betting-win',
+        repositoryPath: upstreamRoot,
+        schema: 'betting-win-surebet-upstream-lock-v1',
+        sourceFingerprintAlgorithm: 'sha256_git_ls_tree_r_full_tree_head_v1',
+        sourceView: 'committed_git_head',
+        surebetProfile: 'surebet_standard_binary_v0',
+        trackedTreeListingSha256: '3'.repeat(64),
+        verifiedAt: TEST_TIMESTAMP,
+      }),
+      lockPath: 'config/betting-win.upstream.lock.json',
+      repoPath: upstreamRoot,
+    }),
+    worker: Object.freeze({
+      leaseDurationMs: 30000,
+      queueName: 'private-paper',
+      workerId: 'worker-bws-520',
+    }),
+  } satisfies BwsServiceRuntimeConfig);
+
+  return Object.freeze({
+    config,
+    dispose: () => rmSync(root, { force: true, recursive: true }),
+    repositoryRoot,
+  });
+}
+
+async function createRuntimeFixtureWithApiPort(apiPort: number): Promise<{
+  readonly dispose: () => void;
+  readonly environment: BwsServiceRuntimeEnvironment;
+  readonly repositoryRoot: string;
+}> {
   const root = mkdtempSync(join(tmpdir(), 'bws-runtime-applications-'));
   const repositoryRoot = join(root, 'betting-win-surebet');
   const upstreamRoot = join(root, 'betting-win');
-  const apiPort = await reserveLoopbackPort();
   mkdirSync(join(repositoryRoot, 'config'), { recursive: true });
   mkdirSync(join(repositoryRoot, 'schemas'), { recursive: true });
   copyFileSync(
@@ -602,6 +792,34 @@ async function createRuntimeFixture(): Promise<{
     }),
     repositoryRoot,
   };
+}
+
+function createNoSocketHttpServer(): ReturnType<typeof createServer> {
+  const events = new EventEmitter();
+  const server = {
+    close(callback?: (error?: Error) => void) {
+      process.nextTick(() => {
+        events.emit('close');
+        callback?.();
+      });
+      return server;
+    },
+    listen() {
+      process.nextTick(() => {
+        events.emit('listening');
+      });
+      return server;
+    },
+    off(eventName: string, listener: (...args: unknown[]) => void) {
+      events.off(eventName, listener);
+      return server;
+    },
+    once(eventName: string, listener: (...args: unknown[]) => void) {
+      events.once(eventName, listener);
+      return server;
+    },
+  } as ReturnType<typeof createServer>;
+  return server;
 }
 
 

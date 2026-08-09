@@ -34,21 +34,21 @@ export function calculateB1FeeCharge(
   if (!normalizedMatrix.ok) {
     return normalizedMatrix;
   }
-  if (venueOrBookmakerId.length === 0) {
+  if (typeof venueOrBookmakerId !== 'string' || venueOrBookmakerId.length === 0) {
     return blocked(
       'B1_FEE_VENUE_MISSING',
       'B1 fee calculation requires an explicit venue for every selected quote.',
       'B1 selected quote venue_or_bookmaker_id.',
     );
   }
-  if (selectionEquivalenceKey.length === 0) {
+  if (typeof selectionEquivalenceKey !== 'string' || selectionEquivalenceKey.length === 0) {
     return blocked(
       'B1_FEE_SELECTION_MISSING',
       'B1 fee calculation requires selection equivalence evidence for every selected quote.',
       'B1 selected quote selection_equivalence_key.',
     );
   }
-  if (stakeMinor <= 0n) {
+  if (typeof stakeMinor !== 'bigint' || stakeMinor <= 0n) {
     return blocked(
       'B1_STAKE_NOT_POSITIVE',
       'B1 fee calculation requires a positive stake assumption.',
@@ -105,7 +105,7 @@ export function normalizeB1FeeMatrix(matrix: B1FeeMatrix): BoundaryResult<B1FeeM
     if (!normalizedEntry.ok) {
       return normalizedEntry;
     }
-    const key = `${entry.venueOrBookmakerId}\0${entry.selectionEquivalenceKey}`;
+    const key = `${normalizedEntry.value.venueOrBookmakerId}\0${normalizedEntry.value.selectionEquivalenceKey}`;
     if (seenKeys.has(key)) {
       return blocked(
         'B1_FEE_MATRIX_DUPLICATE_ENTRY',
@@ -129,21 +129,26 @@ function normalizeB1FeeMatrixEntry(entry: B1FeeMatrixEntry): BoundaryResult<B1Fe
       'B1 fee matrix entry.',
     );
   }
-  if (entry.venueOrBookmakerId.length === 0 || entry.selectionEquivalenceKey.length === 0) {
+  if (
+    typeof entry.venueOrBookmakerId !== 'string'
+      || entry.venueOrBookmakerId.length === 0
+      || typeof entry.selectionEquivalenceKey !== 'string'
+      || entry.selectionEquivalenceKey.length === 0
+  ) {
     return blocked(
       'B1_FEE_MATRIX_ENTRY_KEY_INVALID',
       'B1 fee matrix entries require venue and selection equivalence keys.',
       'B1 fee matrix entry keyed by venue and selection equivalence.',
     );
   }
-  if (entry.feeBps < 0n) {
+  if (typeof entry.feeBps !== 'bigint' || entry.feeBps < 0n) {
     return blocked(
       'B1_FEE_BPS_INVALID',
       'B1 fee basis points must be non-negative integer units.',
       'Non-negative B1 fee basis points.',
     );
   }
-  if (entry.fixedFeeMinor < 0n) {
+  if (typeof entry.fixedFeeMinor !== 'bigint' || entry.fixedFeeMinor < 0n) {
     return blocked(
       'B1_FIXED_FEE_INVALID',
       'B1 fixed fee must be non-negative minor units.',

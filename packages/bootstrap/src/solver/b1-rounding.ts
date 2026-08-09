@@ -12,14 +12,14 @@ export interface B1RoundedStake {
 }
 
 export function roundUpB1StakeMinor(rawStakeMinor: bigint, stepMinor: bigint): BoundaryResult<B1RoundedStake> {
-  if (rawStakeMinor <= 0n) {
+  if (typeof rawStakeMinor !== 'bigint' || rawStakeMinor <= 0n) {
     return blocked(
       'B1_STAKE_NOT_POSITIVE',
       'B1 stake rounding requires positive integer minor-unit stake input.',
       'Positive B1 stake in integer minor units.',
     );
   }
-  if (stepMinor <= 0n) {
+  if (typeof stepMinor !== 'bigint' || stepMinor <= 0n) {
     return blocked(
       'B1_STAKE_VECTOR_ROUNDING_STEP_INVALID',
       'B1 stake-vector solving requires a positive stake rounding step.',

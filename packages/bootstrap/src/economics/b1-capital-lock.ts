@@ -33,14 +33,19 @@ export function calculateB1CapitalLockCharge(
   if (!normalizedPolicy.ok) {
     return normalizedPolicy;
   }
-  if (stakeMinor <= 0n) {
+  if (typeof stakeMinor !== 'bigint' || stakeMinor <= 0n) {
     return blocked(
       'B1_CAPITAL_LOCK_STAKE_INVALID',
       'B1 capital lock requires positive total stake.',
       'Positive B1 total stake in minor units.',
     );
   }
-  if (feeMinor < 0n || quoteAgePenaltyMinor < 0n) {
+  if (
+    typeof feeMinor !== 'bigint'
+    || typeof quoteAgePenaltyMinor !== 'bigint'
+    || feeMinor < 0n
+    || quoteAgePenaltyMinor < 0n
+  ) {
     return blocked(
       'B1_CAPITAL_LOCK_COST_INPUT_INVALID',
       'B1 capital lock requires non-negative fee and quote-age penalty inputs.',

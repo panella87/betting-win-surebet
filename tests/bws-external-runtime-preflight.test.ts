@@ -58,6 +58,27 @@ test('external runtime preflight CLI rejects the retired mode selector', async (
   );
 });
 
+test('external runtime preflight CLI rejects unknown flags before required file checks', async () => {
+  await assert.rejects(
+    () => runBwsExternalRuntimePreflightCli(['prepare', '--unknown-flag', 'value']),
+    /Unknown BWS external runtime preflight flag: --unknown-flag/,
+  );
+});
+
+test('external runtime preflight CLI rejects duplicate flags before value parsing and file checks', async () => {
+  await assert.rejects(
+    () =>
+      runBwsExternalRuntimePreflightCli([
+        'prepare',
+        '--campaign-duration-hours',
+        'not-int',
+        '--campaign-duration-hours',
+        '1',
+      ]),
+    /Duplicate BWS external runtime preflight flag: --campaign-duration-hours/,
+  );
+});
+
 test('external runtime preflight CLI rejects unsafe integer flag values before file IO', async () => {
   await assert.rejects(
     () =>
@@ -192,6 +213,23 @@ test('external runtime preflight rejects credential-bearing API URLs', SEQUENTIA
           }),
         }),
       /must not include embedded credentials/i,
+    );
+  } finally {
+    fixture.dispose();
+  }
+});
+
+test('external runtime preflight rejects API key env names in the private environment file', SEQUENTIAL_TEST_OPTIONS, async () => {
+  const fixture = await createFixture();
+  writeFileSync(
+    fixture.apiEnvFile,
+    `${readFileSync(fixture.apiEnvFile, 'utf-8')}BWS_UPSTREAM_API_KEY=test-only\n`,
+    'utf-8',
+  );
+  try {
+    await assert.rejects(
+      () => createBwsExternalRuntimeCampaignManifest(createApiRequest(fixture)),
+      /unexpected sensitive key BWS_UPSTREAM_API_KEY/i,
     );
   } finally {
     fixture.dispose();

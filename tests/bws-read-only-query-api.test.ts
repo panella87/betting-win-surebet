@@ -122,6 +122,23 @@ test('BWS read-only query service fails closed on missing provenance expansion, 
   assert.equal(lowercaseShaFilter.ok, true);
 });
 
+test('BWS read-only query service constructor returns blocked results for non-object config and dependencies', () => {
+  for (const config of [undefined, null, 'invalid', [], () => TEST_TIMESTAMP]) {
+    const result = createBwsReadOnlyQueryService(createStubDependencies(), config as never);
+    assert.equal(result.ok, false);
+    assert.equal(result.blockers[0]?.code, 'BWS_QUERY_CONFIG_INVALID');
+  }
+
+  for (const dependencies of [undefined, null, 'invalid', [], () => createStubDependencies()]) {
+    const result = createBwsReadOnlyQueryService(dependencies as never, {
+      generatedAt: () => TEST_TIMESTAMP,
+      maxPageSize: 50,
+    });
+    assert.equal(result.ok, false);
+    assert.equal(result.blockers[0]?.code, 'BWS_QUERY_DEPENDENCIES_INVALID');
+  }
+});
+
 test('BWS read-only query service fails closed on malformed direct request and filter shapes', () => {
   const service = createBwsReadOnlyQueryService(createStubDependencies(), {
     generatedAt: () => TEST_TIMESTAMP,
@@ -131,24 +148,90 @@ test('BWS read-only query service fails closed on malformed direct request and f
 
   const queryMethods = Object.freeze([
     Object.freeze({
+      unknownFilterRequest: Object.freeze({
+        expand: 'provenance',
+        filters: Object.freeze({
+          acceptanceState: 'blocked',
+          unsupportedFilter: 'ignored',
+          runKind: 'private_paper_runtime_cycle',
+        }),
+        pageSize: 1,
+      }),
+      unknownTopLevelRequest: Object.freeze({
+        expand: 'provenance',
+        filters: Object.freeze({
+          acceptanceState: 'blocked',
+          runKind: 'private_paper_runtime_cycle',
+        }),
+        pageSize: 1,
+        unsupportedTopLevel: 'ignored',
+      }),
       missingFiltersRequest: Object.freeze({ expand: 'provenance', pageSize: 1 }),
       name: 'strategy ledger',
       nonObjectFiltersRequest: Object.freeze({ expand: 'provenance', filters: 'not-an-object', pageSize: 1 }),
       query: (request: unknown) => service.value.queryStrategyLedger(request as never),
     }),
     Object.freeze({
+      unknownFilterRequest: Object.freeze({
+        expand: 'provenance',
+        filters: Object.freeze({
+          providerId: 'polymarket',
+          unsupportedFilter: 'ignored',
+        }),
+        pageSize: 1,
+      }),
+      unknownTopLevelRequest: Object.freeze({
+        expand: 'provenance',
+        filters: Object.freeze({
+          providerId: 'polymarket',
+        }),
+        pageSize: 1,
+        unsupportedTopLevel: 'ignored',
+      }),
       missingFiltersRequest: Object.freeze({ expand: 'provenance', pageSize: 1 }),
       name: 'pinned strategy exports',
       nonObjectFiltersRequest: Object.freeze({ expand: 'provenance', filters: 'not-an-object', pageSize: 1 }),
       query: (request: unknown) => service.value.queryPinnedStrategyExports(request as never),
     }),
     Object.freeze({
+      unknownFilterRequest: Object.freeze({
+        expand: 'provenance',
+        filters: Object.freeze({
+          acceptanceState: 'blocked',
+          unsupportedFilter: 'ignored',
+        }),
+        pageSize: 1,
+      }),
+      unknownTopLevelRequest: Object.freeze({
+        expand: 'provenance',
+        filters: Object.freeze({
+          acceptanceState: 'blocked',
+        }),
+        pageSize: 1,
+        unsupportedTopLevel: 'ignored',
+      }),
       missingFiltersRequest: Object.freeze({ expand: 'provenance', pageSize: 1 }),
       name: 'private-paper runtime cycles',
       nonObjectFiltersRequest: Object.freeze({ expand: 'provenance', filters: 'not-an-object', pageSize: 1 }),
       query: (request: unknown) => service.value.queryPrivatePaperRuntimeCycles(request as never),
     }),
     Object.freeze({
+      unknownFilterRequest: Object.freeze({
+        expand: 'reporting',
+        filters: Object.freeze({
+          offlineFalsificationStatus: 'B1_OFFLINE_RESEARCH_CANDIDATES_OBSERVED',
+          unsupportedFilter: 'ignored',
+        }),
+        pageSize: 1,
+      }),
+      unknownTopLevelRequest: Object.freeze({
+        expand: 'reporting',
+        filters: Object.freeze({
+          offlineFalsificationStatus: 'B1_OFFLINE_RESEARCH_CANDIDATES_OBSERVED',
+        }),
+        pageSize: 1,
+        unsupportedTopLevel: 'ignored',
+      }),
       missingFiltersRequest: Object.freeze({ expand: 'reporting', pageSize: 1 }),
       name: 'B1 backtest runs',
       nonObjectFiltersRequest: Object.freeze({ expand: 'reporting', filters: 'not-an-object', pageSize: 1 }),
@@ -172,6 +255,14 @@ test('BWS read-only query service fails closed on malformed direct request and f
     const nonObjectFilters = queryMethod.query(queryMethod.nonObjectFiltersRequest);
     assert.equal(nonObjectFilters.ok, false, queryMethod.name);
     assert.equal(nonObjectFilters.blockers[0]?.code, 'BWS_QUERY_FILTERS_INVALID', queryMethod.name);
+
+    const unknownTopLevel = queryMethod.query(queryMethod.unknownTopLevelRequest);
+    assert.equal(unknownTopLevel.ok, false, queryMethod.name);
+    assert.equal(unknownTopLevel.blockers[0]?.code, 'BWS_QUERY_REQUEST_INVALID', queryMethod.name);
+
+    const unknownFilter = queryMethod.query(queryMethod.unknownFilterRequest);
+    assert.equal(unknownFilter.ok, false, queryMethod.name);
+    assert.equal(unknownFilter.blockers[0]?.code, 'BWS_QUERY_FILTERS_INVALID', queryMethod.name);
   }
 });
 
@@ -593,6 +684,102 @@ test('BWS read-only query HTTP handler applies security headers and returns fail
     server.close();
     await once(server, 'close');
   }
+});
+
+test('BWS read-only query HTTP handler returns bounded JSON 400 for malformed raw request URL', async () => {
+  const service = createBwsReadOnlyQueryService(createStubDependencies(), {
+    generatedAt: () => TEST_TIMESTAMP,
+    maxPageSize: 50,
+  });
+  assert.equal(service.ok, true);
+
+  const headers: Record<string, number | string | readonly string[]> = {};
+  let responsePayload: string | undefined;
+  const response = {
+    statusCode: 0,
+    end(payload: string | Uint8Array) {
+      responsePayload = typeof payload === 'string' ? payload : Buffer.from(payload).toString('utf-8');
+      return this as ServerResponse<IncomingMessage>;
+    },
+    setHeader(name: string, value: number | string | readonly string[]) {
+      headers[name.toLowerCase()] = value;
+      return this as ServerResponse<IncomingMessage>;
+    },
+  } as ServerResponse<IncomingMessage>;
+
+  await createBwsReadOnlyQueryHttpHandler(service.value)(
+    { method: 'GET', url: 'http://[::1' } as IncomingMessage,
+    response,
+  );
+
+  assert.equal(response.statusCode, 400);
+  assert.equal(headers['cache-control'], 'no-store');
+  assert.equal(headers['content-type'], 'application/json; charset=utf-8');
+  assert.equal(headers['x-content-type-options'], 'nosniff');
+  assert.equal(headers['x-frame-options'], 'DENY');
+  assert.equal(headers['referrer-policy'], 'no-referrer');
+  if (responsePayload === undefined) {
+    throw new Error('BWS malformed URL response payload was not written.');
+  }
+
+  const body = JSON.parse(responsePayload) as {
+    readonly error: {
+      readonly code: string;
+      readonly message: string;
+    };
+    readonly ok: boolean;
+  };
+  assert.equal(body.ok, false);
+  assert.equal(body.error.code, 'BWS_QUERY_REQUEST_INVALID');
+  assert.match(body.error.message, /Invalid URL/);
+});
+
+test('BWS read-only query HTTP handler returns bounded JSON 400 for missing raw request URL', async () => {
+  const service = createBwsReadOnlyQueryService(createStubDependencies(), {
+    generatedAt: () => TEST_TIMESTAMP,
+    maxPageSize: 50,
+  });
+  assert.equal(service.ok, true);
+
+  const headers: Record<string, number | string | readonly string[]> = {};
+  let responsePayload: string | undefined;
+  const response = {
+    statusCode: 0,
+    end(payload: string | Uint8Array) {
+      responsePayload = typeof payload === 'string' ? payload : Buffer.from(payload).toString('utf-8');
+      return this as ServerResponse<IncomingMessage>;
+    },
+    setHeader(name: string, value: number | string | readonly string[]) {
+      headers[name.toLowerCase()] = value;
+      return this as ServerResponse<IncomingMessage>;
+    },
+  } as ServerResponse<IncomingMessage>;
+
+  await createBwsReadOnlyQueryHttpHandler(service.value)(
+    { method: 'GET' } as IncomingMessage,
+    response,
+  );
+
+  assert.equal(response.statusCode, 400);
+  assert.equal(headers['cache-control'], 'no-store');
+  assert.equal(headers['content-type'], 'application/json; charset=utf-8');
+  assert.equal(headers['x-content-type-options'], 'nosniff');
+  assert.equal(headers['x-frame-options'], 'DENY');
+  assert.equal(headers['referrer-policy'], 'no-referrer');
+  if (responsePayload === undefined) {
+    throw new Error('BWS missing URL response payload was not written.');
+  }
+
+  const body = JSON.parse(responsePayload) as {
+    readonly error: {
+      readonly code: string;
+      readonly message: string;
+    };
+    readonly ok: boolean;
+  };
+  assert.equal(body.ok, false);
+  assert.equal(body.error.code, 'BWS_QUERY_REQUEST_INVALID');
+  assert.equal(body.error.message, 'BWS read-only query request URL is required.');
 });
 
 test('BWS read-only query HTTP API returns immutable strategy-ledger and pinned-export provenance over surebet persistence', { skip: !hasDisposableDatabaseTestConfig() }, async () => {

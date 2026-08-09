@@ -12,7 +12,7 @@ Excludes archives, secrets, logs, databases, generated folders, artifacts, and r
 
 Options:
   --artifacts-only   Create the next numbered artifacts zip from the complete
-                     ./artifacts directory tree without filtering its contents,
+                     ./artifacts directory tree, excluding embedded VCS metadata,
                      for example artifacts12.zip -> artifacts13.zip.
 USAGE
 }
@@ -41,7 +41,7 @@ zc_is_excluded_path() {
   esac
 
   case "/$path/" in
-    */.git/*|*/.github/*|*/.locks/*|*/.automation/locks/*|*/node_modules/*|*/.pnpm-store/*|*/.npm/*|*/.yarn/*|*/.cache/*|*/.next/*|*/.nuxt/*|*/.turbo/*|*/.parcel-cache/*|*/dist/*|*/build/*|*/out/*|*/coverage/*|*/.nyc_output/*|*/artifacts/*|/reports/*|/runtime/*|*/logs/*|*/log/*|*/tmp/*|*/.tmp/*|*/temp/*|*/output/*|*/backup/*|*/backups/*|*/cache/*|*/__pycache__/*|*/.pytest_cache/*|*/.mypy_cache/*|*/.ruff_cache/*|*/.venv/*|*/venv/*|*/secrets/*|*/.secrets/*|*/credentials/*)
+    */.git/*|*/.hg/*|*/.svn/*|*/.github/*|*/.locks/*|*/.automation/locks/*|*/node_modules/*|*/.pnpm-store/*|*/.npm/*|*/.yarn/*|*/.cache/*|*/.next/*|*/.nuxt/*|*/.turbo/*|*/.parcel-cache/*|*/dist/*|*/build/*|*/out/*|*/coverage/*|*/.nyc_output/*|*/artifacts/*|/reports/*|/runtime/*|*/logs/*|*/log/*|*/tmp/*|*/.tmp/*|*/temp/*|*/output/*|*/backup/*|*/backups/*|*/cache/*|*/__pycache__/*|*/.pytest_cache/*|*/.mypy_cache/*|*/.ruff_cache/*|*/.venv/*|*/venv/*|*/secrets/*|*/.secrets/*|*/credentials/*)
       return 0
       ;;
   esac
@@ -53,6 +53,88 @@ zc_is_excluded_path() {
   esac
 
   return 1
+}
+
+zc_validate_relative_path() {
+  local path="$1"
+  path="${path#./}"
+  case "$path" in
+    ""|.|..|/*|../*|*/../*|*/..|*/./*|./*|*//*)
+      zc_fail "unsafe relative path selected for zip: $1"
+      return 1
+      ;;
+  esac
+  if [[ "$path" == *$'\n'* || "$path" == *$'\r'* || "$path" == *$'\t'* ]]; then
+    zc_fail "unsafe control character in zip path: $1"
+    return 1
+  fi
+  printf '%s\n' "$path"
+  return 0
+}
+
+zc_reject_symlink_path() {
+  local path="$1" current="." part
+  IFS=/ read -r -a _zc_path_parts <<< "$path"
+  for part in "${_zc_path_parts[@]}"; do
+    [ -n "$part" ] || continue
+    current="$current/$part"
+    if [ -L "$current" ]; then
+      zc_fail "zip source must not contain symlinks: $path"
+      return 1
+    fi
+    [ -e "$current" ] || break
+  done
+  return 0
+}
+
+zc_validate_zip_destination() {
+  local repo_root="$1" destination="$2" parent
+  case "$destination" in
+    "$repo_root"/*.zip|"$repo_root"/.*.zip) ;;
+    *)
+      zc_fail "zip destination must stay in repo root: $destination"
+      return 1
+      ;;
+  esac
+  parent="$(dirname "$destination")"
+  if [ "$(cd "$parent" 2>/dev/null && pwd -P)" != "$repo_root" ]; then
+    zc_fail "zip destination parent must be the repo root: $destination"
+    return 1
+  fi
+  if [ -L "$destination" ]; then
+    zc_fail "zip destination must not be a symlink: $destination"
+    return 1
+  fi
+}
+
+zc_prune_zip_vcs_metadata() {
+  local archive="$1" rc
+  if [ ! -f "$archive" ] || [ -L "$archive" ]; then
+    zc_fail "zip archive must be a non-symlink regular file: $archive"
+    return 1
+  fi
+  zip -q -d "$archive" '.git' '.git/*' '*/.git' '*/.git/*' '.hg' '.hg/*' '*/.hg' '*/.hg/*' '.svn' '.svn/*' '*/.svn' '*/.svn/*' >/dev/null 2>&1
+  rc=$?
+  case "$rc" in
+    0|12) return 0 ;;
+    *) return "$rc" ;;
+  esac
+}
+
+zc_reject_artifacts_symlinks() {
+  local symlink_entry
+  if [ ! -d artifacts ] || [ -L artifacts ]; then
+    zc_fail "artifacts zip source must be a non-symlink directory: artifacts"
+    return 1
+  fi
+  symlink_entry="$(find -P artifacts -mindepth 1 -type l -print -quit 2>/dev/null)" || {
+    zc_fail "failed to scan artifacts for symlinks"
+    return 1
+  }
+  if [ -n "$symlink_entry" ]; then
+    zc_fail "artifacts zip source must not contain symlinks: $symlink_entry"
+    return 1
+  fi
 }
 
 zc_next_numbered_zip() {
@@ -77,7 +159,7 @@ zc_next_numbered_zip() {
 }
 
 zc_collect_files() {
-  local repo_root="$1" list_file="$2" use_git=0 file_path git_root
+  local repo_root="$1" list_file="$2" use_git=0 file_path git_root normalized_path
   : > "$list_file" || return 1
   if zc_have git && git -C "$repo_root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     git_root="$(git -C "$repo_root" rev-parse --show-toplevel 2>/dev/null)" || return 1
@@ -90,15 +172,19 @@ zc_collect_files() {
 
   if [ "$use_git" = "1" ]; then
     while IFS= read -r -d '' file_path; do
+      normalized_path="$(zc_validate_relative_path "$file_path")" || return 1
+      zc_reject_symlink_path "$normalized_path" || return 1
       [ -f "$file_path" ] || continue
-      zc_is_excluded_path "$file_path" || printf '%s\n' "$file_path" >> "$list_file"
+      zc_is_excluded_path "$normalized_path" || printf '%s\n' "$normalized_path" >> "$list_file"
     done < <(git -C "$repo_root" ls-files --cached --others --exclude-standard -z)
   else
     while IFS= read -r -d '' file_path; do
       file_path="${file_path#./}"
-      [ -f "$file_path" ] || continue
-      zc_is_excluded_path "$file_path" || printf '%s\n' "$file_path" >> "$list_file"
-    done < <(find . -type f -print0)
+      normalized_path="$(zc_validate_relative_path "$file_path")" || return 1
+      zc_reject_symlink_path "$normalized_path" || return 1
+      [ -f "$normalized_path" ] || continue
+      zc_is_excluded_path "$normalized_path" || printf '%s\n' "$normalized_path" >> "$list_file"
+    done < <(find . \( -type f -o -type l \) -print0)
   fi
   sort -u "$list_file" -o "$list_file" 2>/dev/null || return 1
   return 0
@@ -132,7 +218,8 @@ zc_main() {
 
   if [ "$artifacts_only" = "1" ]; then
     [ -d "$repo_root/artifacts" ] || { zc_fail "artifacts directory not found: $repo_root/artifacts"; return 1; }
-    file_count="$(find artifacts -type f -print | wc -l | tr -d '[:space:]')"
+    zc_reject_artifacts_symlinks || return 1
+    file_count="$(find artifacts -type f ! -path '*/.git/*' ! -path '*/.git' ! -path '*/.hg/*' ! -path '*/.hg' ! -path '*/.svn/*' ! -path '*/.svn' -print | wc -l | tr -d '[:space:]')"
     if [ "$file_count" = "0" ]; then
       zc_fail "no files found in artifacts directory"
       return 1
@@ -162,6 +249,8 @@ zc_main() {
   zip_name="${zip_prefix}${next_number}.zip"
   zip_path="$repo_root/$zip_name"
   tmp_zip="$repo_root/.${zip_name}.tmp.$$.zip"
+  zc_validate_zip_destination "$repo_root" "$zip_path" || { [ -z "$list_file" ] || rm -f "$list_file"; return 1; }
+  zc_validate_zip_destination "$repo_root" "$tmp_zip" || { [ -z "$list_file" ] || rm -f "$list_file"; return 1; }
   if [ -e "$zip_path" ]; then
     [ -z "$list_file" ] || rm -f "$list_file"
     zc_fail "target zip already exists: $zip_path"
@@ -170,7 +259,7 @@ zc_main() {
 
   rm -f "$tmp_zip"
   if [ "$artifacts_only" = "1" ]; then
-    if ! zip -q -1 -r "$tmp_zip" artifacts; then
+    if ! zip -q -1 -r "$tmp_zip" artifacts -x 'artifacts/.git/*' 'artifacts/.git' 'artifacts/*/.git/*' 'artifacts/*/.git' 'artifacts/**/.git/*' 'artifacts/**/.git' 'artifacts/.hg/*' 'artifacts/.hg' 'artifacts/*/.hg/*' 'artifacts/*/.hg' 'artifacts/**/.hg/*' 'artifacts/**/.hg' 'artifacts/.svn/*' 'artifacts/.svn' 'artifacts/*/.svn/*' 'artifacts/*/.svn' 'artifacts/**/.svn/*' 'artifacts/**/.svn'; then
       rm -f "$tmp_zip"
       zc_fail "zip command failed"
       return 1
@@ -182,6 +271,10 @@ zc_main() {
       return 1
     fi
     rm -f "$list_file"
+  fi
+  if ! zc_prune_zip_vcs_metadata "$tmp_zip"; then
+    rm -f "$list_file" "$tmp_zip"
+    return 1
   fi
 
   if ! mv "$tmp_zip" "$zip_path"; then

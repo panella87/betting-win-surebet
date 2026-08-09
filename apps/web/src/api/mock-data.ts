@@ -531,6 +531,9 @@ function b1BacktestResponse(): BwsReadOnlyQueryResponse<'b1_backtest_runs', BwsB
             observedAt: MOCK_GENERATED_AT,
             offlineFalsificationStatus: 'B1_OFFLINE_RESEARCH_CANDIDATES_OBSERVED',
             report: Object.freeze({
+              executable: false,
+              liveReadiness: 'not_authorized_bws_900_parked',
+              offlineFalsificationStatus: 'B1_OFFLINE_RESEARCH_CANDIDATES_OBSERVED',
               reportKind: 'deterministic_b1_cross_venue_backtest_report',
               runtimeEvidence: false,
               upstreamReadiness: 'blocked_until_betting_win_b1_multi_venue_markets_v1',

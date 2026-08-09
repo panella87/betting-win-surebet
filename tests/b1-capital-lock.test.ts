@@ -48,6 +48,22 @@ test('B1 capital lock rejects missing bigint policy fields', () => {
   }
 });
 
+test('B1 capital lock blocks malformed direct bigint inputs without throwing', () => {
+  const policy = Object.freeze({
+    lockDurationMs: 86_400_000n,
+    annualizedCostBps: 1_000n,
+    capitalBufferBps: 100n,
+  });
+
+  const missingStake = calculateB1CapitalLockCharge(undefined as never, 50n, 10n, policy);
+  assert.equal(missingStake.ok, false);
+  assert.equal(missingStake.blockers[0]?.code, 'B1_CAPITAL_LOCK_STAKE_INVALID');
+
+  const malformedFee = calculateB1CapitalLockCharge(10_000n, '50' as never, 10n, policy);
+  assert.equal(malformedFee.ok, false);
+  assert.equal(malformedFee.blockers[0]?.code, 'B1_CAPITAL_LOCK_COST_INPUT_INVALID');
+});
+
 test('B1 capital lock blocks negative carrying-cost inputs', () => {
   const result = calculateB1CapitalLockCharge(10_000n, -1n, 10n, Object.freeze({
     lockDurationMs: 86_400_000n,

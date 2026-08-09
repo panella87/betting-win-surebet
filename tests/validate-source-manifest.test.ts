@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
-import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
+import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { createHash } from 'node:crypto';
@@ -18,6 +18,31 @@ type ManifestEntry = {
 
 function sha256(contents: string): string {
   return createHash('sha256').update(contents).digest('hex');
+}
+
+function subprocessErrorText(error: Error): string {
+  const output = error as Error & {
+    readonly stderr?: Buffer | string;
+    readonly stdout?: Buffer | string;
+  };
+  return [
+    error.message,
+    output.stderr?.toString(),
+    output.stdout?.toString(),
+  ].filter((part): part is string => part !== undefined && part.length > 0).join('\n');
+}
+
+function runPython(cwd: string, args: readonly string[]): string {
+  const result = spawnSync('python3', args, { cwd, encoding: 'utf-8', stdio: 'pipe' });
+  if (result.status !== 0) {
+    const error = new Error([
+      `python3 ${args.join(' ')} failed with status ${result.status}`,
+      result.stderr,
+      result.stdout,
+    ].filter((part) => part.length > 0).join('\n'));
+    throw error;
+  }
+  return result.stdout;
 }
 
 function makeFixture(overrideManifest?: Partial<{ generated: string; overlay: string; files: ManifestEntry[] }>): string {
@@ -75,7 +100,7 @@ function makeFixture(overrideManifest?: Partial<{ generated: string; overlay: st
 test('source manifest validator accepts a matching tree with audit metadata', () => {
   const dir = makeFixture();
   try {
-    const output = execFileSync('python3', ['scripts/validate_source_manifest.py'], { cwd: dir, encoding: 'utf-8', stdio: 'pipe' });
+    const output = runPython(dir, ['scripts/validate_source_manifest.py']);
     assert.match(output, /validate_source_manifest: ok/);
   } finally {
     rmSync(dir, { recursive: true, force: true });
@@ -86,10 +111,10 @@ test('source manifest validator rejects missing overlay metadata before tree com
   const dir = makeFixture({ overlay: '' });
   try {
     assert.throws(
-      () => execFileSync('python3', ['scripts/validate_source_manifest.py'], { cwd: dir, encoding: 'utf-8', stdio: 'pipe' }),
+      () => runPython(dir, ['scripts/validate_source_manifest.py']),
       (error: unknown) => {
         assert.ok(error instanceof Error);
-        assert.match(error.message, /SOURCE_MANIFEST\.json overlay must be a non-empty string/);
+        assert.match(subprocessErrorText(error), /SOURCE_MANIFEST\.json overlay must be a non-empty string/);
         return true;
       },
     );
@@ -119,7 +144,7 @@ test('source manifest validator ignores runtime automation locks and handoff fil
     mkdirSync(join(dir, 'config'), { recursive: true });
     writeFileSync(join(dir, 'config', 'betting-win.upstream.lock.json'), '{"schema":"runtime-lock"}\n', { encoding: 'utf-8' });
 
-    const output = execFileSync('python3', ['scripts/validate_source_manifest.py'], { cwd: dir, encoding: 'utf-8', stdio: 'pipe' });
+    const output = runPython(dir, ['scripts/validate_source_manifest.py']);
     assert.match(output, /validate_source_manifest: ok/);
   } finally {
     rmSync(dir, { recursive: true, force: true });
@@ -141,11 +166,11 @@ test('source manifest validator rejects a runtime upstream lock manifest entry b
   });
   try {
     assert.throws(
-      () => execFileSync('python3', ['scripts/validate_source_manifest.py'], { cwd: dir, encoding: 'utf-8', stdio: 'pipe' }),
+      () => runPython(dir, ['scripts/validate_source_manifest.py']),
       (error: unknown) => {
         assert.ok(error instanceof Error);
         assert.match(
-          error.message,
+          subprocessErrorText(error),
           /Source manifest must not include config\/betting-win\.upstream\.lock\.json until the runtime lock file exists\./,
         );
         return true;
@@ -199,7 +224,7 @@ test('source manifest regeneration helper reuses validator inclusion rules and e
     writeFileSync(join(dir, 'graphify-out', 'cache', 'ast.json'), '{"generated":true}\n', { encoding: 'utf-8' });
     writeFileSync(join(dir, 'notes.txt'), 'keep me\n', { encoding: 'utf-8' });
 
-    execFileSync('python3', ['scripts/regenerate_source_manifest.py'], { cwd: dir, encoding: 'utf-8', stdio: 'pipe' });
+    runPython(dir, ['scripts/regenerate_source_manifest.py']);
 
     const manifest = JSON.parse(readFileSync(join(dir, 'SOURCE_MANIFEST.json'), 'utf-8')) as {
       overlay: string;
@@ -223,8 +248,102 @@ test('source manifest regeneration helper reuses validator inclusion rules and e
     assert.ok(!paths.includes('graphify-out/cache/ast.json'));
     assert.ok(paths.includes('packages/bootstrap/src/runtime/keep.ts'));
 
-    const output = execFileSync('python3', ['scripts/validate_source_manifest.py'], { cwd: dir, encoding: 'utf-8', stdio: 'pipe' });
+    const output = runPython(dir, ['scripts/validate_source_manifest.py']);
     assert.match(output, /validate_source_manifest: ok/);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('source manifest regeneration rejects included symlinks and validator rejects unsafe manifest paths', () => {
+  const dir = makeFixture();
+  try {
+    mkdirSync(join(dir, 'artifacts'), { recursive: true });
+    writeFileSync(join(dir, 'artifacts', 'outside.txt'), 'outside-content\n', { encoding: 'utf-8' });
+    symlinkSync(join(dir, 'artifacts', 'outside.txt'), join(dir, 'outside-link.txt'));
+    assert.throws(
+      () => runPython(dir, ['scripts/regenerate_source_manifest.py']),
+      (error: unknown) => {
+        assert.ok(error instanceof Error);
+        assert.match(subprocessErrorText(error), /must not contain symlinks/);
+        return true;
+      },
+    );
+
+    rmSync(join(dir, 'outside-link.txt'), { force: true });
+    const current = JSON.parse(readFileSync(join(dir, 'SOURCE_MANIFEST.json'), 'utf-8')) as { files: ManifestEntry[] };
+    for (const unsafePath of [
+      '../outside.txt',
+      '/outside.txt',
+      './README.md',
+      'C:/outside.txt',
+      'nested//bad.txt',
+      'nested/.git/config',
+      'nested/bad\u0001name.txt',
+      '\\\\server\\share\\file.txt',
+    ]) {
+      writeFileSync(
+        join(dir, 'SOURCE_MANIFEST.json'),
+        JSON.stringify(
+          {
+            schema: 'betting-win-surebet-source-manifest-v1',
+            generated: '2026-07-02T00:00:00Z',
+            overlay: 'SURE-001 source manifest validator contract test fixture',
+            files: [
+              ...current.files,
+              {
+                path: unsafePath,
+                sha256: '0'.repeat(64),
+                size: 1,
+              },
+            ],
+          },
+          null,
+          2,
+        ) + '\n',
+        { encoding: 'utf-8' },
+      );
+      assert.throws(
+        () => runPython(dir, ['scripts/validate_source_manifest.py']),
+        (error: unknown) => {
+          assert.ok(error instanceof Error);
+          assert.match(subprocessErrorText(error), /unsafe/u);
+          return true;
+        },
+      );
+    }
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('source manifest validator and regenerator reject a symlinked manifest file', () => {
+  const dir = makeFixture();
+  try {
+    const outsideManifest = join(dir, 'outside-manifest.json');
+    const outsideContents = readFileSync(join(dir, 'SOURCE_MANIFEST.json'), 'utf-8');
+    writeFileSync(outsideManifest, outsideContents, { encoding: 'utf-8' });
+    rmSync(join(dir, 'SOURCE_MANIFEST.json'), { force: true });
+    symlinkSync(outsideManifest, join(dir, 'SOURCE_MANIFEST.json'));
+
+    assert.throws(
+      () => runPython(dir, ['scripts/validate_source_manifest.py']),
+      (error: unknown) => {
+        assert.ok(error instanceof Error);
+        assert.match(subprocessErrorText(error), /non-symlink regular file/u);
+        return true;
+      },
+    );
+
+    assert.throws(
+      () => runPython(dir, ['scripts/regenerate_source_manifest.py', '--overlay', 'safe overlay']),
+      (error: unknown) => {
+        assert.ok(error instanceof Error);
+        assert.match(subprocessErrorText(error), /non-symlink regular file/u);
+        return true;
+      },
+    );
+    assert.equal(readFileSync(outsideManifest, 'utf-8'), outsideContents);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -249,7 +368,7 @@ test('source manifest ignores runtime automation locks and handoff files but tra
     mkdirSync(join(dir, '.automation', 'consumed-handoffs'), { recursive: true });
     writeFileSync(join(dir, '.automation', 'consumed-handoffs', 'abc.env'), 'HANDOVER_FINGERPRINT=abc\n', { encoding: 'utf-8' });
 
-    execFileSync('python3', ['scripts/regenerate_source_manifest.py'], { cwd: dir, encoding: 'utf-8', stdio: 'pipe' });
+    runPython(dir, ['scripts/regenerate_source_manifest.py']);
 
     const manifest = JSON.parse(readFileSync(join(dir, 'SOURCE_MANIFEST.json'), 'utf-8')) as { files: ManifestEntry[] };
     const paths = manifest.files.map((entry) => entry.path);
@@ -265,7 +384,7 @@ test('source manifest ignores runtime automation locks and handoff files but tra
     assert.ok(!paths.includes('.automation/bugfix-mode-handover.env'));
     assert.ok(!paths.includes('.automation/consumed-handoffs/abc.env'));
 
-    const output = execFileSync('python3', ['scripts/validate_source_manifest.py'], { cwd: dir, encoding: 'utf-8', stdio: 'pipe' });
+    const output = runPython(dir, ['scripts/validate_source_manifest.py']);
     assert.match(output, /validate_source_manifest: ok/);
   } finally {
     rmSync(dir, { recursive: true, force: true });
@@ -277,10 +396,10 @@ test('source manifest validator still rejects real source drift', () => {
   try {
     writeFileSync(join(dir, 'README.md'), '# changed source manifest fixture\n', { encoding: 'utf-8' });
     assert.throws(
-      () => execFileSync('python3', ['scripts/validate_source_manifest.py'], { cwd: dir, encoding: 'utf-8', stdio: 'pipe' }),
+      () => runPython(dir, ['scripts/validate_source_manifest.py']),
       (error: unknown) => {
         assert.ok(error instanceof Error);
-        assert.match(error.message, /SOURCE_MANIFEST\.json is stale/);
+        assert.match(subprocessErrorText(error), /SOURCE_MANIFEST\.json is stale/);
         return true;
       },
     );

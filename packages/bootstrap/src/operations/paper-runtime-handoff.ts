@@ -1,11 +1,15 @@
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import {
+  closeSync,
   existsSync,
+  lstatSync,
   mkdirSync,
+  openSync,
   readFileSync,
   realpathSync,
   renameSync,
+  rmSync,
   statSync,
   writeFileSync,
 } from 'node:fs';
@@ -134,11 +138,13 @@ export async function createBwsPaperRuntimeHandoff(
         `source_handoff_${formatTimestampForFileName(generatedAt)}.tar.gz`,
       ),
   );
+  validateArtifactPath(repositoryRoot, archiveOutputPath, 'BWS paper runtime handoff source archive path');
 
   const archive = (request.createSourceHandoffArchive ?? createSourceHandoffArchive)({
     outputPath: archiveOutputPath,
     repositoryRoot,
   });
+  validateSourceArchiveRecord(repositoryRoot, archiveOutputPath, archive);
   const handoff: BwsPaperRuntimeHandoffRecord = Object.freeze({
     automation: Object.freeze({
       integrationStatus: 'pending_protected_controller_review',
@@ -177,8 +183,8 @@ export async function createBwsPaperRuntimeHandoff(
     sourceFingerprints: lifecycleStatus.sourceFingerprints,
   });
 
-  writeJsonAtomically(versionedHandoffPath, handoff);
-  writeJsonAtomically(latestHandoffPath, handoff);
+  writeJsonAtomically(repositoryRoot, versionedHandoffPath, handoff);
+  writeJsonAtomically(repositoryRoot, latestHandoffPath, handoff);
 
   return Object.freeze({
     archive,
@@ -193,8 +199,12 @@ export function createSourceHandoffArchive(
   request: CreateBwsSourceHandoffArchiveRequest,
 ): BwsPaperRuntimeHandoffArchiveRecord {
   const outputPath = resolveRepositoryPath(request.repositoryRoot, request.outputPath);
+  const relativeOutputPath = relative(request.repositoryRoot, outputPath);
+  validateArtifactPath(request.repositoryRoot, outputPath, 'BWS paper runtime handoff source archive path');
+  rejectExistingPathSymlinkSegments(request.repositoryRoot, dirname(outputPath), 'BWS paper runtime handoff source archive directory');
   mkdirSync(dirname(outputPath), { recursive: true });
-  execFileSync('bash', ['scripts/create-source-handoff-archive.sh', outputPath], {
+  rejectExistingPathSymlinkSegments(request.repositoryRoot, dirname(outputPath), 'BWS paper runtime handoff source archive directory');
+  execFileSync('bash', ['scripts/create-source-handoff-archive.sh', relativeOutputPath], {
     cwd: request.repositoryRoot,
     encoding: 'utf-8',
     stdio: 'pipe',
@@ -277,11 +287,72 @@ function resolveRepositoryPath(repositoryRoot: string, targetPath: string): stri
   return resolvedPath;
 }
 
-function writeJsonAtomically(filePath: string, value: unknown): void {
+function writeJsonAtomically(repositoryRoot: string, filePath: string, value: unknown): void {
+  rejectExistingPathSymlinkSegments(repositoryRoot, dirname(filePath), 'BWS paper runtime handoff output directory');
+  if (existsSync(filePath) && lstatSync(filePath).isSymbolicLink()) {
+    throw new Error(`BWS paper runtime handoff output path must not be a symlink: ${filePath}`);
+  }
   mkdirSync(dirname(filePath), { recursive: true });
+  rejectExistingPathSymlinkSegments(repositoryRoot, dirname(filePath), 'BWS paper runtime handoff output directory');
   const temporaryPath = `${filePath}.${process.pid}.tmp`;
-  writeFileSync(temporaryPath, `${JSON.stringify(value, null, 2)}\n`, 'utf-8');
-  renameSync(temporaryPath, filePath);
+  const temporaryFile = openSync(temporaryPath, 'wx', 0o600);
+  let temporaryFileClosed = false;
+  try {
+    writeFileSync(temporaryFile, `${JSON.stringify(value, null, 2)}\n`, 'utf-8');
+    closeSync(temporaryFile);
+    temporaryFileClosed = true;
+    renameSync(temporaryPath, filePath);
+  } catch (error) {
+    if (!temporaryFileClosed) {
+      closeSync(temporaryFile);
+    }
+    rmSync(temporaryPath, { force: true });
+    throw error;
+  }
+}
+
+function validateArtifactPath(repositoryRoot: string, absolutePath: string, label: string): void {
+  const root = realpathSync(repositoryRoot);
+  const artifactsRoot = resolve(root, 'artifacts');
+  const target = resolve(absolutePath);
+  if (!(target === artifactsRoot || target.startsWith(`${artifactsRoot}/`))) {
+    throw new Error(`${label} must stay under repository artifacts.`);
+  }
+  rejectExistingPathSymlinkSegments(root, target, label);
+}
+
+function validateSourceArchiveRecord(
+  repositoryRoot: string,
+  expectedOutputPath: string,
+  archive: BwsPaperRuntimeHandoffArchiveRecord,
+): void {
+  const archivePath = resolveRepositoryPath(repositoryRoot, archive.archiveFile);
+  if (archivePath !== expectedOutputPath) {
+    throw new Error('BWS paper runtime handoff source archive record must match the requested archive path.');
+  }
+  validateArtifactPath(repositoryRoot, archivePath, 'BWS paper runtime handoff source archive record');
+}
+
+function rejectExistingPathSymlinkSegments(boundaryRoot: string, targetPath: string, label: string): void {
+  const root = resolve(boundaryRoot);
+  const target = resolve(targetPath);
+  if (!(target === root || target.startsWith(`${root}/`))) {
+    throw new Error(`${label} escapes repository: ${targetPath}`);
+  }
+  const relativePath = target.slice(root.length).replace(/^\//u, '');
+  let current = root;
+  for (const part of relativePath.split('/')) {
+    if (part.length === 0) {
+      continue;
+    }
+    current = join(current, part);
+    if (!existsSync(current)) {
+      break;
+    }
+    if (lstatSync(current).isSymbolicLink()) {
+      throw new Error(`${label} must not contain symlinks: ${current}`);
+    }
+  }
 }
 
 function formatTimestampForFileName(value: string): string {

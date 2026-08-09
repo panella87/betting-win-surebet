@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 import {
   createBwsDatabaseBackup,
   createBwsReleasePackage,
@@ -23,7 +24,8 @@ import {
 
 const REPO_ROOT = process.cwd();
 const COCKPIT_METADATA_FILE = join(REPO_ROOT, 'dist', 'apps', 'web', 'bws-cockpit-build.json');
-const TEST_TEMP_ROOT = join(REPO_ROOT, '..', '.bws-release-upgrade-tests');
+const TEST_TEMP_BASE = tmpdir().startsWith(REPO_ROOT) ? '/tmp' : tmpdir();
+const TEST_TEMP_ROOT = join(TEST_TEMP_BASE, 'bws-release-upgrade-tests');
 const TEST_TIMESTAMP = '2026-07-16T14:15:00.000Z';
 const RELEASE_TEST_TIMESTAMP = '2026-07-16T14:15:00Z';
 
@@ -364,7 +366,7 @@ async function createUpgradeFixture(
       stdio: 'pipe',
     },
   );
-  const targetReleaseOutput = join(tempRoot, 'target-release-output');
+  const targetReleaseOutput = join(targetRepositoryRoot, 'artifacts', 'target-release-output');
   const targetResult = await createBwsReleasePackage({
     outputDirectory: targetReleaseOutput,
     repositoryRoot: targetRepositoryRoot,
@@ -416,7 +418,7 @@ async function getReleaseFixture(): Promise<ReleaseFixture> {
   }
   cachedReleaseFixture = (async () => {
     await ensureRuntimeCockpitBuild();
-    const outputDirectory = createRepoTempDirectory('current-');
+    const outputDirectory = createRepoArtifactTempDirectory('current-');
     const result = await createBwsReleasePackage({
       outputDirectory,
       repositoryRoot: REPO_ROOT,
@@ -432,6 +434,12 @@ async function getReleaseFixture(): Promise<ReleaseFixture> {
 function createRepoTempDirectory(prefix: string): string {
   mkdirSync(TEST_TEMP_ROOT, { recursive: true });
   return mkdtempSync(join(TEST_TEMP_ROOT, prefix));
+}
+
+function createRepoArtifactTempDirectory(prefix: string): string {
+  const artifactRoot = join(REPO_ROOT, 'artifacts', 'release-upgrade-tests');
+  mkdirSync(artifactRoot, { recursive: true });
+  return mkdtempSync(join(artifactRoot, prefix));
 }
 
 async function ensureRuntimeCockpitBuild(): Promise<void> {

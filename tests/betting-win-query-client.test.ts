@@ -66,10 +66,18 @@ test('read-only query client rejects invalid base URLs and explicit credentialed
 
   for (const baseUrl of [
     'http://127.0.0.1:4312',
+    'http://127.0.0.2:4312',
+    'http://127.1.2.3:4312',
+    'http://127.2.3.4:4312',
+    'http://127.255.255.255:4312',
     'http://localhost:4312',
     'http://[::1]:4312',
     'http://[::ffff:127.0.0.1]:4312',
+    'http://[::ffff:127.0.0.2]:4312',
+    'http://[::ffff:127.2.3.4]:4312',
     'http://[::ffff:7f00:1]:4312',
+    'http://[::ffff:7f01:203]:4312',
+    'http://[::ffff:7f02:304]:4312',
     'http://0.0.0.0:4312',
     'http://[::]:4312',
   ]) {
@@ -87,19 +95,29 @@ test('read-only query client rejects invalid base URLs and explicit credentialed
     assert.equal(localBwsApi.blockers[0]?.code, 'QUERY_BASE_URL_LOCAL_BWS_API_FORBIDDEN');
   }
 
-  const configuredLocalBwsApi = createReadOnlyQueryApiClient({
-    baseUrl: 'http://localhost:4301',
-    contractVersion: '1.0.0',
-    fetchImplementation: globalThis.fetch.bind(globalThis),
-    localBwsApiPort: 4301,
-    maxPageSize: 50,
-    retryBackoffMs: 5,
-    retryLimit: 1,
-    timeoutMs: 25,
-    upstreamLock: sampleUpstreamLock(),
-  });
-  assert.equal(configuredLocalBwsApi.ok, false);
-  assert.equal(configuredLocalBwsApi.blockers[0]?.code, 'QUERY_BASE_URL_LOCAL_BWS_API_FORBIDDEN');
+  for (const baseUrl of [
+    'http://localhost:4301',
+    'http://127.0.0.2:4301',
+    'http://127.1.2.3:4301',
+    'http://127.255.255.255:4301',
+    'http://[::ffff:127.0.0.2]:4301',
+    'http://[::ffff:127.2.3.4]:4301',
+    'http://[::ffff:7f02:304]:4301',
+  ]) {
+    const configuredLocalBwsApi = createReadOnlyQueryApiClient({
+      baseUrl,
+      contractVersion: '1.0.0',
+      fetchImplementation: globalThis.fetch.bind(globalThis),
+      localBwsApiPort: 4301,
+      maxPageSize: 50,
+      retryBackoffMs: 5,
+      retryLimit: 1,
+      timeoutMs: 25,
+      upstreamLock: sampleUpstreamLock(),
+    });
+    assert.equal(configuredLocalBwsApi.ok, false);
+    assert.equal(configuredLocalBwsApi.blockers[0]?.code, 'QUERY_BASE_URL_LOCAL_BWS_API_FORBIDDEN');
+  }
 
   for (const baseUrl of ['http://0.0.0.0:4301', 'http://[::]:4301']) {
     const configuredUnspecifiedLocalBwsApi = createReadOnlyQueryApiClient({
@@ -257,6 +275,51 @@ test('read-only query client fails closed on contract negotiation mismatches', a
       },
     }));
   });
+});
+
+test('read-only query client rejects response provenance with mismatched lock verification time', async () => {
+  const client = createReadOnlyQueryApiClient({
+    baseUrl: 'http://betting-win-query.test/read-only',
+    contractVersion: '1.0.0',
+    fetchImplementation: async () => new Response(`${JSON.stringify(createEnvelope('rules', {
+      page: {
+        items: [
+          {
+            resultSource: { resultSourceId: 'result-source-001' },
+            ruleProfile: { ruleProfileId: 'rule-profile-001' },
+          },
+        ],
+        pageSize: 1,
+        returnedCount: 1,
+      },
+      provenance: {
+        commitSha: sampleUpstreamLock().commitSha,
+        repository: 'betting-win',
+        responseReceivedAt: TEST_TIMESTAMP,
+        sourceView: 'committed_git_head',
+        verifiedAt: '2026-07-14T10:00:01.000Z',
+      },
+    }))}\n`, {
+      headers: { 'content-type': 'application/json' },
+      status: 200,
+    }),
+    maxPageSize: 50,
+    retryBackoffMs: 5,
+    retryLimit: 1,
+    timeoutMs: 50,
+    upstreamLock: sampleUpstreamLock(),
+  });
+  assert.equal(client.ok, true);
+
+  const result = await client.value.queryRules({
+    filters: {
+      provider: 'polymarket',
+    },
+    pageSize: 1,
+  });
+
+  assert.equal(result.ok, false);
+  assert.equal(result.blockers[0]?.code, 'QUERY_PROVENANCE_MISMATCH');
 });
 
 test('read-only query client retries retryable quote errors before succeeding', async () => {

@@ -2,6 +2,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import {
   appendFileSync,
   existsSync,
+  lstatSync,
   mkdirSync,
   readFileSync,
   readdirSync,
@@ -1019,15 +1020,38 @@ function requirePositiveInteger(value: string | undefined, name: string, fallbac
 }
 
 function requireRepositoryFile(repositoryRoot: string, value: string, name: string): string {
-  const resolvedPath = resolve(value);
   const resolvedRoot = resolve(repositoryRoot);
+  const resolvedPath = resolve(resolvedRoot, value);
   if (!(resolvedPath === resolvedRoot || resolvedPath.startsWith(`${resolvedRoot}/`))) {
     throw new Error(`${name} must stay within the repository root.`);
   }
-  if (!existsSync(resolvedPath) || !statSync(resolvedPath).isFile()) {
+  rejectExistingPathSymlinkSegments(resolvedRoot, resolvedPath, name);
+  if (!existsSync(resolvedPath) || lstatSync(resolvedPath).isSymbolicLink() || !statSync(resolvedPath).isFile()) {
     throw new Error(`${name} must point to an existing file.`);
   }
   return resolvedPath;
+}
+
+function rejectExistingPathSymlinkSegments(boundaryRoot: string, targetPath: string, label: string): void {
+  const root = resolve(boundaryRoot);
+  const target = resolve(targetPath);
+  if (!(target === root || target.startsWith(`${root}/`))) {
+    throw new Error(`${label} must stay within the repository root.`);
+  }
+  const relativePath = target.slice(root.length).replace(/^\//u, '');
+  let current = root;
+  for (const part of relativePath.split('/')) {
+    if (part.length === 0) {
+      continue;
+    }
+    current = join(current, part);
+    if (!existsSync(current)) {
+      break;
+    }
+    if (lstatSync(current).isSymbolicLink()) {
+      throw new Error(`${label} must not contain symlinks: ${current}`);
+    }
+  }
 }
 
 function writeJsonFile(filePath: string, value: unknown): void {

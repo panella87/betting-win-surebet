@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { execFileSync, spawnSync } from 'node:child_process';
+import { spawnSync } from 'node:child_process';
 import { chmodSync, copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -15,6 +15,31 @@ const REQUIRED_EXECUTABLE_PATHS = join(REPO_ROOT, 'tools', 'required_executable_
 const UPDATE_GIT = join(REPO_ROOT, 'update_git.sh');
 const RUN_COMMON = join(REPO_ROOT, '.automation', 'lib', 'run_common.sh');
 const CONTROLLER_HARDENING = join(REPO_ROOT, '.automation', 'lib', 'controller_hardening_v2.sh');
+
+function execFileSync(
+  command: string,
+  args: readonly string[],
+  options: Readonly<{
+    cwd?: string;
+    encoding?: BufferEncoding;
+    env?: NodeJS.ProcessEnv;
+    stdio?: 'pipe' | 'ignore' | 'inherit';
+  }>,
+): string {
+  const result = spawnSync(command, args, {
+    ...options,
+    encoding: options.encoding ?? 'utf-8',
+    stdio: options.stdio ?? 'pipe',
+  });
+  if (result.status !== 0) {
+    throw new Error([
+      `${command} ${args.join(' ')} failed with status ${result.status}`,
+      result.stderr,
+      result.stdout,
+    ].filter((part) => part.length > 0).join('\n'));
+  }
+  return result.stdout;
+}
 
 function read(path: string): string {
   return readFileSync(path, 'utf-8');
@@ -85,6 +110,8 @@ function makeZipCodebaseFixture(): { dir: string; repoDir: string; zipPath: stri
   mkdirSync(join(repoDir, 'node_modules', 'left-pad'), { recursive: true });
   mkdirSync(join(repoDir, 'dist'), { recursive: true });
   mkdirSync(join(repoDir, '.locks'), { recursive: true });
+  mkdirSync(join(repoDir, '.hg'), { recursive: true });
+  mkdirSync(join(repoDir, '.svn'), { recursive: true });
   mkdirSync(join(repoDir, 'tmp'), { recursive: true });
   mkdirSync(join(repoDir, '.tmp'), { recursive: true });
   mkdirSync(join(repoDir, 'logs'), { recursive: true });
@@ -103,6 +130,8 @@ function makeZipCodebaseFixture(): { dir: string; repoDir: string; zipPath: stri
   writeFileSync(join(repoDir, 'node_modules', 'left-pad', 'index.js'), 'module.exports = "nope";\n', { encoding: 'utf-8' });
   writeFileSync(join(repoDir, 'dist', 'bundle.js'), 'console.log("dist");\n', { encoding: 'utf-8' });
   writeFileSync(join(repoDir, '.locks', 'repo.lock'), 'lock\n', { encoding: 'utf-8' });
+  writeFileSync(join(repoDir, '.hg', 'store'), 'hg metadata\n', { encoding: 'utf-8' });
+  writeFileSync(join(repoDir, '.svn', 'wc.db'), 'svn metadata\n', { encoding: 'utf-8' });
   writeFileSync(join(repoDir, 'tmp', 'scratch.txt'), 'tmp dir\n', { encoding: 'utf-8' });
   writeFileSync(join(repoDir, '.tmp', 'scratch.txt'), 'hidden tmp dir\n', { encoding: 'utf-8' });
   writeFileSync(join(repoDir, 'logs', 'build.stderr.txt'), 'stack trace\n', { encoding: 'utf-8' });
@@ -139,7 +168,8 @@ function makeZipCodebaseFixture(): { dir: string; repoDir: string; zipPath: stri
 function makeSourceHandoffFixture(): { dir: string; repoDir: string; archivePath: string } {
   const dir = mkdtempSync(join(tmpdir(), 'surebet-source-handoff-'));
   const repoDir = join(dir, 'repo');
-  const archivePath = join(dir, 'source-handoff.tar.gz');
+  const archiveArgument = 'artifacts/source-handoff.tar.gz';
+  const archivePath = join(repoDir, archiveArgument);
 
   mkdirSync(join(repoDir, 'commands'), { recursive: true });
   mkdirSync(join(repoDir, 'scripts'), { recursive: true });
@@ -192,6 +222,8 @@ function makeSourceHandoffFixture(): { dir: string; repoDir: string; archivePath
   mkdirSync(join(repoDir, 'node_modules', 'left-pad'), { recursive: true });
   mkdirSync(join(repoDir, 'dist'), { recursive: true });
   mkdirSync(join(repoDir, '.locks'), { recursive: true });
+  mkdirSync(join(repoDir, '.hg'), { recursive: true });
+  mkdirSync(join(repoDir, '.svn'), { recursive: true });
   mkdirSync(join(repoDir, 'tmp'), { recursive: true });
   mkdirSync(join(repoDir, '.tmp'), { recursive: true });
 
@@ -199,10 +231,12 @@ function makeSourceHandoffFixture(): { dir: string; repoDir: string; archivePath
   writeFileSync(join(repoDir, 'node_modules', 'left-pad', 'index.js'), 'module.exports = "nope";\n', { encoding: 'utf-8' });
   writeFileSync(join(repoDir, 'dist', 'bundle.js'), 'console.log("dist");\n', { encoding: 'utf-8' });
   writeFileSync(join(repoDir, '.locks', 'repo.lock'), 'lock\n', { encoding: 'utf-8' });
+  writeFileSync(join(repoDir, '.hg', 'store'), 'hg metadata\n', { encoding: 'utf-8' });
+  writeFileSync(join(repoDir, '.svn', 'wc.db'), 'svn metadata\n', { encoding: 'utf-8' });
   writeFileSync(join(repoDir, 'tmp', 'scratch.txt'), 'tmp dir\n', { encoding: 'utf-8' });
   writeFileSync(join(repoDir, '.tmp', 'scratch.txt'), 'hidden tmp dir\n', { encoding: 'utf-8' });
 
-  execFileSync('bash', ['scripts/create-source-handoff-archive.sh', archivePath], {
+  execFileSync('bash', ['scripts/create-source-handoff-archive.sh', archiveArgument], {
     cwd: repoDir,
     encoding: 'utf-8',
     stdio: 'pipe',
@@ -279,9 +313,15 @@ test('final artifact refresh atomically updates post-lock summaries without reco
   try {
     mkdirSync(runDir, { recursive: true });
     mkdirSync(join(runDir, 'final'), { recursive: true });
+    mkdirSync(join(runDir, 'betting-win', '.git'), { recursive: true });
+    mkdirSync(join(runDir, 'betting-win', '.hg'), { recursive: true });
+    mkdirSync(join(runDir, 'betting-win', '.svn'), { recursive: true });
     writeFileSync(join(runDir, 'final-summary.md'), 'lock_release_status=not_attempted\n', { encoding: 'utf-8' });
     writeFileSync(join(runDir, 'final', 'final-summary.md'), 'lock_release_status=not_attempted\n', { encoding: 'utf-8' });
     writeFileSync(join(runDir, 'evidence.txt'), 'preserved evidence\n', { encoding: 'utf-8' });
+    writeFileSync(join(runDir, 'betting-win', '.git', 'config'), '[core]\n', { encoding: 'utf-8' });
+    writeFileSync(join(runDir, 'betting-win', '.hg', 'store'), 'hg metadata\n', { encoding: 'utf-8' });
+    writeFileSync(join(runDir, 'betting-win', '.svn', 'wc.db'), 'svn metadata\n', { encoding: 'utf-8' });
     execFileSync('zip', ['-q', '-1', '-r', archivePath, 'artifacts'], {
       cwd: repoDir,
       encoding: 'utf-8',
@@ -330,6 +370,7 @@ test('final artifact refresh atomically updates post-lock summaries without reco
     assert.match(archivedSummary, /^lock_preserved=no$/m);
     assert.equal(archivedNestedSummary, releasedSummary);
     assert.equal(archivedEvidence, 'preserved evidence\n');
+    assert.ok(!listZipEntries(archivePath).some((entry) => /\/\.(git|hg|svn)(\/|$)/u.test(entry)));
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -507,6 +548,87 @@ test('artifact ZIP helpers reject symlinked artifact files and directories', () 
   }
 });
 
+test('controller path helpers resolve relative paths against the supplied repo root', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'surebet-controller-safe-path-'));
+  const repoDir = join(dir, 'repo');
+  const outsideCwd = join(dir, 'outside-cwd');
+  try {
+    mkdirSync(join(repoDir, 'artifacts'), { recursive: true });
+    mkdirSync(outsideCwd, { recursive: true });
+
+    const insideResult = spawnSync(
+      'bash',
+      [
+        '-lc',
+        '. "$CONTROLLER_HARDENING"; cd "$OUTSIDE_CWD"; automation_v2_safe_repo_path "$REPO_DIR" artifacts/out.zip no',
+      ],
+      {
+        cwd: repoDir,
+        encoding: 'utf-8',
+        env: {
+          ...process.env,
+          CONTROLLER_HARDENING,
+          OUTSIDE_CWD: outsideCwd,
+          REPO_DIR: repoDir,
+        },
+      },
+    );
+    assert.equal(insideResult.status, 0, `${insideResult.stdout}\n${insideResult.stderr}`);
+    assert.equal(insideResult.stdout.trim(), join(repoDir, 'artifacts', 'out.zip'));
+
+    const escapeResult = spawnSync(
+      'bash',
+      [
+        '-lc',
+        '. "$CONTROLLER_HARDENING"; cd "$OUTSIDE_CWD"; automation_v2_safe_repo_path "$REPO_DIR" ../outside.zip no',
+      ],
+      {
+        cwd: repoDir,
+        encoding: 'utf-8',
+        env: {
+          ...process.env,
+          CONTROLLER_HARDENING,
+          OUTSIDE_CWD: outsideCwd,
+          REPO_DIR: repoDir,
+        },
+      },
+    );
+    assert.equal(escapeResult.status, 2, `${escapeResult.stdout}\n${escapeResult.stderr}`);
+    assert.match(escapeResult.stderr, /escapes repository/u);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('automation run directory creation rejects unsafe slugs before creating artifacts', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'surebet-run-dir-slug-'));
+  const repoDir = join(dir, 'repo');
+  try {
+    mkdirSync(repoDir, { recursive: true });
+    const result = spawnSync(
+      'bash',
+      [
+        '-lc',
+        '. "$RUN_COMMON"; automation_temp_inode_bootstrap() { return 0; }; AUTOMATION_REPO_ROOT="$REPO_DIR"; automation_create_run_dir "../escape"',
+      ],
+      {
+        cwd: repoDir,
+        encoding: 'utf-8',
+        env: {
+          ...process.env,
+          REPO_DIR: repoDir,
+          RUN_COMMON,
+        },
+      },
+    );
+    assert.equal(result.status, 42, `${result.stdout}\n${result.stderr}`);
+    assert.match(result.stderr, /slug must be a safe basename/u);
+    assert.equal(readdirSync(repoDir).some((entry) => entry.startsWith('escape_')), false);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test('direct artifact ZIP builder rejects symlinks before publishing artifacts.zip', () => {
   const dir = mkdtempSync(join(tmpdir(), 'surebet-artifact-zip-builder-symlink-'));
   const repoDir = join(dir, 'repo');
@@ -548,6 +670,69 @@ test('direct artifact ZIP builder rejects symlinks before publishing artifacts.z
   }
 });
 
+test('root artifact ZIP helpers exclude embedded VCS metadata', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'surebet-artifact-zip-vcs-'));
+  const repoDir = join(dir, 'repo');
+  const runDir = join(repoDir, 'artifacts', 'autonomous_implementation_test');
+  const sharedArchivePath = join(repoDir, 'shared-artifacts.zip');
+  try {
+    mkdirSync(join(runDir, 'betting-win', '.git'), { recursive: true });
+    mkdirSync(join(runDir, 'betting-win', '.hg'), { recursive: true });
+    mkdirSync(join(runDir, 'betting-win', '.svn'), { recursive: true });
+    writeFileSync(join(runDir, 'evidence.txt'), 'safe evidence\n', { encoding: 'utf-8' });
+    writeFileSync(join(runDir, 'betting-win', '.git', 'config'), '[core]\n', { encoding: 'utf-8' });
+    writeFileSync(join(runDir, 'betting-win', '.hg', 'store'), 'hg metadata\n', { encoding: 'utf-8' });
+    writeFileSync(join(runDir, 'betting-win', '.svn', 'wc.db'), 'svn metadata\n', { encoding: 'utf-8' });
+
+    const result = spawnSync(
+      'bash',
+      [
+        '-lc',
+        [
+          '. "$RUN_COMMON"',
+          'automation_temp_inode_check_capacity() { return 0; }',
+          'automation_require_command() { command -v "$1" >/dev/null 2>&1; }',
+          'automation_build_artifacts_zip "$RUN_DIR" "$REPO_DIR"',
+        ].join('; '),
+      ],
+      {
+        cwd: repoDir,
+        encoding: 'utf-8',
+        env: {
+          ...process.env,
+          REPO_DIR: repoDir,
+          RUN_COMMON,
+          RUN_DIR: runDir,
+        },
+      },
+    );
+    assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
+    assert.ok(!listZipEntries(join(repoDir, 'artifacts.zip')).some((entry) => /\/\.(git|hg|svn)(\/|$)/u.test(entry)));
+
+    const sharedResult = spawnSync(
+      'bash',
+      [
+        '-lc',
+        '. "$CONTROLLER_HARDENING"; automation_v2_zip_with_timeout 30 "$SHARED_ARCHIVE_PATH" "$REPO_DIR" artifacts',
+      ],
+      {
+        cwd: repoDir,
+        encoding: 'utf-8',
+        env: {
+          ...process.env,
+          CONTROLLER_HARDENING,
+          REPO_DIR: repoDir,
+          SHARED_ARCHIVE_PATH: sharedArchivePath,
+        },
+      },
+    );
+    assert.equal(sharedResult.status, 0, `${sharedResult.stdout}\n${sharedResult.stderr}`);
+    assert.ok(!listZipEntries(sharedArchivePath).some((entry) => /\/\.(git|hg|svn)(\/|$)/u.test(entry)));
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test('zip_codebase help documents the numbered repo-root and artifact-only packaging contract', () => {
   const output = execFileSync('bash', [ZIP_CODEBASE, '--help'], {
     cwd: REPO_ROOT,
@@ -559,6 +744,7 @@ test('zip_codebase help documents the numbered repo-root and artifact-only packa
   assert.match(output, /Includes git-tracked files plus untracked non-ignored files by default/);
   assert.match(output, /Uses fast Deflate level 1/);
   assert.match(output, /--artifacts-only/);
+  assert.match(output, /excluding embedded VCS metadata/);
 });
 
 test('zip_codebase uses the Hyperliquid-style numbered archive and exclusion contract', () => {
@@ -618,6 +804,8 @@ test('zip_codebase excludes local secrets, archives, artifacts, dependencies, lo
     assert.ok(!entries.includes('node_modules/left-pad/index.js'));
     assert.ok(!entries.includes('dist/bundle.js'));
     assert.ok(!entries.includes('.locks/repo.lock'));
+    assert.ok(!entries.includes('.hg/store'));
+    assert.ok(!entries.includes('.svn/wc.db'));
     assert.ok(!entries.includes('run.log'));
     assert.ok(!entries.includes('logs/build.stderr.txt'));
     assert.ok(!entries.includes('scratch.tmp'));
@@ -626,6 +814,46 @@ test('zip_codebase excludes local secrets, archives, artifacts, dependencies, lo
     assert.ok(!entries.includes('runtime/generated.txt'));
   } finally {
     rmSync(fixture.dir, { recursive: true, force: true });
+  }
+});
+
+test('zip_codebase rejects source symlinks instead of following outside contents', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'surebet-zip-codebase-symlink-'));
+  const repoDir = join(dir, 'repo');
+  try {
+    mkdirSync(repoDir, { recursive: true });
+    copyFileSync(ZIP_CODEBASE, join(repoDir, 'zip_codebase.sh'));
+    writeFileSync(join(repoDir, 'README.md'), '# fixture\n', { encoding: 'utf-8' });
+    writeFileSync(join(dir, 'outside.txt'), 'outside-content\n', { encoding: 'utf-8' });
+    symlinkSync(join(dir, 'outside.txt'), join(repoDir, 'outside-link.txt'));
+    const fakeBin = join(dir, 'fake-bin');
+    mkdirSync(fakeBin, { recursive: true });
+    const fakeGit = join(fakeBin, 'git');
+    writeFileSync(fakeGit, '#!/usr/bin/env bash\nexit 127\n', { encoding: 'utf-8' });
+    chmodSync(fakeGit, 0o755);
+
+    const fallbackResult = spawnSync('bash', ['zip_codebase.sh'], {
+      cwd: repoDir,
+      encoding: 'utf-8',
+      env: { ...process.env, PATH: `${fakeBin}:${process.env.PATH === undefined ? '' : process.env.PATH}` },
+      stdio: 'pipe',
+    });
+    assert.equal(fallbackResult.status, 1, `${fallbackResult.stdout}\n${fallbackResult.stderr}`);
+    assert.match(fallbackResult.stderr, /must not contain symlinks/u);
+    assert.equal(existsSync(join(repoDir, 'repo1.zip')), false);
+
+    execFileSync('git', ['init', '-q'], { cwd: repoDir, encoding: 'utf-8', stdio: 'pipe' });
+
+    const result = spawnSync('bash', ['zip_codebase.sh'], {
+      cwd: repoDir,
+      encoding: 'utf-8',
+      stdio: 'pipe',
+    });
+    assert.equal(result.status, 1, `${result.stdout}\n${result.stderr}`);
+    assert.match(result.stderr, /must not contain symlinks/u);
+    assert.equal(existsSync(join(repoDir, 'repo1.zip')), false);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
   }
 });
 
@@ -653,6 +881,60 @@ test('zip_codebase artifact-only mode recursively preserves the complete artifac
     }
   } finally {
     rmSync(fixture.dir, { recursive: true, force: true });
+  }
+});
+
+test('zip_codebase artifact-only mode rejects symlinks and excludes embedded VCS metadata', () => {
+  const fixture = makeZipCodebaseFixture();
+  try {
+    mkdirSync(join(fixture.repoDir, 'artifacts', 'fixture', 'betting-win', '.git'), { recursive: true });
+    mkdirSync(join(fixture.repoDir, 'artifacts', 'fixture', 'betting-win', '.hg'), { recursive: true });
+    mkdirSync(join(fixture.repoDir, 'artifacts', 'fixture', 'betting-win', '.svn'), { recursive: true });
+    writeFileSync(join(fixture.repoDir, 'artifacts', 'fixture', 'betting-win', '.git', 'config'), '[core]\n', { encoding: 'utf-8' });
+    writeFileSync(join(fixture.repoDir, 'artifacts', 'fixture', 'betting-win', '.hg', 'store'), 'hg metadata\n', { encoding: 'utf-8' });
+    writeFileSync(join(fixture.repoDir, 'artifacts', 'fixture', 'betting-win', '.svn', 'wc.db'), 'svn metadata\n', { encoding: 'utf-8' });
+    execFileSync('bash', ['zip_codebase.sh', '--artifacts-only'], {
+      cwd: fixture.repoDir,
+      encoding: 'utf-8',
+      stdio: 'pipe',
+    });
+    assert.ok(!listZipEntries(join(fixture.repoDir, 'artifacts1.zip')).some((entry) => /\/\.(git|hg|svn)(\/|$)/u.test(entry)));
+
+    writeFileSync(join(fixture.dir, 'outside.txt'), 'outside-content\n', { encoding: 'utf-8' });
+    symlinkSync(join(fixture.dir, 'outside.txt'), join(fixture.repoDir, 'artifacts', 'cycle_1', 'outside-link.txt'));
+    const result = spawnSync('bash', ['zip_codebase.sh', '--artifacts-only'], {
+      cwd: fixture.repoDir,
+      encoding: 'utf-8',
+      stdio: 'pipe',
+    });
+    assert.equal(result.status, 1, `${result.stdout}\n${result.stderr}`);
+    assert.match(result.stderr, /must not contain symlinks/u);
+  } finally {
+    rmSync(fixture.dir, { recursive: true, force: true });
+  }
+});
+
+test('zip_codebase artifact-only mode rejects a symlinked artifacts root', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'surebet-artifacts-root-symlink-'));
+  const repoDir = join(dir, 'repo');
+  const outsideArtifacts = join(dir, 'outside-artifacts');
+  try {
+    mkdirSync(repoDir, { recursive: true });
+    mkdirSync(outsideArtifacts, { recursive: true });
+    copyFileSync(ZIP_CODEBASE, join(repoDir, 'zip_codebase.sh'));
+    writeFileSync(join(outsideArtifacts, 'evidence.txt'), 'outside artifact\n', { encoding: 'utf-8' });
+    symlinkSync(outsideArtifacts, join(repoDir, 'artifacts'), 'dir');
+
+    const result = spawnSync('bash', ['zip_codebase.sh', '--artifacts-only'], {
+      cwd: repoDir,
+      encoding: 'utf-8',
+      stdio: 'pipe',
+    });
+    assert.equal(result.status, 1, `${result.stdout}\n${result.stderr}`);
+    assert.match(result.stderr, /non-symlink directory/u);
+    assert.equal(existsSync(join(repoDir, 'artifacts1.zip')), false);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
   }
 });
 
@@ -717,8 +999,45 @@ test('source handoff archive excludes local env, archives, artifacts, dependenci
     assert.ok(!entries.includes('./node_modules/left-pad/index.js'));
     assert.ok(!entries.includes('./dist/bundle.js'));
     assert.ok(!entries.includes('./.locks/repo.lock'));
+    assert.ok(!entries.includes('./.hg/store'));
+    assert.ok(!entries.includes('./.svn/wc.db'));
     assert.ok(!entries.includes('./tmp/scratch.txt'));
     assert.ok(!entries.includes('./.tmp/scratch.txt'));
+  } finally {
+    rmSync(fixture.dir, { recursive: true, force: true });
+  }
+});
+
+test('source handoff archive rejects included source symlinks and non-artifact output paths', () => {
+  const fixture = makeSourceHandoffFixture();
+  try {
+    writeFileSync(join(fixture.dir, 'outside.txt'), 'outside-content\n', { encoding: 'utf-8' });
+    symlinkSync(join(fixture.dir, 'outside.txt'), join(fixture.repoDir, 'outside-link.txt'));
+
+    const symlinkResult = spawnSync(
+      'bash',
+      ['scripts/create-source-handoff-archive.sh', 'artifacts/source-handoff-2.tar.gz'],
+      {
+        cwd: fixture.repoDir,
+        encoding: 'utf-8',
+        stdio: 'pipe',
+      },
+    );
+    assert.equal(symlinkResult.status, 1, `${symlinkResult.stdout}\n${symlinkResult.stderr}`);
+    assert.match(symlinkResult.stderr, /must not contain symlinks/u);
+
+    rmSync(join(fixture.repoDir, 'outside-link.txt'), { force: true });
+    const outputResult = spawnSync(
+      'bash',
+      ['scripts/create-source-handoff-archive.sh', join(fixture.dir, 'outside.tar.gz')],
+      {
+        cwd: fixture.repoDir,
+        encoding: 'utf-8',
+        stdio: 'pipe',
+      },
+    );
+    assert.equal(outputResult.status, 1, `${outputResult.stdout}\n${outputResult.stderr}`);
+    assert.match(outputResult.stderr, /output path must be a safe repo-relative artifacts path|output archive must be under artifacts/u);
   } finally {
     rmSync(fixture.dir, { recursive: true, force: true });
   }

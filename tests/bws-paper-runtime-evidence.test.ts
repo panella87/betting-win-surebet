@@ -1,13 +1,14 @@
 import test, { type TestContext } from 'node:test';
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
+import { spawnSync } from 'node:child_process';
 import { createServer } from 'node:http';
-import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, lstatSync, mkdtempSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import type { AddressInfo } from 'node:net';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import {
   createBwsPaperRuntimeEvidence,
+  writeBwsPaperRuntimeEvidence,
 } from '../packages/bootstrap/src/operations/paper-runtime-evidence.js';
 import {
   writeBettingWinUpstreamLock,
@@ -277,6 +278,7 @@ function createTestRepositoryRoot(t: TestContext): string {
     });
   });
   mkdirSync(join(root, 'runtime'), { recursive: true });
+  mkdirSync(join(root, 'artifacts'), { recursive: true });
   writeTestUpstreamLockFixture(root);
   writeEvidenceIndex(root);
   return root;
@@ -351,7 +353,15 @@ function writeJson(path: string, value: unknown): void {
 }
 
 function runGit(cwd: string, args: readonly string[]): string {
-  return execFileSync('git', ['-C', cwd, ...args], { encoding: 'utf-8', stdio: 'pipe' });
+  const result = spawnSync('git', ['-C', cwd, ...args], { encoding: 'utf-8', stdio: 'pipe' });
+  if (result.status !== 0) {
+    throw new Error([
+      `git ${args.join(' ')} failed with status ${result.status}`,
+      result.stderr,
+      result.stdout,
+    ].filter((part) => part.length > 0).join('\n'));
+  }
+  return result.stdout;
 }
 
 function commitUpstreamFixtureChange(repositoryRoot: string): void {
@@ -381,6 +391,9 @@ function configureUpstreamApiPreflightEnvironment(
     BWS_UPSTREAM_API_TIMEOUT_MS: process.env.BWS_UPSTREAM_API_TIMEOUT_MS,
     BWS_UPSTREAM_LOCK_PATH: process.env.BWS_UPSTREAM_LOCK_PATH,
     BWS_UPSTREAM_MODE: process.env.BWS_UPSTREAM_MODE,
+    SUREBET_EXECUTION_ENABLED: process.env.SUREBET_EXECUTION_ENABLED,
+    SUREBET_PROVIDER_CONNECTIONS: process.env.SUREBET_PROVIDER_CONNECTIONS,
+    SUREBET_RUNTIME_MODE: process.env.SUREBET_RUNTIME_MODE,
   });
   t.after(() => {
     restoreEnvironmentValue('BETTING_WIN_REPO_PATH', previous.BETTING_WIN_REPO_PATH);
@@ -390,6 +403,9 @@ function configureUpstreamApiPreflightEnvironment(
     restoreEnvironmentValue('BWS_UPSTREAM_API_TIMEOUT_MS', previous.BWS_UPSTREAM_API_TIMEOUT_MS);
     restoreEnvironmentValue('BWS_UPSTREAM_LOCK_PATH', previous.BWS_UPSTREAM_LOCK_PATH);
     restoreEnvironmentValue('BWS_UPSTREAM_MODE', previous.BWS_UPSTREAM_MODE);
+    restoreEnvironmentValue('SUREBET_EXECUTION_ENABLED', previous.SUREBET_EXECUTION_ENABLED);
+    restoreEnvironmentValue('SUREBET_PROVIDER_CONNECTIONS', previous.SUREBET_PROVIDER_CONNECTIONS);
+    restoreEnvironmentValue('SUREBET_RUNTIME_MODE', previous.SUREBET_RUNTIME_MODE);
   });
   process.env.BETTING_WIN_REPO_PATH = join(repositoryRoot, 'betting-win');
   process.env.BWS_API_PORT = values.apiPort ?? '4312';
@@ -398,6 +414,9 @@ function configureUpstreamApiPreflightEnvironment(
   process.env.BWS_UPSTREAM_API_TIMEOUT_MS = values.timeoutMs ?? '1000';
   process.env.BWS_UPSTREAM_LOCK_PATH = values.lockPath ?? 'config/betting-win.upstream.lock.json';
   process.env.BWS_UPSTREAM_MODE = values.upstreamMode ?? 'api';
+  process.env.SUREBET_EXECUTION_ENABLED = 'false';
+  process.env.SUREBET_PROVIDER_CONNECTIONS = 'disabled';
+  process.env.SUREBET_RUNTIME_MODE = 'paper';
 }
 
 function restoreEnvironmentValue(name: string, value: string | undefined): void {
@@ -567,6 +586,143 @@ test('paper runtime evidence starts an owned stack, records ready observations, 
   assert.equal(result.observation.samples[0]?.runtimeLifecycleState, 'running');
   assert.equal(result.latestRuntimeHandoffFile, 'runtime/bws-paper-runtime-handoff/handoff.json');
   assert.deepEqual(observedCalls, ['status:not_running', 'start', 'status:running', 'diagnostics', 'stop']);
+});
+
+test('paper runtime evidence writer rejects output paths outside repo artifacts', async (t) => {
+  const repositoryRoot = createTestRepositoryRoot(t);
+  await assert.rejects(
+    () => writeBwsPaperRuntimeEvidence({
+      intervalMs: 1000,
+      maxDurationMs: 1000,
+      outputPath: '../outside.json',
+      repositoryRoot,
+    }),
+    /must be a strict relative path|must stay under repository artifacts/u,
+  );
+  await assert.rejects(
+    () => writeBwsPaperRuntimeEvidence({
+      intervalMs: 1000,
+      maxDurationMs: 1000,
+      outputPath: 'runtime/evidence.json',
+      repositoryRoot,
+    }),
+    /must stay under repository artifacts/u,
+  );
+  await assert.rejects(
+    () => writeBwsPaperRuntimeEvidence({
+      intervalMs: 1000,
+      maxDurationMs: 1000,
+      outputPath: join(repositoryRoot, 'artifacts', 'absolute.json'),
+      repositoryRoot,
+    }),
+    /must be a strict relative path/u,
+  );
+  await assert.rejects(
+    () => writeBwsPaperRuntimeEvidence({
+      intervalMs: 1000,
+      maxDurationMs: 1000,
+      outputPath: 'artifacts/../outside.json',
+      repositoryRoot,
+    }),
+    /must be a strict relative path/u,
+  );
+  await assert.rejects(
+    () => writeBwsPaperRuntimeEvidence({
+      intervalMs: 1000,
+      maxDurationMs: 1000,
+      outputPath: './artifacts/evidence.json',
+      repositoryRoot,
+    }),
+    /must be a strict relative path/u,
+  );
+  for (const outputPath of [
+    'artifacts/.git/evidence.json',
+    'artifacts/nested//evidence.json',
+    'C:/artifacts/evidence.json',
+    '\\\\server\\share\\evidence.json',
+  ]) {
+    await assert.rejects(
+      () => writeBwsPaperRuntimeEvidence({
+        intervalMs: 1000,
+        maxDurationMs: 1000,
+        outputPath,
+        repositoryRoot,
+      }),
+      /must be a strict relative path|unsafe path component/u,
+    );
+  }
+});
+
+test('paper runtime evidence writer rejects preexisting final output symlinks before runtime ownership', async (t) => {
+  const repositoryRoot = createTestRepositoryRoot(t);
+  const outsideDirectory = mkdtempSync(join(tmpdir(), 'bws-paper-runtime-final-outside-'));
+  t.after(() => {
+    rmSync(outsideDirectory, { force: true, recursive: true });
+  });
+  const outsideFile = join(outsideDirectory, 'outside.json');
+  const outputPath = 'artifacts/runtime-evidence.json';
+  const absoluteOutputPath = join(repositoryRoot, outputPath);
+  writeFileSync(outsideFile, 'outside-original\n', { encoding: 'utf-8' });
+  symlinkSync(outsideFile, absoluteOutputPath);
+
+  await assert.rejects(
+    () => writeBwsPaperRuntimeEvidence({
+      intervalMs: 1000,
+      maxDurationMs: 1000,
+      outputPath,
+      repositoryRoot,
+    }),
+    /output path must not be a symlink/u,
+  );
+  assert.equal(readFileSync(outsideFile, 'utf-8'), 'outside-original\n');
+  assert.equal(lstatSync(absoluteOutputPath).isSymbolicLink(), true);
+});
+
+test('paper runtime evidence writer rejects preexisting temporary output symlinks before runtime ownership', async (t) => {
+  const repositoryRoot = createTestRepositoryRoot(t);
+  const outsideDirectory = mkdtempSync(join(tmpdir(), 'bws-paper-runtime-temp-outside-'));
+  t.after(() => {
+    rmSync(outsideDirectory, { force: true, recursive: true });
+  });
+  const outsideFile = join(outsideDirectory, 'outside.json');
+  const outputPath = 'artifacts/runtime-evidence.json';
+  const absoluteOutputPath = join(repositoryRoot, outputPath);
+  const temporaryPath = `${absoluteOutputPath}.${process.pid}.tmp`;
+  writeFileSync(outsideFile, 'outside-original\n', { encoding: 'utf-8' });
+  symlinkSync(outsideFile, temporaryPath);
+
+  await assert.rejects(
+    () => writeBwsPaperRuntimeEvidence({
+      intervalMs: 1000,
+      maxDurationMs: 1000,
+      outputPath,
+      repositoryRoot,
+    }),
+    /EEXIST/u,
+  );
+  assert.equal(readFileSync(outsideFile, 'utf-8'), 'outside-original\n');
+  assert.equal(existsSync(absoluteOutputPath), false);
+  assert.equal(lstatSync(temporaryPath).isSymbolicLink(), true);
+});
+
+test('paper runtime evidence writer rejects symlinked artifact parents before creating directories', async (t) => {
+  const repositoryRoot = createTestRepositoryRoot(t);
+  const outsideDirectory = mkdtempSync(join(tmpdir(), 'bws-paper-runtime-outside-'));
+  t.after(() => {
+    rmSync(outsideDirectory, { force: true, recursive: true });
+  });
+  symlinkSync(outsideDirectory, join(repositoryRoot, 'artifacts', 'outside-link'));
+
+  await assert.rejects(
+    () => writeBwsPaperRuntimeEvidence({
+      intervalMs: 1000,
+      maxDurationMs: 1000,
+      outputPath: 'artifacts/outside-link/nested/evidence.json',
+      repositoryRoot,
+    }),
+    /must not contain symlinks/u,
+  );
+  assert.equal(existsSync(join(outsideDirectory, 'nested')), false);
 });
 
 test('paper runtime evidence preserves an attached stack when exact identity and configuration already match', async (t) => {
@@ -759,6 +915,61 @@ test('paper runtime evidence rejects unsafe integer preflight bounds before life
     /BWS_UPSTREAM_API_TIMEOUT_MS must be a positive safe integer/i,
   );
   assert.equal(lifecycleTouched, false);
+});
+
+test('paper runtime evidence validates closed runtime policy before upstream API preflight', async (t) => {
+  const repositoryRoot = process.cwd();
+  configureUpstreamApiPreflightEnvironment(t, repositoryRoot, {
+    apiBaseUrl: 'http://127.0.0.1:4301',
+  });
+  let fetchTouched = false;
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async () => {
+    fetchTouched = true;
+    throw new Error('fetch should not be called');
+  }) as typeof fetch;
+  t.after(() => {
+    globalThis.fetch = originalFetch;
+  });
+
+  for (const testCase of [
+    Object.freeze({ expected: /SUREBET_RUNTIME_MODE must be exactly paper/i, name: 'SUREBET_RUNTIME_MODE', value: 'live' }),
+    Object.freeze({ expected: /SUREBET_RUNTIME_MODE must be exactly paper/i, name: 'SUREBET_RUNTIME_MODE', value: undefined }),
+    Object.freeze({ expected: /SUREBET_PROVIDER_CONNECTIONS must be exactly disabled/i, name: 'SUREBET_PROVIDER_CONNECTIONS', value: 'enabled' }),
+    Object.freeze({ expected: /SUREBET_PROVIDER_CONNECTIONS must be exactly disabled/i, name: 'SUREBET_PROVIDER_CONNECTIONS', value: undefined }),
+    Object.freeze({ expected: /SUREBET_EXECUTION_ENABLED must be exactly false/i, name: 'SUREBET_EXECUTION_ENABLED', value: 'true' }),
+    Object.freeze({ expected: /SUREBET_EXECUTION_ENABLED must be exactly false/i, name: 'SUREBET_EXECUTION_ENABLED', value: undefined }),
+  ]) {
+    process.env.SUREBET_RUNTIME_MODE = 'paper';
+    process.env.SUREBET_PROVIDER_CONNECTIONS = 'disabled';
+    process.env.SUREBET_EXECUTION_ENABLED = 'false';
+    if (testCase.value === undefined) {
+      delete process.env[testCase.name];
+    } else {
+      process.env[testCase.name] = testCase.value;
+    }
+    let lifecycleTouched = false;
+    fetchTouched = false;
+
+    await assert.rejects(
+      () => createBwsPaperRuntimeEvidence({
+        getLifecycleStatus: async () => {
+          lifecycleTouched = true;
+          return createLifecycleStatus('running');
+        },
+        intervalMs: 1000,
+        maxDurationMs: 2000,
+        repositoryRoot,
+        startLifecycle: async () => {
+          lifecycleTouched = true;
+          throw new Error('start should not be called');
+        },
+      }),
+      testCase.expected,
+    );
+    assert.equal(fetchTouched, false);
+    assert.equal(lifecycleTouched, false);
+  }
 });
 
 test('paper runtime evidence fails fast when the upstream API is unavailable before lifecycle ownership is touched', async (t) => {

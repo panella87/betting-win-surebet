@@ -16,6 +16,9 @@ import {
   solveB1GeneralizedStakeVector,
   type B1GeneralizedStakeVectorPolicy,
 } from '../src/solver/b1-generalized-stake-vector.js';
+import {
+  roundUpB1StakeMinor,
+} from '../src/solver/b1-rounding.js';
 
 const FIXTURE_PATH = 'tests/fixtures/b1-local-contract/valid-b1-multi-venue-markets.json';
 
@@ -232,6 +235,16 @@ test('B1 generalized stake-vector solver rejects malformed bigint policy fields'
   const missingConstraintCapacity = solveB1GeneralizedStakeVector(acceptedTwoWayGrossCandidate(), missingConstraintCapacityPolicy as never);
   assert.equal(missingConstraintCapacity.ok, false);
   assert.equal(missingConstraintCapacity.blockers[0]?.code, 'B1_STAKE_VECTOR_CAPACITY_INVALID');
+});
+
+test('B1 stake rounding blocks malformed direct bigint inputs without throwing', () => {
+  const missingRawStake = roundUpB1StakeMinor(undefined as never, 5n);
+  assert.equal(missingRawStake.ok, false);
+  assert.equal(missingRawStake.blockers[0]?.code, 'B1_STAKE_NOT_POSITIVE');
+
+  const missingStep = roundUpB1StakeMinor(10_000n, undefined as never);
+  assert.equal(missingStep.ok, false);
+  assert.equal(missingStep.blockers[0]?.code, 'B1_STAKE_VECTOR_ROUNDING_STEP_INVALID');
 });
 
 test('B1 generalized stake-vector solver blocks unsupported outcome cardinality', () => {

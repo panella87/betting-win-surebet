@@ -44,6 +44,11 @@ const RUN_KINDS = new Set<SurebetStrategyRunKind>([
 ]);
 const SETTLEMENT_STATES = new Set<SurebetStrategySettlementState>(['blocked', 'reconciled']);
 const SOURCE_KINDS = new Set<SurebetStrategySourceKind>(['pinned_records', 'read_only_query', 'resource_export']);
+const B1_OFFLINE_FALSIFICATION_STATUSES = new Set([
+  'B1_BLOCKED_UPSTREAM_DATA_INSUFFICIENT',
+  'B1_FALSIFIED_NET_EDGE_DISAPPEARED',
+  'B1_OFFLINE_RESEARCH_CANDIDATES_OBSERVED',
+]);
 
 type ReadOnlyResponseItem =
   | BwsB1BacktestRunItem
@@ -586,6 +591,11 @@ function assertB1BacktestRunItem(value: unknown, label: string): BwsB1BacktestRu
   ) {
     fail(`${label}.run.upstreamReadiness must preserve the upstream B1 blocker`);
   }
+  const offlineFalsificationStatus = requireLiteral(
+    run['offlineFalsificationStatus'],
+    B1_OFFLINE_FALSIFICATION_STATUSES,
+    `${label}.run.offlineFalsificationStatus`,
+  );
   requireNonEmptyString(run['runId'], `${label}.run.runId`);
   requireSha256(run['runHash'], `${label}.run.runHash`);
   requireSha256(run['sourceManifestHash'], `${label}.run.sourceManifestHash`);
@@ -593,7 +603,31 @@ function assertB1BacktestRunItem(value: unknown, label: string): BwsB1BacktestRu
   requireIsoTimestamp(run['observedAt'], `${label}.run.observedAt`);
   requireIsoTimestamp(run['insertedAt'], `${label}.run.insertedAt`);
   requireObjectRecord(run['metrics'], `${label}.run.metrics`);
-  requireObjectRecord(run['report'], `${label}.run.report`);
+  const report = requireObjectRecord(run['report'], `${label}.run.report`);
+  if (requireNonEmptyString(report['reportKind'], `${label}.run.report.reportKind`) !== 'deterministic_b1_cross_venue_backtest_report') {
+    fail(`${label}.run.report.reportKind must remain deterministic_b1_cross_venue_backtest_report`);
+  }
+  if (requireBoolean(report['runtimeEvidence'], `${label}.run.report.runtimeEvidence`) !== false) {
+    fail(`${label}.run.report.runtimeEvidence must stay false`);
+  }
+  if (requireBoolean(report['executable'], `${label}.run.report.executable`) !== false) {
+    fail(`${label}.run.report.executable must stay false`);
+  }
+  if (requireNonEmptyString(report['liveReadiness'], `${label}.run.report.liveReadiness`) !== 'not_authorized_bws_900_parked') {
+    fail(`${label}.run.report.liveReadiness must keep BWS-900 parked`);
+  }
+  if (
+    requireNonEmptyString(report['upstreamReadiness'], `${label}.run.report.upstreamReadiness`)
+    !== 'blocked_until_betting_win_b1_multi_venue_markets_v1'
+  ) {
+    fail(`${label}.run.report.upstreamReadiness must preserve the upstream B1 blocker`);
+  }
+  if (
+    requireLiteral(report['offlineFalsificationStatus'], B1_OFFLINE_FALSIFICATION_STATUSES, `${label}.run.report.offlineFalsificationStatus`)
+    !== offlineFalsificationStatus
+  ) {
+    fail(`${label}.run.report.offlineFalsificationStatus must match run.offlineFalsificationStatus`);
+  }
 
   const policy = requireObjectRecord(record['policy'], `${label}.policy`);
   if (requireBoolean(policy['runtimeEvidence'], `${label}.policy.runtimeEvidence`) !== false) {

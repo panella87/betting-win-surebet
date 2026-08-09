@@ -12,6 +12,12 @@ import {
   evaluateB1NetEconomics,
   type B1NetEconomicsPolicy,
 } from '../src/economics/b1-net-spread.js';
+import {
+  calculateB1FeeCharge,
+} from '../src/economics/b1-fee-matrix.js';
+import {
+  calculateB1QuoteAgePenalty,
+} from '../src/economics/b1-lateness-penalty.js';
 
 const FIXTURE_PATH = 'tests/fixtures/b1-local-contract/valid-b1-multi-venue-markets.json';
 
@@ -180,6 +186,113 @@ test('B1 net economics rejects missing bigint quote-age policy fields', () => {
       evidenceRequired: 'Non-negative B1 max accepted quote age.',
     },
   ]);
+});
+
+test('B1 net economics helpers block malformed direct bigint inputs without throwing', () => {
+  const malformedStakeFee = calculateB1FeeCharge(
+    netPolicy().feeMatrix,
+    'venue-a',
+    'event-001:moneyline:home',
+    undefined as never,
+  );
+  assert.equal(malformedStakeFee.ok, false);
+  assert.equal(malformedStakeFee.blockers[0]?.code, 'B1_STAKE_NOT_POSITIVE');
+
+  const malformedEntryFee = calculateB1FeeCharge(
+    Object.freeze({
+      entries: Object.freeze([
+        Object.freeze({
+          venueOrBookmakerId: 'venue-a',
+          selectionEquivalenceKey: 'event-001:moneyline:home',
+          feeBps: undefined,
+          fixedFeeMinor: 0n,
+        }),
+      ]),
+    }) as never,
+    'venue-a',
+    'event-001:moneyline:home',
+    10_000n,
+  );
+  assert.equal(malformedEntryFee.ok, false);
+  assert.equal(malformedEntryFee.blockers[0]?.code, 'B1_FEE_BPS_INVALID');
+
+  const malformedQuoteAge = calculateB1QuoteAgePenalty(
+    undefined as never,
+    10_000n,
+    netPolicy().quoteAgePenaltyPolicy,
+  );
+  assert.equal(malformedQuoteAge.ok, false);
+  assert.equal(malformedQuoteAge.blockers[0]?.code, 'B1_QUOTE_AGE_INVALID');
+});
+
+test('B1 fee calculation blocks malformed direct key inputs without throwing', () => {
+  const malformedVenueFee = calculateB1FeeCharge(
+    netPolicy().feeMatrix,
+    undefined as never,
+    'event-001:moneyline:home',
+    10_000n,
+  );
+  assert.equal(malformedVenueFee.ok, false);
+  assert.deepEqual(malformedVenueFee.blockers, [
+    {
+      code: 'B1_FEE_VENUE_MISSING',
+      message: 'B1 fee calculation requires an explicit venue for every selected quote.',
+      evidenceRequired: 'B1 selected quote venue_or_bookmaker_id.',
+    },
+  ]);
+
+  const malformedSelectionFee = calculateB1FeeCharge(
+    netPolicy().feeMatrix,
+    'venue-a',
+    undefined as never,
+    10_000n,
+  );
+  assert.equal(malformedSelectionFee.ok, false);
+  assert.deepEqual(malformedSelectionFee.blockers, [
+    {
+      code: 'B1_FEE_SELECTION_MISSING',
+      message: 'B1 fee calculation requires selection equivalence evidence for every selected quote.',
+      evidenceRequired: 'B1 selected quote selection_equivalence_key.',
+    },
+  ]);
+});
+
+test('B1 fee matrix normalization blocks malformed entry key inputs without throwing', () => {
+  const malformedEntryVenueFee = calculateB1FeeCharge(
+    Object.freeze({
+      entries: Object.freeze([
+        Object.freeze({
+          venueOrBookmakerId: undefined,
+          selectionEquivalenceKey: 'event-001:moneyline:home',
+          feeBps: 10n,
+          fixedFeeMinor: 0n,
+        }),
+      ]),
+    }) as never,
+    'venue-a',
+    'event-001:moneyline:home',
+    10_000n,
+  );
+  assert.equal(malformedEntryVenueFee.ok, false);
+  assert.equal(malformedEntryVenueFee.blockers[0]?.code, 'B1_FEE_MATRIX_ENTRY_KEY_INVALID');
+
+  const malformedEntrySelectionFee = calculateB1FeeCharge(
+    Object.freeze({
+      entries: Object.freeze([
+        Object.freeze({
+          venueOrBookmakerId: 'venue-a',
+          selectionEquivalenceKey: undefined,
+          feeBps: 10n,
+          fixedFeeMinor: 0n,
+        }),
+      ]),
+    }) as never,
+    'venue-a',
+    'event-001:moneyline:home',
+    10_000n,
+  );
+  assert.equal(malformedEntrySelectionFee.ok, false);
+  assert.equal(malformedEntrySelectionFee.blockers[0]?.code, 'B1_FEE_MATRIX_ENTRY_KEY_INVALID');
 });
 
 test('B1 net economics blocks non-positive worst-case net after costs', () => {

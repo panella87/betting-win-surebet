@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
+import { closeSync, existsSync, lstatSync, mkdirSync, openSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { readBettingWinUpstreamLock, verifyBettingWinUpstreamLock } from '../../../upstream/src/index.js';
@@ -32,6 +32,9 @@ const PAPER_RUNTIME_UPSTREAM_API_CONTRACT_VERSION_ENV = 'BWS_UPSTREAM_API_CONTRA
 const PAPER_RUNTIME_UPSTREAM_API_TIMEOUT_MS_ENV = 'BWS_UPSTREAM_API_TIMEOUT_MS';
 const PAPER_RUNTIME_UPSTREAM_LOCK_PATH_ENV = 'BWS_UPSTREAM_LOCK_PATH';
 const PAPER_RUNTIME_UPSTREAM_PROBE_PATH = '/contract' as const;
+const SUREBET_RUNTIME_MODE_ENV = 'SUREBET_RUNTIME_MODE';
+const SUREBET_PROVIDER_CONNECTIONS_ENV = 'SUREBET_PROVIDER_CONNECTIONS';
+const SUREBET_EXECUTION_ENABLED_ENV = 'SUREBET_EXECUTION_ENABLED';
 const BETTING_WIN_REPO_PATH_ENV = 'BETTING_WIN_REPO_PATH';
 const BWS_UPSTREAM_MODE_ENV = 'BWS_UPSTREAM_MODE';
 
@@ -365,13 +368,31 @@ export async function writeBwsPaperRuntimeEvidence(
   request: WriteBwsPaperRuntimeEvidenceRequest,
 ): Promise<BwsPaperRuntimeEvidenceResult> {
   const repositoryRoot = resolve(request.repositoryRoot ?? process.cwd());
-  const outputPath = resolve(repositoryRoot, request.outputPath);
-  const result = await createBwsPaperRuntimeEvidence(request);
-  mkdirSync(dirname(outputPath), { recursive: true });
+  const outputPath = resolveArtifactPath(repositoryRoot, request.outputPath, 'paper runtime evidence output path');
+  const outputDirectory = dirname(outputPath);
+  rejectExistingSymlinkSegments(repositoryRoot, outputDirectory, 'paper runtime evidence output directory');
+  if (existsSync(outputPath) && lstatSync(outputPath).isSymbolicLink()) {
+    throw new Error(`paper runtime evidence output path must not be a symlink: ${request.outputPath}`);
+  }
+  mkdirSync(outputDirectory, { recursive: true });
+  rejectExistingSymlinkSegments(repositoryRoot, outputDirectory, 'paper runtime evidence output directory');
   const temporaryPath = `${outputPath}.${process.pid}.tmp`;
-  writeFileSync(temporaryPath, `${JSON.stringify(result, null, 2)}\n`, 'utf-8');
-  renameSync(temporaryPath, outputPath);
-  return result;
+  const temporaryFile = openSync(temporaryPath, 'wx', 0o600);
+  let temporaryFileClosed = false;
+  try {
+    const result = await createBwsPaperRuntimeEvidence(request);
+    writeFileSync(temporaryFile, `${JSON.stringify(result, null, 2)}\n`, 'utf-8');
+    closeSync(temporaryFile);
+    temporaryFileClosed = true;
+    renameSync(temporaryPath, outputPath);
+    return result;
+  } catch (error) {
+    if (!temporaryFileClosed) {
+      closeSync(temporaryFile);
+    }
+    rmSync(temporaryPath, { force: true });
+    throw error;
+  }
 }
 
 function buildObservationSample(
@@ -656,8 +677,82 @@ async function runBettingWinUpstreamApiPreflight(
 }
 
 function readDiagnosticsManifest(repositoryRoot: string, manifestFile: string): RuntimeEvidenceManifest {
-  const manifestPath = resolve(repositoryRoot, manifestFile);
+  const manifestPath = resolveRepositoryPath(repositoryRoot, manifestFile, 'diagnostics manifest path');
+  rejectExistingSymlinkSegments(repositoryRoot, manifestPath, 'diagnostics manifest path');
+  if (!existsSync(manifestPath) || lstatSync(manifestPath).isSymbolicLink()) {
+    throw new Error(`diagnostics manifest must be a non-symlink artifact file: ${manifestFile}`);
+  }
   return JSON.parse(readFileSync(manifestPath, 'utf-8')) as RuntimeEvidenceManifest;
+}
+
+function resolveRepositoryPath(repositoryRoot: string, requestedPath: string, label: string): string {
+  const normalized = normalizeStrictRelativePath(requestedPath, label);
+  const resolvedPath = resolve(repositoryRoot, normalized);
+  const root = resolve(repositoryRoot);
+  if (!(resolvedPath === root || resolvedPath.startsWith(`${root}/`))) {
+    throw new Error(`${label} escapes repository: ${requestedPath}`);
+  }
+  return resolvedPath;
+}
+
+function resolveArtifactPath(repositoryRoot: string, requestedPath: string, label: string): string {
+  const normalized = normalizeStrictRelativePath(requestedPath, label);
+  if (!normalized.startsWith('artifacts/')) {
+    throw new Error(`${label} must stay under repository artifacts: ${requestedPath}`);
+  }
+  const resolvedPath = resolve(repositoryRoot, normalized);
+  const artifactsRoot = resolve(repositoryRoot, 'artifacts');
+  if (!(resolvedPath === artifactsRoot || resolvedPath.startsWith(`${artifactsRoot}/`))) {
+    throw new Error(`${label} escapes repository artifacts: ${requestedPath}`);
+  }
+  return resolvedPath;
+}
+
+function normalizeStrictRelativePath(value: string, label: string): string {
+  const normalized = value.replaceAll('\\', '/');
+  if (
+    normalized.length === 0
+    || normalized === '.'
+    || normalized === '..'
+    || normalized.startsWith('/')
+    || normalized.startsWith('./')
+    || normalized.startsWith('../')
+    || normalized.startsWith('//')
+    || /^[A-Za-z]:/u.test(normalized)
+    || normalized.includes('/../')
+    || normalized.endsWith('/..')
+    || normalized.includes('/./')
+    || /[\u0000-\u001f]/u.test(normalized)
+  ) {
+    throw new Error(`${label} must be a strict relative path: ${value}`);
+  }
+  const parts = normalized.split('/');
+  if (parts.some((part) => part.length === 0 || part === '.' || part === '..' || part === '.git' || part === '.hg' || part === '.svn')) {
+    throw new Error(`${label} contains an unsafe path component: ${value}`);
+  }
+  return normalized;
+}
+
+function rejectExistingSymlinkSegments(repositoryRoot: string, targetPath: string, label: string): void {
+  const root = resolve(repositoryRoot);
+  const target = resolve(targetPath);
+  if (!(target === root || target.startsWith(`${root}/`))) {
+    throw new Error(`${label} escapes repository: ${targetPath}`);
+  }
+  const relativePath = target.slice(root.length).replace(/^\//u, '');
+  let current = root;
+  for (const part of relativePath.split('/')) {
+    if (part.length === 0) {
+      continue;
+    }
+    current = join(current, part);
+    if (!existsSync(current)) {
+      break;
+    }
+    if (lstatSync(current).isSymbolicLink()) {
+      throw new Error(`${label} must not contain symlinks: ${current}`);
+    }
+  }
 }
 
 function createCollectionFailure(
@@ -705,6 +800,9 @@ function createUpstreamApiPreflightFailure(request: Readonly<{
 }
 
 function validateBettingWinUpstreamApiPreflightStaticConfiguration(environment: NodeJS.ProcessEnv): void {
+  requireExactEnvironmentValue(environment[SUREBET_RUNTIME_MODE_ENV], SUREBET_RUNTIME_MODE_ENV, 'paper');
+  requireExactEnvironmentValue(environment[SUREBET_PROVIDER_CONNECTIONS_ENV], SUREBET_PROVIDER_CONNECTIONS_ENV, 'disabled');
+  requireExactEnvironmentValue(environment[SUREBET_EXECUTION_ENABLED_ENV], SUREBET_EXECUTION_ENABLED_ENV, 'false');
   requirePositiveIntegerFromEnvironment(
     environment[PAPER_RUNTIME_UPSTREAM_API_TIMEOUT_MS_ENV],
     PAPER_RUNTIME_UPSTREAM_API_TIMEOUT_MS_ENV,
@@ -763,6 +861,13 @@ function requireNonEmptyString(value: string | undefined, label: string): string
     throw new Error(`${label} must be a non-empty string.`);
   }
   return value.trim();
+}
+
+function requireExactEnvironmentValue(value: string | undefined, label: string, expected: string): string {
+  if (value === expected) {
+    return value;
+  }
+  throw new Error(`${label} must be exactly ${expected} for BWS-600 runtime evidence.`);
 }
 
 function requirePositiveIntegerFromEnvironment(value: string | undefined, label: string): number {

@@ -8,7 +8,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / 'SOURCE_MANIFEST.json'
 SCHEMA = 'betting-win-surebet-source-manifest-v1'
-SKIP_DIRECTORY_NAMES = {'.git', '.locks', 'artifacts', 'node_modules', 'dist', 'coverage', 'tmp', '.tmp', 'graphify-out'}
+SKIP_DIRECTORY_NAMES = {'.git', '.hg', '.svn', '.locks', 'artifacts', 'node_modules', 'dist', 'coverage', 'tmp', '.tmp', 'graphify-out'}
 SKIP_EXACT = {
     '.env',
     'SOURCE_MANIFEST.json',
@@ -39,11 +39,16 @@ def fail(message: str) -> None:
     raise SystemExit(1)
 
 
+def require_manifest_file() -> None:
+    if MANIFEST.is_symlink():
+        fail('SOURCE_MANIFEST.json must be a non-symlink regular file')
+    if not MANIFEST.is_file():
+        fail('missing SOURCE_MANIFEST.json')
+
+
 def should_include(path: Path) -> bool:
     rel = path.relative_to(ROOT).as_posix()
     parts = path.relative_to(ROOT).parts
-    if not path.is_file():
-        return False
     if rel in SKIP_EXACT:
         return False
     if rel.startswith(SKIP_PREFIXES):
@@ -52,14 +57,40 @@ def should_include(path: Path) -> bool:
         return False
     if any(part in SKIP_DIRECTORY_NAMES for part in parts[:-1]):
         return False
+    if path.is_symlink():
+        fail(f'source manifest input must not contain symlinks: {rel}')
+    if not path.is_file():
+        return False
     lowered = rel.lower()
     return not lowered.endswith(SKIP_SUFFIXES)
 
 
+def require_safe_manifest_path(value: object, field: str) -> str:
+    rel = require_non_empty_string(value, field).replace('\\', '/')
+    if (
+        rel.startswith('/')
+        or rel in {'.', '..'}
+        or rel.startswith('../')
+        or '/../' in rel
+        or rel.endswith('/..')
+        or '/./' in rel
+        or rel.startswith('./')
+        or rel.startswith('//')
+        or re.match(r'^[A-Za-z]:', rel)
+        or re.search(r'[\x00-\x1f]', rel)
+    ):
+        fail(f'SOURCE_MANIFEST.json {field} contains an unsafe relative path')
+    parts = rel.split('/')
+    if any(part in {'', '.', '..', '.git', '.hg', '.svn'} for part in parts):
+        fail(f'SOURCE_MANIFEST.json {field} contains an unsafe path component')
+    return rel
+
+
 def file_entry(path: Path) -> dict[str, object]:
     data = path.read_bytes()
+    rel = require_safe_manifest_path(path.relative_to(ROOT).as_posix(), 'generated file path')
     return {
-        'path': path.relative_to(ROOT).as_posix(),
+        'path': rel,
         'sha256': hashlib.sha256(data).hexdigest(),
         'size': len(data),
     }
@@ -91,14 +122,14 @@ def validate_runtime_upstream_lock_entries(files: object) -> None:
         fail('SOURCE_MANIFEST.json files must be an array')
     for entry in files:
         if not isinstance(entry, dict):
-            continue
-        if entry.get('path') == 'config/betting-win.upstream.lock.json' and not (ROOT / 'config' / 'betting-win.upstream.lock.json').is_file():
+            fail('SOURCE_MANIFEST.json file entries must be JSON objects')
+        path = require_safe_manifest_path(entry.get('path'), 'file path')
+        if path == 'config/betting-win.upstream.lock.json' and not (ROOT / 'config' / 'betting-win.upstream.lock.json').is_file():
             fail('Source manifest must not include config/betting-win.upstream.lock.json until the runtime lock file exists.')
 
 
 def main() -> None:
-    if not MANIFEST.is_file():
-        fail('missing SOURCE_MANIFEST.json')
+    require_manifest_file()
     actual = json.loads(MANIFEST.read_text(encoding='utf-8'))
     if actual.get('schema') != SCHEMA:
         fail(f'SOURCE_MANIFEST.json schema must be {SCHEMA}')

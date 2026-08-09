@@ -718,6 +718,7 @@ test('BWS operator cockpit API client fails closed on inconsistent counts and es
   const mismatchedPinned = structuredClone(snapshot.pinnedStrategyExports);
   const mismatchedRuntime = structuredClone(snapshot.blockedRuntimeCycles);
   const mismatchedB1 = structuredClone(snapshot.b1BacktestRuns);
+  const missingB1Status = structuredClone(snapshot.b1BacktestRuns);
 
   if (mismatchedCount === undefined || mismatchedPinned === undefined) {
     throw new Error('Expected pinned export mock response.');
@@ -734,12 +735,20 @@ test('BWS operator cockpit API client fails closed on inconsistent counts and es
   };
 
   const b1Items = mismatchedB1.page.items as unknown as Array<{
-    run: { offlineFalsificationStatus: string };
+    run: { offlineFalsificationStatus: string; report: { offlineFalsificationStatus: string } };
   }>;
   b1Items[0]!.run = {
     ...b1Items[0]!.run,
-    offlineFalsificationStatus: 'B1_SCOPE_MISMATCH',
+    offlineFalsificationStatus: 'B1_BLOCKED_UPSTREAM_DATA_INSUFFICIENT',
+    report: {
+      ...b1Items[0]!.run.report,
+      offlineFalsificationStatus: 'B1_BLOCKED_UPSTREAM_DATA_INSUFFICIENT',
+    },
   };
+  const missingB1StatusItems = missingB1Status.page.items as unknown as Array<{
+    run: Record<string, unknown>;
+  }>;
+  delete missingB1StatusItems[0]!.run['offlineFalsificationStatus'];
 
   const createClientFor = (payload: unknown) =>
     createBwsOperatorCockpitApiClient(
@@ -797,8 +806,52 @@ test('BWS operator cockpit API client fails closed on inconsistent counts and es
       },
       pageSize: 8,
     }),
-    /b1_backtest_runs response offlineFalsificationStatus B1_SCOPE_MISMATCH did not match requested B1_OFFLINE_RESEARCH_CANDIDATES_OBSERVED/,
+    /b1_backtest_runs response offlineFalsificationStatus B1_BLOCKED_UPSTREAM_DATA_INSUFFICIENT did not match requested B1_OFFLINE_RESEARCH_CANDIDATES_OBSERVED/,
   );
+
+  await assert.rejects(
+    () => createClientFor(missingB1Status).queryB1BacktestRuns({
+      expand: 'reporting',
+      filters: {
+        runId: 'b1-run-001',
+      },
+      pageSize: 8,
+    }),
+    /page\.items\[0\]\.run\.offlineFalsificationStatus must be a non-empty string/,
+  );
+
+  for (const [reportOverrides, expectedMessage] of [
+    [{ reportKind: 'forged_report' }, /page\.items\[0\]\.run\.report\.reportKind must remain deterministic_b1_cross_venue_backtest_report/],
+    [{ runtimeEvidence: true }, /page\.items\[0\]\.run\.report\.runtimeEvidence must stay false/],
+    [{ executable: true }, /page\.items\[0\]\.run\.report\.executable must stay false/],
+    [{ liveReadiness: 'ready' }, /page\.items\[0\]\.run\.report\.liveReadiness must keep BWS-900 parked/],
+    [{ upstreamReadiness: 'ready' }, /page\.items\[0\]\.run\.report\.upstreamReadiness must preserve the upstream B1 blocker/],
+    [
+      { offlineFalsificationStatus: 'B1_BLOCKED_UPSTREAM_DATA_INSUFFICIENT' },
+      /page\.items\[0\]\.run\.report\.offlineFalsificationStatus must match run\.offlineFalsificationStatus/,
+    ],
+  ] as const) {
+    const malformedB1Report = structuredClone(snapshot.b1BacktestRuns);
+    const malformedB1ReportItems = malformedB1Report.page.items as unknown as Array<{
+      run: {
+        report: Record<string, unknown>;
+      };
+    }>;
+    malformedB1ReportItems[0]!.run.report = {
+      ...malformedB1ReportItems[0]!.run.report,
+      ...reportOverrides,
+    };
+    await assert.rejects(
+      () => createClientFor(malformedB1Report).queryB1BacktestRuns({
+        expand: 'reporting',
+        filters: {
+          runId: 'b1-run-001',
+        },
+        pageSize: 8,
+      }),
+      expectedMessage,
+    );
+  }
 
   for (const [filter, expectedMessage] of [
     [{ runId: 'b1-run-requested' }, /b1_backtest_runs response runId b1-run-001 did not match requested b1-run-requested/],

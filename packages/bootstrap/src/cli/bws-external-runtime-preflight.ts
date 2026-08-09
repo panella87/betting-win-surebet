@@ -3,6 +3,35 @@ import {
   createBwsExternalRuntimeCampaignManifest,
 } from '../operations/external-runtime-preflight.js';
 
+const BWS_EXTERNAL_RUNTIME_PREFLIGHT_FLAGS = Object.freeze(new Set([
+  '--api-base-url',
+  '--api-contract-path',
+  '--backup-manifest-file',
+  '--campaign-cycle-timeout-minutes',
+  '--campaign-duration-hours',
+  '--campaign-max-cycles',
+  '--checkpoint-id',
+  '--contract-version',
+  '--env-file',
+  '--evidence-dir',
+  '--expected-upstream-lock-fingerprint',
+  '--install-verification-file',
+  '--max-pages-per-resource',
+  '--migration-status-file',
+  '--minimum-available-bytes',
+  '--mode',
+  '--output-file',
+  '--page-size',
+  '--release-dir',
+  '--restore-verification-file',
+  '--retry-backoff-ms',
+  '--retry-limit',
+  '--runtime-dir',
+  '--soak-manifest-file',
+  '--soak-state-file',
+  '--timeout-ms',
+]));
+
 export async function runBwsExternalRuntimePreflightCli(
   argv: readonly string[],
   repositoryRoot: string = process.cwd(),
@@ -78,6 +107,12 @@ function parseFlags(argv: readonly string[]): ReadonlyMap<string, string | true>
     const key = argv[index];
     if (key === undefined || !key.startsWith('--')) {
       throw new Error(`Unexpected argument: ${key === undefined ? '<missing>' : key}`);
+    }
+    if (!BWS_EXTERNAL_RUNTIME_PREFLIGHT_FLAGS.has(key)) {
+      throw new Error(`Unknown BWS external runtime preflight flag: ${key}`);
+    }
+    if (parsed.has(key)) {
+      throw new Error(`Duplicate BWS external runtime preflight flag: ${key}`);
     }
     const next = argv[index + 1];
     if (next === undefined || next.startsWith('--')) {

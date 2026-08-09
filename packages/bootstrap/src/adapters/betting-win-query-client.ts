@@ -409,9 +409,45 @@ function targetsForbiddenLocalBwsApi(parsed: URL, localBwsApiPort: number | unde
 
 function normalizeAuthorityHostname(hostname: string): string {
   const normalized = hostname.toLowerCase();
-  return LOOPBACK_HOSTS.has(normalized) || IPV4_MAPPED_IPV6_LOOPBACK_HOSTS.has(normalized) || UNSPECIFIED_LOCAL_HOSTS.has(normalized)
+  return LOOPBACK_HOSTS.has(normalized)
+    || IPV4_MAPPED_IPV6_LOOPBACK_HOSTS.has(normalized)
+    || UNSPECIFIED_LOCAL_HOSTS.has(normalized)
+    || isIpv4LoopbackAlias(normalized)
+    || isIpv4MappedIpv6LoopbackAlias(normalized)
     ? LOOPBACK_AUTHORITY_HOST
     : normalized;
+}
+
+function isIpv4LoopbackAlias(hostname: string): boolean {
+  const match = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(hostname);
+  if (match === null) {
+    return false;
+  }
+  const octets = match.slice(1).map((value) => Number.parseInt(value, 10));
+  return octets.length === 4
+    && octets.every((value) => Number.isInteger(value) && value >= 0 && value <= 255)
+    && octets[0] === 127;
+}
+
+function isIpv4MappedIpv6LoopbackAlias(hostname: string): boolean {
+  const normalized = hostname.startsWith('[') && hostname.endsWith(']')
+    ? hostname.slice(1, -1)
+    : hostname;
+  if (!normalized.startsWith('::ffff:')) {
+    return false;
+  }
+  const mappedAddress = normalized.slice('::ffff:'.length);
+  if (mappedAddress.includes('.')) {
+    return isIpv4LoopbackAlias(mappedAddress);
+  }
+  const match = /^([0-9a-f]{1,4}):([0-9a-f]{1,4})$/.exec(mappedAddress);
+  if (match === null) {
+    return false;
+  }
+  const high = Number.parseInt(match[1]!, 16);
+  const low = Number.parseInt(match[2]!, 16);
+  const ipv4Value = (high * 0x10000) + low;
+  return Math.floor(ipv4Value / 0x1000000) === 127;
 }
 
 function resolvedPort(url: URL): string {
@@ -733,7 +769,11 @@ function validateQueryProvenance(
       'Complete response provenance bound to betting-win committed HEAD.',
     );
   }
-  if (repository !== upstreamLock.repository || commitSha !== upstreamLock.commitSha || sourceView !== upstreamLock.sourceView) {
+  if (
+    repository !== upstreamLock.repository
+    || commitSha !== upstreamLock.commitSha
+    || sourceView !== upstreamLock.sourceView
+  ) {
     return blocked(
       'QUERY_PROVENANCE_MISMATCH',
       'Read-only query provenance did not match the pinned betting-win upstream lock.',
@@ -745,6 +785,13 @@ function validateQueryProvenance(
       'QUERY_PROVENANCE_FORMAT_INVALID',
       'Read-only query provenance fields must use canonical Git SHA and ISO-8601 UTC formats.',
       'Canonical response provenance formats.',
+    );
+  }
+  if (verifiedAt !== upstreamLock.verifiedAt) {
+    return blocked(
+      'QUERY_PROVENANCE_MISMATCH',
+      'Read-only query provenance did not match the pinned betting-win upstream lock.',
+      'Response provenance that matches the validated betting-win committed HEAD.',
     );
   }
 

@@ -95,6 +95,21 @@ export function createBwsReadOnlyQueryHttpHandler(
   return async (request, response) => {
     applySecurityHeaders(response);
 
+    let requestUrl: URL;
+    try {
+      requestUrl = parseRawRequestUrl(request.url);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      writeJson(response, 400, {
+        error: {
+          code: 'BWS_QUERY_REQUEST_INVALID',
+          message,
+        },
+        ok: false,
+      } satisfies ErrorBody);
+      return;
+    }
+
     if (request.method !== 'GET') {
       response.setHeader('allow', 'GET');
       writeJson(response, 405, {
@@ -107,10 +122,9 @@ export function createBwsReadOnlyQueryHttpHandler(
       return;
     }
 
-    const requestUrl = new URL(request.url ?? '/', 'http://127.0.0.1');
-    const pathname = trimTrailingSlash(requestUrl.pathname);
-
     try {
+      const pathname = trimTrailingSlash(requestUrl.pathname);
+
       if (pathname === HEALTH_PATH) {
         const snapshot = options.getOperationalStatusSnapshot?.();
         if (snapshot === undefined) {
@@ -345,6 +359,13 @@ function requirePositiveIntegerParam(url: URL, key: string): number {
 
 function trimTrailingSlash(pathname: string): string {
   return pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname;
+}
+
+function parseRawRequestUrl(rawUrl: string | undefined): URL {
+  if (rawUrl === undefined) {
+    throw new Error('BWS read-only query request URL is required.');
+  }
+  return new URL(rawUrl, 'http://127.0.0.1');
 }
 
 function applySecurityHeaders(response: ServerResponse<IncomingMessage>): void {
