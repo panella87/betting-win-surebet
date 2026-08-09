@@ -2,6 +2,7 @@ import test, { type TestContext } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   chmodSync,
+  copyFileSync,
   existsSync,
   mkdirSync,
   mkdtempSync,
@@ -17,6 +18,7 @@ import { spawnSync } from 'node:child_process';
 const REPOSITORY_ROOT = process.cwd();
 const GUARD_PATH = resolve(REPOSITORY_ROOT, '.automation/lib/temp_inode_guard.sh');
 const RUN_COMMON_PATH = resolve(REPOSITORY_ROOT, '.automation/lib/run_common.sh');
+const CLEANUP_PATH = resolve(REPOSITORY_ROOT, 'cleanup_automation_temp_inode_residue.sh');
 
 function shellQuote(value: string): string {
   return `'${value.replaceAll("'", `'"'"'`)}'`;
@@ -234,4 +236,36 @@ find "$AUTOMATION_TEMP_SESSIONS_ROOT" -mindepth 1 -maxdepth 1 -type d -print
   const directories = readdirSync(join(fixture.root, '.automation/tmp-test/sessions'));
   assert.deepEqual(directories, []);
   assert.equal(existsSync(join(fixture.root, '.automation/tmp-test/.session-scan')), false);
+});
+
+
+test('operator cleanup can skip only the optional legacy system-temp scan', (t) => {
+  const fixture = createFixture(t);
+  const fixtureAutomationLib = join(fixture.root, '.automation', 'lib');
+  mkdirSync(fixtureAutomationLib, { recursive: true });
+  copyFileSync(GUARD_PATH, join(fixtureAutomationLib, 'temp_inode_guard.sh'));
+  copyFileSync(CLEANUP_PATH, join(fixture.root, 'cleanup_automation_temp_inode_residue.sh'));
+  chmodSync(join(fixture.root, 'cleanup_automation_temp_inode_residue.sh'), 0o755);
+
+  const result = runShell(
+    fixture,
+    `bash ./cleanup_automation_temp_inode_residue.sh --apply --min-age-seconds 0 --skip-legacy-temp`,
+    {
+      AUTOMATION_TEMP_ROOT_RELATIVE: '.automation/tmp-test',
+      AUTOMATION_TEMP_STALE_SECONDS: '60',
+      AUTOMATION_MIN_FREE_INODES: '100',
+      AUTOMATION_MIN_FREE_INODE_PERCENT: '0',
+      AUTOMATION_MIN_FREE_KIB: '1024',
+      AUTOMATION_MAX_RUN_TEMP_INODES: '10000',
+      AUTOMATION_MAX_RUN_TEMP_KIB: '100000',
+      AUTOMATION_CAPACITY_CHECK_INTERVAL_SECONDS: '1',
+      AUTOMATION_TEMP_USAGE_SCAN_TIMEOUT_SECONDS: '1',
+      AUTOMATION_TEMP_CLEANUP_TIMEOUT_SECONDS: '10',
+    },
+  );
+
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  assert.match(result.stdout, /legacy_temp_scan=skipped reason=operator_requested/);
+  assert.match(result.stdout, /legacy_temp_scan_enabled=0/);
+  assert.match(result.stdout, /cleanup_failures=0/);
 });

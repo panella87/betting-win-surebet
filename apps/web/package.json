@@ -13,7 +13,7 @@
     }
   },
   "scripts": {
-    "build": "vite build",
+    "build": "node node_modules/vite/bin/vite.js build",
     "dev": "vite",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },

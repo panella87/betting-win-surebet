@@ -113,7 +113,7 @@ test('external runtime preflight API mode inspects a loopback contract endpoint 
   const address = server.address();
   assert.ok(address !== null && typeof address === 'object');
   const apiBaseUrl = `http://127.0.0.1:${String(address.port)}`;
-  writeApiEnvFile(fixture.apiEnvFile, apiBaseUrl);
+  writeApiEnvFile(fixture.apiEnvFile, apiBaseUrl, fixture.bettingWinRepositoryPath);
 
   try {
     const exitCode = await runBwsExternalRuntimePreflightCli(
@@ -200,7 +200,7 @@ test('external runtime preflight API mode inspects a loopback contract endpoint 
 
 test('external runtime preflight rejects credential-bearing API URLs', SEQUENTIAL_TEST_OPTIONS, async () => {
   const fixture = await createFixture();
-  writeApiEnvFile(fixture.apiEnvFile, 'http://127.0.0.1:4301');
+  writeApiEnvFile(fixture.apiEnvFile, 'http://127.0.0.1:4301', fixture.bettingWinRepositoryPath);
   try {
     await assert.rejects(
       () =>
@@ -238,7 +238,7 @@ test('external runtime preflight rejects API key env names in the private enviro
 
 test('external runtime preflight rejects non-loopback API URLs', SEQUENTIAL_TEST_OPTIONS, async () => {
   const fixture = await createFixture();
-  writeApiEnvFile(fixture.apiEnvFile, 'https://upstream.invalid');
+  writeApiEnvFile(fixture.apiEnvFile, 'https://upstream.invalid', fixture.bettingWinRepositoryPath);
   try {
     await assert.rejects(
       () =>
@@ -267,7 +267,7 @@ test('external runtime preflight rejects the local BWS API and loopback aliases 
       'http://[::ffff:127.0.0.1]:4312',
       'http://[::ffff:7f00:1]:4312',
     ]) {
-      writeApiEnvFile(fixture.apiEnvFile, apiBaseUrl);
+      writeApiEnvFile(fixture.apiEnvFile, apiBaseUrl, fixture.bettingWinRepositoryPath);
       await assert.rejects(
         () =>
           createBwsExternalRuntimeCampaignManifest({
@@ -602,11 +602,12 @@ async function createFixture() {
     upstreamLockFingerprint,
   });
 
-  writeExportEnvFile(exportEnvFileAbsolute);
-  writeApiEnvFile(apiEnvFileAbsolute, 'http://127.0.0.1:4301');
+  writeExportEnvFile(exportEnvFileAbsolute, upstreamLock.repositoryPath);
+  writeApiEnvFile(apiEnvFileAbsolute, 'http://127.0.0.1:4301', upstreamLock.repositoryPath);
 
   return Object.freeze({
     apiEnvFile: apiEnvFileAbsolute,
+    bettingWinRepositoryPath: upstreamLock.repositoryPath,
     apiManifestOutputFile: apiManifestOutputFileAbsolute,
     apiSoakManifestFile: apiSoak.manifestFile,
     apiSoakStateFile: apiSoak.stateFile,
@@ -727,11 +728,11 @@ function writeSoakRuntimeEvidenceState(
   writeFileSync(stateFile, `${JSON.stringify(parsed, null, 2)}\n`, 'utf-8');
 }
 
-function writeExportEnvFile(path: string): void {
+function writeExportEnvFile(path: string, bettingWinRepositoryPath: string): void {
   writeFileSync(
     path,
     [
-      'BETTING_WIN_REPO_PATH=/home/dev/app_testing/betting-win',
+      `BETTING_WIN_REPO_PATH=${bettingWinRepositoryPath}`,
       'BWS_UPSTREAM_LOCK_PATH=./config/betting-win.upstream.lock.json',
       'BWS_UPSTREAM_MODE=export',
       'BWS_UPSTREAM_EXPORT_SELECTION_PATH=/tmp/operator-selection.json',
@@ -748,11 +749,11 @@ function writeExportEnvFile(path: string): void {
   );
 }
 
-function writeApiEnvFile(path: string, apiBaseUrl: string): void {
+function writeApiEnvFile(path: string, apiBaseUrl: string, bettingWinRepositoryPath: string): void {
   writeFileSync(
     path,
     [
-      'BETTING_WIN_REPO_PATH=/home/dev/app_testing/betting-win',
+      `BETTING_WIN_REPO_PATH=${bettingWinRepositoryPath}`,
       'BWS_UPSTREAM_LOCK_PATH=./config/betting-win.upstream.lock.json',
       'BWS_UPSTREAM_MODE=api',
       'BWS_UPSTREAM_API_CHECKPOINT_ID=api-checkpoint-001',

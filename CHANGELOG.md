@@ -1,3 +1,17 @@
+## 2026-08-09 - Wave 61 external-runtime preflight fixture call-site repair
+
+- Completed the Wave 61 upstream-checkout portability change by passing the repository path read from the generated upstream lock to every `writeApiEnvFile` test-fixture call site.
+- Restored TypeScript typecheck coverage without weakening the runtime upstream checkout, API-only, no-provider, no-execution, or BWS-600 gates.
+- No production application or controller behavior changed.
+
+## 2026-08-09 - Pre-start cleanup and WSL validation portability repair
+
+- Added an explicit `--skip-legacy-temp` operator option so a timed-out optional system-temp legacy scan cannot prevent a new unattended campaign after repository-owned session cleanup has completed.
+- Kept marker-owned `.automation/tmp` recovery, capacity checks, watchdogs, and all cleanup boundaries unchanged.
+- Removed the external-runtime preflight test's hardcoded server checkout path and bound its private environment fixture to the repository's generated upstream lock.
+- Made the web workspace build invoke the workspace-local Vite CLI through Node, avoiding Windows-mounted WSL executable-shim failures without changing browser output or runtime policy.
+- Preserved the already-validated artifact retention cleanup and all no-provider, no-execution, API-only, and BWS-600/BWS-900 gates.
+
 ## 2026-08-09 - Bugfix clean-audit next-area contract repair
 
 - Reconciled the bugfix parent completion parser with the standalone audit contract: `NEXT_AUDIT_AREA` may remain `none` or name the exact next non-closed campaign area.

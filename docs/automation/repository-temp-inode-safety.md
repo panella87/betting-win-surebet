@@ -137,6 +137,8 @@ bash ./cleanup_automation_temp_inode_residue.sh --apply --min-age-seconds 3600
 
 The command operates only on dead marker-owned sessions in `.automation/tmp/sessions` and the confirmed legacy direct-child prefix `bws-paper-runtime-evidence-*` under the active system temp directory. Legacy cleanup is age-gated because those old directories have no ownership marker. It does not kill processes, follow symlinks, cross filesystems, remove the managed base, or perform a generic `/tmp` deletion.
 
+When a large or unhealthy system temp directory makes the optional legacy-prefix scan exceed its bounded timeout, an unattended controller preflight may use `--skip-legacy-temp`. That option skips only the system-temp legacy scan; marker-owned repository session recovery, filesystem capacity checks, and all controller temp/inode guards remain active. The command prints `legacy_temp_scan=skipped reason=operator_requested` so the omission is explicit and auditable.
+
 The command prints `df -Pk` and `df -Pi` before and after cleanup and returns nonzero on partial failure.
 
 ## Test-fixture rule

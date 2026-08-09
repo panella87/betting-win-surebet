@@ -1,7 +1,7 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-08-09T11:19:54Z",
-  "overlay": "bws99-bugfix-clean-audit-next-area-wave60",
+  "generated": "2026-08-09T13:57:18Z",
+  "overlay": "bws100-wave61-preflight-fixture-callsite-repair-wave62",
   "files": [
     {
       "path": ".automation/README.md",
@@ -115,8 +115,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "db9dd85d6f416b837ee5f7dee58f89f7cc95f200bc5c3a1b05fe92e7c89dd306",
-      "size": 73181
+      "sha256": "8281acf7e0b79b0da72d6b08e00413aae415eaa766ba696a0bd48c4029451a1b",
+      "size": 74518
     },
     {
       "path": "PROJECT_STATUS.md",
@@ -140,8 +140,8 @@
     },
     {
       "path": "apps/web/package.json",
-      "sha256": "8f94da67c60ce9ef59f05c2a5f3848220bd04f74164574668155ae2e7926a437",
-      "size": 722
+      "sha256": "6c5197409d203246bb187e69d6fcd10319d2de29ceca44284458c37ba88b8bb6",
+      "size": 752
     },
     {
       "path": "apps/web/src/api/client.ts",
@@ -275,8 +275,8 @@
     },
     {
       "path": "cleanup_automation_temp_inode_residue.sh",
-      "sha256": "454f1a996dc1a3ab317ccc1254a9720576b736296ce53b5877ca6156da7b353c",
-      "size": 4549
+      "sha256": "f0cb436ad5f0b49f7c9b55d059f93f7751183ef8bb8e8eb32d855062dc708d4f",
+      "size": 4977
     },
     {
       "path": "cli.js",
@@ -465,8 +465,8 @@
     },
     {
       "path": "docs/011_validation_matrix.md",
-      "sha256": "e19ca7e1a2f84679e83c27ee9b10737538b6a3177093889af2ffa831fff3113d",
-      "size": 2383
+      "sha256": "2c7e4dc033d2da492339924e58db8cb916c078b3fb86e41ed1504c74a7ce45bc",
+      "size": 2512
     },
     {
       "path": "docs/012_runbook.md",
@@ -660,8 +660,8 @@
     },
     {
       "path": "docs/automation/README.md",
-      "sha256": "5f689958fa32d26a01cf540620432ea5effcd4edbeebaa8bc6a2c51692a6314e",
-      "size": 11549
+      "sha256": "e052f2504ed2aa53daf83135ef9ecdd032953c5a2f70fb2daef4c4b02f8f7492",
+      "size": 11749
     },
     {
       "path": "docs/automation/SSH_KEY_SETUP.md",
@@ -715,8 +715,8 @@
     },
     {
       "path": "docs/automation/repository-temp-inode-safety.md",
-      "sha256": "9940c580088db197203bfa8705d9cefd4cad1d929c9e223049634b2c1cd49bc0",
-      "size": 7471
+      "sha256": "95af2c4c95bd4df1f8655304141e2fa5009bd46f7d759d2f75ade4a1f4c9bad7",
+      "size": 7940
     },
     {
       "path": "docs/automation/telegram-notifications.md",
@@ -1880,8 +1880,8 @@
     },
     {
       "path": "scripts/validate_repo.py",
-      "sha256": "b3c8fc7eb9e61da7ae45eb2b3f130a8f486c252f7109c644e7f90f1cebadb904",
-      "size": 20205
+      "sha256": "52c41ced74b54ddb973f23d59fc2777d4ba27df64e101cf8e390b71d2312aa82",
+      "size": 20526
     },
     {
       "path": "scripts/validate_shell_local_assignments.py",
@@ -1895,8 +1895,8 @@
     },
     {
       "path": "scripts/validate_temp_inode_safety.py",
-      "sha256": "8f40acf88cc9e36d23145223c26fe67085976667ad5bf7d5b5f7645b76418fc9",
-      "size": 5006
+      "sha256": "68a3a8b67a6cae099b0b19c3a6291fbce2bbd89bcf5605d7d2075ad50e9ea22a",
+      "size": 5098
     },
     {
       "path": "scripts/validate_three_repo_surebet_boundary.py",
@@ -2600,8 +2600,8 @@
     },
     {
       "path": "tests/bws-external-runtime-preflight.test.ts",
-      "sha256": "3226b2e42863b78dd20823cf028c3c0dbf07e62ecc7f85d723df3a9cd9c8902d",
-      "size": 30820
+      "sha256": "2478fbef07373762521a963f8a48bac81349d6fba333f7e00c91d0b9dc52841a",
+      "size": 31129
     },
     {
       "path": "tests/bws-final-local-acceptance.test.ts",
@@ -2625,8 +2625,8 @@
     },
     {
       "path": "tests/bws-operator-cockpit.test.ts",
-      "sha256": "647571226be293fef4712c442786d173ae353f6dd21479338f772302a2ce8386",
-      "size": 35932
+      "sha256": "90132182405afdc86f21282c96d3f8ee6a9caf7c09460ee2614d1766c5a65fc4",
+      "size": 36184
     },
     {
       "path": "tests/bws-operator-lifecycle.test.ts",
@@ -2995,8 +2995,8 @@
     },
     {
       "path": "tests/temp-inode-safety.test.ts",
-      "sha256": "9ac77127f92f5fe14f3119e4153a00748b4a1415aba36d32991e680410cf6c06",
-      "size": 8057
+      "sha256": "5d4385826131ed76f051d1d95f6ce46d0ba2f1f9994773b214dedf4791c32fbf",
+      "size": 9589
     },
     {
       "path": "tests/temp-inode-watchdog-race.test.ts",
@@ -3020,8 +3020,8 @@
     },
     {
       "path": "tests/validate-repo-contract.test.ts",
-      "sha256": "98e7229618dda9c6f6071f12f6077f1fd89b1e21f039cf1025e7227067900454",
-      "size": 2581
+      "sha256": "d3e30d8567c19acf7f261da86552411edd45497de583bd6505e1b094e05fe29f",
+      "size": 2629
     },
     {
       "path": "tests/validate-shell-local-assignments.test.ts",

@@ -33,7 +33,7 @@ Clean-checkout validation requirements:
 root TypeScript build first
 exact betting-win committed-HEAD lock generated and verified before tests
 repo-local artifacts directory created explicitly by the test bootstrap
-managed cockpit build and `validate:web` preserve dist/apps/web/src Node modules while replacing static assets
+managed cockpit build and `validate:web` preserve dist/apps/web/src Node modules while replacing static assets; the workspace Vite CLI is invoked through Node so Windows-mounted WSL checkouts do not depend on generated shim executable bits
 serialized compiled test files
 ```
 

@@ -991,6 +991,9 @@ test('BWS operator cockpit validation contract includes the web workspace in roo
     join(process.cwd(), 'scripts', 'build_bws_operator_cockpit.mjs'),
     'utf-8',
   );
+  const webPackageJson = JSON.parse(
+    readFileSync(join(process.cwd(), 'apps', 'web', 'package.json'), 'utf-8'),
+  ) as { scripts?: Record<string, string> };
 
   assert.match(
     packageJson.scripts?.['validate:web'] ?? '',
@@ -1004,6 +1007,7 @@ test('BWS operator cockpit validation contract includes the web workspace in roo
     packageJson.scripts?.['validate:starter'] ?? '',
     /npm run validate:web/,
   );
+  assert.equal(webPackageJson.scripts?.build, 'node node_modules/vite/bin/vite.js build');
   assert.match(cockpitBuilder, /port > 65535/);
   assert.match(cockpitBuilder, /BWS_API_PORT must be a TCP port in the range 1\.\.65535/);
 });

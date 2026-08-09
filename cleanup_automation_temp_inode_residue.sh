@@ -9,18 +9,20 @@ AUTOMATION_REPO_ROOT="$SCRIPT_DIR"
 
 MODE=dry-run
 MIN_AGE_SECONDS=3600
+SCAN_LEGACY_TEMP=1
 
 usage() {
   cat <<'USAGE'
-Usage: ./cleanup_automation_temp_inode_residue.sh [--dry-run|--apply] [--min-age-seconds N]
+Usage: ./cleanup_automation_temp_inode_residue.sh [--dry-run|--apply] [--min-age-seconds N] [--skip-legacy-temp]
 
 Dry-run is the default. The command operates only on:
   1. marker-owned dead sessions under .automation/tmp/sessions; and
   2. direct children of the active system temp directory named
      bws-paper-runtime-evidence-* that are older than the requested age.
 
-It never kills processes, follows symlinks, removes the managed base, or performs
-a generic /tmp purge.
+Use --skip-legacy-temp to omit only the optional system-temp legacy-prefix scan;
+marker-owned repository session recovery still runs. The command never kills
+processes, follows symlinks, removes the managed base, or performs a generic /tmp purge.
 USAGE
 }
 
@@ -32,6 +34,7 @@ while [[ $# -gt 0 ]]; do
       [[ $# -ge 2 ]] || { echo 'ERROR: --min-age-seconds requires a value' >&2; exit 2; }
       MIN_AGE_SECONDS="$2"; shift 2 ;;
     --min-age-seconds=*) MIN_AGE_SECONDS="${1#*=}"; shift ;;
+    --skip-legacy-temp) SCAN_LEGACY_TEMP=0; shift ;;
     -h|--help) usage; exit 0 ;;
     *) echo "ERROR: unknown option: $1" >&2; usage >&2; exit 2 ;;
   esac
@@ -52,6 +55,10 @@ automation_temp_inode_recover_stale "$MODE" "$MIN_AGE_SECONDS" || failures=1
 
 cleanup_legacy_prefix() {
   local temp_root candidate_file candidate real parent base mtime age now rc=0
+  if [[ "$SCAN_LEGACY_TEMP" == "0" ]]; then
+    printf '%s\n' 'legacy_temp_scan=skipped reason=operator_requested'
+    return 0
+  fi
   temp_root="${AUTOMATION_LEGACY_SYSTEM_TEMP_ROOT:-${TMPDIR:-/tmp}}"
   [[ -d "$temp_root" && ! -L "$temp_root" ]] || {
     printf 'legacy_temp_scan=skipped reason=unsafe_or_missing root=%s\n' "$temp_root"
@@ -109,5 +116,6 @@ cleanup_legacy_prefix() {
 cleanup_legacy_prefix || failures=1
 automation_temp_inode_print_filesystem_state AFTER
 printf 'cleanup_mode=%s\n' "$MODE"
+printf 'legacy_temp_scan_enabled=%s\n' "$SCAN_LEGACY_TEMP"
 printf 'cleanup_failures=%s\n' "$failures"
 [[ "$failures" -eq 0 ]]

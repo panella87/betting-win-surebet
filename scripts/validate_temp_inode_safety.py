@@ -94,6 +94,8 @@ def main() -> None:
         'MODE=dry-run',
         '--apply',
         '--min-age-seconds',
+        '--skip-legacy-temp',
+        'legacy_temp_scan=skipped reason=operator_requested',
         'automation_temp_inode_recover_stale',
         'bws-paper-runtime-evidence-*',
         'rm -rf --one-file-system',
