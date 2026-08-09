@@ -1,3 +1,9 @@
+## 2026-08-09 - Final artifact refresh canonical-root contract alignment
+
+- Aligned the protected automation validator with the hardened `automation_refresh_final_artifacts_zip` implementation, which canonicalizes the repository root with `realpath` and passes `root_real` to the bounded ZIP helper.
+- Added controller-contract regression coverage for both the canonicalization step and the `root_real` ZIP-helper invocation.
+- Did not weaken artifact symlink rejection, repository containment, VCS metadata pruning, provider/execution boundaries, or validation requirements.
+
 ## 2026-08-05 - Boundary audit continuation and long-campaign validation repair
 
 - Preserved the latest validated source hardening for pinned strategy/API provenance, API-only runtime selectors, B1 policy guards, report/backtest inputs, venue identifiers, and static boundary scanning.

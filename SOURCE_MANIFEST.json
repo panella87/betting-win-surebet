@@ -1,7 +1,7 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-08-05T19:01:33Z",
-  "overlay": "bws95-bugfix-boundary-validation-long-campaign-wave57",
+  "generated": "2026-08-09T04:00:13Z",
+  "overlay": "bws96-bugfix-artifact-refresh-canonical-root-wave58",
   "files": [
     {
       "path": ".automation/README.md",
@@ -115,8 +115,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "19d0cf5680f7b4823cbe7515fbaf60dcbbd687376f808dd56707defc9d40bf6e",
-      "size": 71230
+      "sha256": "519e142db40fb00d05e5eca00756f59b8601e5b5914467e533473558ccf0ce01",
+      "size": 71807
     },
     {
       "path": "PROJECT_STATUS.md",
@@ -1780,8 +1780,8 @@
     },
     {
       "path": "scripts/validate_autonomous_controller_contract.py",
-      "sha256": "591c027b9730f25e98ca17ba47beeda1732464a747c24bf92734e475a7be193f",
-      "size": 28441
+      "sha256": "1b8fd32019102bb7e67b695c6d555b0f073e04ddab3a0bd2ba43a0701b961d63",
+      "size": 28495
     },
     {
       "path": "scripts/validate_betting_win_upstream_contract.py",
@@ -2440,8 +2440,8 @@
     },
     {
       "path": "tests/autonomous-controller-contract.test.ts",
-      "sha256": "3d999cce43f5ec0d443c3c964ae667d7de8a51ec4591375b96d55f04b21382b1",
-      "size": 26947
+      "sha256": "73a308603846c932737fb9c3658328670cdda8ed73cdf4532d8c1becc050b9d8",
+      "size": 27191
     },
     {
       "path": "tests/b1-capital-lock.test.ts",

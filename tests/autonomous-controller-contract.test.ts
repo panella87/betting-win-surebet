@@ -27,6 +27,8 @@ test('standard automation root scripts and shared helpers are installed', () => 
   assert.match(read('.automation/lib/run_common.sh'), /automation_run_managed_argv\(\)/);
   assert.match(read('.automation/lib/run_common.sh'), /automation_terminate_process_group\(\)/);
   assert.match(read('.automation/lib/run_common.sh'), /zip -q -1 -r "\$zip_tmp" artifacts/);
+  assertContains(read('.automation/lib/run_common.sh'), 'root_real="$(realpath -e -- "$root")"');
+  assertContains(read('.automation/lib/run_common.sh'), 'automation_v2_zip_with_timeout "$timeout_seconds" "$tmp" "$root_real" "${entries[@]}"');
   assert.match(read('.automation/lib/controller_hardening_v2.sh'), /zip -q -1 -r/);
   assert.match(read('.automation/lib/controller_hardening_v2.sh'), /automation_v2_load_env_strict\(\)/);
   assert.match(read('.automation/lib/controller_hardening_v2.sh'), /automation_v2_semantic_env_fingerprint_loaded\(\)/);
