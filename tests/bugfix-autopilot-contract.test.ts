@@ -119,7 +119,7 @@ test('bugfix autopilot exposes the bounded audit implementation re-audit campaig
     'run-autonomous-bugfix.sh', 'run-autonomous-implementation.sh', '--handover-bugfix-audit',
     'mandatory_same_area_reaudit=enabled', 'campaign_coverage.tsv',
     'BUGFIX_AUTOPILOT_COMPLETE', 'BUGFIX_AUTOPILOT_BLOCKED_IMPLEMENTATION_NOOP',
-    'next_same_area_bugfix_reaudit', 'validate_bugfix_completion_contract()',
+    'next_same_area_bugfix_reaudit', 'validate_bugfix_completion_contract()', 'campaign_next_pending_area_after()',
     'semantic_bug_signature_repeat_guard=enabled', 'parent_budget_clamping=enabled',
     'child_aware_lock=enabled', 'cross_controller_lock_guard=enabled',
     'atomic_parent_lock_acquisition=enabled', 'parent_lock_mtime_heartbeat=enabled',
@@ -336,7 +336,7 @@ if [[ "$count" == 1 ]]; then
   rc=2; status='HANDOVER_AUTONOMOUS_IMPLEMENTATION=yes'; reason=stub_bug
 else
   printf 'BUGFIX_AUDIT_COMPLETE=yes\n' > "$cycle/continue_status.txt"
-  printf 'BUGS_FOUND=no\nHANDOVER_AUTONOMOUS_IMPLEMENTATION_REQUIRED=no\nNEXT_AUDIT_AREA=none\nCAMPAIGN_AREA=%s\nCAMPAIGN_AREA_COMPLETE=yes\nSOURCE_EVIDENCE_COMPLETE=yes\nBUG_IDS=none\nIMPLEMENTATION_SCOPE=none\nBUGFIX_MODE_AUTOMATION_MAINTENANCE_ALLOWED=no\nALLOWED_PROTECTED_FILES=none\n' "$area" > "$cycle/request_flags.txt"
+  printf 'BUGS_FOUND=no\nHANDOVER_AUTONOMOUS_IMPLEMENTATION_REQUIRED=no\nNEXT_AUDIT_AREA=filesystem_path_and_artifact_safety\nCAMPAIGN_AREA=%s\nCAMPAIGN_AREA_COMPLETE=yes\nSOURCE_EVIDENCE_COMPLETE=yes\nBUG_IDS=none\nIMPLEMENTATION_SCOPE=none\nBUGFIX_MODE_AUTOMATION_MAINTENANCE_ALLOWED=no\nALLOWED_PROTECTED_FILES=none\n' "$area" > "$cycle/request_flags.txt"
   rc=0; status='BUGFIX_AUDIT_COMPLETE=yes'; reason=stub_clean
 fi
 printf 'final_status=STALE_AUDIT_STATUS\nstop_reason=stale_audit_reason\n'
@@ -393,6 +393,37 @@ printf 'run_dir=%s\nfinal_status=AUTONOMOUS_GOAL_COMPLETE=yes\nstop_reason=stub_
       .trim().split(/\r?\n/);
     assert.deepEqual(childTelegramValues, ['0', '0', '0']);
     assert.match(readFileSync(join(runDir, 'telegram_notification_status.txt'), 'utf8'), /telegram_notification=dry_run/);
+  } finally {
+    rmSync(repo, { recursive: true, force: true });
+  }
+});
+
+test('bugfix autopilot rejects a clean audit that names a non-next campaign area', () => {
+  const repo = prepareTempRepo();
+  try {
+    writeExecutable(join(repo, 'run-autonomous-bugfix.sh'), `#!/usr/bin/env bash
+set -Eeuo pipefail
+repo=""; area=""; while [[ $# -gt 0 ]]; do case "$1" in --repo-dir) repo="$2"; shift 2;; --campaign-area) area="$2"; shift 2;; *) shift;; esac; done
+. "$repo/.automation/lib/controller_hardening_v2.sh"
+run="$repo/artifacts/autonomous_bugfix_20260101T000007Z"; cycle="$run/cycles/cycle_1"; mkdir -p "$cycle"
+printf 'BUGFIX_AUDIT_COMPLETE=yes\n' > "$cycle/continue_status.txt"
+printf 'BUGS_FOUND=no\nHANDOVER_AUTONOMOUS_IMPLEMENTATION_REQUIRED=no\nNEXT_AUDIT_AREA=identity_rules_quotes_and_bundle_parsing\nCAMPAIGN_AREA=%s\nCAMPAIGN_AREA_COMPLETE=yes\nSOURCE_EVIDENCE_COMPLETE=yes\nBUG_IDS=none\nIMPLEMENTATION_SCOPE=none\nBUGFIX_MODE_AUTOMATION_MAINTENANCE_ALLOWED=no\nALLOWED_PROTECTED_FILES=none\n' "$area" > "$cycle/request_flags.txt"
+automation_v2_publish_child_result "$repo" 'run-autonomous-bugfix.sh' 'stub-bugfix-v1' "$run" 'BUGFIX_AUDIT_COMPLETE=yes' 'stub_clean_wrong_next_area' 0 1 not_acquired 0 no
+printf 'run_dir=%s\nfinal_status=BUGFIX_AUDIT_COMPLETE=yes\nstop_reason=stub_clean_wrong_next_area\nfinal_exit_code=0\ncycles_completed=1\n' "$run"
+`);
+    writeExecutable(join(repo, 'run-autonomous-implementation.sh'), '#!/usr/bin/env bash\nexit 99\n');
+
+    const result = spawnSync('bash', ['./run-bugfix-autopilot.sh', '--duration', '60', '--bugfix-duration', '30', '--implementation-duration', '30', '--max-rounds', '1', '--model', 'cli-default', '--fallback-model', 'none', '--no-stream'], {
+      cwd: repo,
+      env: { ...process.env, TELEGRAM_NOTIFY: '0' },
+      encoding: 'utf8',
+      timeout: 20000,
+    });
+
+    assert.equal(result.status, 2, `${result.stdout}\n${result.stderr}`);
+    assert.match(result.stdout, /final_status=BUGFIX_AUTOPILOT_BLOCKED_HANDOFF_MISMATCH/);
+    assert.match(result.stdout, /stop_reason=invalid_bugfix_completion_contract/);
+    assert.match(result.stderr, /clean audit NEXT_AUDIT_AREA mismatch/);
   } finally {
     rmSync(repo, { recursive: true, force: true });
   }

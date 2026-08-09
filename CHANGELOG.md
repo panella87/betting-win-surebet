@@ -1,3 +1,10 @@
+## 2026-08-09 - Bugfix clean-audit next-area contract repair
+
+- Reconciled the bugfix parent completion parser with the standalone audit contract: `NEXT_AUDIT_AREA` may remain `none` or name the exact next non-closed campaign area.
+- Kept the parent campaign ledger authoritative and rejected arbitrary, stale, or skipped next-area values.
+- Added dynamic regression coverage for exact-next acceptance and wrong-next rejection.
+- Preserved the artifact-retention cleanup policy and all provider, execution, runtime-evidence, and protected-file safety boundaries.
+
 ## 2026-08-09 - Artifact residue retention and packaging repair
 
 - Added a plan-first, allowlist-only artifact cleanup command with optional atomic `artifacts.zip` rebuild.

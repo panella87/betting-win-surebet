@@ -26,6 +26,8 @@ select one bounded campaign area
   -> close only after BUGFIX_AUDIT_COMPLETE=yes
 ```
 
+On clean completion, `NEXT_AUDIT_AREA` may be `none` for compatibility or the exact next non-closed campaign area. A non-`none` value must match the parent ledger; arbitrary or skipped-area slugs are rejected. The parent remains authoritative for closing the current row and selecting the next row.
+
 Telegram routing:
 
 ```text

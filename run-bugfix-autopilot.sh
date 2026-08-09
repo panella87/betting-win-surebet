@@ -561,6 +561,21 @@ campaign_select_active_area() {
   CAMPAIGN_ACTIVE_STATUS="${row#*$'\t'}"
 }
 
+campaign_next_pending_area_after() {
+  local current="$1" area status found=0
+  for area in "${CAMPAIGN_AREAS[@]}"; do
+    if (( found )); then
+      status="$(campaign_status_for "$area")"
+      [[ "$status" == closed ]] && continue
+      printf '%s\n' "$area"
+      return 0
+    fi
+    [[ "$area" == "$current" ]] && found=1
+  done
+  (( found )) || return 2
+  printf '%s\n' none
+}
+
 
 validate_loaded_env_keys() {
   local allowed_csv="$1" key
@@ -712,7 +727,7 @@ validate_implementation_handoff() {
 }
 
 validate_bugfix_completion_contract() {
-  local cycle_dir status clean_request_flags_keys
+  local cycle_dir status clean_request_flags_keys next_audit_area expected_next_area
   cycle_dir="$(find "$LAST_CHILD_RUN_DIR/cycles" -mindepth 1 -maxdepth 1 -type d -name 'cycle_*' -print 2>/dev/null | sort -V | tail -n 1)"
   [[ -n "$cycle_dir" && -f "$cycle_dir/continue_status.txt" && -f "$cycle_dir/request_flags.txt" ]] || return 2
   status="$(grep -v '^[[:space:]]*$' "$cycle_dir/continue_status.txt" | tr -d '\r')"
@@ -722,7 +737,15 @@ validate_bugfix_completion_contract() {
   validate_loaded_env_keys "$clean_request_flags_keys" || return 2
   [[ "$(automation_v2_env_require BUGS_FOUND)" == no ]] || return 2
   [[ "$(automation_v2_env_require HANDOVER_AUTONOMOUS_IMPLEMENTATION_REQUIRED)" == no ]] || return 2
-  [[ "$(automation_v2_env_require NEXT_AUDIT_AREA)" == none ]] || return 2
+  next_audit_area="$(automation_v2_env_require NEXT_AUDIT_AREA)" || return 2
+  if [[ "$next_audit_area" != none ]]; then
+    expected_next_area="$(campaign_next_pending_area_after "$CAMPAIGN_ACTIVE_AREA")" || return 2
+    if [[ "$next_audit_area" != "$expected_next_area" ]]; then
+      printf 'ERROR: clean audit NEXT_AUDIT_AREA mismatch: expected %s or none, got %s\n' \
+        "$expected_next_area" "$next_audit_area" >&2
+      return 2
+    fi
+  fi
   [[ "$(automation_v2_env_require CAMPAIGN_AREA)" == "$CAMPAIGN_ACTIVE_AREA" ]] || return 2
   [[ "$(automation_v2_env_require CAMPAIGN_AREA_COMPLETE)" == yes ]] || return 2
   [[ "$(automation_v2_env_require SOURCE_EVIDENCE_COMPLETE)" == yes ]] || return 2

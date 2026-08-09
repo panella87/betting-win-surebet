@@ -115,6 +115,7 @@ The supported root runtime path enforces `SUREBET_RUNTIME_MODE=paper`, `SUREBET_
 
 The centralized temp/inode guard no longer treats a single `du` traversal race as a controller failure. Sustained unusable measurements and genuine capacity breaches remain fail-closed and exact-owner scoped.
 Bugfix handoff completion rule: when `run-autonomous-implementation.sh --handover-bugfix-audit` changes source and its controller-managed validation passes, a child-authored `BLOCKED=yes` caused by environment-only validation constraints is returned to the bugfix parent as `AUTONOMOUS_GOAL_COMPLETE=yes` with re-audit required. The parent still re-audits the same area before advancing.
+A clean bugfix re-audit may report `NEXT_AUDIT_AREA=none` or the exact next non-closed campaign area. The parent verifies any non-`none` value against `campaign_coverage.tsv`, closes the current area itself, and then advances through its own ledger.
 
 ## Artifact retention and cleanup
 

@@ -83,3 +83,7 @@ Executable command lists remain in `automation.config.sh`, `tools/required_execu
 ## Artifact residue cleanup protection
 
 `cleanup_automation_artifact_residue.sh`, `.automation/lib/run_common.sh`, and `.automation/lib/controller_hardening_v2.sh` enforce the retained-artifact boundary. They may remove only explicitly allowlisted test/release scratch families. Canonical controller run directories, handoffs, private-paper reports, runtime evidence, watchdog events, and operator evidence must not be selected by cleanup. Full and incremental artifact packaging clean transient residue before symlink validation so a failed test fixture cannot block an otherwise validated controller result.
+
+## Bugfix completion next-area contract
+
+`run-bugfix-autopilot.sh` remains protected. A clean audit child may report `NEXT_AUDIT_AREA=none` or the exact next non-closed campaign area. The parent validates any explicit slug against its campaign ledger and rejects skipped, stale, or arbitrary areas before closing the current row. This controller repair does not authorize protected changes during ordinary bugfix runs.
