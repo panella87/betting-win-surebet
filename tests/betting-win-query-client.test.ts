@@ -322,6 +322,57 @@ test('read-only query client rejects response provenance with mismatched lock ve
   assert.equal(result.blockers[0]?.code, 'QUERY_PROVENANCE_MISMATCH');
 });
 
+test('read-only query client rejects regex-shaped impossible response provenance timestamps', async () => {
+  for (const provenance of [
+    Object.freeze({ responseReceivedAt: '2026-99-99T99:99:99.999Z' }),
+    Object.freeze({ verifiedAt: '2026-99-99T99:99:99.999Z' }),
+  ] as const) {
+    const client = createReadOnlyQueryApiClient({
+      baseUrl: 'http://betting-win-query.test/read-only',
+      contractVersion: '1.0.0',
+      fetchImplementation: async () => new Response(`${JSON.stringify(createEnvelope('rules', {
+        page: {
+          items: [
+            {
+              resultSource: { resultSourceId: 'result-source-001' },
+              ruleProfile: { ruleProfileId: 'rule-profile-001' },
+            },
+          ],
+          pageSize: 1,
+          returnedCount: 1,
+        },
+        provenance: {
+          commitSha: sampleUpstreamLock().commitSha,
+          repository: 'betting-win',
+          responseReceivedAt: TEST_TIMESTAMP,
+          sourceView: 'committed_git_head',
+          verifiedAt: TEST_TIMESTAMP,
+          ...provenance,
+        },
+      }))}\n`, {
+        headers: { 'content-type': 'application/json' },
+        status: 200,
+      }),
+      maxPageSize: 50,
+      retryBackoffMs: 5,
+      retryLimit: 1,
+      timeoutMs: 50,
+      upstreamLock: sampleUpstreamLock(),
+    });
+    assert.equal(client.ok, true);
+
+    const result = await client.value.queryRules({
+      filters: {
+        provider: 'polymarket',
+      },
+      pageSize: 1,
+    });
+
+    assert.equal(result.ok, false);
+    assert.equal(result.blockers[0]?.code, 'QUERY_PROVENANCE_FORMAT_INVALID');
+  }
+});
+
 test('read-only query client retries retryable quote errors before succeeding', async () => {
   let attempts = 0;
   await withLoopbackServer(async (baseUrl) => {

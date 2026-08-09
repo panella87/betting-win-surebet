@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { createServer } from 'node:http';
 import { existsSync, lstatSync, mkdtempSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import type { AddressInfo } from 'node:net';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 import { tmpdir } from 'node:os';
 import {
   createBwsPaperRuntimeEvidence,
@@ -802,6 +802,98 @@ test('paper runtime evidence fails fast when required upstream lock evidence is 
   assert.equal(result.upstreamApiPreflight?.upstreamLock, undefined);
   assert.equal(result.observation.sampleCount, 0);
   assert.equal(lifecycleTouched, false);
+});
+
+test('paper runtime evidence rejects upstream lock path traversal outside the BWS repository before lifecycle ownership is touched', async (t) => {
+  const repositoryRoot = createTestRepositoryRoot(t);
+  const outsideLockFileName = `${basename(repositoryRoot)}-outside.lock.json`;
+  const outsideLockPath = join(repositoryRoot, '..', outsideLockFileName);
+  t.after(() => {
+    rmSync(outsideLockPath, { force: true });
+  });
+  writeFileSync(
+    outsideLockPath,
+    readFileSync(join(repositoryRoot, 'config', 'betting-win.upstream.lock.json'), 'utf-8'),
+    'utf-8',
+  );
+  configureUpstreamApiPreflightEnvironment(t, repositoryRoot, {
+    apiBaseUrl: 'http://127.0.0.1:9999',
+    lockPath: `../${outsideLockFileName}`,
+  });
+  let lifecycleTouched = false;
+
+  const result = await createBwsPaperRuntimeEvidence({
+    getLifecycleStatus: async () => {
+      lifecycleTouched = true;
+      return createLifecycleStatus('running');
+    },
+    intervalMs: 1000,
+    maxDurationMs: 2000,
+    repositoryRoot,
+    startLifecycle: async () => {
+      lifecycleTouched = true;
+      throw new Error('start should not be called');
+    },
+  });
+
+  assert.equal(result.finalStatus, 'PAPER_EVALUATION_BLOCKED_RUNTIME_EVIDENCE_COLLECTION_FAILED');
+  assert.equal(result.stopReason, 'betting_win_api_unavailable');
+  assert.equal(result.collectionFailure?.stage, 'upstream_api_preflight');
+  assert.equal(result.upstreamApiPreflight?.failureClass, 'upstream_lock_invalid');
+  assert.match(result.upstreamApiPreflight?.errorMessage ?? '', /must resolve to a file inside the BWS repository root/u);
+  assert.equal(result.upstreamApiPreflight?.outcome, 'blocked');
+  assert.equal(result.upstreamApiPreflight?.upstreamLock, undefined);
+  assert.equal(result.observation.sampleCount, 0);
+  assert.equal(lifecycleTouched, false);
+});
+
+test('paper runtime evidence rejects symlinked upstream lock paths escaping the BWS repository before lifecycle ownership is touched', async (t) => {
+  const repositoryRoot = createTestRepositoryRoot(t);
+  const outsideDirectory = mkdtempSync(join(tmpdir(), 'bws-paper-runtime-lock-outside-'));
+  t.after(() => {
+    rmSync(outsideDirectory, { force: true, recursive: true });
+  });
+  const outsideLockPath = join(outsideDirectory, 'betting-win.upstream.lock.json');
+  const symlinkLockPath = join(repositoryRoot, 'config', 'betting-win.upstream.lock.symlink.json');
+  writeFileSync(
+    outsideLockPath,
+    readFileSync(join(repositoryRoot, 'config', 'betting-win.upstream.lock.json'), 'utf-8'),
+    'utf-8',
+  );
+  symlinkSync(outsideLockPath, symlinkLockPath);
+  configureUpstreamApiPreflightEnvironment(t, repositoryRoot, {
+    apiBaseUrl: 'http://127.0.0.1:9999',
+    lockPath: 'config/betting-win.upstream.lock.symlink.json',
+  });
+  let lifecycleTouched = false;
+
+  const result = await createBwsPaperRuntimeEvidence({
+    getLifecycleStatus: async () => {
+      lifecycleTouched = true;
+      return createLifecycleStatus('running');
+    },
+    intervalMs: 1000,
+    maxDurationMs: 2000,
+    repositoryRoot,
+    startLifecycle: async () => {
+      lifecycleTouched = true;
+      throw new Error('start should not be called');
+    },
+  });
+
+  assert.equal(result.finalStatus, 'PAPER_EVALUATION_BLOCKED_RUNTIME_EVIDENCE_COLLECTION_FAILED');
+  assert.equal(result.stopReason, 'betting_win_api_unavailable');
+  assert.equal(result.collectionFailure?.stage, 'upstream_api_preflight');
+  assert.equal(result.upstreamApiPreflight?.failureClass, 'upstream_lock_invalid');
+  assert.match(
+    result.upstreamApiPreflight?.errorMessage ?? '',
+    /must resolve to an existing regular non-symlink file inside the BWS repository root/u,
+  );
+  assert.equal(result.upstreamApiPreflight?.outcome, 'blocked');
+  assert.equal(result.upstreamApiPreflight?.upstreamLock, undefined);
+  assert.equal(result.observation.sampleCount, 0);
+  assert.equal(lifecycleTouched, false);
+  assert.equal(readFileSync(outsideLockPath, 'utf-8').length > 0, true);
 });
 
 test('paper runtime evidence verifies the configured betting-win checkout against the upstream lock before lifecycle ownership is touched', async (t) => {

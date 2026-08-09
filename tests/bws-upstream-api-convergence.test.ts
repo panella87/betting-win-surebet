@@ -297,6 +297,83 @@ test('upstream API convergence rejects recovered import-run provenance that does
   }
 });
 
+test('upstream API convergence rejects recovered import-run provenance with impossible timestamps', async () => {
+  for (const provenanceOverride of [
+    Object.freeze({ responseReceivedAt: '2026-99-99T99:99:99.999Z' }),
+    Object.freeze({ verifiedAt: '2026-99-99T99:99:99.999Z' }),
+  ] as const) {
+    const fixture = createApiFixture({
+      identity: [createEnvelope('identity', { page: { items: [createIdentityItem()], pageSize: 1, returnedCount: 1 } })],
+      rules: [createEnvelope('rules', { page: { items: [createRulesItem()], pageSize: 1, returnedCount: 1 } })],
+      quotes: [createEnvelope('quotes', { page: { items: [createNormalizedItem('quote-lineage-001')], pageSize: 1, returnedCount: 1 } })],
+      settlement: [createEnvelope('settlement', {
+        page: { items: [createNormalizedItem('settlement-lineage-001')], pageSize: 1, returnedCount: 1 },
+      })],
+    });
+    try {
+      const repositories = createInMemoryRepositories();
+      const dependencies = asPassDependencies(repositories, fixture.fetch);
+      const checkpoint = repositories.checkpoints.initial('checkpoint-api-001');
+      repositories.checkpoints.forceSet({
+        ...checkpoint,
+        apiBaseUrl: fixture.config.query.baseUrl,
+        contractVersion: fixture.config.query.contractVersion,
+        maxPagesPerResource: fixture.config.query.maxPagesPerResource,
+        pageSize: fixture.config.query.pageSize,
+        retryBackoffMs: fixture.config.query.retryBackoffMs,
+        retryLimit: fixture.config.query.retryLimit,
+        timeoutMs: fixture.config.query.timeoutMs,
+        upstreamLockRecordId: lockRecordIdForFixture(fixture.config),
+      });
+      const importRunId = 'import:checkpoint-api-001:cycle:1:identity:page:1';
+      repositories.importRuns.forceSetRunning({
+        importRunId,
+        metadata: {
+          apiBaseUrl: fixture.config.query.baseUrl,
+          checkpointId: 'checkpoint-api-001',
+          contractVersion: fixture.config.query.contractVersion,
+          cycleNumber: 1,
+          maxPagesPerResource: fixture.config.query.maxPagesPerResource,
+          mode: 'api',
+          page: {
+            pageNumber: 1,
+            processedCount: 1,
+            provenance: {
+              commitSha: fixture.config.upstream.lock.commitSha,
+              repository: fixture.config.upstream.lock.repository,
+              resource: 'identity',
+              responseReceivedAt: '2026-07-15T13:00:05.000Z',
+              sourceView: fixture.config.upstream.lock.sourceView,
+              verifiedAt: fixture.config.upstream.lock.verifiedAt,
+              ...provenanceOverride,
+            },
+            resource: 'identity',
+          },
+          pageSize: fixture.config.query.pageSize,
+          resource: 'identity',
+          retryBackoffMs: fixture.config.query.retryBackoffMs,
+          retryLimit: fixture.config.query.retryLimit,
+          timeoutMs: fixture.config.query.timeoutMs,
+          upstreamLockRecordId: lockRecordIdForFixture(fixture.config),
+        },
+        requestedAt: '2026-07-15T13:00:04.000Z',
+        sourceKind: 'continuous_read_only_query_page',
+        sourceLocator: `${fixture.config.query.baseUrl}#checkpoint-api-001:cycle:1:resource:identity:page:1`,
+        startedAt: '2026-07-15T13:00:04.000Z',
+        upstreamLockRecordId: lockRecordIdForFixture(fixture.config),
+      });
+
+      const result = await runPass(fixture.config, dependencies);
+      assert.equal(result.ok, false);
+      assert.equal(result.blockers[0]?.code, 'BWS_UPSTREAM_API_IMPORT_METADATA_INVALID');
+      assert.equal(fixture.requestLog.length, 0);
+      assert.equal(repositories.importRuns.get(importRunId)?.outcome, 'running');
+    } finally {
+      fixture.dispose();
+    }
+  }
+});
+
 test('upstream API convergence blocks pagination paths that exceed the explicit page bound and replays the same blocker without fallback', async () => {
   const fixture = createApiFixture({
     identity: [createEnvelope('identity', { page: { items: [createIdentityItem()], pageSize: 1, returnedCount: 1 } })],

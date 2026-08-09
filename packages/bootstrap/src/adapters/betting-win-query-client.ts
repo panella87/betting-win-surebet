@@ -780,7 +780,7 @@ function validateQueryProvenance(
       'Response provenance that matches the validated betting-win committed HEAD.',
     );
   }
-  if (!GIT_SHA_PATTERN.test(commitSha) || !ISO_8601_UTC_MILLISECONDS.test(verifiedAt) || !ISO_8601_UTC_MILLISECONDS.test(responseReceivedAt)) {
+  if (!GIT_SHA_PATTERN.test(commitSha) || !isIso8601UtcTimestamp(verifiedAt) || !isIso8601UtcTimestamp(responseReceivedAt)) {
     return blocked(
       'QUERY_PROVENANCE_FORMAT_INVALID',
       'Read-only query provenance fields must use canonical Git SHA and ISO-8601 UTC formats.',
@@ -804,6 +804,18 @@ function validateQueryProvenance(
       verifiedAt,
     }),
   );
+}
+
+function isIso8601UtcTimestamp(value: string): boolean {
+  if (!ISO_8601_UTC_MILLISECONDS.test(value)) {
+    return false;
+  }
+  const parsed = Date.parse(value);
+  if (Number.isNaN(parsed)) {
+    return false;
+  }
+  const roundTripped = new Date(parsed).toISOString();
+  return roundTripped === value || roundTripped === value.replace(/Z$/, '.000Z');
 }
 
 function validateQueryPage<TResource extends ReadOnlyQueryResource>(

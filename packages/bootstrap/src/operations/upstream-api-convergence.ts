@@ -765,17 +765,25 @@ function parseResponseProvenance(
     );
   }
   const record = value as Record<string, unknown>;
+  const responseReceivedAt = parseIsoTimestamp(
+    record.responseReceivedAt,
+    'metadata.page.provenance.responseReceivedAt',
+  );
+  if (!responseReceivedAt.ok) {
+    return responseReceivedAt;
+  }
+  const verifiedAt = parseIsoTimestamp(record.verifiedAt, 'metadata.page.provenance.verifiedAt');
+  if (!verifiedAt.ok) {
+    return verifiedAt;
+  }
   return accepted(
     Object.freeze({
       commitSha: requireNonEmptyString(record.commitSha, 'metadata.page.provenance.commitSha'),
       repository: requireNonEmptyString(record.repository, 'metadata.page.provenance.repository'),
       resource,
-      responseReceivedAt: requireIsoTimestamp(
-        record.responseReceivedAt,
-        'metadata.page.provenance.responseReceivedAt',
-      ),
+      responseReceivedAt: responseReceivedAt.value,
       sourceView: requireNonEmptyString(record.sourceView, 'metadata.page.provenance.sourceView'),
-      verifiedAt: requireIsoTimestamp(record.verifiedAt, 'metadata.page.provenance.verifiedAt'),
+      verifiedAt: verifiedAt.value,
     }),
   );
 }
@@ -1042,15 +1050,38 @@ function requireApiResource(value: unknown, name: string): ApiResource {
 }
 
 function requireIsoTimestamp(value: unknown, name: string): string {
-  if (typeof value !== 'string' || !ISO_UTC_TIMESTAMP.test(value)) {
+  if (typeof value !== 'string' || !isIsoUtcTimestamp(value)) {
     throw new Error(`${name} must be an ISO-8601 UTC timestamp.`);
   }
   return value;
 }
 
+function parseIsoTimestamp(value: unknown, name: string): BoundaryResult<string> {
+  if (typeof value !== 'string' || !isIsoUtcTimestamp(value)) {
+    return blocked(
+      'BWS_UPSTREAM_API_IMPORT_METADATA_INVALID',
+      `${name} must be an ISO-8601 UTC timestamp.`,
+      'Canonical ISO-8601 UTC persisted API provenance timestamp.',
+    );
+  }
+  return accepted(value);
+}
+
+function isIsoUtcTimestamp(value: string): boolean {
+  if (!ISO_UTC_TIMESTAMP.test(value)) {
+    return false;
+  }
+  const parsed = Date.parse(value);
+  if (Number.isNaN(parsed)) {
+    return false;
+  }
+  const roundTripped = new Date(parsed).toISOString();
+  return roundTripped === value || roundTripped === value.replace(/Z$/, '.000Z');
+}
+
 function defaultNow(): string {
   const now = new Date().toISOString();
-  if (!ISO_UTC_TIMESTAMP.test(now)) {
+  if (!isIsoUtcTimestamp(now)) {
     throw new Error('BWS upstream API convergence timestamp source must emit ISO-8601 UTC timestamps.');
   }
   return now;

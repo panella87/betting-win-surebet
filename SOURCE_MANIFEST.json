@@ -1,6 +1,6 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-08-09T07:37:58Z",
+  "generated": "2026-08-09T10:30:31Z",
   "overlay": "bws97-artifact-retention-cleanup-wave59",
   "files": [
     {
@@ -825,8 +825,8 @@
     },
     {
       "path": "packages/bootstrap/src/adapters/betting-win-query-client.ts",
-      "sha256": "d822ad5f70e5d18a4ab103748c428146c31e7fed692c17fffa3ec69cd6d234c4",
-      "size": 39043
+      "sha256": "78ffbd4684480ec83267f6e8dd048fa55a32269a4a2b42ebf481da00c320bd74",
+      "size": 39380
     },
     {
       "path": "packages/bootstrap/src/adapters/betting-win-strategy-export-intake.ts",
@@ -1070,8 +1070,8 @@
     },
     {
       "path": "packages/bootstrap/src/operations/paper-runtime-evidence.ts",
-      "sha256": "b076850f3f8cb4a1a1b092a72bbd36a906b3a35b2434112152757416e6735e4a",
-      "size": 39271
+      "sha256": "b30903560acc92925a975633089d6d9ecb77f9177511434e0335af24358461fd",
+      "size": 40486
     },
     {
       "path": "packages/bootstrap/src/operations/paper-runtime-handoff.ts",
@@ -1120,8 +1120,8 @@
     },
     {
       "path": "packages/bootstrap/src/operations/upstream-api-convergence.ts",
-      "sha256": "9dfcc0ba7d78dd70e41826e84e635ab26e70a65bef200d2de2a328bbdfd0b6c5",
-      "size": 41430
+      "sha256": "1c0c4162fdb6431afb0a262fa52dac695c2837536ee87e854062e67159b1e861",
+      "size": 42336
     },
     {
       "path": "packages/bootstrap/src/operations/upstream-convergence-service.ts",
@@ -2555,8 +2555,8 @@
     },
     {
       "path": "tests/betting-win-query-client.test.ts",
-      "sha256": "9f41e8a2c7be4b34fe5d927b1b6d3caac3190032ede704c77735e9407c47abb7",
-      "size": 20836
+      "sha256": "eb49de90f6383c0f76c692a0badbe70a2215ab36813504f126ac597eed6fa616",
+      "size": 22451
     },
     {
       "path": "tests/betting-win-resource-records.test.ts",
@@ -2635,8 +2635,8 @@
     },
     {
       "path": "tests/bws-paper-runtime-evidence.test.ts",
-      "sha256": "83821fdcf993b356c68dd9f2cb6d56598a5bf45f6429bcc5ddeb2d314bd10afd",
-      "size": 45211
+      "sha256": "04cc1ecacc0731c36ef29c5598104d8ed53a00547526a4fdbc4292eb908366bb",
+      "size": 49183
     },
     {
       "path": "tests/bws-paper-runtime-handoff.test.ts",
@@ -2690,8 +2690,8 @@
     },
     {
       "path": "tests/bws-upstream-api-convergence.test.ts",
-      "sha256": "e80150929e5d027ce9bbc5705c6beb42294a60ff203d13d03d3e6930f87155c1",
-      "size": 38793
+      "sha256": "27dfab1103d529f328cb12cc2b744e490f0079003d8ddaaab5b7e533cfb296a7",
+      "size": 42528
     },
     {
       "path": "tests/bws-upstream-convergence-service.test.ts",

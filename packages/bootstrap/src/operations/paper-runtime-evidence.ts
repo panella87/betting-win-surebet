@@ -1,4 +1,4 @@
-import { closeSync, existsSync, lstatSync, mkdirSync, openSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
+import { closeSync, existsSync, lstatSync, mkdirSync, openSync, readFileSync, realpathSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { readBettingWinUpstreamLock, verifyBettingWinUpstreamLock } from '../../../upstream/src/index.js';
@@ -906,8 +906,9 @@ function readRequiredUpstreamLock(
     PAPER_RUNTIME_UPSTREAM_LOCK_PATH_ENV,
   );
   const bettingWinRepoPath = requireNonEmptyString(environment[BETTING_WIN_REPO_PATH_ENV], BETTING_WIN_REPO_PATH_ENV);
+  const lockPath = requireRepositoryRegularFile(repositoryRoot, configuredPath, PAPER_RUNTIME_UPSTREAM_LOCK_PATH_ENV);
   const upstreamLock = verifyBettingWinUpstreamLock(
-    readBettingWinUpstreamLock(join(repositoryRoot, configuredPath), repositoryRoot),
+    readBettingWinUpstreamLock(lockPath, repositoryRoot),
     {
       bettingWinRepoPath,
       repositoryRoot,
@@ -917,6 +918,29 @@ function readRequiredUpstreamLock(
     commitSha: upstreamLock.commitSha,
     packageVersion: upstreamLock.packageVersion,
   });
+}
+
+function requireRepositoryRegularFile(repositoryRoot: string, value: string, label: string): string {
+  const resolvedRoot = realpathSync(repositoryRoot);
+  const candidatePath = resolve(resolvedRoot, value);
+  if (!pathIsInside(candidatePath, resolvedRoot)) {
+    throw new Error(`${label} must resolve to a file inside the BWS repository root.`);
+  }
+  if (!existsSync(candidatePath)) {
+    throw new Error(`${label} must resolve to an existing regular non-symlink file inside the BWS repository root.`);
+  }
+  if (lstatSync(candidatePath).isSymbolicLink() || !statSync(candidatePath).isFile()) {
+    throw new Error(`${label} must resolve to an existing regular non-symlink file inside the BWS repository root.`);
+  }
+  const resolvedPath = realpathSync(candidatePath);
+  if (!pathIsInside(resolvedPath, resolvedRoot)) {
+    throw new Error(`${label} must resolve to a file inside the BWS repository root.`);
+  }
+  return resolvedPath;
+}
+
+function pathIsInside(candidatePath: string, rootPath: string): boolean {
+  return candidatePath === rootPath || candidatePath.startsWith(`${rootPath}/`);
 }
 
 function redactBoundedMessage(rawMessage: string): string {
