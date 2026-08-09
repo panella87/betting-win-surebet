@@ -761,20 +761,35 @@ function assertReadOnlyQueryResponse<
   }) as BwsReadOnlyQueryResponse<TResource, TItem>;
 }
 
-function appendQueryParameter(
+function appendIntegerQueryParameter(
   searchParams: URLSearchParams,
   key: string,
-  value: string | number | undefined,
+  value: unknown,
+): void {
+  const normalized = requirePositiveInteger(value, key);
+  searchParams.set(key, String(normalized));
+}
+
+function appendStringQueryParameter(
+  searchParams: URLSearchParams,
+  key: string,
+  value: unknown,
 ): void {
   if (value === undefined) {
     return;
   }
-  searchParams.set(key, String(value));
+  if (typeof value !== 'string') {
+    fail(`${key} must be a string when provided`);
+  }
+  searchParams.set(key, value);
 }
 
-function normalizeOptionalScopeValue(value: string | undefined, label: string): string | undefined {
+function normalizeOptionalScopeValue(value: unknown, label: string): string | undefined {
   if (value === undefined) {
     return undefined;
+  }
+  if (typeof value !== 'string') {
+    fail(`${label} must be a non-empty string when provided`);
   }
   const trimmed = value.trim();
   if (trimmed.length === 0) {
@@ -783,11 +798,11 @@ function normalizeOptionalScopeValue(value: string | undefined, label: string): 
   return trimmed;
 }
 
-function normalizeOptionalSha256(value: string | undefined, label: string): string | undefined {
+function normalizeOptionalSha256(value: unknown, label: string): string | undefined {
   if (value === undefined) {
     return undefined;
   }
-  if (!SHA256_PATTERN.test(value)) {
+  if (typeof value !== 'string' || !SHA256_PATTERN.test(value)) {
     fail(`${label} must be a 64-character lower-case SHA-256 value`);
   }
   return value;
@@ -874,18 +889,18 @@ function buildStrategyLedgerUrl(
   request: BwsStrategyLedgerQueryRequest,
 ): string {
   const searchParams = new URLSearchParams();
-  appendQueryParameter(searchParams, 'pageSize', request.pageSize);
-  appendQueryParameter(searchParams, 'expand', request.expand);
-  appendQueryParameter(searchParams, 'cursor', request.cursor);
-  appendQueryParameter(searchParams, 'acceptanceState', request.filters.acceptanceState);
-  appendQueryParameter(searchParams, 'pinnedStrategyExportRecordId', request.filters.pinnedStrategyExportRecordId);
-  appendQueryParameter(searchParams, 'reportId', request.filters.reportId);
-  appendQueryParameter(searchParams, 'runFingerprintSha256', request.filters.runFingerprintSha256);
-  appendQueryParameter(searchParams, 'runKind', request.filters.runKind);
-  appendQueryParameter(searchParams, 'runReferenceId', request.filters.runReferenceId);
-  appendQueryParameter(searchParams, 'sourceKind', request.filters.sourceKind);
-  appendQueryParameter(searchParams, 'sourceManifestHash', request.filters.sourceManifestHash);
-  appendQueryParameter(searchParams, 'upstreamLockRecordId', request.filters.upstreamLockRecordId);
+  appendIntegerQueryParameter(searchParams, 'pageSize', request.pageSize);
+  appendStringQueryParameter(searchParams, 'expand', request.expand);
+  appendStringQueryParameter(searchParams, 'cursor', request.cursor);
+  appendStringQueryParameter(searchParams, 'acceptanceState', request.filters.acceptanceState);
+  appendStringQueryParameter(searchParams, 'pinnedStrategyExportRecordId', request.filters.pinnedStrategyExportRecordId);
+  appendStringQueryParameter(searchParams, 'reportId', request.filters.reportId);
+  appendStringQueryParameter(searchParams, 'runFingerprintSha256', request.filters.runFingerprintSha256);
+  appendStringQueryParameter(searchParams, 'runKind', request.filters.runKind);
+  appendStringQueryParameter(searchParams, 'runReferenceId', request.filters.runReferenceId);
+  appendStringQueryParameter(searchParams, 'sourceKind', request.filters.sourceKind);
+  appendStringQueryParameter(searchParams, 'sourceManifestHash', request.filters.sourceManifestHash);
+  appendStringQueryParameter(searchParams, 'upstreamLockRecordId', request.filters.upstreamLockRecordId);
   return new URL(`/api/read-only/strategy-ledger?${searchParams.toString()}`, baseUrl).href;
 }
 
@@ -894,14 +909,14 @@ function buildB1BacktestRunsUrl(
   request: BwsB1BacktestRunQueryRequest,
 ): string {
   const searchParams = new URLSearchParams();
-  appendQueryParameter(searchParams, 'pageSize', request.pageSize);
-  appendQueryParameter(searchParams, 'expand', request.expand);
-  appendQueryParameter(searchParams, 'cursor', request.cursor);
-  appendQueryParameter(searchParams, 'offlineFalsificationStatus', request.filters.offlineFalsificationStatus);
-  appendQueryParameter(searchParams, 'runId', request.filters.runId);
-  appendQueryParameter(searchParams, 'sourceManifestHash', request.filters.sourceManifestHash);
-  appendQueryParameter(searchParams, 'upstreamCheckpointId', request.filters.upstreamCheckpointId);
-  appendQueryParameter(searchParams, 'upstreamLockFingerprint', request.filters.upstreamLockFingerprint);
+  appendIntegerQueryParameter(searchParams, 'pageSize', request.pageSize);
+  appendStringQueryParameter(searchParams, 'expand', request.expand);
+  appendStringQueryParameter(searchParams, 'cursor', request.cursor);
+  appendStringQueryParameter(searchParams, 'offlineFalsificationStatus', request.filters.offlineFalsificationStatus);
+  appendStringQueryParameter(searchParams, 'runId', request.filters.runId);
+  appendStringQueryParameter(searchParams, 'sourceManifestHash', request.filters.sourceManifestHash);
+  appendStringQueryParameter(searchParams, 'upstreamCheckpointId', request.filters.upstreamCheckpointId);
+  appendStringQueryParameter(searchParams, 'upstreamLockFingerprint', request.filters.upstreamLockFingerprint);
   return new URL(`/api/read-only/b1/backtest-runs?${searchParams.toString()}`, baseUrl).href;
 }
 
@@ -911,15 +926,15 @@ function buildPinnedStrategyExportsUrl(
 ): string {
   const normalizedScope = normalizeBwsOperatorCockpitPinnedExportScope(request.filters);
   const searchParams = new URLSearchParams();
-  appendQueryParameter(searchParams, 'pageSize', request.pageSize);
-  appendQueryParameter(searchParams, 'expand', request.expand);
-  appendQueryParameter(searchParams, 'cursor', request.cursor);
-  appendQueryParameter(searchParams, 'endpointId', normalizedScope.endpointId);
-  appendQueryParameter(searchParams, 'exportId', normalizedScope.exportId);
-  appendQueryParameter(searchParams, 'importRunId', normalizedScope.importRunId);
-  appendQueryParameter(searchParams, 'providerId', normalizedScope.providerId);
-  appendQueryParameter(searchParams, 'sourceSha256', normalizedScope.sourceSha256);
-  appendQueryParameter(searchParams, 'upstreamLockRecordId', normalizedScope.upstreamLockRecordId);
+  appendIntegerQueryParameter(searchParams, 'pageSize', request.pageSize);
+  appendStringQueryParameter(searchParams, 'expand', request.expand);
+  appendStringQueryParameter(searchParams, 'cursor', request.cursor);
+  appendStringQueryParameter(searchParams, 'endpointId', normalizedScope.endpointId);
+  appendStringQueryParameter(searchParams, 'exportId', normalizedScope.exportId);
+  appendStringQueryParameter(searchParams, 'importRunId', normalizedScope.importRunId);
+  appendStringQueryParameter(searchParams, 'providerId', normalizedScope.providerId);
+  appendStringQueryParameter(searchParams, 'sourceSha256', normalizedScope.sourceSha256);
+  appendStringQueryParameter(searchParams, 'upstreamLockRecordId', normalizedScope.upstreamLockRecordId);
   return new URL(`/api/read-only/pinned-strategy-exports?${searchParams.toString()}`, baseUrl).href;
 }
 
@@ -928,13 +943,13 @@ function buildPrivatePaperRuntimeCyclesUrl(
   request: BwsPrivatePaperRuntimeCycleQueryRequest,
 ): string {
   const searchParams = new URLSearchParams();
-  appendQueryParameter(searchParams, 'pageSize', request.pageSize);
-  appendQueryParameter(searchParams, 'expand', request.expand);
-  appendQueryParameter(searchParams, 'acceptanceState', request.filters.acceptanceState);
-  appendQueryParameter(searchParams, 'queueName', request.filters.queueName);
-  appendQueryParameter(searchParams, 'runtimeId', request.filters.runtimeId);
-  appendQueryParameter(searchParams, 'schedulerCheckpointId', request.filters.schedulerCheckpointId);
-  appendQueryParameter(searchParams, 'upstreamLockRecordId', request.filters.upstreamLockRecordId);
+  appendIntegerQueryParameter(searchParams, 'pageSize', request.pageSize);
+  appendStringQueryParameter(searchParams, 'expand', request.expand);
+  appendStringQueryParameter(searchParams, 'acceptanceState', request.filters.acceptanceState);
+  appendStringQueryParameter(searchParams, 'queueName', request.filters.queueName);
+  appendStringQueryParameter(searchParams, 'runtimeId', request.filters.runtimeId);
+  appendStringQueryParameter(searchParams, 'schedulerCheckpointId', request.filters.schedulerCheckpointId);
+  appendStringQueryParameter(searchParams, 'upstreamLockRecordId', request.filters.upstreamLockRecordId);
   return new URL(`/api/read-only/private-paper-runtime-cycles?${searchParams.toString()}`, baseUrl).href;
 }
 

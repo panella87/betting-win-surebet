@@ -266,6 +266,66 @@ test('BWS read-only query service fails closed on malformed direct request and f
   }
 });
 
+test('BWS read-only query service blocks malformed non-string optional filter values', () => {
+  const service = createBwsReadOnlyQueryService(createStubDependencies(), {
+    generatedAt: () => TEST_TIMESTAMP,
+    maxPageSize: 50,
+  });
+  assert.equal(service.ok, true);
+
+  const malformedFilters = Object.freeze([
+    Object.freeze({
+      name: 'strategy ledger reportId',
+      query: () => service.value.queryStrategyLedger({
+        expand: 'provenance',
+        filters: {
+          acceptanceState: 'blocked',
+          reportId: null,
+          runKind: 'private_paper_runtime_cycle',
+        },
+        pageSize: 1,
+      } as never),
+    }),
+    Object.freeze({
+      name: 'pinned strategy export providerId',
+      query: () => service.value.queryPinnedStrategyExports({
+        expand: 'provenance',
+        filters: {
+          providerId: 123,
+        },
+        pageSize: 1,
+      } as never),
+    }),
+    Object.freeze({
+      name: 'B1 backtest run runId',
+      query: () => service.value.queryB1BacktestRuns({
+        expand: 'reporting',
+        filters: {
+          runId: null,
+        },
+        pageSize: 1,
+      } as never),
+    }),
+    Object.freeze({
+      name: 'private-paper runtime cycle runtimeId',
+      query: () => service.value.queryPrivatePaperRuntimeCycles({
+        expand: 'provenance',
+        filters: {
+          acceptanceState: 'blocked',
+          runtimeId: null,
+        },
+        pageSize: 1,
+      } as never),
+    }),
+  ]);
+
+  for (const malformedFilter of malformedFilters) {
+    const result = malformedFilter.query();
+    assert.equal(result.ok, false, malformedFilter.name);
+    assert.equal(result.blockers[0]?.code, 'BWS_QUERY_FILTER_VALUE_INVALID', malformedFilter.name);
+  }
+});
+
 test('BWS read-only query service validates generatedAt at response construction time', () => {
   const generatedAtValues = [TEST_TIMESTAMP, 'not-an-iso-timestamp'];
   const service = createBwsReadOnlyQueryService({

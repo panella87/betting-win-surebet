@@ -1,6 +1,6 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-08-09T04:00:13Z",
+  "generated": "2026-08-09T04:36:32Z",
   "overlay": "bws96-bugfix-artifact-refresh-canonical-root-wave58",
   "files": [
     {
@@ -145,8 +145,8 @@
     },
     {
       "path": "apps/web/src/api/client.ts",
-      "sha256": "65eccebb1b7f2cd2a38cddded8eac69b592133b8ccd6d7be55486756844ffe81",
-      "size": 62681
+      "sha256": "8b9ba5b322e4b3333925b8b1ee2aa4d12b2db1693ae32cac2eafb7a94fc1bb97",
+      "size": 63297
     },
     {
       "path": "apps/web/src/api/contracts.ts",
@@ -830,8 +830,8 @@
     },
     {
       "path": "packages/bootstrap/src/api/bws-read-only-query-service.ts",
-      "sha256": "1789b958f88d6bf98cebd2c317a9a817ba7b408cb9f119d71e120379ba7ffc9c",
-      "size": 76916
+      "sha256": "c490a47949d6a6a03c00275fa2ce19456d43c2cd44ec0cf2aefd8de3aed4f3dd",
+      "size": 76952
     },
     {
       "path": "packages/bootstrap/src/backtest/b1-cross-venue-backtest.ts",
@@ -2615,8 +2615,8 @@
     },
     {
       "path": "tests/bws-operator-cockpit.test.ts",
-      "sha256": "a6c738fbfa3b56c984ffcea21af4e144c85e06b5b85c64fd1d8edaa1981f8846",
-      "size": 34399
+      "sha256": "647571226be293fef4712c442786d173ae353f6dd21479338f772302a2ce8386",
+      "size": 35932
     },
     {
       "path": "tests/bws-operator-lifecycle.test.ts",
@@ -2650,8 +2650,8 @@
     },
     {
       "path": "tests/bws-read-only-query-api.test.ts",
-      "sha256": "5eb2fefaf4c07411f08cbeb134223f389c8e07cc055dbf13b9e0c02a5b563c41",
-      "size": 57786
+      "sha256": "b9c4c68e5a159af89540e31d2baa3392e86eb22a19b3012d47ecbc1a25ae4180",
+      "size": 59528
     },
     {
       "path": "tests/bws-release-packaging.test.ts",

@@ -1870,14 +1870,14 @@ function validateOptionalB1OfflineFalsificationStatus(
 }
 
 function validateOptionalStringFilters(
-  filters: readonly (readonly [string, string | undefined])[],
+  filters: readonly (readonly [string, unknown])[],
 ): BoundaryResult<Readonly<Record<string, string>>> {
   const normalized: Record<string, string> = {};
   for (const [field, value] of filters) {
     if (value === undefined) {
       continue;
     }
-    if (value.trim().length === 0) {
+    if (typeof value !== 'string' || value.trim().length === 0) {
       return blocked(
         'BWS_QUERY_FILTER_VALUE_INVALID',
         `BWS read-only query filter ${field} must be a non-empty string.`,
@@ -1890,14 +1890,14 @@ function validateOptionalStringFilters(
 }
 
 function validateOptionalSha256Filters(
-  filters: readonly (readonly [string, string | undefined])[],
+  filters: readonly (readonly [string, unknown])[],
 ): BoundaryResult<Readonly<Record<string, string>>> {
   const normalized: Record<string, string> = {};
   for (const [field, value] of filters) {
     if (value === undefined) {
       continue;
     }
-    if (!SHA256_PATTERN.test(value)) {
+    if (typeof value !== 'string' || !SHA256_PATTERN.test(value)) {
       return blocked(
         'BWS_QUERY_FILTER_VALUE_INVALID',
         `BWS read-only query filter ${field} must be a 64-character lower-case SHA-256 value.`,

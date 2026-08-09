@@ -478,6 +478,63 @@ test('BWS operator cockpit API client builds bounded read-only requests and pars
   assert.match(requestedUrls[2], /offlineFalsificationStatus=B1_OFFLINE_RESEARCH_CANDIDATES_OBSERVED/);
 });
 
+test('BWS operator cockpit API client rejects malformed non-string filters before fetch', async () => {
+  let fetchCallCount = 0;
+  const fetchImpl: BwsOperatorCockpitFetchLike = async () => {
+    fetchCallCount += 1;
+    throw new Error('Malformed cockpit requests must fail before fetch.');
+  };
+  const client = createBwsOperatorCockpitApiClient({
+    apiBaseUrl: 'http://127.0.0.1:4312',
+    dataMode: 'api',
+  }, fetchImpl);
+
+  await assert.rejects(
+    () => client.queryStrategyLedger({
+      expand: 'provenance',
+      filters: {
+        acceptanceState: 'blocked',
+        reportId: null,
+        runKind: 'private_paper_runtime_cycle',
+      },
+      pageSize: 8,
+    } as never),
+    /reportId must be a string when provided/,
+  );
+  await assert.rejects(
+    () => client.queryPinnedStrategyExports({
+      expand: 'provenance',
+      filters: {
+        providerId: 123,
+      },
+      pageSize: 8,
+    } as never),
+    /providerId must be a non-empty string when provided/,
+  );
+  await assert.rejects(
+    () => client.queryB1BacktestRuns({
+      expand: 'reporting',
+      filters: {
+        runId: null,
+      },
+      pageSize: 8,
+    } as never),
+    /runId must be a string when provided/,
+  );
+  await assert.rejects(
+    () => client.queryPrivatePaperRuntimeCycles({
+      expand: 'provenance',
+      filters: {
+        acceptanceState: 'blocked',
+        runtimeId: null,
+      },
+      pageSize: 8,
+    } as never),
+    /runtimeId must be a string when provided/,
+  );
+  assert.equal(fetchCallCount, 0);
+});
+
 test('BWS operator cockpit API client fails closed on malformed committed-HEAD provenance and ambiguous blocked candidates', async () => {
   const snapshot = createMockBwsOperatorCockpitSnapshot();
   const malformedProvenance = structuredClone(snapshot.acceptedBacktests);
