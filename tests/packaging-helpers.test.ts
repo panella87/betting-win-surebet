@@ -858,6 +858,55 @@ test('zip_codebase rejects source symlinks instead of following outside contents
   }
 });
 
+test('zip_codebase refuses a late numbered target collision without clobbering it', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'surebet-zip-codebase-late-collision-'));
+  const repoDir = join(dir, 'repo');
+  const fakeBin = join(dir, 'fake-bin');
+  try {
+    mkdirSync(repoDir, { recursive: true });
+    mkdirSync(fakeBin, { recursive: true });
+    copyFileSync(ZIP_CODEBASE, join(repoDir, 'zip_codebase.sh'));
+    writeFileSync(join(repoDir, 'README.md'), '# fixture\n', { encoding: 'utf-8' });
+    execFileSync('git', ['init', '-q'], { cwd: repoDir, encoding: 'utf-8', stdio: 'pipe' });
+    execFileSync('git', ['add', 'README.md', 'zip_codebase.sh'], { cwd: repoDir, encoding: 'utf-8', stdio: 'pipe' });
+
+    const fakeZip = join(fakeBin, 'zip');
+    writeFileSync(
+      fakeZip,
+      [
+        '#!/usr/bin/env bash',
+        'set -euo pipefail',
+        'if [ "${1:-}" = "-q" ] && [ "${2:-}" = "-d" ]; then',
+        '  exit 12',
+        'fi',
+        'archive=""',
+        'for arg in "$@"; do',
+        '  case "$arg" in *.zip) archive="$arg"; break ;; esac',
+        '  done',
+        'if [ -z "$archive" ]; then',
+        '  exit 2',
+        'fi',
+        'printf "late collision sentinel\\n" > repo1.zip',
+        'printf "temporary zip candidate\\n" > "$archive"',
+      ].join('\n') + '\n',
+      { encoding: 'utf-8' },
+    );
+    chmodSync(fakeZip, 0o755);
+
+    const result = spawnSync('bash', ['zip_codebase.sh'], {
+      cwd: repoDir,
+      encoding: 'utf-8',
+      env: { ...process.env, PATH: `${fakeBin}:${process.env.PATH === undefined ? '' : process.env.PATH}` },
+      stdio: 'pipe',
+    });
+    assert.equal(result.status, 1, `${result.stdout}\n${result.stderr}`);
+    assert.match(result.stderr, /without clobbering|could not publish zip/u);
+    assert.equal(readFileSync(join(repoDir, 'repo1.zip'), 'utf-8'), 'late collision sentinel\n');
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test('zip_codebase artifact-only mode recursively preserves the complete artifacts directory', () => {
   const fixture = makeZipCodebaseFixture();
   try {

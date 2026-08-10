@@ -103,3 +103,187 @@ test('B1 scenario cash-flow validation fails closed on incomplete matrices', () 
     },
   ]);
 });
+
+test('B1 scenario cash-flow validation fails closed on missing winning selection equivalence keys', () => {
+  const result = validateB1ScenarioCashflowMatrix(Object.freeze([
+    Object.freeze({
+      scenarioId: 'b1_terminal:event-001:moneyline:away',
+      winningSelectionEquivalenceKey: '',
+      selectionEquivalenceKey: 'event-001:moneyline:away',
+      venueOrBookmakerId: 'venue-b',
+      stakeMinor: 1_000n,
+      payoutMinor: 3_600n,
+    }),
+    Object.freeze({
+      scenarioId: 'b1_terminal:event-001:moneyline:away',
+      winningSelectionEquivalenceKey: '',
+      selectionEquivalenceKey: 'event-001:moneyline:home',
+      venueOrBookmakerId: 'venue-a',
+      stakeMinor: 1_125n,
+      payoutMinor: 0n,
+    }),
+    Object.freeze({
+      scenarioId: 'b1_terminal:event-001:moneyline:home',
+      winningSelectionEquivalenceKey: 'event-001:moneyline:home',
+      selectionEquivalenceKey: 'event-001:moneyline:away',
+      venueOrBookmakerId: 'venue-b',
+      stakeMinor: 1_000n,
+      payoutMinor: 0n,
+    }),
+    Object.freeze({
+      scenarioId: 'b1_terminal:event-001:moneyline:home',
+      winningSelectionEquivalenceKey: 'event-001:moneyline:home',
+      selectionEquivalenceKey: 'event-001:moneyline:home',
+      venueOrBookmakerId: 'venue-a',
+      stakeMinor: 1_125n,
+      payoutMinor: 3_600n,
+    }),
+  ]));
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'B1_SELECTION_EQUIVALENCE_MISSING',
+      message: 'B1 scenario cash-flow validation requires winner selection equivalence evidence for every row.',
+      evidenceRequired: 'B1 scenario cash-flow winning_selection_equivalence_key.',
+    },
+  ]);
+});
+
+test('B1 scenario cash-flow validation fails closed on conflicting scenario winner keys', () => {
+  const result = validateB1ScenarioCashflowMatrix(Object.freeze([
+    Object.freeze({
+      scenarioId: 'b1_terminal:event-001:moneyline:away',
+      winningSelectionEquivalenceKey: 'event-001:moneyline:away',
+      selectionEquivalenceKey: 'event-001:moneyline:away',
+      venueOrBookmakerId: 'venue-b',
+      stakeMinor: 1_000n,
+      payoutMinor: 3_600n,
+    }),
+    Object.freeze({
+      scenarioId: 'b1_terminal:event-001:moneyline:away',
+      winningSelectionEquivalenceKey: 'event-001:moneyline:home',
+      selectionEquivalenceKey: 'event-001:moneyline:home',
+      venueOrBookmakerId: 'venue-a',
+      stakeMinor: 1_125n,
+      payoutMinor: 0n,
+    }),
+    Object.freeze({
+      scenarioId: 'b1_terminal:event-001:moneyline:home',
+      winningSelectionEquivalenceKey: 'event-001:moneyline:home',
+      selectionEquivalenceKey: 'event-001:moneyline:away',
+      venueOrBookmakerId: 'venue-b',
+      stakeMinor: 1_000n,
+      payoutMinor: 0n,
+    }),
+    Object.freeze({
+      scenarioId: 'b1_terminal:event-001:moneyline:home',
+      winningSelectionEquivalenceKey: 'event-001:moneyline:home',
+      selectionEquivalenceKey: 'event-001:moneyline:home',
+      venueOrBookmakerId: 'venue-a',
+      stakeMinor: 1_125n,
+      payoutMinor: 3_600n,
+    }),
+  ]));
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'B1_SCENARIO_CASHFLOW_WINNER_INVALID',
+      message: 'B1 scenario cash-flow validation requires one declared winning selection per terminal scenario.',
+      evidenceRequired: 'One winning B1 terminal outcome per scenario.',
+    },
+  ]);
+});
+
+test('B1 scenario cash-flow validation fails closed on duplicate terminal winners', () => {
+  const result = validateB1ScenarioCashflowMatrix(Object.freeze([
+    Object.freeze({
+      scenarioId: 'b1_terminal:event-001:moneyline:away',
+      winningSelectionEquivalenceKey: 'event-001:moneyline:away',
+      selectionEquivalenceKey: 'event-001:moneyline:away',
+      venueOrBookmakerId: 'venue-b',
+      stakeMinor: 1_000n,
+      payoutMinor: 3_600n,
+    }),
+    Object.freeze({
+      scenarioId: 'b1_terminal:event-001:moneyline:away',
+      winningSelectionEquivalenceKey: 'event-001:moneyline:away',
+      selectionEquivalenceKey: 'event-001:moneyline:home',
+      venueOrBookmakerId: 'venue-a',
+      stakeMinor: 1_125n,
+      payoutMinor: 0n,
+    }),
+    Object.freeze({
+      scenarioId: 'b1_terminal:event-001:moneyline:home',
+      winningSelectionEquivalenceKey: 'event-001:moneyline:away',
+      selectionEquivalenceKey: 'event-001:moneyline:away',
+      venueOrBookmakerId: 'venue-b',
+      stakeMinor: 1_000n,
+      payoutMinor: 3_600n,
+    }),
+    Object.freeze({
+      scenarioId: 'b1_terminal:event-001:moneyline:home',
+      winningSelectionEquivalenceKey: 'event-001:moneyline:away',
+      selectionEquivalenceKey: 'event-001:moneyline:home',
+      venueOrBookmakerId: 'venue-a',
+      stakeMinor: 1_125n,
+      payoutMinor: 0n,
+    }),
+  ]));
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'B1_SCENARIO_CASHFLOW_WINNER_INVALID',
+      message: 'B1 scenario cash-flow validation requires terminal winners to cover every compared selection exactly once.',
+      evidenceRequired: 'One winning B1 terminal outcome for each compared selection.',
+    },
+  ]);
+});
+
+test('B1 scenario cash-flow validation fails closed when positive payout does not match declared winner', () => {
+  const result = validateB1ScenarioCashflowMatrix(Object.freeze([
+    Object.freeze({
+      scenarioId: 'b1_terminal:event-001:moneyline:away',
+      winningSelectionEquivalenceKey: 'event-001:moneyline:away',
+      selectionEquivalenceKey: 'event-001:moneyline:away',
+      venueOrBookmakerId: 'venue-b',
+      stakeMinor: 1_000n,
+      payoutMinor: 0n,
+    }),
+    Object.freeze({
+      scenarioId: 'b1_terminal:event-001:moneyline:away',
+      winningSelectionEquivalenceKey: 'event-001:moneyline:away',
+      selectionEquivalenceKey: 'event-001:moneyline:home',
+      venueOrBookmakerId: 'venue-a',
+      stakeMinor: 1_125n,
+      payoutMinor: 3_600n,
+    }),
+    Object.freeze({
+      scenarioId: 'b1_terminal:event-001:moneyline:home',
+      winningSelectionEquivalenceKey: 'event-001:moneyline:home',
+      selectionEquivalenceKey: 'event-001:moneyline:away',
+      venueOrBookmakerId: 'venue-b',
+      stakeMinor: 1_000n,
+      payoutMinor: 3_600n,
+    }),
+    Object.freeze({
+      scenarioId: 'b1_terminal:event-001:moneyline:home',
+      winningSelectionEquivalenceKey: 'event-001:moneyline:home',
+      selectionEquivalenceKey: 'event-001:moneyline:home',
+      venueOrBookmakerId: 'venue-a',
+      stakeMinor: 1_125n,
+      payoutMinor: 0n,
+    }),
+  ]));
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'B1_SCENARIO_CASHFLOW_WINNER_INVALID',
+      message: 'B1 scenario cash-flow validation requires the positive payout row to match the declared winner.',
+      evidenceRequired: 'One winning B1 terminal outcome per scenario.',
+    },
+  ]);
+});

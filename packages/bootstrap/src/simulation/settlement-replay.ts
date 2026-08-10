@@ -426,15 +426,6 @@ function validateMatrixTerms(
         'Positive fixed-point stake rows for each completion leg.',
       );
     }
-    if (plan.stakeQuantumMinor % referenceRow.stakeMinor !== 0n) {
-      return blocked(
-        'NON_ATOMIC_COMPLETION_MATRIX_QUANTUM_MISMATCH',
-        'Non-atomic completion simulation requires solved stake quanta to be exact multiples of the scenario stake rows.',
-        'Solved stake quanta aligned to the deterministic scenario cash-flow matrix.',
-      );
-    }
-
-    const scaleFactor = plan.stakeQuantumMinor / referenceRow.stakeMinor;
     const contributionsByScenarioId = new Map<string, bigint>();
     for (const row of rowsForLeg) {
       if (
@@ -448,9 +439,17 @@ function validateMatrixTerms(
           'Per-leg fixed-point stake, fee, and cost rows that only vary by winning payout.',
         );
       }
+      const contribution = scaleMatrixContribution(
+        row.payoutMinor - row.stakeMinor - row.feeMinor - row.costMinor,
+        row.stakeMinor,
+        plan,
+      );
+      if (!contribution.ok) {
+        return contribution;
+      }
       contributionsByScenarioId.set(
         row.scenarioId,
-        (row.payoutMinor - row.stakeMinor - row.feeMinor - row.costMinor) * scaleFactor,
+        contribution.value,
       );
     }
 
@@ -475,6 +474,23 @@ function validateMatrixTerms(
       contributionByLegAndScenarioId,
     }),
   );
+}
+
+function scaleMatrixContribution(
+  contributionMinor: bigint,
+  matrixStakeMinor: bigint,
+  plan: StakePlan,
+): BoundaryResult<bigint> {
+  const numerator = contributionMinor * plan.stakeQuantumMinor;
+  if (numerator % matrixStakeMinor !== 0n) {
+    return blocked(
+      'NON_ATOMIC_COMPLETION_MATRIX_QUANTUM_MISMATCH',
+      'Non-atomic completion simulation requires solved stake quanta to scale scenario cash-flow rows to integer minor units.',
+      'Solved stake quanta with integral deterministic scenario cash-flow contributions.',
+    );
+  }
+
+  return accepted(numerator / matrixStakeMinor);
 }
 
 function classifyCompletionLegs(

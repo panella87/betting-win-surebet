@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { mkdtempSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, mkdirSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
 import {
   BWS_UPSTREAM_API_BASE_URL_ENV,
   BWS_UPSTREAM_API_CHECKPOINT_ID_ENV,
@@ -89,7 +89,7 @@ test('upstream convergence service persists success and no-change passes, then r
         assert.notEqual(next, undefined);
         return next!;
       },
-      runtimeStateDirectory: fixture.runtimeStateDirectory,
+      runtimeStateDirectory: relative(fixture.repositoryRoot, fixture.runtimeStateDirectory),
       signalRegistrar: signals.registrar,
       sleep: async () => undefined,
     });
@@ -99,7 +99,7 @@ test('upstream convergence service persists success and no-change passes, then r
       now: () => '2026-07-16T07:30:05.500Z',
       processRuntime: runtime.runtime,
       repositoryRoot: fixture.repositoryRoot,
-      runtimeStateDirectory: fixture.runtimeStateDirectory,
+      runtimeStateDirectory: relative(fixture.repositoryRoot, fixture.runtimeStateDirectory),
     });
     assert.equal(status.command, 'status');
     assert.equal(status.outcome, 'running');
@@ -157,7 +157,7 @@ test('upstream convergence service persists blocker state, applies retry backoff
           },
         ],
       }),
-      runtimeStateDirectory: fixture.runtimeStateDirectory,
+      runtimeStateDirectory: relative(fixture.repositoryRoot, fixture.runtimeStateDirectory),
       sleep: async () => undefined,
     });
     assert.equal(firstResult.lastPass?.outcome, 'blocked');
@@ -191,7 +191,7 @@ test('upstream convergence service persists blocker state, applies retry backoff
           processedCount: 2,
           resource: 'settlement',
         }),
-      runtimeStateDirectory: fixture.runtimeStateDirectory,
+      runtimeStateDirectory: relative(fixture.repositoryRoot, fixture.runtimeStateDirectory),
       sleep: async () => undefined,
     });
     assert.equal(secondResult.counters.blockerCount, 1);
@@ -239,7 +239,7 @@ test('upstream convergence service fails closed on overlap, records timeout fail
           };
         });
       },
-      runtimeStateDirectory: fixture.runtimeStateDirectory,
+      runtimeStateDirectory: relative(fixture.repositoryRoot, fixture.runtimeStateDirectory),
       signalRegistrar: overlapSignals.registrar,
       sleep: async () => undefined,
     });
@@ -248,7 +248,7 @@ test('upstream convergence service fails closed on overlap, records timeout fail
       now: () => '2026-07-16T07:50:01.250Z',
       processRuntime: runtime.runtime,
       repositoryRoot: fixture.repositoryRoot,
-      runtimeStateDirectory: fixture.runtimeStateDirectory,
+      runtimeStateDirectory: relative(fixture.repositoryRoot, fixture.runtimeStateDirectory),
     });
     assert.equal(statusWhileRunning.outcome, 'running');
     await assert.rejects(
@@ -269,7 +269,7 @@ test('upstream convergence service fails closed on overlap, records timeout fail
               selectionCount: 1,
             });
           },
-          runtimeStateDirectory: fixture.runtimeStateDirectory,
+          runtimeStateDirectory: relative(fixture.repositoryRoot, fixture.runtimeStateDirectory),
           sleep: async () => undefined,
         }),
       /already running/,
@@ -314,7 +314,7 @@ test('upstream convergence service fails closed on overlap, records timeout fail
           }, 25);
         });
       },
-      runtimeStateDirectory: fixture.runtimeStateDirectory,
+      runtimeStateDirectory: relative(fixture.repositoryRoot, fixture.runtimeStateDirectory),
       signalRegistrar: timeoutRegistrar,
       sleep: async () => undefined,
     });
@@ -352,6 +352,35 @@ test('upstream convergence service CLI help stays explicit and config rejects fa
     );
   } finally {
     fixture.dispose();
+  }
+});
+
+test('upstream convergence service rejects unsafe runtimeStateDirectory values before writes', () => {
+  const fixture = createServiceFixture();
+  const outsideDirectory = mkdtempSync(join(tmpdir(), 'bws-upstream-service-outside-'));
+  try {
+    symlinkSync(outsideDirectory, join(fixture.repositoryRoot, 'linked-runtime-state'), 'dir');
+    for (const candidate of [
+      outsideDirectory,
+      '../outside-state',
+      'linked-runtime-state',
+      'linked-runtime-state/child',
+    ]) {
+      assert.throws(
+        () => getBwsUpstreamConvergenceServiceStatus({
+          config: createExportServiceConfig(fixture.repositoryRoot, fixture.upstreamRoot),
+          repositoryRoot: fixture.repositoryRoot,
+          runtimeStateDirectory: candidate,
+        }),
+        /runtimeStateDirectory .*repository|runtimeStateDirectory .*symlink|runtimeStateDirectory .*absolute/u,
+      );
+    }
+    assert.equal(existsSync(join(outsideDirectory, 'state.json')), false);
+    assert.equal(existsSync(join(outsideDirectory, 'evidence')), false);
+    assert.equal(existsSync(join(outsideDirectory, 'child')), false);
+  } finally {
+    fixture.dispose();
+    rmSync(outsideDirectory, { recursive: true, force: true });
   }
 });
 

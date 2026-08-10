@@ -196,6 +196,178 @@ test('B1 outcome-set equivalence accepts every terminal outcome across two venue
   );
 });
 
+test('B1 outcome-set equivalence accepts supported three-terminal outcome sets', () => {
+  const [homeA, homeB] = fixturePair();
+  const awayA = cloneRow(homeA, {
+    canonicalSelectionId: 'selection-away-a',
+    selectionEquivalenceKey: 'event-001:moneyline:away',
+    outcomeName: 'Away',
+    outcomeSide: 'away',
+  });
+  const awayB = cloneRow(homeB, {
+    canonicalSelectionId: 'selection-away-b',
+    selectionEquivalenceKey: 'event-001:moneyline:away',
+    outcomeName: 'Away',
+    outcomeSide: 'away',
+  });
+  const drawA = cloneRow(homeA, {
+    canonicalSelectionId: 'selection-draw-a',
+    selectionEquivalenceKey: 'event-001:moneyline:draw',
+    outcomeName: 'Draw',
+    outcomeSide: 'draw',
+  });
+  const drawB = cloneRow(homeB, {
+    canonicalSelectionId: 'selection-draw-b',
+    selectionEquivalenceKey: 'event-001:moneyline:draw',
+    outcomeName: 'Draw',
+    outcomeSide: 'draw',
+  });
+
+  const result = compareB1MarketOutcomeSetEquivalence([homeA, awayA, drawA], [homeB, awayB, drawB]);
+
+  assert.equal(result.ok, true);
+  assert.equal(result.value.terminalOutcomeCount, 3);
+  assert.deepEqual(
+    result.value.selections.map((selection) => selection.selectionEquivalenceKey),
+    ['event-001:moneyline:home', 'event-001:moneyline:away', 'event-001:moneyline:draw'],
+  );
+});
+
+test('B1 outcome-set equivalence fails closed on unsupported terminal outcome cardinality', () => {
+  const [homeA, homeB] = fixturePair();
+  const awayA = cloneRow(homeA, {
+    canonicalSelectionId: 'selection-away-a',
+    selectionEquivalenceKey: 'event-001:moneyline:away',
+    outcomeName: 'Away',
+    outcomeSide: 'away',
+  });
+  const awayB = cloneRow(homeB, {
+    canonicalSelectionId: 'selection-away-b',
+    selectionEquivalenceKey: 'event-001:moneyline:away',
+    outcomeName: 'Away',
+    outcomeSide: 'away',
+  });
+  const drawA = cloneRow(homeA, {
+    canonicalSelectionId: 'selection-draw-a',
+    selectionEquivalenceKey: 'event-001:moneyline:draw',
+    outcomeName: 'Draw',
+    outcomeSide: 'draw',
+  });
+  const drawB = cloneRow(homeB, {
+    canonicalSelectionId: 'selection-draw-b',
+    selectionEquivalenceKey: 'event-001:moneyline:draw',
+    outcomeName: 'Draw',
+    outcomeSide: 'draw',
+  });
+  const fieldA = cloneRow(homeA, {
+    canonicalSelectionId: 'selection-field-a',
+    selectionEquivalenceKey: 'event-001:moneyline:field',
+    outcomeName: 'Field',
+    outcomeSide: 'field',
+  });
+  const fieldB = cloneRow(homeB, {
+    canonicalSelectionId: 'selection-field-b',
+    selectionEquivalenceKey: 'event-001:moneyline:field',
+    outcomeName: 'Field',
+    outcomeSide: 'field',
+  });
+
+  const cases: readonly {
+    readonly firstVenueRows: readonly B1MultiVenueMarketRow[];
+    readonly secondVenueRows: readonly B1MultiVenueMarketRow[];
+  }[] = Object.freeze([
+    Object.freeze({ firstVenueRows: Object.freeze([homeA]), secondVenueRows: Object.freeze([homeB]) }),
+    Object.freeze({
+      firstVenueRows: Object.freeze([homeA, awayA, drawA, fieldA]),
+      secondVenueRows: Object.freeze([homeB, awayB, drawB, fieldB]),
+    }),
+  ]);
+
+  for (const outcomeSet of cases) {
+    const result = compareB1MarketOutcomeSetEquivalence(outcomeSet.firstVenueRows, outcomeSet.secondVenueRows);
+
+    assert.equal(result.ok, false);
+    assert.deepEqual(result.blockers, [
+      {
+        code: 'B1_OUTCOME_SET_INCOMPLETE',
+        message: 'B1 market outcome sets must have a supported terminal outcome cardinality before quote comparison.',
+        evidenceRequired: 'Complete supported B1 terminal outcome sets with exactly 2 or 3 outcomes.',
+      },
+    ]);
+  }
+});
+
+test('B1 outcome-set equivalence fails closed on cross-terminal market context drift', () => {
+  const cases: readonly {
+    readonly name: string;
+    readonly overrides: Partial<B1MultiVenueMarketRow>;
+    readonly blockerCode: string;
+  }[] = Object.freeze([
+    Object.freeze({
+      name: 'canonical event',
+      overrides: Object.freeze({ canonicalEventId: 'event-999' }),
+      blockerCode: 'B1_MARKET_EQUIVALENCE_MISSING',
+    }),
+    Object.freeze({
+      name: 'market type',
+      overrides: Object.freeze({ marketType: 'spread' }),
+      blockerCode: 'B1_MARKET_TYPE_MISMATCH',
+    }),
+    Object.freeze({
+      name: 'period',
+      overrides: Object.freeze({ period: 'first-half' }),
+      blockerCode: 'B1_PERIOD_MISMATCH',
+    }),
+    Object.freeze({
+      name: 'line value',
+      overrides: Object.freeze({ lineValue: '1.5' }),
+      blockerCode: 'B1_LINE_VALUE_MISMATCH',
+    }),
+    Object.freeze({
+      name: 'currency',
+      overrides: Object.freeze({ currency: 'USDC' }),
+      blockerCode: 'B1_CURRENCY_MISMATCH',
+    }),
+    Object.freeze({
+      name: 'settlement rule',
+      overrides: Object.freeze({ settlementRuleVersion: 'settlement-rule-v2' }),
+      blockerCode: 'B1_SETTLEMENT_COMPATIBILITY_UNKNOWN',
+    }),
+    Object.freeze({
+      name: 'void rule',
+      overrides: Object.freeze({ voidRuleId: 'void-rule-b' }),
+      blockerCode: 'B1_VOID_RULE_MISMATCH',
+    }),
+  ]);
+
+  for (const drift of cases) {
+    const [homeA, homeB] = fixturePair();
+    const awayA = cloneRow(homeA, {
+      canonicalSelectionId: `selection-away-a-${drift.name}`,
+      selectionEquivalenceKey: 'event-001:moneyline:away',
+      outcomeName: 'Away',
+      outcomeSide: 'away',
+      ...drift.overrides,
+    });
+    const awayB = cloneRow(homeB, {
+      canonicalSelectionId: `selection-away-b-${drift.name}`,
+      selectionEquivalenceKey: 'event-001:moneyline:away',
+      outcomeName: 'Away',
+      outcomeSide: 'away',
+      ...drift.overrides,
+    });
+
+    const result = compareB1MarketOutcomeSetEquivalence([homeA, awayA], [homeB, awayB]);
+
+    if (result.ok) {
+      assert.fail(`Expected ${drift.name} drift to block outcome-set equivalence.`);
+    }
+    const blocker = result.blockers[0];
+    assert.ok(blocker);
+    assert.equal(blocker.code, drift.blockerCode);
+  }
+});
+
 test('B1 outcome-set equivalence fails closed on missing terminal outcome', () => {
   const [homeA, homeB] = fixturePair();
   const awayA = cloneRow(homeA, {

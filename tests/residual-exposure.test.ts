@@ -107,6 +107,30 @@ test('residual exposure analysis rejects missing terminal scenario coverage', ()
   ]);
 });
 
+test('residual exposure analysis rejects whole standard-binary scenario omission', () => {
+  const completion = createCompletionSnapshot([
+    createLeg('market-001:yes', 'leg_filled', 0n, 100n, '2026-07-02T00:17:05.000Z'),
+    createLeg('market-001:no', 'leg_failed', 0n, 0n, '2026-07-02T00:17:05.000Z'),
+  ]);
+
+  const result = analyzeResidualExposure({
+    completion,
+    matrix: createScenarioMatrix([
+      { scenarioId: 'yes_wins', legId: 'market-001:yes', stakeMinor: 100n, payoutMinor: 215n, feeMinor: 5n, costMinor: 0n },
+      { scenarioId: 'yes_wins', legId: 'market-001:no', stakeMinor: 100n, payoutMinor: 0n, feeMinor: 5n, costMinor: 0n },
+    ]),
+  });
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'SCENARIO_CASHFLOW_SCENARIOS_INCOMPLETE',
+      message: 'Scenario cash-flow builder requires every standard-binary terminal scenario.',
+      evidenceRequired: 'Complete YES-wins and NO-wins scenario coverage.',
+    },
+  ]);
+});
+
 test('residual exposure analysis rejects scenario rows for unknown group legs', () => {
   const completion = createCompletionSnapshot([
     createLeg('market-001:yes', 'leg_filled', 0n, 100n, '2026-07-02T00:17:05.000Z'),

@@ -121,6 +121,15 @@ zc_prune_zip_vcs_metadata() {
   esac
 }
 
+zc_publish_zip_no_clobber() {
+  local source="$1" destination="$2"
+  if ! ln "$source" "$destination"; then
+    zc_fail "target zip already exists or could not be published without clobbering: $destination"
+    return 1
+  fi
+  rm -f "$source"
+}
+
 zc_reject_artifacts_symlinks() {
   local symlink_entry
   if [ ! -d artifacts ] || [ -L artifacts ]; then
@@ -277,7 +286,7 @@ zc_main() {
     return 1
   fi
 
-  if ! mv "$tmp_zip" "$zip_path"; then
+  if ! zc_publish_zip_no_clobber "$tmp_zip" "$zip_path"; then
     rm -f "$tmp_zip"
     zc_fail "could not publish zip: $zip_path"
     return 1

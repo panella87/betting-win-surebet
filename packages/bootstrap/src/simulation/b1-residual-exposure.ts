@@ -39,7 +39,7 @@ export function analyzeB1ResidualExposure(
   legs: readonly B1ResidualExposureLeg[],
   maxResidualExposureMinor: bigint,
 ): BoundaryResult<B1ResidualExposureAnalysis> {
-  if (maxResidualExposureMinor < 0n) {
+  if (typeof maxResidualExposureMinor !== 'bigint' || maxResidualExposureMinor < 0n) {
     return blocked(
       'B1_RESIDUAL_EXPOSURE_LIMIT_INVALID',
       'B1 residual exposure simulation requires a non-negative explicit exposure limit.',

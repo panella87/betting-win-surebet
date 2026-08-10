@@ -472,19 +472,7 @@ test('repo-owned soak runtime integration derives lifecycle state from the prepa
   const fixture = createFixture();
   try {
     await createBwsSoakCampaign(createCampaignRequest(fixture));
-    const integrationModule = await import(
-      pathToFileURL(join(REPO_ROOT, 'dist', 'packages', 'bootstrap', 'src', 'operations', 'bws-soak-runtime-integration.js')).href,
-    ) as {
-      createSoakRuntimeIntegration: (context: Readonly<{
-        readonly manifestFile: string;
-        readonly repositoryRoot: string;
-        readonly resultFile: string;
-        readonly stateFile: string;
-      }>) => Promise<{
-        readonly dependencies: Readonly<Record<string, unknown>>;
-        readonly lifecycleRequest: BwsLifecycleRequest;
-      }>;
-    };
+    const integrationModule = await importSoakRuntimeIntegrationModule();
     const integration = await integrationModule.createSoakRuntimeIntegration(
       Object.freeze({
         manifestFile: fixture.manifestFile,
@@ -500,6 +488,92 @@ test('repo-owned soak runtime integration derives lifecycle state from the prepa
     assert.equal(typeof integration.dependencies['verifyDatabaseCleanup'], 'function');
   } finally {
     fixture.dispose();
+  }
+});
+
+test('repo-owned soak runtime integration rejects manifest and evidence path escapes', SEQUENTIAL_TEST_OPTIONS, async () => {
+  const fixture = createFixture();
+  const outsideDirectory = mkdtempSync(join(tmpdir(), 'bws-soak-runtime-integration-outside-'));
+  try {
+    await createBwsSoakCampaign(createCampaignRequest(fixture));
+    const integrationModule = await importSoakRuntimeIntegrationModule();
+    const originalManifest = JSON.parse(readFileSync(join(REPO_ROOT, fixture.manifestFile), 'utf-8')) as Record<string, unknown>;
+
+    const outsideManifestFile = join(outsideDirectory, 'manifest.json');
+    writeFileSync(outsideManifestFile, `${JSON.stringify(originalManifest, null, 2)}\n`, 'utf-8');
+    const linkedManifestFile = join(fixture.tempDirectoryAbsolute, 'linked-manifest.json');
+    symlinkSync(outsideManifestFile, linkedManifestFile, 'file');
+    await assert.rejects(
+      () => integrationModule.createSoakRuntimeIntegration(
+        Object.freeze({
+          manifestFile: relative(REPO_ROOT, linkedManifestFile),
+          repositoryRoot: REPO_ROOT,
+          resultFile: fixture.resultFile,
+          stateFile: fixture.stateFile,
+        }),
+      ),
+      /soak manifestFile .*symlink/u,
+    );
+
+    const linkedRuntimeDirectory = join(fixture.tempDirectoryAbsolute, 'linked-runtime');
+    symlinkSync(outsideDirectory, linkedRuntimeDirectory, 'dir');
+    writeFileSync(
+      join(REPO_ROOT, fixture.manifestFile),
+      `${JSON.stringify({ ...originalManifest, runtimeDirectory: relative(REPO_ROOT, linkedRuntimeDirectory) }, null, 2)}\n`,
+      'utf-8',
+    );
+    await assert.rejects(
+      () => integrationModule.createSoakRuntimeIntegration(
+        Object.freeze({
+          manifestFile: fixture.manifestFile,
+          repositoryRoot: REPO_ROOT,
+          resultFile: fixture.resultFile,
+          stateFile: fixture.stateFile,
+        }),
+      ),
+      /soak manifest runtimeDirectory .*symlink/u,
+    );
+
+    writeFileSync(
+      join(REPO_ROOT, fixture.manifestFile),
+      `${JSON.stringify({ ...originalManifest, runtimeDirectory: outsideDirectory }, null, 2)}\n`,
+      'utf-8',
+    );
+    await assert.rejects(
+      () => integrationModule.createSoakRuntimeIntegration(
+        Object.freeze({
+          manifestFile: fixture.manifestFile,
+          repositoryRoot: REPO_ROOT,
+          resultFile: fixture.resultFile,
+          stateFile: fixture.stateFile,
+        }),
+      ),
+      /soak manifest runtimeDirectory .*absolute/u,
+    );
+
+    const linkedEvidenceDirectory = join(fixture.tempDirectoryAbsolute, 'linked-evidence');
+    symlinkSync(outsideDirectory, linkedEvidenceDirectory, 'dir');
+    writeFileSync(
+      join(REPO_ROOT, fixture.manifestFile),
+      `${JSON.stringify({ ...originalManifest, evidenceDirectory: relative(REPO_ROOT, linkedEvidenceDirectory) }, null, 2)}\n`,
+      'utf-8',
+    );
+    await assert.rejects(
+      () => integrationModule.createSoakRuntimeIntegration(
+        Object.freeze({
+          manifestFile: fixture.manifestFile,
+          repositoryRoot: REPO_ROOT,
+          resultFile: fixture.resultFile,
+          stateFile: fixture.stateFile,
+        }),
+      ),
+      /soak manifest evidenceDirectory .*symlink/u,
+    );
+    assert.equal(existsSync(join(outsideDirectory, 'soak-failure-injections')), false);
+    assert.equal(existsSync(join(outsideDirectory, 'state.json')), false);
+  } finally {
+    fixture.dispose();
+    rmSync(outsideDirectory, { force: true, recursive: true });
   }
 });
 
@@ -1075,6 +1149,32 @@ function sampleFailureSchedule() {
       triggerCycleNumber: 4,
     }),
   ]);
+}
+
+async function importSoakRuntimeIntegrationModule(): Promise<{
+  readonly createSoakRuntimeIntegration: (context: Readonly<{
+    readonly manifestFile: string;
+    readonly repositoryRoot: string;
+    readonly resultFile: string;
+    readonly stateFile: string;
+  }>) => Promise<{
+    readonly dependencies: Readonly<Record<string, unknown>>;
+    readonly lifecycleRequest: BwsLifecycleRequest;
+  }>;
+}> {
+  return await import(
+    pathToFileURL(join(REPO_ROOT, 'dist', 'packages', 'bootstrap', 'src', 'operations', 'bws-soak-runtime-integration.js')).href
+  ) as {
+    readonly createSoakRuntimeIntegration: (context: Readonly<{
+      readonly manifestFile: string;
+      readonly repositoryRoot: string;
+      readonly resultFile: string;
+      readonly stateFile: string;
+    }>) => Promise<{
+      readonly dependencies: Readonly<Record<string, unknown>>;
+      readonly lifecycleRequest: BwsLifecycleRequest;
+    }>;
+  };
 }
 
 function createFixture() {

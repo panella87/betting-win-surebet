@@ -183,6 +183,9 @@ configure_defaults() {
   CODEX_STREAM_LOGS="${CODEX_STREAM_LOGS:-${AUTOMATION_CODEX_STREAM_LOGS:-1}}"
   case "$CODEX_MODEL" in default|cli-default) CODEX_MODEL="" ;; esac
   case "$CODEX_FALLBACK_MODEL" in default|cli-default) CODEX_FALLBACK_MODEL="cli-default" ;; none|off|disabled) CODEX_FALLBACK_MODEL="" ;; esac
+  if [[ -n "$FROM_ARTIFACTS" ]]; then
+    FROM_ARTIFACTS="$(automation_v2_validate_bugfix_from_artifacts "$AUTOMATION_REPO_ROOT" "$FROM_ARTIFACTS")" || return 2
+  fi
   AUTOMATION_CODEX_MODEL="$CODEX_MODEL"
   AUTOMATION_CODEX_FALLBACK_MODEL="$CODEX_FALLBACK_MODEL"
   AUTOMATION_CODEX_SANDBOX="$CODEX_SANDBOX"
@@ -276,8 +279,7 @@ resolve_task_source() {
 
 resolve_artifact_hint() {
   if [[ -n "$FROM_ARTIFACTS" ]]; then
-    [[ -e "$FROM_ARTIFACTS" ]] || automation_die "--from-artifacts path not found: $FROM_ARTIFACTS" 1
-    realpath -e -- "$FROM_ARTIFACTS"
+    printf '%s\n' "$FROM_ARTIFACTS"
     return
   fi
   [[ -d "$AUTOMATION_REPO_ROOT/artifacts" ]] && automation_latest_evidence_hint "$AUTOMATION_REPO_ROOT" || true

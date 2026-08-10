@@ -111,6 +111,13 @@ export function simulateB1FillRejectionTimeout(
   if (!residualExposure.ok) {
     return residualExposure;
   }
+  if (!residualExposure.value.residualExposureWithinLimit) {
+    return blocked(
+      'B1_RESIDUAL_EXPOSURE_LIMIT_EXCEEDED',
+      'B1 fillability simulation requires residual exposure to stay within the configured limit.',
+      'Worst-case B1 residual exposure within maxResidualExposureMinor.',
+    );
+  }
 
   return accepted(Object.freeze({
     simulationKind: 'deterministic_b1_fill_rejection_timeout_simulation',
@@ -150,7 +157,7 @@ function validateB1FillabilityInput(
       'Explicit B1 fillability events.',
     );
   }
-  if (input.maxResidualExposureMinor < 0n) {
+  if (typeof input.maxResidualExposureMinor !== 'bigint' || input.maxResidualExposureMinor < 0n) {
     return blocked(
       'B1_RESIDUAL_EXPOSURE_LIMIT_INVALID',
       'B1 fillability simulation requires a non-negative explicit residual exposure limit.',
@@ -192,6 +199,13 @@ function replayB1FillabilityEvents(
     replayLegsByKey.set(key, { ...leg });
   }
 
+  for (const event of events) {
+    const eventValidation = validateB1FillabilityEvent(event);
+    if (!eventValidation.ok) {
+      return eventValidation;
+    }
+  }
+
   const indexedEvents = events.map((event, index) => ({ event, index }));
   indexedEvents.sort((left, right) => {
     const timestampOrder = left.event.occurredAtUtc.localeCompare(right.event.occurredAtUtc);
@@ -202,11 +216,6 @@ function replayB1FillabilityEvents(
   });
 
   for (const { event } of indexedEvents) {
-    const eventValidation = validateB1FillabilityEvent(event);
-    if (!eventValidation.ok) {
-      return eventValidation;
-    }
-
     const leg = replayLegsByKey.get(buildB1FillabilityLegKey(event.selectionEquivalenceKey, event.venueOrBookmakerId));
     if (leg === undefined) {
       return blocked(
@@ -244,7 +253,7 @@ function validateB1FillabilityEvent(event: B1FillabilityEvent): BoundaryResult<u
       'B1 fillability event venue_or_bookmaker_id.',
     );
   }
-  if (!ISO_TIMESTAMP_REGEX.test(event.occurredAtUtc)) {
+  if (!isIsoTimestamp(event.occurredAtUtc)) {
     return blocked(
       'B1_FILLABILITY_EVENT_TIMESTAMP_INVALID',
       'B1 fillability simulation requires ISO-8601 UTC timestamps for every event.',
@@ -382,6 +391,14 @@ function toB1ResidualExposureLeg(leg: B1FillabilityLegSnapshot): B1ResidualExpos
 
 function isB1FillabilityEventType(value: string): value is B1FillabilityEventType {
   return B1_FILLABILITY_EVENT_TYPES.includes(value as B1FillabilityEventType);
+}
+
+function isIsoTimestamp(value: string): boolean {
+  if (!ISO_TIMESTAMP_REGEX.test(value)) {
+    return false;
+  }
+  const parsed = new Date(value);
+  return !Number.isNaN(parsed.valueOf()) && parsed.toISOString() === value;
 }
 
 function compareB1FillabilityLegs(

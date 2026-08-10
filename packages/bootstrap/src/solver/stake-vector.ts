@@ -48,6 +48,7 @@ export function solveStandardBinaryStakeVector(input: StakeVectorInputContract):
 
   const scenarioIds = [...new Set(input.matrix.rows.map((row) => row.scenarioId))].sort();
   const legIds = [...new Set(input.matrix.rows.map((row) => row.legId))].sort();
+  const legIdSet = new Set(legIds);
   if (scenarioIds.length !== 2 || legIds.length !== 2) {
     return blocked(
       'STAKE_VECTOR_MATRIX_NOT_STANDARD_BINARY',
@@ -69,6 +70,13 @@ export function solveStandardBinaryStakeVector(input: StakeVectorInputContract):
         'One local min/max capacity constraint for each complete-set leg.',
       );
     }
+    if (!legIdSet.has(validatedConstraint.value.legId)) {
+      return blocked(
+        'STAKE_VECTOR_CAPACITY_UNKNOWN_LEG',
+        'Stake-vector solving requires capacity constraints to match matrix legs.',
+        'Capacity constraints keyed only by validated complete-set leg ids.',
+      );
+    }
     capacityByLeg.set(validatedConstraint.value.legId, validatedConstraint.value);
   }
 
@@ -86,6 +94,13 @@ export function solveStandardBinaryStakeVector(input: StakeVectorInputContract):
         'STAKE_VECTOR_ROUNDING_DUPLICATE',
         'Stake-vector solving requires exactly one rounding constraint per leg.',
         'One local stake rounding step for each complete-set leg.',
+      );
+    }
+    if (!legIdSet.has(constraint.legId)) {
+      return blocked(
+        'STAKE_VECTOR_ROUNDING_UNKNOWN_LEG',
+        'Stake-vector solving requires rounding constraints to match matrix legs.',
+        'Rounding constraints keyed only by validated complete-set leg ids.',
       );
     }
     roundingByLeg.set(constraint.legId, Object.freeze({ ...constraint }));
@@ -326,19 +341,7 @@ function extractSolverLegTerms(
     );
   }
 
-  const quantumMinor = lcm(referenceRow.stakeMinor, rounding.stepMinor);
-  const scaleFactor = quantumMinor / referenceRow.stakeMinor;
-  const maxUnits = capacity.maxStakeMinor / quantumMinor;
-  const minUnits = ceilDiv(capacity.minStakeMinor, quantumMinor);
-  if (maxUnits < minUnits) {
-    return blocked(
-      'STAKE_VECTOR_CAPACITY_EXHAUSTED',
-      'Stake-vector solving cannot fit a non-negative local paper stake vector inside the supplied capacity and rounding limits.',
-      'Larger local capacity bounds or a tighter local scenario cash-flow matrix.',
-    );
-  }
-
-  const contributionsByScenarioId = new Map<string, bigint>();
+  const unscaledContributionsByScenarioId = new Map<string, bigint>();
   for (const row of rows) {
     if (
       row.stakeMinor !== referenceRow.stakeMinor ||
@@ -351,19 +354,78 @@ function extractSolverLegTerms(
         'Per-leg local stake, fee, and cost rows that only vary by winning payout.',
       );
     }
-    contributionsByScenarioId.set(row.scenarioId, (row.payoutMinor - row.stakeMinor - row.feeMinor - row.costMinor) * scaleFactor);
+    unscaledContributionsByScenarioId.set(row.scenarioId, row.payoutMinor - row.stakeMinor - row.feeMinor - row.costMinor);
+  }
+
+  const quantumMinor = selectStakeQuantumMinor(
+    referenceRow.stakeMinor,
+    rounding.stepMinor,
+    unscaledContributionsByScenarioId,
+    capacity,
+  );
+  if (!quantumMinor.ok) {
+    return quantumMinor;
+  }
+  const selectedQuantumMinor = quantumMinor.value;
+  const maxUnits = capacity.maxStakeMinor / selectedQuantumMinor;
+  const minUnits = ceilDiv(capacity.minStakeMinor, selectedQuantumMinor);
+  if (maxUnits < minUnits) {
+    return blocked(
+      'STAKE_VECTOR_CAPACITY_EXHAUSTED',
+      'Stake-vector solving cannot fit a non-negative local paper stake vector inside the supplied capacity and rounding limits.',
+      'Larger local capacity bounds or a tighter local scenario cash-flow matrix.',
+    );
+  }
+
+  const contributionsByScenarioId = new Map<string, bigint>();
+  for (const [scenarioId, contributionMinor] of unscaledContributionsByScenarioId.entries()) {
+    const scaledNumerator = contributionMinor * selectedQuantumMinor;
+    if (scaledNumerator % referenceRow.stakeMinor !== 0n) {
+      return blocked(
+        'STAKE_VECTOR_SCALE_INDETERMINATE',
+        'Stake-vector solving requires rounded stake units to produce deterministic integer scenario cash-flow contributions.',
+        'Rounding step and local cash-flow rows that scale to integer minor units.',
+      );
+    }
+    contributionsByScenarioId.set(scenarioId, scaledNumerator / referenceRow.stakeMinor);
   }
 
   return accepted(
     Object.freeze({
       legId,
-      quantumMinor,
+      quantumMinor: selectedQuantumMinor,
       minUnits,
       maxUnits,
       winningScenarioId: winningRow.scenarioId,
       contributionsByScenarioId: contributionsByScenarioId as ReadonlyMap<string, bigint>,
     }),
   );
+}
+
+function selectStakeQuantumMinor(
+  referenceStakeMinor: bigint,
+  stepMinor: bigint,
+  contributionsByScenarioId: ReadonlyMap<string, bigint>,
+  capacity: CapacityConstraint,
+): BoundaryResult<bigint> {
+  const referenceQuantumMinor = lcm(referenceStakeMinor, stepMinor);
+  if (capacityHasMultiple(capacity, referenceQuantumMinor)) {
+    return accepted(referenceQuantumMinor);
+  }
+
+  let multiplier = 1n;
+  for (const contributionMinor of contributionsByScenarioId.values()) {
+    const scaledStepContribution = contributionMinor * stepMinor;
+    const contributionDenominator = referenceStakeMinor / gcd(scaledStepContribution, referenceStakeMinor);
+    multiplier = lcm(multiplier, contributionDenominator);
+  }
+
+  const quantumMinor = stepMinor * multiplier;
+  return accepted(quantumMinor);
+}
+
+function capacityHasMultiple(capacity: CapacityConstraint, quantumMinor: bigint): boolean {
+  return capacity.maxStakeMinor / quantumMinor >= ceilDiv(capacity.minStakeMinor, quantumMinor);
 }
 
 function gcd(left: bigint, right: bigint): bigint {

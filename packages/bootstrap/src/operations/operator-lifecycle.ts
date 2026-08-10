@@ -34,6 +34,7 @@ import {
   createBwsStructuredProcessIdentity,
   registerBwsEvidenceArtifact,
 } from './observability.js';
+import { resolveRepositoryRelativePathForCreation } from './repository-paths.js';
 import {
   getBwsUpstreamConvergenceServiceStatus,
   type BwsUpstreamConvergenceServiceCommandResult,
@@ -853,13 +854,15 @@ function resolveLifecyclePaths(
   repositoryRoot: string,
   runtimeStateDirectory: string,
 ): BwsOperatorLifecyclePaths {
-  const stateDirectory = resolve(repositoryRoot, runtimeStateDirectory);
-  const stdioDirectory = join(
+  const stateDirectory = resolveRepositoryRelativePathForCreation(
     repositoryRoot,
-    'artifacts',
-    'runtime',
-    'bws-operator-lifecycle',
-    'child-stdio',
+    runtimeStateDirectory,
+    'runtimeStateDirectory',
+  );
+  const stdioDirectory = resolveRepositoryRelativePathForCreation(
+    repositoryRoot,
+    'artifacts/runtime/bws-operator-lifecycle/child-stdio',
+    'lifecycle child stdioDirectory',
   );
   return Object.freeze({
     evidenceDirectory: join(stateDirectory, 'evidence'),

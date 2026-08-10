@@ -6,5 +6,5 @@ export * from '../../packages/bootstrap/src/cli/local-paper-batch-report.js';
 
 if (process.argv[1] !== undefined && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   const exitCode = runLocalPaperBatchReportCli(process.argv.slice(2));
-  process.exit(exitCode);
+  process.exitCode = exitCode;
 }

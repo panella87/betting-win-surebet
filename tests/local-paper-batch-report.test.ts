@@ -204,6 +204,74 @@ test('local paper batch report rejects dangling summary output symlinks before w
   } finally { rmSync(bundleDir, { recursive: true, force: true }); rmSync(summaryOutputPath, { force: true }); rmSync(outsideFile, { force: true }); rmSync(dirname(summaryOutputPath), { recursive: true, force: true }); }
 });
 
+test('local paper batch report rejects summary paths that collide with derived report paths', () => {
+  const bundleDir = createBundleDirectory('batch-summary-report-collision', [
+    {
+      fileName: 'solver-ready.json',
+      sourcePath: 'tests/fixtures/local-only-export-bundles/solver-ready-resource-export.json',
+    },
+  ]);
+  const summaryOutputPath = createArtifactOutputPath('batch-summary-report-collision');
+  const collidingSummaryOutputPath = join(dirname(summaryOutputPath), 'solver-ready.report.json');
+
+  try {
+    const result = writeLocalPaperBatchReport({
+      bundleDirectoryPath: relative(REPO_ROOT, bundleDir),
+      outputPath: relative(REPO_ROOT, collidingSummaryOutputPath),
+      repoRoot: REPO_ROOT,
+    });
+
+    assert.equal(result.ok, false);
+    assert.deepEqual(result.blockers, [
+      {
+        code: 'LOCAL_REPORT_BATCH_OUTPUT_COLLISION',
+        message: 'Pinned bundle batch runner found colliding report output paths for bundle files.',
+        evidenceRequired: 'Repo-local pinned bundle file names that produce unique report artifact paths.',
+      },
+    ]);
+    assert.equal(existsSync(collidingSummaryOutputPath), false);
+  } finally {
+    rmSync(bundleDir, { recursive: true, force: true });
+    rmSync(dirname(summaryOutputPath), { recursive: true, force: true });
+  }
+});
+
+test('local paper batch report preflights every derived report path before writing any report', () => {
+  const bundleDir = createBundleDirectory('batch-report-preflight', [
+    {
+      fileName: 'a-solver-ready.json',
+      sourcePath: 'tests/fixtures/local-only-export-bundles/solver-ready-resource-export.json',
+    },
+    {
+      fileName: 'b-blocked.json',
+      sourcePath: 'tests/fixtures/local-only-export-bundles/valid-resource-records-export.json',
+    },
+  ]);
+  const summaryOutputPath = createArtifactOutputPath('batch-report-preflight-summary');
+  const outsideFile = join(tmpdir(), `surebet-batch-derived-report-${Date.now()}.json`);
+  const blockedReportPath = join(dirname(summaryOutputPath), 'b-blocked.report.json');
+  symlinkSync(outsideFile, blockedReportPath, 'file');
+
+  try {
+    const result = writeLocalPaperBatchReport({
+      bundleDirectoryPath: relative(REPO_ROOT, bundleDir),
+      outputPath: relative(REPO_ROOT, summaryOutputPath),
+      repoRoot: REPO_ROOT,
+    });
+
+    assert.equal(result.ok, false);
+    assert.equal(result.blockers[0]?.code, 'LOCAL_REPORT_BATCH_OUTPUT_SYMLINK_FORBIDDEN');
+    assert.equal(existsSync(summaryOutputPath), false);
+    assert.equal(existsSync(join(dirname(summaryOutputPath), 'a-solver-ready.report.json')), false);
+    assert.equal(existsSync(outsideFile), false);
+  } finally {
+    rmSync(bundleDir, { recursive: true, force: true });
+    rmSync(blockedReportPath, { force: true });
+    rmSync(outsideFile, { force: true });
+    rmSync(dirname(summaryOutputPath), { recursive: true, force: true });
+  }
+});
+
 test('local paper batch report fails closed before writing outputs when a pinned bundle intake is invalid', () => {
   const bundleDir = createBundleDirectory('batch-invalid-intake', [
     {

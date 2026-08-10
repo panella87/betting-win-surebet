@@ -331,6 +331,24 @@ function validateSourceArchiveRecord(
     throw new Error('BWS paper runtime handoff source archive record must match the requested archive path.');
   }
   validateArtifactPath(repositoryRoot, archivePath, 'BWS paper runtime handoff source archive record');
+  if (!existsSync(archivePath)) {
+    throw new Error(`BWS paper runtime handoff source archive record must reference an existing archive file: ${archivePath}`);
+  }
+  const archiveStats = lstatSync(archivePath);
+  if (archiveStats.isSymbolicLink() || !archiveStats.isFile()) {
+    throw new Error(`BWS paper runtime handoff source archive record must reference a regular non-symlink file: ${archivePath}`);
+  }
+  if (!Number.isSafeInteger(archive.sizeBytes) || archive.sizeBytes <= 0) {
+    throw new Error('BWS paper runtime handoff source archive record must include a positive byte size.');
+  }
+  if (archiveStats.size !== archive.sizeBytes) {
+    throw new Error('BWS paper runtime handoff source archive record sizeBytes must match the archive file size.');
+  }
+  const archiveBytes = readFileSync(archivePath);
+  const actualSha256 = createHash('sha256').update(archiveBytes).digest('hex');
+  if (archive.sha256 !== actualSha256) {
+    throw new Error('BWS paper runtime handoff source archive record sha256 must match the archive file content.');
+  }
 }
 
 function rejectExistingPathSymlinkSegments(boundaryRoot: string, targetPath: string, label: string): void {

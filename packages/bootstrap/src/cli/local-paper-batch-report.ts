@@ -5,6 +5,7 @@ import {
   readdirSync,
   realpathSync,
   statSync,
+  writeSync,
   writeFileSync,
 } from 'node:fs';
 import { basename, dirname, extname, isAbsolute, relative, resolve } from 'node:path';
@@ -78,7 +79,7 @@ export function writeLocalPaperBatchReport(
   }
 
   const reportOutputDirectory = dirname(summaryOutputPath.value);
-  const writePlan = createReportWritePlan(bundlePaths.value, reportOutputDirectory, repoRoot);
+  const writePlan = createReportWritePlan(bundlePaths.value, reportOutputDirectory, summaryOutputPath.value, repoRoot);
   if (!writePlan.ok) {
     return writePlan;
   }
@@ -169,12 +170,13 @@ export function runLocalPaperBatchReportCli(
     return 1;
   }
 
-  stdout.write(`${result.value.outputPath}\n`);
+  writeText(stdout, `${result.value.outputPath}\n`);
   return 0;
 }
 
 export function printHelp(stream: NodeJS.WriteStream = process.stdout): void {
-  stream.write(
+  writeText(
+    stream,
     [
       'Usage: node dist/src/cli/local-paper-batch-report.js --bundle-dir <repo-local-bundles-dir> [--output <artifacts/batch-summary.json>]',
       '',
@@ -499,18 +501,22 @@ function resolveBatchSummaryOutputPath(
 function createReportWritePlan(
   bundlePaths: readonly string[],
   reportOutputDirectory: string,
+  summaryOutputPath: string,
   repoRoot: string,
 ): BoundaryResult<readonly { readonly bundlePath: string; readonly reportPath: string }[]> {
+  const resolvedRepoRoot = resolve(repoRoot);
+  const resolvedArtifactsRoot = resolve(resolvedRepoRoot, 'artifacts');
+  const resolvedSummaryOutputPath = resolve(summaryOutputPath);
   const reportPathSet = new Set<string>();
   const plan = bundlePaths.map((bundlePath) => {
     const reportPath = resolve(reportOutputDirectory, `${stripExtension(basename(bundlePath))}.report.json`);
-    if (reportPathSet.has(reportPath)) {
+    if (reportPathSet.has(reportPath) || reportPath === resolvedSummaryOutputPath) {
       return null;
     }
     reportPathSet.add(reportPath);
     return Object.freeze({
       bundlePath,
-      reportPath: relative(repoRoot, reportPath),
+      reportPath,
     });
   });
 
@@ -522,7 +528,24 @@ function createReportWritePlan(
     );
   }
 
-  return accepted(Object.freeze(plan.filter((entry): entry is NonNullable<typeof entry> => entry !== null)));
+  for (const entry of plan) {
+    if (entry === null) {
+      continue;
+    }
+    const contained = ensureBatchOutputPathRealpathContained(resolvedRepoRoot, resolvedArtifactsRoot, entry.reportPath);
+    if (!contained.ok) {
+      return contained;
+    }
+  }
+
+  return accepted(Object.freeze(
+    plan
+      .filter((entry): entry is NonNullable<typeof entry> => entry !== null)
+      .map((entry) => Object.freeze({
+        bundlePath: entry.bundlePath,
+        reportPath: relative(repoRoot, entry.reportPath),
+      })),
+  ));
 }
 
 function ensureBatchOutputPathRealpathContained(
@@ -748,8 +771,20 @@ function serializeJson(value: unknown): string {
 
 function writeBlockers(stream: NodeJS.WriteStream, blockers: readonly Blocker[]): void {
   for (const blocker of blockers) {
-    stream.write(`${blocker.code}: ${blocker.message} Evidence required: ${blocker.evidenceRequired}\n`);
+    writeText(stream, `${blocker.code}: ${blocker.message} Evidence required: ${blocker.evidenceRequired}\n`);
   }
+}
+
+function writeText(stream: NodeJS.WriteStream, text: string): void {
+  if (stream === process.stdout && typeof process.stdout.fd === 'number') {
+    writeSync(process.stdout.fd, text);
+    return;
+  }
+  if (stream === process.stderr && typeof process.stderr.fd === 'number') {
+    writeSync(process.stderr.fd, text);
+    return;
+  }
+  stream.write(text);
 }
 
 function isNodeError(error: unknown): error is NodeJS.ErrnoException {
@@ -758,5 +793,5 @@ function isNodeError(error: unknown): error is NodeJS.ErrnoException {
 
 if (process.argv[1] !== undefined && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   const exitCode = runLocalPaperBatchReportCli(process.argv.slice(2));
-  process.exit(exitCode);
+  process.exitCode = exitCode;
 }

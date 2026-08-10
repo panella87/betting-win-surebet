@@ -1,11 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { once } from 'node:events';
 import { createServer } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
 import {
   getManagedBwsOperatorStackStatus,
   runBwsOperatorLifecycleCli,
@@ -15,6 +15,7 @@ import {
   type BwsOperatorLifecycleCommandResult,
   type BwsOperatorLifecycleManagedProcess,
   type BwsOperatorLifecycleManagedProcessDescriptor,
+  type BwsServiceRuntimeConfig,
   type BwsServiceRuntimeEnvironment,
 } from '../packages/bootstrap/src/index.js';
 import { createFixtureBettingWinCheckout, writeFixtureBettingWinUpstreamLock } from './support/betting-win-fixture.js';
@@ -223,6 +224,163 @@ test('operator lifecycle CLI prints help without side effects', async () => {
   assert.match(capture.read(), /full BWS stack lifecycle/);
 });
 
+test('operator lifecycle rejects unsafe runtimeStateDirectory values before state or evidence writes', async () => {
+  const fixture = await createLifecycleFixture();
+  const outsideDirectory = mkdtempSync(join(tmpdir(), 'bws-operator-lifecycle-outside-'));
+  const symlinkPath = join(fixture.repositoryRoot, 'linked-runtime-state');
+  const linkedParentPath = join(fixture.repositoryRoot, 'linked-runtime-parent');
+  try {
+    symlinkSync(outsideDirectory, symlinkPath, 'dir');
+    symlinkSync(outsideDirectory, linkedParentPath, 'dir');
+    const cases = Object.freeze([
+      Object.freeze({
+        expectedOutsidePath: outsideDirectory,
+        runtimeStateDirectory: outsideDirectory,
+      }),
+      Object.freeze({
+        expectedOutsidePath: join(fixture.repositoryRoot, '..', 'outside-state'),
+        runtimeStateDirectory: '../outside-state',
+      }),
+      Object.freeze({
+        expectedOutsidePath: outsideDirectory,
+        runtimeStateDirectory: 'linked-runtime-state',
+      }),
+      Object.freeze({
+        expectedOutsidePath: join(outsideDirectory, 'child'),
+        runtimeStateDirectory: 'linked-runtime-parent/child',
+      }),
+    ]);
+    for (const candidate of cases) {
+      await assert.rejects(
+        () => getManagedBwsOperatorStackStatus({
+          ...fixture.request,
+          runtimeStateDirectory: candidate.runtimeStateDirectory,
+        }),
+        /runtimeStateDirectory .*repository|runtimeStateDirectory .*symlink|runtimeStateDirectory .*absolute/u,
+      );
+      assert.equal(existsSync(join(candidate.expectedOutsidePath, 'state.json')), false);
+      assert.equal(existsSync(join(candidate.expectedOutsidePath, 'evidence')), false);
+    }
+  } finally {
+    await fixture.dispose();
+    rmSync(outsideDirectory, { force: true, recursive: true });
+  }
+});
+
+test('operator lifecycle rejects symlinked child stdio artifact paths before opening outside logs', async () => {
+  const cases = Object.freeze([
+    Object.freeze({
+      name: 'child stdio directory',
+      setup(repositoryRoot: string, outsideDirectory: string) {
+        mkdirSync(join(repositoryRoot, 'artifacts', 'runtime', 'bws-operator-lifecycle'), { recursive: true });
+        symlinkSync(outsideDirectory, join(repositoryRoot, 'artifacts', 'runtime', 'bws-operator-lifecycle', 'child-stdio'), 'dir');
+      },
+    }),
+    Object.freeze({
+      name: 'lifecycle artifact parent',
+      setup(repositoryRoot: string, outsideDirectory: string) {
+        mkdirSync(join(repositoryRoot, 'artifacts', 'runtime'), { recursive: true });
+        symlinkSync(outsideDirectory, join(repositoryRoot, 'artifacts', 'runtime', 'bws-operator-lifecycle'), 'dir');
+      },
+    }),
+  ]);
+
+  for (const candidate of cases) {
+    const fixture = createMinimalLifecyclePathFixture();
+    const outsideDirectory = mkdtempSync(join(tmpdir(), 'bws-operator-lifecycle-stdio-outside-'));
+    try {
+      candidate.setup(fixture.repositoryRoot, outsideDirectory);
+      await assert.rejects(
+        () => startManagedBwsOperatorStack(fixture.request),
+        /lifecycle child stdioDirectory .*symlink/u,
+        candidate.name,
+      );
+      assert.deepEqual(listRecursiveDirectoryEntries(outsideDirectory), []);
+    } finally {
+      fixture.dispose();
+      rmSync(outsideDirectory, { force: true, recursive: true });
+    }
+  }
+});
+
+function createMinimalLifecyclePathFixture(): {
+  readonly dispose: () => void;
+  readonly repositoryRoot: string;
+  readonly request: BwsLifecycleRequest;
+} {
+  const root = mkdtempSync(join(tmpdir(), 'bws-operator-lifecycle-paths-'));
+  const repositoryRoot = join(root, 'betting-win-surebet');
+  mkdirSync(repositoryRoot, { recursive: true });
+  return Object.freeze({
+    dispose() {
+      rmSync(root, { force: true, recursive: true });
+    },
+    repositoryRoot,
+    request: Object.freeze({
+      config: createMinimalRuntimeConfig(),
+      environment: Object.freeze({}),
+      managedProcessDescriptors: Object.freeze([]),
+      repositoryRoot,
+      runtimeStateDirectory: 'runtime-state',
+    }),
+  });
+}
+
+function createMinimalRuntimeConfig(): BwsServiceRuntimeConfig {
+  return Object.freeze({
+    api: Object.freeze({
+      bindHost: '127.0.0.1',
+      port: 4312,
+    }),
+    persistence: Object.freeze({
+      database: 'surebet_test',
+      host: '127.0.0.1',
+      password: 'redacted',
+      port: 5432,
+      user: 'surebet',
+    }),
+    policy: Object.freeze({
+      executionEnabled: false,
+      providerConnections: 'disabled',
+      runtimeMode: 'paper',
+    }),
+    processDefinitions: Object.freeze([]),
+    upstream: Object.freeze({
+      lock: Object.freeze({
+        capabilities: Object.freeze([
+          'exportHistoricalBundle',
+          'getHistoricalQuotes',
+          'getProviderGenerations',
+          'inspectSourceLineage',
+        ]),
+        commitSha: '0123456789abcdef0123456789abcdef01234567',
+        contractAlias: 'betting-win-strategy-export.v1',
+        contractSchema: 'betting-win.strategy-export.v1',
+        gitTreeSha: 'fedcba9876543210fedcba9876543210fedcba98',
+        packageVersion: '0.48.0',
+        packageVersions: Object.freeze({
+          '@betting-win/provider-collection': '0.48.0',
+        }),
+        repository: 'betting-win',
+        repositoryPath: '/tmp/betting-win-fixture',
+        schema: 'betting-win-surebet-upstream-lock-v1',
+        sourceFingerprintAlgorithm: 'sha256_git_ls_tree_r_full_tree_head_v1',
+        sourceView: 'committed_git_head',
+        surebetProfile: 'surebet_standard_binary_v0',
+        trackedTreeListingSha256: '0'.repeat(64),
+        verifiedAt: TEST_TIMESTAMP,
+      }),
+      lockPath: 'config/betting-win.upstream.lock.json',
+      repoPath: '/tmp/betting-win-fixture',
+    }),
+    worker: Object.freeze({
+      leaseDurationMs: 1000,
+      queueName: 'private-paper',
+      workerId: 'worker-test-001',
+    }),
+  });
+}
+
 async function createLifecycleFixture(options: Readonly<{
   readonly apiReadinessStatus?: 'blocked' | 'ready';
 }> = {}): Promise<{
@@ -363,7 +521,7 @@ async function createLifecycleFixture(options: Readonly<{
     environment,
     managedProcessDescriptors,
     repositoryRoot,
-    runtimeStateDirectory,
+    runtimeStateDirectory: relative(repositoryRoot, runtimeStateDirectory),
   });
 
   return Object.freeze({
@@ -587,6 +745,14 @@ function readSignalLog(filePath: string): readonly string[] {
       .split('\n')
       .map((entry) => entry.trim())
       .filter((entry) => entry.length > 0),
+  );
+}
+
+function listRecursiveDirectoryEntries(directory: string): readonly string[] {
+  return Object.freeze(
+    readdirSync(directory, { recursive: true })
+      .map((entry) => String(entry))
+      .sort(),
   );
 }
 

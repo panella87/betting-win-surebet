@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, mkdirSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
 import {
   accepted,
   blocked,
@@ -63,7 +63,7 @@ test('private-paper worker service persists processed and idle passes, then repo
         assert.notEqual(next, undefined);
         return next!;
       },
-      runtimeStateDirectory: fixture.runtimeStateDirectory,
+      runtimeStateDirectory: relative(fixture.repositoryRoot, fixture.runtimeStateDirectory),
       sleep: async () => undefined,
     });
 
@@ -72,7 +72,7 @@ test('private-paper worker service persists processed and idle passes, then repo
       now: () => '2026-07-16T09:00:03.500Z',
       processRuntime: runtime.runtime,
       repositoryRoot: fixture.repositoryRoot,
-      runtimeStateDirectory: fixture.runtimeStateDirectory,
+      runtimeStateDirectory: relative(fixture.repositoryRoot, fixture.runtimeStateDirectory),
     });
     assert.equal(status.command, 'status');
     assert.equal(status.outcome, 'running');
@@ -137,7 +137,7 @@ test('private-paper worker service preserves blocker counters across restart and
         'blocked',
         'A valid bounded worker configuration.',
       ),
-      runtimeStateDirectory: fixture.runtimeStateDirectory,
+      runtimeStateDirectory: relative(fixture.repositoryRoot, fixture.runtimeStateDirectory),
       sleep: async () => undefined,
     });
     assert.equal(firstResult.lastPass?.outcome, 'blocked');
@@ -164,7 +164,7 @@ test('private-paper worker service preserves blocker counters across restart and
       processRuntime: secondRuntime.runtime,
       repositoryRoot: fixture.repositoryRoot,
       runWorkerPass: async () => accepted(createWorkerPassResult(1, { completedCount: 1 })),
-      runtimeStateDirectory: fixture.runtimeStateDirectory,
+      runtimeStateDirectory: relative(fixture.repositoryRoot, fixture.runtimeStateDirectory),
       sleep: async () => undefined,
     });
     assert.equal(secondResult.counters.blockedCount, 1);
@@ -208,7 +208,7 @@ test('private-paper worker service fails closed on overlap and drains cleanly af
             resolve(accepted(createWorkerPassResult(1, { completedCount: 1, drained: request.shouldDrain?.() === true })));
           };
         }),
-      runtimeStateDirectory: fixture.runtimeStateDirectory,
+      runtimeStateDirectory: relative(fixture.repositoryRoot, fixture.runtimeStateDirectory),
       signalRegistrar: signals.registrar,
       sleep: async () => undefined,
     });
@@ -229,7 +229,7 @@ test('private-paper worker service fails closed on overlap and drains cleanly af
           processRuntime: runtime.runtime,
           repositoryRoot: fixture.repositoryRoot,
           runWorkerPass: async () => accepted(createWorkerPassResult(0)),
-          runtimeStateDirectory: fixture.runtimeStateDirectory,
+          runtimeStateDirectory: relative(fixture.repositoryRoot, fixture.runtimeStateDirectory),
           sleep: async () => undefined,
         }),
       /already running/,
@@ -268,6 +268,35 @@ test('private-paper worker service CLI help stays explicit and config rejects mi
     );
   } finally {
     fixture.dispose();
+  }
+});
+
+test('private-paper worker service rejects unsafe runtimeStateDirectory values before writes', () => {
+  const fixture = createServiceFixture();
+  const outsideDirectory = mkdtempSync(join(tmpdir(), 'bws-private-paper-worker-service-outside-'));
+  try {
+    symlinkSync(outsideDirectory, join(fixture.repositoryRoot, 'linked-runtime-state'), 'dir');
+    for (const candidate of [
+      outsideDirectory,
+      '../outside-state',
+      'linked-runtime-state',
+      'linked-runtime-state/child',
+    ]) {
+      assert.throws(
+        () => getBwsPrivatePaperWorkerServiceStatus({
+          config: createWorkerServiceConfig(fixture.repositoryRoot),
+          repositoryRoot: fixture.repositoryRoot,
+          runtimeStateDirectory: candidate,
+        }),
+        /runtimeStateDirectory .*repository|runtimeStateDirectory .*symlink|runtimeStateDirectory .*absolute/u,
+      );
+    }
+    assert.equal(existsSync(join(outsideDirectory, 'state.json')), false);
+    assert.equal(existsSync(join(outsideDirectory, 'evidence')), false);
+    assert.equal(existsSync(join(outsideDirectory, 'child')), false);
+  } finally {
+    fixture.dispose();
+    rmSync(outsideDirectory, { recursive: true, force: true });
   }
 });
 

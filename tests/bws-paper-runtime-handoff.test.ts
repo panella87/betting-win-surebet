@@ -147,6 +147,82 @@ test('paper runtime handoff rejects mismatched injected source archive records',
   }
 });
 
+test('paper runtime handoff rejects injected source archive records when the archive is missing', async () => {
+  const repositoryRoot = mkdtempSync(join(tmpdir(), 'bws-paper-runtime-handoff-missing-'));
+  try {
+    await assert.rejects(
+      () => createBwsPaperRuntimeHandoff({
+        archiveFilePath: 'artifacts/bws-paper-runtime-handoff/source.tar.gz',
+        createSourceHandoffArchive() {
+          return Object.freeze({
+            archiveFile: 'artifacts/bws-paper-runtime-handoff/source.tar.gz',
+            sha256: 'a'.repeat(64),
+            sizeBytes: 12,
+          });
+        },
+        lifecycleStatus: sampleLifecycleStatus(),
+        now: () => TEST_TIMESTAMP,
+        repositoryRoot,
+      }),
+      /must reference an existing archive file/u,
+    );
+  } finally {
+    rmSync(repositoryRoot, { recursive: true, force: true });
+  }
+});
+
+test('paper runtime handoff rejects injected source archive records with mismatched sha256', async () => {
+  const repositoryRoot = mkdtempSync(join(tmpdir(), 'bws-paper-runtime-handoff-sha-'));
+  try {
+    await assert.rejects(
+      () => createBwsPaperRuntimeHandoff({
+        archiveFilePath: 'artifacts/bws-paper-runtime-handoff/source.tar.gz',
+        createSourceHandoffArchive({ outputPath }) {
+          mkdirSync(join(repositoryRoot, 'artifacts', 'bws-paper-runtime-handoff'), { recursive: true });
+          writeFileSync(outputPath, 'runtime handoff archive bytes\n', 'utf-8');
+          return Object.freeze({
+            archiveFile: 'artifacts/bws-paper-runtime-handoff/source.tar.gz',
+            sha256: '0'.repeat(64),
+            sizeBytes: Buffer.byteLength('runtime handoff archive bytes\n'),
+          });
+        },
+        lifecycleStatus: sampleLifecycleStatus(),
+        now: () => TEST_TIMESTAMP,
+        repositoryRoot,
+      }),
+      /sha256 must match/u,
+    );
+  } finally {
+    rmSync(repositoryRoot, { recursive: true, force: true });
+  }
+});
+
+test('paper runtime handoff rejects injected source archive records with mismatched sizeBytes', async () => {
+  const repositoryRoot = mkdtempSync(join(tmpdir(), 'bws-paper-runtime-handoff-size-'));
+  try {
+    await assert.rejects(
+      () => createBwsPaperRuntimeHandoff({
+        archiveFilePath: 'artifacts/bws-paper-runtime-handoff/source.tar.gz',
+        createSourceHandoffArchive({ outputPath }) {
+          mkdirSync(join(repositoryRoot, 'artifacts', 'bws-paper-runtime-handoff'), { recursive: true });
+          writeFileSync(outputPath, 'runtime handoff archive bytes\n', 'utf-8');
+          return Object.freeze({
+            archiveFile: 'artifacts/bws-paper-runtime-handoff/source.tar.gz',
+            sha256: createHash('sha256').update('runtime handoff archive bytes\n').digest('hex'),
+            sizeBytes: 1,
+          });
+        },
+        lifecycleStatus: sampleLifecycleStatus(),
+        now: () => TEST_TIMESTAMP,
+        repositoryRoot,
+      }),
+      /sizeBytes must match/u,
+    );
+  } finally {
+    rmSync(repositoryRoot, { recursive: true, force: true });
+  }
+});
+
 test('paper runtime handoff CLI prints explicit help', async () => {
   const capture = createCaptureStream();
   const exitCode = await runBwsPaperRuntimeHandoffCli(['--help'], process.cwd(), capture.stream);

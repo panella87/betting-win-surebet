@@ -55,10 +55,10 @@ test('B1 fillability simulation accepts only fully filled offline stake vectors 
   assert.equal(result.value.liveReadiness, 'not_authorized_bws_900_parked');
 });
 
-test('B1 rejection and timeout simulation reports incomplete legs and worst-case residual exposure without unwind', () => {
+test('B1 rejection and timeout simulation reports incomplete legs and in-limit residual exposure without unwind', () => {
   const result = simulateB1FillRejectionTimeout({
     stakeVector: solvedStakeVector(),
-    maxResidualExposureMinor: 4_000n,
+    maxResidualExposureMinor: 5_000n,
     events: Object.freeze([
       Object.freeze({
         selectionEquivalenceKey: 'event-001:moneyline:away',
@@ -126,9 +126,46 @@ test('B1 rejection and timeout simulation reports incomplete legs and worst-case
     ],
     worstCaseNetMinor: -5_000n,
     worstCaseScenarioId: 'b1_terminal:event-001:moneyline:home',
-    maxResidualExposureMinor: 4_000n,
-    residualExposureWithinLimit: false,
+    maxResidualExposureMinor: 5_000n,
+    residualExposureWithinLimit: true,
   });
+});
+
+test('B1 fillability simulation fails closed when residual exposure exceeds the configured limit', () => {
+  const result = simulateB1FillRejectionTimeout({
+    stakeVector: solvedStakeVector(),
+    maxResidualExposureMinor: 4_000n,
+    events: Object.freeze([
+      Object.freeze({
+        selectionEquivalenceKey: 'event-001:moneyline:away',
+        venueOrBookmakerId: 'venue-b',
+        type: 'fill',
+        occurredAtUtc: '2026-07-01T00:00:03.000Z',
+        stakeMinor: 5_000n,
+      }),
+      Object.freeze({
+        selectionEquivalenceKey: 'event-001:moneyline:away',
+        venueOrBookmakerId: 'venue-b',
+        type: 'reject',
+        occurredAtUtc: '2026-07-01T00:00:04.000Z',
+      }),
+      Object.freeze({
+        selectionEquivalenceKey: 'event-001:moneyline:home',
+        venueOrBookmakerId: 'venue-a',
+        type: 'timeout',
+        occurredAtUtc: '2026-07-01T00:00:05.000Z',
+      }),
+    ]),
+  });
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'B1_RESIDUAL_EXPOSURE_LIMIT_EXCEEDED',
+      message: 'B1 fillability simulation requires residual exposure to stay within the configured limit.',
+      evidenceRequired: 'Worst-case B1 residual exposure within maxResidualExposureMinor.',
+    },
+  ]);
 });
 
 test('B1 fillability replay is deterministic after restart regardless of event order', () => {
@@ -168,6 +205,68 @@ test('B1 fillability replay is deterministic after restart regardless of event o
   assert.equal(original.ok, true);
   assert.equal(replayed.ok, true);
   assert.deepEqual(replayed.value, original.value);
+});
+
+test('B1 fillability simulation rejects calendar-invalid event timestamps before replay mutation', () => {
+  const result = simulateB1FillRejectionTimeout({
+    stakeVector: solvedStakeVector(),
+    maxResidualExposureMinor: 10_000n,
+    events: Object.freeze([
+      Object.freeze({
+        selectionEquivalenceKey: 'event-001:moneyline:away',
+        venueOrBookmakerId: 'venue-b',
+        type: 'fill',
+        occurredAtUtc: '2026-07-01T00:00:03.000Z',
+        stakeMinor: 10_001n,
+      }),
+      Object.freeze({
+        selectionEquivalenceKey: 'event-001:moneyline:home',
+        venueOrBookmakerId: 'venue-a',
+        type: 'timeout',
+        occurredAtUtc: '2026-02-31T00:00:00.000Z',
+      }),
+    ]),
+  });
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'B1_FILLABILITY_EVENT_TIMESTAMP_INVALID',
+      message: 'B1 fillability simulation requires ISO-8601 UTC timestamps for every event.',
+      evidenceRequired: 'ISO-8601 UTC B1 fillability event timestamps.',
+    },
+  ]);
+});
+
+test('B1 fillability simulation requires an explicit bigint residual exposure limit', () => {
+  const result = simulateB1FillRejectionTimeout({
+    stakeVector: solvedStakeVector(),
+    events: Object.freeze([
+      Object.freeze({
+        selectionEquivalenceKey: 'event-001:moneyline:away',
+        venueOrBookmakerId: 'venue-b',
+        type: 'fill',
+        occurredAtUtc: '2026-07-01T00:00:03.000Z',
+        stakeMinor: 10_000n,
+      }),
+      Object.freeze({
+        selectionEquivalenceKey: 'event-001:moneyline:home',
+        venueOrBookmakerId: 'venue-a',
+        type: 'fill',
+        occurredAtUtc: '2026-07-01T00:00:04.000Z',
+        stakeMinor: 10_000n,
+      }),
+    ]),
+  } as never);
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'B1_RESIDUAL_EXPOSURE_LIMIT_INVALID',
+      message: 'B1 fillability simulation requires a non-negative explicit residual exposure limit.',
+      evidenceRequired: 'Non-negative B1 residual exposure limit in integer minor units.',
+    },
+  ]);
 });
 
 test('B1 fillability simulation rejects rollback and unwind events explicitly', () => {

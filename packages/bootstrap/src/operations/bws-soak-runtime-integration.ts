@@ -7,6 +7,10 @@ import {
   stopManagedBwsOperatorStack,
   type BwsLifecycleRequest,
 } from './operator-lifecycle.js';
+import {
+  resolveExistingRepositoryRelativeFilePath,
+  resolveRepositoryRelativePathForCreation,
+} from './repository-paths.js';
 
 const SOAK_CAMPAIGN_SCHEMA = 'bws.soak_campaign.v1' as const;
 
@@ -104,11 +108,15 @@ export async function createSoakRuntimeIntegration(
   const repositoryRoot = resolve(context.repositoryRoot);
   const manifestFile = requireContextPath(context.manifestFile, 'manifestFile');
   const manifest = readSoakManifest(repositoryRoot, manifestFile);
+  resolveRepositoryRelativePathForCreation(repositoryRoot, manifest.runtimeDirectory, 'soak manifest runtimeDirectory');
   const lifecycleRequest: BwsLifecycleRequest = Object.freeze({
     repositoryRoot,
     runtimeStateDirectory: manifest.runtimeDirectory,
   });
-  const markerDirectory = join(resolveRepositoryPath(repositoryRoot, manifest.evidenceDirectory), 'soak-failure-injections');
+  const markerDirectory = join(
+    resolveRepositoryRelativePathForCreation(repositoryRoot, manifest.evidenceDirectory, 'soak manifest evidenceDirectory'),
+    'soak-failure-injections',
+  );
 
   return Object.freeze({
     dependencies: Object.freeze({
@@ -234,7 +242,7 @@ function executeArtifactMarkerFailure(input: Readonly<{
 }
 
 function readSoakManifest(repositoryRoot: string, manifestFile: string): SoakManifestShape {
-  const resolvedManifestFile = resolveRepositoryPath(repositoryRoot, manifestFile);
+  const resolvedManifestFile = resolveExistingRepositoryRelativeFilePath(repositoryRoot, manifestFile, 'soak manifestFile');
   const parsed = JSON.parse(readFileSync(resolvedManifestFile, 'utf-8')) as {
     checkpoints?: unknown;
     campaignId?: unknown;
@@ -287,15 +295,6 @@ function requireContextPath(value: string | undefined, label: string): string {
     throw new Error(`Managed-runtime soak integration requires ${label}.`);
   }
   return value.trim();
-}
-
-function resolveRepositoryPath(repositoryRoot: string, inputPath: string): string {
-  const resolvedPath = resolve(repositoryRoot, inputPath);
-  const relativePath = relative(repositoryRoot, resolvedPath);
-  if (relativePath.length === 0 || relativePath === '.' || relativePath.startsWith('..')) {
-    throw new Error(`Resolved repository path escapes the repository root: ${inputPath}`);
-  }
-  return resolvedPath;
 }
 
 function requireRecord(value: unknown, label: string): Record<string, string> {

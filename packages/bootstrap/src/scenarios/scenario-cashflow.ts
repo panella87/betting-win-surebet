@@ -21,6 +21,10 @@ export function validateScenarioCashflowMatrix(rows: readonly ScenarioCashflowRo
       return blocked('SCENARIO_CASHFLOW_NEGATIVE_VALUE', 'Cash-flow values must be non-negative fixed-point amounts.', 'Non-negative fixed-point rows.');
     }
   }
+  const scenarioCoverage = validateScenarioCoverage([...new Set(rows.map((row) => row.scenarioId))].sort());
+  if (!scenarioCoverage.ok) {
+    return scenarioCoverage;
+  }
   return accepted({ rows: Object.freeze([...rows]) });
 }
 
@@ -113,8 +117,9 @@ export function buildStandardBinaryScenarioCashflowMatrix(
 }
 
 function validateScenarioCoverage(scenarioIds: readonly string[]): BoundaryResult<readonly string[]> {
-  const expectedScenarios = standardBinaryTerminalScenarios().map((scenario) => scenario.scenarioId);
-  if (scenarioIds.length !== expectedScenarios.length) {
+  const expectedScenarios = standardBinaryTerminalScenarios().map((scenario) => scenario.scenarioId).sort();
+  const actualScenarios = [...scenarioIds].sort();
+  if (actualScenarios.length !== expectedScenarios.length) {
     return blocked(
       'SCENARIO_CASHFLOW_SCENARIOS_INCOMPLETE',
       'Scenario cash-flow builder requires every standard-binary terminal scenario.',
@@ -123,7 +128,7 @@ function validateScenarioCoverage(scenarioIds: readonly string[]): BoundaryResul
   }
 
   for (let index = 0; index < expectedScenarios.length; index += 1) {
-    if (scenarioIds[index] !== expectedScenarios[index]) {
+    if (actualScenarios[index] !== expectedScenarios[index]) {
       return blocked(
         'SCENARIO_CASHFLOW_SCENARIOS_INCOMPLETE',
         'Scenario cash-flow builder requires every standard-binary terminal scenario.',
@@ -132,7 +137,7 @@ function validateScenarioCoverage(scenarioIds: readonly string[]): BoundaryResul
     }
   }
 
-  return accepted(Object.freeze([...scenarioIds]));
+  return accepted(Object.freeze([...actualScenarios]));
 }
 
 function isOutcomeSide(value: string): value is OutcomeSide {

@@ -32,6 +32,7 @@ import {
   createBwsStructuredProcessIdentity,
   registerBwsEvidenceArtifact,
 } from './observability.js';
+import { resolveRepositoryRelativePathForCreation } from './repository-paths.js';
 
 const BWS_UPSTREAM_CONVERGENCE_SERVICE_STATE_SCHEMA = 'bws.upstream_convergence_service_state.v1';
 const BWS_UPSTREAM_CONVERGENCE_SERVICE_EVIDENCE_SCHEMA = 'bws.upstream_convergence_service_evidence.v1';
@@ -873,7 +874,11 @@ function resolvePaths(
   repositoryRoot: string,
   runtimeStateDirectory: string,
 ): BwsUpstreamConvergenceServicePaths {
-  const stateDirectory = resolve(repositoryRoot, runtimeStateDirectory);
+  const stateDirectory = resolveRepositoryRelativePathForCreation(
+    repositoryRoot,
+    runtimeStateDirectory,
+    'runtimeStateDirectory',
+  );
   return Object.freeze({
     evidenceDirectory: join(stateDirectory, 'evidence'),
     repositoryRoot,

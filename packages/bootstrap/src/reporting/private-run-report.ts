@@ -3,6 +3,7 @@ import type { ConsumedSettlementReplay } from '../simulation/settlement-replay.j
 import type { PrivateCandidateReport } from './opportunity-report.js';
 
 const MANIFEST_HASH_PATTERN = /^[0-9a-f]{64}$/;
+const ISO_8601_UTC_MILLISECONDS = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 const FORBIDDEN_REPORT_TEXT_PATTERN = /(profit|profitable|execution|ready|signal)/i;
 
 export interface PrivateRunSettlementSummary {
@@ -91,6 +92,13 @@ export function createPrivateRunReport(
 }
 
 export function validatePrivateRunReportArtifact(report: PrivateRunReport): BoundaryResult<undefined> {
+  if (!isRecord(report)) {
+    return blocked(
+      'PRIVATE_RUN_REPORT_SHAPE_INVALID',
+      'Private paper-mode artifacts must be serialized objects.',
+      'Serialized private paper-mode run artifact object.',
+    );
+  }
   if (report.reportKind !== 'private_paper_run') {
     return blocked(
       'PRIVATE_RUN_REPORT_KIND_INVALID',
@@ -105,14 +113,14 @@ export function validatePrivateRunReportArtifact(report: PrivateRunReport): Boun
       'Serialized private paper-mode run artifact with the repo first-lane id.',
     );
   }
-  if (report.runId.trim().length === 0) {
+  if (!isNonEmptyString(report.runId)) {
     return blocked(
       'PRIVATE_RUN_REPORT_RUN_ID_MISSING',
       'Private paper-mode artifacts must include a non-empty run id.',
       'Serialized private paper-mode run artifact with a non-empty run id.',
     );
   }
-  if (!MANIFEST_HASH_PATTERN.test(report.sourceManifestHash)) {
+  if (typeof report.sourceManifestHash !== 'string' || !MANIFEST_HASH_PATTERN.test(report.sourceManifestHash)) {
     return blocked(
       'PRIVATE_RUN_REPORT_SOURCE_MANIFEST_HASH_INVALID',
       'Private paper-mode artifacts must include a 64-character lower-case source manifest hash.',
@@ -133,12 +141,21 @@ export function validatePrivateRunReportArtifact(report: PrivateRunReport): Boun
       'Serialized private paper-mode run artifact with status=fixture_results_only.',
     );
   }
-  if (report.candidateReports.length === 0) {
+  if (!Array.isArray(report.candidateReports) || report.candidateReports.length === 0) {
     return blocked(
       'PRIVATE_RUN_REPORT_CANDIDATES_MISSING',
       'Private paper-mode artifacts must include at least one candidate report.',
       'Serialized private paper-mode run artifact with candidate reports.',
     );
+  }
+
+  const candidateIds = new Set<string>();
+  for (const candidateReport of report.candidateReports) {
+    const candidateValidation = validatePrivateCandidateReportArtifact(candidateReport, candidateIds);
+    if (!candidateValidation.ok) {
+      return candidateValidation;
+    }
+    candidateIds.add(candidateReport.candidateId);
   }
 
   const computedBlockerCount = report.candidateReports.reduce(
@@ -154,19 +171,39 @@ export function validatePrivateRunReportArtifact(report: PrivateRunReport): Boun
   }
 
   const settlementSummaries = report.settlementSummaries;
+  if (settlementSummaries !== undefined) {
+    const settlementValidation = validatePrivateRunSettlementSummaries(settlementSummaries, candidateIds);
+    if (!settlementValidation.ok) {
+      return settlementValidation;
+    }
+    if (settlementSummaries.length === 1) {
+      if (report.settlement === undefined) {
+        return blocked(
+          'PRIVATE_RUN_REPORT_SETTLEMENT_SUMMARY_MISMATCH',
+          'Private paper-mode artifacts must keep legacy settlement aligned with single settlementSummaries entries.',
+          'Serialized private paper-mode run artifact with aligned single-candidate settlement fields.',
+        );
+      }
+      const singleSettlementSummary = settlementSummaries[0];
+      if (singleSettlementSummary === undefined || !privateRunSettlementSummariesEqual(singleSettlementSummary, report.settlement)) {
+        return blocked(
+          'PRIVATE_RUN_REPORT_SETTLEMENT_SUMMARY_MISMATCH',
+          'Private paper-mode artifacts must keep settlement and settlementSummaries aligned for single-candidate runs.',
+          'Serialized private paper-mode run artifact with aligned single-candidate settlement fields.',
+        );
+      }
+    }
+  }
   if (report.settlement !== undefined) {
+    const singleSettlementValidation = validatePrivateRunSettlementSummary(report.settlement, candidateIds);
+    if (!singleSettlementValidation.ok) {
+      return singleSettlementValidation;
+    }
     if (settlementSummaries === undefined || settlementSummaries.length !== 1) {
       return blocked(
         'PRIVATE_RUN_REPORT_SETTLEMENT_SUMMARIES_INVALID',
         'Private paper-mode artifacts with a single settlement summary must also expose settlementSummaries.',
         'Serialized private paper-mode run artifact with settlement summaries when settlement context is present.',
-      );
-    }
-    if (settlementSummaries[0]?.candidateId !== report.settlement.candidateId) {
-      return blocked(
-        'PRIVATE_RUN_REPORT_SETTLEMENT_SUMMARY_MISMATCH',
-        'Private paper-mode artifacts must keep settlement and settlementSummaries aligned for single-candidate runs.',
-        'Serialized private paper-mode run artifact with aligned single-candidate settlement fields.',
       );
     }
   }
@@ -182,6 +219,280 @@ export function validatePrivateRunReportArtifact(report: PrivateRunReport): Boun
   }
 
   return accepted(undefined);
+}
+
+function validatePrivateCandidateReportArtifact(
+  candidateReport: PrivateCandidateReport,
+  existingCandidateIds: ReadonlySet<string>,
+): BoundaryResult<undefined> {
+  if (!isRecord(candidateReport)) {
+    return privateCandidateShapeBlocker();
+  }
+  if (candidateReport.reportKind !== 'private_paper_blocked' && candidateReport.reportKind !== 'private_paper_opportunity') {
+    return privateCandidateShapeBlocker();
+  }
+  if (candidateReport.laneId !== FIRST_LANE_SPEC.laneId) {
+    return blocked(
+      'PRIVATE_RUN_REPORT_CANDIDATE_LANE_ID_INVALID',
+      'Private paper-mode candidate reports must include the first-lane identifier.',
+      'Serialized private paper-mode candidate report with the repo first-lane id.',
+    );
+  }
+  if (!isNonEmptyString(candidateReport.candidateId)) {
+    return blocked(
+      'PRIVATE_RUN_REPORT_CANDIDATE_ID_INVALID',
+      'Private paper-mode candidate reports must include non-empty candidate ids.',
+      'Serialized private paper-mode candidate report with a non-empty candidate id.',
+    );
+  }
+  if (existingCandidateIds.has(candidateReport.candidateId)) {
+    return blocked(
+      'PRIVATE_RUN_REPORT_CANDIDATE_ID_DUPLICATE',
+      'Private paper-mode candidate reports must not contain duplicate candidate ids.',
+      'Serialized private paper-mode candidate reports with unique candidate ids.',
+    );
+  }
+  if (candidateReport.accepted !== false) {
+    return blocked(
+      'PRIVATE_RUN_REPORT_CANDIDATE_ACCEPTED_FLAG_INVALID',
+      'Private paper-mode candidate reports must remain accepted=false.',
+      'Serialized private paper-mode candidate report with accepted=false.',
+    );
+  }
+  if (!Array.isArray(candidateReport.blockers)) {
+    return privateCandidateShapeBlocker();
+  }
+  for (const blocker of candidateReport.blockers) {
+    if (!isBlocker(blocker)) {
+      return privateCandidateShapeBlocker();
+    }
+  }
+
+  if (candidateReport.reportKind === 'private_paper_blocked') {
+    if (candidateReport.status !== 'blocked' || candidateReport.blockers.length === 0) {
+      return privateCandidateShapeBlocker();
+    }
+    if (Object.hasOwn(candidateReport, 'stakeVector') || Object.hasOwn(candidateReport, 'residualExposure')) {
+      return privateCandidateShapeBlocker();
+    }
+    return accepted(undefined);
+  }
+
+  if (candidateReport.status !== 'fixture_candidate_only' || candidateReport.blockers.length !== 0) {
+    return privateCandidateShapeBlocker();
+  }
+  const stakeVectorValidation = validateStakeVectorSummary(candidateReport.stakeVector);
+  if (!stakeVectorValidation.ok) {
+    return stakeVectorValidation;
+  }
+  if (candidateReport.residualExposure !== undefined) {
+    const residualExposureValidation = validateResidualExposureSummary(candidateReport.residualExposure);
+    if (!residualExposureValidation.ok) {
+      return residualExposureValidation;
+    }
+  }
+
+  return accepted(undefined);
+}
+
+function validateStakeVectorSummary(value: unknown): BoundaryResult<undefined> {
+  if (!isRecord(value) || !Array.isArray(value.stakes) || value.stakes.length === 0) {
+    return privateCandidateShapeBlocker();
+  }
+  if (!Array.isArray(value.scenarioNets) || value.scenarioNets.length === 0 || !isIntegerLike(value.worstCaseNetMinor)) {
+    return privateCandidateShapeBlocker();
+  }
+  for (const stake of value.stakes) {
+    if (
+      !isRecord(stake)
+      || !isNonEmptyString(stake.legId)
+      || !isIntegerLike(stake.unitCount)
+      || !isIntegerLike(stake.stakeQuantumMinor)
+      || !isIntegerLike(stake.stakeMinor)
+    ) {
+      return privateCandidateShapeBlocker();
+    }
+  }
+  for (const scenarioNet of value.scenarioNets) {
+    if (!isScenarioNetSummary(scenarioNet)) {
+      return privateCandidateShapeBlocker();
+    }
+  }
+
+  return accepted(undefined);
+}
+
+function validateResidualExposureSummary(value: unknown): BoundaryResult<undefined> {
+  if (
+    !isRecord(value)
+    || value.groupState !== 'group_incomplete'
+    || !Array.isArray(value.filledLegIds)
+    || !Array.isArray(value.excludedLegIds)
+    || !Array.isArray(value.scenarioNets)
+    || value.scenarioNets.length === 0
+    || !isIntegerLike(value.worstCaseNetMinor)
+  ) {
+    return privateCandidateShapeBlocker();
+  }
+  if (!value.filledLegIds.every(isNonEmptyString) || !value.excludedLegIds.every(isNonEmptyString)) {
+    return privateCandidateShapeBlocker();
+  }
+  if (!value.scenarioNets.every(isScenarioNetSummary)) {
+    return privateCandidateShapeBlocker();
+  }
+
+  return accepted(undefined);
+}
+
+function validatePrivateRunSettlementSummaries(
+  settlementSummaries: readonly PrivateRunSettlementSummary[],
+  candidateIds: ReadonlySet<string>,
+): BoundaryResult<undefined> {
+  if (!Array.isArray(settlementSummaries) || settlementSummaries.length === 0) {
+    return blocked(
+      'PRIVATE_RUN_REPORT_SETTLEMENT_SUMMARIES_INVALID',
+      'Private paper-mode artifacts must keep settlementSummaries as non-empty arrays when present.',
+      'Serialized private paper-mode run artifact with settlement summaries when settlement context is present.',
+    );
+  }
+  const settlementCandidateIds = new Set<string>();
+  for (const settlementSummary of settlementSummaries) {
+    const settlementValidation = validatePrivateRunSettlementSummary(settlementSummary, candidateIds);
+    if (!settlementValidation.ok) {
+      return settlementValidation;
+    }
+    if (settlementCandidateIds.has(settlementSummary.candidateId)) {
+      return blocked(
+        'PRIVATE_RUN_REPORT_SETTLEMENT_SUMMARY_DUPLICATE',
+        'Private paper-mode settlement summaries must not contain duplicate candidate ids.',
+        'Serialized private paper-mode settlement summaries with unique candidate ids.',
+      );
+    }
+    settlementCandidateIds.add(settlementSummary.candidateId);
+  }
+
+  return accepted(undefined);
+}
+
+function validatePrivateRunSettlementSummary(
+  settlementSummary: PrivateRunSettlementSummary,
+  candidateIds: ReadonlySet<string>,
+): BoundaryResult<undefined> {
+  if (!isRecord(settlementSummary)) {
+    return privateSettlementShapeBlocker();
+  }
+  if (!isNonEmptyString(settlementSummary.candidateId) || !candidateIds.has(settlementSummary.candidateId)) {
+    return blocked(
+      'PRIVATE_RUN_REPORT_SETTLEMENT_CANDIDATE_INVALID',
+      'Private paper-mode settlement summaries must reference known non-empty candidate ids.',
+      'Serialized private paper-mode settlement summaries keyed to candidateReports.',
+    );
+  }
+  if (settlementSummary.canonicalMarketId !== settlementSummary.candidateId) {
+    return blocked(
+      'PRIVATE_RUN_REPORT_SETTLEMENT_CANDIDATE_MISMATCH',
+      'Private paper-mode settlement summaries must keep candidateId aligned to canonicalMarketId.',
+      'Serialized private paper-mode settlement summaries with aligned candidate and canonical market ids.',
+    );
+  }
+  if (
+    !isNonEmptyString(settlementSummary.ruleProfileId)
+    || !isNonEmptyString(settlementSummary.resultSourceId)
+    || !isNonEmptyString(settlementSummary.finalityPolicyId)
+    || !isNonEmptyString(settlementSummary.finalityAuthorityId)
+    || !isNonEmptyString(settlementSummary.scenarioId)
+  ) {
+    return privateSettlementShapeBlocker();
+  }
+  if (!MANIFEST_HASH_PATTERN.test(settlementSummary.replayManifestHash)) {
+    return blocked(
+      'PRIVATE_RUN_REPORT_SETTLEMENT_REPLAY_HASH_INVALID',
+      'Private paper-mode settlement summaries must include 64-character lower-case replay manifest hashes.',
+      'Serialized private paper-mode settlement summaries with replay manifest hashes.',
+    );
+  }
+  if (!isIsoUtcTimestamp(settlementSummary.replayAcceptedAt)) {
+    return blocked(
+      'PRIVATE_RUN_REPORT_SETTLEMENT_TIMESTAMP_INVALID',
+      'Private paper-mode settlement summaries must include ISO-8601 UTC replay acceptance timestamps.',
+      'Serialized private paper-mode settlement summaries with ISO-8601 UTC replayAcceptedAt values.',
+    );
+  }
+  if (settlementSummary.finalOutcome !== 'yes' && settlementSummary.finalOutcome !== 'no') {
+    return blocked(
+      'PRIVATE_RUN_REPORT_SETTLEMENT_OUTCOME_INVALID',
+      'Private paper-mode settlement summaries must include a supported final outcome.',
+      'Serialized private paper-mode settlement summaries with finalOutcome yes or no.',
+    );
+  }
+
+  return accepted(undefined);
+}
+
+function privateRunSettlementSummariesEqual(
+  left: PrivateRunSettlementSummary,
+  right: PrivateRunSettlementSummary,
+): boolean {
+  return left.candidateId === right.candidateId
+    && left.canonicalMarketId === right.canonicalMarketId
+    && left.ruleProfileId === right.ruleProfileId
+    && left.resultSourceId === right.resultSourceId
+    && left.finalityPolicyId === right.finalityPolicyId
+    && left.finalityAuthorityId === right.finalityAuthorityId
+    && left.replayManifestHash === right.replayManifestHash
+    && left.replayAcceptedAt === right.replayAcceptedAt
+    && left.scenarioId === right.scenarioId
+    && left.finalOutcome === right.finalOutcome;
+}
+
+function isScenarioNetSummary(value: unknown): boolean {
+  return isRecord(value) && isNonEmptyString(value.scenarioId) && isIntegerLike(value.netMinor);
+}
+
+function isBlocker(value: unknown): value is { readonly code: string; readonly message: string; readonly evidenceRequired: string } {
+  return isRecord(value)
+    && isNonEmptyString(value.code)
+    && isNonEmptyString(value.message)
+    && isNonEmptyString(value.evidenceRequired);
+}
+
+function isIntegerLike(value: unknown): boolean {
+  if (typeof value === 'bigint') {
+    return true;
+  }
+  return typeof value === 'string' && /^-?\d+$/.test(value);
+}
+
+function isIsoUtcTimestamp(value: unknown): boolean {
+  if (typeof value !== 'string' || !ISO_8601_UTC_MILLISECONDS.test(value)) {
+    return false;
+  }
+  const parsed = Date.parse(value);
+  return !Number.isNaN(parsed) && new Date(parsed).toISOString() === value;
+}
+
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === 'string' && value.trim().length > 0;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function privateCandidateShapeBlocker(): BoundaryResult<undefined> {
+  return blocked(
+    'PRIVATE_RUN_REPORT_CANDIDATE_SHAPE_INVALID',
+    'Private paper-mode artifacts must keep candidate reports in the supported blocked or opportunity shape.',
+    'Serialized private paper-mode candidate reports with lane/status/blocker and stake-vector fields aligned to reportKind.',
+  );
+}
+
+function privateSettlementShapeBlocker(): BoundaryResult<undefined> {
+  return blocked(
+    'PRIVATE_RUN_REPORT_SETTLEMENT_SUMMARY_SHAPE_INVALID',
+    'Private paper-mode settlement summaries must include complete non-empty replay metadata.',
+    'Serialized private paper-mode settlement summaries with complete replay metadata fields.',
+  );
 }
 
 function toSettlementSummaries(

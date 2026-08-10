@@ -206,6 +206,13 @@ interface ReleasePackageJson {
   readonly version?: unknown;
 }
 
+interface ArchiveFileEntry {
+  readonly executable: boolean;
+  readonly name: string;
+  readonly sha256: string;
+  readonly size: number;
+}
+
 interface CockpitBuildMetadata {
   readonly apiBaseUrl: string;
   readonly dataMode: 'api';
@@ -798,16 +805,46 @@ function verifyArchiveIfPresent(
   if (actualArchiveSha256 !== expectedArchiveSha256) {
     throw new Error('Release archive checksum does not match the published .sha256 file.');
   }
-  const archiveEntries = [...listArchiveEntries(resolvedArchivePath, runCommand)].sort(compareStringsLexicographically);
-  const releaseFiles = listRelativeFiles(releaseDirectory)
-    .map((entry) => `${manifest.releaseId}/${entry}`)
-    .sort(compareStringsLexicographically);
+  const archiveEntries = [...listArchiveFileEntries(resolvedArchivePath, runCommand)].sort((left, right) => compareStringsLexicographically(left.name, right.name));
+  const releaseFileEntries = [...listRelativeFiles(releaseDirectory)].sort(compareStringsLexicographically);
+  const releaseFiles = releaseFileEntries.map((entry) => `${manifest.releaseId}/${entry}`);
   if (archiveEntries.length !== releaseFiles.length) {
     throw new Error('Release archive entry count does not match the extracted release directory.');
   }
+  const manifestInventory = buildReleaseManifestInventory(manifest);
   for (let index = 0; index < archiveEntries.length; index += 1) {
-    if (archiveEntries[index] !== releaseFiles[index]) {
+    const archiveEntry = archiveEntries[index];
+    const releaseArchivePath = releaseFiles[index];
+    const relativeReleasePath = releaseFileEntries[index];
+    if (archiveEntry === undefined || releaseArchivePath === undefined || relativeReleasePath === undefined) {
       throw new Error('Release archive inventory does not match the extracted release directory.');
+    }
+    if (archiveEntry.name !== releaseArchivePath) {
+      throw new Error('Release archive inventory does not match the extracted release directory.');
+    }
+    const extractedFile = join(releaseDirectory, relativeReleasePath);
+    const extractedStats = ensureFile(extractedFile, relativeReleasePath, releaseDirectory);
+    const extractedSha256 = fileSha256(extractedFile);
+    if (archiveEntry.sha256 !== extractedSha256) {
+      throw new Error(`Release archive file checksum mismatch for ${relativeReleasePath}.`);
+    }
+    if (archiveEntry.size !== extractedStats.size) {
+      throw new Error(`Release archive file size mismatch for ${relativeReleasePath}.`);
+    }
+    if (archiveEntry.executable !== isExecutableMode(extractedStats)) {
+      throw new Error(`Release archive file executability mismatch for ${relativeReleasePath}.`);
+    }
+    const manifestEntry = manifestInventory.get(relativeReleasePath);
+    if (manifestEntry !== undefined) {
+      if (archiveEntry.sha256 !== manifestEntry.sha256) {
+        throw new Error(`Release archive manifest checksum mismatch for ${relativeReleasePath}.`);
+      }
+      if (archiveEntry.size !== manifestEntry.size) {
+        throw new Error(`Release archive manifest size mismatch for ${relativeReleasePath}.`);
+      }
+      if (archiveEntry.executable !== hasExecutableMode(manifestEntry.mode)) {
+        throw new Error(`Release archive manifest executability mismatch for ${relativeReleasePath}.`);
+      }
     }
   }
   return Object.freeze({
@@ -1216,6 +1253,30 @@ function verifyInventoryMatchesRelease(releaseDirectory: string, inventory: read
   }
 }
 
+function buildReleaseManifestInventory(manifest: BwsReleaseManifest): ReadonlyMap<string, ReleaseFileEntry> {
+  const inventory = new Map<string, ReleaseFileEntry>();
+  for (const entry of [
+    ...manifest.archive.payloadFiles,
+    ...manifest.source.files,
+    ...manifest.builtRuntime.files,
+    ...manifest.cockpit.files,
+    ...manifest.executables,
+    ...manifest.templates.systemdUserTemplates,
+  ]) {
+    const relativePath = normalizeRelativePath(entry.path);
+    const previousEntry = inventory.get(relativePath);
+    if (previousEntry !== undefined && (
+      previousEntry.sha256 !== entry.sha256
+      || previousEntry.size !== entry.size
+      || previousEntry.mode !== entry.mode
+    )) {
+      throw new Error(`Release manifest contains conflicting inventory entries for ${relativePath}.`);
+    }
+    inventory.set(relativePath, entry);
+  }
+  return inventory;
+}
+
 function assertOutputTargetsAvailable(targets: readonly string[], allowOverwrite: boolean): void {
   for (const target of targets) {
     if (existsSync(target) && !allowOverwrite) {
@@ -1296,18 +1357,19 @@ function createDeterministicArchive(
   );
 }
 
-function listArchiveEntries(archivePath: string, runCommand: CommandRunner): readonly string[] {
+function listArchiveFileEntries(archivePath: string, runCommand: CommandRunner): readonly ArchiveFileEntry[] {
   const output = runCommand(
     'python3',
     [
       '-c',
       [
+        'import hashlib',
         'import json',
         'import re',
         'import sys',
         'import tarfile',
         'with tarfile.open(sys.argv[1], "r:gz") as archive:',
-        '    names = []',
+        '    entries = []',
         '    for member in archive.getmembers():',
         '        name = member.name.rstrip("/")',
         '        if not name or name == ".":',
@@ -1328,9 +1390,18 @@ function listArchiveEntries(archivePath: string, runCommand: CommandRunner): rea
         '            raise SystemExit(f"unsafe release archive member path: {member.name}")',
         '        if not member.isfile():',
         '            raise SystemExit(f"release archive member must be a regular file: {member.name}")',
-        '        names.append(name)',
-        '    names = sorted(names)',
-        '    print(json.dumps(names))',
+        '        handle = archive.extractfile(member)',
+        '        if handle is None:',
+        '            raise SystemExit(f"release archive member contents are unavailable: {member.name}")',
+        '        contents = handle.read()',
+        '        entries.append({',
+        '            "executable": (member.mode & 0o111) != 0,',
+        '            "name": name,',
+        '            "sha256": hashlib.sha256(contents).hexdigest(),',
+        '            "size": member.size,',
+        '        })',
+        '    entries = sorted(entries, key=lambda entry: entry["name"])',
+        '    print(json.dumps(entries))',
       ].join('\n'),
       archivePath,
     ],
@@ -1340,8 +1411,33 @@ function listArchiveEntries(archivePath: string, runCommand: CommandRunner): rea
     throw new Error('Archive entry listing must be a JSON array.');
   }
   return Object.freeze(
-    parsed.map((value) => requireNonEmptyString(value, 'archive entry')),
+    parsed.map((value) => parseArchiveFileEntry(value)),
   );
+}
+
+function parseArchiveFileEntry(value: unknown): ArchiveFileEntry {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    throw new Error('Archive entry must be a JSON object.');
+  }
+  const record = value as Partial<ArchiveFileEntry>;
+  const name = requireNonEmptyString(record.name, 'archive entry name');
+  const sha256 = requireNonEmptyString(record.sha256, 'archive entry sha256');
+  if (!SHA256_PATTERN.test(sha256)) {
+    throw new Error(`Archive entry sha256 must be a SHA-256 hex digest: ${name}`);
+  }
+  const size = record.size;
+  if (!Number.isSafeInteger(size) || typeof size !== 'number' || size < 0) {
+    throw new Error(`Archive entry size must be a safe non-negative integer: ${name}`);
+  }
+  if (typeof record.executable !== 'boolean') {
+    throw new Error(`Archive entry executable flag must be boolean: ${name}`);
+  }
+  return Object.freeze({
+    executable: record.executable,
+    name,
+    sha256,
+    size,
+  });
 }
 
 function loadRequiredExecutablePaths(repositoryRoot: string): Promise<readonly string[]> {

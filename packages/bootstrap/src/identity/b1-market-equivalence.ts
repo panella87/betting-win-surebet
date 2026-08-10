@@ -28,6 +28,13 @@ export interface B1MarketEquivalence {
 
 export interface B1MarketOutcomeSetEquivalence {
   readonly marketEquivalenceKey: string;
+  readonly canonicalEventId: string;
+  readonly marketType: string;
+  readonly period: string;
+  readonly lineValue: string;
+  readonly currency: string;
+  readonly settlementRuleVersion: string;
+  readonly voidRuleId: string;
   readonly terminalOutcomeCount: number;
   readonly selections: readonly B1SelectionEquivalence[];
   readonly venuePair: B1VenuePairKey;
@@ -149,6 +156,13 @@ export function compareB1MarketOutcomeSetEquivalence(
       'Matching complete terminal outcome sets for both B1 venues.',
     );
   }
+  if (!isSupportedOutcomeSetCardinality(firstVenueRows.length)) {
+    return blocked(
+      'B1_OUTCOME_SET_INCOMPLETE',
+      'B1 market outcome sets must have a supported terminal outcome cardinality before quote comparison.',
+      'Complete supported B1 terminal outcome sets with exactly 2 or 3 outcomes.',
+    );
+  }
 
   const firstIndex = indexBySelectionEquivalence(firstVenueRows);
   if (!firstIndex.ok) {
@@ -161,7 +175,7 @@ export function compareB1MarketOutcomeSetEquivalence(
 
   const selections: B1SelectionEquivalence[] = [];
   let venuePair: B1VenuePairKey | undefined;
-  let marketEquivalenceKey: string | undefined;
+  let representativeMarket: B1MarketEquivalence | undefined;
   for (const first of firstVenueRows) {
     const second = secondIndex.value.get(first.selectionEquivalenceKey);
     if (second === undefined) {
@@ -179,24 +193,26 @@ export function compareB1MarketOutcomeSetEquivalence(
     selections.push(comparison.value.selection);
     if (venuePair === undefined) {
       venuePair = comparison.value.venuePair;
-      marketEquivalenceKey = comparison.value.marketEquivalenceKey;
-    } else if (venuePair.key !== comparison.value.venuePair.key) {
-      return blocked(
-        'B1_OUTCOME_SET_INCOMPLETE',
-        'B1 market outcome sets must compare the same venue pair for every terminal outcome.',
-        'Consistent venue pair evidence across the complete outcome set.',
-      );
-    }
-    if (marketEquivalenceKey !== comparison.value.marketEquivalenceKey) {
-      return blocked(
-        'B1_MARKET_EQUIVALENCE_MISSING',
-        'B1 market outcome sets must share one accepted market equivalence key.',
-        'One B1 market_equivalence_key across every terminal outcome.',
-      );
+      representativeMarket = comparison.value;
+    } else {
+      if (venuePair.key !== comparison.value.venuePair.key) {
+        return blocked(
+          'B1_OUTCOME_SET_INCOMPLETE',
+          'B1 market outcome sets must compare the same venue pair for every terminal outcome.',
+          'Consistent venue pair evidence across the complete outcome set.',
+        );
+      }
+      if (representativeMarket === undefined) {
+        throw new Error('B1 outcome-set equivalence lost representative market context after venue initialization.');
+      }
+      const contextConsistency = compareOutcomeSetMarketContext(representativeMarket, comparison.value);
+      if (!contextConsistency.ok) {
+        return contextConsistency;
+      }
     }
   }
 
-  if (venuePair === undefined || marketEquivalenceKey === undefined) {
+  if (venuePair === undefined || representativeMarket === undefined) {
     return blocked(
       'B1_OUTCOME_SET_INCOMPLETE',
       'B1 market outcome-set comparison requires at least one terminal outcome.',
@@ -205,11 +221,85 @@ export function compareB1MarketOutcomeSetEquivalence(
   }
 
   return accepted(Object.freeze({
-    marketEquivalenceKey,
+    marketEquivalenceKey: representativeMarket.marketEquivalenceKey,
+    canonicalEventId: representativeMarket.canonicalEventId,
+    marketType: representativeMarket.marketType,
+    period: representativeMarket.period,
+    lineValue: representativeMarket.lineValue,
+    currency: representativeMarket.currency,
+    settlementRuleVersion: representativeMarket.settlementRuleVersion,
+    voidRuleId: representativeMarket.voidRuleId,
     terminalOutcomeCount: selections.length,
     selections: Object.freeze(selections),
     venuePair,
   }));
+}
+
+function isSupportedOutcomeSetCardinality(terminalOutcomeCount: number): terminalOutcomeCount is 2 | 3 {
+  return terminalOutcomeCount === 2 || terminalOutcomeCount === 3;
+}
+
+function compareOutcomeSetMarketContext(
+  representative: B1MarketEquivalence,
+  next: B1MarketEquivalence,
+): BoundaryResult<undefined> {
+  if (representative.marketEquivalenceKey !== next.marketEquivalenceKey) {
+    return blocked(
+      'B1_MARKET_EQUIVALENCE_MISSING',
+      'B1 market outcome sets must share one accepted market equivalence key.',
+      'One B1 market_equivalence_key across every terminal outcome.',
+    );
+  }
+  if (representative.canonicalEventId !== next.canonicalEventId) {
+    return blocked(
+      'B1_MARKET_EQUIVALENCE_MISSING',
+      'B1 market outcome sets must share one canonical event across every terminal outcome.',
+      'One B1 canonical_event_id across every terminal outcome.',
+    );
+  }
+  if (representative.marketType !== next.marketType) {
+    return blocked(
+      'B1_MARKET_TYPE_MISMATCH',
+      'B1 market outcome sets must share one market type across every terminal outcome.',
+      'One B1 market_type across every terminal outcome.',
+    );
+  }
+  if (representative.period !== next.period) {
+    return blocked(
+      'B1_PERIOD_MISMATCH',
+      'B1 market outcome sets must share one period across every terminal outcome.',
+      'One B1 period across every terminal outcome.',
+    );
+  }
+  if (representative.lineValue !== next.lineValue) {
+    return blocked(
+      'B1_LINE_VALUE_MISMATCH',
+      'B1 market outcome sets must share one line value across every terminal outcome.',
+      'One B1 line_value across every terminal outcome.',
+    );
+  }
+  if (representative.currency !== next.currency) {
+    return blocked(
+      'B1_CURRENCY_MISMATCH',
+      'B1 market outcome sets must share one currency across every terminal outcome.',
+      'One B1 currency across every terminal outcome.',
+    );
+  }
+  if (representative.settlementRuleVersion !== next.settlementRuleVersion) {
+    return blocked(
+      'B1_SETTLEMENT_COMPATIBILITY_UNKNOWN',
+      'B1 market outcome sets must share one settlement rule version across every terminal outcome.',
+      'One B1 settlement_rule_version across every terminal outcome.',
+    );
+  }
+  if (representative.voidRuleId !== next.voidRuleId) {
+    return blocked(
+      'B1_VOID_RULE_MISMATCH',
+      'B1 market outcome sets must share one void rule across every terminal outcome.',
+      'One B1 void_rule_id across every terminal outcome.',
+    );
+  }
+  return accepted(undefined);
 }
 
 function indexBySelectionEquivalence(

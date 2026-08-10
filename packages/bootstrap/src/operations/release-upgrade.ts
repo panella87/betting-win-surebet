@@ -37,6 +37,7 @@ import {
   registerBwsEvidenceArtifact,
   type BwsEvidenceIndexEntry,
 } from './observability.js';
+import { resolveRepositoryRelativePathForCreation } from './repository-paths.js';
 import {
   type BwsReleaseInstallVerificationResult,
   type BwsReleaseManifest,
@@ -359,10 +360,14 @@ export async function createBwsReleaseUpgradePlan(
   const targetReleaseDirectory = resolve(request.targetReleaseDirectory);
   const evidenceDirectory = resolve(request.evidenceDirectory);
   const outputFile = resolve(request.outputFile);
-  const runtimeStateDirectory = resolve(request.runtimeStateDirectory);
   const repositoryRoot = request.repositoryRoot === undefined
     ? currentReleaseDirectory
     : resolve(request.repositoryRoot);
+  const runtimeStateDirectory = resolveReleaseOwnedDirectory(
+    repositoryRoot,
+    request.runtimeStateDirectory,
+    'runtimeStateDirectory',
+  );
   ensureDirectoryWritable(evidenceDirectory, 'evidenceDirectory');
   ensureDirectoryWritable(runtimeStateDirectory, 'runtimeStateDirectory');
   ensureParentDirectory(outputFile);
@@ -999,13 +1004,18 @@ function buildLifecycleRequest(
 ): BwsLifecycleRequest {
   const request: BwsLifecycleRequest = {
     repositoryRoot,
-    runtimeStateDirectory,
+    runtimeStateDirectory: relative(repositoryRoot, runtimeStateDirectory),
   };
   Object.assign(
     request,
     { environment: buildLifecycleEnvironment(environment) },
   );
   return Object.freeze(request);
+}
+
+function resolveReleaseOwnedDirectory(repositoryRoot: string, directory: string, label: string): string {
+  const resolvedDirectory = resolve(repositoryRoot, directory);
+  return resolveRepositoryRelativePathForCreation(repositoryRoot, relative(repositoryRoot, resolvedDirectory), label);
 }
 
 function buildLifecycleEnvironment(

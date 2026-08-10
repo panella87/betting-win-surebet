@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn, spawnSync } from 'node:child_process';
-import { chmodSync, copyFileSync, cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
+import { chmodSync, copyFileSync, cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const ROOT = process.cwd();
@@ -12,6 +12,7 @@ function prepareTempRepo(): string {
   mkdirSync(join(repo, '.automation', 'lib'), { recursive: true });
   for (const rel of [
     'run-bugfix-autopilot.sh',
+    'run-autonomous-bugfix.sh',
     '.automation/lib/run_common.sh',
     '.automation/lib/temp_inode_guard.sh',
     '.automation/lib/controller_hardening_v2.sh',
@@ -97,6 +98,18 @@ function runBugfixAutopilot(repo: string, maxRounds: string, timeout: number) {
   });
 }
 
+function runPrintConfig(repo: string, script: string, fromArtifacts: string) {
+  const args = script === './run-autonomous-bugfix.sh'
+    ? [script, '--from-artifacts', fromArtifacts, '--campaign-area', 'filesystem_path_and_artifact_safety', '--print-config']
+    : [script, '--from-artifacts', fromArtifacts, '--print-config'];
+  return spawnSync('bash', args, {
+    cwd: repo,
+    env: { ...process.env, TELEGRAM_NOTIFY: '0' },
+    encoding: 'utf8',
+    timeout: 10000,
+  });
+}
+
 test('bugfix controller exposes strict four-state audit and handoff contract', () => {
   const script = read('run-autonomous-bugfix.sh');
   for (const marker of [
@@ -137,6 +150,59 @@ test('bugfix autopilot exposes the bounded audit implementation re-audit campaig
     "printf 'lock_release_status=%s\\n'", "printf 'lock_preserved=%s\\n'",
   ]) assert.match(script, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   assert.doesNotMatch(script, /run-paper-evaluation\.sh|run-paper-autopilot\.sh|bash \.\/start\.sh|bash \.\/stop\.sh|forever|MongoDB/);
+});
+
+test('bugfix controllers accept only retained artifact evidence for --from-artifacts', async (t) => {
+  for (const script of ['./run-autonomous-bugfix.sh', './run-bugfix-autopilot.sh']) {
+    await t.test(script, () => {
+      const repo = prepareTempRepo();
+      const outside = mkdtempSync('/tmp/surebet-from-artifacts-outside-');
+      try {
+        mkdirSync(join(repo, 'artifacts', 'autonomous_bugfix_20260101T000001Z'), { recursive: true });
+        mkdirSync(join(repo, 'artifacts', 'autonomous_bugfix_20260101T000001Z', 'nested'), { recursive: true });
+        writeFileSync(join(repo, 'artifacts.zip'), 'retained zip\n', 'utf8');
+        writeFileSync(join(repo, 'artifacts1.zip'), 'retained numbered zip\n', 'utf8');
+        writeFileSync(join(repo, 'AGENTS.md'), 'not retained evidence\n', 'utf8');
+        writeFileSync(join(repo, 'artifacts', 'report.md'), 'not a retained evidence directory\n', 'utf8');
+        writeFileSync(join(outside, 'artifacts.zip'), 'outside retained-looking zip\n', 'utf8');
+        symlinkSync(join(repo, 'artifacts.zip'), join(repo, 'artifacts2.zip'));
+        symlinkSync(join(repo, 'artifacts', 'autonomous_bugfix_20260101T000001Z'), join(repo, 'artifacts', 'linked-run'));
+
+        for (const accepted of ['artifacts.zip', 'artifacts1.zip', 'artifacts/autonomous_bugfix_20260101T000001Z']) {
+          const result = runPrintConfig(repo, script, accepted);
+          assert.equal(result.status, 0, `${script} ${accepted}\n${result.stdout}\n${result.stderr}`);
+          const expected = realpathSync(join(repo, accepted)).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          assert.match(result.stdout, new RegExp(`from_artifacts=${expected}`));
+        }
+
+        for (const rejected of [
+          'AGENTS.md',
+          '.env',
+          'artifacts/.env',
+          './artifacts.zip',
+          'artifacts/../artifacts.zip',
+          'artifacts/./autonomous_bugfix_20260101T000001Z',
+          'artifacts/../artifacts/autonomous_bugfix_20260101T000001Z',
+          `${repo}/./artifacts.zip`,
+          `${repo}/artifacts/../artifacts/autonomous_bugfix_20260101T000001Z`,
+          'artifacts/report.md',
+          'artifacts',
+          'missing-artifacts.zip',
+          join(outside, 'artifacts.zip'),
+          'artifacts2.zip',
+          'artifacts/linked-run',
+          'artifacts/linked-run/nested',
+        ]) {
+          const result = runPrintConfig(repo, script, rejected);
+          assert.notEqual(result.status, 0, `${script} unexpectedly accepted ${rejected}\n${result.stdout}`);
+          assert.match(result.stderr, /--from-artifacts/);
+        }
+      } finally {
+        rmSync(repo, { recursive: true, force: true });
+        rmSync(outside, { recursive: true, force: true });
+      }
+    });
+  }
 });
 
 test('bugfix autopilot rejects an incompatible controller before creating campaign artifacts', () => {

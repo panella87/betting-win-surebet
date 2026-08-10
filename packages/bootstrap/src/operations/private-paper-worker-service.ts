@@ -38,6 +38,7 @@ import {
   createBwsStructuredProcessIdentity,
   registerBwsEvidenceArtifact,
 } from './observability.js';
+import { resolveRepositoryRelativePathForCreation } from './repository-paths.js';
 
 const BWS_PRIVATE_PAPER_WORKER_SERVICE_STATE_SCHEMA = 'bws.private_paper_worker_service_state.v1';
 const BWS_PRIVATE_PAPER_WORKER_SERVICE_EVIDENCE_SCHEMA = 'bws.private_paper_worker_service_evidence.v1';
@@ -901,7 +902,11 @@ function resolvePaths(
   repositoryRoot: string,
   runtimeStateDirectory: string,
 ): BwsPrivatePaperWorkerServicePaths {
-  const stateDirectory = resolve(repositoryRoot, runtimeStateDirectory);
+  const stateDirectory = resolveRepositoryRelativePathForCreation(
+    repositoryRoot,
+    runtimeStateDirectory,
+    'runtimeStateDirectory',
+  );
   return Object.freeze({
     evidenceDirectory: join(stateDirectory, 'evidence'),
     repositoryRoot,

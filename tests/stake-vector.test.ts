@@ -99,6 +99,64 @@ test('stake-vector solver returns a blocker when a minimum stake exceeds the loc
   ]);
 });
 
+test('stake-vector solver returns a blocker for unknown capacity constraints', () => {
+  const result = solveStandardBinaryStakeVector({
+    matrix: createScenarioMatrix([
+      { scenarioId: 'yes_wins', legId: 'market-001:no', stakeMinor: 100n, payoutMinor: 0n, feeMinor: 5n, costMinor: 0n },
+      { scenarioId: 'yes_wins', legId: 'market-001:yes', stakeMinor: 100n, payoutMinor: 215n, feeMinor: 5n, costMinor: 0n },
+      { scenarioId: 'no_wins', legId: 'market-001:no', stakeMinor: 100n, payoutMinor: 225n, feeMinor: 5n, costMinor: 0n },
+      { scenarioId: 'no_wins', legId: 'market-001:yes', stakeMinor: 100n, payoutMinor: 0n, feeMinor: 5n, costMinor: 0n },
+    ]),
+    capacityConstraints: [
+      { legId: 'market-001:no', minStakeMinor: 100n, maxStakeMinor: 600n },
+      { legId: 'market-001:yes', minStakeMinor: 100n, maxStakeMinor: 600n },
+      { legId: 'market-001:extra', minStakeMinor: 100n, maxStakeMinor: 600n },
+    ],
+    roundingConstraints: [
+      { legId: 'market-001:no', stepMinor: 50n },
+      { legId: 'market-001:yes', stepMinor: 50n },
+    ],
+  });
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'STAKE_VECTOR_CAPACITY_UNKNOWN_LEG',
+      message: 'Stake-vector solving requires capacity constraints to match matrix legs.',
+      evidenceRequired: 'Capacity constraints keyed only by validated complete-set leg ids.',
+    },
+  ]);
+});
+
+test('stake-vector solver returns a blocker for unknown rounding constraints', () => {
+  const result = solveStandardBinaryStakeVector({
+    matrix: createScenarioMatrix([
+      { scenarioId: 'yes_wins', legId: 'market-001:no', stakeMinor: 100n, payoutMinor: 0n, feeMinor: 5n, costMinor: 0n },
+      { scenarioId: 'yes_wins', legId: 'market-001:yes', stakeMinor: 100n, payoutMinor: 215n, feeMinor: 5n, costMinor: 0n },
+      { scenarioId: 'no_wins', legId: 'market-001:no', stakeMinor: 100n, payoutMinor: 225n, feeMinor: 5n, costMinor: 0n },
+      { scenarioId: 'no_wins', legId: 'market-001:yes', stakeMinor: 100n, payoutMinor: 0n, feeMinor: 5n, costMinor: 0n },
+    ]),
+    capacityConstraints: [
+      { legId: 'market-001:no', minStakeMinor: 100n, maxStakeMinor: 600n },
+      { legId: 'market-001:yes', minStakeMinor: 100n, maxStakeMinor: 600n },
+    ],
+    roundingConstraints: [
+      { legId: 'market-001:no', stepMinor: 50n },
+      { legId: 'market-001:yes', stepMinor: 50n },
+      { legId: 'market-001:extra', stepMinor: 50n },
+    ],
+  });
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'STAKE_VECTOR_ROUNDING_UNKNOWN_LEG',
+      message: 'Stake-vector solving requires rounding constraints to match matrix legs.',
+      evidenceRequired: 'Rounding constraints keyed only by validated complete-set leg ids.',
+    },
+  ]);
+});
+
 test('stake-vector solver applies fee and cost rows to worst-case exposure', () => {
   const withoutFees = solveStandardBinaryStakeVector({
     matrix: createScenarioMatrix([
@@ -185,6 +243,46 @@ test('stake-vector solver rounds to the local stake quantum and preserves determ
     { scenarioId: 'yes_wins', netMinor: 175n },
   ]);
   assert.equal(result.value.worstCaseNetMinor, 0n);
+});
+
+test('stake-vector solver supports exact min max capacity at a smaller deterministic rounding quantum', () => {
+  const result = solveStandardBinaryStakeVector({
+    matrix: createScenarioMatrix([
+      { scenarioId: 'yes_wins', legId: 'market-001:no', stakeMinor: 100n, payoutMinor: 0n, feeMinor: 0n, costMinor: 0n },
+      { scenarioId: 'yes_wins', legId: 'market-001:yes', stakeMinor: 100n, payoutMinor: 220n, feeMinor: 0n, costMinor: 0n },
+      { scenarioId: 'no_wins', legId: 'market-001:no', stakeMinor: 100n, payoutMinor: 220n, feeMinor: 0n, costMinor: 0n },
+      { scenarioId: 'no_wins', legId: 'market-001:yes', stakeMinor: 100n, payoutMinor: 0n, feeMinor: 0n, costMinor: 0n },
+    ]),
+    capacityConstraints: [
+      { legId: 'market-001:no', minStakeMinor: 150n, maxStakeMinor: 150n },
+      { legId: 'market-001:yes', minStakeMinor: 150n, maxStakeMinor: 150n },
+    ],
+    roundingConstraints: [
+      { legId: 'market-001:no', stepMinor: 50n },
+      { legId: 'market-001:yes', stepMinor: 50n },
+    ],
+  });
+
+  assert.equal(result.ok, true);
+  assert.deepEqual(result.value.stakes, [
+    {
+      legId: 'market-001:no',
+      unitCount: 3n,
+      stakeQuantumMinor: 50n,
+      stakeMinor: 150n,
+    },
+    {
+      legId: 'market-001:yes',
+      unitCount: 3n,
+      stakeQuantumMinor: 50n,
+      stakeMinor: 150n,
+    },
+  ]);
+  assert.deepEqual(result.value.scenarioNets, [
+    { scenarioId: 'no_wins', netMinor: 30n },
+    { scenarioId: 'yes_wins', netMinor: 30n },
+  ]);
+  assert.equal(result.value.worstCaseNetMinor, 30n);
 });
 
 test('stake-vector solver blocks impossible non-negative worst-case exposure before capacity search', () => {

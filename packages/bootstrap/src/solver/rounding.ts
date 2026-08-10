@@ -1,6 +1,9 @@
 import { accepted, blocked, type BoundaryResult } from '../contracts/local-types.js';
 
 export function toMinorUnits(decimalText: string, scale: number): BoundaryResult<bigint> {
+  if (!Number.isSafeInteger(scale) || scale < 0) {
+    return blocked('FIXED_POINT_SCALE_INVALID', 'Scale must be a finite non-negative integer.', 'Finite non-negative fixed-point scale.');
+  }
   if (!/^\d+(\.\d+)?$/.test(decimalText)) {
     return blocked('FIXED_POINT_INPUT_INVALID', 'Amount must be a non-negative decimal string.', 'Decimal amount string.');
   }

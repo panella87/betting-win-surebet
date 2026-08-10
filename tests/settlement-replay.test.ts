@@ -261,6 +261,43 @@ test('settlement replay reconciliation closes an incomplete non-atomic group aga
   });
 });
 
+test('settlement replay reconciliation rejects whole standard-binary scenario omission', () => {
+  const completeSet = loadCompleteSet();
+  const input = createTwoUnitSolvedInput();
+  const solved = solveStandardBinaryStakeVector(input);
+  assert.equal(solved.ok, true);
+
+  const completionSimulation = simulateNonAtomicPaperGroupCompletion({
+    stakeVector: solved.value,
+    matrix: input.matrix,
+    manualKill: false,
+    events: [
+      { legId: 'market-001:yes', type: 'fill', stakeMinor: 200n, occurredAt: '2026-07-13T10:00:00.000Z' },
+      { legId: 'market-001:no', type: 'fill', stakeMinor: 200n, occurredAt: '2026-07-13T10:00:01.000Z' },
+    ],
+  });
+  assert.equal(completionSimulation.ok, true);
+
+  const result = reconcileNonAtomicSettlementReplay({
+    completeSet,
+    completionSimulation: completionSimulation.value,
+    stakeVector: solved.value,
+    matrix: {
+      rows: Object.freeze(input.matrix.rows.filter((row) => row.scenarioId === 'yes_wins')),
+    },
+    settlementRecords: [loadSettlementRecord()],
+  });
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'SCENARIO_CASHFLOW_SCENARIOS_INCOMPLETE',
+      message: 'Scenario cash-flow builder requires every standard-binary terminal scenario.',
+      evidenceRequired: 'Complete YES-wins and NO-wins scenario coverage.',
+    },
+  ]);
+});
+
 test('settlement replay reconciliation rejects incomplete groups without residual exposure output', () => {
   const completeSet = loadCompleteSet();
   const input = createTwoUnitSolvedInput();
@@ -297,6 +334,36 @@ test('settlement replay reconciliation rejects incomplete groups without residua
       evidenceRequired: 'Residual exposure output from the validated non-atomic completion simulation.',
     },
   ]);
+});
+
+test('settlement replay reconciliation accepts a solved quantum smaller than the scenario stake', () => {
+  const completeSet = loadCompleteSet();
+  const input = createSmallerQuantumSolvedInput();
+  const solved = solveStandardBinaryStakeVector(input);
+  assert.equal(solved.ok, true);
+  assert.equal(solved.value.stakes[0]?.stakeQuantumMinor, 50n);
+
+  const completionSimulation = simulateNonAtomicPaperGroupCompletion({
+    stakeVector: solved.value,
+    matrix: input.matrix,
+    manualKill: false,
+    events: [
+      { legId: 'market-001:yes', type: 'fill', stakeMinor: 150n, occurredAt: '2026-07-13T10:00:00.000Z' },
+      { legId: 'market-001:no', type: 'fill', stakeMinor: 150n, occurredAt: '2026-07-13T10:00:01.000Z' },
+    ],
+  });
+  assert.equal(completionSimulation.ok, true);
+
+  const result = reconcileNonAtomicSettlementReplay({
+    completeSet,
+    completionSimulation: completionSimulation.value,
+    stakeVector: solved.value,
+    matrix: input.matrix,
+    settlementRecords: [loadSettlementRecord()],
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.value.settledNetMinor, 30n);
 });
 
 function loadResourceRecords(): readonly BettingWinResourceRecord[] {
@@ -362,6 +429,27 @@ function createTwoUnitSolvedInput(): StakeVectorInputContract {
     roundingConstraints: Object.freeze([
       Object.freeze({ legId: 'market-001:yes', stepMinor: 100n }),
       Object.freeze({ legId: 'market-001:no', stepMinor: 100n }),
+    ]),
+  };
+}
+
+function createSmallerQuantumSolvedInput(): StakeVectorInputContract {
+  return {
+    matrix: {
+      rows: Object.freeze([
+        Object.freeze({ scenarioId: 'yes_wins', legId: 'market-001:no', stakeMinor: 100n, payoutMinor: 0n, feeMinor: 0n, costMinor: 0n }),
+        Object.freeze({ scenarioId: 'yes_wins', legId: 'market-001:yes', stakeMinor: 100n, payoutMinor: 220n, feeMinor: 0n, costMinor: 0n }),
+        Object.freeze({ scenarioId: 'no_wins', legId: 'market-001:no', stakeMinor: 100n, payoutMinor: 220n, feeMinor: 0n, costMinor: 0n }),
+        Object.freeze({ scenarioId: 'no_wins', legId: 'market-001:yes', stakeMinor: 100n, payoutMinor: 0n, feeMinor: 0n, costMinor: 0n }),
+      ]),
+    },
+    capacityConstraints: Object.freeze([
+      Object.freeze({ legId: 'market-001:no', minStakeMinor: 150n, maxStakeMinor: 150n }),
+      Object.freeze({ legId: 'market-001:yes', minStakeMinor: 150n, maxStakeMinor: 150n }),
+    ]),
+    roundingConstraints: Object.freeze([
+      Object.freeze({ legId: 'market-001:no', stepMinor: 50n }),
+      Object.freeze({ legId: 'market-001:yes', stepMinor: 50n }),
     ]),
   };
 }

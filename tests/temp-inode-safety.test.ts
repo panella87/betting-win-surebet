@@ -9,6 +9,7 @@ import {
   readFileSync,
   readdirSync,
   rmSync,
+  symlinkSync,
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -149,6 +150,65 @@ test "$count" -eq 0
   assert.equal(result.status, 0, result.stderr || result.stdout);
   assert.match(result.stdout, /rc=43/);
   assert.match(result.stderr, /AUTOMATION_TEMP_INODE_PREFLIGHT_BLOCKED/);
+});
+
+test('managed temp bootstrap rejects symlinked roots before creating outside sessions', (t) => {
+  const fixture = createFixture(t);
+  const outsideDirectory = mkdtempSync(join(tmpdir(), 'surebet-temp-inode-outside-'));
+  t.after(() => {
+    rmSync(outsideDirectory, { force: true, maxRetries: 3, recursive: true, retryDelay: 50 });
+  });
+  symlinkSync(outsideDirectory, join(fixture.root, 'linked-temp-root'), 'dir');
+
+  const result = runShell(fixture, `
+set -uo pipefail
+AUTOMATION_REPO_ROOT=${shellQuote(fixture.root)}
+. ${shellQuote(GUARD_PATH)}
+${healthyConfiguration}
+export AUTOMATION_TEMP_ROOT_RELATIVE=linked-temp-root
+set +e
+_automation_temp_prepare_base
+rc=$?
+set -e
+printf 'rc=%s\\n' "$rc"
+test "$rc" -eq 2
+test ! -e ${shellQuote(join(outsideDirectory, 'sessions'))}
+`);
+
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  assert.match(result.stdout, /rc=2/);
+  assert.match(result.stderr, /managed temp base must not contain symlinks/u);
+  assert.equal(existsSync(join(outsideDirectory, 'sessions')), false);
+});
+
+test('managed temp bootstrap rejects symlinked parent components before creating outside descendants', (t) => {
+  const fixture = createFixture(t);
+  const outsideDirectory = mkdtempSync(join(tmpdir(), 'surebet-temp-inode-parent-outside-'));
+  t.after(() => {
+    rmSync(outsideDirectory, { force: true, maxRetries: 3, recursive: true, retryDelay: 50 });
+  });
+  mkdirSync(join(fixture.root, '.automation'), { recursive: true });
+  symlinkSync(outsideDirectory, join(fixture.root, '.automation', 'linked-temp-root'), 'dir');
+
+  const result = runShell(fixture, `
+set -uo pipefail
+AUTOMATION_REPO_ROOT=${shellQuote(fixture.root)}
+. ${shellQuote(GUARD_PATH)}
+${healthyConfiguration}
+export AUTOMATION_TEMP_ROOT_RELATIVE=.automation/linked-temp-root/tmp-test
+set +e
+_automation_temp_prepare_base
+rc=$?
+set -e
+printf 'rc=%s\\n' "$rc"
+test "$rc" -eq 2
+test ! -e ${shellQuote(join(outsideDirectory, 'tmp-test'))}
+`);
+
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  assert.match(result.stdout, /rc=2/);
+  assert.match(result.stderr, /managed temp base must not contain symlinks/u);
+  assert.equal(existsSync(join(outsideDirectory, 'tmp-test')), false);
 });
 
 test('stale recovery removes only a marker-owned dead direct child and retains a live exact owner', (t) => {

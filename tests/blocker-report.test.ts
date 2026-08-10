@@ -80,7 +80,7 @@ test('private run report assembles candidate reports in deterministic order with
     SOURCE_MANIFEST_HASH,
     [blockedReport, opportunityReport],
     {
-      canonicalMarketId: 'market-001',
+      canonicalMarketId: 'candidate-001',
       ruleProfileId: 'rules-001',
       resultSourceId: 'result-source-001',
       finalityPolicyId: 'finality-001',
@@ -99,7 +99,7 @@ test('private run report assembles candidate reports in deterministic order with
   assert.deepEqual(report.candidateReports.map((candidateReport) => candidateReport.candidateId), ['candidate-001', 'candidate-002']);
   assert.equal(report.blockerCount, 1);
   assert.equal(report.settlement?.scenarioId, 'yes_wins');
-  assert.deepEqual(report.settlementSummaries?.map((settlement) => settlement.candidateId), ['market-001']);
+  assert.deepEqual(report.settlementSummaries?.map((settlement) => settlement.candidateId), ['candidate-001']);
   assert.equal(Object.isFrozen(report.settlementSummaries), true);
   assert.equal(Object.isFrozen(report), true);
   assert.equal(Object.isFrozen(report.candidateReports), true);

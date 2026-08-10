@@ -67,6 +67,34 @@ test('B1 residual exposure analysis fails closed on missing leg snapshots', () =
   ]);
 });
 
+test('B1 residual exposure analysis is not reached for malformed scenario winner matrices', () => {
+  const result = analyzeB1ResidualExposure(malformedWinnerMatrix(), Object.freeze([
+    Object.freeze({
+      legId: 'b1_leg:event-001:moneyline:away:venue-b',
+      selectionEquivalenceKey: 'event-001:moneyline:away',
+      venueOrBookmakerId: 'venue-b',
+      plannedStakeMinor: 10_000n,
+      liveFilledStakeMinor: 5_000n,
+    }),
+    Object.freeze({
+      legId: 'b1_leg:event-001:moneyline:home:venue-a',
+      selectionEquivalenceKey: 'event-001:moneyline:home',
+      venueOrBookmakerId: 'venue-a',
+      plannedStakeMinor: 10_000n,
+      liveFilledStakeMinor: 0n,
+    }),
+  ]), 5_000n);
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'B1_SCENARIO_CASHFLOW_WINNER_INVALID',
+      message: 'B1 scenario cash-flow validation requires the positive payout row to match the declared winner.',
+      evidenceRequired: 'One winning B1 terminal outcome per scenario.',
+    },
+  ]);
+});
+
 test('B1 residual exposure analysis fails closed on invalid limits', () => {
   const result = analyzeB1ResidualExposure(twoWayMatrix(), Object.freeze([
     Object.freeze({
@@ -84,6 +112,34 @@ test('B1 residual exposure analysis fails closed on invalid limits', () => {
       liveFilledStakeMinor: 0n,
     }),
   ]), -1n);
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'B1_RESIDUAL_EXPOSURE_LIMIT_INVALID',
+      message: 'B1 residual exposure simulation requires a non-negative explicit exposure limit.',
+      evidenceRequired: 'Non-negative B1 residual exposure limit in integer minor units.',
+    },
+  ]);
+});
+
+test('B1 residual exposure analysis requires an explicit bigint limit', () => {
+  const result = analyzeB1ResidualExposure(twoWayMatrix(), Object.freeze([
+    Object.freeze({
+      legId: 'b1_leg:event-001:moneyline:away:venue-b',
+      selectionEquivalenceKey: 'event-001:moneyline:away',
+      venueOrBookmakerId: 'venue-b',
+      plannedStakeMinor: 10_000n,
+      liveFilledStakeMinor: 5_000n,
+    }),
+    Object.freeze({
+      legId: 'b1_leg:event-001:moneyline:home:venue-a',
+      selectionEquivalenceKey: 'event-001:moneyline:home',
+      venueOrBookmakerId: 'venue-a',
+      plannedStakeMinor: 10_000n,
+      liveFilledStakeMinor: 0n,
+    }),
+  ]), undefined as never);
 
   assert.equal(result.ok, false);
   assert.deepEqual(result.blockers, [
@@ -129,6 +185,45 @@ function twoWayMatrix() {
         venueOrBookmakerId: 'venue-a',
         stakeMinor: 10_000n,
         payoutMinor: 21_000n,
+      }),
+    ]),
+  });
+}
+
+function malformedWinnerMatrix() {
+  return Object.freeze({
+    rows: Object.freeze([
+      Object.freeze({
+        scenarioId: 'b1_terminal:event-001:moneyline:away',
+        winningSelectionEquivalenceKey: 'event-001:moneyline:away',
+        selectionEquivalenceKey: 'event-001:moneyline:away',
+        venueOrBookmakerId: 'venue-b',
+        stakeMinor: 10_000n,
+        payoutMinor: 0n,
+      }),
+      Object.freeze({
+        scenarioId: 'b1_terminal:event-001:moneyline:away',
+        winningSelectionEquivalenceKey: 'event-001:moneyline:away',
+        selectionEquivalenceKey: 'event-001:moneyline:home',
+        venueOrBookmakerId: 'venue-a',
+        stakeMinor: 10_000n,
+        payoutMinor: 21_000n,
+      }),
+      Object.freeze({
+        scenarioId: 'b1_terminal:event-001:moneyline:home',
+        winningSelectionEquivalenceKey: 'event-001:moneyline:home',
+        selectionEquivalenceKey: 'event-001:moneyline:away',
+        venueOrBookmakerId: 'venue-b',
+        stakeMinor: 10_000n,
+        payoutMinor: 21_000n,
+      }),
+      Object.freeze({
+        scenarioId: 'b1_terminal:event-001:moneyline:home',
+        winningSelectionEquivalenceKey: 'event-001:moneyline:home',
+        selectionEquivalenceKey: 'event-001:moneyline:home',
+        venueOrBookmakerId: 'venue-a',
+        stakeMinor: 10_000n,
+        payoutMinor: 0n,
       }),
     ]),
   });

@@ -1,4 +1,4 @@
-import { existsSync, lstatSync, mkdirSync, realpathSync, writeFileSync } from 'node:fs';
+import { existsSync, lstatSync, mkdirSync, realpathSync, writeFileSync, writeSync } from 'node:fs';
 import { basename, dirname, extname, isAbsolute, relative, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import type { BettingWinExportBundle } from '../adapters/betting-win-export-reader.js';
@@ -122,12 +122,13 @@ export function runLocalPaperReportCli(
     return 1;
   }
 
-  stdout.write(`${result.value.outputPath}\n`);
+  writeText(stdout, `${result.value.outputPath}\n`);
   return 0;
 }
 
 export function printHelp(stream: NodeJS.WriteStream = process.stdout): void {
-  stream.write(
+  writeText(
+    stream,
     [
       'Usage: node dist/src/cli/local-paper-report.js --bundle <repo-local-export.json> [--output <artifacts/report.json>] [--pinned-intake]',
       '',
@@ -510,8 +511,20 @@ function serializeJson(value: unknown): string {
 
 function writeBlockers(stream: NodeJS.WriteStream, blockers: readonly Blocker[]): void {
   for (const blocker of blockers) {
-    stream.write(`${blocker.code}: ${blocker.message} Evidence required: ${blocker.evidenceRequired}\n`);
+    writeText(stream, `${blocker.code}: ${blocker.message} Evidence required: ${blocker.evidenceRequired}\n`);
   }
+}
+
+function writeText(stream: NodeJS.WriteStream, text: string): void {
+  if (stream === process.stdout && typeof process.stdout.fd === 'number') {
+    writeSync(process.stdout.fd, text);
+    return;
+  }
+  if (stream === process.stderr && typeof process.stderr.fd === 'number') {
+    writeSync(process.stderr.fd, text);
+    return;
+  }
+  stream.write(text);
 }
 
 function isSettlementRecord(record: BettingWinResourceRecord): record is BettingWinSettlementRecord {
@@ -520,5 +533,5 @@ function isSettlementRecord(record: BettingWinResourceRecord): record is Betting
 
 if (process.argv[1] !== undefined && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   const exitCode = runLocalPaperReportCli(process.argv.slice(2));
-  process.exit(exitCode);
+  process.exitCode = exitCode;
 }

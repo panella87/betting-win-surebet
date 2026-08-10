@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, mkdirSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
 import {
   accepted,
   blocked,
@@ -59,7 +59,7 @@ test('private-paper scheduler service persists scheduled and skipped passes, the
         assert.notEqual(next, undefined);
         return next!;
       },
-      runtimeStateDirectory: fixture.runtimeStateDirectory,
+      runtimeStateDirectory: relative(fixture.repositoryRoot, fixture.runtimeStateDirectory),
       sleep: async () => undefined,
     });
 
@@ -68,7 +68,7 @@ test('private-paper scheduler service persists scheduled and skipped passes, the
       now: () => '2026-07-16T08:00:03.500Z',
       processRuntime: runtime.runtime,
       repositoryRoot: fixture.repositoryRoot,
-      runtimeStateDirectory: fixture.runtimeStateDirectory,
+      runtimeStateDirectory: relative(fixture.repositoryRoot, fixture.runtimeStateDirectory),
     });
     assert.equal(status.command, 'status');
     assert.equal(status.outcome, 'running');
@@ -124,7 +124,7 @@ test('private-paper scheduler service records backpressure skips, preserves bloc
         'runSchedulerPass must not be reached while backpressure is active',
         'No scheduler pass when outstanding queue depth already exceeds the configured bound.',
       ),
-      runtimeStateDirectory: fixture.runtimeStateDirectory,
+      runtimeStateDirectory: relative(fixture.repositoryRoot, fixture.runtimeStateDirectory),
       sleep: async () => undefined,
     });
     assert.equal(firstResult.lastPass?.outcome, 'skipped');
@@ -148,7 +148,7 @@ test('private-paper scheduler service records backpressure skips, preserves bloc
       processRuntime: secondRuntime.runtime,
       repositoryRoot: fixture.repositoryRoot,
       runSchedulerPass: async () => accepted(createScheduledPassResult()),
-      runtimeStateDirectory: fixture.runtimeStateDirectory,
+      runtimeStateDirectory: relative(fixture.repositoryRoot, fixture.runtimeStateDirectory),
       sleep: async () => undefined,
     });
     assert.equal(secondResult.counters.skippedCount, 1);
@@ -188,7 +188,7 @@ test('private-paper scheduler service fails closed on overlap and stops cleanly 
             resolve(accepted(createScheduledPassResult()));
           };
         }),
-      runtimeStateDirectory: fixture.runtimeStateDirectory,
+      runtimeStateDirectory: relative(fixture.repositoryRoot, fixture.runtimeStateDirectory),
       signalRegistrar: signals.registrar,
       sleep: async () => undefined,
     });
@@ -205,7 +205,7 @@ test('private-paper scheduler service fails closed on overlap and stops cleanly 
           processRuntime: runtime.runtime,
           repositoryRoot: fixture.repositoryRoot,
           runSchedulerPass: async () => accepted(createSkippedPassResult()),
-          runtimeStateDirectory: fixture.runtimeStateDirectory,
+          runtimeStateDirectory: relative(fixture.repositoryRoot, fixture.runtimeStateDirectory),
           sleep: async () => undefined,
         }),
       /already running/,
@@ -244,6 +244,35 @@ test('private-paper scheduler service CLI help stays explicit and config rejects
     );
   } finally {
     fixture.dispose();
+  }
+});
+
+test('private-paper scheduler service rejects unsafe runtimeStateDirectory values before writes', () => {
+  const fixture = createServiceFixture();
+  const outsideDirectory = mkdtempSync(join(tmpdir(), 'bws-private-paper-scheduler-service-outside-'));
+  try {
+    symlinkSync(outsideDirectory, join(fixture.repositoryRoot, 'linked-runtime-state'), 'dir');
+    for (const candidate of [
+      outsideDirectory,
+      '../outside-state',
+      'linked-runtime-state',
+      'linked-runtime-state/child',
+    ]) {
+      assert.throws(
+        () => getBwsPrivatePaperSchedulerServiceStatus({
+          config: createSchedulerServiceConfig(fixture.repositoryRoot),
+          repositoryRoot: fixture.repositoryRoot,
+          runtimeStateDirectory: candidate,
+        }),
+        /runtimeStateDirectory .*repository|runtimeStateDirectory .*symlink|runtimeStateDirectory .*absolute/u,
+      );
+    }
+    assert.equal(existsSync(join(outsideDirectory, 'state.json')), false);
+    assert.equal(existsSync(join(outsideDirectory, 'evidence')), false);
+    assert.equal(existsSync(join(outsideDirectory, 'child')), false);
+  } finally {
+    fixture.dispose();
+    rmSync(outsideDirectory, { recursive: true, force: true });
   }
 });
 

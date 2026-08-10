@@ -124,6 +124,56 @@ test('B1 cross-venue derivation blocks incomplete terminal outcome sets', () => 
   ]);
 });
 
+test('B1 cross-venue derivation blocks unsupported one-way outcome sets before quote synchronization', () => {
+  const [homeA, homeB] = fixturePair();
+  const quoteInvalidHomeB = cloneRow(homeB, { marketStatus: 'closed' });
+
+  const result = deriveB1CrossVenueGrossOpportunityCandidates([homeA, quoteInvalidHomeB], quotePolicy());
+
+  assert.equal(result.ok, true);
+  assert.equal(result.value.length, 1);
+  const candidate = result.value[0];
+  assert.ok(candidate);
+  assert.equal(candidate.ok, false);
+  assert.deepEqual(candidate.blockers, [
+    {
+      code: 'B1_OUTCOME_SET_INCOMPLETE',
+      message: 'B1 market outcome sets must have a supported terminal outcome cardinality before quote comparison.',
+      evidenceRequired: 'Complete supported B1 terminal outcome sets with exactly 2 or 3 outcomes.',
+    },
+  ]);
+});
+
+test('B1 cross-venue derivation blocks mixed terminal market context before gross candidate acceptance', () => {
+  const rows = twoOutcomeGrossRows().map((row) => (
+    row.selectionEquivalenceKey === 'event-001:moneyline:away'
+      ? cloneRow(row, {
+          canonicalEventId: 'event-999',
+          currency: 'USDC',
+          settlementRuleVersion: 'settlement-rule-v2',
+          voidRuleId: 'void-rule-b',
+        })
+      : row
+  ));
+
+  const result = deriveB1CrossVenueGrossOpportunityCandidates(rows, quotePolicy());
+
+  assert.equal(result.ok, true);
+  assert.equal(result.value.length, 1);
+  const candidate = result.value[0];
+  assert.ok(candidate);
+  assert.equal(candidate.ok, false);
+  assert.equal(candidate.candidateId, 'event-001:moneyline:full-game|venue-a::venue-b');
+  assert.equal(candidate.venuePairKey, 'venue-a::venue-b');
+  assert.deepEqual(candidate.blockers, [
+    {
+      code: 'B1_MARKET_EQUIVALENCE_MISSING',
+      message: 'B1 market outcome sets must share one canonical event across every terminal outcome.',
+      evidenceRequired: 'One B1 canonical_event_id across every terminal outcome.',
+    },
+  ]);
+});
+
 test('B1 cross-venue derivation blocks blank venue ids without whitespace-derived candidate keys', () => {
   const rows = twoOutcomeGrossRows().map((row) => (
     row.venueOrBookmakerId === 'venue-b'

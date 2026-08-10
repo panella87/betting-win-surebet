@@ -79,6 +79,43 @@ _automation_temp_validate_relative_root() {
   [[ "$value" =~ ^[A-Za-z0-9._/-]+$ ]] || { _automation_temp_error "invalid AUTOMATION_TEMP_ROOT_RELATIVE: $value"; return 2; }
 }
 
+_automation_temp_create_managed_directory() {
+  local repo_real="${1:?repo realpath required}" relative_path="${2:?relative path required}" label="${3:?label required}"
+  local current part current_real
+  local -a path_parts=()
+  [[ "$relative_path" != /* ]] || { _automation_temp_error "$label must be repository-relative"; return 2; }
+  case "/$relative_path/" in
+    */../*|*/./*) _automation_temp_error "$label contains unsafe path traversal: $relative_path"; return 2 ;;
+  esac
+  current="$repo_real"
+  IFS=/ read -r -a path_parts <<< "$relative_path"
+  for part in "${path_parts[@]}"; do
+    [[ -n "$part" && "$part" != "." && "$part" != ".." ]] || {
+      _automation_temp_error "$label contains unsafe path component: $relative_path"
+      return 2
+    }
+    current="$current/$part"
+    if [[ -L "$current" ]]; then
+      _automation_temp_error "$label must not contain symlinks: $current"
+      return 2
+    fi
+    if [[ -e "$current" ]]; then
+      [[ -d "$current" ]] || { _automation_temp_error "$label path component is not a directory: $current"; return 2; }
+    else
+      mkdir -- "$current" || { _automation_temp_error "cannot create $label path component: $current"; return 2; }
+    fi
+    [[ -d "$current" && ! -L "$current" ]] || { _automation_temp_error "$label path component is unsafe: $current"; return 2; }
+    current_real="$(realpath -e -- "$current" 2>/dev/null)" || {
+      _automation_temp_error "$label path component is not canonical: $current"
+      return 2
+    }
+    case "$current_real/" in
+      "$repo_real/"*) ;;
+      *) _automation_temp_error "$label escapes repository: $current_real"; return 2 ;;
+    esac
+  done
+}
+
 automation_temp_inode_configure() {
   AUTOMATION_TEMP_INODE_SAFETY_ENABLED="${AUTOMATION_TEMP_INODE_SAFETY_ENABLED:-1}"
   AUTOMATION_TEMP_ROOT_RELATIVE="${AUTOMATION_TEMP_ROOT_RELATIVE:-.automation/tmp}"
@@ -123,7 +160,7 @@ _automation_temp_prepare_base() {
   [[ -d "$repo_real" && ! -L "$repo_real" ]] || { _automation_temp_error "repository root is unsafe: $repo_real"; return 2; }
   base_candidate="$repo_real/$AUTOMATION_TEMP_ROOT_RELATIVE"
   umask 077
-  mkdir -p -- "$base_candidate/sessions" || { _automation_temp_error "cannot create managed temp base: $base_candidate"; return 2; }
+  _automation_temp_create_managed_directory "$repo_real" "$AUTOMATION_TEMP_ROOT_RELATIVE/sessions" 'managed temp base' || return 2
   [[ ! -L "$base_candidate" && ! -L "$base_candidate/sessions" ]] || { _automation_temp_error 'managed temp base must not be a symlink'; return 2; }
   base_real="$(realpath -e -- "$base_candidate")" || return 2
   sessions_real="$(realpath -e -- "$base_candidate/sessions")" || return 2

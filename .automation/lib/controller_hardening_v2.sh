@@ -61,6 +61,117 @@ automation_v2_safe_repo_path() {
   esac
 }
 
+automation_v2_validate_bugfix_from_artifacts() {
+  local repo=${1:?repo is required}
+  local candidate=${2:?--from-artifacts path is required}
+  local repo_real candidate_input candidate_lexical candidate_real relative lexical_relative artifacts_real symlink_entry current part original_part
+  local -a _automation_v2_artifact_parts=()
+  local -a _automation_v2_original_artifact_parts=()
+  repo_real=$(realpath -e -- "$repo") || return 2
+  IFS=/ read -r -a _automation_v2_original_artifact_parts <<< "$candidate"
+  for original_part in "${_automation_v2_original_artifact_parts[@]}"; do
+    [[ "$original_part" != "." && "$original_part" != ".." ]] || {
+      printf 'ERROR: --from-artifacts contains unsafe path component: %s\n' "$candidate" >&2
+      return 2
+    }
+  done
+  case "$candidate" in
+    /*) candidate_input="$candidate" ;;
+    *) candidate_input="$repo_real/$candidate" ;;
+  esac
+  candidate_lexical=$(realpath -m -s -- "$candidate_input") || return 2
+  case "$candidate" in
+    .env|.env.*|*/.env|*/.env.*)
+      printf 'ERROR: --from-artifacts must not reference .env paths: %s\n' "$candidate" >&2
+      return 2
+      ;;
+  esac
+  [[ -e "$candidate_input" ]] || {
+    printf 'ERROR: --from-artifacts path not found: %s\n' "$candidate" >&2
+    return 2
+  }
+  [[ ! -L "$candidate_input" ]] || {
+    printf 'ERROR: --from-artifacts path must not be a symlink: %s\n' "$candidate" >&2
+    return 2
+  }
+  case "$candidate_lexical" in
+    "$repo_real"/*) lexical_relative=${candidate_lexical#"$repo_real"/} ;;
+    *)
+      printf 'ERROR: --from-artifacts path must stay under repository artifact boundaries: %s\n' "$candidate" >&2
+      return 2
+      ;;
+  esac
+  current="$repo_real"
+  IFS=/ read -r -a _automation_v2_artifact_parts <<< "$lexical_relative"
+  for part in "${_automation_v2_artifact_parts[@]}"; do
+    [[ -n "$part" && "$part" != "." && "$part" != ".." ]] || {
+      printf 'ERROR: --from-artifacts contains unsafe path component: %s\n' "$candidate" >&2
+      return 2
+    }
+    current="$current/$part"
+    if [[ -L "$current" ]]; then
+      printf 'ERROR: --from-artifacts path must not traverse symlinks: %s\n' "$candidate" >&2
+      return 2
+    fi
+  done
+  candidate_real=$(realpath -e -- "$candidate_input") || return 2
+  case "$candidate_real" in
+    "$repo_real"/*) relative=${candidate_real#"$repo_real"/} ;;
+    *)
+      printf 'ERROR: --from-artifacts path must stay under repository artifact boundaries: %s\n' "$candidate" >&2
+      return 2
+      ;;
+  esac
+  case "$relative" in
+    .env|.env.*|*/.env|*/.env.*)
+      printf 'ERROR: --from-artifacts must not reference .env paths: %s\n' "$candidate" >&2
+      return 2
+      ;;
+    artifacts.zip)
+      [[ -f "$candidate_real" && ! -L "$candidate_real" ]] || {
+        printf 'ERROR: --from-artifacts artifact ZIP must be a non-symlink regular file: %s\n' "$candidate" >&2
+        return 2
+      }
+      printf '%s\n' "$candidate_real"
+      return 0
+      ;;
+  esac
+  if [[ "$relative" =~ ^artifacts[1-9][0-9]*\.zip$ ]]; then
+    [[ -f "$candidate_real" && ! -L "$candidate_real" ]] || {
+      printf 'ERROR: --from-artifacts artifact ZIP must be a non-symlink regular file: %s\n' "$candidate" >&2
+      return 2
+    }
+    printf '%s\n' "$candidate_real"
+    return 0
+  fi
+  [[ -d "$repo_real/artifacts" && ! -L "$repo_real/artifacts" ]] || {
+    printf 'ERROR: --from-artifacts requires a non-symlink repo-local artifacts directory.\n' >&2
+    return 2
+  }
+  artifacts_real=$(realpath -e -- "$repo_real/artifacts") || return 2
+  case "$candidate_real" in
+    "$artifacts_real"/*)
+      [[ -d "$candidate_real" && ! -L "$candidate_real" ]] || {
+        printf 'ERROR: --from-artifacts retained artifact path must be a non-symlink directory under artifacts/: %s\n' "$candidate" >&2
+        return 2
+      }
+      symlink_entry="$(find -P "$candidate_real" -mindepth 1 -type l -print -quit 2>/dev/null)" || {
+        printf 'ERROR: failed to scan --from-artifacts directory for symlinks: %s\n' "$candidate" >&2
+        return 2
+      }
+      if [[ -n "$symlink_entry" ]]; then
+        printf 'ERROR: --from-artifacts retained artifact directory must not contain symlinks: %s\n' "$symlink_entry" >&2
+        return 2
+      fi
+      printf '%s\n' "$candidate_real"
+      ;;
+    *)
+      printf 'ERROR: --from-artifacts must be repo-root artifacts.zip, artifactsN.zip, or a directory under artifacts/: %s\n' "$candidate" >&2
+      return 2
+      ;;
+  esac
+}
+
 declare -gA AUTOMATION_V2_ENV=()
 
 automation_v2_load_env_strict() {

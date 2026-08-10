@@ -211,7 +211,6 @@ function deriveVenuePairGrossCandidate(
   return acceptedCandidate(
     candidateId,
     outcomeSetEquivalence.value,
-    firstRows[0],
     grossSpread.value.impliedProbabilityPpmSum,
     grossSpread.value.grossSpreadPpm,
     grossSpread.value.quoteContributions,
@@ -223,16 +222,12 @@ function deriveVenuePairGrossCandidate(
 function acceptedCandidate(
   candidateId: string,
   outcomeSetEquivalence: B1MarketOutcomeSetEquivalence,
-  representativeRow: B1MultiVenueMarketRow | undefined,
   impliedProbabilityPpmSum: bigint,
   grossSpreadPpm: bigint,
   selectedQuotes: readonly B1GrossQuoteContribution[],
   synchronizedQuotePairs: readonly B1SynchronizedQuotePair[],
   records: readonly B1MultiVenueMarketRow[],
 ): B1AcceptedGrossOpportunityCandidate {
-  if (representativeRow === undefined) {
-    throw new Error('B1 accepted gross candidate requires a representative row.');
-  }
   const firstSynchronizedQuotePair = synchronizedQuotePairs[0];
   if (firstSynchronizedQuotePair === undefined) {
     throw new Error('B1 accepted gross candidate requires synchronized quote pairs.');
@@ -243,11 +238,11 @@ function acceptedCandidate(
     candidateId,
     grossOpportunityKind: 'deterministic_gross_cross_venue_candidate',
     marketEquivalenceKey: outcomeSetEquivalence.marketEquivalenceKey,
-    canonicalEventId: representativeRow.canonicalEventId,
-    marketType: representativeRow.marketType,
-    period: representativeRow.period,
-    lineValue: representativeRow.lineValue,
-    currency: representativeRow.currency,
+    canonicalEventId: outcomeSetEquivalence.canonicalEventId,
+    marketType: outcomeSetEquivalence.marketType,
+    period: outcomeSetEquivalence.period,
+    lineValue: outcomeSetEquivalence.lineValue,
+    currency: outcomeSetEquivalence.currency,
     venuePairKey: outcomeSetEquivalence.venuePair.key,
     firstVenueOrBookmakerId: outcomeSetEquivalence.venuePair.firstVenueOrBookmakerId,
     secondVenueOrBookmakerId: outcomeSetEquivalence.venuePair.secondVenueOrBookmakerId,

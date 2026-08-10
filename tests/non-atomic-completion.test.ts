@@ -134,6 +134,30 @@ test('non-atomic completion rejects missing scenario rows for a solved leg', () 
   ]);
 });
 
+test('non-atomic completion rejects whole standard-binary scenario omission', () => {
+  const input = createTwoUnitSolvedInput();
+  const solved = solveStandardBinaryStakeVector(input);
+  assert.equal(solved.ok, true);
+
+  const result = simulateNonAtomicPaperGroupCompletion({
+    stakeVector: solved.value,
+    matrix: {
+      rows: Object.freeze(input.matrix.rows.filter((row) => row.scenarioId === 'yes_wins')),
+    },
+    manualKill: false,
+    events: [],
+  });
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'SCENARIO_CASHFLOW_SCENARIOS_INCOMPLETE',
+      message: 'Scenario cash-flow builder requires every standard-binary terminal scenario.',
+      evidenceRequired: 'Complete YES-wins and NO-wins scenario coverage.',
+    },
+  ]);
+});
+
 test('non-atomic completion rejects live fill amounts that do not match the solved stake quantum', () => {
   const input = createTwoUnitSolvedInput();
   const solved = solveStandardBinaryStakeVector(input);
@@ -159,6 +183,53 @@ test('non-atomic completion rejects live fill amounts that do not match the solv
   ]);
 });
 
+test('non-atomic completion accepts a solved quantum smaller than the scenario stake when scaling is integral', () => {
+  const input = createSmallerQuantumSolvedInput();
+  const solved = solveStandardBinaryStakeVector(input);
+  assert.equal(solved.ok, true);
+  assert.equal(solved.value.stakes[0]?.stakeQuantumMinor, 50n);
+
+  const result = simulateNonAtomicPaperGroupCompletion({
+    stakeVector: solved.value,
+    matrix: input.matrix,
+    manualKill: false,
+    events: [
+      { legId: 'market-001:yes', type: 'fill', stakeMinor: 50n, occurredAt: '2026-07-13T10:00:00.000Z' },
+      { legId: 'market-001:no', type: 'expire', occurredAt: '2026-07-13T10:00:01.000Z' },
+    ],
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.value.completion.groupState, 'group_incomplete');
+  assert.deepEqual(result.value.residualExposure?.scenarioNets, [
+    { scenarioId: 'no_wins', netMinor: -50n },
+    { scenarioId: 'yes_wins', netMinor: 60n },
+  ]);
+});
+
+test('non-atomic completion rejects a smaller solved quantum when matrix scaling is fractional', () => {
+  const input = createSmallerQuantumSolvedInput();
+  const fractionalMatrixInput = createSmallerQuantumSolvedInput(221n);
+  const solved = solveStandardBinaryStakeVector(input);
+  assert.equal(solved.ok, true);
+
+  const result = simulateNonAtomicPaperGroupCompletion({
+    stakeVector: solved.value,
+    matrix: fractionalMatrixInput.matrix,
+    manualKill: false,
+    events: [],
+  });
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'NON_ATOMIC_COMPLETION_MATRIX_QUANTUM_MISMATCH',
+      message: 'Non-atomic completion simulation requires solved stake quanta to scale scenario cash-flow rows to integer minor units.',
+      evidenceRequired: 'Solved stake quanta with integral deterministic scenario cash-flow contributions.',
+    },
+  ]);
+});
+
 function createTwoUnitSolvedInput(): StakeVectorInputContract {
   return {
     matrix: {
@@ -176,6 +247,27 @@ function createTwoUnitSolvedInput(): StakeVectorInputContract {
     roundingConstraints: Object.freeze([
       Object.freeze({ legId: 'market-001:yes', stepMinor: 100n }),
       Object.freeze({ legId: 'market-001:no', stepMinor: 100n }),
+    ]),
+  };
+}
+
+function createSmallerQuantumSolvedInput(winningPayoutMinor = 220n): StakeVectorInputContract {
+  return {
+    matrix: {
+      rows: Object.freeze([
+        Object.freeze({ scenarioId: 'yes_wins', legId: 'market-001:no', stakeMinor: 100n, payoutMinor: 0n, feeMinor: 0n, costMinor: 0n }),
+        Object.freeze({ scenarioId: 'yes_wins', legId: 'market-001:yes', stakeMinor: 100n, payoutMinor: winningPayoutMinor, feeMinor: 0n, costMinor: 0n }),
+        Object.freeze({ scenarioId: 'no_wins', legId: 'market-001:no', stakeMinor: 100n, payoutMinor: winningPayoutMinor, feeMinor: 0n, costMinor: 0n }),
+        Object.freeze({ scenarioId: 'no_wins', legId: 'market-001:yes', stakeMinor: 100n, payoutMinor: 0n, feeMinor: 0n, costMinor: 0n }),
+      ]),
+    },
+    capacityConstraints: Object.freeze([
+      Object.freeze({ legId: 'market-001:no', minStakeMinor: 150n, maxStakeMinor: 150n }),
+      Object.freeze({ legId: 'market-001:yes', minStakeMinor: 150n, maxStakeMinor: 150n }),
+    ]),
+    roundingConstraints: Object.freeze([
+      Object.freeze({ legId: 'market-001:no', stepMinor: 50n }),
+      Object.freeze({ legId: 'market-001:yes', stepMinor: 50n }),
     ]),
   };
 }

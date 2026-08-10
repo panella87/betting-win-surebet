@@ -9,6 +9,7 @@ import {
   createBwsReleasePackage,
   type BwsReleaseManifest,
   type BwsReleasePackageResult,
+  verifyBwsReleaseInstallation,
 } from '../src/operations/release-packaging.js';
 
 const REPO_ROOT = process.cwd();
@@ -39,6 +40,32 @@ function execFileSync(
     ].filter((part) => part.length > 0).join('\n'));
   }
   return result.stdout;
+}
+
+async function withFakePsqlPath<T>(fakePsqlPath: string, action: () => Promise<T>): Promise<T> {
+  const originalPath = process.env.PATH;
+  process.env.PATH = `${dirname(fakePsqlPath)}:${originalPath === undefined ? '' : originalPath}`;
+  try {
+    return await action();
+  } finally {
+    if (originalPath === undefined) {
+      delete process.env.PATH;
+    } else {
+      process.env.PATH = originalPath;
+    }
+  }
+}
+
+async function assertRejectsWithoutSecret(action: () => Promise<unknown>, pattern: RegExp): Promise<void> {
+  await assert.rejects(
+    action,
+    (error: unknown) => {
+      const message = error instanceof Error ? error.message : String(error);
+      assert.match(message, pattern);
+      assert.ok(!message.includes(TEST_PASSWORD), 'failure must not leak secrets');
+      return true;
+    },
+  );
 }
 
 interface ReleaseFixture {
@@ -137,7 +164,10 @@ test('extracted release verifies itself through the bundled release-packaging CL
   try {
     assert.equal(result.status, 0, result.stderr);
     assert.ok(!result.stdout.includes(TEST_PASSWORD), 'verification output must not include the private password');
-    const verification = JSON.parse(result.stdout) as {
+    const verificationOutput = result.stdout.trim().length > 0
+      ? result.stdout
+      : readFileSync(join(scratchDirectory, 'install-verification.json'), 'utf-8');
+    const verification = JSON.parse(verificationOutput) as {
       archiveCheck: { verified: boolean };
       schema: string;
       semanticFingerprint: string;
@@ -150,29 +180,51 @@ test('extracted release verifies itself through the bundled release-packaging CL
 
     const symlinkArchive = join(fixture.outputDirectory, 'tampered-symlink-release.tar.gz');
     createArchiveWithSymlinkMember(extraction.rootDirectory, extraction.manifest.releaseId, symlinkArchive);
-    const symlinkResult = spawnSync(
-      'node',
-      [
-        join(extraction.rootDirectory, 'dist', 'packages', 'bootstrap', 'src', 'cli', 'bws-release-packaging.js'),
-        'verify-install',
-        '--release-dir',
-        extraction.rootDirectory,
-        '--env-file',
-        privateEnvFile,
-        '--scratch-dir',
-        join(extraction.tempDirectory, 'scratch-symlink'),
-        '--archive',
-        symlinkArchive,
-      ],
-      {
-        cwd: extraction.rootDirectory,
-        encoding: 'utf-8',
-        env,
-        stdio: 'pipe',
-      },
+    await assert.rejects(
+      () => withFakePsqlPath(fakeBin, () => verifyBwsReleaseInstallation({
+        archivePath: symlinkArchive,
+        envFile: privateEnvFile,
+        releaseDirectory: extraction.rootDirectory,
+        scratchDirectory: join(extraction.tempDirectory, 'scratch-symlink'),
+      })),
+      /regular file/u,
     );
-    assert.notEqual(symlinkResult.status, 0);
-    assert.match(symlinkResult.stderr, /regular file/u);
+
+    const contentTamperedArchive = join(fixture.outputDirectory, 'tampered-content-release.tar.gz');
+    createArchiveWithTamperedMemberContent(
+      extraction.rootDirectory,
+      extraction.manifest.releaseId,
+      'package-lock.json',
+      contentTamperedArchive,
+    );
+    await assert.rejects(
+      () => withFakePsqlPath(fakeBin, () => verifyBwsReleaseInstallation({
+        archivePath: contentTamperedArchive,
+        envFile: privateEnvFile,
+        releaseDirectory: extraction.rootDirectory,
+        scratchDirectory: join(extraction.tempDirectory, 'scratch-content-tamper'),
+      })),
+      /archive file checksum mismatch/i,
+    );
+
+    const [firstExecutable] = extraction.manifest.executables;
+    assert.ok(firstExecutable !== undefined);
+    const modeTamperedArchive = join(fixture.outputDirectory, 'tampered-mode-release.tar.gz');
+    createArchiveWithTamperedMemberMode(
+      extraction.rootDirectory,
+      extraction.manifest.releaseId,
+      firstExecutable.path,
+      modeTamperedArchive,
+    );
+    await assert.rejects(
+      () => withFakePsqlPath(fakeBin, () => verifyBwsReleaseInstallation({
+        archivePath: modeTamperedArchive,
+        envFile: privateEnvFile,
+        releaseDirectory: extraction.rootDirectory,
+        scratchDirectory: join(extraction.tempDirectory, 'scratch-mode-tamper'),
+      })),
+      /archive file executability mismatch/i,
+    );
   } finally {
     cleanupExtraction(extraction.tempDirectory);
     rmSync(dirname(fakeBin), { force: true, recursive: true });
@@ -306,10 +358,6 @@ test('install verification rejects tampered releases and partial private configu
   const tamperedPackageLock = join(extraction.rootDirectory, 'package-lock.json');
   const fakeBin = createFakePostgreSqlClient('16.3');
   const scratchDirectory = join(extraction.tempDirectory, 'scratch');
-  const env = {
-    ...process.env,
-    PATH: `${fakeBin}:${process.env.PATH === undefined ? '' : process.env.PATH}`,
-  };
   const traversalExtraction = extractReleaseArchive(fixture.result.archiveFile);
   const traversalEnvFile = join(traversalExtraction.tempDirectory, 'private.env');
   writePrivateEnvironmentFile(traversalEnvFile, traversalExtraction.manifest, TEST_PASSWORD);
@@ -346,78 +394,37 @@ test('install verification rejects tampered releases and partial private configu
     'utf-8',
   );
   rewriteReleaseChecksum(traversalExtraction.rootDirectory, 'release-manifest.json', unsafeTraversalManifestJson);
-  const traversalResult = spawnSync(
-    'node',
-    [
-      DIST_RELEASE_CLI,
-      'verify-install',
-      '--release-dir',
-      traversalExtraction.rootDirectory,
-      '--env-file',
-      traversalEnvFile,
-      '--scratch-dir',
-      join(traversalExtraction.tempDirectory, 'scratch'),
-    ],
-    {
-      cwd: REPO_ROOT,
-      encoding: 'utf-8',
-      env,
-      stdio: 'pipe',
-    },
+  await assertRejectsWithoutSecret(
+    () => withFakePsqlPath(fakeBin, () => verifyBwsReleaseInstallation({
+      envFile: traversalEnvFile,
+      releaseDirectory: traversalExtraction.rootDirectory,
+      scratchDirectory: join(traversalExtraction.tempDirectory, 'scratch'),
+    })),
+    /strict relative path|unsafe component|escapes repository/u,
   );
-  assert.notEqual(traversalResult.status, 0);
-  assert.match(traversalResult.stderr, /strict relative path|unsafe component|escapes repository/u);
 
   writeFileSync(tamperedPackageLock, `${readFileSync(tamperedPackageLock, 'utf-8')}\n`, 'utf-8');
-  const tamperResult = spawnSync(
-    'node',
-    [
-      DIST_RELEASE_CLI,
-      'verify-install',
-      '--release-dir',
-      extraction.rootDirectory,
-      '--env-file',
-      privateEnvFile,
-      '--scratch-dir',
+  await assertRejectsWithoutSecret(
+    () => withFakePsqlPath(fakeBin, () => verifyBwsReleaseInstallation({
+      envFile: privateEnvFile,
+      releaseDirectory: extraction.rootDirectory,
       scratchDirectory,
-    ],
-    {
-      cwd: REPO_ROOT,
-      encoding: 'utf-8',
-      env,
-      stdio: 'pipe',
-    },
+    })),
+    /checksum mismatch|package-lock/i,
   );
-  assert.notEqual(tamperResult.status, 0);
-  assert.match(tamperResult.stderr, /checksum mismatch|package-lock/i);
-  assert.ok(!tamperResult.stderr.includes(TEST_PASSWORD), 'tamper failure must not leak secrets');
 
   const cleanExtraction = extractReleaseArchive(fixture.result.archiveFile);
   const partialEnvFile = join(cleanExtraction.tempDirectory, 'partial.env');
   writePrivateEnvironmentFile(partialEnvFile, cleanExtraction.manifest, TEST_PASSWORD, ['POSTGRES_USER']);
-  const partialResult = spawnSync(
-    'node',
-    [
-      DIST_RELEASE_CLI,
-      'verify-install',
-      '--release-dir',
-      cleanExtraction.rootDirectory,
-      '--env-file',
-      partialEnvFile,
-      '--scratch-dir',
-      join(cleanExtraction.tempDirectory, 'scratch'),
-    ],
-    {
-      cwd: REPO_ROOT,
-      encoding: 'utf-8',
-      env,
-      stdio: 'pipe',
-    },
-  );
   try {
-    assert.notEqual(partialResult.status, 0);
-    assert.match(partialResult.stderr, /POSTGRES_USER/);
-    assert.ok(!partialResult.stderr.includes(TEST_PASSWORD), 'partial-config failure must not leak secrets');
+    await assertRejectsWithoutSecret(
+      () => withFakePsqlPath(fakeBin, () => verifyBwsReleaseInstallation({
+        envFile: partialEnvFile,
+        releaseDirectory: cleanExtraction.rootDirectory,
+        scratchDirectory: join(cleanExtraction.tempDirectory, 'scratch'),
+      })),
+      /POSTGRES_USER/,
+    );
   } finally {
     cleanupExtraction(extraction.tempDirectory);
     cleanupExtraction(traversalExtraction.tempDirectory);
@@ -499,6 +506,104 @@ function createArchiveWithSymlinkMember(releaseDirectory: string, releaseId: str
   );
   const digest = createHash('sha256').update(readFileSync(archivePath)).digest('hex');
   writeFileSync(`${archivePath}.sha256`, `${digest}  ${basename(archivePath)}\n`, 'utf-8');
+}
+
+function createArchiveWithTamperedMemberContent(
+  releaseDirectory: string,
+  releaseId: string,
+  tamperedRelativePath: string,
+  archivePath: string,
+): void {
+  createTamperedArchive({
+    archivePath,
+    releaseDirectory,
+    releaseId,
+    tamperKind: 'content',
+    tamperedRelativePath,
+  });
+}
+
+function createArchiveWithTamperedMemberMode(
+  releaseDirectory: string,
+  releaseId: string,
+  tamperedRelativePath: string,
+  archivePath: string,
+): void {
+  createTamperedArchive({
+    archivePath,
+    releaseDirectory,
+    releaseId,
+    tamperKind: 'mode',
+    tamperedRelativePath,
+  });
+}
+
+function createTamperedArchive(request: Readonly<{
+  readonly archivePath: string;
+  readonly releaseDirectory: string;
+  readonly releaseId: string;
+  readonly tamperKind: 'content' | 'mode';
+  readonly tamperedRelativePath: string;
+}>): void {
+  execFileSync(
+    'python3',
+    [
+      '-c',
+      [
+        'import gzip',
+        'import io',
+        'import os',
+        'import sys',
+        'import tarfile',
+        'release_directory = sys.argv[1]',
+        'release_id = sys.argv[2]',
+        'tampered_relative_path = sys.argv[3]',
+        'tamper_kind = sys.argv[4]',
+        'archive_path = sys.argv[5]',
+        'found = False',
+        'entries = []',
+        'for root, dirs, files in os.walk(release_directory):',
+        '    dirs.sort()',
+        '    files.sort()',
+        '    for name in files:',
+        '        absolute = os.path.join(root, name)',
+        '        release_relative = os.path.relpath(absolute, release_directory)',
+        '        archive_relative = os.path.join(release_id, release_relative)',
+        '        entries.append((absolute, release_relative, archive_relative))',
+        'with open(archive_path, "wb") as raw_handle:',
+        '    with gzip.GzipFile(filename="", mode="wb", fileobj=raw_handle, mtime=0) as gzip_handle:',
+        '        with tarfile.open(fileobj=gzip_handle, mode="w") as archive:',
+        '            for absolute, release_relative, archive_relative in entries:',
+        '                info = archive.gettarinfo(absolute, arcname=archive_relative)',
+        '                info.uid = 0',
+        '                info.gid = 0',
+        '                info.uname = ""',
+        '                info.gname = ""',
+        '                info.mtime = 0',
+        '                if release_relative == tampered_relative_path:',
+        '                    found = True',
+        '                    if tamper_kind == "content":',
+        '                        contents = b"tampered archive-only contents\\n"',
+        '                        info.size = len(contents)',
+        '                        archive.addfile(info, io.BytesIO(contents))',
+        '                        continue',
+        '                    if tamper_kind == "mode":',
+        '                        info.mode = info.mode & ~0o111',
+        '                with open(absolute, "rb") as handle:',
+        '                    archive.addfile(info, handle)',
+        'if not found:',
+        '    raise SystemExit(f"tamper target not found: {tampered_relative_path}")',
+      ].join('\n'),
+      request.releaseDirectory,
+      request.releaseId,
+      request.tamperedRelativePath,
+      request.tamperKind,
+      request.archivePath,
+    ],
+    { cwd: REPO_ROOT, encoding: 'utf-8', stdio: 'pipe' },
+  );
+  const digest = createHash('sha256').update(readFileSync(request.archivePath)).digest('hex');
+  writeFileSync(`${request.archivePath}.sha256`, `${digest}  ${basename(request.archivePath)}\n`, 'utf-8');
 }
 
 async function ensureRuntimeCockpitBuild(): Promise<void> {

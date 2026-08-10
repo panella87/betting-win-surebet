@@ -17,8 +17,25 @@ test('scenario cash-flow matrix rejects empty input', () => {
 test('scenario cash-flow matrix accepts non-negative fixed-point rows', () => {
   const result = validateScenarioCashflowMatrix([
     { scenarioId: 'yes_wins', legId: 'leg-yes', stakeMinor: 100n, payoutMinor: 110n, feeMinor: 1n, costMinor: 0n },
+    { scenarioId: 'no_wins', legId: 'leg-yes', stakeMinor: 100n, payoutMinor: 0n, feeMinor: 1n, costMinor: 0n },
   ]);
   assert.equal(result.ok, true);
+});
+
+test('scenario cash-flow matrix rejects omitted standard-binary terminal scenarios', () => {
+  const result = validateScenarioCashflowMatrix([
+    { scenarioId: 'yes_wins', legId: 'leg-yes', stakeMinor: 100n, payoutMinor: 110n, feeMinor: 1n, costMinor: 0n },
+    { scenarioId: 'yes_wins', legId: 'leg-no', stakeMinor: 100n, payoutMinor: 0n, feeMinor: 1n, costMinor: 0n },
+  ]);
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'SCENARIO_CASHFLOW_SCENARIOS_INCOMPLETE',
+      message: 'Scenario cash-flow builder requires every standard-binary terminal scenario.',
+      evidenceRequired: 'Complete YES-wins and NO-wins scenario coverage.',
+    },
+  ]);
 });
 
 test('scenario cash-flow builder creates deterministic rows for both terminal scenarios', () => {

@@ -91,6 +91,13 @@ export function validateB1ScenarioCashflowMatrix(
     );
   }
   for (const row of rows) {
+    if (row.winningSelectionEquivalenceKey.length === 0) {
+      return blocked(
+        'B1_SELECTION_EQUIVALENCE_MISSING',
+        'B1 scenario cash-flow validation requires winner selection equivalence evidence for every row.',
+        'B1 scenario cash-flow winning_selection_equivalence_key.',
+      );
+    }
     if (row.stakeMinor < 0n || row.payoutMinor < 0n) {
       return blocked(
         'B1_SCENARIO_CASHFLOW_NEGATIVE_VALUE',
@@ -117,8 +124,22 @@ export function validateB1ScenarioCashflowMatrix(
     );
   }
 
+  const scenarioWinningSelectionKeys: string[] = [];
   for (const scenarioId of scenarioIds) {
     const rowsForScenario = rows.filter((row) => row.scenarioId === scenarioId);
+    const winningSelectionKeys = [...new Set(rowsForScenario.map((row) => row.winningSelectionEquivalenceKey))].sort();
+    if (winningSelectionKeys.length !== 1) {
+      return blocked(
+        'B1_SCENARIO_CASHFLOW_WINNER_INVALID',
+        'B1 scenario cash-flow validation requires one declared winning selection per terminal scenario.',
+        'One winning B1 terminal outcome per scenario.',
+      );
+    }
+    const winningSelectionKey = winningSelectionKeys[0];
+    if (winningSelectionKey === undefined) {
+      throw new Error('B1 scenario cash-flow validation lost scenario winner after non-empty row validation.');
+    }
+    scenarioWinningSelectionKeys.push(winningSelectionKey);
     const rowsSelectionKeys = rowsForScenario.map((row) => row.selectionEquivalenceKey).sort();
     for (let index = 0; index < selectionKeys.length; index += 1) {
       if (rowsSelectionKeys[index] !== selectionKeys[index]) {
@@ -135,6 +156,27 @@ export function validateB1ScenarioCashflowMatrix(
         'B1_SCENARIO_CASHFLOW_WINNER_INVALID',
         'B1 scenario cash-flow validation requires exactly one positive payout in each terminal scenario.',
         'One winning B1 terminal outcome per scenario.',
+      );
+    }
+    const winningRow = winningRows[0];
+    if (winningRow === undefined) {
+      throw new Error('B1 scenario cash-flow validation lost winning row after winner count validation.');
+    }
+    if (winningRow.selectionEquivalenceKey !== winningSelectionKey) {
+      return blocked(
+        'B1_SCENARIO_CASHFLOW_WINNER_INVALID',
+        'B1 scenario cash-flow validation requires the positive payout row to match the declared winner.',
+        'One winning B1 terminal outcome per scenario.',
+      );
+    }
+  }
+  const sortedScenarioWinningSelectionKeys = [...scenarioWinningSelectionKeys].sort();
+  for (let index = 0; index < selectionKeys.length; index += 1) {
+    if (sortedScenarioWinningSelectionKeys[index] !== selectionKeys[index]) {
+      return blocked(
+        'B1_SCENARIO_CASHFLOW_WINNER_INVALID',
+        'B1 scenario cash-flow validation requires terminal winners to cover every compared selection exactly once.',
+        'One winning B1 terminal outcome for each compared selection.',
       );
     }
   }

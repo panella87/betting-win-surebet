@@ -212,7 +212,9 @@ configure_defaults() {
   AUDIT_HANDOFF_FILE="$AUTOMATION_REPO_ROOT/.automation/autonomous-implementation-handover.env"
   IMPLEMENTATION_HANDOFF_FILE="$AUTOMATION_REPO_ROOT/.automation/bugfix-mode-handover.env"
   LOCK_FILE="$AUTOMATION_REPO_ROOT/.automation/locks/run-bugfix-autopilot.lock"
-  if [[ -n "$FROM_ARTIFACTS" ]]; then [[ -e "$FROM_ARTIFACTS" ]] || { echo "ERROR: --from-artifacts path not found" >&2; return 2; }; FROM_ARTIFACTS="$(realpath -e -- "$FROM_ARTIFACTS")"; fi
+  if [[ -n "$FROM_ARTIFACTS" ]]; then
+    FROM_ARTIFACTS="$(automation_v2_validate_bugfix_from_artifacts "$AUTOMATION_REPO_ROOT" "$FROM_ARTIFACTS")" || return 2
+  fi
 }
 
 validate_inputs() {
