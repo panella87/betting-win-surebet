@@ -468,7 +468,7 @@ test('artifact ZIP helpers reject symlinked artifact files and directories', () 
   const dir = mkdtempSync(join(tmpdir(), 'surebet-artifact-zip-symlink-'));
   const repoDir = join(dir, 'repo');
   const outsideDir = join(dir, 'outside');
-  const runDir = join(repoDir, 'artifacts', 'autonomous_implementation_test');
+  const runDir = join(repoDir, 'artifacts', 'autonomous_implementation_20260809T020304Z');
   const archivePath = join(repoDir, 'artifacts.zip');
   try {
     mkdirSync(runDir, { recursive: true });
@@ -1098,6 +1098,8 @@ test('artifact residue cleanup removes only allowlisted scratch and preserves co
   const repoDir = join(dir, 'repo');
   const artifactsDir = join(repoDir, 'artifacts');
   const runDir = join(artifactsDir, 'bugfix_autopilot_20260809T000000Z');
+  const auditRunDir = join(artifactsDir, 'autonomous_bugfix_20260809T010203Z');
+  const auditReproDir = join(auditRunDir, 'cycles', 'cycle_1', 'repro', 'partial-output');
   const privatePaperDir = join(artifactsDir, 'private-paper-mode');
   const testTmpDir = join(artifactsDir, 'test-tmp', 'negative-symlink-fixture');
   const releaseDir = join(artifactsDir, 'bws-release-package-ABC123');
@@ -1107,16 +1109,20 @@ test('artifact residue cleanup removes only allowlisted scratch and preserves co
 
   try {
     mkdirSync(runDir, { recursive: true });
+    mkdirSync(auditReproDir, { recursive: true });
     mkdirSync(privatePaperDir, { recursive: true });
     mkdirSync(testTmpDir, { recursive: true });
     mkdirSync(releaseDir, { recursive: true });
     mkdirSync(unknownDir, { recursive: true });
     writeFileSync(join(runDir, 'final_summary.txt'), 'final_status=TEST\n', 'utf-8');
+    writeFileSync(join(auditReproDir, 'reproduction.txt'), 'preserve repro evidence\n', 'utf-8');
     writeFileSync(join(privatePaperDir, 'report.json'), '{}\n', 'utf-8');
     writeFileSync(join(releaseDir, 'release.txt'), 'scratch\n', 'utf-8');
     writeFileSync(join(unknownDir, 'evidence.txt'), 'preserve\n', 'utf-8');
     writeFileSync(outsideFile, 'outside\n', 'utf-8');
     symlinkSync(outsideFile, join(testTmpDir, 'outside-link.txt'));
+    const auditReproLink = join(auditReproDir, 'b-blocked.report.json');
+    symlinkSync(outsideFile, auditReproLink);
 
     const planResult = spawnSync(
       'bash',
@@ -1128,7 +1134,8 @@ test('artifact residue cleanup removes only allowlisted scratch and preserves co
       },
     );
     assert.equal(planResult.status, 0, `${planResult.stdout}\n${planResult.stderr}`);
-    assert.match(planResult.stdout, /artifact_cleanup_selected=2/u);
+    assert.match(planResult.stdout, /artifact_cleanup_selected=3/u);
+    assert.match(planResult.stdout, /artifact_cleanup_repro_symlinks_selected=1/u);
     assert.equal(existsSync(testTmpDir), true);
     assert.equal(existsSync(releaseDir), true);
 
@@ -1154,11 +1161,16 @@ test('artifact residue cleanup removes only allowlisted scratch and preserves co
     assert.equal(existsSync(testTmpDir), false);
     assert.equal(existsSync(releaseDir), false);
     assert.equal(existsSync(runDir), true);
+    assert.equal(existsSync(auditRunDir), true);
+    assert.equal(existsSync(auditReproLink), false);
+    assert.equal(existsSync(join(auditReproDir, 'reproduction.txt')), true);
     assert.equal(existsSync(privatePaperDir), true);
     assert.equal(existsSync(unknownDir), true);
 
     const entries = listZipEntries(archivePath);
     assert.ok(entries.includes('artifacts/bugfix_autopilot_20260809T000000Z/final_summary.txt'));
+    assert.ok(entries.includes('artifacts/autonomous_bugfix_20260809T010203Z/cycles/cycle_1/repro/partial-output/reproduction.txt'));
+    assert.ok(!entries.includes('artifacts/autonomous_bugfix_20260809T010203Z/cycles/cycle_1/repro/partial-output/b-blocked.report.json'));
     assert.ok(entries.includes('artifacts/private-paper-mode/report.json'));
     assert.ok(entries.includes('artifacts/operator-evidence-custom/evidence.txt'));
     assert.ok(!entries.some((entry) => entry.startsWith('artifacts/test-tmp')));

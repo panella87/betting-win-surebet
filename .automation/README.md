@@ -33,7 +33,7 @@ Active shared helpers:
 
 `run_common.sh` provides locking, validation, Codex execution, artifact packaging, cycle artifact checks and source fingerprints. The controller hardening layer provides atomic parent locks, verified child process groups, mtime heartbeats, TERM-first cleanup, atomic child terminal results and strict parent/child identity validation.
 
-All five root controllers archive the complete retained-evidence tree under `artifacts/` using fast standard ZIP compression. Explicit test/release scratch families are pruned before symlink validation and packaging; controller runs, handoffs, private-paper reports, runtime evidence, watchdog events, and operator evidence are retained. Final summaries are refreshed after lock classification so downloaded archives contain authoritative release fields.
+All five root controllers archive the complete retained-evidence tree under `artifacts/` using fast standard ZIP compression. Explicit top-level test/release scratch families and only symlink nodes below exact autonomous child `cycles/cycle_<n>/repro/` trees are pruned before symlink validation and packaging; regular repro evidence, controller runs, handoffs, private-paper reports, runtime evidence, watchdog events, and operator evidence are retained. Final summaries are refreshed after lock classification so downloaded archives contain authoritative release fields.
 
 Parent autopilots pass `TELEGRAM_NOTIFY=0` to children and send one final parent message. Standalone controllers notify by default.
 

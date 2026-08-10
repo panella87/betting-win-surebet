@@ -918,12 +918,33 @@ automation_artifact_residue_name_is_transient() {
   esac
 }
 
+automation_artifact_repro_symlink_is_transient() {
+  local artifacts_root="${1:-}"
+  local candidate="${2:-}"
+  local relative run_dir cycles_dir cycle_dir repro_dir remainder
+
+  [[ -n "$artifacts_root" && -n "$candidate" ]] || return 1
+  case "$candidate" in
+    "$artifacts_root"/*) relative="${candidate#"$artifacts_root"/}" ;;
+    *) return 1 ;;
+  esac
+
+  IFS='/' read -r run_dir cycles_dir cycle_dir repro_dir remainder <<< "$relative"
+  [[ -n "$remainder" ]] || return 1
+  [[ "$run_dir" =~ ^autonomous_(bugfix|implementation)_[0-9]{8}T[0-9]{6}Z$ ]] || return 1
+  [[ "$cycles_dir" == "cycles" ]] || return 1
+  [[ "$cycle_dir" =~ ^cycle_[1-9][0-9]*$ ]] || return 1
+  [[ "$repro_dir" == "repro" ]] || return 1
+  return 0
+}
+
 automation_cleanup_transient_artifact_residue() {
   local root="${1:?repository root is required}"
   local mode="${2:-plan}"
   local min_age_seconds="${3:-3600}"
-  local root_real artifacts_dir artifacts_real candidate name mtime age_seconds now_epoch
+  local root_real artifacts_dir artifacts_real candidate name mtime age_seconds now_epoch relative_candidate
   local candidate_kib=0 candidate_count=0 selected_count=0 removed_count=0 reclaimed_kib=0
+  local repro_symlink_selected_count=0 repro_symlink_removed_count=0
 
   case "$mode" in plan|apply) ;; *)
     printf 'ERROR: artifact cleanup mode must be plan or apply; got %q.\n' "$mode" >&2
@@ -941,7 +962,7 @@ automation_cleanup_transient_artifact_residue() {
   root_real="$(realpath -e -- "$root")" || return 2
   artifacts_dir="$root_real/artifacts"
   if [[ ! -e "$artifacts_dir" ]]; then
-    printf 'artifact_cleanup_candidates=0\nartifact_cleanup_selected=0\nartifact_cleanup_removed=0\nartifact_cleanup_reclaimed_kib=0\n'
+    printf 'artifact_cleanup_candidates=0\nartifact_cleanup_selected=0\nartifact_cleanup_removed=0\nartifact_cleanup_reclaimed_kib=0\nartifact_cleanup_repro_symlinks_selected=0\nartifact_cleanup_repro_symlinks_removed=0\n'
     return 0
   fi
   [[ -d "$artifacts_dir" && ! -L "$artifacts_dir" ]] || {
@@ -996,10 +1017,46 @@ automation_cleanup_transient_artifact_residue() {
     fi
   done < <(find -P "$artifacts_real" -mindepth 1 -maxdepth 1 -print0)
 
+  if ! find -P "$artifacts_real" -mindepth 1 -type l -print -quit >/dev/null 2>&1; then
+    printf 'ERROR: artifact cleanup failed to scan retained evidence for transient repro symlinks: %s\n' "$artifacts_real" >&2
+    return 2
+  fi
+  while IFS= read -r -d '' candidate; do
+    automation_artifact_repro_symlink_is_transient "$artifacts_real" "$candidate" || continue
+    candidate_count=$((candidate_count + 1))
+    case "$candidate" in "$artifacts_real"/*) ;; *)
+      printf 'ERROR: artifact repro symlink candidate escaped canonical artifacts root: %s\n' "$candidate" >&2
+      return 2
+      ;;
+    esac
+    mtime="$(stat -c '%Y' -- "$candidate" 2>/dev/null)" || {
+      printf 'ERROR: artifact cleanup could not stat repro symlink candidate: %s\n' "$candidate" >&2
+      return 2
+    }
+    age_seconds=$((now_epoch - mtime))
+    (( age_seconds < 0 )) && age_seconds=0
+    (( age_seconds >= min_age_seconds )) || continue
+    selected_count=$((selected_count + 1))
+    repro_symlink_selected_count=$((repro_symlink_selected_count + 1))
+    relative_candidate="${candidate#"$root_real"/}"
+    printf 'artifact_cleanup_candidate=%s age_seconds=%s size_kib=0 kind=autonomous_cycle_repro_symlink\n' "$relative_candidate" "$age_seconds"
+    if [[ "$mode" == "apply" ]]; then
+      rm -f -- "$candidate"
+      [[ ! -e "$candidate" && ! -L "$candidate" ]] || {
+        printf 'ERROR: artifact cleanup failed to remove repro symlink candidate: %s\n' "$candidate" >&2
+        return 2
+      }
+      removed_count=$((removed_count + 1))
+      repro_symlink_removed_count=$((repro_symlink_removed_count + 1))
+    fi
+  done < <(find -P "$artifacts_real" -mindepth 1 -type l -print0)
+
   printf 'artifact_cleanup_candidates=%s\n' "$candidate_count"
   printf 'artifact_cleanup_selected=%s\n' "$selected_count"
   printf 'artifact_cleanup_removed=%s\n' "$removed_count"
   printf 'artifact_cleanup_reclaimed_kib=%s\n' "$reclaimed_kib"
+  printf 'artifact_cleanup_repro_symlinks_selected=%s\n' "$repro_symlink_selected_count"
+  printf 'artifact_cleanup_repro_symlinks_removed=%s\n' "$repro_symlink_removed_count"
 }
 
 automation_refresh_final_artifacts_zip() {

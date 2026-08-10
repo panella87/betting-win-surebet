@@ -82,7 +82,7 @@ Executable command lists remain in `automation.config.sh`, `tools/required_execu
 
 ## Artifact residue cleanup protection
 
-`cleanup_automation_artifact_residue.sh`, `.automation/lib/run_common.sh`, and `.automation/lib/controller_hardening_v2.sh` enforce the retained-artifact boundary. They may remove only explicitly allowlisted test/release scratch families. Canonical controller run directories, handoffs, private-paper reports, runtime evidence, watchdog events, and operator evidence must not be selected by cleanup. Full and incremental artifact packaging clean transient residue before symlink validation so a failed test fixture cannot block an otherwise validated controller result.
+`cleanup_automation_artifact_residue.sh`, `.automation/lib/run_common.sh`, and `.automation/lib/controller_hardening_v2.sh` enforce the retained-artifact boundary. They may remove only explicitly allowlisted top-level test/release scratch families and symlink nodes below exact autonomous child `cycles/cycle_<n>/repro/` trees. Regular repro files, canonical controller run directories, handoffs, private-paper reports, runtime evidence, watchdog events, and operator evidence must not be selected by cleanup. A symlink outside that exact nested rule remains fatal. Full and incremental artifact packaging clean transient residue before symlink validation so a failed negative-test fixture cannot block an otherwise validated controller result.
 
 ## Bugfix completion next-area contract
 

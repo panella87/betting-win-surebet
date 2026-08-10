@@ -25,9 +25,10 @@ Options:
   --help                        Show this help.
 
 Safety:
-  Only explicit test/release scratch names are eligible. Canonical controller run
-  directories, private-paper reports, runtime evidence, handoffs, watchdog events,
-  and other operator evidence are preserved.
+  Only explicit top-level test/release scratch names and symlink nodes below exact
+  autonomous child cycles/cycle_N/repro/ trees are eligible. Regular repro files,
+  canonical controller runs, private-paper reports, runtime evidence, handoffs,
+  watchdog events, and other operator evidence are preserved.
 EOF_USAGE
 }
 

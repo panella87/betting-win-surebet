@@ -1,3 +1,10 @@
+## 2026-08-10 - Nested autonomous repro symlink artifact publication repair
+
+- Extended allowlist-only artifact cleanup to remove only symlink nodes below exact timestamped autonomous bugfix/implementation `cycles/cycle_<n>/repro/` trees before packaging.
+- Preserved all regular reproduction files, canonical controller directories, handoffs, ledgers, runtime evidence, operator evidence, and fail-closed rejection for every symlink outside the exact nested rule.
+- Added dynamic packaging coverage for the observed `b-blocked.report.json` repro-symlink failure and retained evidence around it.
+- Did not alter strategy logic, runtime behavior, database state, provider boundaries, execution policy, or the validated area-6 source repair.
+
 ## 2026-08-09 - Wave 61 external-runtime preflight fixture call-site repair
 
 - Completed the Wave 61 upstream-checkout portability change by passing the repository path read from the generated upstream lock to every `writeApiEnvFile` test-fixture call site.

@@ -1,7 +1,7 @@
 # Artifact retention and cleanup
 
 ```text
-policy=BWS_AUTOMATION_ARTIFACT_RETENTION_V1
+policy=BWS_AUTOMATION_ARTIFACT_RETENTION_V2
 cleanup_script=cleanup_automation_artifact_residue.sh
 default_mode=plan
 apply_requires=--apply
@@ -27,7 +27,7 @@ paper_autopilot_<timestamp>/
 private-paper-mode/
 paper-runtime-evidence/
 temp_inode_watchdog_events/
-source handoffs, child results and campaign ledgers under canonical run directories
+source handoffs, child results, campaign ledgers and regular repro evidence under canonical run directories
 any other top-level path not present in the explicit transient allowlist
 ```
 
@@ -58,7 +58,16 @@ pinned-intake-*
 corrected-settlement-input-*
 ```
 
-These names are repository test/release scratch surfaces. Cleanup is top-level only, validates the canonical repository and artifacts roots, does not follow symlinks, and refuses unknown modes or invalid ages.
+These names are repository test/release scratch surfaces. In addition, cleanup may remove only the symlink nodes—never regular files or directories—below these exact nested reproduction roots:
+
+```text
+autonomous_bugfix_<timestamp>/cycles/cycle_<positive-integer>/repro/**
+autonomous_implementation_<timestamp>/cycles/cycle_<positive-integer>/repro/**
+```
+
+Those symlink nodes are deliberately created negative-test inputs and cannot be represented safely in the retained ZIP. Their surrounding reproduction files and canonical controller run directories remain intact. A symlink at the run, `cycles`, `cycle_<n>`, or `repro` directory itself is not eligible and remains fatal.
+
+Cleanup validates the canonical repository and artifacts roots, never follows symlinks, and refuses unknown modes or invalid ages. Every symlink outside the exact nested rule remains fatal during packaging.
 
 ## Operator commands
 

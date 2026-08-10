@@ -92,7 +92,7 @@ The managed cockpit build replaces browser assets but atomically preserves `dist
 
 ## Evidence packaging
 
-All root controllers archive the complete retained-evidence portion of `artifacts/` with fast standard ZIP compression and refresh the current final summary after lock classification. Before full or incremental packaging, explicit test/release scratch families are removed by `cleanup_automation_artifact_residue.sh`; canonical controller runs, handoffs, private-paper reports, runtime evidence, watchdog events, and operator evidence are preserved. Repo-local temporary files are used instead of relying on writable `/tmp`.
+All root controllers archive the complete retained-evidence portion of `artifacts/` with fast standard ZIP compression and refresh the current final summary after lock classification. Before full or incremental packaging, explicit top-level test/release scratch families and only non-archivable symlink nodes below exact autonomous child `cycles/cycle_<n>/repro/` trees are removed by `cleanup_automation_artifact_residue.sh`; regular repro evidence, canonical controller runs, handoffs, private-paper reports, runtime evidence, watchdog events, and operator evidence are preserved. Repo-local temporary files are used instead of relying on writable `/tmp`.
 
 For status, inspect machine-readable retained evidence. Do not infer success from elapsed time or exit code alone.
 
@@ -119,4 +119,4 @@ A clean bugfix re-audit may report `NEXT_AUDIT_AREA=none` or the exact next non-
 
 ## Artifact retention and cleanup
 
-See `docs/automation/artifact-retention-and-cleanup.md`. The cleanup command defaults to plan mode. Destructive cleanup requires `--apply`, uses an explicit top-level allowlist, never follows symlinks, and can atomically rebuild root `artifacts.zip`. Packaging invokes the same cleanup policy automatically to prevent transient test fixtures from blocking terminal artifact publication.
+See `docs/automation/artifact-retention-and-cleanup.md`. The cleanup command defaults to plan mode. Destructive cleanup requires `--apply`, uses an explicit top-level allowlist plus one exact nested autonomous-child repro-symlink rule, never follows symlinks, and can atomically rebuild root `artifacts.zip`. Packaging invokes the same cleanup policy automatically to prevent transient negative-test fixtures from blocking terminal artifact publication.

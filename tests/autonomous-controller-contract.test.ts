@@ -28,6 +28,9 @@ test('standard automation root scripts and shared helpers are installed', () => 
   assert.match(read('.automation/lib/run_common.sh'), /automation_terminate_process_group\(\)/);
   assert.match(read('.automation/lib/run_common.sh'), /automation_cleanup_transient_artifact_residue\(\)/);
   assert.match(read('.automation/lib/run_common.sh'), /automation_artifact_residue_name_is_transient\(\)/);
+  assert.match(read('.automation/lib/run_common.sh'), /automation_artifact_repro_symlink_is_transient\(\)/);
+  assert.match(read('.automation/lib/run_common.sh'), /artifact_cleanup_repro_symlinks_selected=/);
+  assert.match(read('.automation/lib/run_common.sh'), /kind=autonomous_cycle_repro_symlink/);
   assert.match(read('cleanup_automation_artifact_residue.sh'), /--rebuild-artifacts-zip/);
   assert.match(read('cleanup_automation_artifact_residue.sh'), /AUTOMATION_ARTIFACT_RESIDUE_CLEANUP_OK/);
   assert.match(read('.automation/lib/run_common.sh'), /zip -q -1 -r "\$zip_tmp" artifacts/);
