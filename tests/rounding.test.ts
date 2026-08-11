@@ -13,7 +13,7 @@ test('fixed-point conversion rejects excessive precision', () => {
 });
 
 test('fixed-point conversion rejects invalid scale values deterministically', () => {
-  for (const scale of [Number.NaN, 2.5, -1, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY]) {
+  for (const scale of [Number.NaN, 2.5, -1, 19, Number.MAX_SAFE_INTEGER, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY]) {
     const result = toMinorUnits('1.2', scale);
     assert.equal(result.ok, false);
     assert.deepEqual(result.blockers, [

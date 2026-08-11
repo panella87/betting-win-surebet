@@ -2,6 +2,7 @@ import { accepted, blocked, type BoundaryResult } from '../contracts/local-types
 import type { ScenarioCashflowMatrix } from '../scenarios/scenario-cashflow.js';
 import { validateScenarioCashflowMatrix } from '../scenarios/scenario-cashflow.js';
 import type {
+  PaperGroupCompletionState,
   PaperGroupCompletionSnapshot,
   PaperLegCompletionSnapshot,
   PaperLegCompletionState,
@@ -31,6 +32,29 @@ export function analyzeResidualExposure(input: ResidualExposureInput): BoundaryR
     return matrixValidation;
   }
 
+  if (typeof input.completion.manualKill !== 'boolean') {
+    return blocked(
+      'RESIDUAL_EXPOSURE_COMPLETION_AGGREGATE_INVALID',
+      'Residual exposure analysis requires completion manualKill to be an explicit boolean.',
+      'Explicit boolean manualKill evidence for the local paper completion group.',
+    );
+  }
+  if (!isPaperGroupCompletionState(input.completion.groupState)) {
+    return blocked(
+      'RESIDUAL_EXPOSURE_COMPLETION_AGGREGATE_INVALID',
+      'Residual exposure analysis requires a supported aggregate completion group state.',
+      'Supported local paper completion groupState evidence.',
+    );
+  }
+  const expectedGroupState = derivePaperGroupCompletionState(input.completion.legs, input.completion.manualKill);
+  if (input.completion.groupState !== expectedGroupState) {
+    return blocked(
+      'RESIDUAL_EXPOSURE_COMPLETION_GROUP_STATE_MISMATCH',
+      'Residual exposure analysis requires aggregate completion group state to match leg snapshots.',
+      'Local paper completion groupState derived from completion leg snapshots.',
+    );
+  }
+
   if (input.completion.groupState !== 'group_incomplete') {
     return blocked(
       'RESIDUAL_EXPOSURE_GROUP_STATE_INVALID',
@@ -39,7 +63,23 @@ export function analyzeResidualExposure(input: ResidualExposureInput): BoundaryR
     );
   }
 
-  const completionLegIds = new Set(input.completion.legs.map((leg) => leg.legId));
+  const completionLegIds = new Set<string>();
+  for (const leg of input.completion.legs) {
+    const snapshotValidation = validateResidualCompletionLegSnapshot(leg);
+    if (!snapshotValidation.ok) {
+      return snapshotValidation;
+    }
+
+    if (completionLegIds.has(leg.legId)) {
+      return blocked(
+        'RESIDUAL_EXPOSURE_DUPLICATE_COMPLETION_LEG',
+        'Residual exposure analysis requires exactly one completion snapshot per incomplete group leg id.',
+        'Unique incomplete local paper completion leg ids.',
+      );
+    }
+    completionLegIds.add(leg.legId);
+  }
+
   const rowsByLegId = new Map<string, Map<string, ScenarioCashflowMatrix['rows'][number]>>();
   const scenarioIdSet = new Set<string>();
   for (const row of input.matrix.rows) {
@@ -76,14 +116,6 @@ export function analyzeResidualExposure(input: ResidualExposureInput): BoundaryR
   const filledLegIds: string[] = [];
   const excludedLegIds: string[] = [];
   for (const leg of input.completion.legs) {
-    if (!supportsResidualExposureState(leg.state)) {
-      return blocked(
-        'RESIDUAL_EXPOSURE_STATE_INCONSISTENT',
-        'Residual exposure analysis only supports incomplete local paper groups composed of filled, failed, or stale legs.',
-        'Incomplete local paper completion snapshots limited to filled, failed, and stale legs.',
-      );
-    }
-
     const rowsForLeg = rowsByLegId.get(leg.legId);
     if (!rowsForLeg) {
       return blocked(
@@ -153,6 +185,78 @@ export function analyzeResidualExposure(input: ResidualExposureInput): BoundaryR
 
 function supportsResidualExposureState(state: PaperLegCompletionState): boolean {
   return state === 'leg_filled' || state === 'leg_failed' || state === 'leg_stale';
+}
+
+function validateResidualCompletionLegSnapshot(
+  leg: PaperLegCompletionSnapshot,
+): BoundaryResult<PaperLegCompletionSnapshot> {
+  if (!supportsResidualExposureState(leg.state)) {
+    return blocked(
+      'RESIDUAL_EXPOSURE_STATE_INCONSISTENT',
+      'Residual exposure analysis only supports incomplete local paper groups composed of filled, failed, or stale legs.',
+      'Incomplete local paper completion snapshots limited to filled, failed, and stale legs.',
+    );
+  }
+
+  if (typeof leg.reservedStakeMinor !== 'bigint' || typeof leg.filledStakeMinor !== 'bigint') {
+    return blocked(
+      'RESIDUAL_EXPOSURE_COMPLETION_SNAPSHOT_STATE_STAKE_MISMATCH',
+      'Residual exposure analysis requires completion leg state to match stake evidence.',
+      'State-aligned local paper completion leg stake evidence.',
+    );
+  }
+
+  if (leg.state === 'leg_filled') {
+    if (leg.reservedStakeMinor !== 0n || leg.filledStakeMinor <= 0n) {
+      return blocked(
+        'RESIDUAL_EXPOSURE_COMPLETION_SNAPSHOT_STATE_STAKE_MISMATCH',
+        'Residual exposure analysis requires completion leg state to match stake evidence.',
+        'State-aligned local paper completion leg stake evidence.',
+      );
+    }
+    return accepted(leg);
+  }
+
+  if (leg.reservedStakeMinor !== 0n || leg.filledStakeMinor !== 0n) {
+    return blocked(
+      'RESIDUAL_EXPOSURE_COMPLETION_SNAPSHOT_STATE_STAKE_MISMATCH',
+      'Residual exposure analysis requires completion leg state to match stake evidence.',
+      'State-aligned local paper completion leg stake evidence.',
+    );
+  }
+
+  return accepted(leg);
+}
+
+function derivePaperGroupCompletionState(
+  legs: readonly PaperLegCompletionSnapshot[],
+  manualKill: boolean,
+): PaperGroupCompletionState {
+  if (manualKill) {
+    return 'group_killed';
+  }
+  if (legs.every((leg) => leg.state === 'leg_open')) {
+    return 'group_open';
+  }
+  if (legs.every((leg) => leg.state === 'leg_open' || leg.state === 'leg_reserved')) {
+    return 'group_reserved';
+  }
+  if (legs.every((leg) => leg.state === 'leg_filled')) {
+    return 'group_complete';
+  }
+  if (legs.every((leg) => leg.state === 'leg_filled' || leg.state === 'leg_settlement_pending')) {
+    return legs.some((leg) => leg.state === 'leg_settlement_pending') ? 'group_settlement_pending' : 'group_complete';
+  }
+  return 'group_incomplete';
+}
+
+function isPaperGroupCompletionState(value: string): value is PaperGroupCompletionState {
+  return value === 'group_open'
+    || value === 'group_reserved'
+    || value === 'group_settlement_pending'
+    || value === 'group_complete'
+    || value === 'group_incomplete'
+    || value === 'group_killed';
 }
 
 function sumScenarioNetForFilledLegs(

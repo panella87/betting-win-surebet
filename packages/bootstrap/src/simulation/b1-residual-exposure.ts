@@ -52,6 +52,14 @@ export function analyzeB1ResidualExposure(
     return matrixValidation;
   }
 
+  if (!Array.isArray(legs)) {
+    return blocked(
+      'B1_RESIDUAL_EXPOSURE_LEG_INVALID',
+      'B1 residual exposure simulation requires structured residual exposure leg snapshots.',
+      'Structured B1 residual exposure leg snapshot objects.',
+    );
+  }
+
   const legsByKey = new Map<string, B1ResidualExposureLeg>();
   for (const leg of legs) {
     const legValidation = validateB1ResidualExposureLeg(leg);
@@ -126,25 +134,39 @@ export function analyzeB1ResidualExposure(
 function validateB1ResidualExposureLeg(
   leg: B1ResidualExposureLeg,
 ): BoundaryResult<B1ResidualExposureLeg> {
-  if (leg.legId.length === 0) {
+  if (typeof leg !== 'object' || leg === null) {
+    return blocked(
+      'B1_RESIDUAL_EXPOSURE_LEG_INVALID',
+      'B1 residual exposure simulation requires structured residual exposure leg snapshots.',
+      'Structured B1 residual exposure leg snapshot objects.',
+    );
+  }
+  if (typeof leg.legId !== 'string' || leg.legId.length === 0) {
     return blocked(
       'B1_RESIDUAL_EXPOSURE_LEG_ID_MISSING',
       'B1 residual exposure simulation requires stable non-empty leg ids.',
       'Stable B1 fillability leg ids.',
     );
   }
-  if (leg.selectionEquivalenceKey.length === 0) {
+  if (typeof leg.selectionEquivalenceKey !== 'string' || leg.selectionEquivalenceKey.length === 0) {
     return blocked(
       'B1_SELECTION_EQUIVALENCE_MISSING',
       'B1 residual exposure simulation requires selection equivalence evidence for every leg.',
       'B1 selection_equivalence_key for every residual exposure leg.',
     );
   }
-  if (leg.venueOrBookmakerId.length === 0) {
+  if (typeof leg.venueOrBookmakerId !== 'string' || leg.venueOrBookmakerId.length === 0) {
     return blocked(
       'B1_VENUE_PAIR_INCOMPLETE',
       'B1 residual exposure simulation requires venue evidence for every leg.',
       'B1 venue_or_bookmaker_id for every residual exposure leg.',
+    );
+  }
+  if (typeof leg.plannedStakeMinor !== 'bigint' || typeof leg.liveFilledStakeMinor !== 'bigint') {
+    return blocked(
+      'B1_RESIDUAL_EXPOSURE_STAKE_INVALID',
+      'B1 residual exposure simulation requires integer minor-unit stake fields.',
+      'B1 residual exposure stake fields encoded as bigint integer minor units.',
     );
   }
   if (leg.plannedStakeMinor <= 0n || leg.liveFilledStakeMinor < 0n) {
@@ -200,7 +222,15 @@ function buildScenarioNets(
           'B1 live fills bounded by the scenario cash-flow matrix stake.',
         );
       }
-      const payoutMinor = (row.payoutMinor * leg.liveFilledStakeMinor) / row.stakeMinor;
+      const payoutNumeratorMinor = row.payoutMinor * leg.liveFilledStakeMinor;
+      if (payoutNumeratorMinor % row.stakeMinor !== 0n) {
+        return blocked(
+          'B1_RESIDUAL_EXPOSURE_PAYOUT_SCALING_FRACTIONAL',
+          'B1 residual exposure simulation requires partial payout scaling to resolve to integer minor units.',
+          'B1 scenario cash-flow payout scaling with no fractional minor-unit remainder.',
+        );
+      }
+      const payoutMinor = payoutNumeratorMinor / row.stakeMinor;
       netMinor += payoutMinor - leg.liveFilledStakeMinor;
     }
     if (winningSelectionEquivalenceKey.length === 0) {

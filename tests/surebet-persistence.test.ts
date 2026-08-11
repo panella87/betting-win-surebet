@@ -14,6 +14,7 @@ import {
   loadSurebetMigrationFiles,
   listAppliedSurebetMigrations,
   resolveSurebetPersistenceConfig,
+  type SurebetPendingPinnedStrategyExportRecord,
   type SurebetPersistenceConfig,
 } from '../packages/persistence/src/index.js';
 import { validatePinnedBettingWinBundleIntake } from '../src/adapters/betting-win-pinned-bundle-intake.js';
@@ -88,6 +89,24 @@ test('surebet persistence config classifies malformed environment inputs', () =>
           ...optionalOverride,
         } as never),
       (error: unknown) => error instanceof SurebetPersistenceError && error.code === 'SUREBET_PERSISTENCE_CONFIG_INVALID',
+    );
+  }
+});
+
+test('pinned strategy export repository rejects noncanonical identifiers before persistence', () => {
+  const repository = new SurebetPinnedStrategyExportRepository({} as never);
+
+  for (const overrides of [
+    { exportId: ' provider-history-export.fixture-001.20260714t100000000z.fixture ' },
+    { providerGenerationIds: [' generation-id-001 '] },
+    { sourceLineageRecordIds: [' record-001 '] },
+    { sourceLineageRecordIds: ['record-001', ' record-001 '] },
+    { normalizedEvidenceIds: [' normalized-001 '] },
+  ]) {
+    assert.throws(
+      () => repository.create(createPinnedStrategyExportRecord(overrides)),
+      (error: unknown) =>
+        error instanceof SurebetPersistenceError && error.code === 'SUREBET_PINNED_STRATEGY_EXPORT_INVALID',
     );
   }
 });
@@ -508,5 +527,32 @@ function sampleUpstreamLock(): BettingWinUpstreamLock {
       'getProviderGenerations',
       'inspectSourceLineage',
     ]),
+  });
+}
+
+function createPinnedStrategyExportRecord(
+  overrides: Partial<SurebetPendingPinnedStrategyExportRecord> = {},
+): SurebetPendingPinnedStrategyExportRecord {
+  return Object.freeze({
+    intakeRecordId: 'intake-001',
+    importRunId: 'import-001',
+    upstreamLockRecordId: 'lock-001',
+    sourceSha256: '4'.repeat(64),
+    sourceLocator: '/tmp/pinned-export.json',
+    contractSchema: 'betting-win.strategy-export.v1',
+    contractAlias: 'betting-win-strategy-export.v1',
+    surebetProfile: 'surebet_standard_binary_v0',
+    exportId: 'provider-history-export.fixture-001.20260714t100000000z.fixture',
+    exportKind: 'pinned_provider_history_bundle',
+    exportProfile: 'provider_history_fixture_bundle_v1',
+    exportedAt: TEST_TIMESTAMP,
+    providerId: 'polymarket',
+    endpointId: 'endpoint-001',
+    payloadSha256: '5'.repeat(64),
+    providerGenerationIds: Object.freeze(['generation-id-001']),
+    sourceLineageRecordIds: Object.freeze(['record-001']),
+    normalizedEvidenceIds: Object.freeze(['normalized-001']),
+    importedAt: TEST_TIMESTAMP,
+    ...overrides,
   });
 }

@@ -215,6 +215,13 @@ function validateB1GeneralizedStakeVectorPolicy(
 
   const constraintsByKey = new Map<string, B1NormalizedLegConstraint>();
   for (const constraint of policy.legConstraints) {
+    if (typeof constraint !== 'object' || constraint === null || Array.isArray(constraint)) {
+      return blocked(
+        'B1_STAKE_VECTOR_CONSTRAINT_INVALID',
+        'B1 generalized stake-vector policy requires every leg constraint to be an object.',
+        'Structured B1 stake-vector leg constraint entries.',
+      );
+    }
     if (typeof constraint.selectionEquivalenceKey !== 'string' || constraint.selectionEquivalenceKey.length === 0) {
       return blocked(
         'B1_SELECTION_EQUIVALENCE_MISSING',

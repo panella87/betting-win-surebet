@@ -168,6 +168,33 @@ test('B1 fillability simulation fails closed when residual exposure exceeds the 
   ]);
 });
 
+test('B1 fillability simulation rejects non-bigint fill stakes before arithmetic', () => {
+  for (const stakeMinor of [10_000, '10000']) {
+    const result = simulateB1FillRejectionTimeout({
+      stakeVector: solvedStakeVector(),
+      maxResidualExposureMinor: 10_000n,
+      events: Object.freeze([
+        Object.freeze({
+          selectionEquivalenceKey: 'event-001:moneyline:away',
+          venueOrBookmakerId: 'venue-b',
+          type: 'fill',
+          occurredAtUtc: '2026-07-01T00:00:03.000Z',
+          stakeMinor,
+        }),
+      ]),
+    } as never);
+
+    assert.equal(result.ok, false);
+    assert.deepEqual(result.blockers, [
+      {
+        code: 'B1_FILLABILITY_FILL_STAKE_INVALID',
+        message: 'B1 fillability fill events require a positive integer minor-unit stake.',
+        evidenceRequired: 'Positive B1 fill stake in integer minor units.',
+      },
+    ]);
+  }
+});
+
 test('B1 fillability replay is deterministic after restart regardless of event order', () => {
   const events = Object.freeze([
     Object.freeze({
@@ -205,6 +232,42 @@ test('B1 fillability replay is deterministic after restart regardless of event o
   assert.equal(original.ok, true);
   assert.equal(replayed.ok, true);
   assert.deepEqual(replayed.value, original.value);
+});
+
+test('B1 fillability simulation rejects same-leg same-timestamp event ties in every input order', () => {
+  const fillEvent = Object.freeze({
+    selectionEquivalenceKey: 'event-001:moneyline:away',
+    venueOrBookmakerId: 'venue-b',
+    type: 'fill' as const,
+    occurredAtUtc: '2026-07-01T00:00:03.000Z',
+    stakeMinor: 5_000n,
+  });
+  const rejectEvent = Object.freeze({
+    selectionEquivalenceKey: 'event-001:moneyline:away',
+    venueOrBookmakerId: 'venue-b',
+    type: 'reject' as const,
+    occurredAtUtc: '2026-07-01T00:00:03.000Z',
+  });
+
+  for (const events of [
+    Object.freeze([fillEvent, rejectEvent]),
+    Object.freeze([rejectEvent, fillEvent]),
+  ]) {
+    const result = simulateB1FillRejectionTimeout({
+      stakeVector: solvedStakeVector(),
+      maxResidualExposureMinor: 10_000n,
+      events,
+    });
+
+    assert.equal(result.ok, false);
+    assert.deepEqual(result.blockers, [
+      {
+        code: 'B1_FILLABILITY_SAME_LEG_TIMESTAMP_AMBIGUOUS',
+        message: 'B1 fillability simulation rejects same-leg events with identical timestamps.',
+        evidenceRequired: 'Unambiguous B1 fillability event ordering per leg and timestamp.',
+      },
+    ]);
+  }
 });
 
 test('B1 fillability simulation rejects calendar-invalid event timestamps before replay mutation', () => {

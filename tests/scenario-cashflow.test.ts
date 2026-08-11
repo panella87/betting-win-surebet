@@ -5,6 +5,8 @@ import { parseBettingWinResourceRecords } from '../src/contracts/betting-win-res
 import { assembleStandardBinaryCompleteSet } from '../src/scenarios/complete-set.js';
 import {
   buildStandardBinaryScenarioCashflowMatrix,
+  type ScenarioCashflowLegTerms,
+  type ScenarioCashflowMatrix,
   validateScenarioCashflowMatrix,
 } from '../src/scenarios/scenario-cashflow.js';
 
@@ -20,6 +22,79 @@ test('scenario cash-flow matrix accepts non-negative fixed-point rows', () => {
     { scenarioId: 'no_wins', legId: 'leg-yes', stakeMinor: 100n, payoutMinor: 0n, feeMinor: 1n, costMinor: 0n },
   ]);
   assert.equal(result.ok, true);
+});
+
+test('scenario cash-flow matrix rejects malformed row shape before field access', () => {
+  const result = validateScenarioCashflowMatrix([
+    null,
+  ] as unknown as ScenarioCashflowMatrix['rows']);
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'SCENARIO_CASHFLOW_ROW_INVALID',
+      message: 'Scenario cash-flow rows must be structured objects.',
+      evidenceRequired: 'Structured scenario cash-flow rows.',
+    },
+  ]);
+});
+
+test('scenario cash-flow matrix rejects malformed row identities before coverage comparison', () => {
+  for (const field of ['scenarioId', 'legId'] as const) {
+    for (const malformedValue of ['', 100, null, undefined]) {
+      const malformedRow = {
+        scenarioId: 'yes_wins',
+        legId: 'leg-yes',
+        stakeMinor: 100n,
+        payoutMinor: 110n,
+        feeMinor: 1n,
+        costMinor: 0n,
+        [field]: malformedValue,
+      };
+      const result = validateScenarioCashflowMatrix([
+        malformedRow,
+        { scenarioId: 'no_wins', legId: 'leg-yes', stakeMinor: 100n, payoutMinor: 0n, feeMinor: 1n, costMinor: 0n },
+      ] as unknown as ScenarioCashflowMatrix['rows']);
+
+      assert.equal(result.ok, false);
+      assert.deepEqual(result.blockers, [
+        {
+          code: 'SCENARIO_CASHFLOW_IDENTITY_INVALID',
+          message: 'Scenario cash-flow rows require non-empty scenario and leg identities.',
+          evidenceRequired: 'Non-empty scenarioId and legId values for every cash-flow row.',
+        },
+      ]);
+    }
+  }
+});
+
+test('scenario cash-flow matrix rejects malformed fixed-point row values before comparisons', () => {
+  for (const field of ['stakeMinor', 'payoutMinor', 'feeMinor', 'costMinor'] as const) {
+    for (const malformedValue of [100, '100', null, undefined]) {
+      const malformedRow = {
+        scenarioId: 'yes_wins',
+        legId: 'leg-yes',
+        stakeMinor: 100n,
+        payoutMinor: 110n,
+        feeMinor: 1n,
+        costMinor: 0n,
+        [field]: malformedValue,
+      };
+      const result = validateScenarioCashflowMatrix([
+        malformedRow,
+        { scenarioId: 'no_wins', legId: 'leg-yes', stakeMinor: 100n, payoutMinor: 0n, feeMinor: 1n, costMinor: 0n },
+      ] as unknown as ScenarioCashflowMatrix['rows']);
+
+      assert.equal(result.ok, false);
+      assert.deepEqual(result.blockers, [
+        {
+          code: 'SCENARIO_CASHFLOW_VALUE_INVALID',
+          message: 'Cash-flow values must be bigint fixed-point amounts.',
+          evidenceRequired: 'Bigint fixed-point rows for stake, payout, fee and cost.',
+        },
+      ]);
+    }
+  }
 });
 
 test('scenario cash-flow matrix rejects omitted standard-binary terminal scenarios', () => {
@@ -102,6 +177,62 @@ test('scenario cash-flow builder rejects incomplete scenario coverage before row
       code: 'SCENARIO_CASHFLOW_SCENARIOS_INCOMPLETE',
       message: 'Scenario cash-flow builder requires every standard-binary terminal scenario.',
       evidenceRequired: 'Complete YES-wins and NO-wins scenario coverage.',
+    },
+  ]);
+});
+
+test('scenario cash-flow builder rejects malformed leg-term values before row construction', () => {
+  const completeSet = loadCompleteSet();
+
+  const malformedShape = buildStandardBinaryScenarioCashflowMatrix(completeSet, [
+    null,
+    { legId: 'market-001:no', stakeMinor: 1000000n, payoutMinor: 1490000n },
+  ] as unknown as readonly ScenarioCashflowLegTerms[]);
+  assert.equal(malformedShape.ok, false);
+  assert.deepEqual(malformedShape.blockers, [
+    {
+      code: 'SCENARIO_CASHFLOW_LEG_TERMS_INVALID',
+      message: 'Scenario cash-flow terms must be structured objects.',
+      evidenceRequired: 'Structured stake and payout terms for each complete-set leg.',
+    },
+  ]);
+
+  const malformedLegId = buildStandardBinaryScenarioCashflowMatrix(completeSet, [
+    { legId: 100, stakeMinor: 1000000n, payoutMinor: 1510000n },
+    { legId: 'market-001:no', stakeMinor: 1000000n, payoutMinor: 1490000n },
+  ] as unknown as readonly ScenarioCashflowLegTerms[]);
+  assert.equal(malformedLegId.ok, false);
+  assert.deepEqual(malformedLegId.blockers, [
+    {
+      code: 'SCENARIO_CASHFLOW_LEG_TERMS_INVALID',
+      message: 'Scenario cash-flow terms require non-empty leg identities.',
+      evidenceRequired: 'Non-empty legId values for each complete-set leg term.',
+    },
+  ]);
+
+  const malformedStake = buildStandardBinaryScenarioCashflowMatrix(completeSet, [
+    { legId: 'market-001:yes', stakeMinor: 1000000, payoutMinor: 1510000n },
+    { legId: 'market-001:no', stakeMinor: 1000000n, payoutMinor: 1490000n },
+  ] as unknown as readonly ScenarioCashflowLegTerms[]);
+  assert.equal(malformedStake.ok, false);
+  assert.deepEqual(malformedStake.blockers, [
+    {
+      code: 'SCENARIO_CASHFLOW_STAKE_INVALID',
+      message: 'Scenario cash-flow stakes must be bigint fixed-point amounts.',
+      evidenceRequired: 'Bigint fixed-point stake amounts for each complete-set leg.',
+    },
+  ]);
+
+  const malformedPayout = buildStandardBinaryScenarioCashflowMatrix(completeSet, [
+    { legId: 'market-001:yes', stakeMinor: 1000000n, payoutMinor: '1510000' },
+    { legId: 'market-001:no', stakeMinor: 1000000n, payoutMinor: 1490000n },
+  ] as unknown as readonly ScenarioCashflowLegTerms[]);
+  assert.equal(malformedPayout.ok, false);
+  assert.deepEqual(malformedPayout.blockers, [
+    {
+      code: 'SCENARIO_CASHFLOW_PAYOUT_INVALID',
+      message: 'Scenario cash-flow payouts must be bigint fixed-point amounts.',
+      evidenceRequired: 'Bigint fixed-point payout amounts for each complete-set leg.',
     },
   ]);
 });

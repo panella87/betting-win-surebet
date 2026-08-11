@@ -1,7 +1,9 @@
 import { accepted, blocked, type BoundaryResult } from '../contracts/local-types.js';
 
+const MAX_FIXED_POINT_SCALE = 18;
+
 export function toMinorUnits(decimalText: string, scale: number): BoundaryResult<bigint> {
-  if (!Number.isSafeInteger(scale) || scale < 0) {
+  if (!Number.isSafeInteger(scale) || scale < 0 || scale > MAX_FIXED_POINT_SCALE) {
     return blocked('FIXED_POINT_SCALE_INVALID', 'Scale must be a finite non-negative integer.', 'Finite non-negative fixed-point scale.');
   }
   if (!/^\d+(\.\d+)?$/.test(decimalText)) {

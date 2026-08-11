@@ -40,12 +40,13 @@ export function validateB1VoidRuleReplay(
     if (!validation.ok) {
       return validation;
     }
-    const legKey = buildB1VoidRuleLegKey(record.selectionEquivalenceKey, record.venueOrBookmakerId);
+    const validatedRecord = validation.value;
+    const legKey = buildB1VoidRuleLegKey(validatedRecord.selectionEquivalenceKey, validatedRecord.venueOrBookmakerId);
     legKeys.add(legKey);
 
     if (settlementRuleVersion === undefined) {
-      settlementRuleVersion = record.settlementRuleVersion;
-    } else if (settlementRuleVersion !== record.settlementRuleVersion) {
+      settlementRuleVersion = validatedRecord.settlementRuleVersion;
+    } else if (settlementRuleVersion !== validatedRecord.settlementRuleVersion) {
       return blocked(
         'B1_SETTLEMENT_RULE_MISMATCH',
         'B1 settlement replay blocks cross-venue candidates with mismatched settlement rule versions.',
@@ -54,8 +55,8 @@ export function validateB1VoidRuleReplay(
     }
 
     if (voidRuleId === undefined) {
-      voidRuleId = record.voidRuleId;
-    } else if (voidRuleId !== record.voidRuleId) {
+      voidRuleId = validatedRecord.voidRuleId;
+    } else if (voidRuleId !== validatedRecord.voidRuleId) {
       return blocked(
         'B1_VOID_RULE_MISMATCH',
         'B1 settlement replay blocks cross-venue candidates with mismatched void rules.',
@@ -94,7 +95,7 @@ function validateB1VoidRuleReplayRecord(
       'B1 settlement replay venue_or_bookmaker_id.',
     );
   }
-  if (record.settlementRuleVersion.length === 0) {
+  if (record.settlementRuleVersion.trim().length === 0) {
     return blocked(
       'B1_SETTLEMENT_COMPATIBILITY_UNKNOWN',
       'B1 settlement replay requires an explicit settlement rule version.',
@@ -108,14 +109,18 @@ function validateB1VoidRuleReplayRecord(
       'B1 settlement_compatibility_flag=compatible for every compared leg.',
     );
   }
-  if (record.voidRuleId.length === 0) {
+  if (record.voidRuleId.trim().length === 0) {
     return blocked(
       'B1_SETTLEMENT_COMPATIBILITY_UNKNOWN',
       'B1 settlement replay requires an explicit void-rule id.',
       'B1 void_rule_id for every compared leg.',
     );
   }
-  return accepted(Object.freeze({ ...record }));
+  return accepted(Object.freeze({
+    ...record,
+    settlementRuleVersion: record.settlementRuleVersion.trim(),
+    voidRuleId: record.voidRuleId.trim(),
+  }));
 }
 
 function buildB1VoidRuleLegKey(selectionEquivalenceKey: string, venueOrBookmakerId: string): string {

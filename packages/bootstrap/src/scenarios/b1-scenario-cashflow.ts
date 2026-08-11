@@ -91,11 +91,39 @@ export function validateB1ScenarioCashflowMatrix(
     );
   }
   for (const row of rows) {
-    if (row.winningSelectionEquivalenceKey.length === 0) {
+    if (!isRecord(row)) {
+      return blocked(
+        'B1_SCENARIO_CASHFLOW_ROW_INVALID',
+        'B1 scenario cash-flow rows must be structured objects.',
+        'Structured B1 scenario cash-flow rows.',
+      );
+    }
+    if (!isNonEmptyString(row.scenarioId)) {
+      return blocked(
+        'B1_SCENARIO_CASHFLOW_SCENARIO_ID_MISSING',
+        'B1 scenario cash-flow validation requires scenario identity evidence for every row.',
+        'B1 scenario cash-flow scenario_id.',
+      );
+    }
+    if (!isNonEmptyString(row.winningSelectionEquivalenceKey) || !isNonEmptyString(row.selectionEquivalenceKey)) {
       return blocked(
         'B1_SELECTION_EQUIVALENCE_MISSING',
         'B1 scenario cash-flow validation requires winner selection equivalence evidence for every row.',
         'B1 scenario cash-flow winning_selection_equivalence_key.',
+      );
+    }
+    if (!isNonEmptyString(row.venueOrBookmakerId)) {
+      return blocked(
+        'B1_VENUE_PAIR_INCOMPLETE',
+        'B1 scenario cash-flow validation requires venue evidence for every row.',
+        'B1 scenario cash-flow venue_or_bookmaker_id.',
+      );
+    }
+    if (typeof row.stakeMinor !== 'bigint' || typeof row.payoutMinor !== 'bigint') {
+      return blocked(
+        'B1_SCENARIO_CASHFLOW_VALUE_INVALID',
+        'B1 scenario cash-flow values must be bigint integer minor units.',
+        'Bigint B1 integer minor-unit scenario cash-flow rows.',
       );
     }
     if (row.stakeMinor < 0n || row.payoutMinor < 0n) {
@@ -109,6 +137,10 @@ export function validateB1ScenarioCashflowMatrix(
 
   const scenarioIds = [...new Set(rows.map((row) => row.scenarioId))].sort();
   const selectionKeys = [...new Set(rows.map((row) => row.selectionEquivalenceKey))].sort();
+  const legKeys = [...new Set(rows.map((row) => buildB1ScenarioLegKey(
+    row.selectionEquivalenceKey,
+    row.venueOrBookmakerId,
+  )))].sort();
   if (scenarioIds.length !== 2 && scenarioIds.length !== 3) {
     return blocked(
       'B1_STAKE_VECTOR_OUTCOME_COUNT_UNSUPPORTED',
@@ -116,11 +148,25 @@ export function validateB1ScenarioCashflowMatrix(
       'Complete B1 2-way or 3-way scenario cash-flow matrix.',
     );
   }
-  if (selectionKeys.length !== scenarioIds.length || rows.length !== scenarioIds.length * selectionKeys.length) {
+  if (selectionKeys.length !== scenarioIds.length) {
     return blocked(
       'B1_SCENARIO_CASHFLOW_MATRIX_INCOMPLETE',
       'B1 scenario cash-flow validation requires every leg to appear in every terminal scenario.',
       'Complete B1 scenario-by-selection cash-flow matrix.',
+    );
+  }
+  if (legKeys.length !== selectionKeys.length) {
+    return blocked(
+      'B1_SCENARIO_CASHFLOW_LEG_KEY_DRIFT',
+      'B1 scenario cash-flow validation requires each selection to keep one stable venue across terminal scenarios.',
+      'Stable B1 scenario-by-leg-key coverage keyed by selection_equivalence_key and venue_or_bookmaker_id.',
+    );
+  }
+  if (rows.length !== scenarioIds.length * legKeys.length) {
+    return blocked(
+      'B1_SCENARIO_CASHFLOW_MATRIX_INCOMPLETE',
+      'B1 scenario cash-flow validation requires every leg to appear in every terminal scenario.',
+      'Complete B1 scenario-by-leg-key cash-flow matrix.',
     );
   }
 
@@ -140,13 +186,16 @@ export function validateB1ScenarioCashflowMatrix(
       throw new Error('B1 scenario cash-flow validation lost scenario winner after non-empty row validation.');
     }
     scenarioWinningSelectionKeys.push(winningSelectionKey);
-    const rowsSelectionKeys = rowsForScenario.map((row) => row.selectionEquivalenceKey).sort();
-    for (let index = 0; index < selectionKeys.length; index += 1) {
-      if (rowsSelectionKeys[index] !== selectionKeys[index]) {
+    const rowsLegKeys = rowsForScenario.map((row) => buildB1ScenarioLegKey(
+      row.selectionEquivalenceKey,
+      row.venueOrBookmakerId,
+    )).sort();
+    for (let index = 0; index < legKeys.length; index += 1) {
+      if (rowsLegKeys[index] !== legKeys[index]) {
         return blocked(
           'B1_SCENARIO_CASHFLOW_MATRIX_INCOMPLETE',
           'B1 scenario cash-flow validation requires every leg to appear in every terminal scenario.',
-          'Complete B1 scenario-by-selection cash-flow matrix.',
+          'Complete B1 scenario-by-leg-key cash-flow matrix.',
         );
       }
     }
@@ -200,7 +249,14 @@ function validateB1TerminalScenarioSet(
   }
   const seen = new Set<string>();
   for (const scenario of scenarios) {
-    if (scenario.selectionEquivalenceKey.length === 0 || scenario.scenarioId.length === 0) {
+    if (!isRecord(scenario)) {
+      return blocked(
+        'B1_TERMINAL_SCENARIO_INVALID',
+        'B1 scenario cash-flow construction requires structured terminal scenarios.',
+        'Structured B1 terminal scenario inputs.',
+      );
+    }
+    if (!isNonEmptyString(scenario.selectionEquivalenceKey) || !isNonEmptyString(scenario.scenarioId)) {
       return blocked(
         'B1_SELECTION_EQUIVALENCE_MISSING',
         'B1 scenario cash-flow construction requires selection equivalence evidence for every terminal scenario.',
@@ -222,18 +278,39 @@ function validateB1TerminalScenarioSet(
 function validateB1ScenarioCashflowLegTerm(
   term: B1ScenarioCashflowLegTerms,
 ): BoundaryResult<B1ScenarioCashflowLegTerms> {
-  if (term.selectionEquivalenceKey.length === 0) {
+  if (!isRecord(term)) {
+    return blocked(
+      'B1_SCENARIO_CASHFLOW_LEG_TERM_INVALID',
+      'B1 scenario cash-flow leg terms must be structured objects.',
+      'Structured B1 scenario cash-flow leg terms.',
+    );
+  }
+  if (!isNonEmptyString(term.selectionEquivalenceKey)) {
     return blocked(
       'B1_SELECTION_EQUIVALENCE_MISSING',
       'B1 scenario cash-flow leg terms require selection equivalence evidence.',
       'B1 leg term selection_equivalence_key.',
     );
   }
-  if (term.venueOrBookmakerId.length === 0) {
+  if (!isNonEmptyString(term.venueOrBookmakerId)) {
     return blocked(
       'B1_VENUE_PAIR_INCOMPLETE',
       'B1 scenario cash-flow leg terms require venue evidence.',
       'B1 leg term venue_or_bookmaker_id.',
+    );
+  }
+  if (typeof term.stakeMinor !== 'bigint') {
+    return blocked(
+      'B1_STAKE_INVALID',
+      'B1 scenario cash-flow leg terms require bigint integer minor-unit stakes.',
+      'Bigint B1 stake in integer minor units.',
+    );
+  }
+  if (typeof term.decimalOddsMicro !== 'bigint') {
+    return blocked(
+      'B1_DECIMAL_ODDS_INVALID',
+      'B1 scenario cash-flow leg terms require bigint decimal odds micro values.',
+      'Bigint B1 decimal odds scaled to micro units.',
     );
   }
   if (term.stakeMinor <= 0n) {
@@ -277,4 +354,16 @@ function compareLegTerms(left: B1ScenarioCashflowLegTerms, right: B1ScenarioCash
     return selectionComparison;
   }
   return left.venueOrBookmakerId.localeCompare(right.venueOrBookmakerId);
+}
+
+function buildB1ScenarioLegKey(selectionEquivalenceKey: string, venueOrBookmakerId: string): string {
+  return `${selectionEquivalenceKey}\u0000${venueOrBookmakerId}`;
+}
+
+function isRecord(value: unknown): value is Readonly<Record<string, unknown>> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === 'string' && value.length > 0;
 }

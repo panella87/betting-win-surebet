@@ -163,6 +163,8 @@ function writeDiagnosticsBundle(
     readonly readinessStatus: 'blocked' | 'ready';
     readonly runtimeLifecycleState: string;
     readonly schedulerLifecycleState: string;
+    readonly upstreamLastBlockerCodes?: readonly string[];
+    readonly upstreamLastSuccessAt?: string;
     readonly upstreamLifecycleState: string;
     readonly workerLifecycleState: string;
   }>,
@@ -194,6 +196,8 @@ function writeDiagnosticsBundle(
           lifecycleState: sample.schedulerLifecycleState,
         },
         upstream: {
+          ...(sample.upstreamLastBlockerCodes === undefined ? {} : { lastBlockerCodes: sample.upstreamLastBlockerCodes }),
+          ...(sample.upstreamLastSuccessAt === undefined ? {} : { lastSuccessAt: sample.upstreamLastSuccessAt }),
           lifecycleState: sample.upstreamLifecycleState,
         },
         worker: {
@@ -224,6 +228,8 @@ function createDiagnosticsBundleResult(
     readonly readinessStatus: 'blocked' | 'ready';
     readonly runtimeLifecycleState: string;
     readonly schedulerLifecycleState: string;
+    readonly upstreamLastBlockerCodes?: readonly string[];
+    readonly upstreamLastSuccessAt?: string;
     readonly upstreamLifecycleState: string;
     readonly workerLifecycleState: string;
   }>,
@@ -530,6 +536,8 @@ test('paper runtime evidence starts an owned stack, records ready observations, 
         readinessStatus: 'ready',
         runtimeLifecycleState: 'running',
         schedulerLifecycleState: 'running',
+        upstreamLastBlockerCodes: Object.freeze([]),
+        upstreamLastSuccessAt: '2026-07-16T00:00:00.000Z',
         upstreamLifecycleState: 'running',
         workerLifecycleState: 'running',
       });
@@ -746,6 +754,8 @@ test('paper runtime evidence preserves an attached stack when exact identity and
       readinessStatus: 'ready',
       runtimeLifecycleState: 'running',
       schedulerLifecycleState: 'running',
+      upstreamLastBlockerCodes: Object.freeze([]),
+      upstreamLastSuccessAt: '2026-07-16T00:00:00.000Z',
       upstreamLifecycleState: 'running',
       workerLifecycleState: 'running',
     }),
@@ -1240,6 +1250,76 @@ test('paper runtime evidence returns a bounded blocker when the observation wind
   assert.equal(result.observation.samples[0]?.apiStatus, 'blocked');
 });
 
+test('paper runtime evidence requires upstream convergence last-pass success for readiness', async (t) => {
+  const originalFetch = globalThis.fetch;
+  t.after(() => {
+    globalThis.fetch = originalFetch;
+  });
+  globalThis.fetch = async (input) => {
+    const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
+    if (url.endsWith('/contract')) {
+      return new Response(JSON.stringify({ contractVersion: '1.0.0' }), {
+        headers: { 'content-type': 'application/json' },
+        status: 200,
+      });
+    }
+    return new Response(JSON.stringify({ error: 'not_found' }), {
+      headers: { 'content-type': 'application/json' },
+      status: 404,
+    });
+  };
+
+  for (const upstreamPassEvidence of [
+    Object.freeze({ upstreamLastBlockerCodes: Object.freeze([]) }),
+    Object.freeze({
+      upstreamLastBlockerCodes: Object.freeze([]),
+      upstreamLastSuccessAt: 'not-a-date',
+    }),
+    Object.freeze({
+      upstreamLastBlockerCodes: Object.freeze(['UPSTREAM_BLOCKED']),
+      upstreamLastSuccessAt: '2026-07-16T00:00:00.000Z',
+    }),
+  ]) {
+    const repositoryRoot = createTestRepositoryRoot(t);
+    configureUpstreamApiPreflightEnvironment(t, repositoryRoot, { apiBaseUrl: 'http://127.0.0.1:4301' });
+    let runtimeHandoffCreated = false;
+    const result = await createBwsPaperRuntimeEvidence({
+      collectDiagnostics: async ({ repositoryRoot: root }) => createDiagnosticsBundleResult(root, `bundle-upstream-pass-${runtimeHandoffCreated}`, {
+        apiStatus: 'ready',
+        cockpitStatus: 'ready',
+        databaseStatus: 'compatible',
+        healthStatus: 'healthy',
+        readinessStatus: 'ready',
+        runtimeLifecycleState: 'running',
+        schedulerLifecycleState: 'running',
+        ...upstreamPassEvidence,
+        upstreamLifecycleState: 'running',
+        workerLifecycleState: 'running',
+      }),
+      createRuntimeHandoff: async () => {
+        runtimeHandoffCreated = true;
+        return createRuntimeHandoffResult(repositoryRoot);
+      },
+      getLifecycleStatus: async () => createLifecycleStatus('running'),
+      intervalMs: 1000,
+      maxDurationMs: 1000,
+      now: (() => {
+        const values = [
+          '2026-07-16T00:00:00.000Z',
+          '2026-07-16T00:00:01.000Z',
+        ];
+        let index = 0;
+        return () => values[Math.min(index++, values.length - 1)]!;
+      })(),
+      repositoryRoot,
+      sleep: async () => undefined,
+    });
+
+    assert.equal(result.finalStatus, 'PAPER_EVALUATION_BLOCKED_RUNTIME_OBSERVATION_NOT_READY');
+    assert.equal(result.observation.sampleCount, 1);
+    assert.equal(runtimeHandoffCreated, false);
+  }
+});
 
 test('paper runtime evidence retains a bounded redacted collection-failure stage', async (t) => {
   const repositoryRoot = createTestRepositoryRoot(t);

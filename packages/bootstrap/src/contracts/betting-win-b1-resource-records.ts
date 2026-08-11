@@ -18,10 +18,10 @@ import {
 } from './b1-local-types.js';
 
 const ISO_TIMESTAMP_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
-const MANIFEST_HASH_REGEX = /^[0-9a-f]{64}$/i;
+const MANIFEST_HASH_REGEX = /^[0-9a-f]{64}$/;
 const MINOR_UNITS_REGEX = /^(0|[1-9][0-9]*)$/;
 const DECIMAL_STRING_REGEX = /^(0|[1-9][0-9]*)(\.[0-9]+)?$/;
-const COMMIT_SHA_REGEX = /^[0-9a-f]{40}$/i;
+const COMMIT_SHA_REGEX = /^[0-9a-f]{40}$/;
 const B1_CURRENCIES = ['USD', 'USDC'] as const;
 const B1_VENUE_TYPES = ['sportsbook', 'exchange', 'prediction_market'] as const;
 const B1_SETTLEMENT_COMPATIBILITY_FLAGS = ['compatible', 'incompatible'] as const;
@@ -474,7 +474,7 @@ function requireNonEmptyString(
   message: string,
   evidenceRequired: string,
 ): BoundaryResult<string> {
-  if (typeof value !== 'string' || value.trim().length === 0) {
+  if (typeof value !== 'string' || value.length === 0 || value !== value.trim()) {
     return blocked(code, message, evidenceRequired);
   }
   return accepted(value);
@@ -582,10 +582,12 @@ function requireNonEmptyStringArray(
   if (parsed.value.length === 0) {
     return blocked(code, message, evidenceRequired);
   }
+  const seen = new Set<string>();
   for (const item of parsed.value) {
-    if (item.trim().length === 0) {
+    if (item.length === 0 || item !== item.trim() || seen.has(item)) {
       return blocked(code, message, evidenceRequired);
     }
+    seen.add(item);
   }
   return parsed;
 }

@@ -741,10 +741,10 @@ function validateStrategyExportPayload(
   const rawRecordIds: string[] = [];
   for (const record of sourceLineageRecords.value) {
     const recordId = record.recordId;
-    if (typeof recordId !== 'string' || recordId.trim().length === 0) {
+    if (typeof recordId !== 'string' || recordId.trim().length === 0 || recordId !== recordId.trim()) {
       return blocked(
         'PINNED_STRATEGY_EXPORT_SOURCE_LINEAGE_RECORD_ID_MISSING',
-        'Pinned strategy export source lineage records must contain a non-empty recordId.',
+        'Pinned strategy export source lineage records must contain a canonical non-empty recordId.',
         'Pinned strategy export source lineage record ids.',
       );
     }
@@ -840,17 +840,23 @@ function validateStrategyExportPayload(
     }
   }
 
-  const expectedNormalizedEvidenceIds = normalizedEvidence.value
-    .map((evidence) => evidence.normalizedEvidenceId)
-    .filter((entry): entry is string => typeof entry === 'string' && entry.trim().length > 0)
-    .sort();
-  if (expectedNormalizedEvidenceIds.length !== normalizedEvidence.value.length) {
-    return blocked(
-      'PINNED_STRATEGY_EXPORT_NORMALIZED_EVIDENCE_ID_MISSING',
-      'Pinned strategy export normalized evidence entries must contain normalizedEvidenceId values.',
-      'Pinned strategy export normalized evidence ids.',
-    );
+  const expectedNormalizedEvidenceIds: string[] = [];
+  for (const evidence of normalizedEvidence.value) {
+    const normalizedEvidenceId = evidence.normalizedEvidenceId;
+    if (
+      typeof normalizedEvidenceId !== 'string'
+      || normalizedEvidenceId.trim().length === 0
+      || normalizedEvidenceId !== normalizedEvidenceId.trim()
+    ) {
+      return blocked(
+        'PINNED_STRATEGY_EXPORT_NORMALIZED_EVIDENCE_ID_MISSING',
+        'Pinned strategy export normalized evidence entries must contain canonical normalizedEvidenceId values.',
+        'Pinned strategy export normalized evidence ids.',
+      );
+    }
+    expectedNormalizedEvidenceIds.push(normalizedEvidenceId);
   }
+  expectedNormalizedEvidenceIds.sort();
   if (new Set(expectedNormalizedEvidenceIds).size !== expectedNormalizedEvidenceIds.length) {
     return blocked(
       'PINNED_STRATEGY_EXPORT_NORMALIZED_EVIDENCE_DUPLICATE',
@@ -922,14 +928,18 @@ function requireGenerationReference(
   label: string,
 ): BoundaryResult<string> {
   const providerGenerationId = record.providerGenerationId;
-  if (typeof providerGenerationId !== 'string' || providerGenerationId.trim().length === 0) {
+  if (
+    typeof providerGenerationId !== 'string'
+    || providerGenerationId.trim().length === 0
+    || providerGenerationId !== providerGenerationId.trim()
+  ) {
     return blocked(
       'PINNED_STRATEGY_EXPORT_PROVIDER_GENERATION_ID_MISSING',
-      `Pinned strategy export ${label} records must contain a non-empty providerGenerationId.`,
+      `Pinned strategy export ${label} records must contain a canonical non-empty providerGenerationId.`,
       'Pinned strategy export with provider generation provenance on every normalized record.',
     );
   }
-  return accepted(providerGenerationId.trim());
+  return accepted(providerGenerationId);
 }
 
 function requireNonEmptyString(
@@ -938,10 +948,10 @@ function requireNonEmptyString(
   message: string,
   evidenceRequired: string,
 ): BoundaryResult<string> {
-  if (typeof value !== 'string' || value.trim().length === 0) {
+  if (typeof value !== 'string' || value.trim().length === 0 || value !== value.trim()) {
     return blocked(code, message, evidenceRequired);
   }
-  return accepted(value.trim());
+  return accepted(value);
 }
 
 function requireIsoTimestamp(
@@ -995,7 +1005,7 @@ function requireStringArray(
   }
   const entries: string[] = [];
   for (const entry of value) {
-    if (typeof entry !== 'string' || entry.trim().length === 0) {
+    if (typeof entry !== 'string' || entry.trim().length === 0 || entry !== entry.trim()) {
       return blocked(code, message, evidenceRequired);
     }
     entries.push(entry);

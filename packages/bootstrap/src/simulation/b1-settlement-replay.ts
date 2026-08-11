@@ -13,7 +13,11 @@ import {
   analyzeB1ResidualExposure,
   type B1ResidualExposureAnalysis,
 } from './b1-residual-exposure.js';
-import type { B1FillabilitySimulation, B1FillabilityLegSnapshot } from './b1-leg-completion.js';
+import type {
+  B1FillabilityGroupState,
+  B1FillabilitySimulation,
+  B1FillabilityLegSnapshot,
+} from './b1-leg-completion.js';
 import {
   validateB1VoidRuleReplay,
   type B1VoidRuleReplayAnalysis,
@@ -69,13 +73,26 @@ interface B1SettlementReplayManifestGroup {
 export function analyzeB1SettlementReplay(
   input: B1SettlementReplayAnalysisInput,
 ): BoundaryResult<B1SettlementReplayAnalysis> {
-  if (input.candidateId.trim().length === 0) {
+  if (typeof input !== 'object' || input === null) {
+    return blocked(
+      'B1_SETTLEMENT_REPLAY_INPUT_INVALID',
+      'B1 settlement replay requires structured analysis input.',
+      'Structured B1 settlement replay analysis input.',
+    );
+  }
+  if (typeof input.candidateId !== 'string' || input.candidateId.trim().length === 0) {
     return blocked(
       'B1_SETTLEMENT_REPLAY_CANDIDATE_ID_MISSING',
       'B1 settlement replay requires a stable non-empty candidate id.',
       'Stable B1 settlement replay candidate id.',
     );
   }
+
+  const fillabilitySimulationShape = validateB1SettlementFillabilitySimulation(input.fillabilitySimulation);
+  if (!fillabilitySimulationShape.ok) {
+    return fillabilitySimulationShape;
+  }
+
   if (input.fillabilitySimulation.candidateId !== input.candidateId) {
     return blocked(
       'B1_SETTLEMENT_REPLAY_CANDIDATE_ID_MISMATCH',
@@ -89,13 +106,9 @@ export function analyzeB1SettlementReplay(
     return matrixValidation;
   }
 
-  const legAlignment = validateSettlementLegAlignment(
-    matrixValidation.value.rows,
-    input.fillabilitySimulation.legs,
-    input.settlementRecords,
-  );
-  if (!legAlignment.ok) {
-    return legAlignment;
+  const replayRecordShapes = validateB1SettlementReplayRecordShapes(input.settlementRecords);
+  if (!replayRecordShapes.ok) {
+    return replayRecordShapes;
   }
 
   const fillabilitySnapshots = validateB1SettlementFillabilitySnapshots(
@@ -104,6 +117,24 @@ export function analyzeB1SettlementReplay(
   );
   if (!fillabilitySnapshots.ok) {
     return fillabilitySnapshots;
+  }
+
+  const expectedGroupState = deriveB1SettlementGroupState(input.fillabilitySimulation.legs);
+  if (input.fillabilitySimulation.groupState !== expectedGroupState) {
+    return blocked(
+      'B1_SETTLEMENT_REPLAY_FILLABILITY_GROUP_STATE_MISMATCH',
+      'B1 settlement replay requires aggregate fillability group state to match leg snapshots.',
+      'B1 fillability simulation groupState derived from validated leg snapshots.',
+    );
+  }
+
+  const legAlignment = validateSettlementLegAlignment(
+    matrixValidation.value.rows,
+    input.fillabilitySimulation.legs,
+    input.settlementRecords,
+  );
+  if (!legAlignment.ok) {
+    return legAlignment;
   }
 
   const voidRuleReplay = validateB1VoidRuleReplay(input.settlementRecords);
@@ -226,6 +257,80 @@ function validateSettlementLegAlignment(
   }
 
   return accepted(Object.freeze({ expectedLegKeys: matrixLegKeys }));
+}
+
+function validateB1SettlementFillabilitySimulation(
+  fillabilitySimulation: B1FillabilitySimulation,
+): BoundaryResult<undefined> {
+  if (
+    typeof fillabilitySimulation !== 'object'
+    || fillabilitySimulation === null
+    || typeof fillabilitySimulation.candidateId !== 'string'
+    || !Array.isArray(fillabilitySimulation.legs)
+  ) {
+    return blocked(
+      'B1_SETTLEMENT_REPLAY_FILLABILITY_SNAPSHOT_INVALID',
+      'B1 settlement replay requires structured fillability simulation evidence.',
+      'Structured B1 fillability simulation evidence with leg snapshots.',
+    );
+  }
+  if (!isB1FillabilityGroupState(fillabilitySimulation.groupState)) {
+    return blocked(
+      'B1_SETTLEMENT_REPLAY_FILLABILITY_SNAPSHOT_INVALID',
+      'B1 settlement replay requires a supported aggregate fillability group state.',
+      'Supported B1 fillability simulation groupState evidence.',
+    );
+  }
+  return accepted(undefined);
+}
+
+function validateB1SettlementReplayRecordShapes(
+  records: readonly B1SettlementReplayRecord[],
+): BoundaryResult<undefined> {
+  if (!Array.isArray(records)) {
+    return blocked(
+      'B1_SETTLEMENT_REPLAY_RECORD_INVALID',
+      'B1 settlement replay requires structured settlement replay records.',
+      'Structured B1 settlement replay record objects.',
+    );
+  }
+  for (const record of records) {
+    const shapeValidation = validateB1SettlementReplayRecordShape(record);
+    if (!shapeValidation.ok) {
+      return shapeValidation;
+    }
+  }
+  return accepted(undefined);
+}
+
+function validateB1SettlementReplayRecordShape(
+  record: B1SettlementReplayRecord,
+): BoundaryResult<undefined> {
+  if (typeof record !== 'object' || record === null) {
+    return blocked(
+      'B1_SETTLEMENT_REPLAY_RECORD_INVALID',
+      'B1 settlement replay requires structured settlement replay records.',
+      'Structured B1 settlement replay record objects.',
+    );
+  }
+  if (
+    typeof record.selectionEquivalenceKey !== 'string'
+    || typeof record.venueOrBookmakerId !== 'string'
+    || typeof record.settlementRuleVersion !== 'string'
+    || typeof record.settlementCompatibilityFlag !== 'string'
+    || typeof record.voidRuleId !== 'string'
+    || typeof record.replayManifestHash !== 'string'
+    || typeof record.replayAcceptedAtUtc !== 'string'
+    || typeof record.finalityAuthorityId !== 'string'
+    || typeof record.finalOutcomeSelectionEquivalenceKey !== 'string'
+  ) {
+    return blocked(
+      'B1_SETTLEMENT_REPLAY_RECORD_INVALID',
+      'B1 settlement replay requires string identity, rule, manifest, finality and outcome fields.',
+      'B1 settlement replay record fields encoded with the expected runtime types.',
+    );
+  }
+  return accepted(undefined);
 }
 
 function resolveB1SettlementReplaySequence(
@@ -424,6 +529,38 @@ function validateB1SettlementFillabilitySnapshots(
 function validateB1SettlementFillabilitySnapshot(
   leg: B1FillabilityLegSnapshot,
 ): BoundaryResult<undefined> {
+  if (typeof leg !== 'object' || leg === null) {
+    return blocked(
+      'B1_SETTLEMENT_REPLAY_FILLABILITY_SNAPSHOT_INVALID',
+      'B1 settlement replay requires structured fillability leg snapshots.',
+      'Structured B1 fillability leg snapshot objects.',
+    );
+  }
+  if (
+    typeof leg.legId !== 'string'
+    || typeof leg.selectionEquivalenceKey !== 'string'
+    || typeof leg.venueOrBookmakerId !== 'string'
+    || typeof leg.updatedAtUtc !== 'string'
+    || typeof leg.terminalDisposition !== 'string'
+    || typeof leg.state !== 'string'
+  ) {
+    return blocked(
+      'B1_SETTLEMENT_REPLAY_FILLABILITY_SNAPSHOT_INVALID',
+      'B1 settlement replay requires typed fillability snapshot identity, timestamp and state fields.',
+      'B1 fillability snapshot fields encoded with the expected runtime types.',
+    );
+  }
+  if (
+    typeof leg.plannedStakeMinor !== 'bigint'
+    || typeof leg.liveFilledStakeMinor !== 'bigint'
+    || typeof leg.unfilledStakeMinor !== 'bigint'
+  ) {
+    return blocked(
+      'B1_SETTLEMENT_REPLAY_FILLABILITY_SNAPSHOT_INVALID',
+      'B1 settlement replay requires integer minor-unit fillability snapshot stake fields.',
+      'B1 fillability snapshot stake fields encoded as bigint integer minor units.',
+    );
+  }
   if (
     leg.legId.trim().length === 0
     || leg.selectionEquivalenceKey.length === 0
@@ -491,6 +628,10 @@ function isB1FillabilityTerminalDisposition(value: string): boolean {
   return value === 'none' || value === 'rejected' || value === 'timed_out';
 }
 
+function isB1FillabilityGroupState(value: string): value is B1FillabilityGroupState {
+  return value === 'group_filled' || value === 'group_incomplete';
+}
+
 function isB1FillabilityLegState(value: string): boolean {
   return value === 'leg_open'
     || value === 'leg_partial'
@@ -513,6 +654,12 @@ function hasConsistentB1FillabilityState(leg: B1FillabilityLegSnapshot): boolean
     return leg.liveFilledStakeMinor === 0n && leg.terminalDisposition === 'timed_out';
   }
   return leg.liveFilledStakeMinor === 0n && leg.terminalDisposition === 'none';
+}
+
+function deriveB1SettlementGroupState(
+  legs: readonly B1FillabilityLegSnapshot[],
+): B1FillabilityGroupState {
+  return legs.every((leg) => leg.state === 'leg_filled') ? 'group_filled' : 'group_incomplete';
 }
 
 function resolveFinalScenario(
@@ -576,7 +723,15 @@ function calculateSettledNetMinor(
     if (leg.liveFilledStakeMinor === 0n) {
       continue;
     }
-    const payoutMinor = (row.payoutMinor * leg.liveFilledStakeMinor) / row.stakeMinor;
+    const payoutNumeratorMinor = row.payoutMinor * leg.liveFilledStakeMinor;
+    if (payoutNumeratorMinor % row.stakeMinor !== 0n) {
+      return blocked(
+        'B1_SETTLEMENT_REPLAY_PAYOUT_SCALING_FRACTIONAL',
+        'B1 settlement replay requires partial payout scaling to resolve to integer minor units.',
+        'B1 settled scenario payout scaling with no fractional minor-unit remainder.',
+      );
+    }
+    const payoutMinor = payoutNumeratorMinor / row.stakeMinor;
     settledNetMinor += payoutMinor - leg.liveFilledStakeMinor;
   }
   return accepted(settledNetMinor);
@@ -600,6 +755,10 @@ function validateB1SettlementResidualReplay(
       'B1 residual exposure output from the validated fillability simulation.',
     );
   }
+  const residualExposureShape = validateB1SettlementResidualExposureEvidence(residualExposure);
+  if (!residualExposureShape.ok) {
+    return residualExposureShape;
+  }
 
   const freshness = validateB1ResidualExposureFreshness(
     residualExposure,
@@ -609,6 +768,13 @@ function validateB1SettlementResidualReplay(
   );
   if (!freshness.ok) {
     return freshness;
+  }
+  if (residualExposure.residualExposureWithinLimit !== true) {
+    return blocked(
+      'B1_SETTLEMENT_REPLAY_RESIDUAL_EXPOSURE_OVER_LIMIT',
+      'B1 settlement replay requires incomplete residual exposure evidence to stay within the configured exposure limit.',
+      'B1 residual exposure evidence with residualExposureWithinLimit=true.',
+    );
   }
 
   const settledScenario = residualExposure.scenarioNets.find(
@@ -629,6 +795,62 @@ function validateB1SettlementResidualReplay(
     );
   }
 
+  return accepted(undefined);
+}
+
+function validateB1SettlementResidualExposureEvidence(
+  residualExposure: B1ResidualExposureAnalysis,
+): BoundaryResult<undefined> {
+  if (
+    typeof residualExposure !== 'object'
+    || residualExposure === null
+    || !Array.isArray(residualExposure.exposedLegIds)
+    || !Array.isArray(residualExposure.excludedLegIds)
+    || !Array.isArray(residualExposure.scenarioNets)
+  ) {
+    return blocked(
+      'B1_SETTLEMENT_REPLAY_RESIDUAL_EXPOSURE_INVALID',
+      'B1 settlement replay requires structured residual exposure replay evidence.',
+      'Structured B1 residual exposure replay evidence.',
+    );
+  }
+  if (
+    residualExposure.exposureKind !== 'deterministic_b1_residual_exposure'
+    || typeof residualExposure.worstCaseNetMinor !== 'bigint'
+    || typeof residualExposure.worstCaseScenarioId !== 'string'
+    || typeof residualExposure.maxResidualExposureMinor !== 'bigint'
+    || typeof residualExposure.residualExposureWithinLimit !== 'boolean'
+  ) {
+    return blocked(
+      'B1_SETTLEMENT_REPLAY_RESIDUAL_EXPOSURE_INVALID',
+      'B1 settlement replay requires typed residual exposure aggregate fields.',
+      'B1 residual exposure aggregate fields encoded with the expected runtime types.',
+    );
+  }
+  for (const legId of [...residualExposure.exposedLegIds, ...residualExposure.excludedLegIds]) {
+    if (typeof legId !== 'string') {
+      return blocked(
+        'B1_SETTLEMENT_REPLAY_RESIDUAL_EXPOSURE_INVALID',
+        'B1 settlement replay requires residual exposure leg classifications to contain leg ids.',
+        'B1 residual exposure exposed and excluded leg ids encoded as strings.',
+      );
+    }
+  }
+  for (const scenarioNet of residualExposure.scenarioNets) {
+    if (
+      typeof scenarioNet !== 'object'
+      || scenarioNet === null
+      || typeof scenarioNet.scenarioId !== 'string'
+      || typeof scenarioNet.winningSelectionEquivalenceKey !== 'string'
+      || typeof scenarioNet.netMinor !== 'bigint'
+    ) {
+      return blocked(
+        'B1_SETTLEMENT_REPLAY_RESIDUAL_EXPOSURE_INVALID',
+        'B1 settlement replay requires typed residual exposure scenario nets.',
+        'B1 residual exposure scenario nets encoded with the expected runtime types.',
+      );
+    }
+  }
   return accepted(undefined);
 }
 

@@ -263,6 +263,40 @@ test -d "$live"
   assert.equal(result.status, 0, result.stderr || result.stdout);
 });
 
+test('stale recovery reports and retains immediate malformed session symlinks', (t) => {
+  const fixture = createFixture(t);
+  const outsideDirectory = mkdtempSync(join(tmpdir(), 'surebet-temp-inode-symlink-target-'));
+  t.after(() => {
+    rmSync(outsideDirectory, { force: true, maxRetries: 3, recursive: true, retryDelay: 50 });
+  });
+  const result = runShell(fixture, `
+set -Eeuo pipefail
+AUTOMATION_REPO_ROOT=${shellQuote(fixture.root)}
+. ${shellQuote(GUARD_PATH)}
+${healthyConfiguration}
+automation_temp_inode_configure
+_automation_temp_prepare_base
+candidate="$AUTOMATION_TEMP_SESSIONS_ROOT/bws-automation-malformed.20260717T000000Z.999999.symlink"
+file_candidate="$AUTOMATION_TEMP_SESSIONS_ROOT/bws-automation-malformed.20260717T000000Z.999999.file"
+ln -s -- ${shellQuote(outsideDirectory)} "$candidate"
+printf 'not a session directory\\n' > "$file_candidate"
+set +e
+automation_temp_inode_recover_stale dry-run 0
+rc=$?
+set -e
+printf 'rc=%s\\n' "$rc"
+test "$rc" -eq 2
+test -L "$candidate"
+test -f "$file_candidate"
+`);
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  assert.match(result.stdout, /rc=2/u);
+  assert.match(result.stderr, /stale_recovery_rejected path=.*bws-automation-malformed.*reason=invalid_path_or_marker/u);
+  assert.match(result.stderr, /stale_recovery_rejected path=.*bws-automation-malformed.*\.file reason=invalid_path_or_marker/u);
+  assert.equal(existsSync(join(fixture.root, '.automation/tmp-test/sessions/bws-automation-malformed.20260717T000000Z.999999.symlink')), true);
+  assert.equal(existsSync(join(fixture.root, '.automation/tmp-test/sessions/bws-automation-malformed.20260717T000000Z.999999.file')), true);
+});
+
 test('run_common centrally loads the guard, bootstraps every run directory, and excludes managed temp state', () => {
   const source = readFileSync(RUN_COMMON_PATH, 'utf-8');
   assert.match(source, /temp_inode_guard\.sh/);

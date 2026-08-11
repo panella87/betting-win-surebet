@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { chmodSync, copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, dirname, join } from 'node:path';
 import {
@@ -236,11 +236,62 @@ test('release archive excludes secrets, runtime state, logs, and artifacts', asy
   const entries = listArchiveEntries(fixture.result.archiveFile);
   const releaseRootPrefix = `${fixture.result.manifest.releaseId}/`;
   assert.ok(!entries.some((entry) => entry.endsWith('/.env')));
+  assert.ok(!entries.some((entry) => {
+    const base = basename(entry);
+    return base.startsWith('.env') && !['.env.example', '.env.sample', '.env.template'].includes(base);
+  }));
   assert.ok(!entries.some((entry) => entry.startsWith(`${releaseRootPrefix}artifacts/`)));
   assert.ok(!entries.some((entry) => entry.startsWith(`${releaseRootPrefix}runtime/`)));
   assert.ok(!entries.some((entry) => entry.startsWith(`${releaseRootPrefix}logs/`)));
   assert.ok(entries.some((entry) => entry.endsWith('/config/bws.private.env.template')));
   assert.ok(entries.some((entry) => entry.endsWith('/deployment/systemd-user/bws-operator.service.template')));
+});
+
+test('install verification rejects extracted release .env variants before runtime preflight', async () => {
+  const fixture = await getReleaseFixture();
+  const extraction = extractReleaseArchive(fixture.result.archiveFile);
+  const privateEnvFile = join(extraction.tempDirectory, 'private.env');
+  const fakeBin = createFakePostgreSqlClient('16.3');
+  try {
+    writePrivateEnvironmentFile(privateEnvFile, extraction.manifest, TEST_PASSWORD);
+    writeFileSync(join(extraction.rootDirectory, '.env.production'), 'PRIVATE_VALUE=redacted\n', 'utf-8');
+
+    await assertRejectsWithoutSecret(
+      () => withFakePsqlPath(fakeBin, () => verifyBwsReleaseInstallation({
+        envFile: privateEnvFile,
+        releaseDirectory: extraction.rootDirectory,
+        scratchDirectory: join(extraction.tempDirectory, 'scratch-env-variant'),
+      })),
+      /forbidden runtime, database, secret, or artifact path/u,
+    );
+  } finally {
+    cleanupExtraction(extraction.tempDirectory);
+    rmSync(dirname(fakeBin), { force: true, recursive: true });
+  }
+});
+
+test('install verification rejects extracted release symlinks before checksum payload hashing', async () => {
+  const fixture = await getReleaseFixture();
+  const extraction = extractReleaseArchive(fixture.result.archiveFile);
+  const privateEnvFile = join(extraction.tempDirectory, 'private.env');
+  const fakeBin = createFakePostgreSqlClient('16.3');
+  try {
+    writePrivateEnvironmentFile(privateEnvFile, extraction.manifest, TEST_PASSWORD);
+    rmSync(join(extraction.rootDirectory, 'package-lock.json'), { force: true });
+    symlinkSync(join(extraction.tempDirectory, 'outside-package-lock.json'), join(extraction.rootDirectory, 'package-lock.json'));
+
+    await assertRejectsWithoutSecret(
+      () => withFakePsqlPath(fakeBin, () => verifyBwsReleaseInstallation({
+        envFile: privateEnvFile,
+        releaseDirectory: extraction.rootDirectory,
+        scratchDirectory: join(extraction.tempDirectory, 'scratch-symlink-checksum'),
+      })),
+      /must not contain symlinks|must not be a symlink/u,
+    );
+  } finally {
+    cleanupExtraction(extraction.tempDirectory);
+    rmSync(dirname(fakeBin), { force: true, recursive: true });
+  }
 });
 
 test('release packaging rejects traversal paths from SOURCE_MANIFEST before payload staging', async () => {
@@ -350,6 +401,48 @@ test('release packaging rejects repo-local source manifest symlink entries befor
   }
 });
 
+test('release packaging rejects stale SOURCE_MANIFEST digest and size entries before payload staging', async () => {
+  for (const mismatch of ['sha256', 'size'] as const) {
+    const fixture = createMinimalReleaseRepositoryFixture(`release stale manifest ${mismatch} fixture`);
+    try {
+      const sourceContents = 'release source bytes\n';
+      writeFileSync(join(fixture.repositoryRoot, 'README.md'), sourceContents, 'utf-8');
+      const actualSha256 = createHash('sha256').update(sourceContents).digest('hex');
+      const actualSize = Buffer.byteLength(sourceContents, 'utf-8');
+      writeFileSync(
+        join(fixture.repositoryRoot, 'SOURCE_MANIFEST.json'),
+        JSON.stringify(
+          {
+            schema: 'betting-win-surebet-source-manifest-v1',
+            generated: '2026-07-02T00:00:00Z',
+            overlay: fixture.overlay,
+            files: [
+              {
+                path: 'README.md',
+                sha256: mismatch === 'sha256' ? '0'.repeat(64) : actualSha256,
+                size: mismatch === 'size' ? actualSize + 1 : actualSize,
+              },
+            ],
+          },
+          null,
+          2,
+        ) + '\n',
+        'utf-8',
+      );
+
+      await assert.rejects(
+        () => createBwsReleasePackage({
+          outputDirectory: join(fixture.repositoryRoot, 'artifacts', 'out'),
+          repositoryRoot: fixture.repositoryRoot,
+        }),
+        new RegExp(`SOURCE_MANIFEST\\.json ${mismatch} mismatch for README\\.md`, 'u'),
+      );
+    } finally {
+      rmSync(fixture.tempDirectory, { force: true, recursive: true });
+    }
+  }
+});
+
 test('install verification rejects tampered releases and partial private configuration without leaking secrets', async () => {
   const fixture = await getReleaseFixture();
   const extraction = extractReleaseArchive(fixture.result.archiveFile);
@@ -456,6 +549,44 @@ function createReleaseOutputDirectory(prefix: string): string {
   const artifactRoot = join(REPO_ROOT, 'artifacts');
   mkdirSync(artifactRoot, { recursive: true });
   return mkdtempSync(join(artifactRoot, prefix));
+}
+
+function createMinimalReleaseRepositoryFixture(overlay: string): {
+  readonly overlay: string;
+  readonly repositoryRoot: string;
+  readonly tempDirectory: string;
+} {
+  const tempDirectory = mkdtempSync(join(tmpdir(), 'bws-release-minimal-repo-'));
+  const repositoryRoot = join(tempDirectory, 'repo');
+  mkdirSync(join(repositoryRoot, 'config'), { recursive: true });
+  mkdirSync(join(repositoryRoot, 'schemas'), { recursive: true });
+  mkdirSync(join(repositoryRoot, 'tools'), { recursive: true });
+  copyFileSync(
+    join(REPO_ROOT, 'config', 'betting-win.upstream.lock.json'),
+    join(repositoryRoot, 'config', 'betting-win.upstream.lock.json'),
+  );
+  copyFileSync(
+    join(REPO_ROOT, 'schemas', 'betting-win-upstream-lock.v1.schema.json'),
+    join(repositoryRoot, 'schemas', 'betting-win-upstream-lock.v1.schema.json'),
+  );
+  writeFileSync(join(repositoryRoot, 'package.json'), JSON.stringify({
+    engines: { node: '>=20' },
+    type: 'module',
+    version: '0.0.0-test',
+  }, null, 2), 'utf-8');
+  writeFileSync(join(repositoryRoot, 'package-lock.json'), '{"lockfileVersion":3}\n', 'utf-8');
+  writeFileSync(
+    join(repositoryRoot, 'tools', 'required_executable_paths.js'),
+    'export const REQUIRED_EXECUTABLE_PATHS = Object.freeze([\'cli.js\']);\n',
+    'utf-8',
+  );
+  writeFileSync(join(repositoryRoot, 'cli.js'), '#!/usr/bin/env node\n', 'utf-8');
+  chmodSync(join(repositoryRoot, 'cli.js'), 0o755);
+  return Object.freeze({
+    overlay,
+    repositoryRoot,
+    tempDirectory,
+  });
 }
 
 function createArchiveWithSymlinkMember(releaseDirectory: string, releaseId: string, archivePath: string): void {

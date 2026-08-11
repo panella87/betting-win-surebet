@@ -176,6 +176,97 @@ test('pinned strategy export intake fails closed on SHA and upstream alias misma
   }
 });
 
+test('pinned strategy export intake rejects whitespace-wrapped canonical identifiers', () => {
+  const tempDir = createTempDir('strategy-export-canonical-id-');
+
+  try {
+    const basePayload = createStrategyExportPayload();
+    for (const testCase of [
+      {
+        fileName: 'export-id-whitespace.json',
+        document: createStrategyExportDocument({
+          exportId: ' provider-history-export.fixture-001.20260714t100000000z.fixture ',
+        }),
+        code: 'PINNED_STRATEGY_EXPORT_ID_MISSING',
+      },
+      {
+        fileName: 'summary-lineage-whitespace.json',
+        document: createStrategyExportDocument({
+          sourceLineageRecordIds: [' record-001 '],
+        }),
+        code: 'PINNED_STRATEGY_EXPORT_SOURCE_LINEAGE_IDS_INVALID',
+      },
+      {
+        fileName: 'summary-generation-whitespace.json',
+        document: createStrategyExportDocument({
+          providerGenerationIds: [' generation-id-001 '],
+        }),
+        code: 'PINNED_STRATEGY_EXPORT_PROVIDER_GENERATION_IDS_INVALID',
+      },
+      {
+        fileName: 'raw-lineage-whitespace.json',
+        document: createStrategyExportDocument({
+          payload: {
+            ...basePayload,
+            rawStore: {
+              ...(basePayload.rawStore as Record<string, unknown>),
+              sourceLineageRecords: [{ recordId: ' record-001 ', provider: 'polymarket' }],
+            },
+          },
+        }),
+        code: 'PINNED_STRATEGY_EXPORT_SOURCE_LINEAGE_RECORD_ID_MISSING',
+      },
+      {
+        fileName: 'normalized-evidence-whitespace.json',
+        document: createStrategyExportDocument({
+          payload: {
+            ...basePayload,
+            quoteStore: {
+              ...(basePayload.quoteStore as Record<string, unknown>),
+              normalizedEvidence: [
+                {
+                  normalizedEvidenceId: ' normalized-001 ',
+                  sourceLineageRecordId: 'record-001',
+                  provider: 'polymarket',
+                  providerGenerationId: 'generation-id-001',
+                },
+              ],
+            },
+          },
+        }),
+        code: 'PINNED_STRATEGY_EXPORT_NORMALIZED_EVIDENCE_ID_MISSING',
+      },
+      {
+        fileName: 'generation-reference-whitespace.json',
+        document: createStrategyExportDocument({
+          payload: {
+            ...basePayload,
+            quoteStore: {
+              ...(basePayload.quoteStore as Record<string, unknown>),
+              generationResolutions: [{ recordId: 'record-001', providerGenerationId: ' generation-id-001 ' }],
+            },
+          },
+        }),
+        code: 'PINNED_STRATEGY_EXPORT_PROVIDER_GENERATION_ID_MISSING',
+      },
+    ]) {
+      const exportPath = join(tempDir, testCase.fileName);
+      const sourceSha256 = writeJsonAndHash(exportPath, testCase.document);
+      const result = validatePinnedBettingWinStrategyExportIntake({
+        exportPath,
+        expectedSha256: sourceSha256,
+        repositoryRoot: REPO_ROOT,
+        upstreamLock: sampleUpstreamLock(),
+      });
+
+      assert.equal(result.ok, false);
+      assert.equal(result.blockers[0]?.code, testCase.code);
+    }
+  } finally {
+    rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
 test('pinned strategy export intake rejects generation and lineage mismatches', () => {
   const tempDir = createTempDir('strategy-export-mismatch-');
 

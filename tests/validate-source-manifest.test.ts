@@ -199,9 +199,12 @@ test('source manifest regeneration helper reuses validator inclusion rules and e
     mkdirSync(join(dir, '.tmp'), { recursive: true });
     mkdirSync(join(dir, 'graphify-out', 'cache'), { recursive: true });
     writeFileSync(join(dir, '.env'), 'SECRET=1\n', { encoding: 'utf-8' });
+    writeFileSync(join(dir, '.env.local'), 'LOCAL_SECRET=1\n', { encoding: 'utf-8' });
+    writeFileSync(join(dir, '.env.production'), 'PRODUCTION_SECRET=1\n', { encoding: 'utf-8' });
     writeFileSync(join(dir, 'repo.zip'), 'zip bytes\n', { encoding: 'utf-8' });
     writeFileSync(join(dir, 'OVERLAY_MANIFEST.json'), '{"generated":true}\n', { encoding: 'utf-8' });
     mkdirSync(join(dir, 'config'), { recursive: true });
+    writeFileSync(join(dir, 'config', '.env.local'), 'NESTED_SECRET=1\n', { encoding: 'utf-8' });
     writeFileSync(join(dir, 'config', 'betting-win.upstream.lock.json'), '{"schema":"runtime-lock"}\n', { encoding: 'utf-8' });
     writeFileSync(join(dir, 'run.log'), 'log bytes\n', { encoding: 'utf-8' });
     writeFileSync(join(dir, 'scratch.tmp'), 'tmp bytes\n', { encoding: 'utf-8' });
@@ -241,6 +244,10 @@ test('source manifest regeneration helper reuses validator inclusion rules and e
       'scripts/validate_source_manifest.py',
     ]);
     assert.ok(!paths.includes('OVERLAY_MANIFEST.json'));
+    assert.ok(!paths.includes('.env'));
+    assert.ok(!paths.includes('.env.local'));
+    assert.ok(!paths.includes('.env.production'));
+    assert.ok(!paths.includes('config/.env.local'));
     assert.ok(!paths.includes('config/betting-win.upstream.lock.json'));
     assert.ok(!paths.includes('apps/web/node_modules/vite/index.js'));
     assert.ok(!paths.includes('apps/web/dist/bundle.js'));

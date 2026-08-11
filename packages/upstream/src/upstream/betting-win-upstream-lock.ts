@@ -3,6 +3,7 @@ import { constants as fsConstants } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { dirname, join, relative, resolve, sep } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const BETTING_WIN_REPOSITORY_NAME = 'betting-win';
 const BETTING_WIN_UPSTREAM_LOCK_SCHEMA = 'betting-win-surebet-upstream-lock-v1';
@@ -201,7 +202,9 @@ export function readBettingWinUpstreamLock(lockPath: string, repositoryRoot: str
       `betting-win upstream lock file does not exist: ${resolvedLockPath}`,
     );
   }
-  return requireLockObject(parseJsonFile(resolvedLockPath, 'BETTING_WIN_UPSTREAM_LOCK_JSON_INVALID'));
+  const parsed = parseJsonFile(resolvedLockPath, 'BETTING_WIN_UPSTREAM_LOCK_JSON_INVALID');
+  validateLockAgainstSchema(parsed, resolveUpstreamLockSchemaPath(repositoryRoot));
+  return requireLockObject(parsed);
 }
 
 function inspectBettingWinCheckout(options: {
@@ -434,6 +437,25 @@ function validateLockAgainstSchema(lock: unknown, schemaPath: string): void {
   for (const [key, propertySchema] of Object.entries(properties)) {
     validateSchemaProperty(object[key], propertySchema, key);
   }
+}
+
+function resolveUpstreamLockSchemaPath(repositoryRoot: string): string {
+  const moduleDirectory = dirname(fileURLToPath(import.meta.url));
+  const candidates = [
+    resolve(repositoryRoot, BETTING_WIN_UPSTREAM_LOCK_SCHEMA_PATH),
+    resolve(process.cwd(), BETTING_WIN_UPSTREAM_LOCK_SCHEMA_PATH),
+    resolve(moduleDirectory, '../../../../', BETTING_WIN_UPSTREAM_LOCK_SCHEMA_PATH),
+    resolve(moduleDirectory, '../../../../../', BETTING_WIN_UPSTREAM_LOCK_SCHEMA_PATH),
+  ];
+  for (const candidate of candidates) {
+    if (existsSync(candidate)) {
+      return candidate;
+    }
+  }
+  throw new UpstreamVerificationError(
+    'BETTING_WIN_UPSTREAM_LOCK_SCHEMA_MISSING',
+    `betting-win upstream lock schema is missing: ${BETTING_WIN_UPSTREAM_LOCK_SCHEMA_PATH}`,
+  );
 }
 
 function validateSchemaProperty(value: unknown, schema: JsonSchemaProperty, field: string): void {

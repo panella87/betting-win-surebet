@@ -17,6 +17,32 @@ export function validateScenarioCashflowMatrix(rows: readonly ScenarioCashflowRo
     return blocked('SCENARIO_CASHFLOW_EMPTY', 'Scenario cash-flow rows are required.', 'Complete scenario cash-flow matrix.');
   }
   for (const row of rows) {
+    if (!isRecord(row)) {
+      return blocked(
+        'SCENARIO_CASHFLOW_ROW_INVALID',
+        'Scenario cash-flow rows must be structured objects.',
+        'Structured scenario cash-flow rows.',
+      );
+    }
+    if (!isNonEmptyString(row.scenarioId) || !isNonEmptyString(row.legId)) {
+      return blocked(
+        'SCENARIO_CASHFLOW_IDENTITY_INVALID',
+        'Scenario cash-flow rows require non-empty scenario and leg identities.',
+        'Non-empty scenarioId and legId values for every cash-flow row.',
+      );
+    }
+    if (
+      typeof row.stakeMinor !== 'bigint'
+      || typeof row.payoutMinor !== 'bigint'
+      || typeof row.feeMinor !== 'bigint'
+      || typeof row.costMinor !== 'bigint'
+    ) {
+      return blocked(
+        'SCENARIO_CASHFLOW_VALUE_INVALID',
+        'Cash-flow values must be bigint fixed-point amounts.',
+        'Bigint fixed-point rows for stake, payout, fee and cost.',
+      );
+    }
     if (row.stakeMinor < 0n || row.payoutMinor < 0n || row.feeMinor < 0n || row.costMinor < 0n) {
       return blocked('SCENARIO_CASHFLOW_NEGATIVE_VALUE', 'Cash-flow values must be non-negative fixed-point amounts.', 'Non-negative fixed-point rows.');
     }
@@ -39,11 +65,39 @@ export function buildStandardBinaryScenarioCashflowMatrix(
 
   const termsByLegId = new Map<string, ScenarioCashflowLegTerms>();
   for (const term of legTerms) {
+    if (!isRecord(term)) {
+      return blocked(
+        'SCENARIO_CASHFLOW_LEG_TERMS_INVALID',
+        'Scenario cash-flow terms must be structured objects.',
+        'Structured stake and payout terms for each complete-set leg.',
+      );
+    }
+    if (!isNonEmptyString(term.legId)) {
+      return blocked(
+        'SCENARIO_CASHFLOW_LEG_TERMS_INVALID',
+        'Scenario cash-flow terms require non-empty leg identities.',
+        'Non-empty legId values for each complete-set leg term.',
+      );
+    }
     if (termsByLegId.has(term.legId)) {
       return blocked(
         'SCENARIO_CASHFLOW_DUPLICATE_LEG_TERMS',
         'Scenario cash-flow terms must include exactly one stake and payout entry per leg.',
         'One deterministic stake and payout pair for each complete-set leg.',
+      );
+    }
+    if (typeof term.stakeMinor !== 'bigint') {
+      return blocked(
+        'SCENARIO_CASHFLOW_STAKE_INVALID',
+        'Scenario cash-flow stakes must be bigint fixed-point amounts.',
+        'Bigint fixed-point stake amounts for each complete-set leg.',
+      );
+    }
+    if (typeof term.payoutMinor !== 'bigint') {
+      return blocked(
+        'SCENARIO_CASHFLOW_PAYOUT_INVALID',
+        'Scenario cash-flow payouts must be bigint fixed-point amounts.',
+        'Bigint fixed-point payout amounts for each complete-set leg.',
       );
     }
     if (term.stakeMinor < 0n) {
@@ -142,4 +196,12 @@ function validateScenarioCoverage(scenarioIds: readonly string[]): BoundaryResul
 
 function isOutcomeSide(value: string): value is OutcomeSide {
   return value === 'yes' || value === 'no';
+}
+
+function isRecord(value: unknown): value is Readonly<Record<string, unknown>> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === 'string' && value.length > 0;
 }

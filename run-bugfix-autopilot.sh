@@ -317,28 +317,42 @@ parent_script_realpath() {
 
 write_parent_lock_file() {
   local target="$1"
+  local controller_boot_id controller_start_ticks child_boot_id="" child_start_ticks=""
+  controller_boot_id="$(automation_v2_boot_id)" || return 2
+  controller_start_ticks="$(automation_v2_process_start_ticks "$$")" || return 2
+  if [[ "${ACTIVE_CHILD_PID:-}" =~ ^[1-9][0-9]*$ ]] && automation_v2_process_alive "$ACTIVE_CHILD_PID"; then
+    child_boot_id="$controller_boot_id"
+    child_start_ticks="$(automation_v2_process_start_ticks "$ACTIVE_CHILD_PID")" || return 2
+  fi
   automation_v2_write_env_atomic "$target" \
     "LOCK_SCHEMA_VERSION=1" "CONTROLLER=$SCRIPT_NAME" "CONTROLLER_PID=$$" \
+    "CONTROLLER_BOOT_ID=$controller_boot_id" "CONTROLLER_START_TICKS=$controller_start_ticks" \
     "REPOSITORY=$(parent_repo_name)" \
     "REPO_REALPATH=$(parent_repo_realpath)" \
     "SCRIPT_REALPATH=$(parent_script_realpath)" \
     "RUN_DIR=${AUTOMATION_RUN_DIR:-}" \
     "HEARTBEAT_SOURCE=file_mtime" \
     "HEARTBEAT_EPOCH=$(automation_now_epoch)" "HEARTBEAT_AT=$(automation_now_iso)" \
-    "ACTIVE_CHILD_PID=${ACTIVE_CHILD_PID:-}" "ACTIVE_CHILD_KIND=${ACTIVE_CHILD_KIND:-none}" \
+    "ACTIVE_CHILD_PID=${ACTIVE_CHILD_PID:-}" "ACTIVE_CHILD_BOOT_ID=$child_boot_id" \
+    "ACTIVE_CHILD_START_TICKS=$child_start_ticks" "ACTIVE_CHILD_KIND=${ACTIVE_CHILD_KIND:-none}" \
     "ACTIVE_CHILD_SCRIPT=${ACTIVE_CHILD_SCRIPT:-}" "ACTIVE_CHILD_COMMAND=${ACTIVE_CHILD_COMMAND:-}"
 }
 
 claim_parent_lock() {
+  local controller_boot_id controller_start_ticks
+  controller_boot_id="$(automation_v2_boot_id)" || return 2
+  controller_start_ticks="$(automation_v2_process_start_ticks "$$")" || return 2
   automation_v2_claim_env_file_atomic "$LOCK_FILE" \
     "LOCK_SCHEMA_VERSION=1" "CONTROLLER=$SCRIPT_NAME" "CONTROLLER_PID=$$" \
+    "CONTROLLER_BOOT_ID=$controller_boot_id" "CONTROLLER_START_TICKS=$controller_start_ticks" \
     "REPOSITORY=$(parent_repo_name)" \
     "REPO_REALPATH=$(parent_repo_realpath)" \
     "SCRIPT_REALPATH=$(parent_script_realpath)" \
     "RUN_DIR=${AUTOMATION_RUN_DIR:-}" \
     "HEARTBEAT_SOURCE=file_mtime" \
     "HEARTBEAT_EPOCH=$(automation_now_epoch)" "HEARTBEAT_AT=$(automation_now_iso)" \
-    "ACTIVE_CHILD_PID=${ACTIVE_CHILD_PID:-}" "ACTIVE_CHILD_KIND=${ACTIVE_CHILD_KIND:-none}" \
+    "ACTIVE_CHILD_PID=${ACTIVE_CHILD_PID:-}" "ACTIVE_CHILD_BOOT_ID=" "ACTIVE_CHILD_START_TICKS=" \
+    "ACTIVE_CHILD_KIND=${ACTIVE_CHILD_KIND:-none}" \
     "ACTIVE_CHILD_SCRIPT=${ACTIVE_CHILD_SCRIPT:-}" "ACTIVE_CHILD_COMMAND=${ACTIVE_CHILD_COMMAND:-}"
 }
 
@@ -358,14 +372,14 @@ status_lock() {
   load_owned_parent_lock || return 2
   echo LOCK_STATUS=present
   cat "$LOCK_FILE"
-  local pid="${AUTOMATION_V2_ENV[CONTROLLER_PID]-}" child="${AUTOMATION_V2_ENV[ACTIVE_CHILD_PID]-}"
+  local pid="${AUTOMATION_V2_ENV[CONTROLLER_PID]-}" child="${AUTOMATION_V2_ENV[ACTIVE_CHILD_PID]-}" child_boot_id="${AUTOMATION_V2_ENV[ACTIVE_CHILD_BOOT_ID]-}" child_start_ticks="${AUTOMATION_V2_ENV[ACTIVE_CHILD_START_TICKS]-}"
   local heartbeat age
   heartbeat=$(automation_v2_parent_lock_mtime_epoch "$LOCK_FILE") || return 2
   age=$(( $(automation_now_epoch) - heartbeat ))
   printf 'HEARTBEAT_MTIME_EPOCH=%s\n' "$heartbeat"
   printf 'HEARTBEAT_AGE_SECONDS=%s\n' "$age"
   automation_v2_process_alive "$pid" && echo PID_STATUS=alive || echo PID_STATUS=dead
-  if [[ "$child" =~ ^[1-9][0-9]*$ ]] && automation_v2_process_alive "$child"; then
+  if [[ "$child" =~ ^[1-9][0-9]*$ ]] && automation_v2_process_alive "$child" && automation_v2_process_identity_matches "$child" "$child_boot_id" "$child_start_ticks"; then
     echo ACTIVE_CHILD_STATUS=alive
   else
     echo ACTIVE_CHILD_STATUS=absent_or_dead
@@ -373,9 +387,13 @@ status_lock() {
 }
 
 terminate_verified_child_from_loaded_lock() {
-  local pid="${AUTOMATION_V2_ENV[ACTIVE_CHILD_PID]-}" script="${AUTOMATION_V2_ENV[ACTIVE_CHILD_SCRIPT]-}"
+  local pid="${AUTOMATION_V2_ENV[ACTIVE_CHILD_PID]-}" script="${AUTOMATION_V2_ENV[ACTIVE_CHILD_SCRIPT]-}" boot_id="${AUTOMATION_V2_ENV[ACTIVE_CHILD_BOOT_ID]-}" start_ticks="${AUTOMATION_V2_ENV[ACTIVE_CHILD_START_TICKS]-}"
   [[ "$pid" =~ ^[1-9][0-9]*$ ]] || return 0
   automation_v2_process_alive "$pid" || return 0
+  automation_v2_process_identity_matches "$pid" "$boot_id" "$start_ticks" || {
+    echo "ERROR: refusing to terminate child PID with mismatched ownership: $pid" >&2
+    return 2
+  }
   [[ -n "$script" ]] || {
     echo "ERROR: live child PID has no script identity" >&2
     return 2
@@ -384,7 +402,7 @@ terminate_verified_child_from_loaded_lock() {
     echo "ERROR: refusing to terminate child PID with mismatched command: $pid" >&2
     return 2
   }
-  automation_v2_terminate_process_group "$pid" "${AUTOMATION_GRACEFUL_UNLOCK_SECONDS:-30}"
+  automation_v2_terminate_process_group "$pid" "${AUTOMATION_GRACEFUL_UNLOCK_SECONDS:-30}" "$boot_id" "$start_ticks"
 }
 
 force_unlock_parent() {
@@ -393,6 +411,10 @@ force_unlock_parent() {
   local pid="${AUTOMATION_V2_ENV[CONTROLLER_PID]-}"
   terminate_verified_child_from_loaded_lock || return 2
   if automation_v2_process_alive "$pid"; then
+    automation_v2_process_identity_matches "$pid" "${AUTOMATION_V2_ENV[CONTROLLER_BOOT_ID]-}" "${AUTOMATION_V2_ENV[CONTROLLER_START_TICKS]-}" || {
+      echo "ERROR: refusing to terminate mismatched controller PID ownership" >&2
+      return 2
+    }
     automation_v2_process_matches_script "$pid" "$AUTOMATION_REPO_ROOT/$SCRIPT_NAME" || {
       echo "ERROR: refusing to terminate mismatched controller PID" >&2
       return 2
@@ -464,7 +486,7 @@ acquire_parent_lock() {
         echo "ERROR: stale lock PID identity mismatch" >&2
         return 2
       }
-      automation_v2_terminate_process_group "$pid" "${AUTOMATION_GRACEFUL_UNLOCK_SECONDS:-30}" || {
+      automation_v2_terminate_process_group "$pid" "${AUTOMATION_GRACEFUL_UNLOCK_SECONDS:-30}" "${AUTOMATION_V2_ENV[CONTROLLER_BOOT_ID]-}" "${AUTOMATION_V2_ENV[CONTROLLER_START_TICKS]-}" || {
         echo "ERROR: stale parent did not terminate; use --force-unlock after verification" >&2
         return 2
       }
@@ -492,6 +514,7 @@ release_parent_lock() {
 }
 
 terminate_active_child() {
+  local child_boot_id child_start_ticks
   if [[ ! "$ACTIVE_CHILD_PID" =~ ^[1-9][0-9]*$ ]]; then
     return 0
   fi
@@ -503,8 +526,12 @@ terminate_active_child() {
     write_parent_lock || return 2
     return 0
   fi
+  load_owned_parent_lock "$$" || return 2
+  child_boot_id="${AUTOMATION_V2_ENV[ACTIVE_CHILD_BOOT_ID]-}"
+  child_start_ticks="${AUTOMATION_V2_ENV[ACTIVE_CHILD_START_TICKS]-}"
+  automation_v2_process_identity_matches "$ACTIVE_CHILD_PID" "$child_boot_id" "$child_start_ticks" || return 2
   automation_v2_process_matches_script "$ACTIVE_CHILD_PID" "$ACTIVE_CHILD_SCRIPT" || return 2
-  automation_v2_terminate_process_group "$ACTIVE_CHILD_PID" "${AUTOMATION_GRACEFUL_UNLOCK_SECONDS:-30}" || return 2
+  automation_v2_terminate_process_group "$ACTIVE_CHILD_PID" "${AUTOMATION_GRACEFUL_UNLOCK_SECONDS:-30}" "$child_boot_id" "$child_start_ticks" || return 2
   ACTIVE_CHILD_PID=""
   ACTIVE_CHILD_KIND=none
   ACTIVE_CHILD_SCRIPT=""
@@ -763,7 +790,7 @@ append_round() {
 }
 
 run_child_controller() {
-  local kind="$1" round_dir="$2" focus_file="${3:-}" configured budget script output terminal_result rc child_source_before child_source_after
+  local kind="$1" round_dir="$2" focus_file="${3:-}" configured budget script output terminal_result rc child_source_before child_source_after parent_boot_id parent_start_ticks child_pid_for_result
   local -a cmd=() launch_cmd=()
   [[ "$kind" == bugfix ]] && configured="$BUGFIX_DURATION_SECONDS" || configured="$IMPLEMENTATION_DURATION_SECONDS"
   budget="$(clamped_child_budget "$configured")" || return 124
@@ -777,11 +804,15 @@ run_child_controller() {
   fi
   [[ "$AUTO_INSTALL" == 1 ]] && cmd+=(--auto-install)
   [[ "$CODEX_STREAM_LOGS" == 1 ]] && cmd+=(--stream) || cmd+=(--no-stream)
+  parent_boot_id="$(automation_v2_boot_id)" || return 2
+  parent_start_ticks="$(automation_v2_process_start_ticks "$$")" || return 2
   terminal_result="$round_dir/child_terminal_result.env"
   rm -f -- "$terminal_result" "$round_dir/child_result.env"
   launch_cmd=(env \
     "AUTOMATION_PARENT_CONTROLLER=$SCRIPT_NAME" \
     "AUTOMATION_PARENT_PID=$$" \
+    "AUTOMATION_PARENT_BOOT_ID=$parent_boot_id" \
+    "AUTOMATION_PARENT_START_TICKS=$parent_start_ticks" \
     "AUTOMATION_PARENT_LOCK_FILE=$LOCK_FILE" \
     "AUTOMATION_CHILD_RESULT_FILE=$terminal_result" \
     "TELEGRAM_NOTIFY=0" \
@@ -792,6 +823,7 @@ run_child_controller() {
   ACTIVE_CHILD_KIND="$kind"; ACTIVE_CHILD_SCRIPT="$script"; ACTIVE_CHILD_COMMAND="$(automation_quote_argv "${launch_cmd[@]}")"
   setsid "${launch_cmd[@]}" > "$output" 2>&1 &
   ACTIVE_CHILD_PID=$!
+  child_pid_for_result="$ACTIVE_CHILD_PID"
   write_parent_lock
   if [[ "$CODEX_STREAM_LOGS" == 1 ]]; then tail -n +1 -f --pid="$ACTIVE_CHILD_PID" "$output" & ACTIVE_CHILD_TAIL_PID=$!; fi
   set +e; wait "$ACTIVE_CHILD_PID"; rc=$?; set -e
@@ -810,7 +842,8 @@ run_child_controller() {
 
   if ! automation_v2_validate_child_result_file \
     "$terminal_result" "$SCRIPT_NAME" "$$" "$(basename -- "$script")" \
-    "${AUTOMATION_REPO_NAME:-betting-win-surebet}" "$rc" "$AUTOMATION_REPO_ROOT"; then
+    "${AUTOMATION_REPO_NAME:-betting-win-surebet}" "$rc" "$AUTOMATION_REPO_ROOT" \
+    "$child_pid_for_result" "$parent_boot_id" "$parent_start_ticks"; then
     automation_v2_write_env_atomic "$round_dir/child_result.env" \
       'CHILD_RESULT_SCHEMA_VERSION=2' 'CHILD_RESULT_TRANSPORT=atomic_side_channel_v1' \
       'CHILD_RESULT_VALID=no' "CHILD_KIND=$kind" "CHILD_EXIT_CODE=$rc" \
@@ -848,7 +881,7 @@ build_artifacts_zip_bounded() {
   tmp="$AUTOMATION_REPO_ROOT/.artifacts.zip.tmp.$$.zip"
   rm -f -- "$tmp"
   automation_v2_zip_with_timeout "$ZIP_TIMEOUT_SECONDS" "$tmp" "$AUTOMATION_REPO_ROOT" "artifacts" || { local rc=$?; rm -f -- "$tmp"; return "$rc"; }
-  mv -f -- "$tmp" "$AUTOMATION_REPO_ROOT/artifacts.zip"
+  automation_publish_final_artifacts_zip "$tmp" "$AUTOMATION_REPO_ROOT"
 }
 
 write_final_summary() {

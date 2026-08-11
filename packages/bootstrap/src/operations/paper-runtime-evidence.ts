@@ -37,6 +37,7 @@ const SUREBET_PROVIDER_CONNECTIONS_ENV = 'SUREBET_PROVIDER_CONNECTIONS';
 const SUREBET_EXECUTION_ENABLED_ENV = 'SUREBET_EXECUTION_ENABLED';
 const BETTING_WIN_REPO_PATH_ENV = 'BETTING_WIN_REPO_PATH';
 const BWS_UPSTREAM_MODE_ENV = 'BWS_UPSTREAM_MODE';
+const ISO_8601_UTC_MILLISECONDS = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/;
 
 export type BwsPaperRuntimeEvidenceFinalStatus =
   | 'PAPER_EVALUATION_BLOCKED_RUNTIME_EVIDENCE_COLLECTION_FAILED'
@@ -59,6 +60,8 @@ export interface BwsPaperRuntimeEvidenceObservationSample {
   readonly readinessStatus: 'blocked' | 'ready' | 'unknown';
   readonly runtimeLifecycleState: string;
   readonly schedulerLifecycleState: string;
+  readonly upstreamLastBlockerCodes?: readonly string[];
+  readonly upstreamLastSuccessAt?: string;
   readonly upstreamLifecycleState: string;
   readonly workerLifecycleState: string;
 }
@@ -184,6 +187,8 @@ interface RuntimeEvidenceManifest {
       readonly lifecycleState?: string;
     }>;
     readonly upstream?: Readonly<{
+      readonly lastBlockerCodes?: readonly string[];
+      readonly lastSuccessAt?: string;
       readonly lifecycleState?: string;
     }>;
     readonly worker?: Readonly<{
@@ -402,6 +407,8 @@ function buildObservationSample(
   manifest: RuntimeEvidenceManifest,
   evidenceIndex: BwsEvidenceIndexSummary,
 ): BwsPaperRuntimeEvidenceObservationSample {
+  const upstreamLastBlockerCodes = readOptionalStringArray(manifest.metrics?.upstream?.lastBlockerCodes);
+  const upstreamLastSuccessAt = readOptionalNonEmptyString(manifest.metrics?.upstream?.lastSuccessAt);
   return Object.freeze({
     apiStatus: manifest.metrics?.api?.status ?? 'blocked',
     cockpitStatus: manifest.metrics?.cockpit?.status ?? 'blocked',
@@ -418,9 +425,28 @@ function buildObservationSample(
     readinessStatus: manifest.readiness?.status ?? 'unknown',
     runtimeLifecycleState: manifest.metrics?.runtime?.lifecycleState ?? 'unknown',
     schedulerLifecycleState: manifest.metrics?.scheduler?.lifecycleState ?? 'unknown',
+    ...(upstreamLastBlockerCodes === undefined
+      ? {}
+      : { upstreamLastBlockerCodes }),
+    ...(upstreamLastSuccessAt === undefined
+      ? {}
+      : { upstreamLastSuccessAt }),
     upstreamLifecycleState: manifest.metrics?.upstream?.lifecycleState ?? 'unknown',
     workerLifecycleState: manifest.metrics?.worker?.lifecycleState ?? 'unknown',
   });
+}
+
+function readOptionalStringArray(value: unknown): readonly string[] | undefined {
+  if (!Array.isArray(value) || !value.every((entry) => typeof entry === 'string')) {
+    return undefined;
+  }
+  return Object.freeze([...value]);
+}
+
+function readOptionalNonEmptyString(value: unknown): string | undefined {
+  return typeof value === 'string' && ISO_8601_UTC_MILLISECONDS.test(value) && !Number.isNaN(Date.parse(value))
+    ? value
+    : undefined;
 }
 
 function sampleIsReady(sample: BwsPaperRuntimeEvidenceObservationSample): boolean {
@@ -433,6 +459,9 @@ function sampleIsReady(sample: BwsPaperRuntimeEvidenceObservationSample): boolea
     && sample.runtimeLifecycleState === 'running'
     && sample.schedulerLifecycleState === 'running'
     && sample.upstreamLifecycleState === 'running'
+    && sample.upstreamLastSuccessAt !== undefined
+    && sample.upstreamLastBlockerCodes !== undefined
+    && sample.upstreamLastBlockerCodes.length === 0
     && sample.workerLifecycleState === 'running';
 }
 

@@ -384,13 +384,13 @@ function toComparablePendingRecord(record: SurebetPendingPinnedStrategyExportRec
 }
 
 function requireNonEmptyString(value: string | undefined, field: string): string {
-  if (typeof value !== 'string' || value.trim().length === 0) {
+  if (typeof value !== 'string' || value.trim().length === 0 || value !== value.trim()) {
     throw new SurebetPersistenceError(
       'SUREBET_PINNED_STRATEGY_EXPORT_INVALID',
-      `Surebet pinned strategy export requires a non-empty ${field}.`,
+      `Surebet pinned strategy export requires a canonical non-empty ${field}.`,
     );
   }
-  return value.trim();
+  return value;
 }
 
 function requireIsoTimestamp(value: string, field: string): void {

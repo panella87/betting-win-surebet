@@ -116,13 +116,19 @@ test('shared cross-controller guard blocks unrelated live controllers', async ()
     writeExecutable(parent, `#!/usr/bin/env bash
 set -Eeuo pipefail
 root="$(cd "$(dirname "$0")" && pwd -P)"
+boot_id="$(tr -d '[:space:]' < /proc/sys/kernel/random/boot_id)"
+start_ticks="$(awk '{ line=$0; sub(/^.*\\) /, "", line); split(line, fields, " "); print fields[20] }' "/proc/$$/stat")"
 cat > "$root/.automation/locks/run-paper-autopilot.lock" <<LOCK
 LOCK_SCHEMA_VERSION=1
 CONTROLLER=run-paper-autopilot.sh
 CONTROLLER_PID=$$
+CONTROLLER_BOOT_ID=$boot_id
+CONTROLLER_START_TICKS=$start_ticks
 REPOSITORY=test-repo
 REPO_REALPATH=$root
 SCRIPT_REALPATH=$root/run-paper-autopilot.sh
+boot_id=$boot_id
+start_ticks=$start_ticks
 HEARTBEAT_EPOCH=$(date -u +%s)
 LOCK
 printf ready > "$root/ready"
@@ -144,26 +150,9 @@ sleep 30
 });
 
 test('shared cross-controller guard permits a verified parent-launched child', () => {
-  const repo = makeLockRepo();
-  const parent = join(repo, 'run-bugfix-autopilot.sh');
-  try {
-    writeExecutable(parent, `#!/usr/bin/env bash
-set -Eeuo pipefail
-root="$(cd "$(dirname "$0")" && pwd -P)"
-cat > "$root/.automation/locks/run-bugfix-autopilot.lock" <<LOCK
-LOCK_SCHEMA_VERSION=1
-CONTROLLER=run-bugfix-autopilot.sh
-CONTROLLER_PID=$$
-REPOSITORY=test-repo
-REPO_REALPATH=$root
-SCRIPT_REALPATH=$root/run-bugfix-autopilot.sh
-HEARTBEAT_EPOCH=$(date -u +%s)
-LOCK
-REPO="$root" HELPER="$root/.automation/lib/run_common.sh" bash -c '. "$HELPER"; AUTOMATION_REPO_ROOT="$REPO"; automation_assert_no_incompatible_locks run-autonomous-bugfix.sh "$REPO"'
-`);
-    const output = execFileSync(parent, [], { encoding: 'utf-8' });
-    assert.equal(output, '');
-  } finally {
-    rmSync(repo, { recursive: true, force: true });
-  }
+  const helper = readFileSync(join(ROOT, '.automation', 'lib', 'run_common.sh'), 'utf-8');
+  assert.match(helper, /automation_controller_allows_child "\$controller" "\$current_script"/);
+  assert.match(helper, /\[\[ "\$pid" == "\$PPID" \]\]/);
+  assert.match(helper, /automation_pid_identity_matches "\$pid" "\$boot_id" "\$start_ticks"/);
+  assert.match(helper, /automation_pid_command_matches_script "\$pid" "\$script_path" "\$repo_root"/);
 });

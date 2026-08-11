@@ -106,6 +106,11 @@ const FORBIDDEN_EXACT_PATHS = new Set([
   'id_rsa',
   'id_ed25519',
 ]);
+const ALLOWED_ENV_TEMPLATE_NAMES = new Set([
+  '.env.example',
+  '.env.sample',
+  '.env.template',
+]);
 const FORBIDDEN_SUFFIXES = Object.freeze([
   '.db',
   '.dump',
@@ -623,6 +628,7 @@ export async function verifyBwsReleaseInstallation(
   ) {
     throw new Error('Release manifest semanticFingerprint does not match the deterministic release content descriptor.');
   }
+  rejectReleaseDirectorySymlinks(releaseDirectory);
   verifyChecksumsFile(releaseDirectory);
   verifyManifestAgainstReleaseDirectory(releaseDirectory, manifest);
   const renderedSystemdTemplateFile = renderSystemdTemplate({
@@ -948,6 +954,10 @@ function containsForbiddenReleasePath(releaseDirectory: string): boolean {
   return false;
 }
 
+function rejectReleaseDirectorySymlinks(releaseDirectory: string): void {
+  listRelativeFiles(releaseDirectory);
+}
+
 function verifyChecksumsFile(releaseDirectory: string): void {
   const checksumsPath = join(releaseDirectory, RELEASE_CHECKSUMS_FILE);
   const lines = readRequiredFile(releaseDirectory, RELEASE_CHECKSUMS_FILE).split(/\r?\n/);
@@ -973,7 +983,9 @@ function verifyChecksumsFile(releaseDirectory: string): void {
       throw new Error(`Release checksum file contains a duplicate entry: ${relativePath}`);
     }
     seen.add(relativePath);
-    const actualSha256 = fileSha256(join(releaseDirectory, relativePath));
+    const absolutePath = join(releaseDirectory, relativePath);
+    ensureFile(absolutePath, relativePath, releaseDirectory);
+    const actualSha256 = fileSha256(absolutePath);
     if (actualSha256 !== match[1]) {
       throw new Error(`Release checksum mismatch for ${relativePath}.`);
     }
@@ -1027,8 +1039,15 @@ function collectReleaseSourceFiles(
     if (!isAllowedReleasePath(relativePath)) {
       continue;
     }
+    const releaseEntry = createReleaseFileEntry(repositoryRoot, relativePath);
+    if (releaseEntry.sha256 !== entry.sha256) {
+      throw new Error(`SOURCE_MANIFEST.json sha256 mismatch for ${relativePath}.`);
+    }
+    if (releaseEntry.size !== entry.size) {
+      throw new Error(`SOURCE_MANIFEST.json size mismatch for ${relativePath}.`);
+    }
     entries.push(
-      createReleaseFileEntry(repositoryRoot, relativePath),
+      releaseEntry,
     );
   }
   for (const requiredPath of [RELEASE_ENV_TEMPLATE_PATH, SYSTEMD_TEMPLATE_PATH, PACKAGE_JSON_PATH, PACKAGE_LOCK_PATH, SOURCE_MANIFEST_PATH]) {
@@ -1669,6 +1688,9 @@ function isAllowedReleasePath(relativePath: string): boolean {
     return false;
   }
   const parts = normalized.split('/');
+  if (isForbiddenEnvPath(parts[parts.length - 1])) {
+    return false;
+  }
   for (const part of parts.slice(0, -1)) {
     if (FORBIDDEN_SOURCE_ROOTS.has(part)) {
       return false;
@@ -1693,6 +1715,9 @@ function isForbiddenExtractedReleasePath(relativePath: string): boolean {
     return true;
   }
   const parts = normalized.split('/');
+  if (isForbiddenEnvPath(parts[parts.length - 1])) {
+    return true;
+  }
   const firstPart = parts[0];
   if (firstPart !== undefined && FORBIDDEN_EXTRACTED_RELEASE_ROOTS.has(firstPart)) {
     return true;
@@ -1704,6 +1729,13 @@ function isForbiddenExtractedReleasePath(relativePath: string): boolean {
     }
   }
   return false;
+}
+
+function isForbiddenEnvPath(baseName: string | undefined): boolean {
+  if (baseName === undefined) {
+    return false;
+  }
+  return baseName.startsWith('.env') && !ALLOWED_ENV_TEMPLATE_NAMES.has(baseName);
 }
 
 function hashUpstreamLockFingerprint(lock: BettingWinUpstreamLock): string {

@@ -5,6 +5,58 @@ import type { PrivateCandidateReport } from './opportunity-report.js';
 const MANIFEST_HASH_PATTERN = /^[0-9a-f]{64}$/;
 const ISO_8601_UTC_MILLISECONDS = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 const FORBIDDEN_REPORT_TEXT_PATTERN = /(profit|profitable|execution|ready|signal)/i;
+const PRIVATE_RUN_REPORT_KEYS = new Set([
+  'reportKind',
+  'laneId',
+  'runId',
+  'sourceManifestHash',
+  'accepted',
+  'status',
+  'candidateReports',
+  'blockerCount',
+  'settlement',
+  'settlementSummaries',
+]);
+const BLOCKED_CANDIDATE_REPORT_KEYS = new Set([
+  'reportKind',
+  'laneId',
+  'candidateId',
+  'accepted',
+  'status',
+  'blockers',
+]);
+const OPPORTUNITY_CANDIDATE_REPORT_KEYS = new Set([
+  'reportKind',
+  'laneId',
+  'candidateId',
+  'accepted',
+  'status',
+  'blockers',
+  'stakeVector',
+  'residualExposure',
+]);
+const SETTLEMENT_SUMMARY_KEYS = new Set([
+  'candidateId',
+  'canonicalMarketId',
+  'ruleProfileId',
+  'resultSourceId',
+  'finalityPolicyId',
+  'finalityAuthorityId',
+  'replayManifestHash',
+  'replayAcceptedAt',
+  'scenarioId',
+  'finalOutcome',
+]);
+const STAKE_VECTOR_SUMMARY_KEYS = new Set(['stakes', 'scenarioNets', 'worstCaseNetMinor']);
+const STAKE_VECTOR_STAKE_KEYS = new Set(['legId', 'unitCount', 'stakeQuantumMinor', 'stakeMinor']);
+const SCENARIO_NET_SUMMARY_KEYS = new Set(['scenarioId', 'netMinor']);
+const RESIDUAL_EXPOSURE_SUMMARY_KEYS = new Set([
+  'groupState',
+  'filledLegIds',
+  'excludedLegIds',
+  'scenarioNets',
+  'worstCaseNetMinor',
+]);
 
 export interface PrivateRunSettlementSummary {
   readonly candidateId: string;
@@ -99,6 +151,13 @@ export function validatePrivateRunReportArtifact(report: PrivateRunReport): Boun
       'Serialized private paper-mode run artifact object.',
     );
   }
+  if (!hasOnlySupportedFields(report, PRIVATE_RUN_REPORT_KEYS)) {
+    return blocked(
+      'PRIVATE_RUN_REPORT_UNSUPPORTED_FIELDS',
+      'Private paper-mode artifacts must not retain unsupported run report fields.',
+      'Serialized private paper-mode run artifact with only supported private fields.',
+    );
+  }
   if (report.reportKind !== 'private_paper_run') {
     return blocked(
       'PRIVATE_RUN_REPORT_KIND_INVALID',
@@ -150,11 +209,20 @@ export function validatePrivateRunReportArtifact(report: PrivateRunReport): Boun
   }
 
   const candidateIds = new Set<string>();
+  let previousCandidateId: string | undefined;
   for (const candidateReport of report.candidateReports) {
     const candidateValidation = validatePrivateCandidateReportArtifact(candidateReport, candidateIds);
     if (!candidateValidation.ok) {
       return candidateValidation;
     }
+    if (previousCandidateId !== undefined && previousCandidateId.localeCompare(candidateReport.candidateId) > 0) {
+      return blocked(
+        'PRIVATE_RUN_REPORT_CANDIDATES_ORDER_INVALID',
+        'Private paper-mode candidate reports must remain sorted by candidate id.',
+        'Serialized private paper-mode run artifact with candidateReports in producer canonical order.',
+      );
+    }
+    previousCandidateId = candidateReport.candidateId;
     candidateIds.add(candidateReport.candidateId);
   }
 
@@ -231,6 +299,18 @@ function validatePrivateCandidateReportArtifact(
   if (candidateReport.reportKind !== 'private_paper_blocked' && candidateReport.reportKind !== 'private_paper_opportunity') {
     return privateCandidateShapeBlocker();
   }
+  if (
+    candidateReport.reportKind === 'private_paper_blocked'
+    && !hasOnlySupportedFields(candidateReport, BLOCKED_CANDIDATE_REPORT_KEYS)
+  ) {
+    return privateCandidateUnsupportedFieldsBlocker();
+  }
+  if (
+    candidateReport.reportKind === 'private_paper_opportunity'
+    && !hasOnlySupportedFields(candidateReport, OPPORTUNITY_CANDIDATE_REPORT_KEYS)
+  ) {
+    return privateCandidateUnsupportedFieldsBlocker();
+  }
   if (candidateReport.laneId !== FIRST_LANE_SPEC.laneId) {
     return blocked(
       'PRIVATE_RUN_REPORT_CANDIDATE_LANE_ID_INVALID',
@@ -299,23 +379,39 @@ function validateStakeVectorSummary(value: unknown): BoundaryResult<undefined> {
   if (!isRecord(value) || !Array.isArray(value.stakes) || value.stakes.length === 0) {
     return privateCandidateShapeBlocker();
   }
+  if (!hasOnlySupportedFields(value, STAKE_VECTOR_SUMMARY_KEYS)) {
+    return privateCandidateUnsupportedFieldsBlocker();
+  }
   if (!Array.isArray(value.scenarioNets) || value.scenarioNets.length === 0 || !isIntegerLike(value.worstCaseNetMinor)) {
     return privateCandidateShapeBlocker();
   }
   for (const stake of value.stakes) {
+    if (!isRecord(stake)) {
+      return privateCandidateShapeBlocker();
+    }
+    if (!hasOnlySupportedFields(stake, STAKE_VECTOR_STAKE_KEYS)) {
+      return privateCandidateUnsupportedFieldsBlocker();
+    }
+    const unitCount = integerLikeToBigInt(stake.unitCount);
+    const stakeQuantumMinor = integerLikeToBigInt(stake.stakeQuantumMinor);
+    const stakeMinor = integerLikeToBigInt(stake.stakeMinor);
     if (
-      !isRecord(stake)
-      || !isNonEmptyString(stake.legId)
-      || !isIntegerLike(stake.unitCount)
-      || !isIntegerLike(stake.stakeQuantumMinor)
-      || !isIntegerLike(stake.stakeMinor)
+      !isNonEmptyString(stake.legId)
+      || unitCount === undefined
+      || stakeQuantumMinor === undefined
+      || stakeMinor === undefined
+      || unitCount <= 0n
+      || stakeQuantumMinor <= 0n
+      || stakeMinor <= 0n
+      || unitCount * stakeQuantumMinor !== stakeMinor
     ) {
       return privateCandidateShapeBlocker();
     }
   }
   for (const scenarioNet of value.scenarioNets) {
-    if (!isScenarioNetSummary(scenarioNet)) {
-      return privateCandidateShapeBlocker();
+    const scenarioNetValidation = validateScenarioNetSummary(scenarioNet);
+    if (!scenarioNetValidation.ok) {
+      return scenarioNetValidation;
     }
   }
 
@@ -334,11 +430,17 @@ function validateResidualExposureSummary(value: unknown): BoundaryResult<undefin
   ) {
     return privateCandidateShapeBlocker();
   }
+  if (!hasOnlySupportedFields(value, RESIDUAL_EXPOSURE_SUMMARY_KEYS)) {
+    return privateCandidateUnsupportedFieldsBlocker();
+  }
   if (!value.filledLegIds.every(isNonEmptyString) || !value.excludedLegIds.every(isNonEmptyString)) {
     return privateCandidateShapeBlocker();
   }
-  if (!value.scenarioNets.every(isScenarioNetSummary)) {
-    return privateCandidateShapeBlocker();
+  for (const scenarioNet of value.scenarioNets) {
+    const scenarioNetValidation = validateScenarioNetSummary(scenarioNet);
+    if (!scenarioNetValidation.ok) {
+      return scenarioNetValidation;
+    }
   }
 
   return accepted(undefined);
@@ -356,6 +458,7 @@ function validatePrivateRunSettlementSummaries(
     );
   }
   const settlementCandidateIds = new Set<string>();
+  let previousSettlementCandidateId: string | undefined;
   for (const settlementSummary of settlementSummaries) {
     const settlementValidation = validatePrivateRunSettlementSummary(settlementSummary, candidateIds);
     if (!settlementValidation.ok) {
@@ -368,6 +471,17 @@ function validatePrivateRunSettlementSummaries(
         'Serialized private paper-mode settlement summaries with unique candidate ids.',
       );
     }
+    if (
+      previousSettlementCandidateId !== undefined
+      && previousSettlementCandidateId.localeCompare(settlementSummary.candidateId) > 0
+    ) {
+      return blocked(
+        'PRIVATE_RUN_REPORT_SETTLEMENT_SUMMARIES_ORDER_INVALID',
+        'Private paper-mode settlement summaries must remain sorted by candidate id.',
+        'Serialized private paper-mode run artifact with settlementSummaries in producer canonical order.',
+      );
+    }
+    previousSettlementCandidateId = settlementSummary.candidateId;
     settlementCandidateIds.add(settlementSummary.candidateId);
   }
 
@@ -380,6 +494,13 @@ function validatePrivateRunSettlementSummary(
 ): BoundaryResult<undefined> {
   if (!isRecord(settlementSummary)) {
     return privateSettlementShapeBlocker();
+  }
+  if (!hasOnlySupportedFields(settlementSummary, SETTLEMENT_SUMMARY_KEYS)) {
+    return blocked(
+      'PRIVATE_RUN_REPORT_SETTLEMENT_UNSUPPORTED_FIELDS',
+      'Private paper-mode settlement summaries must not retain unsupported fields.',
+      'Serialized private paper-mode settlement summaries with only supported private fields.',
+    );
   }
   if (!isNonEmptyString(settlementSummary.candidateId) || !candidateIds.has(settlementSummary.candidateId)) {
     return blocked(
@@ -445,8 +566,18 @@ function privateRunSettlementSummariesEqual(
     && left.finalOutcome === right.finalOutcome;
 }
 
-function isScenarioNetSummary(value: unknown): boolean {
-  return isRecord(value) && isNonEmptyString(value.scenarioId) && isIntegerLike(value.netMinor);
+function validateScenarioNetSummary(value: unknown): BoundaryResult<undefined> {
+  if (!isRecord(value)) {
+    return privateCandidateShapeBlocker();
+  }
+  if (!hasOnlySupportedFields(value, SCENARIO_NET_SUMMARY_KEYS)) {
+    return privateCandidateUnsupportedFieldsBlocker();
+  }
+  if (!isNonEmptyString(value.scenarioId) || !isIntegerLike(value.netMinor)) {
+    return privateCandidateShapeBlocker();
+  }
+
+  return accepted(undefined);
 }
 
 function isBlocker(value: unknown): value is { readonly code: string; readonly message: string; readonly evidenceRequired: string } {
@@ -457,10 +588,17 @@ function isBlocker(value: unknown): value is { readonly code: string; readonly m
 }
 
 function isIntegerLike(value: unknown): boolean {
+  return integerLikeToBigInt(value) !== undefined;
+}
+
+function integerLikeToBigInt(value: unknown): bigint | undefined {
   if (typeof value === 'bigint') {
-    return true;
+    return value;
   }
-  return typeof value === 'string' && /^-?\d+$/.test(value);
+  if (typeof value === 'string' && /^-?\d+$/.test(value)) {
+    return BigInt(value);
+  }
+  return undefined;
 }
 
 function isIsoUtcTimestamp(value: unknown): boolean {
@@ -479,11 +617,23 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
+function hasOnlySupportedFields(value: Record<string, unknown>, supportedFields: ReadonlySet<string>): boolean {
+  return Object.keys(value).every((field) => supportedFields.has(field));
+}
+
 function privateCandidateShapeBlocker(): BoundaryResult<undefined> {
   return blocked(
     'PRIVATE_RUN_REPORT_CANDIDATE_SHAPE_INVALID',
     'Private paper-mode artifacts must keep candidate reports in the supported blocked or opportunity shape.',
     'Serialized private paper-mode candidate reports with lane/status/blocker and stake-vector fields aligned to reportKind.',
+  );
+}
+
+function privateCandidateUnsupportedFieldsBlocker(): BoundaryResult<undefined> {
+  return blocked(
+    'PRIVATE_RUN_REPORT_CANDIDATE_UNSUPPORTED_FIELDS',
+    'Private paper-mode candidate reports must not retain unsupported fields.',
+    'Serialized private paper-mode candidate report with only supported private fields for its reportKind.',
   );
 }
 

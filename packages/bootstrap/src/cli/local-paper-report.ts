@@ -44,6 +44,18 @@ export interface LocalPaperReportWriteResult {
 export function writeLocalPaperReport(
   options: WriteLocalPaperReportOptions,
 ): BoundaryResult<LocalPaperReportWriteResult> {
+  const reportArtifact = createLocalPaperReportArtifact(options);
+  if (!reportArtifact.ok) {
+    return reportArtifact;
+  }
+
+  writeLocalPaperReportArtifact(reportArtifact.value);
+  return reportArtifact;
+}
+
+export function createLocalPaperReportArtifact(
+  options: WriteLocalPaperReportOptions,
+): BoundaryResult<LocalPaperReportWriteResult> {
   const repoRoot = resolve(options.repoRoot ?? process.cwd());
   let bundleValue: BettingWinExportBundle;
   let parsedRecords: readonly BettingWinResourceRecord[] | undefined;
@@ -74,8 +86,6 @@ export function writeLocalPaperReport(
   if (!reportArtifact.ok) {
     return reportArtifact;
   }
-  mkdirSync(dirname(resolvedOutputPath.value), { recursive: true });
-  writeFileSync(resolvedOutputPath.value, `${serializeJson(report)}\n`, { encoding: 'utf-8' });
 
   return accepted(
     Object.freeze({
@@ -83,6 +93,11 @@ export function writeLocalPaperReport(
       report,
     }),
   );
+}
+
+export function writeLocalPaperReportArtifact(reportArtifact: LocalPaperReportWriteResult): void {
+  mkdirSync(dirname(reportArtifact.outputPath), { recursive: true });
+  writeFileSync(reportArtifact.outputPath, `${serializeJson(reportArtifact.report)}\n`, { encoding: 'utf-8' });
 }
 
 export function runLocalPaperReportCli(

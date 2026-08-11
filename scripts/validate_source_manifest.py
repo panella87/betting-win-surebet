@@ -31,6 +31,7 @@ SKIP_PREFIXES = (
     '.automation/consumed-handoffs/',
 )
 SKIP_SUFFIXES = ('.zip', '.log', '.tmp', '.pyc', '.tar', '.tgz', '.tar.gz')
+ALLOWED_ENV_TEMPLATE_NAMES = {'.env.example', '.env.sample', '.env.template'}
 UTC_TIMESTAMP = re.compile(r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$')
 
 
@@ -49,6 +50,8 @@ def require_manifest_file() -> None:
 def should_include(path: Path) -> bool:
     rel = path.relative_to(ROOT).as_posix()
     parts = path.relative_to(ROOT).parts
+    if path.name.startswith('.env') and path.name not in ALLOWED_ENV_TEMPLATE_NAMES:
+        return False
     if rel in SKIP_EXACT:
         return False
     if rel.startswith(SKIP_PREFIXES):

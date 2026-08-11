@@ -53,6 +53,24 @@ test('B1 settlement replay marks non-positive settled net as a false positive me
   assert.equal(result.value.falsePositiveReason, 'settled_net_non_positive');
 });
 
+test('B1 settlement replay fails closed on fractional partial payout scaling', () => {
+  const result = analyzeB1SettlementReplay({
+    candidateId: 'event-001:moneyline|venue-a|venue-b',
+    matrix: fractionalPartialPayoutMatrix(),
+    fillabilitySimulation: partialSimulation(),
+    settlementRecords: settlementRecords('event-001:moneyline:away'),
+  });
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'B1_SETTLEMENT_REPLAY_PAYOUT_SCALING_FRACTIONAL',
+      message: 'B1 settlement replay requires partial payout scaling to resolve to integer minor units.',
+      evidenceRequired: 'B1 settled scenario payout scaling with no fractional minor-unit remainder.',
+    },
+  ]);
+});
+
 test('B1 settlement replay rejects whitespace-only finality authority evidence', () => {
   const records = settlementRecords('event-001:moneyline:away').map((record) => Object.freeze({
     ...record,
@@ -108,6 +126,56 @@ test('B1 settlement replay rejects incomplete fillability simulations without re
       code: 'B1_SETTLEMENT_REPLAY_RESIDUAL_EXPOSURE_MISSING',
       message: 'B1 settlement replay requires residual exposure evidence for incomplete fillability simulations.',
       evidenceRequired: 'B1 residual exposure output from the validated fillability simulation.',
+    },
+  ]);
+});
+
+test('B1 settlement replay rejects forged aggregate group state before residual replay decisions', () => {
+  const result = analyzeB1SettlementReplay({
+    candidateId: 'event-001:moneyline|venue-a|venue-b',
+    matrix: twoWayMatrix(),
+    fillabilitySimulation: Object.freeze({
+      ...partialSimulationWithoutResidualExposure(),
+      groupState: 'group_filled',
+    }),
+    settlementRecords: settlementRecords('event-001:moneyline:away'),
+  });
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'B1_SETTLEMENT_REPLAY_FILLABILITY_GROUP_STATE_MISMATCH',
+      message: 'B1 settlement replay requires aggregate fillability group state to match leg snapshots.',
+      evidenceRequired: 'B1 fillability simulation groupState derived from validated leg snapshots.',
+    },
+  ]);
+});
+
+test('B1 settlement replay rejects over-limit incomplete residual exposure evidence', () => {
+  const simulation = partialSimulation();
+  const residualExposure = simulation.residualExposure;
+  assert.ok(residualExposure);
+
+  const result = analyzeB1SettlementReplay({
+    candidateId: 'event-001:moneyline|venue-a|venue-b',
+    matrix: twoWayMatrix(),
+    fillabilitySimulation: Object.freeze({
+      ...simulation,
+      residualExposure: Object.freeze({
+        ...residualExposure,
+        maxResidualExposureMinor: 4_999n,
+        residualExposureWithinLimit: false,
+      }),
+    }),
+    settlementRecords: settlementRecords('event-001:moneyline:away'),
+  });
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'B1_SETTLEMENT_REPLAY_RESIDUAL_EXPOSURE_OVER_LIMIT',
+      message: 'B1 settlement replay requires incomplete residual exposure evidence to stay within the configured exposure limit.',
+      evidenceRequired: 'B1 residual exposure evidence with residualExposureWithinLimit=true.',
     },
   ]);
 });
@@ -285,6 +353,106 @@ test('B1 settlement replay rejects malformed fillability snapshots before settle
   ]);
 });
 
+test('B1 settlement replay rejects null fillability snapshots without throwing', () => {
+  const simulation = filledSimulation();
+  const secondLeg = simulation.legs[1];
+  assert.ok(secondLeg);
+  const result = analyzeB1SettlementReplay({
+    candidateId: 'event-001:moneyline|venue-a|venue-b',
+    matrix: twoWayMatrix(),
+    fillabilitySimulation: Object.freeze({
+      ...simulation,
+      legs: Object.freeze([null, secondLeg]),
+    }) as never,
+    settlementRecords: settlementRecords('event-001:moneyline:away'),
+  });
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'B1_SETTLEMENT_REPLAY_FILLABILITY_SNAPSHOT_INVALID',
+      message: 'B1 settlement replay requires structured fillability leg snapshots.',
+      evidenceRequired: 'Structured B1 fillability leg snapshot objects.',
+    },
+  ]);
+});
+
+test('B1 settlement replay rejects non-bigint fillability stake fields without throwing', () => {
+  const simulation = filledSimulation();
+  const secondLeg = simulation.legs[1];
+  assert.ok(secondLeg);
+  const result = analyzeB1SettlementReplay({
+    candidateId: 'event-001:moneyline|venue-a|venue-b',
+    matrix: twoWayMatrix(),
+    fillabilitySimulation: Object.freeze({
+      ...simulation,
+      legs: Object.freeze([
+        Object.freeze({
+          ...leg('event-001:moneyline:away', 'venue-b', 10_000n, 10_000n, 'leg_filled'),
+          liveFilledStakeMinor: 10_000,
+        }),
+        secondLeg,
+      ]),
+    }) as never,
+    settlementRecords: settlementRecords('event-001:moneyline:away'),
+  });
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'B1_SETTLEMENT_REPLAY_FILLABILITY_SNAPSHOT_INVALID',
+      message: 'B1 settlement replay requires integer minor-unit fillability snapshot stake fields.',
+      evidenceRequired: 'B1 fillability snapshot stake fields encoded as bigint integer minor units.',
+    },
+  ]);
+});
+
+test('B1 settlement replay rejects malformed settlement records without throwing', () => {
+  const result = analyzeB1SettlementReplay({
+    candidateId: 'event-001:moneyline|venue-a|venue-b',
+    matrix: twoWayMatrix(),
+    fillabilitySimulation: filledSimulation(),
+    settlementRecords: Object.freeze([
+      null,
+      settlementRecords('event-001:moneyline:away')[1],
+    ]) as never,
+  });
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'B1_SETTLEMENT_REPLAY_RECORD_INVALID',
+      message: 'B1 settlement replay requires structured settlement replay records.',
+      evidenceRequired: 'Structured B1 settlement replay record objects.',
+    },
+  ]);
+});
+
+test('B1 settlement replay rejects malformed residual exposure replay evidence without throwing', () => {
+  const simulation = partialSimulation();
+  const result = analyzeB1SettlementReplay({
+    candidateId: 'event-001:moneyline|venue-a|venue-b',
+    matrix: twoWayMatrix(),
+    fillabilitySimulation: Object.freeze({
+      ...simulation,
+      residualExposure: Object.freeze({
+        ...simulation.residualExposure,
+        scenarioNets: Object.freeze([null]),
+      }),
+    }) as never,
+    settlementRecords: settlementRecords('event-001:moneyline:away'),
+  });
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'B1_SETTLEMENT_REPLAY_RESIDUAL_EXPOSURE_INVALID',
+      message: 'B1 settlement replay requires typed residual exposure scenario nets.',
+      evidenceRequired: 'B1 residual exposure scenario nets encoded with the expected runtime types.',
+    },
+  ]);
+});
+
 test('B1 settlement replay blocks calendar-invalid replay acceptance timestamps', () => {
   const records = settlementRecords('event-001:moneyline:away').map((record) => Object.freeze({
     ...record,
@@ -326,6 +494,24 @@ test('B1 settlement replay analysis is not reached for malformed scenario winner
   ]);
 });
 
+test('B1 settlement replay analysis is not reached for scenario leg-key venue drift', () => {
+  const result = analyzeB1SettlementReplay({
+    candidateId: 'event-001:moneyline|venue-a|venue-b',
+    matrix: venueDriftMatrix(),
+    fillabilitySimulation: partialSimulation(),
+    settlementRecords: settlementRecords('event-001:moneyline:home'),
+  });
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'B1_SCENARIO_CASHFLOW_LEG_KEY_DRIFT',
+      message: 'B1 scenario cash-flow validation requires each selection to keep one stable venue across terminal scenarios.',
+      evidenceRequired: 'Stable B1 scenario-by-leg-key coverage keyed by selection_equivalence_key and venue_or_bookmaker_id.',
+    },
+  ]);
+});
+
 test('B1 settlement replay blocks unknown settlement compatibility before false-positive analysis', () => {
   const records = settlementRecords('event-001:moneyline:away').map((record) => Object.freeze({
     ...record,
@@ -346,6 +532,65 @@ test('B1 settlement replay blocks unknown settlement compatibility before false-
       evidenceRequired: 'B1 settlement_compatibility_flag=compatible for every compared leg.',
     },
   ]);
+});
+
+test('B1 settlement replay blocks whitespace-only rule and void-rule identifiers', () => {
+  const blankSettlementRule = analyzeB1SettlementReplay({
+    candidateId: 'event-001:moneyline|venue-a|venue-b',
+    matrix: twoWayMatrix(),
+    fillabilitySimulation: filledSimulation(),
+    settlementRecords: settlementRecords('event-001:moneyline:away').map((record) => Object.freeze({
+      ...record,
+      settlementRuleVersion: '   ',
+    })),
+  });
+  assert.equal(blankSettlementRule.ok, false);
+  assert.deepEqual(blankSettlementRule.blockers, [
+    {
+      code: 'B1_SETTLEMENT_COMPATIBILITY_UNKNOWN',
+      message: 'B1 settlement replay requires an explicit settlement rule version.',
+      evidenceRequired: 'B1 settlement_rule_version for every compared leg.',
+    },
+  ]);
+
+  const blankVoidRule = analyzeB1SettlementReplay({
+    candidateId: 'event-001:moneyline|venue-a|venue-b',
+    matrix: twoWayMatrix(),
+    fillabilitySimulation: filledSimulation(),
+    settlementRecords: settlementRecords('event-001:moneyline:away').map((record) => Object.freeze({
+      ...record,
+      voidRuleId: '   ',
+    })),
+  });
+  assert.equal(blankVoidRule.ok, false);
+  assert.deepEqual(blankVoidRule.blockers, [
+    {
+      code: 'B1_SETTLEMENT_COMPATIBILITY_UNKNOWN',
+      message: 'B1 settlement replay requires an explicit void-rule id.',
+      evidenceRequired: 'B1 void_rule_id for every compared leg.',
+    },
+  ]);
+});
+
+test('B1 settlement replay normalizes padded rule and void-rule identifiers', () => {
+  const records = settlementRecords('event-001:moneyline:away');
+  const result = analyzeB1SettlementReplay({
+    candidateId: 'event-001:moneyline|venue-a|venue-b',
+    matrix: twoWayMatrix(),
+    fillabilitySimulation: filledSimulation(),
+    settlementRecords: Object.freeze([
+      Object.freeze({
+        ...(records[0] as B1SettlementReplayRecord),
+        settlementRuleVersion: ' settlement-rule-v1 ',
+        voidRuleId: ' void-rule-push-refund-v1 ',
+      }),
+      records[1] as B1SettlementReplayRecord,
+    ]),
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.value.voidRuleReplay.settlementRuleVersion, 'settlement-rule-v1');
+  assert.equal(result.value.voidRuleReplay.voidRuleId, 'void-rule-push-refund-v1');
 });
 
 test('B1 settlement replay blocks cross-venue void-rule mismatch', () => {
@@ -539,6 +784,57 @@ function twoWayMatrix() {
         payoutMinor: 21_000n,
       }),
     ]),
+  });
+}
+
+function venueDriftMatrix() {
+  return Object.freeze({
+    rows: Object.freeze([
+      Object.freeze({
+        scenarioId: 'b1_terminal:event-001:moneyline:away',
+        winningSelectionEquivalenceKey: 'event-001:moneyline:away',
+        selectionEquivalenceKey: 'event-001:moneyline:away',
+        venueOrBookmakerId: 'venue-b',
+        stakeMinor: 10_000n,
+        payoutMinor: 21_000n,
+      }),
+      Object.freeze({
+        scenarioId: 'b1_terminal:event-001:moneyline:away',
+        winningSelectionEquivalenceKey: 'event-001:moneyline:away',
+        selectionEquivalenceKey: 'event-001:moneyline:home',
+        venueOrBookmakerId: 'venue-a',
+        stakeMinor: 10_000n,
+        payoutMinor: 0n,
+      }),
+      Object.freeze({
+        scenarioId: 'b1_terminal:event-001:moneyline:home',
+        winningSelectionEquivalenceKey: 'event-001:moneyline:home',
+        selectionEquivalenceKey: 'event-001:moneyline:away',
+        venueOrBookmakerId: 'venue-x',
+        stakeMinor: 10_000n,
+        payoutMinor: 0n,
+      }),
+      Object.freeze({
+        scenarioId: 'b1_terminal:event-001:moneyline:home',
+        winningSelectionEquivalenceKey: 'event-001:moneyline:home',
+        selectionEquivalenceKey: 'event-001:moneyline:home',
+        venueOrBookmakerId: 'venue-a',
+        stakeMinor: 10_000n,
+        payoutMinor: 21_000n,
+      }),
+    ]),
+  });
+}
+
+function fractionalPartialPayoutMatrix() {
+  return Object.freeze({
+    rows: Object.freeze(twoWayMatrix().rows.map((row) => Object.freeze({
+      ...row,
+      payoutMinor: row.scenarioId === 'b1_terminal:event-001:moneyline:away'
+        && row.selectionEquivalenceKey === 'event-001:moneyline:away'
+        ? 21_001n
+        : row.payoutMinor,
+    }))),
   });
 }
 

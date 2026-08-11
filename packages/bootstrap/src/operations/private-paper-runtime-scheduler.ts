@@ -148,6 +148,7 @@ export function resolveBwsPrivatePaperSchedulerConfig(
         candidatePlans: manifest.value.candidatePlans,
         checkpointId: upstream.checkpointId,
         contractVersion: upstream.query.contractVersion,
+        localBwsApiPort: upstream.query.localBwsApiPort,
         maxCandidatesPerCycle: manifest.value.maxCandidatesPerCycle,
         maxPagesPerResource: upstream.query.maxPagesPerResource,
         mode: 'api',
@@ -188,6 +189,13 @@ export async function runBwsPrivatePaperSchedulerPass(
   request: RunBwsPrivatePaperSchedulerPassRequest = {},
 ): Promise<BoundaryResult<BwsPrivatePaperSchedulerPassResult>> {
   const config = request.config ?? resolveBwsPrivatePaperSchedulerConfig(request.environment, request.repositoryRoot);
+  if (config.upstream.query.localBwsApiPort === undefined) {
+    return blocked(
+      'BWS_PRIVATE_PAPER_SCHEDULER_LOCAL_BWS_API_PORT_MISSING',
+      'BWS private-paper scheduler requires BWS_API_PORT so read-only query worker jobs preserve the local BWS API guard.',
+      'A persisted local BWS API port guard for private-paper read-only query worker sources.',
+    );
+  }
   const lockRecordId = buildUpstreamLockRecordId(config.upstream.upstream.lock.commitSha, config.upstream.upstream.lock.gitTreeSha);
   const schedulerCheckpoints = request.schedulerCheckpoints
     ?? new SurebetPrivatePaperRuntimeSchedulerCheckpointRepository(config.persistence);
@@ -369,6 +377,7 @@ function buildApiRuntimeJobPayload(
   cycleId: string,
   source: { readonly exportedAt: string; readonly sourceId: string },
 ): PersistedPrivatePaperRuntimeJobPayload {
+  const localBwsApiPort = requireLocalBwsApiPort(config);
   return Object.freeze({
     candidatePlans: config.schedule.candidatePlans,
     cycleId,
@@ -380,6 +389,7 @@ function buildApiRuntimeJobPayload(
       contractVersion: config.upstream.query.contractVersion,
       exportedAt: source.exportedAt,
       kind: 'read_only_query',
+      localBwsApiPort,
       maxPagesPerResource: config.upstream.query.maxPagesPerResource,
       pageSize: config.upstream.query.pageSize,
       retryBackoffMs: config.upstream.query.retryBackoffMs,
@@ -391,6 +401,7 @@ function buildApiRuntimeJobPayload(
             checkpointId: config.upstream.checkpointId,
             cycleNumber,
             exportedAt: source.exportedAt,
+            localBwsApiPort,
             manifestSha256: config.schedule.manifestSha256,
             runtimeId: config.schedule.runtimeId,
           }) as JsonValue,
@@ -403,6 +414,14 @@ function buildApiRuntimeJobPayload(
       config.upstream.upstream.lock.gitTreeSha,
     ),
   });
+}
+
+function requireLocalBwsApiPort(config: BwsPrivatePaperApiSchedulerConfig): number {
+  const localBwsApiPort = config.upstream.query.localBwsApiPort;
+  if (localBwsApiPort === undefined) {
+    throw new Error('BWS private-paper scheduler read_only_query payload requires localBwsApiPort.');
+  }
+  return localBwsApiPort;
 }
 
 function findCompletedApiCycleSource(
@@ -504,14 +523,25 @@ function parseApiImportRunMetadata(
       'Persisted api import-run metadata with cycleNumber, pageNumber, resource, and responseReceivedAt.',
     );
   }
+  const nextCursor = page.nextCursor;
+  if (
+    Object.prototype.hasOwnProperty.call(page, 'nextCursor')
+    && (typeof nextCursor !== 'string' || nextCursor.trim().length === 0 || nextCursor !== nextCursor.trim())
+  ) {
+    return blocked(
+      'BWS_PRIVATE_PAPER_SCHEDULER_IMPORT_METADATA_INVALID',
+      `BWS private-paper scheduler requires metadata.page.nextCursor to be a canonical non-empty string when present for ${importRun.importRunId}.`,
+      'Persisted api import-run metadata with absent or canonical non-empty nextCursor.',
+    );
+  }
   return accepted(
     Object.freeze({
       cycleNumber: cycleNumber.value,
       pageNumber: pageNumber.value,
       resource: resource.value,
       responseReceivedAt: responseReceivedAt.value,
-      ...(typeof page.nextCursor === 'string' && page.nextCursor.length > 0
-        ? { nextCursor: page.nextCursor }
+      ...(typeof nextCursor === 'string'
+        ? { nextCursor }
         : {}),
     }),
   );

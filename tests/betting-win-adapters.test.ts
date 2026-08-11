@@ -93,6 +93,46 @@ test('export bundle parser rejects blank contract version after source check pas
   ]);
 });
 
+test('export bundle parser rejects noncanonical contract version and manifest hash metadata', () => {
+  const paddedContractVersion = parseBettingWinExportBundle(
+    createFixtureBundle({
+      reference: {
+        source: 'betting-win',
+        contractVersion: ' 0.0.0-test ',
+        manifestHash: 'a'.repeat(64),
+      },
+    }),
+  );
+
+  assert.equal(paddedContractVersion.ok, false);
+  assert.deepEqual(paddedContractVersion.blockers, [
+    {
+      code: 'EXPORT_CONTRACT_VERSION_MISSING',
+      message: 'Export bundle contract version is required.',
+      evidenceRequired: 'Pinned betting-win export contract version.',
+    },
+  ]);
+
+  const uppercaseManifestHash = parseBettingWinExportBundle(
+    createFixtureBundle({
+      reference: {
+        source: 'betting-win',
+        contractVersion: '0.0.0-test',
+        manifestHash: 'A'.repeat(64),
+      },
+    }),
+  );
+
+  assert.equal(uppercaseManifestHash.ok, false);
+  assert.deepEqual(uppercaseManifestHash.blockers, [
+    {
+      code: 'EXPORT_MANIFEST_HASH_INVALID',
+      message: 'Export bundle manifest hash must be 64 hexadecimal characters.',
+      evidenceRequired: 'Pinned betting-win export manifest hash.',
+    },
+  ]);
+});
+
 test('export bundle parser rejects malformed manifest hash, timestamp, and bundle kind', () => {
   const invalidManifest = parseBettingWinExportBundle(
     createFixtureBundle({

@@ -26,6 +26,7 @@ import type {
 const JOB_PAYLOAD_SCHEMA = 'bws.private_paper_runtime_job.v1';
 const ISO_UTC_TIMESTAMP = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/;
 const SIGNED_INTEGER_STRING = /^-?[0-9]+$/;
+const MAX_TCP_PORT = 65_535;
 
 export interface SerializablePrivatePaperCompletionEvent {
   readonly legId: string;
@@ -68,6 +69,7 @@ export interface PersistedPrivatePaperRuntimeReadOnlyQuerySource {
   readonly sourceManifestHash: string;
   readonly apiBaseUrl: string;
   readonly contractVersion: string;
+  readonly localBwsApiPort: number;
   readonly pageSize: number;
   readonly maxPagesPerResource: number;
   readonly retryBackoffMs: number;
@@ -116,8 +118,24 @@ export function createPrivatePaperRuntimeJobHandler(
         );
       }
 
+      const runtimeRequest = toRuntimeRequest(parsedPayload.value, upstreamLock.lock);
+      if (!runtimeRequest.ok) {
+        return deadLetter(
+          context.now(),
+          'BWS_PRIVATE_PAPER_RUNTIME_BLOCKED',
+          Object.freeze({
+            blockers: runtimeRequest.blockers.map((blocker) =>
+              Object.freeze({
+                code: blocker.code,
+                evidenceRequired: blocker.evidenceRequired,
+                message: blocker.message,
+              })),
+          }),
+        );
+      }
+
       const runtimeResult = await (dependencies.runCycle ?? runBoundedPrivatePaperRuntimeCycle)(
-        toRuntimeRequest(parsedPayload.value, upstreamLock.lock),
+        runtimeRequest.value,
       );
       if (!runtimeResult.ok) {
         return deadLetter(
@@ -393,6 +411,7 @@ function parsePersistedJobSource(
   if (sourceRecord.kind === 'read_only_query') {
     const apiBaseUrl = requireNonEmptyString(sourceRecord.apiBaseUrl);
     const contractVersion = requireNonEmptyString(sourceRecord.contractVersion);
+    const localBwsApiPort = requireTcpPort(sourceRecord.localBwsApiPort);
     const pageSize = requirePositiveInteger(sourceRecord.pageSize);
     const maxPagesPerResource = requirePositiveInteger(sourceRecord.maxPagesPerResource);
     const retryBackoffMs = requirePositiveInteger(sourceRecord.retryBackoffMs);
@@ -401,6 +420,7 @@ function parsePersistedJobSource(
     if (
       apiBaseUrl === undefined
       || contractVersion === undefined
+      || localBwsApiPort === undefined
       || pageSize === undefined
       || maxPagesPerResource === undefined
       || retryBackoffMs === undefined
@@ -412,7 +432,7 @@ function parsePersistedJobSource(
           failedAt,
           'BWS_PRIVATE_PAPER_JOB_SOURCE_UNSUPPORTED',
           Object.freeze({
-            evidenceRequired: 'A read_only_query worker source with apiBaseUrl, contractVersion, bounded page settings, retry settings, and timeout.',
+            evidenceRequired: 'A read_only_query worker source with apiBaseUrl, contractVersion, localBwsApiPort, bounded page settings, retry settings, and timeout.',
           }),
         ),
         ok: false,
@@ -425,6 +445,7 @@ function parsePersistedJobSource(
         contractVersion,
         exportedAt,
         kind: 'read_only_query',
+        localBwsApiPort,
         maxPagesPerResource,
         pageSize,
         retryBackoffMs,
@@ -565,7 +586,7 @@ function parseCandidatePlans(
 function toRuntimeRequest(
   payload: PersistedPrivatePaperRuntimeJobPayload,
   upstreamLock: NonNullable<ReturnType<PrivatePaperRuntimeJobHandlerDependencies['upstreamLocks']['get']>>['lock'],
-): PrivatePaperRuntimeRequest {
+): BoundaryResult<PrivatePaperRuntimeRequest> {
   const source = payload.source.kind === 'pinned_records'
     ? accepted(
       Object.freeze({
@@ -578,16 +599,18 @@ function toRuntimeRequest(
     )
     : buildReadOnlyQuerySource(payload.source, upstreamLock);
   if (!source.ok) {
-    throw new Error(source.blockers.map((blocker) => blocker.message).join(' '));
+    return source;
   }
-  return Object.freeze({
-    candidatePlans: payload.candidatePlans.map((plan) => deserializeCandidatePlan(plan)),
-    cycleId: payload.cycleId,
-    maxCandidatesPerCycle: payload.maxCandidatesPerCycle,
-    runtimeId: payload.runtimeId,
-    source: source.value,
-    upstreamLock,
-  });
+  return accepted(
+    Object.freeze({
+      candidatePlans: payload.candidatePlans.map((plan) => deserializeCandidatePlan(plan)),
+      cycleId: payload.cycleId,
+      maxCandidatesPerCycle: payload.maxCandidatesPerCycle,
+      runtimeId: payload.runtimeId,
+      source: source.value,
+      upstreamLock,
+    }),
+  );
 }
 
 function buildReadOnlyQuerySource(
@@ -598,6 +621,7 @@ function buildReadOnlyQuerySource(
     baseUrl: source.apiBaseUrl,
     contractVersion: source.contractVersion,
     fetchImplementation: globalThis.fetch.bind(globalThis),
+    localBwsApiPort: source.localBwsApiPort,
     maxPageSize: source.pageSize,
     retryBackoffMs: source.retryBackoffMs,
     retryLimit: source.retryLimit,
@@ -788,6 +812,11 @@ function requireSha256String(value: unknown): string | undefined {
 
 function requirePositiveInteger(value: unknown): number | undefined {
   return typeof value === 'number' && Number.isSafeInteger(value) && value > 0 ? value : undefined;
+}
+
+function requireTcpPort(value: unknown): number | undefined {
+  const port = requirePositiveInteger(value);
+  return port !== undefined && port <= MAX_TCP_PORT ? port : undefined;
 }
 
 function requireNonNegativeInteger(value: unknown): number | undefined {

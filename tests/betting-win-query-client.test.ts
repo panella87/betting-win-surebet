@@ -148,19 +148,36 @@ test('read-only query client rejects invalid base URLs and explicit credentialed
   });
   assert.equal(externalUnspecifiedPort.ok, true);
 
-  const unsafeLocalBwsApiPort = createReadOnlyQueryApiClient({
-    baseUrl: 'http://localhost:4301',
-    contractVersion: '1.0.0',
-    fetchImplementation: globalThis.fetch.bind(globalThis),
-    localBwsApiPort: Number.MAX_SAFE_INTEGER + 1,
-    maxPageSize: 50,
-    retryBackoffMs: 5,
-    retryLimit: 1,
-    timeoutMs: 25,
-    upstreamLock: sampleUpstreamLock(),
-  });
-  assert.equal(unsafeLocalBwsApiPort.ok, false);
-  assert.equal(unsafeLocalBwsApiPort.blockers[0]?.code, 'QUERY_LOCAL_BWS_API_PORT_INVALID');
+  for (const localBwsApiPort of [1, 65_535]) {
+    const validLocalBwsApiPort = createReadOnlyQueryApiClient({
+      baseUrl: 'http://betting-win-query.test/read-only',
+      contractVersion: '1.0.0',
+      fetchImplementation: globalThis.fetch.bind(globalThis),
+      localBwsApiPort,
+      maxPageSize: 50,
+      retryBackoffMs: 5,
+      retryLimit: 1,
+      timeoutMs: 25,
+      upstreamLock: sampleUpstreamLock(),
+    });
+    assert.equal(validLocalBwsApiPort.ok, true);
+  }
+
+  for (const localBwsApiPort of [0, 65_536, 1.5, '4301', Number.MAX_SAFE_INTEGER + 1]) {
+    const invalidLocalBwsApiPort = createReadOnlyQueryApiClient({
+      baseUrl: 'http://localhost:4301',
+      contractVersion: '1.0.0',
+      fetchImplementation: globalThis.fetch.bind(globalThis),
+      localBwsApiPort,
+      maxPageSize: 50,
+      retryBackoffMs: 5,
+      retryLimit: 1,
+      timeoutMs: 25,
+      upstreamLock: sampleUpstreamLock(),
+    } as never);
+    assert.equal(invalidLocalBwsApiPort.ok, false);
+    assert.equal(invalidLocalBwsApiPort.blockers[0]?.code, 'QUERY_LOCAL_BWS_API_PORT_INVALID');
+  }
 });
 
 test('read-only query client rejects unsupported per-resource filter keys before fetch', async () => {
@@ -190,6 +207,86 @@ test('read-only query client rejects unsupported per-resource filter keys before
 
   assert.equal(result.ok, false);
   assert.equal(result.blockers[0]?.code, 'QUERY_FILTER_UNSUPPORTED');
+  assert.equal(fetchTouched, false);
+});
+
+test('read-only query client rejects noncanonical per-resource filter values before fetch', async () => {
+  let fetchTouched = false;
+  const client = createReadOnlyQueryApiClient({
+    baseUrl: 'http://127.0.0.1:9999/read-only',
+    contractVersion: '1.0.0',
+    fetchImplementation: async () => {
+      fetchTouched = true;
+      throw new Error('fetch should not be called');
+    },
+    maxPageSize: 50,
+    retryBackoffMs: 5,
+    retryLimit: 1,
+    timeoutMs: 25,
+    upstreamLock: sampleUpstreamLock(),
+  });
+  assert.equal(client.ok, true);
+
+  const identityResult = await client.value.queryIdentity({
+    filters: {
+      canonicalId: ' market-001 ',
+    },
+    pageSize: 1,
+  });
+  assert.equal(identityResult.ok, false);
+  assert.deepEqual(identityResult.blockers, [
+    {
+      code: 'QUERY_FILTER_VALUE_INVALID',
+      message: 'Read-only query filter canonicalId must be a canonical non-empty string.',
+      evidenceRequired: 'Typed read-only query filter value for identity.',
+    },
+  ]);
+
+  const rulesResult = await client.value.queryRules({
+    filters: {
+      provider: ' polymarket ',
+    },
+    pageSize: 1,
+  });
+  assert.equal(rulesResult.ok, false);
+  assert.deepEqual(rulesResult.blockers, [
+    {
+      code: 'QUERY_FILTER_VALUE_INVALID',
+      message: 'Read-only query filter provider must be a canonical non-empty string.',
+      evidenceRequired: 'Typed read-only query filter value for rules.',
+    },
+  ]);
+
+  const quotesResult = await client.value.queryQuotes({
+    filters: {
+      marketId: ' market-001 ',
+    },
+    pageSize: 1,
+  });
+  assert.equal(quotesResult.ok, false);
+  assert.deepEqual(quotesResult.blockers, [
+    {
+      code: 'QUERY_FILTER_VALUE_INVALID',
+      message: 'Read-only query filter marketId must be a canonical non-empty string.',
+      evidenceRequired: 'Typed read-only query filter value for quotes.',
+    },
+  ]);
+
+  const settlementResult = await client.value.querySettlement({
+    filters: {
+      provider: '   ',
+    },
+    pageSize: 1,
+  });
+  assert.equal(settlementResult.ok, false);
+  assert.deepEqual(settlementResult.blockers, [
+    {
+      code: 'QUERY_FILTER_VALUE_INVALID',
+      message: 'Read-only query filter provider must be a canonical non-empty string.',
+      evidenceRequired: 'Typed read-only query filter value for settlement.',
+    },
+  ]);
+
   assert.equal(fetchTouched, false);
 });
 
@@ -244,6 +341,140 @@ test('read-only query client negotiates identity queries and validates paginatio
       },
     }));
   });
+});
+
+test('read-only query client rejects noncanonical identity rules and normalized response strings', async () => {
+  let requestCount = 0;
+  const client = createReadOnlyQueryApiClient({
+    baseUrl: 'http://betting-win-query.test/read-only',
+    contractVersion: '1.0.0',
+    fetchImplementation: async () => {
+      requestCount += 1;
+      if (requestCount === 1) {
+        return new Response(`${JSON.stringify(createEnvelope('identity', {
+          page: {
+            items: [
+              {
+                canonicalId: ' sport.soccer ',
+                entityType: 'sport',
+                providerReferences: [
+                  {
+                    provider: 'polymarket',
+                    providerGeneration: 'pm-gen-001',
+                    sourceLineageRecordId: 'record-identity-001',
+                  },
+                ],
+              },
+            ],
+            pageSize: 1,
+            returnedCount: 1,
+          },
+        }))}\n`, {
+          headers: { 'content-type': 'application/json' },
+          status: 200,
+        });
+      }
+      if (requestCount === 2) {
+        return new Response(`${JSON.stringify(createEnvelope('rules', {
+          page: {
+            items: [
+              {
+                resultSource: { resultSourceId: 'result-source-001' },
+                ruleProfile: { ruleProfileId: ' rule-profile-001 ' },
+              },
+            ],
+            pageSize: 1,
+            returnedCount: 1,
+          },
+        }))}\n`, {
+          headers: { 'content-type': 'application/json' },
+          status: 200,
+        });
+      }
+      if (requestCount === 3) {
+        return new Response(`${JSON.stringify(createEnvelope('quotes', {
+          page: {
+            items: [
+              {
+                normalizedEvidence: {
+                  provider: 'polymarket',
+                  providerGenerationId: ' pm-gen-001 ',
+                  sourceLineageRecordId: 'record-quote-001',
+                },
+                recordType: 'evidence',
+              },
+            ],
+            pageSize: 1,
+            returnedCount: 1,
+          },
+        }))}\n`, {
+          headers: { 'content-type': 'application/json' },
+          status: 200,
+        });
+      }
+      return new Response(`${JSON.stringify(createEnvelope('settlement', {
+        page: {
+          items: [
+            {
+              normalizedRejection: {
+                provider: 'polymarket',
+                providerGenerationId: 'pm-gen-001',
+                sourceLineageRecordId: ' record-settlement-001 ',
+              },
+              recordType: 'rejection',
+            },
+          ],
+          pageSize: 1,
+          returnedCount: 1,
+        },
+      }))}\n`, {
+        headers: { 'content-type': 'application/json' },
+        status: 200,
+      });
+    },
+    maxPageSize: 50,
+    retryBackoffMs: 5,
+    retryLimit: 1,
+    timeoutMs: 50,
+    upstreamLock: sampleUpstreamLock(),
+  });
+  assert.equal(client.ok, true);
+
+  const identityResult = await client.value.queryIdentity({
+    filters: {
+      entityType: 'sport',
+    },
+    pageSize: 1,
+  });
+  assert.equal(identityResult.ok, false);
+  assert.equal(identityResult.blockers[0]?.code, 'QUERY_PROVENANCE_INVALID');
+
+  const rulesResult = await client.value.queryRules({
+    filters: {
+      provider: 'polymarket',
+    },
+    pageSize: 1,
+  });
+  assert.equal(rulesResult.ok, false);
+  assert.equal(rulesResult.blockers[0]?.code, 'QUERY_RULES_ITEM_INVALID');
+
+  const quotesResult = await client.value.queryQuotes({
+    filters: {
+      marketId: 'market-001',
+    },
+    pageSize: 1,
+  });
+  assert.equal(quotesResult.ok, false);
+  assert.equal(quotesResult.blockers[0]?.code, 'QUERY_PROVENANCE_INVALID');
+
+  const settlementResult = await client.value.querySettlement({
+    filters: {
+      marketId: 'market-001',
+    },
+    pageSize: 1,
+  });
+  assert.equal(settlementResult.ok, false);
+  assert.equal(settlementResult.blockers[0]?.code, 'QUERY_PROVENANCE_INVALID');
 });
 
 test('read-only query client fails closed on contract negotiation mismatches', async () => {

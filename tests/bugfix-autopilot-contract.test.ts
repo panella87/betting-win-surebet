@@ -7,6 +7,22 @@ import { join } from 'node:path';
 const ROOT = process.cwd();
 const read = (rel: string): string => readFileSync(join(ROOT, rel), 'utf8');
 
+function bootId(): string {
+  return readFileSync('/proc/sys/kernel/random/boot_id', 'utf8').trim();
+}
+
+function procStartTicks(pid: number): string {
+  const stat = readFileSync(`/proc/${pid}/stat`, 'utf8');
+  const remainder = stat.slice(stat.lastIndexOf(') ') + 2);
+  const fields = remainder.trim().split(/\s+/u);
+  const startTicks = fields[19];
+  if (startTicks === undefined) {
+    throw new Error(`missing process start ticks for pid ${pid}`);
+  }
+  assert.match(startTicks, /^[0-9]+$/u);
+  return startTicks;
+}
+
 function prepareTempRepo(): string {
   const repo = mkdtempSync('/tmp/surebet-bugfix-autopilot-');
   mkdirSync(join(repo, '.automation', 'lib'), { recursive: true });
@@ -222,12 +238,18 @@ test('bugfix autopilot rejects an incompatible controller before creating campai
       'LOCK_SCHEMA_VERSION=1',
       'CONTROLLER=run-paper-autopilot.sh',
       `CONTROLLER_PID=${paperParent.pid}`,
+      `CONTROLLER_BOOT_ID=${bootId()}`,
+      `CONTROLLER_START_TICKS=${procStartTicks(paperParent.pid)}`,
       'REPOSITORY=betting-win-surebet',
       `REPO_REALPATH=${realpathSync(repo)}`,
       `SCRIPT_REALPATH=${realpathSync(paperScript)}`,
       'RUN_DIR=',
+      'HEARTBEAT_SOURCE=file_mtime',
       `HEARTBEAT_EPOCH=${Math.floor(Date.now() / 1000)}`,
+      `HEARTBEAT_AT=${new Date().toISOString().replace(/\.[0-9]{3}Z$/u, 'Z')}`,
       'ACTIVE_CHILD_PID=',
+      'ACTIVE_CHILD_BOOT_ID=',
+      'ACTIVE_CHILD_START_TICKS=',
       'ACTIVE_CHILD_KIND=none',
       'ACTIVE_CHILD_SCRIPT=',
       'ACTIVE_CHILD_COMMAND=',

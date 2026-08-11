@@ -42,6 +42,28 @@ test('standard-binary complete-set stake solving fails closed on stale quote evi
   ]);
 });
 
+test('standard-binary complete-set stake solving fails closed on non-canonical quote observedAt evidence', () => {
+  for (const observedAt of ['2026-07-01', '2026-07-01T00:00:02Z']) {
+    const completeSet = mutateQuote(loadAcceptedCompleteSet(), 'yes', {
+      evidence: {
+        observedAt,
+      },
+    });
+    const result = solveStandardBinaryCompleteSetStakeVector(completeSet, {
+      observedNowMs: Date.parse('2026-07-01T00:00:03.000Z'),
+    });
+
+    assert.equal(result.ok, false, observedAt);
+    assert.deepEqual(result.blockers, [
+      {
+        code: 'QUOTE_TIMESTAMP_INVALID',
+        message: 'Quote evidence observedAt must be a canonical ISO-8601 UTC millisecond timestamp.',
+        evidenceRequired: 'Canonical quote observedAt timestamp formatted as YYYY-MM-DDTHH:mm:ss.mmmZ.',
+      },
+    ]);
+  }
+});
+
 test('standard-binary complete-set stake solving fails closed on retained depth below the minimum stake', () => {
   const completeSet = mutateQuote(loadAcceptedCompleteSet(), 'yes', {
     evidence: {

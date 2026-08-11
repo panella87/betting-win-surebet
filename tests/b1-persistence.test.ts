@@ -7,6 +7,9 @@ import {
   loadSurebetMigrationFiles,
   type SurebetPersistenceConfig,
 } from '../packages/persistence/src/index.js';
+import {
+  buildSurebetB1SimulationResultInsertValues,
+} from '../packages/persistence/src/repositories/b1-backtest-run-repository.js';
 
 const REPO_ROOT = process.cwd();
 const SAMPLE_CONFIG: SurebetPersistenceConfig = Object.freeze({
@@ -118,6 +121,75 @@ test('B1 backtest run repository rejects forged report markers before persistenc
         && error.code === code,
     );
   }
+});
+
+test('B1 backtest simulation result mapping stores residual evidence on the residual row', () => {
+  const residualExposure = Object.freeze({
+    exposureKind: 'deterministic_b1_residual_exposure' as const,
+    exposedLegIds: Object.freeze(['b1_leg:event-001:moneyline:away:venue-b']),
+    excludedLegIds: Object.freeze(['b1_leg:event-001:moneyline:home:venue-a']),
+    scenarioNets: Object.freeze([
+      Object.freeze({
+        scenarioId: 'b1_terminal:event-001:moneyline:away',
+        winningSelectionEquivalenceKey: 'event-001:moneyline:away',
+        netMinor: 5_500n,
+      }),
+      Object.freeze({
+        scenarioId: 'b1_terminal:event-001:moneyline:home',
+        winningSelectionEquivalenceKey: 'event-001:moneyline:home',
+        netMinor: -5_000n,
+      }),
+    ]),
+    worstCaseNetMinor: -5_000n,
+    worstCaseScenarioId: 'b1_terminal:event-001:moneyline:home',
+    maxResidualExposureMinor: 5_000n,
+    residualExposureWithinLimit: true,
+  });
+
+  const results = buildSurebetB1SimulationResultInsertValues({
+    ok: true,
+    candidateId: 'candidate-001',
+    fillabilitySimulation: Object.freeze({
+      candidateId: 'candidate-001',
+      groupState: 'group_incomplete',
+      residualExposure,
+    }),
+    settlementReplay: Object.freeze({
+      falsePositive: true,
+      settledNetMinor: -5_000n,
+    }),
+  } as never);
+
+  const residualRow = results.find((result) => result.simulationKind === 'residual_exposure');
+  const settlementRow = results.find((result) => result.simulationKind === 'settlement_replay');
+  assert.ok(residualRow);
+  assert.ok(settlementRow);
+  assert.equal(residualRow.result, residualExposure);
+  assert.equal(residualRow.residualExposureMinor, -5_000n);
+  assert.equal(settlementRow.residualExposureMinor, undefined);
+  assert.equal(settlementRow.settledNetMinor, -5_000n);
+});
+
+test('B1 backtest simulation result mapping fails closed when incomplete residual evidence is missing', () => {
+  assert.throws(
+    () =>
+      buildSurebetB1SimulationResultInsertValues({
+        ok: true,
+        candidateId: 'candidate-001',
+        fillabilitySimulation: Object.freeze({
+          candidateId: 'candidate-001',
+          groupState: 'group_incomplete',
+        }),
+        settlementReplay: Object.freeze({
+          falsePositive: true,
+          settledNetMinor: -5_000n,
+        }),
+      } as never),
+    (error: unknown) =>
+      error instanceof Error
+      && 'code' in error
+      && error.code === 'SUREBET_B1_RESIDUAL_EXPOSURE_MISSING',
+  );
 });
 
 test('B1 private observation repository rejects executable cycles before persistence', () => {

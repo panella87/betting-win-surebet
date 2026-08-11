@@ -140,11 +140,85 @@ test('private-paper scheduler persists one completed API cycle into a determinis
   const payload = persistedJob?.payload as unknown as PersistedPrivatePaperRuntimeJobPayload | undefined;
   assert.equal(payload?.source.kind, 'read_only_query');
   assert.equal(payload?.source.exportedAt, '2026-07-15T12:00:09.000Z');
+  assert.equal(payload?.source.kind === 'read_only_query' ? payload.source.localBwsApiPort : undefined, 4312);
   assert.equal(payload?.runtimeId, 'runtime-001');
 
   const checkpoint = schedulerCheckpoints.get('scheduler-001');
   assert.equal(checkpoint?.lastScheduledApiCycleNumber, 1);
   assert.equal(checkpoint?.lastScheduledJobId, 'private-paper:scheduler-001:cycle:1');
+});
+
+test('private-paper scheduler fails closed before job persistence when the local BWS API guard port is missing', async () => {
+  const jobs = new InMemoryJobs();
+  const schedulerCheckpoints = new InMemorySchedulerCheckpoints();
+  const config = createSchedulerConfigWithoutLocalBwsApiPort();
+
+  const result = await runBwsPrivatePaperSchedulerPass({
+    config,
+    importRuns: new InMemoryImportRuns([
+      createSucceededImportRun('checkpoint-api-001', 1, 'settlement', 1, '2026-07-15T12:00:09.000Z'),
+    ]),
+    jobs,
+    runUpstreamApiConvergencePass: async () =>
+      accepted(Object.freeze({
+        checkpointId: 'checkpoint-api-001',
+        completedCycleCount: 1,
+        cycleCompleted: true,
+        cycleNumber: 1,
+        importRunId: 'import:checkpoint-api-001:cycle:1:settlement:page:1',
+        mode: 'api',
+        nextResource: 'identity',
+        pageNumber: 1,
+        processedCount: 1,
+        resource: 'settlement',
+      })),
+    schedulerCheckpoints,
+    upstreamApiCheckpoints: new InMemoryApiCheckpoints(1),
+  });
+
+  assert.equal(result.ok, false);
+  assert.equal(result.blockers[0]?.code, 'BWS_PRIVATE_PAPER_SCHEDULER_LOCAL_BWS_API_PORT_MISSING');
+  assert.equal(jobs.get('private-paper:scheduler-001:cycle:1'), undefined);
+});
+
+test('private-paper scheduler rejects malformed import-run nextCursor instead of treating it as terminal page metadata', async () => {
+  for (const metadataPageNextCursor of ['', '   ', 0, Object.freeze({ cursor: 'cursor.settlement.2' })]) {
+    const jobs = new InMemoryJobs();
+    const schedulerCheckpoints = new InMemorySchedulerCheckpoints();
+    const result = await runBwsPrivatePaperSchedulerPass({
+      config: createSchedulerConfig(),
+      importRuns: new InMemoryImportRuns([
+        createSucceededImportRun(
+          'checkpoint-api-001',
+          1,
+          'settlement',
+          1,
+          '2026-07-15T12:00:09.000Z',
+          { metadataPageNextCursor },
+        ),
+      ]),
+      jobs,
+      runUpstreamApiConvergencePass: async () =>
+        accepted(Object.freeze({
+          checkpointId: 'checkpoint-api-001',
+          completedCycleCount: 1,
+          cycleCompleted: true,
+          cycleNumber: 1,
+          importRunId: 'import:checkpoint-api-001:cycle:1:settlement:page:1',
+          mode: 'api',
+          nextResource: 'identity',
+          pageNumber: 1,
+          processedCount: 1,
+          resource: 'settlement',
+        })),
+      schedulerCheckpoints,
+      upstreamApiCheckpoints: new InMemoryApiCheckpoints(1),
+    });
+
+    assert.equal(result.ok, false);
+    assert.equal(result.blockers[0]?.code, 'BWS_PRIVATE_PAPER_SCHEDULER_IMPORT_METADATA_INVALID');
+    assert.equal(jobs.get('private-paper:scheduler-001:cycle:1'), undefined);
+  }
 });
 
 test('private-paper scheduler suppresses duplicate jobs after restart when the job exists before checkpoint advance', async () => {
@@ -339,6 +413,138 @@ test('private-paper worker handler converts read_only_query jobs into runtime re
   assert.equal(observedSourceKind, 'read_only_query');
   assert.equal(result.outcome, 'dead_letter');
   assert.equal(result.errorCode, 'BWS_PRIVATE_PAPER_RUNTIME_BLOCKED');
+});
+
+test('private-paper worker handler rejects read_only_query jobs targeting the local BWS API port', async () => {
+  const payload: PersistedPrivatePaperRuntimeJobPayload = createExpectedApiJobPayload(
+    createSchedulerConfig(),
+    1,
+    '2026-07-15T12:00:09.000Z',
+  );
+  const rejectedPayload: PersistedPrivatePaperRuntimeJobPayload = Object.freeze({
+    ...payload,
+    source: Object.freeze({
+      ...payload.source,
+      apiBaseUrl: 'http://127.0.0.2:4301',
+      localBwsApiPort: 4301,
+    }),
+  });
+  const handler = createPrivatePaperRuntimeJobHandler({
+    runCycle: async () => {
+      throw new Error('runCycle must not be reached for local BWS API read_only_query sources');
+    },
+    strategyLedger: {
+      create() {
+        throw new Error('strategy ledger must not be reached for invalid read_only_query sources');
+      },
+    },
+    upstreamLocks: {
+      get() {
+        return Object.freeze({
+          insertedAt: TEST_TIMESTAMP,
+          lock: sampleUpstreamLock(),
+          lockRecordId: 'upstream-lock:1111111111111111111111111111111111111111:2222222222222222222222222222222222222222',
+        });
+      },
+    },
+  });
+
+  const result = await handler.run({
+      heartbeat() {
+        throw new Error('heartbeat must not be reached for invalid read_only_query sources');
+      },
+      job: Object.freeze({
+        attemptCount: 1,
+        availableAt: '2026-07-15T12:00:09.000Z',
+        checkpointCount: 0,
+        insertedAt: TEST_TIMESTAMP,
+        jobId: 'private-paper:scheduler-001:cycle:1',
+        jobKind: 'private_paper_runtime_cycle_v1',
+        payload: rejectedPayload as unknown as JsonValue,
+        payloadSha256: '4'.repeat(64),
+        queueName: 'private-paper',
+        retryDelaysMs: Object.freeze([]),
+        status: 'leased',
+        updatedAt: TEST_TIMESTAMP,
+      }),
+      leaseDurationMs: 1_000,
+      now: () => TEST_TIMESTAMP,
+      recordCheckpoint() {},
+    });
+
+  assert.equal(result.outcome, 'dead_letter');
+  assert.equal(result.errorCode, 'BWS_PRIVATE_PAPER_RUNTIME_BLOCKED');
+  const details = result.errorDetails as Readonly<{ readonly blockers?: readonly Readonly<{ readonly code?: string }>[] }>;
+  assert.equal(details.blockers?.[0]?.code, 'QUERY_BASE_URL_LOCAL_BWS_API_FORBIDDEN');
+});
+
+test('private-paper worker handler rejects missing and out-of-range persisted local BWS API guard ports', async () => {
+  for (const localBwsApiPort of [undefined, 0, 65_536, '4312']) {
+    const payload = createExpectedApiJobPayload(
+      createSchedulerConfig(),
+      1,
+      '2026-07-15T12:00:09.000Z',
+    );
+    assert.equal(payload.source.kind, 'read_only_query');
+    if (payload.source.kind !== 'read_only_query') {
+      throw new Error('test payload must use read_only_query source');
+    }
+    const { localBwsApiPort: _localBwsApiPort, ...sourceWithoutLocalBwsApiPort } = payload.source;
+    const rejectedPayload = Object.freeze({
+      ...payload,
+      source: Object.freeze(localBwsApiPort === undefined
+        ? sourceWithoutLocalBwsApiPort
+        : {
+          ...payload.source,
+          localBwsApiPort,
+        }),
+    });
+    const handler = createPrivatePaperRuntimeJobHandler({
+      runCycle: async () => {
+        throw new Error('runCycle must not be reached for invalid read_only_query ports');
+      },
+      strategyLedger: {
+        create() {
+          throw new Error('strategy ledger must not be reached for invalid read_only_query ports');
+        },
+      },
+      upstreamLocks: {
+        get() {
+          return Object.freeze({
+            insertedAt: TEST_TIMESTAMP,
+            lock: sampleUpstreamLock(),
+            lockRecordId: 'upstream-lock:1111111111111111111111111111111111111111:2222222222222222222222222222222222222222',
+          });
+        },
+      },
+    });
+
+    const result = await handler.run({
+      heartbeat() {
+        throw new Error('heartbeat must not be reached for invalid read_only_query ports');
+      },
+      job: Object.freeze({
+        attemptCount: 1,
+        availableAt: '2026-07-15T12:00:09.000Z',
+        checkpointCount: 0,
+        insertedAt: TEST_TIMESTAMP,
+        jobId: 'private-paper:scheduler-001:cycle:1',
+        jobKind: 'private_paper_runtime_cycle_v1',
+        payload: rejectedPayload as unknown as JsonValue,
+        payloadSha256: '4'.repeat(64),
+        queueName: 'private-paper',
+        retryDelaysMs: Object.freeze([]),
+        status: 'leased',
+        updatedAt: TEST_TIMESTAMP,
+      }),
+      leaseDurationMs: 1_000,
+      now: () => TEST_TIMESTAMP,
+      recordCheckpoint() {},
+    });
+
+    assert.equal(result.outcome, 'dead_letter');
+    assert.equal(result.errorCode, 'BWS_PRIVATE_PAPER_JOB_SOURCE_UNSUPPORTED');
+  }
 });
 
 test('private-paper scheduler checkpoint repository persists immutable api scheduler state and monotonic cycle advancement', { skip: !hasDisposableDatabaseTestConfig() }, () => {
@@ -547,6 +753,18 @@ function createSchedulerConfig(): BwsPrivatePaperApiSchedulerConfig {
   });
 }
 
+function createSchedulerConfigWithoutLocalBwsApiPort(): BwsPrivatePaperApiSchedulerConfig {
+  const config = createSchedulerConfig();
+  const { localBwsApiPort: _localBwsApiPort, ...queryWithoutLocalBwsApiPort } = config.upstream.query;
+  return Object.freeze({
+    ...config,
+    upstream: Object.freeze({
+      ...config.upstream,
+      query: Object.freeze(queryWithoutLocalBwsApiPort),
+    }),
+  });
+}
+
 function createUpstreamApiConfig(): BwsUpstreamApiConvergenceConfig {
   return Object.freeze({
     checkpointId: 'checkpoint-api-001',
@@ -555,6 +773,7 @@ function createUpstreamApiConfig(): BwsUpstreamApiConvergenceConfig {
     query: Object.freeze({
       baseUrl: 'http://127.0.0.1:4301',
       contractVersion: '1.0.0',
+      localBwsApiPort: 4312,
       maxPagesPerResource: 2,
       pageSize: 2,
       retryBackoffMs: 250,
@@ -577,6 +796,7 @@ function createSucceededImportRun(
   pageNumber: number,
   responseReceivedAt: string,
   options: {
+    readonly metadataPageNextCursor?: JsonValue;
     readonly metadataCheckpointId?: string;
     readonly metadataUpstreamLockRecordId?: string;
     readonly sourceKind?: string;
@@ -606,6 +826,9 @@ function createSucceededImportRun(
           verifiedAt: responseReceivedAt,
         }),
         resource,
+        ...(Object.prototype.hasOwnProperty.call(options, 'metadataPageNextCursor')
+          ? { nextCursor: options.metadataPageNextCursor }
+          : {}),
       }),
       resource,
       upstreamLockRecordId: options.metadataUpstreamLockRecordId ?? upstreamLockRecordId,
@@ -632,6 +855,7 @@ function createExpectedApiJobPayload(
         checkpointId: config.upstream.checkpointId,
         cycleNumber,
         exportedAt,
+        localBwsApiPort: config.upstream.query.localBwsApiPort,
         manifestSha256: config.schedule.manifestSha256,
         runtimeId: config.schedule.runtimeId,
       }) as unknown as JsonValue,
@@ -648,6 +872,7 @@ function createExpectedApiJobPayload(
       contractVersion: '1.0.0',
       exportedAt,
       kind: 'read_only_query',
+      localBwsApiPort: 4312,
       maxPagesPerResource: 2,
       pageSize: 2,
       retryBackoffMs: 250,

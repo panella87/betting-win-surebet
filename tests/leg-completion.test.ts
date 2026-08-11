@@ -90,6 +90,79 @@ test('leg completion simulation marks the group as killed when manual kill is ra
   assert.equal(result.value.groupState, 'group_killed');
 });
 
+test('leg completion simulation rejects malformed manual kill evidence', () => {
+  const result = simulatePaperGroupCompletion({
+    legs: [
+      createLeg('leg-1', 'leg_reserved', 100n, 0n, '2026-07-02T00:17:05.000Z'),
+      createLeg('leg-2', 'leg_filled', 0n, 100n, '2026-07-02T00:17:05.000Z'),
+    ],
+    manualKill: 'false',
+  } as never);
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'LEG_COMPLETION_MANUAL_KILL_INVALID',
+      message: 'Leg completion simulation requires manualKill to be an explicit boolean.',
+      evidenceRequired: 'Explicit boolean manualKill evidence for the local paper completion group.',
+    },
+  ]);
+});
+
+test('leg completion simulation rejects malformed runtime stake field shapes', () => {
+  const cases = [
+    {
+      name: 'filled stake string',
+      leg: { ...createLeg('leg-1', 'leg_filled', 0n, 100n, '2026-07-02T00:17:05.000Z'), filledStakeMinor: '100' },
+    },
+    {
+      name: 'filled stake missing',
+      leg: {
+        legId: 'leg-2',
+        state: 'leg_filled',
+        reservedStakeMinor: 0n,
+        updatedAt: '2026-07-02T00:17:05.000Z',
+      },
+    },
+    {
+      name: 'reserved stake string',
+      leg: { ...createLeg('leg-3', 'leg_reserved', 100n, 0n, '2026-07-02T00:17:05.000Z'), reservedStakeMinor: '100' },
+    },
+    {
+      name: 'reserved stake number',
+      leg: { ...createLeg('leg-4', 'leg_reserved', 100n, 0n, '2026-07-02T00:17:05.000Z'), reservedStakeMinor: 100 },
+    },
+    {
+      name: 'filled stake null',
+      leg: { ...createLeg('leg-5', 'leg_filled', 0n, 100n, '2026-07-02T00:17:05.000Z'), filledStakeMinor: null },
+    },
+    {
+      name: 'reserved stake object',
+      leg: { ...createLeg('leg-6', 'leg_reserved', 100n, 0n, '2026-07-02T00:17:05.000Z'), reservedStakeMinor: {} },
+    },
+  ] as const;
+
+  for (const testCase of cases) {
+    const result = simulatePaperGroupCompletion({
+      legs: [Object.freeze(testCase.leg)],
+      manualKill: false,
+    } as never);
+
+    assert.equal(result.ok, false, testCase.name);
+    assert.deepEqual(
+      result.blockers,
+      [
+        {
+          code: 'LEG_COMPLETION_STAKE_INVALID',
+          message: 'Leg completion simulation requires reserved and filled stake amounts encoded as bigint minor units.',
+          evidenceRequired: 'Bigint local paper reserved and filled stake amounts.',
+        },
+      ],
+      testCase.name,
+    );
+  }
+});
+
 test('leg completion simulation rejects state and stake mismatches', () => {
   const result = simulatePaperGroupCompletion({
     legs: [createLeg('leg-1', 'leg_reserved', 0n, 0n, '2026-07-02T00:17:05.000Z')],

@@ -1142,9 +1142,20 @@ function validateCompletedCycleImportRunMetadata(
   if (!provenanceValidation.ok) {
     return provenanceValidation;
   }
+  const nextCursor = page['nextCursor'];
+  if (
+    Object.prototype.hasOwnProperty.call(page, 'nextCursor')
+    && (typeof nextCursor !== 'string' || nextCursor.trim().length === 0)
+  ) {
+    return blocked(
+      'BWS_QUERY_RUNTIME_CYCLE_PROVENANCE_INVALID',
+      `BWS runtime cycle import run ${importRun.importRunId} must keep nextCursor absent or a non-empty string when more pages remain.`,
+      'Malformed persisted read-only query cursors rejected for private-paper runtime cycle provenance.',
+    );
+  }
   return accepted(
     Object.freeze({
-      hasNextCursor: typeof page['nextCursor'] === 'string' && page['nextCursor'].length > 0,
+      hasNextCursor: typeof nextCursor === 'string',
     }),
   );
 }
@@ -1251,12 +1262,15 @@ function parsePrivatePaperRuntimeJobPayload(
 }>> {
   const payload = asRecord(job.payload);
   const source = asRecord(payload?.['source']);
+  const maxCandidatesPerCycle = payload?.['maxCandidatesPerCycle'];
   if (
     payload?.['schema'] !== PRIVATE_PAPER_RUNTIME_JOB_SCHEMA
     || typeof payload?.['runtimeId'] !== 'string'
     || typeof payload?.['cycleId'] !== 'string'
     || typeof payload?.['upstreamLockRecordId'] !== 'string'
-    || !Number.isSafeInteger(payload?.['maxCandidatesPerCycle'])
+    || !Number.isSafeInteger(maxCandidatesPerCycle)
+    || typeof maxCandidatesPerCycle !== 'number'
+    || maxCandidatesPerCycle <= 0
     || source === undefined
   ) {
     return blocked(
@@ -1277,6 +1291,15 @@ function parsePrivatePaperRuntimeJobPayload(
       'BWS_QUERY_RUNTIME_CYCLE_JOB_INVALID',
       `BWS private-paper worker job ${job.jobId} must align to scheduler checkpoint ${schedulerCheckpoint.schedulerCheckpointId} cycle ${cycleNumber}.`,
       'Deterministic private-paper worker job identifiers aligned to the scheduler checkpoint and cycle number.',
+    );
+  }
+  const expectedCycleId = `${schedulerCheckpoint.schedulerCheckpointId}:cycle:${cycleNumber}`;
+  const cycleId = payload['cycleId'];
+  if (cycleId !== expectedCycleId) {
+    return blocked(
+      'BWS_QUERY_RUNTIME_CYCLE_JOB_INVALID',
+      `BWS private-paper worker job ${job.jobId} must retain cycleId ${expectedCycleId}.`,
+      'Private-paper worker payload cycle identifiers aligned to the deterministic scheduler cycle id.',
     );
   }
   if (payload['upstreamLockRecordId'] !== schedulerCheckpoint.upstreamLockRecordId) {
@@ -1310,7 +1333,7 @@ function parsePrivatePaperRuntimeJobPayload(
   }
   return accepted(
     Object.freeze({
-      cycleId: payload['cycleId'].trim(),
+      cycleId,
       runtimeId: payload['runtimeId'].trim(),
       sourceKind,
       sourceManifestHash,

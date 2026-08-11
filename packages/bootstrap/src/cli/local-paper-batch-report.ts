@@ -13,9 +13,34 @@ import { createHash } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 import { FIRST_LANE_SPEC, accepted, blocked, type Blocker, type BoundaryResult, type FirstLaneId } from '../contracts/local-types.js';
 import { validatePinnedBettingWinBundleIntake } from '../adapters/betting-win-pinned-bundle-intake.js';
-import { writeLocalPaperReport } from './local-paper-report.js';
+import {
+  createLocalPaperReportArtifact,
+  writeLocalPaperReportArtifact,
+  type LocalPaperReportWriteResult,
+} from './local-paper-report.js';
 
 const URL_SCHEME_PREFIX = /^[a-z][a-z0-9+.-]*:\/\//i;
+const FORBIDDEN_BATCH_SUMMARY_TEXT_PATTERN = /(profit|profitable|execution|ready|signal)/i;
+const PRIVATE_BATCH_SUMMARY_KEYS = new Set([
+  'reportKind',
+  'laneId',
+  'batchId',
+  'accepted',
+  'status',
+  'bundleCount',
+  'reportCount',
+  'totalCandidateCount',
+  'totalBlockerCount',
+  'blockerFrequencies',
+  'bundles',
+]);
+const PRIVATE_BATCH_BUNDLE_SUMMARY_KEYS = new Set([
+  'bundlePath',
+  'reportPath',
+  'candidateCount',
+  'blockerCount',
+]);
+const PRIVATE_BATCH_BLOCKER_FREQUENCY_KEYS = new Set(['code', 'count']);
 
 export interface WriteLocalPaperBatchReportOptions {
   readonly bundleDirectoryPath: string;
@@ -92,9 +117,9 @@ export function writeLocalPaperBatchReport(
   }
 
   const bundleSummaries: PrivatePaperBatchBundleResult[] = [];
-  const reportPaths: string[] = [];
+  const reportArtifacts: LocalPaperReportWriteResult[] = [];
   for (const bundlePlan of writePlan.value) {
-    const reportResult = writeLocalPaperReport({
+    const reportResult = createLocalPaperReportArtifact({
       bundlePath: bundlePlan.bundlePath,
       outputPath: bundlePlan.reportPath,
       requirePinnedBundleIntake: true,
@@ -104,7 +129,7 @@ export function writeLocalPaperBatchReport(
       return prefixBlockers(`BATCH_BUNDLE_${basename(bundlePlan.bundlePath)}`, reportResult.blockers);
     }
 
-    reportPaths.push(reportResult.value.outputPath);
+    reportArtifacts.push(reportResult.value);
     bundleSummaries.push(
       Object.freeze({
         bundlePath: relative(repoRoot, resolve(repoRoot, bundlePlan.bundlePath)),
@@ -126,6 +151,9 @@ export function writeLocalPaperBatchReport(
     return summaryValidation;
   }
 
+  for (const reportArtifact of reportArtifacts) {
+    writeLocalPaperReportArtifact(reportArtifact);
+  }
   mkdirSync(dirname(summaryOutputPath.value), { recursive: true });
   writeFileSync(summaryOutputPath.value, `${serializeJson(summary)}\n`, { encoding: 'utf-8' });
 
@@ -133,7 +161,7 @@ export function writeLocalPaperBatchReport(
     Object.freeze({
       outputPath: summaryOutputPath.value,
       summary,
-      reportPaths: Object.freeze([...reportPaths]),
+      reportPaths: Object.freeze(reportArtifacts.map((reportArtifact) => reportArtifact.outputPath)),
     }),
   );
 }
@@ -231,7 +259,17 @@ export function createPrivatePaperBatchSummary(
   });
 }
 
-export function validatePrivatePaperBatchSummary(summary: PrivatePaperBatchSummary): BoundaryResult<undefined> {
+export function validatePrivatePaperBatchSummary(summary: unknown): BoundaryResult<undefined> {
+  if (!isRecord(summary)) {
+    return batchSummaryShapeBlocker();
+  }
+  if (!hasOnlySupportedFields(summary, PRIVATE_BATCH_SUMMARY_KEYS)) {
+    return blocked(
+      'PRIVATE_BATCH_SUMMARY_UNSUPPORTED_FIELDS',
+      'Private paper-mode batch summaries must not retain unsupported top-level fields.',
+      'Serialized private paper-mode batch summary with only supported private fields.',
+    );
+  }
   if (summary.reportKind !== 'private_paper_batch_summary') {
     return blocked(
       'PRIVATE_BATCH_SUMMARY_KIND_INVALID',
@@ -246,7 +284,7 @@ export function validatePrivatePaperBatchSummary(summary: PrivatePaperBatchSumma
       'Serialized private paper-mode batch summary with the repo first-lane id.',
     );
   }
-  if (summary.batchId.trim().length === 0) {
+  if (!isNonEmptyString(summary.batchId)) {
     return blocked(
       'PRIVATE_BATCH_SUMMARY_BATCH_ID_MISSING',
       'Private paper-mode batch summaries must include a non-empty batch id.',
@@ -267,65 +305,168 @@ export function validatePrivatePaperBatchSummary(summary: PrivatePaperBatchSumma
       'Serialized private paper-mode batch summary with status=fixture_results_only.',
     );
   }
-  if (summary.bundles.length === 0) {
+
+  const bundleCount = summary.bundleCount;
+  const reportCount = summary.reportCount;
+  const totalCandidateCount = summary.totalCandidateCount;
+  const totalBlockerCount = summary.totalBlockerCount;
+  if (
+    !isNonNegativeIntegerCount(bundleCount)
+    || !isNonNegativeIntegerCount(reportCount)
+    || !isNonNegativeIntegerCount(totalCandidateCount)
+    || !isNonNegativeIntegerCount(totalBlockerCount)
+  ) {
+    return batchSummaryCountDomainBlocker();
+  }
+
+  const bundles = summary.bundles;
+  if (!Array.isArray(bundles) || bundles.length === 0) {
     return blocked(
       'PRIVATE_BATCH_SUMMARY_BUNDLES_MISSING',
       'Private paper-mode batch summaries must include at least one bundle summary.',
       'Serialized private paper-mode batch summary with bundle summaries.',
     );
   }
-  if (summary.bundleCount !== summary.bundles.length || summary.reportCount !== summary.bundles.length) {
+  if (bundleCount !== bundles.length || reportCount !== bundles.length) {
     return blocked(
       'PRIVATE_BATCH_SUMMARY_COUNTS_INVALID',
       'Private paper-mode batch summaries must keep bundleCount and reportCount aligned with bundle summaries.',
       'Serialized private paper-mode batch summary with aligned bundle/report counts.',
     );
   }
-  const computedCandidateCount = summary.bundles.reduce(
-    (currentCandidateCount, bundleSummary) => currentCandidateCount + bundleSummary.candidateCount,
-    0,
-  );
-  if (summary.totalCandidateCount !== computedCandidateCount) {
-    return blocked(
-      'PRIVATE_BATCH_SUMMARY_CANDIDATE_COUNT_INVALID',
-      'Private paper-mode batch summaries must keep totalCandidateCount aligned with the bundle summaries.',
-      'Serialized private paper-mode batch summary with aligned candidate counts.',
-    );
-  }
-  const computedBlockerCount = summary.bundles.reduce(
-    (currentBlockerCount, bundleSummary) => currentBlockerCount + bundleSummary.blockerCount,
-    0,
-  );
-  if (summary.totalBlockerCount !== computedBlockerCount) {
-    return blocked(
-      'PRIVATE_BATCH_SUMMARY_BLOCKER_COUNT_INVALID',
-      'Private paper-mode batch summaries must keep totalBlockerCount aligned with the bundle summaries.',
-      'Serialized private paper-mode batch summary with aligned blocker counts.',
-    );
-  }
-  for (const bundleSummary of summary.bundles) {
-    if (bundleSummary.bundlePath.trim().length === 0 || bundleSummary.reportPath.trim().length === 0) {
+
+  const bundleSummaries: PrivatePaperBatchBundleSummary[] = [];
+  const bundlePaths = new Set<string>();
+  const reportPaths = new Set<string>();
+  let previousBundlePath: string | undefined;
+  for (const bundleSummary of bundles) {
+    if (!isRecord(bundleSummary)) {
+      return batchSummaryShapeBlocker();
+    }
+    if (!hasOnlySupportedFields(bundleSummary, PRIVATE_BATCH_BUNDLE_SUMMARY_KEYS)) {
+      return blocked(
+        'PRIVATE_BATCH_SUMMARY_BUNDLE_UNSUPPORTED_FIELDS',
+        'Private paper-mode batch bundle summaries must not retain unsupported fields.',
+        'Serialized private paper-mode batch bundle summary with only supported private fields.',
+      );
+    }
+    const bundlePath = bundleSummary.bundlePath;
+    const reportPath = bundleSummary.reportPath;
+    const candidateCount = bundleSummary.candidateCount;
+    const blockerCount = bundleSummary.blockerCount;
+    if (
+      !isNonEmptyString(bundlePath)
+      || !isNonEmptyString(reportPath)
+      || !isRepoRelativeRetainedArtifactPath(bundlePath)
+      || !isRepoRelativeRetainedArtifactPath(reportPath)
+    ) {
       return blocked(
         'PRIVATE_BATCH_SUMMARY_PATHS_INVALID',
         'Private paper-mode batch summaries must keep non-empty repo-local bundle and report paths.',
         'Serialized private paper-mode batch summary with non-empty bundle and report paths.',
       );
     }
+    if (
+      !isNonNegativeIntegerCount(candidateCount)
+      || !isNonNegativeIntegerCount(blockerCount)
+    ) {
+      return batchSummaryCountDomainBlocker();
+    }
+    if (bundlePaths.has(bundlePath) || reportPaths.has(reportPath)) {
+      return blocked(
+        'PRIVATE_BATCH_SUMMARY_BUNDLE_IDENTITY_DUPLICATE',
+        'Private paper-mode batch summaries must not contain duplicate bundle or report paths.',
+        'Serialized private paper-mode batch summary with unique bundlePath and reportPath values.',
+      );
+    }
+    if (previousBundlePath !== undefined && previousBundlePath.localeCompare(bundlePath) > 0) {
+      return blocked(
+        'PRIVATE_BATCH_SUMMARY_BUNDLE_ORDER_INVALID',
+        'Private paper-mode batch bundle summaries must remain sorted by bundle path.',
+        'Serialized private paper-mode batch summary with bundles in producer canonical order.',
+      );
+    }
+    bundlePaths.add(bundlePath);
+    reportPaths.add(reportPath);
+    previousBundlePath = bundlePath;
+    bundleSummaries.push(Object.freeze({ bundlePath, reportPath, candidateCount, blockerCount }));
   }
 
-  const blockerFrequencyTotal = summary.blockerFrequencies.reduce(
-    (currentBlockerCount, blockerFrequency) => currentBlockerCount + blockerFrequency.count,
+  const computedCandidateCount = bundleSummaries.reduce(
+    (currentCandidateCount, bundleSummary) => currentCandidateCount + bundleSummary.candidateCount,
     0,
   );
-  if (blockerFrequencyTotal !== summary.totalBlockerCount) {
+  if (totalCandidateCount !== computedCandidateCount) {
+    return blocked(
+      'PRIVATE_BATCH_SUMMARY_CANDIDATE_COUNT_INVALID',
+      'Private paper-mode batch summaries must keep totalCandidateCount aligned with the bundle summaries.',
+      'Serialized private paper-mode batch summary with aligned candidate counts.',
+    );
+  }
+  const computedBlockerCount = bundleSummaries.reduce(
+    (currentBlockerCount, bundleSummary) => currentBlockerCount + bundleSummary.blockerCount,
+    0,
+  );
+  if (totalBlockerCount !== computedBlockerCount) {
+    return blocked(
+      'PRIVATE_BATCH_SUMMARY_BLOCKER_COUNT_INVALID',
+      'Private paper-mode batch summaries must keep totalBlockerCount aligned with the bundle summaries.',
+      'Serialized private paper-mode batch summary with aligned blocker counts.',
+    );
+  }
+
+  const blockerFrequencies = summary.blockerFrequencies;
+  if (!Array.isArray(blockerFrequencies)) {
     return blocked(
       'PRIVATE_BATCH_SUMMARY_FREQUENCIES_INVALID',
       'Private paper-mode batch summaries must keep blockerFrequencies aligned with totalBlockerCount.',
       'Serialized private paper-mode batch summary with deterministic blocker frequencies.',
     );
   }
-  for (let index = 0; index < summary.blockerFrequencies.length; index += 1) {
-    const blockerFrequency = summary.blockerFrequencies[index];
+  const normalizedBlockerFrequencies: PrivatePaperBatchBlockerFrequency[] = [];
+  for (const blockerFrequency of blockerFrequencies) {
+    if (!isRecord(blockerFrequency)) {
+      return blocked(
+        'PRIVATE_BATCH_SUMMARY_FREQUENCIES_INVALID',
+        'Private paper-mode batch summaries must keep non-empty blocker codes with positive counts.',
+        'Serialized private paper-mode batch summary with deterministic blocker frequencies.',
+      );
+    }
+    if (!hasOnlySupportedFields(blockerFrequency, PRIVATE_BATCH_BLOCKER_FREQUENCY_KEYS)) {
+      return blocked(
+        'PRIVATE_BATCH_SUMMARY_FREQUENCY_UNSUPPORTED_FIELDS',
+        'Private paper-mode batch blocker frequencies must not retain unsupported fields.',
+        'Serialized private paper-mode batch blocker frequency with only supported private fields.',
+      );
+    }
+    const code = blockerFrequency.code;
+    const count = blockerFrequency.count;
+    if (
+      !isNonEmptyString(code)
+      || !isNonNegativeIntegerCount(count)
+    ) {
+      return blocked(
+        'PRIVATE_BATCH_SUMMARY_FREQUENCIES_INVALID',
+        'Private paper-mode batch summaries must keep non-empty blocker codes with positive counts.',
+        'Serialized private paper-mode batch summary with deterministic blocker frequencies.',
+      );
+    }
+    normalizedBlockerFrequencies.push(Object.freeze({ code, count }));
+  }
+
+  const blockerFrequencyTotal = normalizedBlockerFrequencies.reduce(
+    (currentBlockerCount, blockerFrequency) => currentBlockerCount + blockerFrequency.count,
+    0,
+  );
+  if (blockerFrequencyTotal !== totalBlockerCount) {
+    return blocked(
+      'PRIVATE_BATCH_SUMMARY_FREQUENCIES_INVALID',
+      'Private paper-mode batch summaries must keep blockerFrequencies aligned with totalBlockerCount.',
+      'Serialized private paper-mode batch summary with deterministic blocker frequencies.',
+    );
+  }
+  for (let index = 0; index < normalizedBlockerFrequencies.length; index += 1) {
+    const blockerFrequency = normalizedBlockerFrequencies[index];
     if (blockerFrequency === undefined || blockerFrequency.code.trim().length === 0 || blockerFrequency.count <= 0) {
       return blocked(
         'PRIVATE_BATCH_SUMMARY_FREQUENCIES_INVALID',
@@ -333,7 +474,7 @@ export function validatePrivatePaperBatchSummary(summary: PrivatePaperBatchSumma
         'Serialized private paper-mode batch summary with deterministic blocker frequencies.',
       );
     }
-    const previousBlockerFrequency = index === 0 ? undefined : summary.blockerFrequencies[index - 1];
+    const previousBlockerFrequency = index === 0 ? undefined : normalizedBlockerFrequencies[index - 1];
     if (previousBlockerFrequency !== undefined && previousBlockerFrequency.code.localeCompare(blockerFrequency.code) >= 0) {
       return blocked(
         'PRIVATE_BATCH_SUMMARY_FREQUENCIES_INVALID',
@@ -343,7 +484,33 @@ export function validatePrivatePaperBatchSummary(summary: PrivatePaperBatchSumma
     }
   }
 
+  for (const text of collectStrings(summary)) {
+    if (FORBIDDEN_BATCH_SUMMARY_TEXT_PATTERN.test(text)) {
+      return blocked(
+        'PRIVATE_BATCH_SUMMARY_FORBIDDEN_LANGUAGE',
+        'Private paper-mode batch summaries must not contain public-signal, profitability, or execution-readiness language.',
+        'Serialized private paper-mode batch summary without forbidden public/execution/profitability language.',
+      );
+    }
+  }
+
   return accepted(undefined);
+}
+
+function batchSummaryShapeBlocker(): BoundaryResult<undefined> {
+  return blocked(
+    'PRIVATE_BATCH_SUMMARY_SHAPE_INVALID',
+    'Private paper-mode batch summaries must be serialized objects with the supported batch summary shape.',
+    'Serialized private paper-mode batch summary object.',
+  );
+}
+
+function batchSummaryCountDomainBlocker(): BoundaryResult<undefined> {
+  return blocked(
+    'PRIVATE_BATCH_SUMMARY_COUNT_DOMAIN_INVALID',
+    'Private paper-mode batch summaries must use finite non-negative integer counts.',
+    'Serialized private paper-mode batch summary with finite non-negative integer count fields.',
+  );
 }
 
 function resolveLocalBundleDirectory(bundleDirectoryPath: string, repoRoot: string): BoundaryResult<string> {
@@ -785,6 +952,44 @@ function writeText(stream: NodeJS.WriteStream, text: string): void {
     return;
   }
   stream.write(text);
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === 'string' && value.trim().length > 0;
+}
+
+function isRepoRelativeRetainedArtifactPath(value: string): boolean {
+  if (value !== value.trim() || URL_SCHEME_PREFIX.test(value) || isAbsolute(value) || /^[a-z]:[\\/]/iu.test(value)) {
+    return false;
+  }
+  const pathParts = value.replace(/\\/gu, '/').split('/');
+  return pathParts.every((pathPart) => pathPart.length > 0 && pathPart !== '.' && pathPart !== '..');
+}
+
+function isNonNegativeIntegerCount(value: unknown): value is number {
+  return typeof value === 'number' && Number.isSafeInteger(value) && value >= 0;
+}
+
+function hasOnlySupportedFields(value: Record<string, unknown>, supportedFields: ReadonlySet<string>): boolean {
+  return Object.keys(value).every((field) => supportedFields.has(field));
+}
+
+function collectStrings(value: unknown): readonly string[] {
+  if (typeof value === 'string') {
+    return [value];
+  }
+  if (typeof value !== 'object' || value === null) {
+    return [];
+  }
+  if (Array.isArray(value)) {
+    return value.flatMap((entry) => collectStrings(entry));
+  }
+
+  return Object.values(value).flatMap((entry) => collectStrings(entry));
 }
 
 function isNodeError(error: unknown): error is NodeJS.ErrnoException {

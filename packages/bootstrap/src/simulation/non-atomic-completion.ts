@@ -110,6 +110,14 @@ interface LegAccumulator {
 export function simulateNonAtomicPaperGroupCompletion(
   input: NonAtomicCompletionInput,
 ): BoundaryResult<NonAtomicCompletionSimulation> {
+  if (typeof input.manualKill !== 'boolean') {
+    return blocked(
+      'NON_ATOMIC_COMPLETION_MANUAL_KILL_INVALID',
+      'Non-atomic completion simulation requires manualKill to be an explicit boolean.',
+      'Explicit boolean manualKill evidence for the non-atomic completion group.',
+    );
+  }
+
   const matrixTerms = validateNonAtomicInputs(input.stakeVector, input.matrix);
   if (!matrixTerms.ok) {
     return matrixTerms;
@@ -400,7 +408,7 @@ function validateEventStakeShape(event: NonAtomicCompletionEvent): BoundaryResul
     return accepted(undefined);
   }
 
-  if (event.stakeMinor === undefined || event.stakeMinor <= 0n) {
+  if (typeof event.stakeMinor !== 'bigint' || event.stakeMinor <= 0n) {
     return blocked(
       'NON_ATOMIC_COMPLETION_EVENT_STAKE_INVALID',
       `Non-atomic completion event ${event.type} requires a positive fixed-point stake amount.`,
@@ -495,6 +503,13 @@ function applyEvent(accumulator: LegAccumulator, event: NonAtomicCompletionEvent
       accumulator.reservedStakeMinor = 0n;
       break;
     case 'rollback':
+      if (accumulator.terminalDisposition !== undefined) {
+        return blocked(
+          'NON_ATOMIC_COMPLETION_ROLLBACK_AFTER_TERMINAL_FORBIDDEN',
+          'Non-atomic completion simulation does not allow rollback events after rejection or expiry.',
+          'Event order that does not roll back a terminally rejected or expired leg.',
+        );
+      }
       if (accumulator.liveFilledStakeMinor < (event.stakeMinor as bigint)) {
         return blocked(
           'NON_ATOMIC_COMPLETION_ROLLBACK_EXCEEDS_LIVE_FILL',

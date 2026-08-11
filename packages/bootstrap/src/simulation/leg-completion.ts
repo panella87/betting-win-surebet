@@ -45,6 +45,14 @@ export interface PaperGroupCompletionSnapshot {
 export function simulatePaperGroupCompletion(
   input: PaperGroupCompletionInput,
 ): BoundaryResult<PaperGroupCompletionSnapshot> {
+  if (typeof input.manualKill !== 'boolean') {
+    return blocked(
+      'LEG_COMPLETION_MANUAL_KILL_INVALID',
+      'Leg completion simulation requires manualKill to be an explicit boolean.',
+      'Explicit boolean manualKill evidence for the local paper completion group.',
+    );
+  }
+
   if (input.legs.length === 0) {
     return blocked(
       'LEG_COMPLETION_LEGS_EMPTY',
@@ -82,6 +90,13 @@ export function simulatePaperGroupCompletion(
         'LEG_COMPLETION_TIMESTAMP_INVALID',
         'Leg completion simulation requires ISO-8601 UTC timestamps for each leg snapshot.',
         'ISO-8601 UTC completion timestamps for each local paper leg.',
+      );
+    }
+    if (typeof leg.reservedStakeMinor !== 'bigint' || typeof leg.filledStakeMinor !== 'bigint') {
+      return blocked(
+        'LEG_COMPLETION_STAKE_INVALID',
+        'Leg completion simulation requires reserved and filled stake amounts encoded as bigint minor units.',
+        'Bigint local paper reserved and filled stake amounts.',
       );
     }
     if (leg.reservedStakeMinor < 0n || leg.filledStakeMinor < 0n) {

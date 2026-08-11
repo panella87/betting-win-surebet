@@ -54,6 +54,26 @@ pa_get_config() {
 
 pa_shell_quote() { printf '%q' "$1"; }
 
+pa_validate_zip_integrity() {
+  local source="$1"
+  if [ ! -f "$source" ] || [ -L "$source" ]; then
+    pa_fail "downloaded zip candidate must be a non-symlink regular file: $source"
+    return 1
+  fi
+  if ! unzip -tq "$source" >/dev/null; then
+    pa_fail "downloaded zip candidate failed ZIP integrity validation: $source"
+    return 1
+  fi
+}
+
+pa_validate_zip_publish_destination() {
+  local destination="$1"
+  if [ -e "$destination" ] || [ -L "$destination" ]; then
+    pa_fail "target zip already exists or could not be published without clobbering: $destination"
+    return 1
+  fi
+}
+
 pa_next_numbered_zip() {
   local prefix="$1" max=0 f b rest generation n
   shopt -s nullglob
@@ -113,6 +133,17 @@ pa_stream_remote_file() {
   pa_scp "$remote_spec" "$local_path"
 }
 
+pa_publish_zip_no_clobber() {
+  local source="$1" destination="$2"
+  pa_validate_zip_integrity "$source" || return 1
+  pa_validate_zip_publish_destination "$destination" || return 1
+  if ! ln "$source" "$destination"; then
+    pa_fail "target zip already exists or could not be published without clobbering: $destination"
+    return 1
+  fi
+  rm -f "$source"
+}
+
 pa_main() {
   local remote_codebase=0 SCRIPT_DIR LOCAL_ROOT ENV_FILE repo_name remote_repo_name remote_artifact artifact_number local_artifact tmp_artifact latest remote_codebase_path local_remote tmp_remote quoted
   while [ "$#" -gt 0 ]; do
@@ -134,6 +165,7 @@ pa_main() {
   pa_have ssh || { pa_fail "required command not found: ssh"; return 127; }
   pa_have scp || { pa_fail "required command not found: scp"; return 127; }
   pa_have grep || { pa_fail "required command not found: grep"; return 127; }
+  pa_have unzip || { pa_fail "required command not found: unzip"; return 127; }
 
   SSH_HOST="$(pa_get_config SSH_HOST "$ENV_FILE")" || { pa_fail "Missing SSH_HOST in .env"; return 2; }
   SSH_USER="$(pa_get_config SSH_USER "$ENV_FILE")" || { pa_fail "Missing SSH_USER in .env"; return 2; }
@@ -163,17 +195,16 @@ pa_main() {
     pa_fail "artifact download failed"
     return 1
   fi
-  if ! mv "$tmp_artifact" "$local_artifact"; then
+  if ! pa_validate_zip_integrity "$tmp_artifact"; then
     rm -f "$tmp_artifact"
-    pa_fail "could not publish local artifact: $local_artifact"
     return 1
   fi
-  printf 'downloaded_artifacts=%s\n' "$LOCAL_ROOT/$local_artifact"
 
   if [ "$remote_codebase" = "1" ]; then
-    quoted="$(pa_shell_quote "$REMOTE_REPO")" || return 1
+    quoted="$(pa_shell_quote "$REMOTE_REPO")" || { rm -f "$tmp_artifact"; return 1; }
     latest="$(pa_ssh "cd $quoted && ls -1 ${repo_name}[0-9]*.zip 2>/dev/null | sort -V | tail -n 1" 2>/dev/null)" || latest=""
     if [ -z "$latest" ]; then
+      rm -f "$tmp_artifact"
       pa_fail "--remote-codebase requested but no remote ${repo_name}N.zip was found in $REMOTE_REPO"
       return 1
     fi
@@ -183,12 +214,39 @@ pa_main() {
     rm -f "$tmp_remote"
     printf 'downloading_remote_codebase=%s@%s:%s\n' "$SSH_USER" "$SSH_HOST" "$remote_codebase_path"
     if ! pa_stream_remote_file "$remote_codebase_path" "$tmp_remote"; then
-      rm -f "$tmp_remote"
+      rm -f "$tmp_artifact" "$tmp_remote"
       pa_fail "remote codebase download failed"
       return 1
     fi
-    mv "$tmp_remote" "$local_remote" || { rm -f "$tmp_remote"; pa_fail "could not publish remote codebase"; return 1; }
+    if ! pa_validate_zip_integrity "$tmp_remote"; then
+      rm -f "$tmp_artifact" "$tmp_remote"
+      return 1
+    fi
+    if ! pa_validate_zip_publish_destination "$local_artifact"; then
+      rm -f "$tmp_artifact" "$tmp_remote"
+      pa_fail "could not publish local artifact: $local_artifact"
+      return 1
+    fi
+    if ! pa_validate_zip_publish_destination "$local_remote"; then
+      rm -f "$tmp_artifact" "$tmp_remote"
+      pa_fail "could not publish remote codebase"
+      return 1
+    fi
+    if ! pa_publish_zip_no_clobber "$tmp_artifact" "$local_artifact"; then
+      rm -f "$tmp_artifact" "$tmp_remote"
+      pa_fail "could not publish local artifact: $local_artifact"
+      return 1
+    fi
+    printf 'downloaded_artifacts=%s\n' "$LOCAL_ROOT/$local_artifact"
+    pa_publish_zip_no_clobber "$tmp_remote" "$local_remote" || { rm -f "$tmp_remote"; pa_fail "could not publish remote codebase"; return 1; }
     printf 'downloaded_remote_codebase=%s\n' "$LOCAL_ROOT/$local_remote"
+  else
+    if ! pa_publish_zip_no_clobber "$tmp_artifact" "$local_artifact"; then
+      rm -f "$tmp_artifact"
+      pa_fail "could not publish local artifact: $local_artifact"
+      return 1
+    fi
+    printf 'downloaded_artifacts=%s\n' "$LOCAL_ROOT/$local_artifact"
   fi
 
   printf 'creating_local_codebase_zip=./zip_codebase.sh\n'

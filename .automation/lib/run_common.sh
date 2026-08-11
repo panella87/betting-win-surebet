@@ -134,6 +134,32 @@ automation_pid_alive() {
   return 0
 }
 
+automation_boot_id() {
+  [[ -r /proc/sys/kernel/random/boot_id ]] || return 1
+  tr -d '[:space:]' < /proc/sys/kernel/random/boot_id
+}
+
+automation_pid_start_ticks() {
+  local pid="${1:-}" stat_line remainder
+  local -a fields=()
+  [[ "$pid" =~ ^[1-9][0-9]*$ && -r "/proc/$pid/stat" ]] || return 1
+  IFS= read -r stat_line < "/proc/$pid/stat" || return 1
+  [[ "$stat_line" == *') '* ]] || return 1
+  remainder="${stat_line##*) }"
+  read -r -a fields <<< "$remainder"
+  [[ "${fields[19]-}" =~ ^[0-9]+$ ]] || return 1
+  printf '%s\n' "${fields[19]}"
+}
+
+automation_pid_identity_matches() {
+  local pid="${1:-}" expected_boot_id="${2:-}" expected_start_ticks="${3:-}" current_boot_id current_start_ticks
+  [[ -n "$expected_boot_id" && "$expected_boot_id" != none && -n "$expected_start_ticks" && "$expected_start_ticks" != none ]] || return 1
+  current_boot_id="$(automation_boot_id)" || return 1
+  [[ "$current_boot_id" == "$expected_boot_id" ]] || return 1
+  current_start_ticks="$(automation_pid_start_ticks "$pid")" || return 1
+  [[ "$current_start_ticks" == "$expected_start_ticks" ]]
+}
+
 automation_pid_command_matches_script() {
   local pid="$1" expected="$2" repo_root="${3:-${AUTOMATION_REPO_ROOT:-}}"
   local expected_real cwd arg candidate resolved cmdline_snapshot matched=1
@@ -193,14 +219,17 @@ automation_controller_allows_child() {
 
 automation_is_verified_parent_lock() {
   local file="$1" current_script="$2" repo_root="$3"
-  local controller pid repo script_path
+  local controller pid repo script_path boot_id start_ticks
   controller="$(automation_lock_value_any "$file" CONTROLLER script 2>/dev/null || true)"
   pid="$(automation_lock_value_any "$file" CONTROLLER_PID pid 2>/dev/null || true)"
   repo="$(automation_lock_value_any "$file" REPO_REALPATH repo_realpath repo_path 2>/dev/null || true)"
   script_path="$(automation_lock_value_any "$file" SCRIPT_REALPATH script_path 2>/dev/null || true)"
+  boot_id="$(automation_lock_value_any "$file" CONTROLLER_BOOT_ID boot_id 2>/dev/null || true)"
+  start_ticks="$(automation_lock_value_any "$file" CONTROLLER_START_TICKS start_ticks 2>/dev/null || true)"
 
   automation_controller_allows_child "$controller" "$current_script" || return 1
   [[ "$pid" == "$PPID" ]] || return 1
+  automation_pid_identity_matches "$pid" "$boot_id" "$start_ticks" || return 1
   [[ "$(realpath -m -- "$repo" 2>/dev/null || true)" == "$(realpath -e -- "$repo_root" 2>/dev/null || true)" ]] || return 1
   [[ -n "$script_path" ]] || script_path="$repo_root/$controller"
   automation_pid_command_matches_script "$pid" "$script_path" "$repo_root"
@@ -218,7 +247,7 @@ automation_known_controller_lock_files() {
 
 automation_assert_no_incompatible_locks() {
   local current_script="$1" repo_root="$2" own_lock_file="${3:-}"
-  local file controller pid repo script_path
+  local file controller pid repo script_path boot_id start_ticks
   while IFS= read -r file; do
     [[ -n "$file" && "$file" != "$own_lock_file" && -e "$file" ]] || continue
     [[ -f "$file" && ! -L "$file" ]] || automation_die "incompatible controller lock is not a non-symlink regular file: $file" 27
@@ -227,8 +256,10 @@ automation_assert_no_incompatible_locks() {
     pid="$(automation_lock_value_any "$file" CONTROLLER_PID pid 2>/dev/null || true)"
     repo="$(automation_lock_value_any "$file" REPO_REALPATH repo_realpath repo_path 2>/dev/null || true)"
     script_path="$(automation_lock_value_any "$file" SCRIPT_REALPATH script_path 2>/dev/null || true)"
+    boot_id="$(automation_lock_value_any "$file" CONTROLLER_BOOT_ID boot_id 2>/dev/null || true)"
+    start_ticks="$(automation_lock_value_any "$file" CONTROLLER_START_TICKS start_ticks 2>/dev/null || true)"
 
-    if [[ -z "$controller" || -z "$pid" || -z "$repo" ]]; then
+    if [[ -z "$controller" || -z "$pid" || -z "$repo" || -z "$boot_id" || -z "$start_ticks" ]]; then
       if automation_pid_alive "$pid"; then
         automation_die "refusing to touch malformed incompatible lock with live PID: $file" 27
       fi
@@ -244,6 +275,8 @@ automation_assert_no_incompatible_locks() {
     fi
 
     if automation_pid_alive "$pid"; then
+      automation_pid_identity_matches "$pid" "$boot_id" "$start_ticks" || \
+        automation_die "incompatible controller lock PID ownership mismatch: $file" 27
       [[ -n "$script_path" ]] || script_path="$repo_root/$controller"
       automation_pid_command_matches_script "$pid" "$script_path" "$repo_root" || \
         automation_die "incompatible controller lock PID identity mismatch: $file" 27
@@ -255,16 +288,26 @@ automation_assert_no_incompatible_locks() {
 }
 
 automation_emit_lock_file() {
-  local command_text repo_real script_real
+  local command_text repo_real script_real boot_id start_ticks child_boot_id child_start_ticks
   command_text="${AUTOMATION_SCRIPT_COMMAND:-$AUTOMATION_SCRIPT_NAME}"
   repo_real="$(realpath -e -- "$AUTOMATION_REPO_ROOT")"
   script_real="$(realpath -e -- "$AUTOMATION_REPO_ROOT/$AUTOMATION_SCRIPT_NAME" 2>/dev/null || true)"
+  boot_id="$(automation_boot_id)" || return 2
+  start_ticks="$(automation_pid_start_ticks "$AUTOMATION_CONTROLLER_PID")" || return 2
+  child_boot_id=""
+  child_start_ticks=""
+  if [[ "${AUTOMATION_ACTIVE_CHILD_PID:-}" =~ ^[1-9][0-9]*$ ]] && automation_pid_alive "$AUTOMATION_ACTIVE_CHILD_PID"; then
+    child_boot_id="$boot_id"
+    child_start_ticks="$(automation_pid_start_ticks "$AUTOMATION_ACTIVE_CHILD_PID")" || return 2
+  fi
   printf 'lock_schema_version=2\n'
   printf 'script=%s\n' "$AUTOMATION_SCRIPT_NAME"
   printf 'script_path=%s\n' "$script_real"
   printf 'repo_path=%s\n' "$AUTOMATION_REPO_ROOT"
   printf 'repo_realpath=%s\n' "$repo_real"
   printf 'pid=%s\n' "$AUTOMATION_CONTROLLER_PID"
+  printf 'boot_id=%s\n' "$boot_id"
+  printf 'start_ticks=%s\n' "$start_ticks"
   printf 'started_at=%s\n' "$AUTOMATION_STARTED_AT"
   printf 'heartbeat_at=%s\n' "$(automation_now_epoch)"
   printf 'heartbeat_iso=%s\n' "$(automation_now_iso)"
@@ -275,6 +318,8 @@ automation_emit_lock_file() {
   printf 'parent_controller=%s\n' "${AUTOMATION_PARENT_CONTROLLER:-none}"
   printf 'parent_pid=%s\n' "${AUTOMATION_PARENT_PID:-none}"
   printf 'active_child_pid=%s\n' "${AUTOMATION_ACTIVE_CHILD_PID:-}"
+  printf 'active_child_boot_id=%s\n' "$child_boot_id"
+  printf 'active_child_start_ticks=%s\n' "$child_start_ticks"
   printf 'active_child_kind=%s\n' "${AUTOMATION_ACTIVE_CHILD_KIND:-none}"
   printf 'active_child_script=%s\n' "${AUTOMATION_ACTIVE_CHILD_SCRIPT:-}"
   printf 'active_child_command=%s\n' "${AUTOMATION_ACTIVE_CHILD_COMMAND:-}"
@@ -337,7 +382,7 @@ automation_status_lock() {
   fi
   echo "LOCK_STATUS=present"
   cat "$file"
-  local pid child_pid
+  local pid child_pid child_boot_id child_start_ticks
   pid="$(automation_lock_value "$file" pid || true)"
   if automation_pid_alive "$pid"; then
     echo "PID_STATUS=alive"
@@ -345,7 +390,9 @@ automation_status_lock() {
     echo "PID_STATUS=dead"
   fi
   child_pid="$(automation_lock_value "$file" active_child_pid || true)"
-  if automation_pid_alive "$child_pid"; then
+  child_boot_id="$(automation_lock_value "$file" active_child_boot_id || true)"
+  child_start_ticks="$(automation_lock_value "$file" active_child_start_ticks || true)"
+  if automation_pid_alive "$child_pid" && automation_pid_identity_matches "$child_pid" "$child_boot_id" "$child_start_ticks"; then
     echo "ACTIVE_CHILD_STATUS=alive"
   else
     echo "ACTIVE_CHILD_STATUS=absent_or_dead"
@@ -353,7 +400,7 @@ automation_status_lock() {
 }
 
 automation_force_unlock() {
-  local file="$1" expected_script="$2" expected_repo="$3" pid repo script script_path child_pid child_script waited grace
+  local file="$1" expected_script="$2" expected_repo="$3" pid repo script script_path child_pid child_script waited grace boot_id start_ticks child_boot_id child_start_ticks
   if [[ ! -f "$file" ]]; then
     echo "FORCE_UNLOCK=no_lock"
     return 0
@@ -364,11 +411,16 @@ automation_force_unlock() {
   script_path="$(automation_lock_value "$file" script_path || true)"
   child_pid="$(automation_lock_value "$file" active_child_pid || true)"
   child_script="$(automation_lock_value "$file" active_child_script || true)"
+  boot_id="$(automation_lock_value "$file" boot_id || true)"
+  start_ticks="$(automation_lock_value "$file" start_ticks || true)"
+  child_boot_id="$(automation_lock_value "$file" active_child_boot_id || true)"
+  child_start_ticks="$(automation_lock_value "$file" active_child_start_ticks || true)"
   [[ "$repo" == "$expected_repo" ]] || automation_die "refusing force-unlock: lock repo mismatch: $repo" 20
   [[ "$script" == "$expected_script" ]] || automation_die "refusing force-unlock: lock script mismatch: $script" 20
   [[ -n "$script_path" ]] || script_path="$expected_repo/$expected_script"
 
   if automation_pid_alive "$child_pid"; then
+    automation_pid_identity_matches "$child_pid" "$child_boot_id" "$child_start_ticks" || automation_die "refusing force-unlock: cannot verify active child PID ownership for $child_pid" 20
     [[ -n "$child_script" ]] || automation_die "refusing force-unlock: live child has no script identity" 20
     if ! automation_pid_command_matches_script "$child_pid" "$child_script" "$expected_repo"; then
       automation_pid_alive "$child_pid" && automation_die "refusing force-unlock: cannot verify active child command for $child_pid" 20
@@ -378,6 +430,7 @@ automation_force_unlock() {
   fi
 
   if automation_pid_alive "$pid"; then
+    automation_pid_identity_matches "$pid" "$boot_id" "$start_ticks" || automation_die "refusing force-unlock: cannot verify PID ownership for $pid" 20
     if ! automation_pid_command_matches_script "$pid" "$script_path" "$expected_repo"; then
       automation_pid_alive "$pid" && automation_die "refusing force-unlock: cannot verify PID command for $pid" 20
     else
@@ -399,7 +452,7 @@ automation_force_unlock() {
 }
 
 automation_acquire_lock() {
-  local script_name="$1" repo_root="$2" lock_dir pid repo script heartbeat now age waited
+  local script_name="$1" repo_root="$2" lock_dir pid repo script heartbeat now age waited boot_id start_ticks
   AUTOMATION_SCRIPT_NAME="$script_name"
   AUTOMATION_REPO_ROOT="$repo_root"
   AUTOMATION_CONTROLLER_PID="$$"
@@ -414,8 +467,10 @@ automation_acquire_lock() {
     repo="$(automation_lock_value "$AUTOMATION_LOCK_FILE" repo_path || true)"
     script="$(automation_lock_value "$AUTOMATION_LOCK_FILE" script || true)"
     heartbeat="$(automation_lock_value "$AUTOMATION_LOCK_FILE" heartbeat_at || true)"
+    boot_id="$(automation_lock_value "$AUTOMATION_LOCK_FILE" boot_id || true)"
+    start_ticks="$(automation_lock_value "$AUTOMATION_LOCK_FILE" start_ticks || true)"
 
-    if [[ -z "$pid" || -z "$repo" || -z "$script" ]]; then
+    if [[ -z "$pid" || -z "$repo" || -z "$script" || -z "$boot_id" || -z "$start_ticks" ]]; then
       if [[ -n "$pid" && "$pid" =~ ^[0-9]+$ ]] && automation_pid_alive "$pid"; then
         automation_die "refusing to touch malformed lock with live PID: $AUTOMATION_LOCK_FILE" 22
       fi
@@ -425,6 +480,7 @@ automation_acquire_lock() {
     else
       [[ "$repo" == "$repo_root" ]] || automation_die "refusing lock auto-unlock: repo mismatch: $repo" 23
       [[ "$script" == "$script_name" ]] || automation_die "refusing lock auto-unlock: script mismatch: $script" 23
+      automation_pid_identity_matches "$pid" "$boot_id" "$start_ticks" || automation_die "refusing lock auto-unlock: cannot verify PID ownership for $pid" 24
       automation_pid_command_matches_script "$pid" "$repo_root/$script_name" "$repo_root" || automation_die "refusing lock auto-unlock: cannot verify PID command for $pid" 24
       now="$(automation_now_epoch)"
       if [[ "$heartbeat" =~ ^[0-9]+$ ]]; then
@@ -502,8 +558,11 @@ automation_clear_active_child() {
 }
 
 automation_terminate_process_group() {
-  local pid="$1" expected_script="$2" grace="${3:-10}" waited=0
+  local pid="$1" expected_script="$2" grace="${3:-10}" expected_boot_id="${4:-}" expected_start_ticks="${5:-}" waited=0
   automation_pid_alive "$pid" || return 0
+  if [[ -n "$expected_boot_id" || -n "$expected_start_ticks" ]]; then
+    automation_pid_identity_matches "$pid" "$expected_boot_id" "$expected_start_ticks" || return 2
+  fi
   automation_pid_command_matches_script "$pid" "$expected_script" "${AUTOMATION_REPO_ROOT:-}" || return 2
   kill -TERM -- "-$pid" 2>/dev/null || kill -TERM "$pid" 2>/dev/null || true
   while automation_pid_alive "$pid" && (( waited < grace * 10 )); do
@@ -520,11 +579,13 @@ automation_terminate_process_group() {
 }
 
 automation_terminate_active_child() {
-  local pid="${AUTOMATION_ACTIVE_CHILD_PID:-}" script="${AUTOMATION_ACTIVE_CHILD_SCRIPT:-}"
+  local pid="${AUTOMATION_ACTIVE_CHILD_PID:-}" script="${AUTOMATION_ACTIVE_CHILD_SCRIPT:-}" boot_id start_ticks
   [[ "$pid" =~ ^[1-9][0-9]*$ ]] || return 0
   automation_pid_alive "$pid" || { automation_clear_active_child; return 0; }
-  [[ -n "$script" ]] || return 2
-  automation_terminate_process_group "$pid" "$script" "${AUTOMATION_GRACEFUL_UNLOCK_SECONDS:-30}" || return 2
+  [[ -n "$script" && -n "${AUTOMATION_LOCK_FILE:-}" ]] || return 2
+  boot_id="$(automation_lock_value "$AUTOMATION_LOCK_FILE" active_child_boot_id || true)"
+  start_ticks="$(automation_lock_value "$AUTOMATION_LOCK_FILE" active_child_start_ticks || true)"
+  automation_terminate_process_group "$pid" "$script" "${AUTOMATION_GRACEFUL_UNLOCK_SECONDS:-30}" "$boot_id" "$start_ticks" || return 2
   automation_clear_active_child
 }
 
@@ -1129,11 +1190,7 @@ automation_refresh_final_artifacts_zip() {
     rm -f -- "$tmp"
     return "$rc"
   fi
-  if ! mv -f -- "$tmp" "$archive"; then
-    rm -f -- "$tmp"
-    return 1
-  fi
-  return 0
+  automation_publish_final_artifacts_zip "$tmp" "$root_real"
 }
 
 automation_prune_artifact_zip_vcs_metadata() {
@@ -1151,6 +1208,62 @@ automation_prune_artifact_zip_vcs_metadata() {
     0|12) return 0 ;;
     *) return "$rc" ;;
   esac
+}
+
+automation_publish_final_artifacts_zip() {
+  local temp="${1:?temp archive path is required}"
+  local root="${2:?repository root is required}"
+  local root_real temp_input temp_real destination parent_real rc
+  [[ -d "$root" && ! -L "$root" ]] || {
+    printf 'ERROR: artifact ZIP publish repository root must be a non-symlink directory: %s\n' "$root" >&2
+    return 2
+  }
+  root_real="$(realpath -e -- "$root")" || {
+    rc=$?
+    return "$rc"
+  }
+  case "$temp" in
+    /*) temp_input="$temp" ;;
+    *) temp_input="$root_real/$temp" ;;
+  esac
+  [[ -f "$temp_input" && ! -L "$temp_input" ]] || {
+    printf 'ERROR: artifact ZIP publish temp archive must be a non-symlink regular file: %s\n' "$temp" >&2
+    return 2
+  }
+  temp_real="$(realpath -e -- "$temp_input")" || {
+    rc=$?
+    return "$rc"
+  }
+  case "$temp_real" in
+    "$root_real"/*) ;;
+    *)
+      printf 'ERROR: artifact ZIP publish temp archive escapes repository: %s\n' "$temp" >&2
+      return 2
+      ;;
+  esac
+  destination="$root_real/artifacts.zip"
+  parent_real="$(realpath -e -- "$(dirname -- "$destination")")" || {
+    rc=$?
+    rm -f -- "$temp_real"
+    return "$rc"
+  }
+  [[ "$parent_real" == "$root_real" ]] || {
+    printf 'ERROR: artifact ZIP publish destination must have a canonical non-symlink parent: %s\n' "$destination" >&2
+    rm -f -- "$temp_real"
+    return 2
+  }
+  if [[ -e "$destination" || -L "$destination" ]]; then
+    [[ -f "$destination" && ! -L "$destination" ]] || {
+      printf 'ERROR: artifact ZIP publish destination must be absent or a non-symlink regular file: %s\n' "$destination" >&2
+      rm -f -- "$temp_real"
+      return 2
+    }
+  fi
+  if ! mv -T -- "$temp_real" "$destination"; then
+    rc=$?
+    rm -f -- "$temp_real"
+    return "$rc"
+  fi
 }
 
 automation_reject_artifact_zip_symlinks() {
@@ -1209,7 +1322,7 @@ automation_build_artifacts_zip() {
     rm -f -- "$zip_tmp"
     return "$rc"
   }
-  mv "$zip_tmp" "$root_real/artifacts.zip"
+  automation_publish_final_artifacts_zip "$zip_tmp" "$root_real" || return $?
   automation_log "artifacts_zip_created path=$root_real/artifacts.zip"
 }
 

@@ -16,6 +16,32 @@ automation_v2_sha256_file() {
   sha256sum -- "$file" | awk '{print $1}'
 }
 
+automation_v2_boot_id() {
+  [[ -r /proc/sys/kernel/random/boot_id ]] || return 1
+  tr -d '[:space:]' < /proc/sys/kernel/random/boot_id
+}
+
+automation_v2_process_start_ticks() {
+  local pid=${1:-} stat_line remainder
+  local -a fields=()
+  [[ "$pid" =~ ^[1-9][0-9]*$ && -r "/proc/$pid/stat" ]] || return 1
+  IFS= read -r stat_line < "/proc/$pid/stat" || return 1
+  [[ "$stat_line" == *') '* ]] || return 1
+  remainder=${stat_line##*) }
+  read -r -a fields <<< "$remainder"
+  [[ "${fields[19]-}" =~ ^[0-9]+$ ]] || return 1
+  printf '%s\n' "${fields[19]}"
+}
+
+automation_v2_process_identity_matches() {
+  local pid=${1:-} expected_boot_id=${2:-} expected_start_ticks=${3:-} current_boot_id current_start_ticks
+  [[ -n "$expected_boot_id" && "$expected_boot_id" != none && -n "$expected_start_ticks" && "$expected_start_ticks" != none ]] || return 1
+  current_boot_id=$(automation_v2_boot_id) || return 1
+  [[ "$current_boot_id" == "$expected_boot_id" ]] || return 1
+  current_start_ticks=$(automation_v2_process_start_ticks "$pid") || return 1
+  [[ "$current_start_ticks" == "$expected_start_ticks" ]]
+}
+
 automation_v2_parse_duration_seconds() {
   local raw=${1:?duration is required}
   local number unit
@@ -390,7 +416,9 @@ automation_v2_publish_child_result() {
   local target=${AUTOMATION_CHILD_RESULT_FILE:-}
   local parent_controller=${AUTOMATION_PARENT_CONTROLLER:-}
   local parent_pid=${AUTOMATION_PARENT_PID:-}
-  local repo_real target_real target_parent_real run_real relative_target relative_run
+  local parent_boot_id=${AUTOMATION_PARENT_BOOT_ID:-}
+  local parent_start_ticks=${AUTOMATION_PARENT_START_TICKS:-}
+  local child_boot_id child_start_ticks repo_real target_real target_parent_real run_real relative_target relative_run
 
   [[ -n "$target" ]] || return 0
   repo_real=$(realpath -e -- "$repository_root") || return 2
@@ -402,6 +430,12 @@ automation_v2_publish_child_result() {
     printf 'ERROR: parent controller is not alive for child result publication: %s\n' "$parent_pid" >&2
     return 2
   }
+  automation_v2_process_identity_matches "$parent_pid" "$parent_boot_id" "$parent_start_ticks" || {
+    printf 'ERROR: parent controller ownership mismatch for child result publication: %s\n' "$parent_pid" >&2
+    return 2
+  }
+  child_boot_id=$(automation_v2_boot_id) || return 2
+  child_start_ticks=$(automation_v2_process_start_ticks "$$") || return 2
   target_real=$(automation_v2_safe_repo_path "$repo_real" "$target" no) || return 2
   target_parent_real=$(realpath -e -- "$(dirname -- "$target_real")") || return 2
   [[ "$target_parent_real" == "$(dirname -- "$target_real")" && ! -L "$target_real" ]] || {
@@ -465,7 +499,12 @@ automation_v2_publish_child_result() {
     'RESULT_KIND=controller_terminal_result' \
     "PARENT_CONTROLLER=$parent_controller" \
     "PARENT_PID=$parent_pid" \
+    "PARENT_BOOT_ID=$parent_boot_id" \
+    "PARENT_START_TICKS=$parent_start_ticks" \
     "CONTROLLER=$controller" \
+    "CHILD_PID=$$" \
+    "CHILD_BOOT_ID=$child_boot_id" \
+    "CHILD_START_TICKS=$child_start_ticks" \
     "SCRIPT_VERSION=$script_version" \
     "REPOSITORY=${AUTOMATION_REPO_NAME:-betting-win-surebet}" \
     "RUN_DIR=$run_real" \
@@ -487,9 +526,13 @@ automation_v2_validate_child_result_file() {
   local expected_repository=${5:?expected repository is required}
   local expected_exit_code=${6:?expected exit code is required}
   local repository_root=${7:?repository root is required}
+  local expected_child_pid=${8:?expected child PID is required}
+  local expected_parent_boot_id=${9:?expected parent boot id is required}
+  local expected_parent_start_ticks=${10:?expected parent start ticks are required}
   local key run_dir relative_run
   local -a expected_keys=(
-    CHILD_RESULT_SCHEMA_VERSION RESULT_KIND PARENT_CONTROLLER PARENT_PID CONTROLLER
+    CHILD_RESULT_SCHEMA_VERSION RESULT_KIND PARENT_CONTROLLER PARENT_PID PARENT_BOOT_ID
+    PARENT_START_TICKS CONTROLLER CHILD_PID CHILD_BOOT_ID CHILD_START_TICKS
     SCRIPT_VERSION REPOSITORY RUN_DIR FINAL_STATUS STOP_REASON FINAL_EXIT_CODE
     CYCLES_COMPLETED LOCK_RELEASE_STATUS LOCK_RELEASE_EXIT_CODE LOCK_PRESERVED WRITTEN_AT
   )
@@ -509,7 +552,13 @@ automation_v2_validate_child_result_file() {
   [[ "${AUTOMATION_V2_ENV[RESULT_KIND]}" == controller_terminal_result ]] || return 2
   [[ "${AUTOMATION_V2_ENV[PARENT_CONTROLLER]}" == "$expected_parent" ]] || return 2
   [[ "${AUTOMATION_V2_ENV[PARENT_PID]}" == "$expected_parent_pid" ]] || return 2
+  [[ "${AUTOMATION_V2_ENV[PARENT_BOOT_ID]}" == "$expected_parent_boot_id" ]] || return 2
+  [[ "${AUTOMATION_V2_ENV[PARENT_START_TICKS]}" == "$expected_parent_start_ticks" ]] || return 2
+  automation_v2_process_identity_matches "$expected_parent_pid" "$expected_parent_boot_id" "$expected_parent_start_ticks" || return 2
   [[ "${AUTOMATION_V2_ENV[CONTROLLER]}" == "$expected_controller" ]] || return 2
+  [[ "${AUTOMATION_V2_ENV[CHILD_PID]}" == "$expected_child_pid" ]] || return 2
+  [[ "${AUTOMATION_V2_ENV[CHILD_BOOT_ID]}" == "$expected_parent_boot_id" ]] || return 2
+  [[ "${AUTOMATION_V2_ENV[CHILD_START_TICKS]}" =~ ^[0-9]+$ ]] || return 2
   [[ "${AUTOMATION_V2_ENV[REPOSITORY]}" == "$expected_repository" ]] || return 2
   [[ "${AUTOMATION_V2_ENV[SCRIPT_VERSION]}" =~ ^[A-Za-z0-9._:+-]+$ ]] || return 2
   [[ "${AUTOMATION_V2_ENV[FINAL_STATUS]}" =~ ^[A-Za-z0-9._:=+-]+$ ]] || return 2
@@ -631,6 +680,72 @@ automation_v2_validate_zip_destination() {
   }
 }
 
+automation_v2_publish_regular_file_atomic() {
+  local temp=${1:?temp file is required}
+  local destination=${2:?destination is required}
+  local working_dir=${3:?working directory is required}
+  local working_real temp_input temp_real destination_input destination_real parent_real rc
+  [[ -d "$working_dir" && ! -L "$working_dir" ]] || {
+    printf 'ERROR: publish working directory must be a non-symlink directory: %s\n' "$working_dir" >&2
+    return 2
+  }
+  working_real=$(realpath -e -- "$working_dir") || {
+    rc=$?
+    return "$rc"
+  }
+  case "$temp" in
+    /*) temp_input="$temp" ;;
+    *) temp_input="$working_real/$temp" ;;
+  esac
+  [[ -f "$temp_input" && ! -L "$temp_input" ]] || {
+    printf 'ERROR: publish temp file must be a non-symlink regular file: %s\n' "$temp" >&2
+    return 2
+  }
+  temp_real=$(automation_v2_safe_repo_path "$working_real" "$temp_input" yes) || {
+    rc=$?
+    return "$rc"
+  }
+  case "$destination" in
+    /*) destination_input="$destination" ;;
+    *) destination_input="$working_real/$destination" ;;
+  esac
+  destination_real=$(realpath -m -s -- "$destination_input") || {
+    rc=$?
+    rm -f -- "$temp_real"
+    return "$rc"
+  }
+  case "$destination_real" in
+    "$working_real"|"$working_real"/*) ;;
+    *)
+      printf 'ERROR: publish destination escapes repository: %s\n' "$destination" >&2
+      rm -f -- "$temp_real"
+      return 2
+      ;;
+  esac
+  parent_real=$(realpath -e -- "$(dirname -- "$destination_real")") || {
+    rc=$?
+    rm -f -- "$temp_real"
+    return "$rc"
+  }
+  if [[ "$parent_real" != "$(dirname -- "$destination_real")" ]]; then
+    printf 'ERROR: publish destination must have a canonical non-symlink parent: %s\n' "$destination" >&2
+    rm -f -- "$temp_real"
+    return 2
+  fi
+  if [[ -e "$destination_real" || -L "$destination_real" ]]; then
+    [[ -f "$destination_real" && ! -L "$destination_real" ]] || {
+      printf 'ERROR: publish destination must be absent or a non-symlink regular file: %s\n' "$destination_real" >&2
+      rm -f -- "$temp_real"
+      return 2
+    }
+  fi
+  if ! mv -T -- "$temp_real" "$destination_real"; then
+    rc=$?
+    rm -f -- "$temp_real"
+    return "$rc"
+  fi
+}
+
 automation_v2_prune_zip_vcs_metadata() {
   local archive=${1:?archive path is required}
   local rc
@@ -653,26 +768,46 @@ automation_v2_archive_run_dirs() {
   local archive=${1:?archive path is required}
   local repo=${2:?repo is required}
   shift 2
-  local temp item rel
+  local repo_real temp item item_input rel rc
   command -v zip >/dev/null 2>&1 || return 127
   automation_v2_validate_zip_destination "$repo" "$archive" || return $?
+  repo_real=$(realpath -e -- "$repo") || return 2
+  archive=$(automation_v2_safe_repo_path "$repo_real" "$archive" no) || return $?
   temp="${archive}.tmp.$$"
-  rm -f -- "$temp"
+  if [[ -e "$temp" || -L "$temp" ]]; then
+    [[ -f "$temp" && ! -L "$temp" ]] || {
+      printf 'ERROR: archive temp path must be absent or a non-symlink regular file: %s\n' "$temp" >&2
+      return 2
+    }
+    rm -f -- "$temp"
+  fi
   local -a rels=()
   for item in "$@"; do
-    [[ -e "$item" ]] || continue
-    item=$(automation_v2_safe_repo_path "$repo" "$item" yes) || return
-    rel=${item#"$(realpath -e -- "$repo")"/}
+    case "$item" in
+      /*) item_input="$item" ;;
+      *) item_input="$repo_real/$item" ;;
+    esac
+    [[ -e "$item_input" ]] || continue
+    item=$(automation_v2_safe_repo_path "$repo_real" "$item" yes) || return
+    rel=${item#"$repo_real"/}
     rels+=("$rel")
   done
   (( ${#rels[@]} > 0 )) || return 0
-  automation_v2_reject_zip_symlink_entries "$repo" "${rels[@]}" || return $?
+  automation_v2_reject_zip_symlink_entries "$repo_real" "${rels[@]}" || return $?
   (
-    cd "$repo"
+    cd "$repo_real"
     zip -q -1 -r "$temp" "${rels[@]}" -x 'artifacts/.git/*' 'artifacts/.git' 'artifacts/*/.git/*' 'artifacts/*/.git' 'artifacts/**/.git/*' 'artifacts/**/.git' 'artifacts/.hg/*' 'artifacts/.hg' 'artifacts/*/.hg/*' 'artifacts/*/.hg' 'artifacts/**/.hg/*' 'artifacts/**/.hg' 'artifacts/.svn/*' 'artifacts/.svn' 'artifacts/*/.svn/*' 'artifacts/*/.svn' 'artifacts/**/.svn/*' 'artifacts/**/.svn'
-  ) || { rm -f -- "$temp"; return 2; }
-  automation_v2_prune_zip_vcs_metadata "$temp" || { rm -f -- "$temp"; return 2; }
-  mv -f -- "$temp" "$archive"
+  ) || {
+    rc=$?
+    [[ -f "$temp" && ! -L "$temp" ]] && rm -f -- "$temp"
+    return "$rc"
+  }
+  automation_v2_prune_zip_vcs_metadata "$temp" || {
+    rc=$?
+    [[ -f "$temp" && ! -L "$temp" ]] && rm -f -- "$temp"
+    return "$rc"
+  }
+  automation_v2_publish_regular_file_atomic "$temp" "$archive" "$repo_real"
 }
 
 automation_v2_validate_child_script() {
@@ -756,8 +891,8 @@ automation_v2_validate_parent_lock_loaded() {
   local expected_repo_real=${3:?expected repository realpath is required}
   local expected_script_real=${4:?expected script realpath is required}
   local expected_pid=${5:-}
-  local key run_dir child_pid child_kind child_script child_command
-  local allowed=',LOCK_SCHEMA_VERSION,CONTROLLER,CONTROLLER_PID,REPOSITORY,REPO_REALPATH,SCRIPT_REALPATH,RUN_DIR,HEARTBEAT_SOURCE,HEARTBEAT_EPOCH,HEARTBEAT_AT,ACTIVE_CHILD_PID,ACTIVE_CHILD_KIND,ACTIVE_CHILD_SCRIPT,ACTIVE_CHILD_COMMAND,'
+  local key run_dir child_pid child_boot_id child_start_ticks child_kind child_script child_command
+  local allowed=',LOCK_SCHEMA_VERSION,CONTROLLER,CONTROLLER_PID,CONTROLLER_BOOT_ID,CONTROLLER_START_TICKS,REPOSITORY,REPO_REALPATH,SCRIPT_REALPATH,RUN_DIR,HEARTBEAT_SOURCE,HEARTBEAT_EPOCH,HEARTBEAT_AT,ACTIVE_CHILD_PID,ACTIVE_CHILD_BOOT_ID,ACTIVE_CHILD_START_TICKS,ACTIVE_CHILD_KIND,ACTIVE_CHILD_SCRIPT,ACTIVE_CHILD_COMMAND,'
 
   for key in "${!AUTOMATION_V2_ENV[@]}"; do
     [[ "$allowed" == *",$key,"* ]] || {
@@ -793,6 +928,14 @@ automation_v2_validate_parent_lock_loaded() {
     printf 'ERROR: parent-lock owner PID mismatch.\n' >&2
     return 2
   fi
+  [[ -n "${AUTOMATION_V2_ENV[CONTROLLER_BOOT_ID]-}" && -n "${AUTOMATION_V2_ENV[CONTROLLER_START_TICKS]-}" ]] || {
+    printf 'ERROR: parent-lock owner identity is incomplete.\n' >&2
+    return 2
+  }
+  automation_v2_process_identity_matches "${AUTOMATION_V2_ENV[CONTROLLER_PID]}" "${AUTOMATION_V2_ENV[CONTROLLER_BOOT_ID]}" "${AUTOMATION_V2_ENV[CONTROLLER_START_TICKS]}" || {
+    printf 'ERROR: parent-lock owner PID identity mismatch.\n' >&2
+    return 2
+  }
   [[ "${AUTOMATION_V2_ENV[HEARTBEAT_SOURCE]-}" == file_mtime ]] || {
     printf 'ERROR: parent-lock heartbeat source must be file_mtime.\n' >&2
     return 2
@@ -812,19 +955,27 @@ automation_v2_validate_parent_lock_loaded() {
   fi
 
   child_pid=${AUTOMATION_V2_ENV[ACTIVE_CHILD_PID]-}
+  child_boot_id=${AUTOMATION_V2_ENV[ACTIVE_CHILD_BOOT_ID]-}
+  child_start_ticks=${AUTOMATION_V2_ENV[ACTIVE_CHILD_START_TICKS]-}
   child_kind=${AUTOMATION_V2_ENV[ACTIVE_CHILD_KIND]-}
   child_script=${AUTOMATION_V2_ENV[ACTIVE_CHILD_SCRIPT]-}
   child_command=${AUTOMATION_V2_ENV[ACTIVE_CHILD_COMMAND]-}
   if [[ -z "$child_pid" ]]; then
-    [[ "$child_kind" == none && -z "$child_script" && -z "$child_command" ]] || {
+    [[ -z "$child_boot_id" && -z "$child_start_ticks" && "$child_kind" == none && -z "$child_script" && -z "$child_command" ]] || {
       printf 'ERROR: parent-lock empty child PID has inconsistent child metadata.\n' >&2
       return 2
     }
   else
-    [[ "$child_pid" =~ ^[1-9][0-9]*$ && -n "$child_kind" && "$child_kind" != none && -n "$child_script" && -n "$child_command" ]] || {
+    [[ "$child_pid" =~ ^[1-9][0-9]*$ && -n "$child_boot_id" && -n "$child_start_ticks" && -n "$child_kind" && "$child_kind" != none && -n "$child_script" && -n "$child_command" ]] || {
       printf 'ERROR: parent-lock active child metadata is incomplete.\n' >&2
       return 2
     }
+    if automation_v2_process_alive "$child_pid"; then
+      automation_v2_process_identity_matches "$child_pid" "$child_boot_id" "$child_start_ticks" || {
+        printf 'ERROR: parent-lock active child PID identity mismatch.\n' >&2
+        return 2
+      }
+    fi
     automation_v2_safe_repo_path "$expected_repo_real" "$child_script" yes >/dev/null || return 2
   fi
 }
@@ -904,12 +1055,17 @@ automation_v2_process_matches_script() {
 automation_v2_terminate_process_group() {
   local pid=${1:-}
   local grace=${2:-10}
+  local expected_boot_id=${3:-}
+  local expected_start_ticks=${4:-}
   [[ "$pid" =~ ^[1-9][0-9]*$ ]] || return 0
   [[ "$grace" =~ ^[0-9]+$ ]] || {
     printf 'ERROR: termination grace must be a non-negative integer; got %q.\n' "$grace" >&2
     return 2
   }
   automation_v2_process_alive "$pid" || return 0
+  if [[ -n "$expected_boot_id" || -n "$expected_start_ticks" ]]; then
+    automation_v2_process_identity_matches "$pid" "$expected_boot_id" "$expected_start_ticks" || return 2
+  fi
   kill -TERM -- "-$pid" 2>/dev/null || kill -TERM "$pid" 2>/dev/null || true
   automation_v2_wait_for_pid_exit "$pid" "$grace" && return 0
   kill -KILL -- "-$pid" 2>/dev/null || kill -KILL "$pid" 2>/dev/null || true

@@ -888,7 +888,7 @@ build_artifacts_zip_bounded() {
   tmp="$AUTOMATION_REPO_ROOT/.artifacts.zip.tmp.$$.zip"
   rm -f "$tmp"
   if automation_v2_zip_with_timeout "$ZIP_TIMEOUT_SECONDS" "$tmp" "$AUTOMATION_REPO_ROOT" "artifacts"; then
-    mv -f "$tmp" "$AUTOMATION_REPO_ROOT/artifacts.zip"
+    automation_publish_final_artifacts_zip "$tmp" "$AUTOMATION_REPO_ROOT" || return $?
     automation_log "artifacts_zip_created path=$AUTOMATION_REPO_ROOT/artifacts.zip"
   else
     local rc=$?

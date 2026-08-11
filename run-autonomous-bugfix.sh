@@ -392,10 +392,16 @@ read_bugfix_continue_status() {
 validate_protected_allowlist() {
   local csv="$1" item known found
   local -a items=()
+  local -A seen=()
   [[ -z "$csv" || "$csv" == none ]] && return 0
   IFS=',' read -r -a items <<< "$csv"
   for item in "${items[@]}"; do
-    [[ -n "$item" && "$item" != /* && "$item" != *'..'* ]] || return 2
+    [[ -n "$item" && "$item" != /* && "$item" != *'..'* && "$item" != *$'\n'* ]] || return 2
+    [[ -z "${seen[$item]+x}" ]] || {
+      echo "ERROR: duplicate protected-file allowlist entry: $item" >&2
+      return 2
+    }
+    seen["$item"]=1
     found=0
     for known in "${AUTOMATION_PROTECTED_FILES[@]:-}"; do [[ "$known" == "$item" ]] && found=1; done
     [[ "$found" == 1 ]] || { echo "ERROR: unknown protected-file allowlist entry: $item" >&2; return 2; }
@@ -422,6 +428,10 @@ load_and_validate_request_flags() {
   [[ -n "${AUTOMATION_V2_ENV[IMPLEMENTATION_SCOPE]}" ]] || return 2
   [[ "${AUTOMATION_V2_ENV[IMPLEMENTATION_SCOPE]}" != *$'\n'* && "${AUTOMATION_V2_ENV[IMPLEMENTATION_SCOPE]}" != *$'\t'* ]] || return 2
   if [[ "${AUTOMATION_V2_ENV[BUGFIX_MODE_AUTOMATION_MAINTENANCE_ALLOWED]}" == yes ]]; then
+    [[ "$status" == HANDOVER_AUTONOMOUS_IMPLEMENTATION=yes ]] || {
+      echo "ERROR: protected maintenance is allowed only for autonomous implementation handoff request flags" >&2
+      return 2
+    }
     [[ "${AUTOMATION_V2_ENV[ALLOWED_PROTECTED_FILES]}" != none ]] || return 2
     validate_protected_allowlist "${AUTOMATION_V2_ENV[ALLOWED_PROTECTED_FILES]}" || return 2
   else
@@ -430,15 +440,18 @@ load_and_validate_request_flags() {
 
   case "$status" in
     BUGFIX_AUDIT_COMPLETE=yes)
+      [[ "${AUTOMATION_V2_ENV[BUGFIX_MODE_AUTOMATION_MAINTENANCE_ALLOWED]}" == no && "${AUTOMATION_V2_ENV[ALLOWED_PROTECTED_FILES]}" == none ]] || return 2
       [[ "${AUTOMATION_V2_ENV[BUGS_FOUND]}" == no && "${AUTOMATION_V2_ENV[HANDOVER_AUTONOMOUS_IMPLEMENTATION_REQUIRED]}" == no && "${AUTOMATION_V2_ENV[CAMPAIGN_AREA_COMPLETE]}" == yes && "${AUTOMATION_V2_ENV[SOURCE_EVIDENCE_COMPLETE]}" == yes && "${AUTOMATION_V2_ENV[BUG_IDS]}" == none && "$LAST_VALIDATION_STATUS" == passed ]] || return 2
       ;;
     HANDOVER_AUTONOMOUS_IMPLEMENTATION=yes)
       [[ "${AUTOMATION_V2_ENV[BUGS_FOUND]}" == yes && "${AUTOMATION_V2_ENV[HANDOVER_AUTONOMOUS_IMPLEMENTATION_REQUIRED]}" == yes && "${AUTOMATION_V2_ENV[CAMPAIGN_AREA_COMPLETE]}" == no && "${AUTOMATION_V2_ENV[SOURCE_EVIDENCE_COMPLETE]}" == yes && "${AUTOMATION_V2_ENV[BUG_IDS]}" != none && "${AUTOMATION_V2_ENV[IMPLEMENTATION_SCOPE]}" != none ]] || return 2
       ;;
     CONTINUE_REQUIRED=yes)
+      [[ "${AUTOMATION_V2_ENV[BUGFIX_MODE_AUTOMATION_MAINTENANCE_ALLOWED]}" == no && "${AUTOMATION_V2_ENV[ALLOWED_PROTECTED_FILES]}" == none ]] || return 2
       [[ "${AUTOMATION_V2_ENV[HANDOVER_AUTONOMOUS_IMPLEMENTATION_REQUIRED]}" == no && "${AUTOMATION_V2_ENV[CAMPAIGN_AREA_COMPLETE]}" == no ]] || return 2
       ;;
     BLOCKED=yes)
+      [[ "${AUTOMATION_V2_ENV[BUGFIX_MODE_AUTOMATION_MAINTENANCE_ALLOWED]}" == no && "${AUTOMATION_V2_ENV[ALLOWED_PROTECTED_FILES]}" == none ]] || return 2
       [[ "${AUTOMATION_V2_ENV[HANDOVER_AUTONOMOUS_IMPLEMENTATION_REQUIRED]}" == no && "${AUTOMATION_V2_ENV[CAMPAIGN_AREA_COMPLETE]}" == no ]] || return 2
       ;;
   esac
@@ -581,7 +594,7 @@ build_artifacts_zip_bounded() {
   tmp="$AUTOMATION_REPO_ROOT/.artifacts.zip.tmp.$$.zip"
   rm -f -- "$tmp"
   automation_v2_zip_with_timeout "$ZIP_TIMEOUT_SECONDS" "$tmp" "$AUTOMATION_REPO_ROOT" "artifacts" || { local rc=$?; rm -f -- "$tmp"; return "$rc"; }
-  mv -f -- "$tmp" "$AUTOMATION_REPO_ROOT/artifacts.zip"
+  automation_publish_final_artifacts_zip "$tmp" "$AUTOMATION_REPO_ROOT"
 }
 
 write_final_summary() {

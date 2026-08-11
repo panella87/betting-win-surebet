@@ -82,28 +82,25 @@ export function solveStandardBinaryStakeVector(input: StakeVectorInputContract):
 
   const roundingByLeg = new Map<string, StakeVectorRoundingConstraint>();
   for (const constraint of input.roundingConstraints) {
-    if (constraint.stepMinor <= 0n) {
-      return blocked(
-        'STAKE_VECTOR_ROUNDING_STEP_INVALID',
-        'Stake-vector solving requires a positive rounding step for every leg.',
-        'Positive local stake rounding step for each complete-set leg.',
-      );
+    const validatedConstraint = validateStakeVectorRoundingConstraint(constraint);
+    if (!validatedConstraint.ok) {
+      return validatedConstraint;
     }
-    if (roundingByLeg.has(constraint.legId)) {
+    if (roundingByLeg.has(validatedConstraint.value.legId)) {
       return blocked(
         'STAKE_VECTOR_ROUNDING_DUPLICATE',
         'Stake-vector solving requires exactly one rounding constraint per leg.',
         'One local stake rounding step for each complete-set leg.',
       );
     }
-    if (!legIdSet.has(constraint.legId)) {
+    if (!legIdSet.has(validatedConstraint.value.legId)) {
       return blocked(
         'STAKE_VECTOR_ROUNDING_UNKNOWN_LEG',
         'Stake-vector solving requires rounding constraints to match matrix legs.',
         'Rounding constraints keyed only by validated complete-set leg ids.',
       );
     }
-    roundingByLeg.set(constraint.legId, Object.freeze({ ...constraint }));
+    roundingByLeg.set(validatedConstraint.value.legId, validatedConstraint.value);
   }
 
   const legTerms: SolverLegTerms[] = [];
@@ -279,6 +276,26 @@ export function solveStandardBinaryStakeVector(input: StakeVectorInputContract):
       worstCaseNetMinor,
     }),
   );
+}
+
+function validateStakeVectorRoundingConstraint(
+  constraint: StakeVectorRoundingConstraint,
+): BoundaryResult<StakeVectorRoundingConstraint> {
+  if (typeof constraint !== 'object' || constraint === null) {
+    return blocked(
+      'STAKE_VECTOR_ROUNDING_STEP_INVALID',
+      'Stake-vector solving requires a positive rounding step for every leg.',
+      'Positive local stake rounding step for each complete-set leg.',
+    );
+  }
+  if (typeof constraint.stepMinor !== 'bigint' || constraint.stepMinor <= 0n) {
+    return blocked(
+      'STAKE_VECTOR_ROUNDING_STEP_INVALID',
+      'Stake-vector solving requires a positive rounding step for every leg.',
+      'Positive local stake rounding step for each complete-set leg.',
+    );
+  }
+  return accepted(Object.freeze({ ...constraint }));
 }
 
 function extractSolverLegTerms(

@@ -99,6 +99,34 @@ test('stake-vector solver returns a blocker when a minimum stake exceeds the loc
   ]);
 });
 
+test('stake-vector solver returns a blocker for malformed capacity numeric fields', () => {
+  const result = solveStandardBinaryStakeVector({
+    matrix: createScenarioMatrix([
+      { scenarioId: 'yes_wins', legId: 'market-001:no', stakeMinor: 100n, payoutMinor: 0n, feeMinor: 5n, costMinor: 0n },
+      { scenarioId: 'yes_wins', legId: 'market-001:yes', stakeMinor: 100n, payoutMinor: 215n, feeMinor: 5n, costMinor: 0n },
+      { scenarioId: 'no_wins', legId: 'market-001:no', stakeMinor: 100n, payoutMinor: 225n, feeMinor: 5n, costMinor: 0n },
+      { scenarioId: 'no_wins', legId: 'market-001:yes', stakeMinor: 100n, payoutMinor: 0n, feeMinor: 5n, costMinor: 0n },
+    ]),
+    capacityConstraints: [
+      { legId: 'market-001:no', minStakeMinor: undefined, maxStakeMinor: 600n },
+      { legId: 'market-001:yes', minStakeMinor: 100n, maxStakeMinor: 600n },
+    ] as never,
+    roundingConstraints: [
+      { legId: 'market-001:no', stepMinor: 50n },
+      { legId: 'market-001:yes', stepMinor: 50n },
+    ],
+  });
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'CAPACITY_CONSTRAINT_INVALID',
+      message: 'Capacity constraints must use bigint minor-unit values.',
+      evidenceRequired: 'Bigint min/max capacity constraint.',
+    },
+  ]);
+});
+
 test('stake-vector solver returns a blocker for unknown capacity constraints', () => {
   const result = solveStandardBinaryStakeVector({
     matrix: createScenarioMatrix([
@@ -124,6 +152,34 @@ test('stake-vector solver returns a blocker for unknown capacity constraints', (
       code: 'STAKE_VECTOR_CAPACITY_UNKNOWN_LEG',
       message: 'Stake-vector solving requires capacity constraints to match matrix legs.',
       evidenceRequired: 'Capacity constraints keyed only by validated complete-set leg ids.',
+    },
+  ]);
+});
+
+test('stake-vector solver returns a blocker for malformed rounding numeric fields', () => {
+  const result = solveStandardBinaryStakeVector({
+    matrix: createScenarioMatrix([
+      { scenarioId: 'yes_wins', legId: 'market-001:no', stakeMinor: 100n, payoutMinor: 0n, feeMinor: 0n, costMinor: 0n },
+      { scenarioId: 'yes_wins', legId: 'market-001:yes', stakeMinor: 100n, payoutMinor: 215n, feeMinor: 0n, costMinor: 0n },
+      { scenarioId: 'no_wins', legId: 'market-001:no', stakeMinor: 100n, payoutMinor: 225n, feeMinor: 0n, costMinor: 0n },
+      { scenarioId: 'no_wins', legId: 'market-001:yes', stakeMinor: 100n, payoutMinor: 0n, feeMinor: 0n, costMinor: 0n },
+    ]),
+    capacityConstraints: [
+      { legId: 'market-001:no', minStakeMinor: 100n, maxStakeMinor: 600n },
+      { legId: 'market-001:yes', minStakeMinor: 100n, maxStakeMinor: 600n },
+    ],
+    roundingConstraints: [
+      { legId: 'market-001:no', stepMinor: undefined },
+      { legId: 'market-001:yes', stepMinor: 50n },
+    ] as never,
+  });
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'STAKE_VECTOR_ROUNDING_STEP_INVALID',
+      message: 'Stake-vector solving requires a positive rounding step for every leg.',
+      evidenceRequired: 'Positive local stake rounding step for each complete-set leg.',
     },
   ]);
 });

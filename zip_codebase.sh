@@ -122,8 +122,17 @@ zc_prune_zip_vcs_metadata() {
 }
 
 zc_publish_zip_no_clobber() {
-  local source="$1" destination="$2"
-  if ! ln "$source" "$destination"; then
+  local repo_root="$1" source="$2" destination="$3"
+  zc_validate_zip_destination "$repo_root" "$destination" || return 1
+  if [ ! -f "$source" ] || [ -L "$source" ]; then
+    zc_fail "source zip must be a non-symlink regular file: $source"
+    return 1
+  fi
+  if [ -e "$destination" ] || [ -L "$destination" ]; then
+    zc_fail "target zip already exists or is a symlink: $destination"
+    return 1
+  fi
+  if ! ln -T -- "$source" "$destination"; then
     zc_fail "target zip already exists or could not be published without clobbering: $destination"
     return 1
   fi
@@ -286,7 +295,7 @@ zc_main() {
     return 1
   fi
 
-  if ! zc_publish_zip_no_clobber "$tmp_zip" "$zip_path"; then
+  if ! zc_publish_zip_no_clobber "$repo_root" "$tmp_zip" "$zip_path"; then
     rm -f "$tmp_zip"
     zc_fail "could not publish zip: $zip_path"
     return 1

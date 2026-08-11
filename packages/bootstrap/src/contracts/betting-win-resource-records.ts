@@ -10,7 +10,7 @@ import {
 } from './local-types.js';
 
 const ISO_TIMESTAMP_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
-const MANIFEST_HASH_REGEX = /^[0-9a-f]{64}$/i;
+const MANIFEST_HASH_REGEX = /^[0-9a-f]{64}$/;
 const MINOR_UNITS_REGEX = /^(0|[1-9][0-9]*)$/;
 
 export const BETTING_WIN_RESOURCE_RECORD_TYPES = ['identity', 'rules', 'quotes', 'settlement'] as const;
@@ -459,7 +459,7 @@ function requireNonEmptyString(
   message: string,
   evidenceRequired: string,
 ): BoundaryResult<string> {
-  if (typeof value !== 'string' || value.trim().length === 0) {
+  if (typeof value !== 'string' || value.length === 0 || value !== value.trim()) {
     return blocked(code, message, evidenceRequired);
   }
   return accepted(value);

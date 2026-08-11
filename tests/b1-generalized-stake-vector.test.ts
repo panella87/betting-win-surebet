@@ -237,6 +237,56 @@ test('B1 generalized stake-vector solver rejects malformed bigint policy fields'
   assert.equal(missingConstraintCapacity.blockers[0]?.code, 'B1_STAKE_VECTOR_CAPACITY_INVALID');
 });
 
+test('B1 generalized stake-vector solver rejects malformed leg constraint entries before field access', () => {
+  const malformedConstraints: readonly {
+    readonly name: string;
+    readonly constraint: unknown;
+    readonly code: string;
+  }[] = Object.freeze([
+    Object.freeze({
+      name: 'null constraint',
+      constraint: null,
+      code: 'B1_STAKE_VECTOR_CONSTRAINT_INVALID',
+    }),
+    Object.freeze({
+      name: 'array constraint',
+      constraint: Object.freeze([]),
+      code: 'B1_STAKE_VECTOR_CONSTRAINT_INVALID',
+    }),
+    Object.freeze({
+      name: 'scalar constraint',
+      constraint: 10,
+      code: 'B1_STAKE_VECTOR_CONSTRAINT_INVALID',
+    }),
+    Object.freeze({
+      name: 'malformed object constraint',
+      constraint: Object.freeze({}),
+      code: 'B1_SELECTION_EQUIVALENCE_MISSING',
+    }),
+  ]);
+
+  for (const malformedConstraint of malformedConstraints) {
+    assert.doesNotThrow(() => {
+      const result = solveB1GeneralizedStakeVector(acceptedTwoWayGrossCandidate(), Object.freeze({
+        ...twoWayPolicy(),
+        legConstraints: Object.freeze([
+          malformedConstraint.constraint,
+          Object.freeze({
+            selectionEquivalenceKey: 'event-001:moneyline:home',
+            venueOrBookmakerId: 'venue-a',
+            minStakeMinor: 10_000n,
+            maxStakeMinor: 50_000n,
+            stakeStepMinor: 1n,
+          }),
+        ]),
+      }) as never);
+
+      assert.equal(result.ok, false, malformedConstraint.name);
+      assert.equal(result.blockers[0]?.code, malformedConstraint.code, malformedConstraint.name);
+    }, malformedConstraint.name);
+  }
+});
+
 test('B1 stake rounding blocks malformed direct bigint inputs without throwing', () => {
   const missingRawStake = roundUpB1StakeMinor(undefined as never, 5n);
   assert.equal(missingRawStake.ok, false);

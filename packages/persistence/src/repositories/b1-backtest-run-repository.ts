@@ -83,6 +83,16 @@ export interface SurebetB1SimulationResultRecord {
   readonly insertedAt: string;
 }
 
+export interface SurebetB1SimulationResultInsertValue {
+  readonly simulationKind: SurebetB1SimulationResultRecord['simulationKind'];
+  readonly status: SurebetB1SimulationResultRecord['status'];
+  readonly result: unknown;
+  readonly blockers: unknown;
+  readonly falsePositive?: boolean;
+  readonly residualExposureMinor?: bigint;
+  readonly settledNetMinor?: bigint;
+}
+
 interface RawB1BacktestRunRow extends Omit<SurebetB1BacktestRunRecord, 'upstreamCheckpointId'> {
   readonly upstreamCheckpointId: string | null;
 }
@@ -380,46 +390,19 @@ VALUES (
   }
 
   private createSimulationResults(runId: string, candidate: B1CrossVenueBacktestCandidateResult): void {
-    if (!candidate.ok) {
-      this.insertSimulationResult(runId, candidate.candidateId, 'false_positive', 'blocked', candidate, candidate.blockers);
-      return;
+    for (const result of buildSurebetB1SimulationResultInsertValues(candidate)) {
+      this.insertSimulationResult(
+        runId,
+        candidate.candidateId,
+        result.simulationKind,
+        result.status,
+        result.result,
+        result.blockers,
+        result.falsePositive,
+        result.residualExposureMinor,
+        result.settledNetMinor,
+      );
     }
-    this.insertSimulationResult(
-      runId,
-      candidate.candidateId,
-      'fill_rejection_timeout',
-      'accepted',
-      candidate.fillabilitySimulation,
-      [],
-    );
-    this.insertSimulationResult(
-      runId,
-      candidate.candidateId,
-      'residual_exposure',
-      'accepted',
-      candidate.fillabilitySimulation,
-      [],
-    );
-    this.insertSimulationResult(
-      runId,
-      candidate.candidateId,
-      'settlement_replay',
-      'accepted',
-      candidate.settlementReplay,
-      [],
-      candidate.settlementReplay.falsePositive,
-      candidate.fillabilitySimulation.residualExposure?.worstCaseNetMinor,
-      candidate.settlementReplay.settledNetMinor,
-    );
-    this.insertSimulationResult(
-      runId,
-      candidate.candidateId,
-      'false_positive',
-      'accepted',
-      { falsePositive: candidate.settlementReplay.falsePositive },
-      [],
-      candidate.settlementReplay.falsePositive,
-    );
   }
 
   private insertSimulationResult(
@@ -463,6 +446,68 @@ VALUES (
 `,
     );
   }
+}
+
+export function buildSurebetB1SimulationResultInsertValues(
+  candidate: B1CrossVenueBacktestCandidateResult,
+): readonly SurebetB1SimulationResultInsertValue[] {
+  if (!candidate.ok) {
+    return Object.freeze([
+      Object.freeze({
+        simulationKind: 'false_positive',
+        status: 'blocked',
+        result: candidate,
+        blockers: candidate.blockers,
+      }),
+    ]);
+  }
+
+  const residualExposure = candidate.fillabilitySimulation.residualExposure;
+  if (residualExposure === undefined && candidate.fillabilitySimulation.groupState === 'group_incomplete') {
+    throw new SurebetPersistenceError(
+      'SUREBET_B1_RESIDUAL_EXPOSURE_MISSING',
+      'B1 persistence requires residual exposure evidence for incomplete accepted candidates.',
+    );
+  }
+  const residualResult: SurebetB1SimulationResultInsertValue = residualExposure === undefined
+    ? Object.freeze({
+      simulationKind: 'residual_exposure',
+      status: 'accepted',
+      result: null,
+      blockers: Object.freeze([]),
+    })
+    : Object.freeze({
+      simulationKind: 'residual_exposure',
+      status: 'accepted',
+      result: residualExposure,
+      blockers: Object.freeze([]),
+      residualExposureMinor: residualExposure.worstCaseNetMinor,
+    });
+
+  return Object.freeze([
+    Object.freeze({
+      simulationKind: 'fill_rejection_timeout',
+      status: 'accepted',
+      result: candidate.fillabilitySimulation,
+      blockers: Object.freeze([]),
+    }),
+    residualResult,
+    Object.freeze({
+      simulationKind: 'settlement_replay',
+      status: 'accepted',
+      result: candidate.settlementReplay,
+      blockers: Object.freeze([]),
+      falsePositive: candidate.settlementReplay.falsePositive,
+      settledNetMinor: candidate.settlementReplay.settledNetMinor,
+    }),
+    Object.freeze({
+      simulationKind: 'false_positive',
+      status: 'accepted',
+      result: Object.freeze({ falsePositive: candidate.settlementReplay.falsePositive }),
+      blockers: Object.freeze([]),
+      falsePositive: candidate.settlementReplay.falsePositive,
+    }),
+  ]);
 }
 
 function validateCreateRecord(record: SurebetB1BacktestRunCreateRecord): void {

@@ -375,7 +375,7 @@ automation_temp_inode_recover_stale() {
   _automation_temp_require_uint min_age "$min_age" 0 2592000 || return
   scan_file="$AUTOMATION_TEMP_BASE/.session-scan.$$.$RANDOM"
   if timeout --signal=TERM --kill-after=2s "${AUTOMATION_TEMP_USAGE_SCAN_TIMEOUT_SECONDS}s" \
-    find "$AUTOMATION_TEMP_SESSIONS_ROOT" -mindepth 1 -maxdepth 1 -type d -name "${_AUTOMATION_TEMP_SESSION_PREFIX}*" -print0 > "$scan_file"; then
+    find -P "$AUTOMATION_TEMP_SESSIONS_ROOT" -mindepth 1 -maxdepth 1 -name "${_AUTOMATION_TEMP_SESSION_PREFIX}*" -print0 > "$scan_file"; then
     rc=0
   else
     rc=$?

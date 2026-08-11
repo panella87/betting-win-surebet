@@ -70,6 +70,43 @@ test('resource record parser rejects incomplete rules fixtures before later mark
   ]);
 });
 
+test('resource record parser rejects whitespace-wrapped local identifiers', () => {
+  const identity = parseBettingWinResourceRecord({
+    recordType: 'identity',
+    canonicalEventId: 'event-001',
+    canonicalMarketId: 'market-001',
+    providerMarketId: 'provider-market-001',
+    providerGeneration: ' generation-001 ',
+  });
+  assert.equal(identity.ok, false);
+  assert.equal(identity.blockers[0]?.code, 'IDENTITY_RECORD_PROVIDER_GENERATION_MISSING');
+
+  const rules = parseBettingWinResourceRecord({
+    recordType: 'rules',
+    canonicalMarketId: 'market-001',
+    ruleProfileId: ' rules-001 ',
+    resultSourceId: 'result-source-001',
+    finalityPolicyId: 'finality-001',
+  });
+  assert.equal(rules.ok, false);
+  assert.equal(rules.blockers[0]?.code, 'RULE_RECORD_PROFILE_ID_MISSING');
+
+  const settlement = parseBettingWinResourceRecord({
+    recordType: 'settlement',
+    canonicalMarketId: 'market-001',
+    ruleProfileId: 'rules-001',
+    resultSourceId: 'result-source-001',
+    finalityPolicyId: ' finality-001 ',
+    finalityAuthorityId: 'authority-001',
+    replayManifestHash: 'c'.repeat(64),
+    replayAcceptedAt: '2026-07-01T00:05:00.000Z',
+    acceptanceStatus: 'accepted',
+    finalOutcome: 'yes',
+  });
+  assert.equal(settlement.ok, false);
+  assert.equal(settlement.blockers[0]?.code, 'SETTLEMENT_RECORD_FINALITY_POLICY_ID_MISSING');
+});
+
 test('resource record parser rejects invalid quote manifest hashes and minor-unit values', () => {
   const badManifest = parseBettingWinResourceRecord({
     recordType: 'quotes',
@@ -118,6 +155,23 @@ test('resource record parser rejects invalid quote manifest hashes and minor-uni
       evidenceRequired: 'Local quote price minor units.',
     },
   ]);
+
+  const uppercaseManifest = parseBettingWinResourceRecord({
+    recordType: 'quotes',
+    canonicalMarketId: 'market-001',
+    outcome: 'yes',
+    quoteSourceManifestHash: 'B'.repeat(64),
+    evidenceId: 'quote-001',
+    observedAt: '2026-07-01T00:00:01.000Z',
+    priceMinor: '510000',
+    availableSizeMinor: '1200000',
+    minStakeMinor: '1000',
+    feeMinor: '25',
+    costMinor: '0',
+    currency: 'USDC',
+  });
+  assert.equal(uppercaseManifest.ok, false);
+  assert.equal(uppercaseManifest.blockers[0]?.code, 'QUOTE_RECORD_MANIFEST_HASH_INVALID');
 });
 
 test('resource record parser rejects settlement fixtures without accepted replay authority and final outcome', () => {

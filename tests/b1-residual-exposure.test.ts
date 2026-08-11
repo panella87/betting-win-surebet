@@ -67,6 +67,62 @@ test('B1 residual exposure analysis fails closed on missing leg snapshots', () =
   ]);
 });
 
+test('B1 residual exposure analysis fails closed on malformed leg evidence without throwing', () => {
+  for (const malformedLeg of [
+    null,
+    Object.freeze({
+      legId: 'b1_leg:event-001:moneyline:away:venue-b',
+      selectionEquivalenceKey: 'event-001:moneyline:away',
+      venueOrBookmakerId: 'venue-b',
+      plannedStakeMinor: 10_000n,
+      liveFilledStakeMinor: 5_000,
+    }),
+  ]) {
+    const result = analyzeB1ResidualExposure(twoWayMatrix(), Object.freeze([
+      malformedLeg,
+      Object.freeze({
+        legId: 'b1_leg:event-001:moneyline:home:venue-a',
+        selectionEquivalenceKey: 'event-001:moneyline:home',
+        venueOrBookmakerId: 'venue-a',
+        plannedStakeMinor: 10_000n,
+        liveFilledStakeMinor: 0n,
+      }),
+    ]) as never, 5_000n);
+
+    assert.equal(result.ok, false);
+    assert.equal(result.blockers.length, 1);
+    assert.match(result.blockers[0]?.code ?? '', /^B1_RESIDUAL_EXPOSURE_(LEG|STAKE)_INVALID$/);
+  }
+});
+
+test('B1 residual exposure analysis fails closed on fractional partial payout scaling', () => {
+  const result = analyzeB1ResidualExposure(fractionalPartialPayoutMatrix(), Object.freeze([
+    Object.freeze({
+      legId: 'b1_leg:event-001:moneyline:away:venue-b',
+      selectionEquivalenceKey: 'event-001:moneyline:away',
+      venueOrBookmakerId: 'venue-b',
+      plannedStakeMinor: 10_000n,
+      liveFilledStakeMinor: 5_000n,
+    }),
+    Object.freeze({
+      legId: 'b1_leg:event-001:moneyline:home:venue-a',
+      selectionEquivalenceKey: 'event-001:moneyline:home',
+      venueOrBookmakerId: 'venue-a',
+      plannedStakeMinor: 10_000n,
+      liveFilledStakeMinor: 0n,
+    }),
+  ]), 5_000n);
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'B1_RESIDUAL_EXPOSURE_PAYOUT_SCALING_FRACTIONAL',
+      message: 'B1 residual exposure simulation requires partial payout scaling to resolve to integer minor units.',
+      evidenceRequired: 'B1 scenario cash-flow payout scaling with no fractional minor-unit remainder.',
+    },
+  ]);
+});
+
 test('B1 residual exposure analysis is not reached for malformed scenario winner matrices', () => {
   const result = analyzeB1ResidualExposure(malformedWinnerMatrix(), Object.freeze([
     Object.freeze({
@@ -91,6 +147,34 @@ test('B1 residual exposure analysis is not reached for malformed scenario winner
       code: 'B1_SCENARIO_CASHFLOW_WINNER_INVALID',
       message: 'B1 scenario cash-flow validation requires the positive payout row to match the declared winner.',
       evidenceRequired: 'One winning B1 terminal outcome per scenario.',
+    },
+  ]);
+});
+
+test('B1 residual exposure analysis is not reached for scenario leg-key venue drift', () => {
+  const result = analyzeB1ResidualExposure(venueDriftMatrix(), Object.freeze([
+    Object.freeze({
+      legId: 'b1_leg:event-001:moneyline:away:venue-b',
+      selectionEquivalenceKey: 'event-001:moneyline:away',
+      venueOrBookmakerId: 'venue-b',
+      plannedStakeMinor: 10_000n,
+      liveFilledStakeMinor: 5_000n,
+    }),
+    Object.freeze({
+      legId: 'b1_leg:event-001:moneyline:home:venue-a',
+      selectionEquivalenceKey: 'event-001:moneyline:home',
+      venueOrBookmakerId: 'venue-a',
+      plannedStakeMinor: 10_000n,
+      liveFilledStakeMinor: 0n,
+    }),
+  ]), 5_000n);
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'B1_SCENARIO_CASHFLOW_LEG_KEY_DRIFT',
+      message: 'B1 scenario cash-flow validation requires each selection to keep one stable venue across terminal scenarios.',
+      evidenceRequired: 'Stable B1 scenario-by-leg-key coverage keyed by selection_equivalence_key and venue_or_bookmaker_id.',
     },
   ]);
 });
@@ -226,5 +310,56 @@ function malformedWinnerMatrix() {
         payoutMinor: 0n,
       }),
     ]),
+  });
+}
+
+function venueDriftMatrix() {
+  return Object.freeze({
+    rows: Object.freeze([
+      Object.freeze({
+        scenarioId: 'b1_terminal:event-001:moneyline:away',
+        winningSelectionEquivalenceKey: 'event-001:moneyline:away',
+        selectionEquivalenceKey: 'event-001:moneyline:away',
+        venueOrBookmakerId: 'venue-b',
+        stakeMinor: 10_000n,
+        payoutMinor: 21_000n,
+      }),
+      Object.freeze({
+        scenarioId: 'b1_terminal:event-001:moneyline:away',
+        winningSelectionEquivalenceKey: 'event-001:moneyline:away',
+        selectionEquivalenceKey: 'event-001:moneyline:home',
+        venueOrBookmakerId: 'venue-a',
+        stakeMinor: 10_000n,
+        payoutMinor: 0n,
+      }),
+      Object.freeze({
+        scenarioId: 'b1_terminal:event-001:moneyline:home',
+        winningSelectionEquivalenceKey: 'event-001:moneyline:home',
+        selectionEquivalenceKey: 'event-001:moneyline:away',
+        venueOrBookmakerId: 'venue-x',
+        stakeMinor: 10_000n,
+        payoutMinor: 0n,
+      }),
+      Object.freeze({
+        scenarioId: 'b1_terminal:event-001:moneyline:home',
+        winningSelectionEquivalenceKey: 'event-001:moneyline:home',
+        selectionEquivalenceKey: 'event-001:moneyline:home',
+        venueOrBookmakerId: 'venue-a',
+        stakeMinor: 10_000n,
+        payoutMinor: 21_000n,
+      }),
+    ]),
+  });
+}
+
+function fractionalPartialPayoutMatrix() {
+  return Object.freeze({
+    rows: Object.freeze(twoWayMatrix().rows.map((row) => Object.freeze({
+      ...row,
+      payoutMinor: row.scenarioId === 'b1_terminal:event-001:moneyline:away'
+        && row.selectionEquivalenceKey === 'event-001:moneyline:away'
+        ? 21_001n
+        : row.payoutMinor,
+    }))),
   });
 }

@@ -16,7 +16,7 @@ const REPO_ROOT = process.cwd();
 test('local paper batch report writes one private report per bundle plus a deterministic batch summary', () => {
   const bundleDir = createBundleDirectory('batch-success', [
     {
-      fileName: 'b-solver-ready.json',
+      fileName: 'b-solver-candidate.json',
       sourcePath: 'tests/fixtures/local-only-export-bundles/solver-ready-resource-export.json',
     },
     {
@@ -37,7 +37,7 @@ test('local paper batch report writes one private report per bundle plus a deter
     assert.equal(result.value.outputPath, summaryOutputPath);
     assert.deepEqual(result.value.reportPaths.map((reportPath) => relative(REPO_ROOT, reportPath)), [
       relative(REPO_ROOT, join(dirname(summaryOutputPath), 'a-blocked.report.json')),
-      relative(REPO_ROOT, join(dirname(summaryOutputPath), 'b-solver-ready.report.json')),
+      relative(REPO_ROOT, join(dirname(summaryOutputPath), 'b-solver-candidate.report.json')),
     ]);
 
     const summary = JSON.parse(readFileSync(summaryOutputPath, 'utf-8')) as {
@@ -74,8 +74,8 @@ test('local paper batch report writes one private report per bundle plus a deter
         blockerCount: 1,
       },
       {
-        bundlePath: relative(REPO_ROOT, join(bundleDir, 'b-solver-ready.json')),
-        reportPath: relative(REPO_ROOT, join(dirname(summaryOutputPath), 'b-solver-ready.report.json')),
+        bundlePath: relative(REPO_ROOT, join(bundleDir, 'b-solver-candidate.json')),
+        reportPath: relative(REPO_ROOT, join(dirname(summaryOutputPath), 'b-solver-candidate.report.json')),
         candidateCount: 1,
         blockerCount: 0,
       },
@@ -121,7 +121,7 @@ test('local paper batch report rejects remote batch paths', () => {
 test('local paper batch report rejects summary outputs outside repo-local artifacts', () => {
   const bundleDir = createBundleDirectory('batch-output-outside-artifacts', [
     {
-      fileName: 'solver-ready.json',
+      fileName: 'solver-candidate.json',
       sourcePath: 'tests/fixtures/local-only-export-bundles/solver-ready-resource-export.json',
     },
   ]);
@@ -149,7 +149,7 @@ test('local paper batch report rejects summary outputs outside repo-local artifa
 test('local paper batch report rejects artifact output symlink escapes', () => {
   const bundleDir = createBundleDirectory('batch-output-symlink', [
     {
-      fileName: 'solver-ready.json',
+      fileName: 'solver-candidate.json',
       sourcePath: 'tests/fixtures/local-only-export-bundles/solver-ready-resource-export.json',
     },
   ]);
@@ -176,7 +176,7 @@ test('local paper batch report rejects artifact output symlink escapes', () => {
 
 
 test('local paper batch report rejects nested artifact output symlink escapes before creating outside directories', () => {
-  const bundleDir = createBundleDirectory('batch-output-nested-symlink', [{ fileName: 'solver-ready.json', sourcePath: 'tests/fixtures/local-only-export-bundles/solver-ready-resource-export.json' }]);
+  const bundleDir = createBundleDirectory('batch-output-nested-symlink', [{ fileName: 'solver-candidate.json', sourcePath: 'tests/fixtures/local-only-export-bundles/solver-ready-resource-export.json' }]);
   mkdirSync(join(REPO_ROOT, 'artifacts'), { recursive: true });
   const outsideDir = mkdtempSync(join(tmpdir(), 'surebet-batch-output-nested-escape-'));
   const linkPath = join(REPO_ROOT, 'artifacts', `batch-nested-symlink-output-${Date.now()}`);
@@ -191,7 +191,7 @@ test('local paper batch report rejects nested artifact output symlink escapes be
 
 
 test('local paper batch report rejects dangling summary output symlinks before writing outside artifacts', () => {
-  const bundleDir = createBundleDirectory('batch-output-dangling-symlink', [{ fileName: 'solver-ready.json', sourcePath: 'tests/fixtures/local-only-export-bundles/solver-ready-resource-export.json' }]);
+  const bundleDir = createBundleDirectory('batch-output-dangling-symlink', [{ fileName: 'solver-candidate.json', sourcePath: 'tests/fixtures/local-only-export-bundles/solver-ready-resource-export.json' }]);
   const summaryOutputPath = createArtifactOutputPath('dangling-batch-summary');
   const outsideFile = join(tmpdir(), `surebet-dangling-batch-${Date.now()}.json`);
   mkdirSync(dirname(summaryOutputPath), { recursive: true });
@@ -207,12 +207,12 @@ test('local paper batch report rejects dangling summary output symlinks before w
 test('local paper batch report rejects summary paths that collide with derived report paths', () => {
   const bundleDir = createBundleDirectory('batch-summary-report-collision', [
     {
-      fileName: 'solver-ready.json',
+      fileName: 'solver-candidate.json',
       sourcePath: 'tests/fixtures/local-only-export-bundles/solver-ready-resource-export.json',
     },
   ]);
   const summaryOutputPath = createArtifactOutputPath('batch-summary-report-collision');
-  const collidingSummaryOutputPath = join(dirname(summaryOutputPath), 'solver-ready.report.json');
+  const collidingSummaryOutputPath = join(dirname(summaryOutputPath), 'solver-candidate.report.json');
 
   try {
     const result = writeLocalPaperBatchReport({
@@ -239,7 +239,7 @@ test('local paper batch report rejects summary paths that collide with derived r
 test('local paper batch report preflights every derived report path before writing any report', () => {
   const bundleDir = createBundleDirectory('batch-report-preflight', [
     {
-      fileName: 'a-solver-ready.json',
+      fileName: 'a-solver-candidate.json',
       sourcePath: 'tests/fixtures/local-only-export-bundles/solver-ready-resource-export.json',
     },
     {
@@ -262,7 +262,7 @@ test('local paper batch report preflights every derived report path before writi
     assert.equal(result.ok, false);
     assert.equal(result.blockers[0]?.code, 'LOCAL_REPORT_BATCH_OUTPUT_SYMLINK_FORBIDDEN');
     assert.equal(existsSync(summaryOutputPath), false);
-    assert.equal(existsSync(join(dirname(summaryOutputPath), 'a-solver-ready.report.json')), false);
+    assert.equal(existsSync(join(dirname(summaryOutputPath), 'a-solver-candidate.report.json')), false);
     assert.equal(existsSync(outsideFile), false);
   } finally {
     rmSync(bundleDir, { recursive: true, force: true });
@@ -302,10 +302,51 @@ test('local paper batch report fails closed before writing outputs when a pinned
   }
 });
 
+test('local paper batch report validates all private reports before writing any batch artifacts', () => {
+  const bundleDir = createBundleDirectory('batch-private-report-failure', [
+    {
+      fileName: 'a-candidate.json',
+      sourcePath: 'tests/fixtures/local-only-export-bundles/solver-ready-resource-export.json',
+    },
+    {
+      fileName: 'b-invalid-private-report.json',
+      sourcePath: 'tests/fixtures/local-only-export-bundles/solver-ready-resource-export.json',
+      mutate: (source) => ({
+        ...source,
+        records: source.records.map((record) => (
+          typeof record.canonicalMarketId === 'string'
+            ? { ...record, canonicalMarketId: `${record.canonicalMarketId}-profitable` }
+            : record
+        )),
+      }),
+    },
+  ]);
+  const summaryOutputPath = createArtifactOutputPath('batch-private-report-failure-summary');
+  const firstReportPath = join(dirname(summaryOutputPath), 'a-candidate.report.json');
+  const secondReportPath = join(dirname(summaryOutputPath), 'b-invalid-private-report.report.json');
+
+  try {
+    const result = writeLocalPaperBatchReport({
+      bundleDirectoryPath: relative(REPO_ROOT, bundleDir),
+      outputPath: relative(REPO_ROOT, summaryOutputPath),
+      repoRoot: REPO_ROOT,
+    });
+
+    assert.equal(result.ok, false);
+    assert.equal(result.blockers[0]?.code, 'BATCH_BUNDLE_b-invalid-private-report.json_PRIVATE_RUN_REPORT_FORBIDDEN_LANGUAGE');
+    assert.equal(readArtifactPresence(firstReportPath), false);
+    assert.equal(readArtifactPresence(secondReportPath), false);
+    assert.equal(readArtifactPresence(summaryOutputPath), false);
+  } finally {
+    rmSync(bundleDir, { recursive: true, force: true });
+    rmSync(dirname(summaryOutputPath), { recursive: true, force: true });
+  }
+});
+
 test('local paper batch report cli prints the batch summary path on success', () => {
   const bundleDir = createBundleDirectory('batch-cli-success', [
     {
-      fileName: 'solver-ready.json',
+      fileName: 'solver-candidate.json',
       sourcePath: 'tests/fixtures/local-only-export-bundles/solver-ready-resource-export.json',
     },
   ]);
@@ -342,7 +383,7 @@ test('local paper batch report cli prints the batch summary path on success', ()
 test('built dist local paper batch report entrypoint writes the batch summary path on success', () => {
   const bundleDir = createBundleDirectory('dist-batch-cli-success', [
     {
-      fileName: 'solver-ready.json',
+      fileName: 'solver-candidate.json',
       sourcePath: 'tests/fixtures/local-only-export-bundles/solver-ready-resource-export.json',
     },
   ]);
@@ -400,6 +441,262 @@ test('private paper batch summary validator rejects mismatched blocker frequenci
   ]);
 });
 
+test('private paper batch summary validator rejects non-object roots without throwing', () => {
+  for (const value of [null, undefined, [], 'private_paper_batch_summary']) {
+    const result = validatePrivatePaperBatchSummary(value);
+
+    assert.equal(result.ok, false);
+    assert.deepEqual(result.blockers, [
+      {
+        code: 'PRIVATE_BATCH_SUMMARY_SHAPE_INVALID',
+        message: 'Private paper-mode batch summaries must be serialized objects with the supported batch summary shape.',
+        evidenceRequired: 'Serialized private paper-mode batch summary object.',
+      },
+    ]);
+  }
+});
+
+test('private paper batch summary validator rejects invalid count domains', () => {
+  const summary = createPrivatePaperBatchSummary('local-batch-test', [
+    {
+      bundlePath: 'artifacts/private-paper-mode/input-a.json',
+      reportPath: 'artifacts/private-paper-mode/input-a.report.json',
+      candidateCount: 1,
+      blockerCount: 1,
+      blockerCodes: ['COMPLETE_SET_INCOMPLETE'],
+    },
+  ]);
+  const bundle = summary.bundles[0];
+  if (bundle === undefined) {
+    throw new Error('Expected fixture batch summary to contain one bundle.');
+  }
+
+  const invalidSummaries = [
+    { ...summary, bundleCount: -1 },
+    { ...summary, reportCount: 1.5 },
+    { ...summary, totalCandidateCount: Number.POSITIVE_INFINITY },
+    { ...summary, totalBlockerCount: -1 },
+    { ...summary, bundles: [{ ...bundle, candidateCount: 0.5 }] },
+    { ...summary, bundles: [{ ...bundle, blockerCount: -1 }] },
+  ];
+
+  for (const invalidSummary of invalidSummaries) {
+    const result = validatePrivatePaperBatchSummary(invalidSummary);
+
+    assert.equal(result.ok, false);
+    assert.deepEqual(result.blockers, [
+      {
+        code: 'PRIVATE_BATCH_SUMMARY_COUNT_DOMAIN_INVALID',
+        message: 'Private paper-mode batch summaries must use finite non-negative integer counts.',
+        evidenceRequired: 'Serialized private paper-mode batch summary with finite non-negative integer count fields.',
+      },
+    ]);
+  }
+});
+
+test('private paper batch summary validator rejects forbidden retained path language', () => {
+  const summary = createPrivatePaperBatchSummary('local-batch-test', [
+    {
+      bundlePath: 'artifacts/private-paper-mode/input-a.json',
+      reportPath: 'artifacts/private-paper-mode/input-a.report.json',
+      candidateCount: 1,
+      blockerCount: 1,
+      blockerCodes: ['COMPLETE_SET_INCOMPLETE'],
+    },
+  ]);
+  const bundle = summary.bundles[0];
+  if (bundle === undefined) {
+    throw new Error('Expected fixture batch summary to contain one bundle.');
+  }
+
+  const result = validatePrivatePaperBatchSummary({
+    ...summary,
+    bundles: [
+      {
+        ...bundle,
+        bundlePath: 'artifacts/private-paper-mode/profitable-ready-signal.json',
+      },
+    ],
+  });
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'PRIVATE_BATCH_SUMMARY_FORBIDDEN_LANGUAGE',
+      message: 'Private paper-mode batch summaries must not contain public-signal, profitability, or execution-readiness language.',
+      evidenceRequired: 'Serialized private paper-mode batch summary without forbidden public/execution/profitability language.',
+    },
+  ]);
+});
+
+test('private paper batch summary validator rejects unsupported retained fields', () => {
+  const summary = createPrivatePaperBatchSummary('local-batch-test', [
+    {
+      bundlePath: 'artifacts/private-paper-mode/input-a.json',
+      reportPath: 'artifacts/private-paper-mode/input-a.report.json',
+      candidateCount: 1,
+      blockerCount: 1,
+      blockerCodes: ['COMPLETE_SET_INCOMPLETE'],
+    },
+  ]);
+  const bundle = summary.bundles[0];
+  const blockerFrequency = summary.blockerFrequencies[0];
+  if (bundle === undefined || blockerFrequency === undefined) {
+    throw new Error('Expected fixture batch summary to contain one bundle and one blocker frequency.');
+  }
+
+  assertPrivatePaperBatchSummaryBlockedWithCode(
+    {
+      ...summary,
+      liveReady: false,
+    },
+    'PRIVATE_BATCH_SUMMARY_UNSUPPORTED_FIELDS',
+  );
+  assertPrivatePaperBatchSummaryBlockedWithCode(
+    {
+      ...summary,
+      bundles: [
+        {
+          ...bundle,
+          executionEnabled: false,
+        },
+      ],
+    },
+    'PRIVATE_BATCH_SUMMARY_BUNDLE_UNSUPPORTED_FIELDS',
+  );
+  assertPrivatePaperBatchSummaryBlockedWithCode(
+    {
+      ...summary,
+      blockerFrequencies: [
+        {
+          ...blockerFrequency,
+          profitMinor: 0,
+        },
+      ],
+    },
+    'PRIVATE_BATCH_SUMMARY_FREQUENCY_UNSUPPORTED_FIELDS',
+  );
+});
+
+test('private paper batch summary validator rejects non-repo-local retained paths', () => {
+  const summary = createPrivatePaperBatchSummary('local-batch-test', [
+    {
+      bundlePath: 'artifacts/private-paper-mode/input-a.json',
+      reportPath: 'artifacts/private-paper-mode/input-a.report.json',
+      candidateCount: 1,
+      blockerCount: 0,
+    },
+  ]);
+  const bundle = summary.bundles[0];
+  if (bundle === undefined) {
+    throw new Error('Expected fixture batch summary to contain one bundle.');
+  }
+
+  assert.equal(validatePrivatePaperBatchSummary(summary).ok, true);
+
+  for (const pathOverride of [
+    { bundlePath: '/tmp/input-a.json' },
+    { bundlePath: '../input-a.json' },
+    { bundlePath: 'artifacts/private-paper-mode/../input-a.json' },
+    { reportPath: 'https://example.invalid/input-a.report.json' },
+    { reportPath: '.' },
+    { reportPath: './' },
+    { bundlePath: './artifacts/private-paper-mode/input-a.json' },
+  ]) {
+    assertPrivatePaperBatchSummaryBlockedWithCode(
+      {
+        ...summary,
+        bundles: [
+          {
+            ...bundle,
+            ...pathOverride,
+          },
+        ],
+      },
+      'PRIVATE_BATCH_SUMMARY_PATHS_INVALID',
+    );
+  }
+});
+
+test('private paper batch summary validator rejects duplicate bundle and report identities', () => {
+  const summary = createPrivatePaperBatchSummary('local-batch-test', [
+    {
+      bundlePath: 'artifacts/private-paper-mode/input-a.json',
+      reportPath: 'artifacts/private-paper-mode/input-a.report.json',
+      candidateCount: 1,
+      blockerCount: 0,
+    },
+    {
+      bundlePath: 'artifacts/private-paper-mode/input-b.json',
+      reportPath: 'artifacts/private-paper-mode/input-b.report.json',
+      candidateCount: 1,
+      blockerCount: 0,
+    },
+  ]);
+  const firstBundle = summary.bundles[0];
+  const secondBundle = summary.bundles[1];
+  if (firstBundle === undefined || secondBundle === undefined) {
+    throw new Error('Expected fixture batch summary to contain two bundles.');
+  }
+
+  assertPrivatePaperBatchSummaryBlockedWithCode(
+    {
+      ...summary,
+      bundles: [
+        firstBundle,
+        {
+          ...secondBundle,
+          bundlePath: firstBundle.bundlePath,
+        },
+      ],
+    },
+    'PRIVATE_BATCH_SUMMARY_BUNDLE_IDENTITY_DUPLICATE',
+  );
+  assertPrivatePaperBatchSummaryBlockedWithCode(
+    {
+      ...summary,
+      bundles: [
+        firstBundle,
+        {
+          ...secondBundle,
+          reportPath: firstBundle.reportPath,
+        },
+      ],
+    },
+    'PRIVATE_BATCH_SUMMARY_BUNDLE_IDENTITY_DUPLICATE',
+  );
+});
+
+test('private paper batch summary validator rejects non-canonical bundle order', () => {
+  const summary = createPrivatePaperBatchSummary('local-batch-test', [
+    {
+      bundlePath: 'artifacts/private-paper-mode/input-a.json',
+      reportPath: 'artifacts/private-paper-mode/input-a.report.json',
+      candidateCount: 1,
+      blockerCount: 0,
+    },
+    {
+      bundlePath: 'artifacts/private-paper-mode/input-b.json',
+      reportPath: 'artifacts/private-paper-mode/input-b.report.json',
+      candidateCount: 1,
+      blockerCount: 0,
+    },
+  ]);
+  const firstBundle = summary.bundles[0];
+  const secondBundle = summary.bundles[1];
+  if (firstBundle === undefined || secondBundle === undefined) {
+    throw new Error('Expected fixture batch summary to contain two bundles.');
+  }
+
+  assertPrivatePaperBatchSummaryBlockedWithCode(
+    {
+      ...summary,
+      bundles: [secondBundle, firstBundle],
+    },
+    'PRIVATE_BATCH_SUMMARY_BUNDLE_ORDER_INVALID',
+  );
+});
+
 function createBundleDirectory(
   prefix: string,
   bundles: Array<{
@@ -434,6 +731,15 @@ function readArtifactPresence(path: string): boolean {
   } catch {
     return false;
   }
+}
+
+function assertPrivatePaperBatchSummaryBlockedWithCode(summary: unknown, code: string): void {
+  const validation = validatePrivatePaperBatchSummary(summary);
+  assert.equal(validation.ok, false);
+  if (validation.ok) {
+    throw new Error(`Expected private paper batch summary validation blocker ${code}.`);
+  }
+  assert.equal(validation.blockers[0]?.code, code);
 }
 
 function createWriteStream(write: (chunk: string) => void): NodeJS.WriteStream {

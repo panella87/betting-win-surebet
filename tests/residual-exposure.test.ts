@@ -56,6 +56,66 @@ test('residual exposure analysis rejects group states outside incomplete local p
   ]);
 });
 
+test('residual exposure analysis rejects forged incomplete aggregate state with all-filled legs', () => {
+  const completion = createCompletionSnapshot([
+    createLeg('market-001:yes', 'leg_filled', 0n, 100n, '2026-07-02T00:17:05.000Z'),
+    createLeg('market-001:no', 'leg_filled', 0n, 100n, '2026-07-02T00:17:05.000Z'),
+  ]);
+
+  const result = analyzeResidualExposure({
+    completion: Object.freeze({
+      ...completion,
+      groupState: 'group_incomplete',
+    }),
+    matrix: createScenarioMatrix([
+      { scenarioId: 'yes_wins', legId: 'market-001:yes', stakeMinor: 100n, payoutMinor: 215n, feeMinor: 5n, costMinor: 0n },
+      { scenarioId: 'yes_wins', legId: 'market-001:no', stakeMinor: 100n, payoutMinor: 0n, feeMinor: 5n, costMinor: 0n },
+      { scenarioId: 'no_wins', legId: 'market-001:yes', stakeMinor: 100n, payoutMinor: 0n, feeMinor: 5n, costMinor: 0n },
+      { scenarioId: 'no_wins', legId: 'market-001:no', stakeMinor: 100n, payoutMinor: 225n, feeMinor: 5n, costMinor: 0n },
+    ]),
+  });
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'RESIDUAL_EXPOSURE_COMPLETION_GROUP_STATE_MISMATCH',
+      message: 'Residual exposure analysis requires aggregate completion group state to match leg snapshots.',
+      evidenceRequired: 'Local paper completion groupState derived from completion leg snapshots.',
+    },
+  ]);
+});
+
+test('residual exposure analysis rejects duplicate completion leg snapshots', () => {
+  const completion = createCompletionSnapshot([
+    createLeg('market-001:yes', 'leg_filled', 0n, 100n, '2026-07-02T00:17:05.000Z'),
+    createLeg('market-001:no', 'leg_failed', 0n, 0n, '2026-07-02T00:17:05.000Z'),
+  ]);
+  const firstLeg = completion.legs[0];
+  assert.ok(firstLeg);
+
+  const result = analyzeResidualExposure({
+    completion: Object.freeze({
+      ...completion,
+      legs: Object.freeze([firstLeg, firstLeg, ...completion.legs.slice(1)]),
+    }),
+    matrix: createScenarioMatrix([
+      { scenarioId: 'yes_wins', legId: 'market-001:no', stakeMinor: 100n, payoutMinor: 0n, feeMinor: 5n, costMinor: 0n },
+      { scenarioId: 'yes_wins', legId: 'market-001:yes', stakeMinor: 100n, payoutMinor: 215n, feeMinor: 5n, costMinor: 0n },
+      { scenarioId: 'no_wins', legId: 'market-001:no', stakeMinor: 100n, payoutMinor: 225n, feeMinor: 5n, costMinor: 0n },
+      { scenarioId: 'no_wins', legId: 'market-001:yes', stakeMinor: 100n, payoutMinor: 0n, feeMinor: 5n, costMinor: 0n },
+    ]),
+  });
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'RESIDUAL_EXPOSURE_DUPLICATE_COMPLETION_LEG',
+      message: 'Residual exposure analysis requires exactly one completion snapshot per incomplete group leg id.',
+      evidenceRequired: 'Unique incomplete local paper completion leg ids.',
+    },
+  ]);
+});
+
 test('residual exposure analysis rejects incomplete groups with unsupported leg states', () => {
   const completion = createCompletionSnapshot([
     createLeg('market-001:yes', 'leg_filled', 0n, 100n, '2026-07-02T00:17:05.000Z'),
@@ -80,6 +140,49 @@ test('residual exposure analysis rejects incomplete groups with unsupported leg 
       evidenceRequired: 'Incomplete local paper completion snapshots limited to filled, failed, and stale legs.',
     },
   ]);
+});
+
+test('residual exposure analysis rejects forged residual leg state and stake shapes before arithmetic', () => {
+  const completion = createCompletionSnapshot([
+    createLeg('market-001:yes', 'leg_filled', 0n, 100n, '2026-07-02T00:17:05.000Z'),
+    createLeg('market-001:no', 'leg_failed', 0n, 0n, '2026-07-02T00:17:05.000Z'),
+  ]);
+  const yesLeg = completion.legs[0];
+  const noLeg = completion.legs[1];
+  assert.ok(yesLeg);
+  assert.ok(noLeg);
+
+  const matrix = createScenarioMatrix([
+    { scenarioId: 'yes_wins', legId: 'market-001:no', stakeMinor: 100n, payoutMinor: 0n, feeMinor: 5n, costMinor: 0n },
+    { scenarioId: 'yes_wins', legId: 'market-001:yes', stakeMinor: 100n, payoutMinor: 215n, feeMinor: 5n, costMinor: 0n },
+    { scenarioId: 'no_wins', legId: 'market-001:no', stakeMinor: 100n, payoutMinor: 225n, feeMinor: 5n, costMinor: 0n },
+    { scenarioId: 'no_wins', legId: 'market-001:yes', stakeMinor: 100n, payoutMinor: 0n, feeMinor: 5n, costMinor: 0n },
+  ]);
+
+  for (const forgedLeg of [
+    Object.freeze({ ...yesLeg, reservedStakeMinor: 1n }),
+    Object.freeze({ ...yesLeg, filledStakeMinor: 0n }),
+    Object.freeze({ ...noLeg, filledStakeMinor: 1n }),
+    Object.freeze({ ...noLeg, state: 'leg_stale' as const, reservedStakeMinor: 1n }),
+    Object.freeze({ ...yesLeg, filledStakeMinor: '100' }),
+  ]) {
+    const result = analyzeResidualExposure({
+      completion: Object.freeze({
+        ...completion,
+        legs: Object.freeze([forgedLeg, forgedLeg.legId === yesLeg.legId ? noLeg : yesLeg] as never),
+      }),
+      matrix,
+    });
+
+    assert.equal(result.ok, false);
+    assert.deepEqual(result.blockers, [
+      {
+        code: 'RESIDUAL_EXPOSURE_COMPLETION_SNAPSHOT_STATE_STAKE_MISMATCH',
+        message: 'Residual exposure analysis requires completion leg state to match stake evidence.',
+        evidenceRequired: 'State-aligned local paper completion leg stake evidence.',
+      },
+    ]);
+  }
 });
 
 test('residual exposure analysis rejects missing terminal scenario coverage', () => {

@@ -111,11 +111,15 @@ test('shared parent-lock helper claims a complete file atomically and exactly on
     const result = runBash(`
 . ${shellQuote(helper)}
 claim() {
+  boot_id="$(automation_v2_boot_id)"
+  start_ticks="$(automation_v2_process_start_ticks $$)"
   automation_v2_claim_env_file_atomic ${shellQuote(lockFile)} \\
     LOCK_SCHEMA_VERSION=1 CONTROLLER=dummy.sh CONTROLLER_PID=$$ REPOSITORY=test \\
+    CONTROLLER_BOOT_ID="$boot_id" CONTROLLER_START_TICKS="$start_ticks" \\
     REPO_REALPATH=${shellQuote(repo)} SCRIPT_REALPATH=${shellQuote(join(repo, 'dummy.sh'))} \\
     RUN_DIR= HEARTBEAT_SOURCE=file_mtime HEARTBEAT_EPOCH=1 HEARTBEAT_AT=now \\
-    ACTIVE_CHILD_PID= ACTIVE_CHILD_KIND=none ACTIVE_CHILD_SCRIPT= ACTIVE_CHILD_COMMAND=
+    ACTIVE_CHILD_PID= ACTIVE_CHILD_BOOT_ID= ACTIVE_CHILD_START_TICKS= \\
+    ACTIVE_CHILD_KIND=none ACTIVE_CHILD_SCRIPT= ACTIVE_CHILD_COMMAND=
 }
 ( if claim; then echo 0; else echo $?; fi ) > ${shellQuote(join(repo, 'a'))} &
 ( if claim; then echo 0; else echo $?; fi ) > ${shellQuote(join(repo, 'b'))} &
@@ -174,13 +178,17 @@ test('mtime heartbeat cannot erase newer active-child metadata', () => {
     const result = runBash(`
 . ${shellQuote(helper)}
 write_lock() {
+  boot_id="$(automation_v2_boot_id)"
+  start_ticks="$(automation_v2_process_start_ticks $$)"
   automation_v2_write_env_atomic ${shellQuote(lock)} \\
     LOCK_SCHEMA_VERSION=1 CONTROLLER=parent.sh CONTROLLER_PID=$$ REPOSITORY=test \\
+    CONTROLLER_BOOT_ID="$boot_id" CONTROLLER_START_TICKS="$start_ticks" \\
     REPO_REALPATH=${shellQuote(repo)} SCRIPT_REALPATH=${shellQuote(controller)} RUN_DIR= \\
     HEARTBEAT_SOURCE=file_mtime HEARTBEAT_EPOCH=1 HEARTBEAT_AT=now \\
-    ACTIVE_CHILD_PID="$1" ACTIVE_CHILD_KIND="$2" ACTIVE_CHILD_SCRIPT="$3" ACTIVE_CHILD_COMMAND="$4"
+    ACTIVE_CHILD_PID="$1" ACTIVE_CHILD_BOOT_ID="$5" ACTIVE_CHILD_START_TICKS="$6" \\
+    ACTIVE_CHILD_KIND="$2" ACTIVE_CHILD_SCRIPT="$3" ACTIVE_CHILD_COMMAND="$4"
 }
-write_lock '' none '' ''
+write_lock '' none '' '' '' ''
 (
   for _ in $(seq 1 30); do
     automation_v2_touch_owned_parent_lock ${shellQuote(lock)} parent.sh test ${shellQuote(repo)} ${shellQuote(controller)} $$ || exit 2
@@ -188,9 +196,11 @@ write_lock '' none '' ''
   done
 ) & hb=$!
 sleep 0.05
-write_lock 98765 implementation ${shellQuote(child)} 'bash child.sh'
+write_lock 98765 implementation ${shellQuote(child)} 'bash child.sh' "$(automation_v2_boot_id)" 1
 wait "$hb"
 grep -Fx 'ACTIVE_CHILD_PID=98765' ${shellQuote(lock)}
+grep -Fx "ACTIVE_CHILD_BOOT_ID=$(automation_v2_boot_id)" ${shellQuote(lock)}
+grep -Fx 'ACTIVE_CHILD_START_TICKS=1' ${shellQuote(lock)}
 grep -Fx 'ACTIVE_CHILD_KIND=implementation' ${shellQuote(lock)}
 grep -Fx 'ACTIVE_CHILD_SCRIPT=${child}' ${shellQuote(lock)}
 `);

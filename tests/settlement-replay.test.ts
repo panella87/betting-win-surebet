@@ -66,6 +66,19 @@ test('settlement replay consumption rejects missing finality authority and malfo
       evidenceRequired: 'Accepted local settlement replay manifest hash.',
     },
   ]);
+
+  const malformedAcceptedAt = consumeStandardBinarySettlementReplay(completeSet, {
+    ...settlementRecord,
+    replayAcceptedAt: 'not-an-iso-timestamp',
+  });
+  assert.equal(malformedAcceptedAt.ok, false);
+  assert.deepEqual(malformedAcceptedAt.blockers, [
+    {
+      code: 'SETTLEMENT_REPLAY_ACCEPTED_AT_INVALID',
+      message: 'Settlement replay consumption requires ISO-8601 UTC replay acceptance timestamps.',
+      evidenceRequired: 'Accepted local settlement replayAcceptedAt timestamp in ISO-8601 UTC form.',
+    },
+  ]);
 });
 
 test('settlement replay consumption rejects replay records that do not match the complete-set context', () => {
@@ -336,6 +349,258 @@ test('settlement replay reconciliation rejects incomplete groups without residua
   ]);
 });
 
+test('settlement replay reconciliation rejects forged aggregate group state before residual replay decisions', () => {
+  const fixture = createIncompleteReconciliationFixture();
+  const result = reconcileNonAtomicSettlementReplay({
+    completeSet: fixture.completeSet,
+    completionSimulation: {
+      completion: Object.freeze({
+        ...fixture.completionSimulation.completion,
+        groupState: 'group_complete',
+      }),
+    },
+    stakeVector: fixture.stakeVector,
+    matrix: fixture.input.matrix,
+    settlementRecords: [loadSettlementRecord()],
+  });
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'SETTLEMENT_REPLAY_COMPLETION_GROUP_STATE_MISMATCH',
+      message: 'Settlement replay reconciliation requires aggregate completion group state to match leg snapshots.',
+      evidenceRequired: 'Non-atomic completion groupState derived from completion leg snapshots.',
+    },
+  ]);
+});
+
+test('settlement replay reconciliation rejects non-boolean aggregate manualKill evidence', () => {
+  const fixture = createCompleteReconciliationFixture();
+  const result = reconcileNonAtomicSettlementReplay({
+    completeSet: fixture.completeSet,
+    completionSimulation: {
+      completion: Object.freeze({
+        ...fixture.completionSimulation.completion,
+        groupState: 'group_killed',
+        manualKill: 'yes',
+      } as never),
+    },
+    stakeVector: fixture.stakeVector,
+    matrix: fixture.input.matrix,
+    settlementRecords: [loadSettlementRecord()],
+  });
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'SETTLEMENT_REPLAY_COMPLETION_AGGREGATE_INVALID',
+      message: 'Settlement replay reconciliation requires completion manualKill to be an explicit boolean.',
+      evidenceRequired: 'Explicit boolean manualKill evidence for the non-atomic completion group.',
+    },
+  ]);
+});
+
+test('settlement replay reconciliation rejects malformed filled completion leg snapshots', () => {
+  const fixture = createCompleteReconciliationFixture();
+  const firstLeg = fixture.completionSimulation.completion.legs[0];
+  assert.ok(firstLeg);
+
+  const result = reconcileNonAtomicSettlementReplay({
+    completeSet: fixture.completeSet,
+    completionSimulation: {
+      completion: Object.freeze({
+        ...fixture.completionSimulation.completion,
+        legs: Object.freeze([
+          Object.freeze({
+            ...firstLeg,
+            liveFilledStakeMinor: 0n,
+          }),
+          ...fixture.completionSimulation.completion.legs.slice(1),
+        ]),
+      }),
+    },
+    stakeVector: fixture.stakeVector,
+    matrix: fixture.input.matrix,
+    settlementRecords: [loadSettlementRecord()],
+  });
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'SETTLEMENT_REPLAY_COMPLETION_SNAPSHOT_STATE_STAKE_MISMATCH',
+      message: 'Settlement replay reconciliation requires completion leg state to match stake evidence.',
+      evidenceRequired: 'State-aligned non-atomic completion leg stake evidence.',
+    },
+  ]);
+});
+
+test('settlement replay reconciliation rejects missing solved completion leg snapshots', () => {
+  const fixture = createCompleteReconciliationFixture();
+  const firstLeg = fixture.completionSimulation.completion.legs[0];
+  assert.ok(firstLeg);
+
+  const result = reconcileNonAtomicSettlementReplay({
+    completeSet: fixture.completeSet,
+    completionSimulation: {
+      completion: Object.freeze({
+        ...fixture.completionSimulation.completion,
+        legs: Object.freeze([firstLeg]),
+      }),
+    },
+    stakeVector: fixture.stakeVector,
+    matrix: fixture.input.matrix,
+    settlementRecords: [loadSettlementRecord()],
+  });
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'SETTLEMENT_REPLAY_COMPLETION_LEG_COVERAGE_MISMATCH',
+      message: 'Settlement replay reconciliation requires exactly one completion leg snapshot per solved stake-vector leg.',
+      evidenceRequired: 'Complete and unique completion leg snapshots aligned to solved stake-vector legs.',
+    },
+  ]);
+});
+
+test('settlement replay reconciliation rejects duplicate solved completion leg snapshots', () => {
+  const fixture = createCompleteReconciliationFixture();
+  const firstLeg = fixture.completionSimulation.completion.legs[0];
+  assert.ok(firstLeg);
+
+  const result = reconcileNonAtomicSettlementReplay({
+    completeSet: fixture.completeSet,
+    completionSimulation: {
+      completion: Object.freeze({
+        ...fixture.completionSimulation.completion,
+        legs: Object.freeze([firstLeg, firstLeg]),
+      }),
+    },
+    stakeVector: fixture.stakeVector,
+    matrix: fixture.input.matrix,
+    settlementRecords: [loadSettlementRecord()],
+  });
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'SETTLEMENT_REPLAY_COMPLETION_LEG_COVERAGE_MISMATCH',
+      message: 'Settlement replay reconciliation requires exactly one completion leg snapshot per solved stake-vector leg.',
+      evidenceRequired: 'Complete and unique completion leg snapshots aligned to solved stake-vector legs.',
+    },
+  ]);
+});
+
+test('settlement replay reconciliation rejects stale residual exposure leg classification', () => {
+  const fixture = createIncompleteReconciliationFixture();
+  const result = reconcileNonAtomicSettlementReplay({
+    completeSet: fixture.completeSet,
+    completionSimulation: {
+      completion: fixture.completionSimulation.completion,
+      residualExposure: Object.freeze({
+        ...fixture.residualExposure,
+        exposedLegIds: Object.freeze(['market-001:no']),
+        excludedLegIds: Object.freeze(['market-001:yes']),
+      }),
+    },
+    stakeVector: fixture.stakeVector,
+    matrix: fixture.input.matrix,
+    settlementRecords: [loadSettlementRecord()],
+  });
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'SETTLEMENT_REPLAY_RESIDUAL_EXPOSURE_STALE',
+      message: 'Settlement replay reconciliation requires residual exposure leg classification to match completion evidence.',
+      evidenceRequired: 'Fresh residual exposure exposed and excluded leg ids for the non-atomic completion simulation.',
+    },
+  ]);
+});
+
+test('settlement replay reconciliation rejects stale non-final residual scenario nets', () => {
+  const fixture = createIncompleteReconciliationFixture();
+  const result = reconcileNonAtomicSettlementReplay({
+    completeSet: fixture.completeSet,
+    completionSimulation: {
+      completion: fixture.completionSimulation.completion,
+      residualExposure: Object.freeze({
+        ...fixture.residualExposure,
+        scenarioNets: Object.freeze(fixture.residualExposure.scenarioNets.map((scenarioNet) =>
+          scenarioNet.scenarioId === 'no_wins'
+            ? Object.freeze({ ...scenarioNet, netMinor: 999n })
+            : scenarioNet,
+        )),
+      }),
+    },
+    stakeVector: fixture.stakeVector,
+    matrix: fixture.input.matrix,
+    settlementRecords: [loadSettlementRecord()],
+  });
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'SETTLEMENT_REPLAY_RECONCILIATION_MISMATCH',
+      message: 'Settlement replay reconciliation requires residual exposure scenario nets to match completion evidence.',
+      evidenceRequired: 'Fresh residual exposure scenario nets derived from the non-atomic completion simulation.',
+    },
+  ]);
+});
+
+test('settlement replay reconciliation rejects missing residual scenario coverage', () => {
+  const fixture = createIncompleteReconciliationFixture();
+  const result = reconcileNonAtomicSettlementReplay({
+    completeSet: fixture.completeSet,
+    completionSimulation: {
+      completion: fixture.completionSimulation.completion,
+      residualExposure: Object.freeze({
+        ...fixture.residualExposure,
+        scenarioNets: Object.freeze(fixture.residualExposure.scenarioNets.filter((scenarioNet) =>
+          scenarioNet.scenarioId === 'yes_wins')),
+      }),
+    },
+    stakeVector: fixture.stakeVector,
+    matrix: fixture.input.matrix,
+    settlementRecords: [loadSettlementRecord()],
+  });
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'SETTLEMENT_REPLAY_RESIDUAL_SCENARIO_MISSING',
+      message: 'Settlement replay reconciliation requires residual exposure coverage for every terminal scenario.',
+      evidenceRequired: 'Complete residual exposure scenario nets aligned to the scenario cash-flow matrix.',
+    },
+  ]);
+});
+
+test('settlement replay reconciliation rejects stale residual worst-case evidence', () => {
+  const fixture = createIncompleteReconciliationFixture();
+  const result = reconcileNonAtomicSettlementReplay({
+    completeSet: fixture.completeSet,
+    completionSimulation: {
+      completion: fixture.completionSimulation.completion,
+      residualExposure: Object.freeze({
+        ...fixture.residualExposure,
+        worstCaseNetMinor: 110n,
+        worstCaseScenarioId: 'yes_wins',
+      }),
+    },
+    stakeVector: fixture.stakeVector,
+    matrix: fixture.input.matrix,
+    settlementRecords: [loadSettlementRecord()],
+  });
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'SETTLEMENT_REPLAY_RESIDUAL_EXPOSURE_STALE',
+      message: 'Settlement replay reconciliation requires residual exposure worst-case evidence to match scenario nets.',
+      evidenceRequired: 'Fresh residual exposure worst-case scenario derived from residual scenario nets.',
+    },
+  ]);
+});
+
 test('settlement replay reconciliation accepts a solved quantum smaller than the scenario stake', () => {
   const completeSet = loadCompleteSet();
   const input = createSmallerQuantumSolvedInput();
@@ -410,6 +675,60 @@ function loadSettlementRecord(): BettingWinSettlementRecord {
   );
   assert.ok(settlementRecord);
   return settlementRecord;
+}
+
+function createIncompleteReconciliationFixture() {
+  const completeSet = loadCompleteSet();
+  const input = createTwoUnitSolvedInput();
+  const solved = solveStandardBinaryStakeVector(input);
+  assert.equal(solved.ok, true);
+
+  const completionSimulation = simulateNonAtomicPaperGroupCompletion({
+    stakeVector: solved.value,
+    matrix: input.matrix,
+    manualKill: false,
+    events: [
+      { legId: 'market-001:yes', type: 'reserve', stakeMinor: 200n, occurredAt: '2026-07-13T10:00:00.000Z' },
+      { legId: 'market-001:yes', type: 'fill', stakeMinor: 100n, occurredAt: '2026-07-13T10:00:01.000Z' },
+      { legId: 'market-001:yes', type: 'reject', occurredAt: '2026-07-13T10:00:02.000Z' },
+      { legId: 'market-001:no', type: 'expire', occurredAt: '2026-07-13T10:00:03.000Z' },
+    ],
+  });
+  assert.equal(completionSimulation.ok, true);
+  assert.ok(completionSimulation.value.residualExposure);
+
+  return {
+    completeSet,
+    input,
+    stakeVector: solved.value,
+    completionSimulation: completionSimulation.value,
+    residualExposure: completionSimulation.value.residualExposure,
+  };
+}
+
+function createCompleteReconciliationFixture() {
+  const completeSet = loadCompleteSet();
+  const input = createTwoUnitSolvedInput();
+  const solved = solveStandardBinaryStakeVector(input);
+  assert.equal(solved.ok, true);
+
+  const completionSimulation = simulateNonAtomicPaperGroupCompletion({
+    stakeVector: solved.value,
+    matrix: input.matrix,
+    manualKill: false,
+    events: [
+      { legId: 'market-001:yes', type: 'fill', stakeMinor: 200n, occurredAt: '2026-07-13T10:00:00.000Z' },
+      { legId: 'market-001:no', type: 'fill', stakeMinor: 200n, occurredAt: '2026-07-13T10:00:01.000Z' },
+    ],
+  });
+  assert.equal(completionSimulation.ok, true);
+
+  return {
+    completeSet,
+    input,
+    stakeVector: solved.value,
+    completionSimulation: completionSimulation.value,
+  };
 }
 
 function createTwoUnitSolvedInput(): StakeVectorInputContract {

@@ -290,7 +290,7 @@ function validateClientConfig(config: ReadOnlyQueryClientConfig): BoundaryResult
   }
   const localBwsApiPort = config.localBwsApiPort === undefined
     ? undefined
-    : validatePositiveInteger(config.localBwsApiPort, 'QUERY_LOCAL_BWS_API_PORT_INVALID', 'Read-only query local BWS API port must be a positive safe integer.');
+    : validateTcpPort(config.localBwsApiPort, 'QUERY_LOCAL_BWS_API_PORT_INVALID', 'Read-only query local BWS API port must be a TCP port in the range 1..65535.');
   if (localBwsApiPort !== undefined && !localBwsApiPort.ok) {
     return localBwsApiPort;
   }
@@ -520,10 +520,10 @@ function validateResourceFilters<TResource extends ReadOnlyQueryResource>(
         `Supported read-only query filter key for ${resource}.`,
       );
     }
-    if (typeof value !== 'string' || value.trim().length === 0) {
+    if (typeof value !== 'string' || value.length === 0 || value !== value.trim()) {
       return blocked(
         'QUERY_FILTER_VALUE_INVALID',
-        `Read-only query filter ${key} must be a non-empty string.`,
+        `Read-only query filter ${key} must be a canonical non-empty string.`,
         `Typed read-only query filter value for ${resource}.`,
       );
     }
@@ -1025,6 +1025,13 @@ function validatePositiveInteger(value: number, code: string, message: string): 
   return accepted(value);
 }
 
+function validateTcpPort(value: number, code: string, message: string): BoundaryResult<number> {
+  if (!Number.isSafeInteger(value) || value < 1 || value > 65_535) {
+    return blocked(code, message, 'Explicit TCP port configuration.');
+  }
+  return accepted(value);
+}
+
 function validateNonNegativeInteger(value: number, code: string, message: string): BoundaryResult<number> {
   if (!Number.isSafeInteger(value) || value < 0) {
     return blocked(code, message, 'Explicit non-negative safe integer configuration.');
@@ -1033,7 +1040,7 @@ function validateNonNegativeInteger(value: number, code: string, message: string
 }
 
 function requireStringField(value: unknown): string | undefined {
-  return typeof value === 'string' && value.trim().length > 0 ? value.trim() : undefined;
+  return typeof value === 'string' && value.length > 0 && value === value.trim() ? value : undefined;
 }
 
 function requireIntegerField(value: unknown): number | undefined {

@@ -110,6 +110,104 @@ test('non-atomic completion rejects rollback amounts that exceed the currently l
   ]);
 });
 
+test('non-atomic completion rejects rollback after terminal reject', () => {
+  const input = createTwoUnitSolvedInput();
+  const solved = solveStandardBinaryStakeVector(input);
+  assert.equal(solved.ok, true);
+
+  const result = simulateNonAtomicPaperGroupCompletion({
+    stakeVector: solved.value,
+    matrix: input.matrix,
+    manualKill: false,
+    events: [
+      { legId: 'market-001:yes', type: 'fill', stakeMinor: 100n, occurredAt: '2026-07-13T10:00:00.000Z' },
+      { legId: 'market-001:yes', type: 'reject', occurredAt: '2026-07-13T10:00:01.000Z' },
+      { legId: 'market-001:yes', type: 'rollback', stakeMinor: 100n, occurredAt: '2026-07-13T10:00:02.000Z' },
+    ],
+  });
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'NON_ATOMIC_COMPLETION_ROLLBACK_AFTER_TERMINAL_FORBIDDEN',
+      message: 'Non-atomic completion simulation does not allow rollback events after rejection or expiry.',
+      evidenceRequired: 'Event order that does not roll back a terminally rejected or expired leg.',
+    },
+  ]);
+});
+
+test('non-atomic completion rejects rollback after terminal expire', () => {
+  const input = createTwoUnitSolvedInput();
+  const solved = solveStandardBinaryStakeVector(input);
+  assert.equal(solved.ok, true);
+
+  const result = simulateNonAtomicPaperGroupCompletion({
+    stakeVector: solved.value,
+    matrix: input.matrix,
+    manualKill: false,
+    events: [
+      { legId: 'market-001:yes', type: 'fill', stakeMinor: 100n, occurredAt: '2026-07-13T10:00:00.000Z' },
+      { legId: 'market-001:yes', type: 'expire', occurredAt: '2026-07-13T10:00:01.000Z' },
+      { legId: 'market-001:yes', type: 'rollback', stakeMinor: 100n, occurredAt: '2026-07-13T10:00:02.000Z' },
+    ],
+  });
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'NON_ATOMIC_COMPLETION_ROLLBACK_AFTER_TERMINAL_FORBIDDEN',
+      message: 'Non-atomic completion simulation does not allow rollback events after rejection or expiry.',
+      evidenceRequired: 'Event order that does not roll back a terminally rejected or expired leg.',
+    },
+  ]);
+});
+
+test('non-atomic completion rejects malformed manual kill evidence', () => {
+  const input = createTwoUnitSolvedInput();
+  const solved = solveStandardBinaryStakeVector(input);
+  assert.equal(solved.ok, true);
+
+  const result = simulateNonAtomicPaperGroupCompletion({
+    stakeVector: solved.value,
+    matrix: input.matrix,
+    manualKill: 'false',
+    events: [],
+  } as never);
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'NON_ATOMIC_COMPLETION_MANUAL_KILL_INVALID',
+      message: 'Non-atomic completion simulation requires manualKill to be an explicit boolean.',
+      evidenceRequired: 'Explicit boolean manualKill evidence for the non-atomic completion group.',
+    },
+  ]);
+});
+
+test('non-atomic completion rejects non-bigint event stake before arithmetic', () => {
+  const input = createTwoUnitSolvedInput();
+  const solved = solveStandardBinaryStakeVector(input);
+  assert.equal(solved.ok, true);
+
+  const result = simulateNonAtomicPaperGroupCompletion({
+    stakeVector: solved.value,
+    matrix: input.matrix,
+    manualKill: false,
+    events: [
+      { legId: 'market-001:yes', type: 'reserve', stakeMinor: 100, occurredAt: '2026-07-13T10:00:00.000Z' },
+    ],
+  } as never);
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'NON_ATOMIC_COMPLETION_EVENT_STAKE_INVALID',
+      message: 'Non-atomic completion event reserve requires a positive fixed-point stake amount.',
+      evidenceRequired: 'Positive fixed-point stake amounts for reserve, fill, and rollback events.',
+    },
+  ]);
+});
+
 test('non-atomic completion rejects missing scenario rows for a solved leg', () => {
   const input = createTwoUnitSolvedInput();
   const solved = solveStandardBinaryStakeVector(input);

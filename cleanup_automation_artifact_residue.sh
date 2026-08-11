@@ -93,7 +93,7 @@ if [[ "$REBUILD_ARCHIVE" == "1" ]]; then
   rm -f -- "$TMP_ARCHIVE"
   automation_v2_zip_with_timeout "$ZIP_TIMEOUT_SECONDS" "$TMP_ARCHIVE" "$REPO" artifacts
   unzip -tq "$TMP_ARCHIVE" >/dev/null
-  mv -f -- "$TMP_ARCHIVE" "$REPO/artifacts.zip"
+  automation_publish_final_artifacts_zip "$TMP_ARCHIVE" "$REPO"
   trap - EXIT
   printf 'artifact_archive_rebuilt=%s\n' "$REPO/artifacts.zip"
   printf 'artifact_archive_size_bytes=%s\n' "$(stat -c '%s' "$REPO/artifacts.zip")"

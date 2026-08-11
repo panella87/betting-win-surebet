@@ -206,6 +206,11 @@ function replayB1FillabilityEvents(
     }
   }
 
+  const timestampTieValidation = validateNoSameLegTimestampTies(events);
+  if (!timestampTieValidation.ok) {
+    return timestampTieValidation;
+  }
+
   const indexedEvents = events.map((event, index) => ({ event, index }));
   indexedEvents.sort((left, right) => {
     const timestampOrder = left.event.occurredAtUtc.localeCompare(right.event.occurredAtUtc);
@@ -239,6 +244,25 @@ function replayB1FillabilityEvents(
 }
 
 function validateB1FillabilityEvent(event: B1FillabilityEvent): BoundaryResult<undefined> {
+  if (typeof event !== 'object' || event === null) {
+    return blocked(
+      'B1_FILLABILITY_EVENT_INVALID',
+      'B1 fillability simulation requires structured fillability events.',
+      'Structured B1 fillability event objects.',
+    );
+  }
+  if (
+    typeof event.selectionEquivalenceKey !== 'string'
+    || typeof event.venueOrBookmakerId !== 'string'
+    || typeof event.type !== 'string'
+    || typeof event.occurredAtUtc !== 'string'
+  ) {
+    return blocked(
+      'B1_FILLABILITY_EVENT_INVALID',
+      'B1 fillability simulation requires typed event identity, type and timestamp fields.',
+      'B1 fillability event fields encoded with the expected runtime types.',
+    );
+  }
   if (event.selectionEquivalenceKey.length === 0) {
     return blocked(
       'B1_SELECTION_EQUIVALENCE_MISSING',
@@ -278,7 +302,7 @@ function validateB1FillabilityEvent(event: B1FillabilityEvent): BoundaryResult<u
   }
 
   if (event.type === 'fill') {
-    if (event.stakeMinor === undefined || event.stakeMinor <= 0n) {
+    if (typeof event.stakeMinor !== 'bigint' || event.stakeMinor <= 0n) {
       return blocked(
         'B1_FILLABILITY_FILL_STAKE_INVALID',
         'B1 fillability fill events require a positive integer minor-unit stake.',
@@ -294,6 +318,24 @@ function validateB1FillabilityEvent(event: B1FillabilityEvent): BoundaryResult<u
       'B1 fillability reject and timeout events must not include a stake amount.',
       'Stake-free B1 reject and timeout events.',
     );
+  }
+  return accepted(undefined);
+}
+
+function validateNoSameLegTimestampTies(
+  events: readonly B1FillabilityEvent[],
+): BoundaryResult<undefined> {
+  const seenLegTimestamps = new Set<string>();
+  for (const event of events) {
+    const key = `${event.selectionEquivalenceKey}\u0000${event.venueOrBookmakerId}\u0000${event.occurredAtUtc}`;
+    if (seenLegTimestamps.has(key)) {
+      return blocked(
+        'B1_FILLABILITY_SAME_LEG_TIMESTAMP_AMBIGUOUS',
+        'B1 fillability simulation rejects same-leg events with identical timestamps.',
+        'Unambiguous B1 fillability event ordering per leg and timestamp.',
+      );
+    }
+    seenLegTimestamps.add(key);
   }
   return accepted(undefined);
 }

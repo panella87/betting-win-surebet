@@ -105,6 +105,53 @@ test('B1 deterministic fixture parser rejects missing manifest lineage evidence'
   ]);
 });
 
+test('B1 deterministic fixture parser rejects noncanonical manifest metadata identifiers', () => {
+  const whitespaceFixture = readFixture();
+  const whitespaceManifest = whitespaceFixture.manifest as Record<string, unknown>;
+  whitespaceManifest.providerGenerationIds = [' generation-001 '];
+
+  const whitespaceResult = parseBettingWinB1DeterministicFixture(whitespaceFixture);
+
+  assert.equal(whitespaceResult.ok, false);
+  assert.deepEqual(whitespaceResult.blockers, [
+    {
+      code: 'B1_PROVIDER_GENERATION_IDS_MISSING',
+      message: 'B1 manifest providerGenerationIds must contain at least one id.',
+      evidenceRequired: 'B1 provider generation ids from betting-win.',
+    },
+  ]);
+
+  const duplicateFixture = readFixture();
+  const duplicateManifest = duplicateFixture.manifest as Record<string, unknown>;
+  duplicateManifest.sourceLineageRecordIds = ['lineage-001', 'lineage-001'];
+
+  const duplicateResult = parseBettingWinB1DeterministicFixture(duplicateFixture);
+
+  assert.equal(duplicateResult.ok, false);
+  assert.deepEqual(duplicateResult.blockers, [
+    {
+      code: 'B1_SOURCE_LINEAGE_RECORD_IDS_MISSING',
+      message: 'B1 manifest sourceLineageRecordIds must contain at least one id.',
+      evidenceRequired: 'B1 source lineage record ids from betting-win.',
+    },
+  ]);
+
+  const uppercaseHashFixture = readFixture();
+  const uppercaseHashManifest = uppercaseHashFixture.manifest as Record<string, unknown>;
+  uppercaseHashManifest.sourceManifestHash = 'A'.repeat(64);
+
+  const uppercaseHashResult = parseBettingWinB1DeterministicFixture(uppercaseHashFixture);
+
+  assert.equal(uppercaseHashResult.ok, false);
+  assert.deepEqual(uppercaseHashResult.blockers, [
+    {
+      code: 'B1_SOURCE_MANIFEST_HASH_INVALID',
+      message: 'B1 manifest sourceManifestHash must be 64 hexadecimal characters.',
+      evidenceRequired: 'B1 source manifest hash.',
+    },
+  ]);
+});
+
 test('B1 deterministic fixture parser binds manifest lineage ids to row lineage ids', () => {
   const fixtureWithUnusedManifestLineage = readFixture();
   const unusedManifest = fixtureWithUnusedManifestLineage.manifest as Record<string, unknown>;

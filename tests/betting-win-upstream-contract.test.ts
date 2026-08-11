@@ -7,6 +7,7 @@ import { join } from 'node:path';
 import {
   UpstreamVerificationError,
   generateBettingWinUpstreamLock,
+  readBettingWinUpstreamLock,
   verifyBettingWinUpstreamLock,
   writeBettingWinUpstreamLock,
 } from '../src/upstream/betting-win-upstream-lock.js';
@@ -151,6 +152,40 @@ test('upstream lock schema and static repository validator remain wired', () => 
     stdio: 'pipe',
   });
   assert.match(output, /validate_betting_win_upstream_contract: ok/);
+});
+
+test('upstream lock reader fails closed on schema-invalid lock evidence', () => {
+  const tempRoot = mkdtempSync('/tmp/bws-upstream-lock-reader-');
+  try {
+    const lockPath = join(tempRoot, 'invalid-lock.json');
+    writeJson(lockPath, {
+      repository: 'betting-win',
+      repositoryPath: '/tmp/betting-win',
+      commitSha: 'not-a-commit-sha',
+      gitTreeSha: '2'.repeat(40),
+      sourceView: 'committed_git_head',
+      packageVersion: '0.48.0',
+      trackedTreeListingSha256: '3'.repeat(64),
+      sourceFingerprintAlgorithm: 'sha256_git_ls_tree_r_full_tree_head_v1',
+      contractSchema: 'betting-win.strategy-export.v1',
+      contractAlias: 'betting-win-strategy-export.v1',
+      surebetProfile: 'surebet_standard_binary_v0',
+      verifiedAt: FIXED_VERIFIED_AT,
+      packageVersions: {
+        '@betting-win/provider-collection': '0.48.0',
+      },
+      capabilities: ['exportHistoricalBundle'],
+      unsupportedEvidence: true,
+    });
+
+    expectVerificationError(
+      () => readBettingWinUpstreamLock(lockPath, ROOT),
+      'BETTING_WIN_UPSTREAM_LOCK_SCHEMA_MISMATCH',
+      /missing required field: schema|unsupported field: unsupportedEvidence|field commitSha/,
+    );
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
 });
 
 test('upstream lock generation captures exact committed Git evidence, package versions, and write-read verification', () => {

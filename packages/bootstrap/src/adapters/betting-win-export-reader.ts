@@ -3,7 +3,7 @@ import { accepted, blocked, type BettingWinReference, type BoundaryResult } from
 export const BETTING_WIN_EXPORT_BUNDLE_SCHEMA = 'betting-win.export-bundle.v1' as const;
 
 const ISO_TIMESTAMP_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
-const MANIFEST_HASH_REGEX = /^[0-9a-f]{64}$/i;
+const MANIFEST_HASH_REGEX = /^[0-9a-f]{64}$/;
 
 export const BETTING_WIN_EXPORT_BUNDLE_KINDS = ['resource_export', 'read_only_query_export'] as const;
 
@@ -32,7 +32,11 @@ export function parseBettingWinExportBundle(value: unknown): BoundaryResult<Bett
   if (!candidate.reference || candidate.reference.source !== 'betting-win') {
     return blocked('EXPORT_NOT_FROM_BETTING_WIN', 'Export bundle must reference betting-win.', 'betting-win export reference.');
   }
-  if (typeof candidate.reference.contractVersion !== 'string' || candidate.reference.contractVersion.trim().length === 0) {
+  if (
+    typeof candidate.reference.contractVersion !== 'string'
+    || candidate.reference.contractVersion.length === 0
+    || candidate.reference.contractVersion !== candidate.reference.contractVersion.trim()
+  ) {
     return blocked(
       'EXPORT_CONTRACT_VERSION_MISSING',
       'Export bundle contract version is required.',
