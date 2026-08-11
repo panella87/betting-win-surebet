@@ -219,7 +219,8 @@ automation_controller_allows_child() {
 
 automation_is_verified_parent_lock() {
   local file="$1" current_script="$2" repo_root="$3"
-  local controller pid repo script_path boot_id start_ticks
+  local controller pid repo script_path boot_id start_ticks file_real declared_lock_real
+  [[ -f "$file" && ! -L "$file" ]] || return 1
   controller="$(automation_lock_value_any "$file" CONTROLLER script 2>/dev/null || true)"
   pid="$(automation_lock_value_any "$file" CONTROLLER_PID pid 2>/dev/null || true)"
   repo="$(automation_lock_value_any "$file" REPO_REALPATH repo_realpath repo_path 2>/dev/null || true)"
@@ -229,10 +230,29 @@ automation_is_verified_parent_lock() {
 
   automation_controller_allows_child "$controller" "$current_script" || return 1
   [[ "$pid" == "$PPID" ]] || return 1
-  automation_pid_identity_matches "$pid" "$boot_id" "$start_ticks" || return 1
+  [[ "${AUTOMATION_PARENT_CONTROLLER:-}" == "$controller" ]] || return 1
+  [[ "${AUTOMATION_PARENT_PID:-}" == "$pid" ]] || return 1
+  [[ -n "${AUTOMATION_PARENT_LOCK_FILE:-}" ]] || return 1
+  file_real="$(realpath -e -- "$file" 2>/dev/null || true)"
+  declared_lock_real="$(realpath -e -- "$AUTOMATION_PARENT_LOCK_FILE" 2>/dev/null || true)"
+  [[ -n "$file_real" && "$declared_lock_real" == "$file_real" ]] || return 1
   [[ "$(realpath -m -- "$repo" 2>/dev/null || true)" == "$(realpath -e -- "$repo_root" 2>/dev/null || true)" ]] || return 1
   [[ -n "$script_path" ]] || script_path="$repo_root/$controller"
-  automation_pid_command_matches_script "$pid" "$script_path" "$repo_root"
+  automation_pid_command_matches_script "$pid" "$script_path" "$repo_root" || return 1
+
+  if [[ -n "$boot_id" || -n "$start_ticks" ]]; then
+    [[ -n "$boot_id" && -n "$start_ticks" ]] || return 1
+    [[ "${AUTOMATION_PARENT_BOOT_ID:-}" == "$boot_id" ]] || return 1
+    [[ "${AUTOMATION_PARENT_START_TICKS:-}" == "$start_ticks" ]] || return 1
+    automation_pid_identity_matches "$pid" "$boot_id" "$start_ticks"
+    return $?
+  fi
+
+  # One-generation hot-upgrade compatibility: an already-running parent may
+  # have written the pre-identity lock schema before a child hardened the
+  # controller files on disk. Accept that lock only for its declared direct
+  # child, exact lock path, exact repository, and exact parent command.
+  [[ -z "${AUTOMATION_PARENT_BOOT_ID:-}" && -z "${AUTOMATION_PARENT_START_TICKS:-}" ]]
 }
 
 automation_known_controller_lock_files() {
@@ -259,6 +279,10 @@ automation_assert_no_incompatible_locks() {
     boot_id="$(automation_lock_value_any "$file" CONTROLLER_BOOT_ID boot_id 2>/dev/null || true)"
     start_ticks="$(automation_lock_value_any "$file" CONTROLLER_START_TICKS start_ticks 2>/dev/null || true)"
 
+    if automation_is_verified_parent_lock "$file" "$current_script" "$repo_root"; then
+      continue
+    fi
+
     if [[ -z "$controller" || -z "$pid" || -z "$repo" || -z "$boot_id" || -z "$start_ticks" ]]; then
       if automation_pid_alive "$pid"; then
         automation_die "refusing to touch malformed incompatible lock with live PID: $file" 27
@@ -269,10 +293,6 @@ automation_assert_no_incompatible_locks() {
 
     [[ "$(realpath -m -- "$repo" 2>/dev/null || true)" == "$(realpath -e -- "$repo_root" 2>/dev/null || true)" ]] || \
       automation_die "incompatible controller lock repo mismatch: $file" 27
-
-    if automation_is_verified_parent_lock "$file" "$current_script" "$repo_root"; then
-      continue
-    fi
 
     if automation_pid_alive "$pid"; then
       automation_pid_identity_matches "$pid" "$boot_id" "$start_ticks" || \

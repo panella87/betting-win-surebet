@@ -41,6 +41,11 @@ function copyHelpers(repo: string): void {
   }
 }
 
+function writeExecutable(path: string, content: string): void {
+  writeFileSync(path, content, 'utf-8');
+  chmodSync(path, 0o755);
+}
+
 function runBugfixAutopilotFinalizer(childCleanupRc: number, releaseRc: number): FinalizerResult {
   const repo = mkdtempSync(join(tmpdir(), 'surebet-wave9-bugfix-finalizer-'));
   const runDir = join(repo, 'artifacts', 'bugfix_autopilot_test');
@@ -286,4 +291,202 @@ test('bugfix parent successful child cleanup and lock release remain visible', (
   assert.match(result.summary, /^lock_release_status=released$/m);
   assert.equal(result.zipCount, 'xr', 'successful release must refresh the archived final summary');
   assert.equal(result.telegram, 'BUGFIX_AUTOPILOT_COMPLETE|all_campaign_areas_closed|0\n');
+});
+
+
+test('new child accepts only the exact declared legacy direct parent during an in-campaign hot upgrade', () => {
+  const repo = mkdtempSync(join(tmpdir(), 'surebet-wave9-legacy-parent-transition-'));
+  const parent = join(repo, 'run-bugfix-autopilot.sh');
+  const child = join(repo, 'run-autonomous-bugfix.sh');
+  const lock = join(repo, '.automation', 'locks', 'run-bugfix-autopilot.lock');
+  const roundDir = join(repo, 'artifacts', 'bugfix_autopilot_20260810T000000Z', 'round_001_bugfix');
+  const resultFile = join(roundDir, 'child_terminal_result.env');
+  try {
+    copyHelpers(repo);
+    mkdirSync(join(repo, '.automation', 'locks'), { recursive: true });
+    mkdirSync(roundDir, { recursive: true });
+
+    writeExecutable(child, `#!/usr/bin/env bash
+set -Eeuo pipefail
+root="$1"
+. "$root/.automation/lib/run_common.sh"
+. "$root/.automation/lib/controller_hardening_v2.sh"
+AUTOMATION_REPO_NAME=betting-win-surebet
+automation_assert_no_incompatible_locks run-autonomous-bugfix.sh "$root"
+run="$root/artifacts/autonomous_bugfix_20260810T000001Z"
+mkdir -p "$run"
+automation_v2_publish_child_result \
+  "$root" run-autonomous-bugfix.sh stub-bugfix-v1 "$run" \
+  BUGFIX_AUDIT_COMPLETE=yes bugfix_audit_complete 0 1 not_acquired 0 no
+`);
+
+    writeExecutable(parent, `#!/usr/bin/env bash
+set -Eeuo pipefail
+root=${shellQuote(repo)}
+lock=${shellQuote(lock)}
+result=${shellQuote(resultFile)}
+cat > "$lock" <<LOCK
+CONTROLLER=run-bugfix-autopilot.sh
+CONTROLLER_PID=$$
+REPO_REALPATH=$root
+SCRIPT_REALPATH=$root/run-bugfix-autopilot.sh
+LOCK
+
+env \
+  AUTOMATION_PARENT_CONTROLLER=run-bugfix-autopilot.sh \
+  AUTOMATION_PARENT_PID=$$ \
+  AUTOMATION_PARENT_LOCK_FILE="$lock" \
+  AUTOMATION_CHILD_RESULT_FILE="$result" \
+  bash "$root/run-autonomous-bugfix.sh" "$root"
+`);
+
+    const result = spawnSync('bash', [parent], { encoding: 'utf-8' });
+    assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
+
+    const lines = readFileSync(resultFile, 'utf-8').trim().split('\n');
+    const keys = lines.map((line) => line.slice(0, line.indexOf('=')));
+    assert.deepEqual(keys, [
+      'CHILD_RESULT_SCHEMA_VERSION',
+      'RESULT_KIND',
+      'PARENT_CONTROLLER',
+      'PARENT_PID',
+      'CONTROLLER',
+      'SCRIPT_VERSION',
+      'REPOSITORY',
+      'RUN_DIR',
+      'FINAL_STATUS',
+      'STOP_REASON',
+      'FINAL_EXIT_CODE',
+      'CYCLES_COMPLETED',
+      'LOCK_RELEASE_STATUS',
+      'LOCK_RELEASE_EXIT_CODE',
+      'LOCK_PRESERVED',
+      'WRITTEN_AT',
+    ]);
+    assert.doesNotMatch(readFileSync(resultFile, 'utf-8'), /^(PARENT_BOOT_ID|CHILD_PID)=/m);
+  } finally {
+    rmSync(repo, { recursive: true, force: true });
+  }
+});
+
+test('unrelated identity-less live controller locks remain fatal during the hot-upgrade compatibility window', () => {
+  const repo = mkdtempSync(join(tmpdir(), 'surebet-wave9-unrelated-legacy-lock-'));
+  const parent = join(repo, 'run-paper-autopilot.sh');
+  const ready = join(repo, 'parent-ready');
+  try {
+    copyHelpers(repo);
+    mkdirSync(join(repo, '.automation', 'locks'), { recursive: true });
+    writeExecutable(parent, `#!/usr/bin/env bash
+set -Eeuo pipefail
+root=${shellQuote(repo)}
+cat > "$root/.automation/locks/run-paper-autopilot.lock" <<LOCK
+CONTROLLER=run-paper-autopilot.sh
+CONTROLLER_PID=$$
+REPO_REALPATH=$root
+SCRIPT_REALPATH=$root/run-paper-autopilot.sh
+LOCK
+printf ready > ${shellQuote(ready)}
+trap 'exit 0' TERM
+while :; do sleep 0.1; done
+`);
+
+    const result = runBash(`
+bash ${shellQuote(parent)} & parent_pid=$!
+for _ in $(seq 1 100); do
+  [[ -f ${shellQuote(ready)} ]] && break
+  sleep 0.02
+done
+[[ -f ${shellQuote(ready)} ]]
+set +e
+(
+  . ${shellQuote(join(repo, '.automation', 'lib', 'run_common.sh'))}
+  automation_assert_no_incompatible_locks run-autonomous-bugfix.sh ${shellQuote(repo)}
+) > ${shellQuote(join(repo, 'guard.stdout'))} 2> ${shellQuote(join(repo, 'guard.stderr'))}
+guard_rc=$?
+set -e
+kill -TERM "$parent_pid" 2>/dev/null || true
+wait "$parent_pid" 2>/dev/null || true
+printf 'guard_rc=%s\n' "$guard_rc"
+cat ${shellQuote(join(repo, 'guard.stderr'))}
+`);
+    assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
+    assert.match(`${result.stdout}\n${result.stderr}`, /guard_rc=27/);
+    assert.match(`${result.stdout}\n${result.stderr}`, /refusing to touch malformed incompatible lock with live PID/);
+  } finally {
+    rmSync(repo, { recursive: true, force: true });
+  }
+});
+
+test('identity-rich parents can validate a strict pre-start child result with no run directory', () => {
+  const repo = mkdtempSync(join(tmpdir(), 'surebet-wave9-prestart-child-result-'));
+  const parent = join(repo, 'run-bugfix-autopilot.sh');
+  const child = join(repo, 'run-autonomous-bugfix.sh');
+  const lock = join(repo, '.automation', 'locks', 'run-bugfix-autopilot.lock');
+  const roundDir = join(repo, 'artifacts', 'bugfix_autopilot_20260810T000010Z', 'round_001_bugfix');
+  const resultFile = join(roundDir, 'child_terminal_result.env');
+  try {
+    copyHelpers(repo);
+    mkdirSync(join(repo, '.automation', 'locks'), { recursive: true });
+    mkdirSync(roundDir, { recursive: true });
+
+    writeExecutable(child, `#!/usr/bin/env bash
+set -Eeuo pipefail
+root="$1"
+. "$root/.automation/lib/run_common.sh"
+. "$root/.automation/lib/controller_hardening_v2.sh"
+AUTOMATION_REPO_NAME=betting-win-surebet
+automation_v2_publish_child_result \
+  "$root" run-autonomous-bugfix.sh stub-bugfix-v1 '' \
+  setup_failed unexpected_exit_before_start 27 0 not_acquired 0 no
+exit 27
+`);
+
+    writeExecutable(parent, `#!/usr/bin/env bash
+set -Eeuo pipefail
+root=${shellQuote(repo)}
+lock=${shellQuote(lock)}
+result=${shellQuote(resultFile)}
+. "$root/.automation/lib/run_common.sh"
+. "$root/.automation/lib/controller_hardening_v2.sh"
+boot_id="$(automation_v2_boot_id)"
+start_ticks="$(automation_v2_process_start_ticks $$)"
+cat > "$lock" <<LOCK
+LOCK_SCHEMA_VERSION=1
+CONTROLLER=run-bugfix-autopilot.sh
+CONTROLLER_PID=$$
+CONTROLLER_BOOT_ID=$boot_id
+CONTROLLER_START_TICKS=$start_ticks
+REPO_REALPATH=$root
+SCRIPT_REALPATH=$root/run-bugfix-autopilot.sh
+LOCK
+set +e
+env \
+  AUTOMATION_PARENT_CONTROLLER=run-bugfix-autopilot.sh \
+  AUTOMATION_PARENT_PID=$$ \
+  AUTOMATION_PARENT_BOOT_ID="$boot_id" \
+  AUTOMATION_PARENT_START_TICKS="$start_ticks" \
+  AUTOMATION_PARENT_LOCK_FILE="$lock" \
+  AUTOMATION_CHILD_RESULT_FILE="$result" \
+  bash "$root/run-autonomous-bugfix.sh" "$root" &
+child_pid=$!
+wait "$child_pid"
+child_rc=$?
+set -e
+[[ "$child_rc" == 27 ]]
+automation_v2_validate_child_result_file \
+  "$result" run-bugfix-autopilot.sh $$ run-autonomous-bugfix.sh \
+  betting-win-surebet "$child_rc" "$root" "$child_pid" "$boot_id" "$start_ticks"
+[[ "\${AUTOMATION_V2_ENV[RUN_DIR]}" == none ]]
+printf PRESTART_CHILD_RESULT_OK
+`);
+
+    const result = spawnSync('bash', [parent], { encoding: 'utf-8' });
+    assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
+    assert.match(result.stdout, /PRESTART_CHILD_RESULT_OK/);
+    assert.match(readFileSync(resultFile, 'utf-8'), /^RUN_DIR=none$/m);
+    assert.match(readFileSync(resultFile, 'utf-8'), /^PARENT_BOOT_ID=/m);
+    assert.match(readFileSync(resultFile, 'utf-8'), /^CHILD_PID=/m);
+  } finally {
+    rmSync(repo, { recursive: true, force: true });
+  }
 });

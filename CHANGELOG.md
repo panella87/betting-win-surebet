@@ -1,3 +1,11 @@
+## 2026-08-11 - In-campaign parent/child identity transition repair
+
+- Preserved the validated area-7 automation, lock, manifest, and packaging implementation from the stopped bugfix campaign.
+- Added one-generation compatibility for a newly hardened child launched by the exact already-running direct parent whose in-memory lock schema predates boot/start identity fields.
+- Kept unrelated, skipped, mismatched, symlinked, and malformed live controller locks fail-closed.
+- Added legacy terminal-result emission only for that exact direct parent transition and strict identity-rich `RUN_DIR=none` reporting for failures before child run-directory creation.
+- Added dynamic regressions for the observed hot-upgrade transition, unrelated legacy-lock rejection, and pre-start child-result validation.
+
 ## 2026-08-10 - Nested autonomous repro symlink artifact publication repair
 
 - Extended allowlist-only artifact cleanup to remove only symlink nodes below exact timestamped autonomous bugfix/implementation `cycles/cycle_<n>/repro/` trees before packaging.

@@ -1,7 +1,7 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-08-10T20:59:03Z",
-  "overlay": "bws101-artifact-repro-symlink-cleanup-wave63",
+  "generated": "2026-08-11T04:34:00Z",
+  "overlay": "bws102-bugfix-hot-upgrade-child-result-wave64",
   "files": [
     {
       "path": ".automation/README.md",
@@ -10,13 +10,13 @@
     },
     {
       "path": ".automation/lib/controller_hardening_v2.sh",
-      "sha256": "718fcc286956ae3c668e1c11f1f386f48ff77bba9424fad3993d78f14e56cecc",
-      "size": 42805
+      "sha256": "350523529ccfe2bfbe0549012b1b6fc46159e10ad2d7d9adf305038927e26fc1",
+      "size": 45537
     },
     {
       "path": ".automation/lib/run_common.sh",
-      "sha256": "ea32fb96d99478bdf0e9d6d63fa7aeb42fca87df4563b8f435032683e1cd8284",
-      "size": 53299
+      "sha256": "eaf17dc30af4f4e4a09c503922423a74ff7b60eab162b1b6b544961bd0ab34f2",
+      "size": 54457
     },
     {
       "path": ".automation/lib/telegram_notify.sh",
@@ -115,8 +115,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "054a7d380cbc8ba7ae9a5043a55b0be32d55c78efbdfc063d3c0ce0c9e661489",
-      "size": 75259
+      "sha256": "08d5143ad00c5112e19cafc28338147b3d26ce8c5a67679f2e63233a30aa3c62",
+      "size": 76059
     },
     {
       "path": "PROJECT_STATUS.md",
@@ -655,8 +655,8 @@
     },
     {
       "path": "docs/automation/PROTECTED_AUTOMATION_FILES.md",
-      "sha256": "3222f2503971f783f3a11c257421af7f987c8af34c06c5fc6506b98f197473ab",
-      "size": 4853
+      "sha256": "7227522efee40766f9b03cbbfd9775d741f22f5818f841528ec42639261147b5",
+      "size": 5748
     },
     {
       "path": "docs/automation/README.md",
@@ -690,8 +690,8 @@
     },
     {
       "path": "docs/automation/bugfix-autopilot.md",
-      "sha256": "3efa094e2c334828f94461bc84003b01c6a2c988a1f988a17b56a01a1628e4e2",
-      "size": 4634
+      "sha256": "465eeeb9513493b4709bfbdee83c4a7445125898c922be0e8d7e6bbf94362756",
+      "size": 6188
     },
     {
       "path": "docs/automation/current-implementation-task.md",
@@ -1795,8 +1795,8 @@
     },
     {
       "path": "scripts/validate_autonomous_controller_contract.py",
-      "sha256": "75310b5289d20d84d1290e20c836749a1996b2802b5bfd029e516959ce0cc8a9",
-      "size": 29626
+      "sha256": "2a52faaa7b5b12fcf7c84ccb82f9c6acf3423c250b6d38409a0fd37426f1273d",
+      "size": 30144
     },
     {
       "path": "scripts/validate_betting_win_upstream_contract.py",
@@ -2945,8 +2945,8 @@
     },
     {
       "path": "tests/run-script-hardening-wave9.test.ts",
-      "sha256": "d7cf19c078399ab370dc5a1864e9e3c64578626353ebdbb989d13b28b4a98bdd",
-      "size": 12690
+      "sha256": "948e9789befcf3a0083cf965ba5c1dc734d94075e381eff357a03db55157d319",
+      "size": 20022
     },
     {
       "path": "tests/scenario-cashflow.test.ts",

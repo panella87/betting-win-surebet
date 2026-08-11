@@ -405,7 +405,7 @@ automation_v2_publish_child_result() {
   local repository_root=${1:?repository root is required}
   local controller=${2:?controller is required}
   local script_version=${3:?script version is required}
-  local run_dir=${4:?run directory is required}
+  local run_dir=${4:-none}
   local final_status=${5:?final status is required}
   local stop_reason=${6:?stop reason is required}
   local final_exit_code=${7:?final exit code is required}
@@ -418,7 +418,9 @@ automation_v2_publish_child_result() {
   local parent_pid=${AUTOMATION_PARENT_PID:-}
   local parent_boot_id=${AUTOMATION_PARENT_BOOT_ID:-}
   local parent_start_ticks=${AUTOMATION_PARENT_START_TICKS:-}
+  local parent_lock_file=${AUTOMATION_PARENT_LOCK_FILE:-}
   local child_boot_id child_start_ticks repo_real target_real target_parent_real run_real relative_target relative_run
+  local legacy_parent_result=0
 
   [[ -n "$target" ]] || return 0
   repo_real=$(realpath -e -- "$repository_root") || return 2
@@ -430,10 +432,28 @@ automation_v2_publish_child_result() {
     printf 'ERROR: parent controller is not alive for child result publication: %s\n' "$parent_pid" >&2
     return 2
   }
-  automation_v2_process_identity_matches "$parent_pid" "$parent_boot_id" "$parent_start_ticks" || {
-    printf 'ERROR: parent controller ownership mismatch for child result publication: %s\n' "$parent_pid" >&2
-    return 2
-  }
+
+  if [[ -n "$parent_boot_id" || -n "$parent_start_ticks" ]]; then
+    [[ -n "$parent_boot_id" && -n "$parent_start_ticks" ]] || {
+      printf 'ERROR: parent controller identity is only partially specified.\n' >&2
+      return 2
+    }
+    automation_v2_process_identity_matches "$parent_pid" "$parent_boot_id" "$parent_start_ticks" || {
+      printf 'ERROR: parent controller ownership mismatch for child result publication: %s\n' "$parent_pid" >&2
+      return 2
+    }
+  else
+    [[ "$parent_pid" == "$PPID" && -n "$parent_lock_file" ]] || {
+      printf 'ERROR: legacy parent result compatibility requires the declared direct parent and lock.\n' >&2
+      return 2
+    }
+    automation_is_verified_parent_lock "$parent_lock_file" "$controller" "$repo_real" || {
+      printf 'ERROR: legacy parent lock could not be verified for child result publication.\n' >&2
+      return 2
+    }
+    legacy_parent_result=1
+  fi
+
   child_boot_id=$(automation_v2_boot_id) || return 2
   child_start_ticks=$(automation_v2_process_start_ticks "$$") || return 2
   target_real=$(automation_v2_safe_repo_path "$repo_real" "$target" no) || return 2
@@ -464,20 +484,37 @@ automation_v2_publish_child_result() {
       ;;
   esac
 
-  run_real=$(automation_v2_safe_repo_path "$repo_real" "$run_dir" yes) || return 2
-  relative_run=${run_real#"$repo_real"/}
-  case "$controller" in
-    run-autonomous-implementation.sh)
-      [[ "$relative_run" =~ ^artifacts/autonomous_implementation_[0-9]{8}T[0-9]{6}Z$ ]] || return 2
-      ;;
-    run-paper-evaluation.sh)
-      [[ "$relative_run" =~ ^artifacts/paper_evaluation_[0-9]{8}T[0-9]{6}Z$ ]] || return 2
-      ;;
-    run-autonomous-bugfix.sh)
-      [[ "$relative_run" =~ ^artifacts/autonomous_bugfix_[0-9]{8}T[0-9]{6}Z$ ]] || return 2
-      ;;
-    *) return 2 ;;
-  esac
+  [[ -n "$run_dir" ]] || run_dir=none
+  if [[ "$run_dir" == none ]]; then
+    [[ "$legacy_parent_result" == 0 ]] || {
+      printf 'ERROR: legacy parent result compatibility requires a canonical child run directory.\n' >&2
+      return 2
+    }
+    [[ "$final_status" == setup_failed && "$stop_reason" == unexpected_exit_before_start ]] || {
+      printf 'ERROR: a child result without a run directory must be an explicit pre-start setup failure.\n' >&2
+      return 2
+    }
+    [[ "$cycles_completed" == 0 && "$final_exit_code" =~ ^[1-9][0-9]*$ ]] || {
+      printf 'ERROR: a child result without a run directory must have zero cycles and a nonzero exit.\n' >&2
+      return 2
+    }
+    run_real=none
+  else
+    run_real=$(automation_v2_safe_repo_path "$repo_real" "$run_dir" yes) || return 2
+    relative_run=${run_real#"$repo_real"/}
+    case "$controller" in
+      run-autonomous-implementation.sh)
+        [[ "$relative_run" =~ ^artifacts/autonomous_implementation_[0-9]{8}T[0-9]{6}Z$ ]] || return 2
+        ;;
+      run-paper-evaluation.sh)
+        [[ "$relative_run" =~ ^artifacts/paper_evaluation_[0-9]{8}T[0-9]{6}Z$ ]] || return 2
+        ;;
+      run-autonomous-bugfix.sh)
+        [[ "$relative_run" =~ ^artifacts/autonomous_bugfix_[0-9]{8}T[0-9]{6}Z$ ]] || return 2
+        ;;
+      *) return 2 ;;
+    esac
+  fi
 
   [[ "$controller" =~ ^[A-Za-z0-9._-]+$ ]] || return 2
   [[ "$script_version" =~ ^[A-Za-z0-9._:+-]+$ ]] || return 2
@@ -493,6 +530,27 @@ automation_v2_publish_child_result() {
     preserved:yes:*) [[ "$lock_release_exit_code" != 0 ]] || return 2 ;;
     *) return 2 ;;
   esac
+
+  if [[ "$legacy_parent_result" == 1 ]]; then
+    automation_v2_write_env_atomic "$target_real" \
+      'CHILD_RESULT_SCHEMA_VERSION=1' \
+      'RESULT_KIND=controller_terminal_result' \
+      "PARENT_CONTROLLER=$parent_controller" \
+      "PARENT_PID=$parent_pid" \
+      "CONTROLLER=$controller" \
+      "SCRIPT_VERSION=$script_version" \
+      "REPOSITORY=${AUTOMATION_REPO_NAME:-betting-win-surebet}" \
+      "RUN_DIR=$run_real" \
+      "FINAL_STATUS=$final_status" \
+      "STOP_REASON=$stop_reason" \
+      "FINAL_EXIT_CODE=$final_exit_code" \
+      "CYCLES_COMPLETED=$cycles_completed" \
+      "LOCK_RELEASE_STATUS=$lock_release_status" \
+      "LOCK_RELEASE_EXIT_CODE=$lock_release_exit_code" \
+      "LOCK_PRESERVED=$lock_preserved" \
+      "WRITTEN_AT=$(automation_v2_now_utc)"
+    return $?
+  fi
 
   automation_v2_write_env_atomic "$target_real" \
     'CHILD_RESULT_SCHEMA_VERSION=1' \
@@ -574,6 +632,15 @@ automation_v2_validate_child_result_file() {
     *) return 2 ;;
   esac
   [[ "${AUTOMATION_V2_ENV[WRITTEN_AT]}" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$ ]] || return 2
+
+  if [[ "${AUTOMATION_V2_ENV[RUN_DIR]}" == none ]]; then
+    [[ "${AUTOMATION_V2_ENV[FINAL_STATUS]}" == setup_failed ]] || return 2
+    [[ "${AUTOMATION_V2_ENV[STOP_REASON]}" == unexpected_exit_before_start ]] || return 2
+    [[ "${AUTOMATION_V2_ENV[CYCLES_COMPLETED]}" == 0 ]] || return 2
+    [[ "${AUTOMATION_V2_ENV[FINAL_EXIT_CODE]}" =~ ^[1-9][0-9]*$ ]] || return 2
+    AUTOMATION_V2_ENV[RUN_DIR]=none
+    return 0
+  fi
 
   run_dir=$(automation_v2_safe_repo_path "$repository_root" "${AUTOMATION_V2_ENV[RUN_DIR]}" yes) || return 2
   relative_run=${run_dir#"$(realpath -e -- "$repository_root")"/}
