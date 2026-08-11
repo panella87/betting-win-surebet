@@ -73,7 +73,7 @@ interface B1SettlementReplayManifestGroup {
 export function analyzeB1SettlementReplay(
   input: B1SettlementReplayAnalysisInput,
 ): BoundaryResult<B1SettlementReplayAnalysis> {
-  if (typeof input !== 'object' || input === null) {
+  if (typeof input !== 'object' || input === null || Array.isArray(input)) {
     return blocked(
       'B1_SETTLEMENT_REPLAY_INPUT_INVALID',
       'B1 settlement replay requires structured analysis input.',
@@ -98,6 +98,13 @@ export function analyzeB1SettlementReplay(
       'B1_SETTLEMENT_REPLAY_CANDIDATE_ID_MISMATCH',
       'B1 settlement replay requires the caller candidate id to match fillability simulation evidence.',
       'B1 settlement replay input aligned to the fillability simulation candidate id.',
+    );
+  }
+  if (typeof input.matrix !== 'object' || input.matrix === null || Array.isArray(input.matrix) || !Array.isArray(input.matrix.rows)) {
+    return blocked(
+      'B1_SETTLEMENT_REPLAY_MATRIX_INVALID',
+      'B1 settlement replay requires a structured scenario cash-flow matrix.',
+      'Structured B1 scenario cash-flow matrix with rows.',
     );
   }
 
@@ -265,6 +272,7 @@ function validateB1SettlementFillabilitySimulation(
   if (
     typeof fillabilitySimulation !== 'object'
     || fillabilitySimulation === null
+    || Array.isArray(fillabilitySimulation)
     || typeof fillabilitySimulation.candidateId !== 'string'
     || !Array.isArray(fillabilitySimulation.legs)
   ) {
@@ -306,7 +314,7 @@ function validateB1SettlementReplayRecordShapes(
 function validateB1SettlementReplayRecordShape(
   record: B1SettlementReplayRecord,
 ): BoundaryResult<undefined> {
-  if (typeof record !== 'object' || record === null) {
+  if (typeof record !== 'object' || record === null || Array.isArray(record)) {
     return blocked(
       'B1_SETTLEMENT_REPLAY_RECORD_INVALID',
       'B1 settlement replay requires structured settlement replay records.',
@@ -529,7 +537,7 @@ function validateB1SettlementFillabilitySnapshots(
 function validateB1SettlementFillabilitySnapshot(
   leg: B1FillabilityLegSnapshot,
 ): BoundaryResult<undefined> {
-  if (typeof leg !== 'object' || leg === null) {
+  if (typeof leg !== 'object' || leg === null || Array.isArray(leg)) {
     return blocked(
       'B1_SETTLEMENT_REPLAY_FILLABILITY_SNAPSHOT_INVALID',
       'B1 settlement replay requires structured fillability leg snapshots.',
@@ -804,6 +812,7 @@ function validateB1SettlementResidualExposureEvidence(
   if (
     typeof residualExposure !== 'object'
     || residualExposure === null
+    || Array.isArray(residualExposure)
     || !Array.isArray(residualExposure.exposedLegIds)
     || !Array.isArray(residualExposure.excludedLegIds)
     || !Array.isArray(residualExposure.scenarioNets)
@@ -840,6 +849,7 @@ function validateB1SettlementResidualExposureEvidence(
     if (
       typeof scenarioNet !== 'object'
       || scenarioNet === null
+      || Array.isArray(scenarioNet)
       || typeof scenarioNet.scenarioId !== 'string'
       || typeof scenarioNet.winningSelectionEquivalenceKey !== 'string'
       || typeof scenarioNet.netMinor !== 'bigint'

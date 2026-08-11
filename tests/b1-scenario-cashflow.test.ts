@@ -76,6 +76,45 @@ test('B1 scenario cash-flow builder supports deterministic 3-way terminal portfo
   ]);
 });
 
+test('B1 scenario cash-flow validation rejects malformed top-level row containers without throwing', () => {
+  for (const rows of [undefined, null, {}, 'rows']) {
+    assert.doesNotThrow(() => {
+      const result = validateB1ScenarioCashflowMatrix(rows as never);
+
+      assert.equal(result.ok, false);
+      assert.deepEqual(result.blockers, [
+        {
+          code: 'B1_SCENARIO_CASHFLOW_ROWS_INVALID',
+          message: 'B1 scenario cash-flow rows must be supplied as an array.',
+          evidenceRequired: 'Array of structured B1 scenario cash-flow rows.',
+        },
+      ]);
+    });
+  }
+});
+
+test('B1 scenario cash-flow builder rejects malformed top-level containers without throwing', () => {
+  const malformedScenarios = buildB1ScenarioCashflowMatrix(undefined as never, validThreeWayTerms());
+  assert.equal(malformedScenarios.ok, false);
+  assert.deepEqual(malformedScenarios.blockers, [
+    {
+      code: 'B1_TERMINAL_SCENARIO_INVALID',
+      message: 'B1 scenario cash-flow construction requires terminal scenarios as an array.',
+      evidenceRequired: 'Array of structured B1 terminal scenario inputs.',
+    },
+  ]);
+
+  const malformedTerms = buildB1ScenarioCashflowMatrix(SCENARIOS, null as never);
+  assert.equal(malformedTerms.ok, false);
+  assert.deepEqual(malformedTerms.blockers, [
+    {
+      code: 'B1_SCENARIO_CASHFLOW_LEG_TERMS_INVALID',
+      message: 'B1 scenario cash-flow construction requires leg terms as an array.',
+      evidenceRequired: 'Array of structured B1 scenario cash-flow leg terms.',
+    },
+  ]);
+});
+
 test('B1 scenario cash-flow validation rejects malformed row shape before field access', () => {
   const result = validateB1ScenarioCashflowMatrix(Object.freeze([
     null,
@@ -185,6 +224,21 @@ test('B1 scenario cash-flow validation rejects malformed fixed-point row values 
       ]);
     }
   }
+});
+
+test('B1 scenario cash-flow validation rejects zero stake rows before downstream arithmetic', () => {
+  const result = validateB1ScenarioCashflowMatrix(createTwoWayRows({
+    stakeMinor: 0n,
+  }));
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'B1_STAKE_NOT_POSITIVE',
+      message: 'B1 scenario cash-flow validation requires positive stake rows.',
+      evidenceRequired: 'Positive B1 scenario cash-flow stake amounts in integer minor units.',
+    },
+  ]);
 });
 
 test('B1 scenario cash-flow builder rejects malformed leg-term values before payout arithmetic', () => {

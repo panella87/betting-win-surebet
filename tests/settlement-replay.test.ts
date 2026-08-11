@@ -41,6 +41,14 @@ test('settlement replay consumption rejects missing finality authority and malfo
   const completeSet = loadCompleteSet();
   const settlementRecord = loadSettlementRecord();
 
+  const malformedCompleteSet = consumeStandardBinarySettlementReplay(null as never, settlementRecord);
+  assert.equal(malformedCompleteSet.ok, false);
+  assert.equal(malformedCompleteSet.blockers[0]?.code, 'SETTLEMENT_REPLAY_COMPLETE_SET_INVALID');
+
+  const malformedRecord = consumeStandardBinarySettlementReplay(completeSet, null as never);
+  assert.equal(malformedRecord.ok, false);
+  assert.equal(malformedRecord.blockers[0]?.code, 'SETTLEMENT_REPLAY_RECORD_INVALID');
+
   const missingAuthority = consumeStandardBinarySettlementReplay(completeSet, {
     ...settlementRecord,
     finalityAuthorityId: '   ',
@@ -152,6 +160,22 @@ test('settlement replay sequence resolves idempotent duplicates and later correc
     correctionCount: 1,
     finalityProgressionCount: 0,
   });
+});
+
+test('settlement replay sequence rejects malformed replay containers without throwing', () => {
+  const completeSet = loadCompleteSet();
+  const settlementRecord = loadSettlementRecord();
+
+  const malformedRecords = consumeStandardBinarySettlementReplaySequence(completeSet, null as never);
+  assert.equal(malformedRecords.ok, false);
+  assert.equal(malformedRecords.blockers[0]?.code, 'SETTLEMENT_REPLAY_RECORDS_INVALID');
+
+  const malformedRecord = consumeStandardBinarySettlementReplaySequence(completeSet, [
+    null,
+    settlementRecord,
+  ] as never);
+  assert.equal(malformedRecord.ok, false);
+  assert.equal(malformedRecord.blockers[0]?.code, 'SETTLEMENT_REPLAY_RECORD_INVALID');
 });
 
 test('settlement replay sequence rejects replay idempotency mismatches and authority conflicts', () => {
@@ -272,6 +296,73 @@ test('settlement replay reconciliation closes an incomplete non-atomic group aga
     filledLegIds: ['market-001:yes'],
     excludedLegIds: ['market-001:no'],
   });
+});
+
+test('settlement replay reconciliation rejects malformed top-level containers without throwing', () => {
+  const fixture = createCompleteReconciliationFixture();
+
+  const malformedInput = reconcileNonAtomicSettlementReplay(null as never);
+  assert.equal(malformedInput.ok, false);
+  assert.equal(malformedInput.blockers[0]?.code, 'SETTLEMENT_REPLAY_INPUT_INVALID');
+
+  const malformedRecords = reconcileNonAtomicSettlementReplay({
+    completeSet: fixture.completeSet,
+    completionSimulation: fixture.completionSimulation,
+    stakeVector: fixture.stakeVector,
+    matrix: fixture.input.matrix,
+    settlementRecords: null,
+  } as never);
+  assert.equal(malformedRecords.ok, false);
+  assert.equal(malformedRecords.blockers[0]?.code, 'SETTLEMENT_REPLAY_RECORDS_INVALID');
+
+  const malformedCompletion = reconcileNonAtomicSettlementReplay({
+    completeSet: fixture.completeSet,
+    completionSimulation: null,
+    stakeVector: fixture.stakeVector,
+    matrix: fixture.input.matrix,
+    settlementRecords: [loadSettlementRecord()],
+  } as never);
+  assert.equal(malformedCompletion.ok, false);
+  assert.equal(malformedCompletion.blockers[0]?.code, 'SETTLEMENT_REPLAY_COMPLETION_SIMULATION_INVALID');
+
+  const malformedStakeVector = reconcileNonAtomicSettlementReplay({
+    completeSet: fixture.completeSet,
+    completionSimulation: fixture.completionSimulation,
+    stakeVector: null,
+    matrix: fixture.input.matrix,
+    settlementRecords: [loadSettlementRecord()],
+  } as never);
+  assert.equal(malformedStakeVector.ok, false);
+  assert.equal(malformedStakeVector.blockers[0]?.code, 'SETTLEMENT_REPLAY_STAKE_VECTOR_INVALID');
+
+  const malformedStakeVectorLeg = reconcileNonAtomicSettlementReplay({
+    completeSet: fixture.completeSet,
+    completionSimulation: fixture.completionSimulation,
+    stakeVector: Object.freeze({
+      ...fixture.stakeVector,
+      stakes: Object.freeze([null]),
+    }),
+    matrix: fixture.input.matrix,
+    settlementRecords: [loadSettlementRecord()],
+  } as never);
+  assert.equal(malformedStakeVectorLeg.ok, false);
+  assert.deepEqual(malformedStakeVectorLeg.blockers, [
+    {
+      code: 'SETTLEMENT_REPLAY_STAKE_VECTOR_INVALID',
+      message: 'Settlement replay reconciliation requires structured solved stake-vector leg terms.',
+      evidenceRequired: 'Structured solved stake-vector legs with leg id, unit count, stake quantum and stake total.',
+    },
+  ]);
+
+  const malformedMatrix = reconcileNonAtomicSettlementReplay({
+    completeSet: fixture.completeSet,
+    completionSimulation: fixture.completionSimulation,
+    stakeVector: fixture.stakeVector,
+    matrix: null,
+    settlementRecords: [loadSettlementRecord()],
+  } as never);
+  assert.equal(malformedMatrix.ok, false);
+  assert.equal(malformedMatrix.blockers[0]?.code, 'SETTLEMENT_REPLAY_MATRIX_INVALID');
 });
 
 test('settlement replay reconciliation rejects whole standard-binary scenario omission', () => {
@@ -486,6 +577,51 @@ test('settlement replay reconciliation rejects duplicate solved completion leg s
       code: 'SETTLEMENT_REPLAY_COMPLETION_LEG_COVERAGE_MISMATCH',
       message: 'Settlement replay reconciliation requires exactly one completion leg snapshot per solved stake-vector leg.',
       evidenceRequired: 'Complete and unique completion leg snapshots aligned to solved stake-vector legs.',
+    },
+  ]);
+});
+
+test('settlement replay reconciliation rejects malformed residual exposure evidence without throwing', () => {
+  const fixture = createIncompleteReconciliationFixture();
+
+  const malformedResidualExposure = reconcileNonAtomicSettlementReplay({
+    completeSet: fixture.completeSet,
+    completionSimulation: {
+      completion: fixture.completionSimulation.completion,
+      residualExposure: null,
+    },
+    stakeVector: fixture.stakeVector,
+    matrix: fixture.input.matrix,
+    settlementRecords: [loadSettlementRecord()],
+  } as never);
+  assert.equal(malformedResidualExposure.ok, false);
+  assert.deepEqual(malformedResidualExposure.blockers, [
+    {
+      code: 'SETTLEMENT_REPLAY_RESIDUAL_EXPOSURE_INVALID',
+      message: 'Settlement replay reconciliation requires structured residual exposure evidence.',
+      evidenceRequired: 'Structured residual exposure output from the validated non-atomic completion simulation.',
+    },
+  ]);
+
+  const malformedScenarioNet = reconcileNonAtomicSettlementReplay({
+    completeSet: fixture.completeSet,
+    completionSimulation: {
+      completion: fixture.completionSimulation.completion,
+      residualExposure: Object.freeze({
+        ...fixture.residualExposure,
+        scenarioNets: Object.freeze([null]),
+      }),
+    },
+    stakeVector: fixture.stakeVector,
+    matrix: fixture.input.matrix,
+    settlementRecords: [loadSettlementRecord()],
+  } as never);
+  assert.equal(malformedScenarioNet.ok, false);
+  assert.deepEqual(malformedScenarioNet.blockers, [
+    {
+      code: 'SETTLEMENT_REPLAY_RESIDUAL_EXPOSURE_INVALID',
+      message: 'Settlement replay reconciliation requires structured residual scenario net evidence.',
+      evidenceRequired: 'Structured residual exposure scenario nets.',
     },
   ]);
 });

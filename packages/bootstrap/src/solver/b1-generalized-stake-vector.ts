@@ -94,12 +94,45 @@ export function solveB1GeneralizedStakeVector(
   candidate: B1GrossOpportunityCandidate,
   policy: B1GeneralizedStakeVectorPolicy,
 ): BoundaryResult<B1GeneralizedStakeVectorSolution> {
+  if (typeof candidate !== 'object' || candidate === null || Array.isArray(candidate)) {
+    return blocked(
+      'B1_STAKE_VECTOR_GROSS_CANDIDATE_INVALID',
+      'B1 generalized stake-vector solving requires a structured gross candidate input.',
+      'Structured B1 gross opportunity candidate.',
+    );
+  }
+  if (typeof candidate.ok !== 'boolean') {
+    return blocked(
+      'B1_STAKE_VECTOR_GROSS_CANDIDATE_INVALID',
+      'B1 generalized stake-vector solving requires a typed gross candidate outcome.',
+      'Structured B1 gross opportunity candidate with ok status.',
+    );
+  }
   if (!candidate.ok) {
     return blocked(
       'B1_STAKE_VECTOR_REQUIRES_ACCEPTED_GROSS_CANDIDATE',
       'B1 generalized stake-vector solving requires an accepted gross-only candidate.',
       'Accepted B1 deterministic gross cross-venue candidate.',
     );
+  }
+  if (
+    typeof candidate.candidateId !== 'string'
+    || !Array.isArray(candidate.selectedQuotes)
+  ) {
+    return blocked(
+      'B1_STAKE_VECTOR_GROSS_CANDIDATE_INVALID',
+      'B1 generalized stake-vector solving requires an accepted gross candidate with selected quote evidence.',
+      'Accepted B1 gross candidate with selected quotes.',
+    );
+  }
+  for (const quote of candidate.selectedQuotes) {
+    if (!isB1SelectedGrossQuote(quote)) {
+      return blocked(
+        'B1_STAKE_VECTOR_GROSS_CANDIDATE_INVALID',
+        'B1 generalized stake-vector solving requires structured selected gross quote evidence.',
+        'Accepted B1 gross candidate with structured selected quotes.',
+      );
+    }
   }
 
   const policyValidation = validateB1GeneralizedStakeVectorPolicy(candidate, policy);
@@ -182,11 +215,22 @@ export function solveB1GeneralizedStakeVector(
   );
 }
 
+function isB1SelectedGrossQuote(value: unknown): value is B1AcceptedGrossOpportunityCandidate['selectedQuotes'][number] {
+  return typeof value === 'object'
+    && value !== null
+    && !Array.isArray(value)
+    && typeof (value as { readonly selectionEquivalenceKey?: unknown }).selectionEquivalenceKey === 'string'
+    && typeof (value as { readonly outcomeName?: unknown }).outcomeName === 'string'
+    && typeof (value as { readonly outcomeSide?: unknown }).outcomeSide === 'string'
+    && typeof (value as { readonly venueOrBookmakerId?: unknown }).venueOrBookmakerId === 'string'
+    && typeof (value as { readonly decimalOddsMicro?: unknown }).decimalOddsMicro === 'bigint';
+}
+
 function validateB1GeneralizedStakeVectorPolicy(
   candidate: B1AcceptedGrossOpportunityCandidate,
   policy: B1GeneralizedStakeVectorPolicy,
 ): BoundaryResult<ReadonlyMap<string, B1NormalizedLegConstraint>> {
-  if (typeof policy !== 'object' || policy === null || !Array.isArray(policy.legConstraints)) {
+  if (typeof policy !== 'object' || policy === null || Array.isArray(policy) || !Array.isArray(policy.legConstraints)) {
     return blocked(
       'B1_STAKE_VECTOR_POLICY_MISSING',
       'B1 generalized stake-vector solving requires an explicit policy with leg constraints.',

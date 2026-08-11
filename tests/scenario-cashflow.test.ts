@@ -16,6 +16,23 @@ test('scenario cash-flow matrix rejects empty input', () => {
   assert.equal(validateScenarioCashflowMatrix([]).ok, false);
 });
 
+test('scenario cash-flow matrix rejects malformed top-level row containers without throwing', () => {
+  for (const rows of [undefined, null, {}, 'rows']) {
+    assert.doesNotThrow(() => {
+      const result = validateScenarioCashflowMatrix(rows as never);
+
+      assert.equal(result.ok, false);
+      assert.deepEqual(result.blockers, [
+        {
+          code: 'SCENARIO_CASHFLOW_ROWS_INVALID',
+          message: 'Scenario cash-flow rows must be supplied as an array.',
+          evidenceRequired: 'Array of structured scenario cash-flow rows.',
+        },
+      ]);
+    });
+  }
+});
+
 test('scenario cash-flow matrix accepts non-negative fixed-point rows', () => {
   const result = validateScenarioCashflowMatrix([
     { scenarioId: 'yes_wins', legId: 'leg-yes', stakeMinor: 100n, payoutMinor: 110n, feeMinor: 1n, costMinor: 0n },
@@ -177,6 +194,49 @@ test('scenario cash-flow builder rejects incomplete scenario coverage before row
       code: 'SCENARIO_CASHFLOW_SCENARIOS_INCOMPLETE',
       message: 'Scenario cash-flow builder requires every standard-binary terminal scenario.',
       evidenceRequired: 'Complete YES-wins and NO-wins scenario coverage.',
+    },
+  ]);
+});
+
+test('scenario cash-flow builder rejects malformed top-level containers without throwing', () => {
+  const completeSet = loadCompleteSet();
+
+  const malformedCompleteSet = buildStandardBinaryScenarioCashflowMatrix(null as never, []);
+  assert.equal(malformedCompleteSet.ok, false);
+  assert.deepEqual(malformedCompleteSet.blockers, [
+    {
+      code: 'SCENARIO_CASHFLOW_COMPLETE_SET_INVALID',
+      message: 'Scenario cash-flow builder requires a structured standard-binary complete set.',
+      evidenceRequired: 'Validated standard-binary complete set with scenarios, legs and quote terms.',
+    },
+  ]);
+
+  const malformedTerms = buildStandardBinaryScenarioCashflowMatrix(completeSet, null as never);
+  assert.equal(malformedTerms.ok, false);
+  assert.deepEqual(malformedTerms.blockers, [
+    {
+      code: 'SCENARIO_CASHFLOW_LEG_TERMS_INVALID',
+      message: 'Scenario cash-flow terms must be supplied as an array.',
+      evidenceRequired: 'Array of structured stake and payout terms for each complete-set leg.',
+    },
+  ]);
+
+  const malformedLeg = buildStandardBinaryScenarioCashflowMatrix(
+    {
+      ...completeSet,
+      legs: [null],
+    } as never,
+    [
+      { legId: 'market-001:yes', stakeMinor: 1000000n, payoutMinor: 1510000n },
+      { legId: 'market-001:no', stakeMinor: 1000000n, payoutMinor: 1490000n },
+    ],
+  );
+  assert.equal(malformedLeg.ok, false);
+  assert.deepEqual(malformedLeg.blockers, [
+    {
+      code: 'SCENARIO_CASHFLOW_LEG_INVALID',
+      message: 'Scenario cash-flow builder requires structured complete-set legs.',
+      evidenceRequired: 'Structured standard-binary complete-set legs.',
     },
   ]);
 });

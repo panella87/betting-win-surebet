@@ -1,6 +1,6 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-08-11T04:34:00Z",
+  "generated": "2026-08-11T09:42:27Z",
   "overlay": "bws102-bugfix-hot-upgrade-child-result-wave64",
   "files": [
     {
@@ -1000,8 +1000,8 @@
     },
     {
       "path": "packages/bootstrap/src/economics/b1-net-spread.ts",
-      "sha256": "b657b4d66fa4c3bb157c8ae7fd5585e49531c91a033e976251fcf492d9553736",
-      "size": 9264
+      "sha256": "0f4bbd52d105d75aef34baa43bea49b09b5c6fde8e3afc8ef7f51383cda0947b",
+      "size": 13275
     },
     {
       "path": "packages/bootstrap/src/identity/b1-market-equivalence.ts",
@@ -1140,13 +1140,13 @@
     },
     {
       "path": "packages/bootstrap/src/opportunity/b1-cross-venue-derivation.ts",
-      "sha256": "35538ad7969cbd06904a35b9e639dde65280fdd04872a77c69b0130bdaddf36e",
-      "size": 14055
+      "sha256": "1ff41078fc0b08c335562de718ff6938fde9c0e02cb0be87f5639e8b57494ecc",
+      "size": 16353
     },
     {
       "path": "packages/bootstrap/src/opportunity/b1-gross-spread.ts",
-      "sha256": "cc8df1bfef88310d5fd092f7cd86ebe614b7d292a1a8d241ad274f14b810cd22",
-      "size": 6003
+      "sha256": "48ecd0e6402a23610f9582222e86e31c943948f31b6edf0896a66751edfddafb",
+      "size": 6822
     },
     {
       "path": "packages/bootstrap/src/opportunity/standard-binary-derivation.ts",
@@ -1155,8 +1155,8 @@
     },
     {
       "path": "packages/bootstrap/src/opportunity/standard-binary-stake-solver.ts",
-      "sha256": "f485585ca582e0761520f47925b4caf96908c5032dbcadfa9ee266c12595c12d",
-      "size": 6536
+      "sha256": "a68d4ea89b2ec4a7d83d8e2ced929732522e0e4af5a36efaac4712e88255dc92",
+      "size": 7922
     },
     {
       "path": "packages/bootstrap/src/quotes/b1-capacity-model.ts",
@@ -1225,8 +1225,8 @@
     },
     {
       "path": "packages/bootstrap/src/scenarios/b1-scenario-cashflow.ts",
-      "sha256": "f4d9c39e8d4e5adbbc221a6c3dc05245bbf5399e7fa5616030f347edc5b183c1",
-      "size": 14420
+      "sha256": "d13996375cbba6cb2a5758db4708dcb7a836bc4054f8384bb4656b967552b5e9",
+      "size": 15402
     },
     {
       "path": "packages/bootstrap/src/scenarios/b1-terminal-scenario.ts",
@@ -1240,8 +1240,8 @@
     },
     {
       "path": "packages/bootstrap/src/scenarios/scenario-cashflow.ts",
-      "sha256": "244948ebb058996cb9c092f61228661f152aa20e59fd8ecead25541ed41fcfdc",
-      "size": 7826
+      "sha256": "11c1608a8d1cb5341f6125b9a30af4afd7c22aac64e228545636446b38476228",
+      "size": 9359
     },
     {
       "path": "packages/bootstrap/src/scenarios/terminal-scenario.ts",
@@ -1250,33 +1250,33 @@
     },
     {
       "path": "packages/bootstrap/src/simulation/b1-leg-completion.ts",
-      "sha256": "91dddcfdccfe324b44608bdab945ace77ad1748941c2f3f0d9362c6d6c62abe1",
-      "size": 16208
+      "sha256": "108996f173a566dfb8b72de38c364d3f1d7b3610bcceadbe6c415d94a5fc5b3b",
+      "size": 18757
     },
     {
       "path": "packages/bootstrap/src/simulation/b1-residual-exposure.ts",
-      "sha256": "9365b18bdb1dad92856577966a8ca5760b98c6e5c8f2026ae9122ce926c82ffd",
-      "size": 10110
+      "sha256": "95752368da2da1bae3778ca9eae94892cb06db0876a8655beba9c6127c26a516",
+      "size": 10683
     },
     {
       "path": "packages/bootstrap/src/simulation/b1-settlement-replay.ts",
-      "sha256": "cf2d23412abc84047274b33b20ba2d6532b00932d5da17162560ec10cfb34674",
-      "size": 37847
+      "sha256": "d81e781e3499dfd1ed7a6135daa40e56b3e189124bf6df5cb74974d24df6d09d",
+      "size": 38387
     },
     {
       "path": "packages/bootstrap/src/simulation/b1-void-rule-replay.ts",
-      "sha256": "b9f6f7d48a71a08f24f07dfa7d039b9aca7522b09cbdce5cc32824526abfeb17",
-      "size": 4634
+      "sha256": "107607954dc2d9cf911e51e8e68d39592d4b5d8f06cddfcdb018ed92212ad2fb",
+      "size": 5450
     },
     {
       "path": "packages/bootstrap/src/simulation/leg-completion.ts",
-      "sha256": "96eb40986fd75a34af8192617a71c9200fa06d8f8382c6229ec6eb6039d25e89",
-      "size": 6674
+      "sha256": "934fb7e5b36545bbc393d0c4909cd4fbc5ddaaf2d540819acc222577ba672aa7",
+      "size": 7756
     },
     {
       "path": "packages/bootstrap/src/simulation/non-atomic-completion.ts",
-      "sha256": "f6bc8057cb220aa650c056423f29a42c6466da08fc5cacc53818389fc12329f5",
-      "size": 25543
+      "sha256": "2e3a556d4945b782bdadba28bc0db6f4a19425ed73597950b887473235364cd6",
+      "size": 28696
     },
     {
       "path": "packages/bootstrap/src/simulation/partial-fill.ts",
@@ -1285,18 +1285,18 @@
     },
     {
       "path": "packages/bootstrap/src/simulation/residual-exposure.ts",
-      "sha256": "16e1b866f096c8ca46d328ba527981965d01dc3fae76f972cf8690982275d31d",
-      "size": 10263
+      "sha256": "b79022cc35f342f5002932b083259326c773a12919541af18976684a455d16d4",
+      "size": 11930
     },
     {
       "path": "packages/bootstrap/src/simulation/settlement-replay.ts",
-      "sha256": "b974b77e4f859a264e276d24866621afb3605f86cf6956b6cfdfc53d42639086",
-      "size": 37171
+      "sha256": "1cab14a69a2bb213a1dd99f04cc2461e0009e6cd3a4405f18532b212185f8b31",
+      "size": 44274
     },
     {
       "path": "packages/bootstrap/src/solver/b1-generalized-stake-vector.ts",
-      "sha256": "f2e0c8e53bec9bf97e1c0d4010d2b41bb9ea55ecf5bb7718a83efdab384d33b3",
-      "size": 18072
+      "sha256": "67037ed90339c05f5c61b2afc4a44586b53caa514ab8239abf64059fe5b3b9d8",
+      "size": 20082
     },
     {
       "path": "packages/bootstrap/src/solver/b1-rounding.ts",
@@ -1315,8 +1315,8 @@
     },
     {
       "path": "packages/bootstrap/src/solver/stake-vector.ts",
-      "sha256": "7a41b6d39434e90636bfab75362bdb6bd6f0200648fe8909d52dc9120ca5d39d",
-      "size": 17678
+      "sha256": "925e30d26fcb1f4adf3cd178937d9198f29e5b6ee3cab300c6fe4a8dc8a9f5f7",
+      "size": 19175
     },
     {
       "path": "packages/bootstrap/src/strategy/strategy-ledger.ts",
@@ -2470,8 +2470,8 @@
     },
     {
       "path": "tests/b1-cross-venue-derivation.test.ts",
-      "sha256": "eeeae95f5f15238d81ca84d119346421fbc5bf42ded1d28f33244e438b3c3fe2",
-      "size": 9419
+      "sha256": "69d33842639aefbc36d93485abdab4796a1cf42f2672b748120d91cb41c6242f",
+      "size": 11405
     },
     {
       "path": "tests/b1-false-positive-report.test.ts",
@@ -2480,13 +2480,13 @@
     },
     {
       "path": "tests/b1-generalized-stake-vector.test.ts",
-      "sha256": "b554342f2e88bf4930c73d6a7755d07e8d7ee4e05deb4945f3374d6abf34b3f1",
-      "size": 15367
+      "sha256": "bbedbe86e86aba94d7e3009ef83037eb7e853ff31875fc860393ebf54fdc48cd",
+      "size": 17411
     },
     {
       "path": "tests/b1-gross-spread.test.ts",
-      "sha256": "fad20795ecc8cc69e50f0cb0ce5504d25641990620840103686565407d8f7cd0",
-      "size": 2366
+      "sha256": "59f5eb1a90c251bc7ab4697eac2177278c0c7c7b44a0de07f7b511a83c72c2d1",
+      "size": 4173
     },
     {
       "path": "tests/b1-market-equivalence.test.ts",
@@ -2495,8 +2495,8 @@
     },
     {
       "path": "tests/b1-net-spread.test.ts",
-      "sha256": "99808a0cea16c8c856548432d5f756491acacf3b374ca7bec5fde1f6eb7eaacb",
-      "size": 10856
+      "sha256": "2a4ded52d13f4366cda91b18af6a3575a78aef9e5c41f674cc802db5230265d4",
+      "size": 17908
     },
     {
       "path": "tests/b1-operator-cockpit.test.ts",
@@ -2525,13 +2525,13 @@
     },
     {
       "path": "tests/b1-rejection-model.test.ts",
-      "sha256": "00bdea292472dd8afc28c007474469e29da746a798d278a684d704fb5d83afa0",
-      "size": 16772
+      "sha256": "2b170f593b098d3825e7e80d3664062af4725c0a31b8e035f1f520224753e5fa",
+      "size": 23971
     },
     {
       "path": "tests/b1-residual-exposure.test.ts",
-      "sha256": "005eb37e696d39c808c5826bf601b9548bb3d18d07eda14388879a43aa2446e3",
-      "size": 13062
+      "sha256": "ba7d780ab1c0b7cd60ce86383cc85887fcb8315e215da164fe40bc284f0c100f",
+      "size": 15506
     },
     {
       "path": "tests/b1-runtime-evidence.test.ts",
@@ -2540,13 +2540,18 @@
     },
     {
       "path": "tests/b1-scenario-cashflow.test.ts",
-      "sha256": "25ae63261abb5f2324220fd59afeaa3d59c44a4c6b16e4837a44d548d26704b8",
-      "size": 23944
+      "sha256": "3e0ef6dc72c51d063358cab726a10a71d5611482276ff49e54cf05a1e23b8a15",
+      "size": 26005
     },
     {
       "path": "tests/b1-settlement-replay.test.ts",
-      "sha256": "bec3f93b11a0a32095d3c9e0adc1d55f2e523525c3e1511e0ab8192348bcc31d",
-      "size": 32746
+      "sha256": "0a937ae842b942d1443be193fb5029e22bad25904b9a7909963210aa30538f29",
+      "size": 37530
+    },
+    {
+      "path": "tests/b1-void-rule-replay.test.ts",
+      "sha256": "5d211f947e77088ddce4baf5518e459327b507767471faf8331a9a15517a7d2c",
+      "size": 2023
     },
     {
       "path": "tests/betting-win-adapters.test.ts",
@@ -2825,8 +2830,8 @@
     },
     {
       "path": "tests/leg-completion.test.ts",
-      "sha256": "ea4cbbf56704554e3d97dad980bdeb760687e7ce93472502180d05205f292c52",
-      "size": 6649
+      "sha256": "f3e273e97b4388f9aa45e6cb4197874f90aafdedceebea4892a2293abeadce24",
+      "size": 8155
     },
     {
       "path": "tests/local-engine-backlog-contract.test.ts",
@@ -2850,8 +2855,8 @@
     },
     {
       "path": "tests/non-atomic-completion.test.ts",
-      "sha256": "7ddf7ae6da9f547ab185512a558bd659de147c857e79a706b81aeecdcf917bf1",
-      "size": 14833
+      "sha256": "a0af93ca534c5bca9dd335df08eedefe4d1d14eaf1ac8b5f2106fedf6e9e209b",
+      "size": 17335
     },
     {
       "path": "tests/opportunity-derivation.test.ts",
@@ -2900,8 +2905,8 @@
     },
     {
       "path": "tests/residual-exposure.test.ts",
-      "sha256": "fa830f79cfcdd1074791bfc4fcf3ee5224473010f0f317ec9e60ae7b4dc1535f",
-      "size": 14430
+      "sha256": "b59d3ae4e33568ea8f9df6a8ded9170fad00b9efaa43d47e77d019531bf71633",
+      "size": 16462
     },
     {
       "path": "tests/root-cli-contract.test.ts",
@@ -2950,18 +2955,18 @@
     },
     {
       "path": "tests/scenario-cashflow.test.ts",
-      "sha256": "a47a22a062381e99f29bc1eed15f2912cfb6a371bf820c99e0a4993382d2786d",
-      "size": 11077
+      "sha256": "061816893afbef3033ff859773f3e4e4d12b0bcbd12f0ed1963a8b5104659bf3",
+      "size": 13315
     },
     {
       "path": "tests/settlement-replay.test.ts",
-      "sha256": "5f0802c718291711e3be135f639bf239296dd87c5386abf9a0c4b1eeb6422201",
-      "size": 29050
+      "sha256": "08f09085c872140b1f9a26c7ee4d45e50ac473993c342a045e8d0fd8d7c39fd4",
+      "size": 34805
     },
     {
       "path": "tests/stake-vector.test.ts",
-      "sha256": "e6764681d331829e67cce91448da311c51cfd29d15ef569736961f7ce8ab84d6",
-      "size": 18235
+      "sha256": "bbc02e320695f469b3750f591c2bc706de29cba79039891ebbc38a52c8de3837",
+      "size": 22553
     },
     {
       "path": "tests/standard-binary-backtest.test.ts",
@@ -2970,8 +2975,8 @@
     },
     {
       "path": "tests/standard-binary-stake-solver.test.ts",
-      "sha256": "48fc0c76f910198218ecd9cafa7af6cf7a9baf40d6a2c9dc91065d4b5edd1899",
-      "size": 4869
+      "sha256": "b36b431fcc0242f16067e8a14bd8117505a7d2982c42bc963e48a5a5daa2df54",
+      "size": 5948
     },
     {
       "path": "tests/strategy-ledger.test.ts",

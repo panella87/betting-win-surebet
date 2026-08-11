@@ -55,6 +55,217 @@ test('B1 fillability simulation accepts only fully filled offline stake vectors 
   assert.equal(result.value.liveReadiness, 'not_authorized_bws_900_parked');
 });
 
+test('B1 fillability simulation rejects malformed stake-vector containers without throwing', () => {
+  const malformedInput = simulateB1FillRejectionTimeout(null as never);
+  assert.equal(malformedInput.ok, false);
+  assert.equal(malformedInput.blockers[0]?.code, 'B1_FILLABILITY_INPUT_MISSING');
+
+  const malformedInputArray = simulateB1FillRejectionTimeout([] as never);
+  assert.equal(malformedInputArray.ok, false);
+  assert.equal(malformedInputArray.blockers[0]?.code, 'B1_FILLABILITY_INPUT_MISSING');
+
+  const malformedStakeVector = simulateB1FillRejectionTimeout({
+    stakeVector: null,
+    maxResidualExposureMinor: 0n,
+    events: Object.freeze([
+      Object.freeze({
+        selectionEquivalenceKey: 'event-001:moneyline:away',
+        venueOrBookmakerId: 'venue-b',
+        type: 'fill',
+        occurredAtUtc: '2026-07-01T00:00:03.000Z',
+        stakeMinor: 10_000n,
+      }),
+    ]),
+  } as never);
+  assert.equal(malformedStakeVector.ok, false);
+  assert.equal(malformedStakeVector.blockers[0]?.code, 'B1_FILLABILITY_REQUIRES_ACCEPTED_STAKE_VECTOR');
+
+  const malformedStakeVectorArray = simulateB1FillRejectionTimeout({
+    stakeVector: [],
+    maxResidualExposureMinor: 0n,
+    events: Object.freeze([]),
+  } as never);
+  assert.equal(malformedStakeVectorArray.ok, false);
+  assert.equal(malformedStakeVectorArray.blockers[0]?.code, 'B1_FILLABILITY_REQUIRES_ACCEPTED_STAKE_VECTOR');
+
+  const malformedEvents = simulateB1FillRejectionTimeout({
+    stakeVector: solvedStakeVector(),
+    maxResidualExposureMinor: 0n,
+    events: null,
+  } as never);
+  assert.equal(malformedEvents.ok, false);
+  assert.equal(malformedEvents.blockers[0]?.code, 'B1_FILLABILITY_INPUT_MISSING');
+
+  for (const malformedEvent of [null, undefined, {}, []]) {
+    const malformedEventEntry = simulateB1FillRejectionTimeout({
+      stakeVector: solvedStakeVector(),
+      maxResidualExposureMinor: 0n,
+      events: Object.freeze([malformedEvent]) as never,
+    });
+    assert.equal(malformedEventEntry.ok, false);
+    assert.equal(malformedEventEntry.blockers[0]?.code, 'B1_FILLABILITY_EVENT_INVALID');
+  }
+
+  const malformedStakes = simulateB1FillRejectionTimeout({
+    stakeVector: Object.freeze({
+      ...solvedStakeVector(),
+      stakes: null,
+    }),
+    maxResidualExposureMinor: 0n,
+    events: Object.freeze([
+      Object.freeze({
+        selectionEquivalenceKey: 'event-001:moneyline:away',
+        venueOrBookmakerId: 'venue-b',
+        type: 'fill',
+        occurredAtUtc: '2026-07-01T00:00:03.000Z',
+        stakeMinor: 10_000n,
+      }),
+    ]),
+  } as never);
+  assert.equal(malformedStakes.ok, false);
+  assert.equal(malformedStakes.blockers[0]?.code, 'B1_FILLABILITY_STAKE_VECTOR_INVALID');
+
+  const malformedMatrix = simulateB1FillRejectionTimeout({
+    stakeVector: Object.freeze({
+      ...solvedStakeVector(),
+      scenarioCashflowMatrix: null,
+    }),
+    maxResidualExposureMinor: 0n,
+    events: Object.freeze([
+      Object.freeze({
+        selectionEquivalenceKey: 'event-001:moneyline:away',
+        venueOrBookmakerId: 'venue-b',
+        type: 'fill',
+        occurredAtUtc: '2026-07-01T00:00:03.000Z',
+        stakeMinor: 10_000n,
+      }),
+    ]),
+  } as never);
+  assert.equal(malformedMatrix.ok, false);
+  assert.equal(malformedMatrix.blockers[0]?.code, 'B1_FILLABILITY_STAKE_VECTOR_INVALID');
+
+  const malformedMatrixRows = simulateB1FillRejectionTimeout({
+    stakeVector: Object.freeze({
+      ...solvedStakeVector(),
+      scenarioCashflowMatrix: Object.freeze({
+        rows: Object.freeze([null]),
+      }),
+    }),
+    maxResidualExposureMinor: 0n,
+    events: Object.freeze([
+      Object.freeze({
+        selectionEquivalenceKey: 'event-001:moneyline:away',
+        venueOrBookmakerId: 'venue-b',
+        type: 'fill',
+        occurredAtUtc: '2026-07-01T00:00:03.000Z',
+        stakeMinor: 10_000n,
+      }),
+      Object.freeze({
+        selectionEquivalenceKey: 'event-001:moneyline:home',
+        venueOrBookmakerId: 'venue-a',
+        type: 'fill',
+        occurredAtUtc: '2026-07-01T00:00:04.000Z',
+        stakeMinor: 10_000n,
+      }),
+    ]),
+  } as never);
+  assert.equal(malformedMatrixRows.ok, false);
+  assert.equal(malformedMatrixRows.blockers[0]?.code, 'B1_SCENARIO_CASHFLOW_ROW_INVALID');
+
+  const malformedAcceptedShape = simulateB1FillRejectionTimeout({
+    stakeVector: Object.freeze({
+      ok: true,
+      candidateId: 'candidate',
+      stakes: Object.freeze([null]),
+      scenarioCashflowMatrix: solvedStakeVector().scenarioCashflowMatrix,
+    }),
+    maxResidualExposureMinor: 0n,
+    events: Object.freeze([
+      Object.freeze({
+        selectionEquivalenceKey: 'event-001:moneyline:away',
+        venueOrBookmakerId: 'venue-b',
+        type: 'fill',
+        occurredAtUtc: '2026-07-01T00:00:03.000Z',
+        stakeMinor: 10_000n,
+      }),
+    ]),
+  } as never);
+  assert.equal(malformedAcceptedShape.ok, false);
+  assert.equal(malformedAcceptedShape.blockers[0]?.code, 'B1_FILLABILITY_STAKE_VECTOR_INVALID');
+
+  const malformedStakeArray = simulateB1FillRejectionTimeout({
+    stakeVector: Object.freeze({
+      ok: true,
+      candidateId: 'candidate',
+      stakes: Object.freeze([[]]),
+      scenarioCashflowMatrix: solvedStakeVector().scenarioCashflowMatrix,
+    }),
+    maxResidualExposureMinor: 0n,
+    events: Object.freeze([
+      Object.freeze({
+        selectionEquivalenceKey: 'event-001:moneyline:away',
+        venueOrBookmakerId: 'venue-b',
+        type: 'fill',
+        occurredAtUtc: '2026-07-01T00:00:03.000Z',
+        stakeMinor: 10_000n,
+      }),
+    ]),
+  } as never);
+  assert.equal(malformedStakeArray.ok, false);
+  assert.equal(malformedStakeArray.blockers[0]?.code, 'B1_FILLABILITY_STAKE_VECTOR_INVALID');
+
+  const solved = solvedStakeVector();
+  const firstStake = solved.stakes[0];
+  assert.ok(firstStake);
+  const malformedSelection = simulateB1FillRejectionTimeout({
+    stakeVector: Object.freeze({
+      ...solved,
+      stakes: Object.freeze([
+        Object.freeze({
+          ...firstStake,
+          selectionEquivalenceKey: '',
+        }),
+      ]),
+    }),
+    maxResidualExposureMinor: 0n,
+    events: Object.freeze([
+      Object.freeze({
+        selectionEquivalenceKey: 'event-001:moneyline:away',
+        venueOrBookmakerId: 'venue-b',
+        type: 'fill',
+        occurredAtUtc: '2026-07-01T00:00:03.000Z',
+        stakeMinor: 10_000n,
+      }),
+    ]),
+  } as never);
+  assert.equal(malformedSelection.ok, false);
+  assert.equal(malformedSelection.blockers[0]?.code, 'B1_SELECTION_EQUIVALENCE_MISSING');
+
+  const malformedStake = simulateB1FillRejectionTimeout({
+    stakeVector: Object.freeze({
+      ...solved,
+      stakes: Object.freeze([
+        Object.freeze({
+          ...firstStake,
+          stakeMinor: 0n,
+        }),
+      ]),
+    }),
+    maxResidualExposureMinor: 0n,
+    events: Object.freeze([
+      Object.freeze({
+        selectionEquivalenceKey: 'event-001:moneyline:away',
+        venueOrBookmakerId: 'venue-b',
+        type: 'fill',
+        occurredAtUtc: '2026-07-01T00:00:03.000Z',
+        stakeMinor: 10_000n,
+      }),
+    ]),
+  } as never);
+  assert.equal(malformedStake.ok, false);
+  assert.equal(malformedStake.blockers[0]?.code, 'B1_STAKE_NOT_POSITIVE');
+});
+
 test('B1 rejection and timeout simulation reports incomplete legs and in-limit residual exposure without unwind', () => {
   const result = simulateB1FillRejectionTimeout({
     stakeVector: solvedStakeVector(),

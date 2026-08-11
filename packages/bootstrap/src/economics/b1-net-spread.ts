@@ -81,12 +81,30 @@ export function evaluateB1NetEconomics(
   candidate: B1GrossOpportunityCandidate,
   policy: B1NetEconomicsPolicy,
 ): BoundaryResult<B1AcceptedNetOpportunityCandidate> {
-  if (!candidate.ok) {
+  if (typeof candidate !== 'object' || candidate === null || Array.isArray(candidate)) {
+    return blocked(
+      'B1_NET_GROSS_CANDIDATE_INVALID',
+      'B1 net economics requires a structured gross candidate input.',
+      'Structured B1 gross opportunity candidate.',
+    );
+  }
+  if (typeof candidate.ok !== 'boolean') {
+    return blocked(
+      'B1_NET_GROSS_CANDIDATE_INVALID',
+      'B1 net economics requires a typed gross candidate outcome.',
+      'Structured B1 gross opportunity candidate with ok status.',
+    );
+  }
+  if (candidate.ok !== true) {
     return blocked(
       'B1_NET_REQUIRES_ACCEPTED_GROSS_CANDIDATE',
       'B1 net economics requires an accepted gross-only candidate before net evaluation.',
       'Accepted B1 deterministic gross cross-venue candidate.',
     );
+  }
+  const candidateShape = validateAcceptedB1GrossCandidateShape(candidate);
+  if (!candidateShape.ok) {
+    return candidateShape;
   }
   const stakeAssumptions = normalizeB1StakeAssumptions(policy);
   if (!stakeAssumptions.ok) {
@@ -197,7 +215,7 @@ export function evaluateB1NetEconomics(
 }
 
 function normalizeB1StakeAssumptions(policy: B1NetEconomicsPolicy): BoundaryResult<ReadonlyMap<string, bigint>> {
-  if (typeof policy !== 'object' || policy === null || !Array.isArray(policy.stakeAssumptions)) {
+  if (typeof policy !== 'object' || policy === null || Array.isArray(policy) || !Array.isArray(policy.stakeAssumptions)) {
     return blocked(
       'B1_NET_POLICY_MISSING',
       'B1 net economics requires an explicit policy with stake assumptions.',
@@ -214,6 +232,19 @@ function normalizeB1StakeAssumptions(policy: B1NetEconomicsPolicy): BoundaryResu
 
   const stakes = new Map<string, bigint>();
   for (const assumption of policy.stakeAssumptions) {
+    if (
+      typeof assumption !== 'object'
+      || assumption === null
+      || Array.isArray(assumption)
+      || typeof assumption.selectionEquivalenceKey !== 'string'
+      || typeof assumption.stakeMinor !== 'bigint'
+    ) {
+      return blocked(
+        'B1_NET_STAKE_INVALID',
+        'B1 net stake assumptions require structured selection and bigint stake fields.',
+        'Structured B1 stake assumptions with bigint minor-unit stakes.',
+      );
+    }
     if (assumption.selectionEquivalenceKey.length === 0) {
       return blocked(
         'B1_NET_STAKE_SELECTION_MISSING',
@@ -239,6 +270,80 @@ function normalizeB1StakeAssumptions(policy: B1NetEconomicsPolicy): BoundaryResu
   }
 
   return accepted(stakes);
+}
+
+function validateAcceptedB1GrossCandidateShape(
+  candidate: B1AcceptedGrossOpportunityCandidate,
+): BoundaryResult<undefined> {
+  if (
+    typeof candidate.candidateId !== 'string'
+    || typeof candidate.grossSpreadPpm !== 'bigint'
+    || !Array.isArray(candidate.selectedQuotes)
+    || !Array.isArray(candidate.synchronizedQuotePairs)
+  ) {
+    return blocked(
+      'B1_NET_GROSS_CANDIDATE_INVALID',
+      'B1 net economics requires an accepted gross candidate with selected quote evidence.',
+      'Accepted B1 gross candidate with selected quotes and synchronized quote pairs.',
+    );
+  }
+  if (candidate.selectedQuotes.length === 0 || candidate.synchronizedQuotePairs.length === 0) {
+    return blocked(
+      'B1_NET_GROSS_CANDIDATE_INVALID',
+      'B1 net economics requires non-empty selected quote and synchronization evidence.',
+      'Accepted B1 gross candidate with non-empty selected quotes and synchronized quote pairs.',
+    );
+  }
+  for (const quote of candidate.selectedQuotes) {
+    if (
+      typeof quote !== 'object'
+      || quote === null
+      || Array.isArray(quote)
+      || typeof quote.selectionEquivalenceKey !== 'string'
+      || typeof quote.outcomeName !== 'string'
+      || typeof quote.outcomeSide !== 'string'
+      || typeof quote.venueOrBookmakerId !== 'string'
+      || typeof quote.decimalOddsMicro !== 'bigint'
+    ) {
+      return blocked(
+        'B1_NET_GROSS_CANDIDATE_INVALID',
+        'B1 net economics requires structured selected gross quote evidence.',
+        'Accepted B1 gross candidate with structured selected quotes.',
+      );
+    }
+  }
+  for (const pair of candidate.synchronizedQuotePairs) {
+    if (
+      typeof pair !== 'object'
+      || pair === null
+      || Array.isArray(pair)
+      || typeof pair.first !== 'object'
+      || pair.first === null
+      || Array.isArray(pair.first)
+      || typeof pair.second !== 'object'
+      || pair.second === null
+      || Array.isArray(pair.second)
+      || typeof pair.first.row !== 'object'
+      || pair.first.row === null
+      || Array.isArray(pair.first.row)
+      || typeof pair.second.row !== 'object'
+      || pair.second.row === null
+      || Array.isArray(pair.second.row)
+      || typeof pair.first.row.selectionEquivalenceKey !== 'string'
+      || typeof pair.first.row.venueOrBookmakerId !== 'string'
+      || typeof pair.first.quoteAgeMs !== 'bigint'
+      || typeof pair.second.row.selectionEquivalenceKey !== 'string'
+      || typeof pair.second.row.venueOrBookmakerId !== 'string'
+      || typeof pair.second.quoteAgeMs !== 'bigint'
+    ) {
+      return blocked(
+        'B1_NET_GROSS_CANDIDATE_INVALID',
+        'B1 net economics requires structured synchronized quote pair evidence.',
+        'Accepted B1 gross candidate with structured synchronized quote pairs.',
+      );
+    }
+  }
+  return accepted(undefined);
 }
 
 function findSelectedSynchronizedQuote(

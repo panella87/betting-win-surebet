@@ -99,6 +99,55 @@ test('B1 cross-venue derivation emits deterministic gross-only candidates', () =
   assert.equal(Object.hasOwn(candidate, 'executable'), false);
 });
 
+test('B1 cross-venue derivation rejects malformed top-level row containers without throwing', () => {
+  const malformedRows = deriveB1CrossVenueGrossOpportunityCandidates(null as never, quotePolicy());
+  assert.equal(malformedRows.ok, false);
+  assert.deepEqual(malformedRows.blockers, [
+    {
+      code: 'B1_GROSS_INPUT_ROWS_INVALID',
+      message: 'B1 gross derivation requires multi-venue market rows as an array.',
+      evidenceRequired: 'Array of B1 multi-venue market rows.',
+    },
+  ]);
+
+  for (const malformedEntry of [null, undefined, {}, []]) {
+    const malformedRow = deriveB1CrossVenueGrossOpportunityCandidates(Object.freeze([
+      malformedEntry,
+    ] as never), quotePolicy());
+    assert.equal(malformedRow.ok, false);
+    assert.deepEqual(malformedRow.blockers, [
+      {
+        code: 'B1_GROSS_INPUT_ROW_INVALID',
+        message: 'B1 gross derivation requires structured multi-venue market row inputs.',
+        evidenceRequired: 'Structured B1 multi-venue market rows.',
+      },
+    ]);
+  }
+
+  const [homeA] = fixturePair();
+  const malformedRowField = deriveB1CrossVenueGrossOpportunityCandidates(Object.freeze([
+    cloneRow(homeA, { quoteAgeMs: '100' as never }),
+  ]), quotePolicy());
+  assert.equal(malformedRowField.ok, false);
+  assert.deepEqual(malformedRowField.blockers, [
+    {
+      code: 'B1_GROSS_INPUT_ROW_INVALID',
+      message: 'B1 gross derivation requires structured multi-venue market row inputs.',
+      evidenceRequired: 'Structured B1 multi-venue market rows.',
+    },
+  ]);
+});
+
+test('B1 cross-venue derivation carries malformed quote-policy blockers without throwing', () => {
+  const result = deriveB1CrossVenueGrossOpportunityCandidates(twoOutcomeGrossRows(), null as never);
+  assert.equal(result.ok, true);
+  assert.equal(result.value.length, 1);
+  const candidate = result.value[0];
+  assert.ok(candidate);
+  assert.equal(candidate.ok, false);
+  assert.equal(candidate.blockers[0]?.code, 'B1_QUOTE_SYNC_POLICY_MISSING');
+});
+
 test('B1 cross-venue derivation blocks incomplete terminal outcome sets', () => {
   const [homeA, homeB] = fixturePair();
 

@@ -22,6 +22,25 @@ export function buildStandardBinaryStakeVectorInput(
   completeSet: StandardBinaryCompleteSet,
   options: StandardBinaryStakeVectorSolveOptions,
 ): BoundaryResult<StakeVectorInputContract> {
+  if (!isStandardBinaryCompleteSetContainer(completeSet)) {
+    return blocked(
+      'STANDARD_BINARY_SOLVER_INPUT_INVALID',
+      'Stake solving requires a structured standard-binary complete-set input.',
+      'Structured standard-binary complete-set with legs and YES/NO quote records.',
+    );
+  }
+  if (
+    typeof options !== 'object'
+    || options === null
+    || Array.isArray(options)
+    || typeof options.observedNowMs !== 'number'
+  ) {
+    return blocked(
+      'STANDARD_BINARY_SOLVER_OPTIONS_INVALID',
+      'Stake solving requires structured quote freshness options.',
+      'Structured stake-vector solve options with observedNowMs.',
+    );
+  }
   const maxQuoteAgeMs = options.maxQuoteAgeMs ?? DEFAULT_STANDARD_BINARY_MAX_QUOTE_AGE_MS;
   const freshness = validateCompleteSetQuoteFreshness(completeSet, options.observedNowMs, maxQuoteAgeMs);
   if (!freshness.ok) {
@@ -66,6 +85,26 @@ export function solveStandardBinaryCompleteSetStakeVector(
     return input;
   }
   return solveStandardBinaryStakeVector(input.value);
+}
+
+function isStandardBinaryCompleteSetContainer(value: unknown): value is StandardBinaryCompleteSet {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return false;
+  }
+  const completeSet = value as {
+    readonly legs?: unknown;
+    readonly quotesByOutcome?: {
+      readonly yes?: unknown;
+      readonly no?: unknown;
+    };
+  };
+  return Array.isArray(completeSet.legs)
+    && typeof completeSet.quotesByOutcome === 'object'
+    && completeSet.quotesByOutcome !== null
+    && typeof completeSet.quotesByOutcome.yes === 'object'
+    && completeSet.quotesByOutcome.yes !== null
+    && typeof completeSet.quotesByOutcome.no === 'object'
+    && completeSet.quotesByOutcome.no !== null;
 }
 
 function validateCompleteSetQuoteFreshness(

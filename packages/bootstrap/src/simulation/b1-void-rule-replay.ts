@@ -24,6 +24,13 @@ export interface B1VoidRuleReplayAnalysis {
 export function validateB1VoidRuleReplay(
   records: readonly B1VoidRuleReplayRecord[],
 ): BoundaryResult<B1VoidRuleReplayAnalysis> {
+  if (!Array.isArray(records)) {
+    return blocked(
+      'B1_SETTLEMENT_REPLAY_RECORD_INVALID',
+      'B1 void-rule replay requires settlement records as an array.',
+      'Array of structured B1 settlement replay records.',
+    );
+  }
   if (records.length === 0) {
     return blocked(
       'B1_SETTLEMENT_REPLAY_MISSING',
@@ -81,6 +88,22 @@ export function validateB1VoidRuleReplay(
 function validateB1VoidRuleReplayRecord(
   record: B1VoidRuleReplayRecord,
 ): BoundaryResult<B1VoidRuleReplayRecord> {
+  if (
+    typeof record !== 'object'
+    || record === null
+    || Array.isArray(record)
+    || typeof record.selectionEquivalenceKey !== 'string'
+    || typeof record.venueOrBookmakerId !== 'string'
+    || typeof record.settlementRuleVersion !== 'string'
+    || typeof record.settlementCompatibilityFlag !== 'string'
+    || typeof record.voidRuleId !== 'string'
+  ) {
+    return blocked(
+      'B1_SETTLEMENT_REPLAY_RECORD_INVALID',
+      'B1 void-rule replay requires structured settlement replay records.',
+      'Structured B1 settlement replay record fields.',
+    );
+  }
   if (record.selectionEquivalenceKey.length === 0) {
     return blocked(
       'B1_SELECTION_EQUIVALENCE_MISSING',

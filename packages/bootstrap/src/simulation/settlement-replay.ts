@@ -73,6 +73,15 @@ export function consumeStandardBinarySettlementReplay(
   completeSet: StandardBinaryCompleteSet,
   settlementRecord: BettingWinSettlementRecord,
 ): BoundaryResult<ConsumedSettlementReplay> {
+  const completeSetValidation = validateSettlementReplayCompleteSet(completeSet);
+  if (!completeSetValidation.ok) {
+    return completeSetValidation;
+  }
+  const settlementRecordValidation = validateSettlementReplayRecordShape(settlementRecord);
+  if (!settlementRecordValidation.ok) {
+    return settlementRecordValidation;
+  }
+
   if (settlementRecord.canonicalMarketId !== completeSet.canonicalMarketId) {
     return blocked(
       'SETTLEMENT_REPLAY_MARKET_IDENTITY_MISMATCH',
@@ -157,6 +166,63 @@ export function consumeStandardBinarySettlementReplay(
   );
 }
 
+function validateSettlementReplayCompleteSet(
+  completeSet: StandardBinaryCompleteSet,
+): BoundaryResult<undefined> {
+  if (
+    typeof completeSet !== 'object'
+    || completeSet === null
+    || Array.isArray(completeSet)
+    || typeof completeSet.canonicalMarketId !== 'string'
+    || typeof completeSet.ruleProfileId !== 'string'
+    || typeof completeSet.resultSourceId !== 'string'
+    || typeof completeSet.finalityPolicyId !== 'string'
+    || !Array.isArray(completeSet.scenarioIds)
+  ) {
+    return blocked(
+      'SETTLEMENT_REPLAY_COMPLETE_SET_INVALID',
+      'Settlement replay consumption requires a structured standard-binary complete set.',
+      'Structured standard-binary complete set with market, rule, result, finality and scenario evidence.',
+    );
+  }
+  for (const scenarioId of completeSet.scenarioIds) {
+    if (typeof scenarioId !== 'string') {
+      return blocked(
+        'SETTLEMENT_REPLAY_COMPLETE_SET_INVALID',
+        'Settlement replay consumption requires complete-set scenario ids as strings.',
+        'Structured standard-binary complete set with string scenario ids.',
+      );
+    }
+  }
+  return accepted(undefined);
+}
+
+function validateSettlementReplayRecordShape(
+  settlementRecord: BettingWinSettlementRecord,
+): BoundaryResult<undefined> {
+  if (
+    typeof settlementRecord !== 'object'
+    || settlementRecord === null
+    || Array.isArray(settlementRecord)
+    || typeof settlementRecord.canonicalMarketId !== 'string'
+    || typeof settlementRecord.ruleProfileId !== 'string'
+    || typeof settlementRecord.resultSourceId !== 'string'
+    || typeof settlementRecord.finalityPolicyId !== 'string'
+    || typeof settlementRecord.acceptanceStatus !== 'string'
+    || typeof settlementRecord.finalityAuthorityId !== 'string'
+    || typeof settlementRecord.replayManifestHash !== 'string'
+    || typeof settlementRecord.replayAcceptedAt !== 'string'
+    || typeof settlementRecord.finalOutcome !== 'string'
+  ) {
+    return blocked(
+      'SETTLEMENT_REPLAY_RECORD_INVALID',
+      'Settlement replay consumption requires a structured settlement replay record.',
+      'Structured accepted local settlement replay fixture record.',
+    );
+  }
+  return accepted(undefined);
+}
+
 function isIsoTimestamp(value: string): boolean {
   if (!ISO_TIMESTAMP_REGEX.test(value)) {
     return false;
@@ -169,6 +235,13 @@ export function consumeStandardBinarySettlementReplaySequence(
   completeSet: StandardBinaryCompleteSet,
   settlementRecords: readonly BettingWinSettlementRecord[],
 ): BoundaryResult<ResolvedSettlementReplaySequence> {
+  if (!Array.isArray(settlementRecords)) {
+    return blocked(
+      'SETTLEMENT_REPLAY_RECORDS_INVALID',
+      'Settlement replay consumption requires settlement records as an array.',
+      'Array of accepted local settlement replay fixture records.',
+    );
+  }
   if (settlementRecords.length === 0) {
     return blocked(
       'SETTLEMENT_REPLAY_MISSING',
@@ -261,6 +334,20 @@ export function consumeStandardBinarySettlementReplaySequence(
 export function reconcileNonAtomicSettlementReplay(
   input: NonAtomicSettlementReplayReconciliationInput,
 ): BoundaryResult<NonAtomicSettlementReplayReconciliation> {
+  if (typeof input !== 'object' || input === null || Array.isArray(input)) {
+    return blocked(
+      'SETTLEMENT_REPLAY_INPUT_INVALID',
+      'Settlement replay reconciliation requires structured reconciliation input.',
+      'Structured non-atomic settlement replay reconciliation input.',
+    );
+  }
+  if (typeof input.completionSimulation !== 'object' || input.completionSimulation === null || Array.isArray(input.completionSimulation)) {
+    return blocked(
+      'SETTLEMENT_REPLAY_COMPLETION_SIMULATION_INVALID',
+      'Settlement replay reconciliation requires structured completion simulation evidence.',
+      'Structured non-atomic completion simulation evidence.',
+    );
+  }
   const resolvedReplay = consumeStandardBinarySettlementReplaySequence(input.completeSet, input.settlementRecords);
   if (!resolvedReplay.ok) {
     return resolvedReplay;
@@ -361,6 +448,10 @@ function validateResidualExposureFreshness(
   legs: readonly NonAtomicPaperLegSnapshot[],
   legClassification: { readonly filledLegIds: readonly string[]; readonly excludedLegIds: readonly string[] },
 ): BoundaryResult<undefined> {
+  const residualExposureShape = validateSettlementResidualExposureEvidence(residualExposure);
+  if (!residualExposureShape.ok) {
+    return residualExposureShape;
+  }
   if (residualExposure.groupState !== 'group_incomplete') {
     return blocked(
       'SETTLEMENT_REPLAY_RESIDUAL_EXPOSURE_STALE',
@@ -436,6 +527,62 @@ function validateResidualExposureFreshness(
   return accepted(undefined);
 }
 
+function validateSettlementResidualExposureEvidence(
+  residualExposure: NonAtomicResidualExposureAnalysis,
+): BoundaryResult<undefined> {
+  if (
+    typeof residualExposure !== 'object'
+    || residualExposure === null
+    || Array.isArray(residualExposure)
+    || typeof residualExposure.groupState !== 'string'
+    || !Array.isArray(residualExposure.exposedLegIds)
+    || !Array.isArray(residualExposure.excludedLegIds)
+    || !Array.isArray(residualExposure.scenarioNets)
+    || typeof residualExposure.worstCaseNetMinor !== 'bigint'
+    || typeof residualExposure.worstCaseScenarioId !== 'string'
+  ) {
+    return blocked(
+      'SETTLEMENT_REPLAY_RESIDUAL_EXPOSURE_INVALID',
+      'Settlement replay reconciliation requires structured residual exposure evidence.',
+      'Structured residual exposure output from the validated non-atomic completion simulation.',
+    );
+  }
+  for (const legId of residualExposure.exposedLegIds) {
+    if (typeof legId !== 'string') {
+      return blocked(
+        'SETTLEMENT_REPLAY_RESIDUAL_EXPOSURE_INVALID',
+        'Settlement replay reconciliation requires residual exposed leg ids as strings.',
+        'Structured residual exposure exposed leg ids.',
+      );
+    }
+  }
+  for (const legId of residualExposure.excludedLegIds) {
+    if (typeof legId !== 'string') {
+      return blocked(
+        'SETTLEMENT_REPLAY_RESIDUAL_EXPOSURE_INVALID',
+        'Settlement replay reconciliation requires residual excluded leg ids as strings.',
+        'Structured residual exposure excluded leg ids.',
+      );
+    }
+  }
+  for (const scenarioNet of residualExposure.scenarioNets) {
+    if (
+      typeof scenarioNet !== 'object'
+      || scenarioNet === null
+      || Array.isArray(scenarioNet)
+      || typeof scenarioNet.scenarioId !== 'string'
+      || typeof scenarioNet.netMinor !== 'bigint'
+    ) {
+      return blocked(
+        'SETTLEMENT_REPLAY_RESIDUAL_EXPOSURE_INVALID',
+        'Settlement replay reconciliation requires structured residual scenario net evidence.',
+        'Structured residual exposure scenario nets.',
+      );
+    }
+  }
+  return accepted(undefined);
+}
+
 function buildExpectedResidualExposure(
   legs: readonly NonAtomicPaperLegSnapshot[],
   matrixTerms: MatrixTerms,
@@ -508,6 +655,20 @@ function validateMatrixTerms(
   stakeVector: StakeVectorSolution,
   matrix: ScenarioCashflowMatrix,
 ): BoundaryResult<MatrixTerms> {
+  if (typeof stakeVector !== 'object' || stakeVector === null || Array.isArray(stakeVector) || !Array.isArray(stakeVector.stakes)) {
+    return blocked(
+      'SETTLEMENT_REPLAY_STAKE_VECTOR_INVALID',
+      'Settlement replay reconciliation requires a structured solved stake-vector.',
+      'Structured solved stake-vector with solved leg stakes.',
+    );
+  }
+  if (typeof matrix !== 'object' || matrix === null || Array.isArray(matrix) || !Array.isArray(matrix.rows)) {
+    return blocked(
+      'SETTLEMENT_REPLAY_MATRIX_INVALID',
+      'Settlement replay reconciliation requires a structured scenario cash-flow matrix.',
+      'Structured scenario cash-flow matrix with rows.',
+    );
+  }
   if (stakeVector.stakes.length === 0) {
     return blocked(
       'NON_ATOMIC_COMPLETION_STAKES_EMPTY',
@@ -518,6 +679,21 @@ function validateMatrixTerms(
 
   const plansByLegId = new Map<string, StakePlan>();
   for (const stake of stakeVector.stakes) {
+    if (
+      typeof stake !== 'object'
+      || stake === null
+      || Array.isArray(stake)
+      || typeof stake.legId !== 'string'
+      || typeof stake.unitCount !== 'bigint'
+      || typeof stake.stakeQuantumMinor !== 'bigint'
+      || typeof stake.stakeMinor !== 'bigint'
+    ) {
+      return blocked(
+        'SETTLEMENT_REPLAY_STAKE_VECTOR_INVALID',
+        'Settlement replay reconciliation requires structured solved stake-vector leg terms.',
+        'Structured solved stake-vector legs with leg id, unit count, stake quantum and stake total.',
+      );
+    }
     if (stake.legId.trim().length === 0) {
       return blocked(
         'NON_ATOMIC_COMPLETION_LEG_ID_MISSING',
@@ -562,8 +738,9 @@ function validateMatrixTerms(
   if (!matrixValidation.ok) {
     return matrixValidation;
   }
+  const matrixRows = matrixValidation.value.rows;
 
-  const scenarioIds = [...new Set(matrix.rows.map((row) => row.scenarioId))].sort();
+  const scenarioIds = [...new Set(matrixRows.map((row) => row.scenarioId))].sort();
   if (scenarioIds.length === 0) {
     return blocked(
       'NON_ATOMIC_COMPLETION_SCENARIOS_MISSING',
@@ -574,7 +751,7 @@ function validateMatrixTerms(
 
   const contributionByLegAndScenarioId = new Map<string, ReadonlyMap<string, bigint>>();
   for (const [legId, plan] of plansByLegId) {
-    const rowsForLeg = matrix.rows.filter((row) => row.legId === legId);
+    const rowsForLeg = matrixRows.filter((row) => row.legId === legId);
     if (rowsForLeg.length !== scenarioIds.length) {
       return blocked(
         'NON_ATOMIC_COMPLETION_SCENARIOS_MISSING',
@@ -639,7 +816,7 @@ function validateMatrixTerms(
     contributionByLegAndScenarioId.set(legId, contributionsByScenarioId as ReadonlyMap<string, bigint>);
   }
 
-  const matrixLegIds = new Set(matrix.rows.map((row) => row.legId));
+  const matrixLegIds = new Set(matrixRows.map((row) => row.legId));
   for (const legId of matrixLegIds) {
     if (!plansByLegId.has(legId)) {
       return blocked(

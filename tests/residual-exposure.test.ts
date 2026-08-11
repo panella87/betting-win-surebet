@@ -30,6 +30,50 @@ test('residual exposure analysis returns deterministic scenario nets for an inco
   assert.equal(result.value.worstCaseNetMinor, -105n);
 });
 
+test('residual exposure analysis rejects malformed top-level containers without throwing', () => {
+  const malformedInput = analyzeResidualExposure(null as never);
+  assert.equal(malformedInput.ok, false);
+  assert.equal(malformedInput.blockers[0]?.code, 'RESIDUAL_EXPOSURE_INPUT_INVALID');
+
+  const malformedMatrix = analyzeResidualExposure({
+    completion: createCompletionSnapshot([
+      createLeg('market-001:yes', 'leg_filled', 0n, 100n, '2026-07-02T00:17:05.000Z'),
+    ]),
+    matrix: null,
+  } as never);
+  assert.equal(malformedMatrix.ok, false);
+  assert.equal(malformedMatrix.blockers[0]?.code, 'RESIDUAL_EXPOSURE_INPUT_INVALID');
+
+  const malformedCompletion = analyzeResidualExposure({
+    completion: null,
+    matrix: createScenarioMatrix([]),
+  } as never);
+  assert.equal(malformedCompletion.ok, false);
+  assert.equal(malformedCompletion.blockers[0]?.code, 'RESIDUAL_EXPOSURE_COMPLETION_AGGREGATE_INVALID');
+
+  const malformedCompletionLeg = analyzeResidualExposure({
+    completion: Object.freeze({
+      groupState: 'group_incomplete',
+      manualKill: false,
+      legs: Object.freeze([null]),
+    }),
+    matrix: createScenarioMatrix([
+      { scenarioId: 'yes_wins', legId: 'market-001:no', stakeMinor: 100n, payoutMinor: 0n, feeMinor: 5n, costMinor: 0n },
+      { scenarioId: 'yes_wins', legId: 'market-001:yes', stakeMinor: 100n, payoutMinor: 215n, feeMinor: 5n, costMinor: 0n },
+      { scenarioId: 'no_wins', legId: 'market-001:no', stakeMinor: 100n, payoutMinor: 225n, feeMinor: 5n, costMinor: 0n },
+      { scenarioId: 'no_wins', legId: 'market-001:yes', stakeMinor: 100n, payoutMinor: 0n, feeMinor: 5n, costMinor: 0n },
+    ]),
+  } as never);
+  assert.equal(malformedCompletionLeg.ok, false);
+  assert.deepEqual(malformedCompletionLeg.blockers, [
+    {
+      code: 'RESIDUAL_EXPOSURE_COMPLETION_AGGREGATE_INVALID',
+      message: 'Residual exposure analysis requires structured completion leg evidence.',
+      evidenceRequired: 'Structured local paper completion leg snapshots.',
+    },
+  ]);
+});
+
 test('residual exposure analysis rejects group states outside incomplete local paper groups', () => {
   const completion = createCompletionSnapshot([
     createLeg('market-001:yes', 'leg_filled', 0n, 100n, '2026-07-02T00:17:05.000Z'),

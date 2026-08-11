@@ -36,6 +36,13 @@ export function buildB1ScenarioCashflowMatrix(
   if (!scenarioValidation.ok) {
     return scenarioValidation;
   }
+  if (!Array.isArray(legTerms)) {
+    return blocked(
+      'B1_SCENARIO_CASHFLOW_LEG_TERMS_INVALID',
+      'B1 scenario cash-flow construction requires leg terms as an array.',
+      'Array of structured B1 scenario cash-flow leg terms.',
+    );
+  }
 
   const termsBySelection = new Map<string, B1ScenarioCashflowLegTerms>();
   for (const term of legTerms) {
@@ -83,6 +90,13 @@ export function buildB1ScenarioCashflowMatrix(
 export function validateB1ScenarioCashflowMatrix(
   rows: readonly B1ScenarioCashflowRow[],
 ): BoundaryResult<B1ScenarioCashflowMatrix> {
+  if (!Array.isArray(rows)) {
+    return blocked(
+      'B1_SCENARIO_CASHFLOW_ROWS_INVALID',
+      'B1 scenario cash-flow rows must be supplied as an array.',
+      'Array of structured B1 scenario cash-flow rows.',
+    );
+  }
   if (rows.length === 0) {
     return blocked(
       'B1_SCENARIO_CASHFLOW_EMPTY',
@@ -131,6 +145,13 @@ export function validateB1ScenarioCashflowMatrix(
         'B1_SCENARIO_CASHFLOW_NEGATIVE_VALUE',
         'B1 scenario cash-flow values must be non-negative integer minor units.',
         'Non-negative B1 integer minor-unit scenario cash-flow rows.',
+      );
+    }
+    if (row.stakeMinor === 0n) {
+      return blocked(
+        'B1_STAKE_NOT_POSITIVE',
+        'B1 scenario cash-flow validation requires positive stake rows.',
+        'Positive B1 scenario cash-flow stake amounts in integer minor units.',
       );
     }
   }
@@ -240,6 +261,13 @@ export function calculateB1PayoutMinor(stakeMinor: bigint, decimalOddsMicro: big
 function validateB1TerminalScenarioSet(
   scenarios: readonly B1TerminalScenario[],
 ): BoundaryResult<readonly B1TerminalScenario[]> {
+  if (!Array.isArray(scenarios)) {
+    return blocked(
+      'B1_TERMINAL_SCENARIO_INVALID',
+      'B1 scenario cash-flow construction requires terminal scenarios as an array.',
+      'Array of structured B1 terminal scenario inputs.',
+    );
+  }
   if (scenarios.length !== 2 && scenarios.length !== 3) {
     return blocked(
       'B1_STAKE_VECTOR_OUTCOME_COUNT_UNSUPPORTED',

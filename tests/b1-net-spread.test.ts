@@ -126,6 +126,161 @@ test('B1 net economics accepts only positive worst-case net after explicit fees,
   assert.equal(result.value.liveReadiness, 'not_authorized_bws_900_parked');
 });
 
+test('B1 net economics rejects malformed candidate and stake assumption containers without throwing', () => {
+  const malformedCandidate = evaluateB1NetEconomics(null as never, netPolicy());
+  assert.equal(malformedCandidate.ok, false);
+  assert.equal(malformedCandidate.blockers[0]?.code, 'B1_NET_GROSS_CANDIDATE_INVALID');
+
+  const malformedCandidateArray = evaluateB1NetEconomics([] as never, netPolicy());
+  assert.equal(malformedCandidateArray.ok, false);
+  assert.equal(malformedCandidateArray.blockers[0]?.code, 'B1_NET_GROSS_CANDIDATE_INVALID');
+
+  const malformedPolicy = evaluateB1NetEconomics(acceptedGrossCandidate(), null as never);
+  assert.equal(malformedPolicy.ok, false);
+  assert.equal(malformedPolicy.blockers[0]?.code, 'B1_NET_POLICY_MISSING');
+
+  const malformedPolicyArray = evaluateB1NetEconomics(acceptedGrossCandidate(), [] as never);
+  assert.equal(malformedPolicyArray.ok, false);
+  assert.equal(malformedPolicyArray.blockers[0]?.code, 'B1_NET_POLICY_MISSING');
+
+  const malformedCandidateOutcome = evaluateB1NetEconomics({ ok: null } as never, netPolicy());
+  assert.equal(malformedCandidateOutcome.ok, false);
+  assert.equal(malformedCandidateOutcome.blockers[0]?.code, 'B1_NET_GROSS_CANDIDATE_INVALID');
+
+  const malformedStakeAssumption = evaluateB1NetEconomics(acceptedGrossCandidate(), netPolicy({
+    stakeAssumptions: Object.freeze([null]) as never,
+  }));
+  assert.equal(malformedStakeAssumption.ok, false);
+  assert.equal(malformedStakeAssumption.blockers[0]?.code, 'B1_NET_STAKE_INVALID');
+
+  const malformedStakeAssumptionArray = evaluateB1NetEconomics(acceptedGrossCandidate(), netPolicy({
+    stakeAssumptions: Object.freeze([[]]) as never,
+  }));
+  assert.equal(malformedStakeAssumptionArray.ok, false);
+  assert.equal(malformedStakeAssumptionArray.blockers[0]?.code, 'B1_NET_STAKE_INVALID');
+
+  const acceptedCandidate = acceptedGrossCandidate();
+  const malformedSelectedQuotesContainer = evaluateB1NetEconomics(Object.freeze({
+    ...acceptedCandidate,
+    selectedQuotes: null,
+  }) as never, netPolicy());
+  assert.equal(malformedSelectedQuotesContainer.ok, false);
+  assert.equal(malformedSelectedQuotesContainer.blockers[0]?.code, 'B1_NET_GROSS_CANDIDATE_INVALID');
+
+  const emptySelectedQuotes = evaluateB1NetEconomics(Object.freeze({
+    ...acceptedCandidate,
+    selectedQuotes: Object.freeze([]),
+  }) as never, netPolicy());
+  assert.equal(emptySelectedQuotes.ok, false);
+  assert.equal(emptySelectedQuotes.blockers[0]?.code, 'B1_NET_GROSS_CANDIDATE_INVALID');
+
+  const selectedQuote = acceptedCandidate.selectedQuotes[0];
+  assert.ok(selectedQuote);
+  const malformedSelectedQuote = evaluateB1NetEconomics(Object.freeze({
+    ...acceptedCandidate,
+    selectedQuotes: Object.freeze([
+      Object.freeze({
+        ...selectedQuote,
+        outcomeName: 100,
+      }),
+    ]),
+  }) as never, netPolicy());
+  assert.equal(malformedSelectedQuote.ok, false);
+  assert.equal(malformedSelectedQuote.blockers[0]?.code, 'B1_NET_GROSS_CANDIDATE_INVALID');
+
+  const malformedSelectedQuoteArray = evaluateB1NetEconomics(Object.freeze({
+    ...acceptedCandidate,
+    selectedQuotes: Object.freeze([[]]),
+  }) as never, netPolicy());
+  assert.equal(malformedSelectedQuoteArray.ok, false);
+  assert.equal(malformedSelectedQuoteArray.blockers[0]?.code, 'B1_NET_GROSS_CANDIDATE_INVALID');
+
+  const malformedSelectedQuoteUndefined = evaluateB1NetEconomics(Object.freeze({
+    ...acceptedCandidate,
+    selectedQuotes: Object.freeze([undefined]),
+  }) as never, netPolicy());
+  assert.equal(malformedSelectedQuoteUndefined.ok, false);
+  assert.equal(malformedSelectedQuoteUndefined.blockers[0]?.code, 'B1_NET_GROSS_CANDIDATE_INVALID');
+
+  const synchronizedQuotePair = acceptedCandidate.synchronizedQuotePairs[0];
+  assert.ok(synchronizedQuotePair);
+  const malformedSynchronizedQuoteContainer = evaluateB1NetEconomics(Object.freeze({
+    ...acceptedCandidate,
+    synchronizedQuotePairs: Object.freeze([null]),
+  }) as never, netPolicy());
+  assert.equal(malformedSynchronizedQuoteContainer.ok, false);
+  assert.equal(malformedSynchronizedQuoteContainer.blockers[0]?.code, 'B1_NET_GROSS_CANDIDATE_INVALID');
+
+  const malformedSynchronizedQuoteArray = evaluateB1NetEconomics(Object.freeze({
+    ...acceptedCandidate,
+    synchronizedQuotePairs: Object.freeze([[]]),
+  }) as never, netPolicy());
+  assert.equal(malformedSynchronizedQuoteArray.ok, false);
+  assert.equal(malformedSynchronizedQuoteArray.blockers[0]?.code, 'B1_NET_GROSS_CANDIDATE_INVALID');
+
+  const malformedSynchronizedQuoteUndefined = evaluateB1NetEconomics(Object.freeze({
+    ...acceptedCandidate,
+    synchronizedQuotePairs: Object.freeze([undefined]),
+  }) as never, netPolicy());
+  assert.equal(malformedSynchronizedQuoteUndefined.ok, false);
+  assert.equal(malformedSynchronizedQuoteUndefined.blockers[0]?.code, 'B1_NET_GROSS_CANDIDATE_INVALID');
+
+  const emptySynchronizedQuotes = evaluateB1NetEconomics(Object.freeze({
+    ...acceptedCandidate,
+    synchronizedQuotePairs: Object.freeze([]),
+  }) as never, netPolicy());
+  assert.equal(emptySynchronizedQuotes.ok, false);
+  assert.equal(emptySynchronizedQuotes.blockers[0]?.code, 'B1_NET_GROSS_CANDIDATE_INVALID');
+
+  const malformedSynchronizedQuote = evaluateB1NetEconomics(Object.freeze({
+    ...acceptedCandidate,
+    synchronizedQuotePairs: Object.freeze([
+      Object.freeze({
+        ...synchronizedQuotePair,
+        first: Object.freeze({
+          ...synchronizedQuotePair.first,
+          quoteAgeMs: '100',
+        }),
+      }),
+    ]),
+  }) as never, netPolicy());
+  assert.equal(malformedSynchronizedQuote.ok, false);
+  assert.equal(malformedSynchronizedQuote.blockers[0]?.code, 'B1_NET_GROSS_CANDIDATE_INVALID');
+
+  const malformedSynchronizedQuoteRow = evaluateB1NetEconomics(Object.freeze({
+    ...acceptedCandidate,
+    synchronizedQuotePairs: Object.freeze([
+      Object.freeze({
+        ...synchronizedQuotePair,
+        first: Object.freeze({
+          ...synchronizedQuotePair.first,
+          row: null,
+        }),
+      }),
+    ]),
+  }) as never, netPolicy());
+  assert.equal(malformedSynchronizedQuoteRow.ok, false);
+  assert.equal(malformedSynchronizedQuoteRow.blockers[0]?.code, 'B1_NET_GROSS_CANDIDATE_INVALID');
+
+  const malformedFeePolicy = evaluateB1NetEconomics(acceptedGrossCandidate(), netPolicy({
+    feeMatrix: null,
+  } as never));
+  assert.equal(malformedFeePolicy.ok, false);
+  assert.equal(malformedFeePolicy.blockers[0]?.code, 'B1_FEE_MATRIX_MISSING');
+
+  const malformedQuoteAgePolicy = evaluateB1NetEconomics(acceptedGrossCandidate(), netPolicy({
+    quoteAgePenaltyPolicy: null,
+  } as never));
+  assert.equal(malformedQuoteAgePolicy.ok, false);
+  assert.equal(malformedQuoteAgePolicy.blockers[0]?.code, 'B1_QUOTE_AGE_PENALTY_POLICY_MISSING');
+
+  const malformedCapitalLockPolicy = evaluateB1NetEconomics(acceptedGrossCandidate(), netPolicy({
+    capitalLockPolicy: null,
+  } as never));
+  assert.equal(malformedCapitalLockPolicy.ok, false);
+  assert.equal(malformedCapitalLockPolicy.blockers[0]?.code, 'B1_CAPITAL_LOCK_POLICY_MISSING');
+});
+
 test('B1 net economics blocks missing fee matrix entries instead of defaulting to zero', () => {
   const result = evaluateB1NetEconomics(acceptedGrossCandidate(), netPolicy({
     feeMatrix: Object.freeze({

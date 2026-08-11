@@ -110,11 +110,25 @@ interface LegAccumulator {
 export function simulateNonAtomicPaperGroupCompletion(
   input: NonAtomicCompletionInput,
 ): BoundaryResult<NonAtomicCompletionSimulation> {
+  if (typeof input !== 'object' || input === null || Array.isArray(input)) {
+    return blocked(
+      'NON_ATOMIC_COMPLETION_INPUT_INVALID',
+      'Non-atomic completion simulation requires structured input.',
+      'Structured non-atomic completion input.',
+    );
+  }
   if (typeof input.manualKill !== 'boolean') {
     return blocked(
       'NON_ATOMIC_COMPLETION_MANUAL_KILL_INVALID',
       'Non-atomic completion simulation requires manualKill to be an explicit boolean.',
       'Explicit boolean manualKill evidence for the non-atomic completion group.',
+    );
+  }
+  if (!Array.isArray(input.events)) {
+    return blocked(
+      'NON_ATOMIC_COMPLETION_EVENTS_INVALID',
+      'Non-atomic completion simulation requires events as an array.',
+      'Array of non-atomic completion replay events.',
     );
   }
 
@@ -154,6 +168,20 @@ function validateNonAtomicInputs(
   stakeVector: StakeVectorSolution,
   matrix: ScenarioCashflowMatrix,
 ): BoundaryResult<MatrixTerms> {
+  if (typeof stakeVector !== 'object' || stakeVector === null || Array.isArray(stakeVector) || !Array.isArray(stakeVector.stakes)) {
+    return blocked(
+      'NON_ATOMIC_COMPLETION_STAKE_VECTOR_INVALID',
+      'Non-atomic completion simulation requires a structured solved stake vector.',
+      'Solved stake-vector output with stake legs.',
+    );
+  }
+  if (typeof matrix !== 'object' || matrix === null || Array.isArray(matrix) || !Array.isArray(matrix.rows)) {
+    return blocked(
+      'NON_ATOMIC_COMPLETION_MATRIX_INVALID',
+      'Non-atomic completion simulation requires a structured scenario cash-flow matrix.',
+      'Structured scenario cash-flow matrix with rows.',
+    );
+  }
   if (stakeVector.stakes.length === 0) {
     return blocked(
       'NON_ATOMIC_COMPLETION_STAKES_EMPTY',
@@ -164,6 +192,20 @@ function validateNonAtomicInputs(
 
   const plansByLegId = new Map<string, StakePlan>();
   for (const stake of stakeVector.stakes) {
+    if (typeof stake !== 'object' || stake === null || Array.isArray(stake)) {
+      return blocked(
+        'NON_ATOMIC_COMPLETION_STAKE_PLAN_INVALID',
+        'Non-atomic completion simulation requires structured solved stake-vector legs.',
+        'Structured solved stake-vector legs.',
+      );
+    }
+    if (typeof stake.legId !== 'string') {
+      return blocked(
+        'NON_ATOMIC_COMPLETION_LEG_ID_MISSING',
+        'Non-atomic completion simulation requires a non-empty stake-vector leg id.',
+        'Stable leg ids for each solved stake-vector leg.',
+      );
+    }
     if (stake.legId.trim().length === 0) {
       return blocked(
         'NON_ATOMIC_COMPLETION_LEG_ID_MISSING',
@@ -178,7 +220,14 @@ function validateNonAtomicInputs(
         'Unique solved stake-vector leg ids for the completion group.',
       );
     }
-    if (stake.unitCount <= 0n || stake.stakeQuantumMinor <= 0n || stake.stakeMinor <= 0n) {
+    if (
+      typeof stake.unitCount !== 'bigint'
+      || typeof stake.stakeQuantumMinor !== 'bigint'
+      || typeof stake.stakeMinor !== 'bigint'
+      || stake.unitCount <= 0n
+      || stake.stakeQuantumMinor <= 0n
+      || stake.stakeMinor <= 0n
+    ) {
       return blocked(
         'NON_ATOMIC_COMPLETION_STAKE_PLAN_INVALID',
         'Non-atomic completion simulation requires positive solved unit counts, stake quanta, and stake totals.',
@@ -208,8 +257,9 @@ function validateNonAtomicInputs(
   if (!matrixValidation.ok) {
     return matrixValidation;
   }
+  const matrixRows = matrixValidation.value.rows;
 
-  const scenarioIds = [...new Set(matrix.rows.map((row) => row.scenarioId))].sort();
+  const scenarioIds = [...new Set(matrixRows.map((row) => row.scenarioId))].sort();
   if (scenarioIds.length === 0) {
     return blocked(
       'NON_ATOMIC_COMPLETION_SCENARIOS_MISSING',
@@ -220,7 +270,7 @@ function validateNonAtomicInputs(
 
   const contributionByLegAndScenarioId = new Map<string, ReadonlyMap<string, bigint>>();
   for (const [legId, plan] of plansByLegId) {
-    const rowsForLeg = matrix.rows.filter((row) => row.legId === legId);
+    const rowsForLeg = matrixRows.filter((row) => row.legId === legId);
     if (rowsForLeg.length !== scenarioIds.length) {
       return blocked(
         'NON_ATOMIC_COMPLETION_SCENARIOS_MISSING',
@@ -285,7 +335,7 @@ function validateNonAtomicInputs(
     contributionByLegAndScenarioId.set(legId, contributionsByScenarioId as ReadonlyMap<string, bigint>);
   }
 
-  const matrixLegIds = new Set(matrix.rows.map((row) => row.legId));
+  const matrixLegIds = new Set(matrixRows.map((row) => row.legId));
   for (const legId of matrixLegIds) {
     if (!plansByLegId.has(legId)) {
       return blocked(
@@ -341,6 +391,13 @@ function replayLegEvents(
     legs.map((leg) => [leg.legId, leg]),
   );
 
+  for (const event of events) {
+    const eventShape = validateNonAtomicCompletionEventShape(event);
+    if (!eventShape.ok) {
+      return eventShape;
+    }
+  }
+
   const indexedEvents = events.map((event, index) => ({ event, index }));
   indexedEvents.sort((left, right) => {
     const timestampOrder = left.event.occurredAt.localeCompare(right.event.occurredAt);
@@ -394,6 +451,31 @@ function replayLegEvents(
   }
 
   return accepted(Object.freeze(legs.map((leg) => Object.freeze({ ...leg })) as readonly LegAccumulator[]));
+}
+
+function validateNonAtomicCompletionEventShape(event: NonAtomicCompletionEvent): BoundaryResult<undefined> {
+  if (typeof event !== 'object' || event === null || Array.isArray(event)) {
+    return blocked(
+      'NON_ATOMIC_COMPLETION_EVENT_INVALID',
+      'Non-atomic completion simulation requires structured replay events.',
+      'Structured non-atomic completion replay events.',
+    );
+  }
+  if (typeof event.legId !== 'string') {
+    return blocked(
+      'NON_ATOMIC_COMPLETION_EVENT_LEG_ID_MISSING',
+      'Non-atomic completion simulation requires a non-empty event leg id.',
+      'Stable leg ids for each non-atomic completion event.',
+    );
+  }
+  if (typeof event.occurredAt !== 'string') {
+    return blocked(
+      'NON_ATOMIC_COMPLETION_EVENT_TIMESTAMP_INVALID',
+      'Non-atomic completion simulation requires ISO-8601 UTC timestamps for every event.',
+      'ISO-8601 UTC event timestamps for the non-atomic completion replay.',
+    );
+  }
+  return accepted(undefined);
 }
 
 function validateEventStakeShape(event: NonAtomicCompletionEvent): BoundaryResult<undefined> {

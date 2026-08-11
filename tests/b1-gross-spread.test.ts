@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  buildB1GrossQuoteContribution,
   calculateB1GrossSpread,
   parseB1DecimalOddsMicro,
 } from '../src/opportunity/b1-gross-spread.js';
@@ -28,6 +29,56 @@ test('B1 gross spread uses conservative fixed-point implied probability arithmet
   assert.equal(result.value.impliedProbabilityPpmSum, 952382n);
   assert.equal(result.value.grossSpreadPpm, 47618n);
   assert.equal(Object.isFrozen(result.value.quoteContributions), true);
+});
+
+test('B1 gross spread rejects malformed top-level quote containers without throwing', () => {
+  const malformedInputs = calculateB1GrossSpread(null as never);
+  assert.equal(malformedInputs.ok, false);
+  assert.deepEqual(malformedInputs.blockers, [
+    {
+      code: 'B1_GROSS_QUOTE_INPUTS_INVALID',
+      message: 'B1 gross spread requires quote inputs as an array.',
+      evidenceRequired: 'Array of structured B1 terminal outcome quotes.',
+    },
+  ]);
+
+  const malformedQuote = buildB1GrossQuoteContribution(null as never);
+  assert.equal(malformedQuote.ok, false);
+  assert.deepEqual(malformedQuote.blockers, [
+    {
+      code: 'B1_GROSS_QUOTE_INVALID',
+      message: 'B1 gross spread requires structured quote inputs with string identity and odds fields.',
+      evidenceRequired: 'Structured B1 quote input fields.',
+    },
+  ]);
+
+  const malformedQuoteInArray = calculateB1GrossSpread(Object.freeze([
+    null,
+    {
+      selectionEquivalenceKey: 'event-001:moneyline:away',
+      outcomeName: 'Away',
+      outcomeSide: 'away',
+      venueOrBookmakerId: 'venue-b',
+      decimalOdds: '2.10',
+    },
+  ] as never));
+  assert.equal(malformedQuoteInArray.ok, false);
+  assert.equal(malformedQuoteInArray.blockers[0]?.code, 'B1_GROSS_QUOTE_INVALID');
+
+  for (const malformedEntry of [undefined, {}, []]) {
+    const malformedEntryResult = calculateB1GrossSpread(Object.freeze([
+      malformedEntry,
+      {
+        selectionEquivalenceKey: 'event-001:moneyline:away',
+        outcomeName: 'Away',
+        outcomeSide: 'away',
+        venueOrBookmakerId: 'venue-b',
+        decimalOdds: '2.10',
+      },
+    ] as never));
+    assert.equal(malformedEntryResult.ok, false);
+    assert.equal(malformedEntryResult.blockers[0]?.code, 'B1_GROSS_QUOTE_INVALID');
+  }
 });
 
 test('B1 gross spread blocks non-positive gross opportunities', () => {

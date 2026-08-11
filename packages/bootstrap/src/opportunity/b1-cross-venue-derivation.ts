@@ -61,12 +61,28 @@ export function deriveB1CrossVenueGrossOpportunityCandidates(
   rows: readonly B1MultiVenueMarketRow[],
   quotePolicy: B1QuoteSynchronizationPolicy,
 ): BoundaryResult<readonly B1GrossOpportunityCandidate[]> {
+  if (!Array.isArray(rows)) {
+    return blocked(
+      'B1_GROSS_INPUT_ROWS_INVALID',
+      'B1 gross derivation requires multi-venue market rows as an array.',
+      'Array of B1 multi-venue market rows.',
+    );
+  }
   if (rows.length === 0) {
     return blocked(
       'B1_GROSS_INPUT_ROWS_EMPTY',
       'B1 gross derivation requires at least one multi-venue market row.',
       'B1 multi-venue market rows.',
     );
+  }
+  for (const row of rows) {
+    if (!isB1GrossInputRow(row)) {
+      return blocked(
+        'B1_GROSS_INPUT_ROW_INVALID',
+        'B1 gross derivation requires structured multi-venue market row inputs.',
+        'Structured B1 multi-venue market rows.',
+      );
+    }
   }
 
   const rowsByMarket = groupRowsByMarketEquivalence(rows);
@@ -390,6 +406,30 @@ function buildVenuePairKeyForRows(
 
 function normalizeVenueId(value: unknown): string | undefined {
   return typeof value === 'string' && value.trim().length > 0 ? value.trim() : undefined;
+}
+
+function isB1GrossInputRow(value: unknown): value is B1MultiVenueMarketRow {
+  return typeof value === 'object'
+    && value !== null
+    && !Array.isArray(value)
+    && typeof (value as { readonly canonicalEventId?: unknown }).canonicalEventId === 'string'
+    && typeof (value as { readonly marketEquivalenceKey?: unknown }).marketEquivalenceKey === 'string'
+    && typeof (value as { readonly marketType?: unknown }).marketType === 'string'
+    && typeof (value as { readonly period?: unknown }).period === 'string'
+    && typeof (value as { readonly lineValue?: unknown }).lineValue === 'string'
+    && typeof (value as { readonly outcomeName?: unknown }).outcomeName === 'string'
+    && typeof (value as { readonly outcomeSide?: unknown }).outcomeSide === 'string'
+    && typeof (value as { readonly venueOrBookmakerId?: unknown }).venueOrBookmakerId === 'string'
+    && typeof (value as { readonly selectionEquivalenceKey?: unknown }).selectionEquivalenceKey === 'string'
+    && typeof (value as { readonly snapshotTimeUtc?: unknown }).snapshotTimeUtc === 'string'
+    && typeof (value as { readonly retrievedAtUtc?: unknown }).retrievedAtUtc === 'string'
+    && typeof (value as { readonly quoteAgeMs?: unknown }).quoteAgeMs === 'bigint'
+    && typeof (value as { readonly decimalOdds?: unknown }).decimalOdds === 'string'
+    && typeof (value as { readonly currency?: unknown }).currency === 'string'
+    && typeof (value as { readonly marketStatus?: unknown }).marketStatus === 'string'
+    && typeof (value as { readonly settlementRuleVersion?: unknown }).settlementRuleVersion === 'string'
+    && typeof (value as { readonly settlementCompatibilityFlag?: unknown }).settlementCompatibilityFlag === 'string'
+    && typeof (value as { readonly voidRuleId?: unknown }).voidRuleId === 'string';
 }
 
 function maxComparisonWindow(synchronizedQuotePairs: readonly B1SynchronizedQuotePair[]): bigint {

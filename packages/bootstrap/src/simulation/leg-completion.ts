@@ -45,6 +45,13 @@ export interface PaperGroupCompletionSnapshot {
 export function simulatePaperGroupCompletion(
   input: PaperGroupCompletionInput,
 ): BoundaryResult<PaperGroupCompletionSnapshot> {
+  if (typeof input !== 'object' || input === null || Array.isArray(input)) {
+    return blocked(
+      'LEG_COMPLETION_INPUT_INVALID',
+      'Leg completion simulation requires structured input.',
+      'Structured local paper completion input.',
+    );
+  }
   if (typeof input.manualKill !== 'boolean') {
     return blocked(
       'LEG_COMPLETION_MANUAL_KILL_INVALID',
@@ -53,6 +60,13 @@ export function simulatePaperGroupCompletion(
     );
   }
 
+  if (!Array.isArray(input.legs)) {
+    return blocked(
+      'LEG_COMPLETION_LEGS_INVALID',
+      'Leg completion simulation requires legs as an array.',
+      'Array of local paper leg completion snapshots.',
+    );
+  }
   if (input.legs.length === 0) {
     return blocked(
       'LEG_COMPLETION_LEGS_EMPTY',
@@ -64,6 +78,20 @@ export function simulatePaperGroupCompletion(
   const seenLegIds = new Set<string>();
   const validatedLegs: PaperLegCompletionSnapshot[] = [];
   for (const leg of input.legs) {
+    if (typeof leg !== 'object' || leg === null || Array.isArray(leg)) {
+      return blocked(
+        'LEG_COMPLETION_LEG_INVALID',
+        'Leg completion simulation requires structured leg snapshots.',
+        'Structured local paper leg completion snapshots.',
+      );
+    }
+    if (typeof leg.legId !== 'string') {
+      return blocked(
+        'LEG_COMPLETION_LEG_ID_MISSING',
+        'Leg completion simulation requires a non-empty leg id.',
+        'Stable local paper leg id for each completion snapshot.',
+      );
+    }
     if (leg.legId.trim().length === 0) {
       return blocked(
         'LEG_COMPLETION_LEG_ID_MISSING',
@@ -78,14 +106,14 @@ export function simulatePaperGroupCompletion(
         'Unique local paper leg ids for the completion group.',
       );
     }
-    if (!isPaperLegCompletionState(leg.state)) {
+    if (typeof leg.state !== 'string' || !isPaperLegCompletionState(leg.state)) {
       return blocked(
         'LEG_COMPLETION_STATE_INVALID',
         'Leg completion simulation requires a supported local paper leg state.',
         'Supported local paper leg completion state.',
       );
     }
-    if (!isIsoTimestamp(leg.updatedAt)) {
+    if (typeof leg.updatedAt !== 'string' || !isIsoTimestamp(leg.updatedAt)) {
       return blocked(
         'LEG_COMPLETION_TIMESTAMP_INVALID',
         'Leg completion simulation requires ISO-8601 UTC timestamps for each leg snapshot.',

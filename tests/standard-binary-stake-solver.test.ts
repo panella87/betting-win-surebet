@@ -26,6 +26,30 @@ test('standard-binary complete-set stake solving integrates quote freshness, cap
   ]);
 });
 
+test('standard-binary complete-set stake solving rejects malformed top-level containers without throwing', () => {
+  const malformedCompleteSet = solveStandardBinaryCompleteSetStakeVector(null as never, {
+    observedNowMs: Date.parse('2026-07-01T00:00:03.000Z'),
+  });
+  assert.equal(malformedCompleteSet.ok, false);
+  assert.deepEqual(malformedCompleteSet.blockers, [
+    {
+      code: 'STANDARD_BINARY_SOLVER_INPUT_INVALID',
+      message: 'Stake solving requires a structured standard-binary complete-set input.',
+      evidenceRequired: 'Structured standard-binary complete-set with legs and YES/NO quote records.',
+    },
+  ]);
+
+  const malformedOptions = solveStandardBinaryCompleteSetStakeVector(loadAcceptedCompleteSet(), null as never);
+  assert.equal(malformedOptions.ok, false);
+  assert.deepEqual(malformedOptions.blockers, [
+    {
+      code: 'STANDARD_BINARY_SOLVER_OPTIONS_INVALID',
+      message: 'Stake solving requires structured quote freshness options.',
+      evidenceRequired: 'Structured stake-vector solve options with observedNowMs.',
+    },
+  ]);
+});
+
 test('standard-binary complete-set stake solving fails closed on stale quote evidence', () => {
   const completeSet = loadAcceptedCompleteSet();
   const result = solveStandardBinaryCompleteSetStakeVector(completeSet, {

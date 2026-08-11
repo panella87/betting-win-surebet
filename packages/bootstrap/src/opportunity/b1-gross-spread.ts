@@ -35,6 +35,13 @@ export interface B1GrossSpread {
 export function calculateB1GrossSpread(
   quoteInputs: readonly B1GrossQuoteInput[],
 ): BoundaryResult<B1GrossSpread> {
+  if (!Array.isArray(quoteInputs)) {
+    return blocked(
+      'B1_GROSS_QUOTE_INPUTS_INVALID',
+      'B1 gross spread requires quote inputs as an array.',
+      'Array of structured B1 terminal outcome quotes.',
+    );
+  }
   if (quoteInputs.length < 2) {
     return blocked(
       'B1_OUTCOME_SET_INCOMPLETE',
@@ -47,19 +54,19 @@ export function calculateB1GrossSpread(
   const quoteContributions: B1GrossQuoteContribution[] = [];
   let impliedProbabilityPpmSum = 0n;
   for (const quoteInput of quoteInputs) {
-    if (seenSelections.has(quoteInput.selectionEquivalenceKey)) {
+    const contribution = buildB1GrossQuoteContribution(quoteInput);
+    if (!contribution.ok) {
+      return contribution;
+    }
+    if (seenSelections.has(contribution.value.selectionEquivalenceKey)) {
       return blocked(
         'B1_OUTCOME_SET_INCOMPLETE',
         'B1 gross spread requires one quote for each terminal outcome.',
         'Unique B1 selection_equivalence_key values in the selected quote set.',
       );
     }
-    seenSelections.add(quoteInput.selectionEquivalenceKey);
+    seenSelections.add(contribution.value.selectionEquivalenceKey);
 
-    const contribution = buildB1GrossQuoteContribution(quoteInput);
-    if (!contribution.ok) {
-      return contribution;
-    }
     quoteContributions.push(contribution.value);
     impliedProbabilityPpmSum += contribution.value.impliedProbabilityPpm;
   }
@@ -83,6 +90,22 @@ export function calculateB1GrossSpread(
 export function buildB1GrossQuoteContribution(
   quoteInput: B1GrossQuoteInput,
 ): BoundaryResult<B1GrossQuoteContribution> {
+  if (
+    typeof quoteInput !== 'object'
+    || quoteInput === null
+    || Array.isArray(quoteInput)
+    || typeof quoteInput.selectionEquivalenceKey !== 'string'
+    || typeof quoteInput.outcomeName !== 'string'
+    || typeof quoteInput.outcomeSide !== 'string'
+    || typeof quoteInput.venueOrBookmakerId !== 'string'
+    || typeof quoteInput.decimalOdds !== 'string'
+  ) {
+    return blocked(
+      'B1_GROSS_QUOTE_INVALID',
+      'B1 gross spread requires structured quote inputs with string identity and odds fields.',
+      'Structured B1 quote input fields.',
+    );
+  }
   if (quoteInput.selectionEquivalenceKey.length === 0) {
     return blocked(
       'B1_SELECTION_EQUIVALENCE_MISSING',

@@ -27,6 +27,31 @@ export interface ResidualExposureAnalysis {
 }
 
 export function analyzeResidualExposure(input: ResidualExposureInput): BoundaryResult<ResidualExposureAnalysis> {
+  if (
+    typeof input !== 'object'
+    || input === null
+    || typeof input.matrix !== 'object'
+    || input.matrix === null
+    || !Array.isArray(input.matrix.rows)
+  ) {
+    return blocked(
+      'RESIDUAL_EXPOSURE_INPUT_INVALID',
+      'Residual exposure analysis requires a structured scenario cash-flow matrix.',
+      'Structured residual exposure input with scenario cash-flow matrix rows.',
+    );
+  }
+  if (
+    typeof input.completion !== 'object'
+    || input.completion === null
+    || !Array.isArray(input.completion.legs)
+  ) {
+    return blocked(
+      'RESIDUAL_EXPOSURE_COMPLETION_AGGREGATE_INVALID',
+      'Residual exposure analysis requires structured completion evidence.',
+      'Structured local paper completion group evidence.',
+    );
+  }
+
   const matrixValidation = validateScenarioCashflowMatrix(input.matrix.rows);
   if (!matrixValidation.ok) {
     return matrixValidation;
@@ -45,6 +70,12 @@ export function analyzeResidualExposure(input: ResidualExposureInput): BoundaryR
       'Residual exposure analysis requires a supported aggregate completion group state.',
       'Supported local paper completion groupState evidence.',
     );
+  }
+  for (const leg of input.completion.legs) {
+    const legContainerValidation = validateResidualCompletionLegContainer(leg);
+    if (!legContainerValidation.ok) {
+      return legContainerValidation;
+    }
   }
   const expectedGroupState = derivePaperGroupCompletionState(input.completion.legs, input.completion.manualKill);
   if (input.completion.groupState !== expectedGroupState) {
@@ -190,6 +221,10 @@ function supportsResidualExposureState(state: PaperLegCompletionState): boolean 
 function validateResidualCompletionLegSnapshot(
   leg: PaperLegCompletionSnapshot,
 ): BoundaryResult<PaperLegCompletionSnapshot> {
+  const legContainerValidation = validateResidualCompletionLegContainer(leg);
+  if (!legContainerValidation.ok) {
+    return legContainerValidation;
+  }
   if (!supportsResidualExposureState(leg.state)) {
     return blocked(
       'RESIDUAL_EXPOSURE_STATE_INCONSISTENT',
@@ -226,6 +261,25 @@ function validateResidualCompletionLegSnapshot(
   }
 
   return accepted(leg);
+}
+
+function validateResidualCompletionLegContainer(
+  leg: PaperLegCompletionSnapshot,
+): BoundaryResult<undefined> {
+  if (
+    typeof leg !== 'object'
+    || leg === null
+    || Array.isArray(leg)
+    || typeof leg.legId !== 'string'
+    || typeof leg.state !== 'string'
+  ) {
+    return blocked(
+      'RESIDUAL_EXPOSURE_COMPLETION_AGGREGATE_INVALID',
+      'Residual exposure analysis requires structured completion leg evidence.',
+      'Structured local paper completion leg snapshots.',
+    );
+  }
+  return accepted(undefined);
 }
 
 function derivePaperGroupCompletionState(

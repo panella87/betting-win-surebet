@@ -184,6 +184,75 @@ test('non-atomic completion rejects malformed manual kill evidence', () => {
   ]);
 });
 
+test('non-atomic completion rejects malformed boundary containers without throwing', () => {
+  const input = createTwoUnitSolvedInput();
+  const solved = solveStandardBinaryStakeVector(input);
+  assert.equal(solved.ok, true);
+
+  const malformedInput = simulateNonAtomicPaperGroupCompletion(null as never);
+  assert.equal(malformedInput.ok, false);
+  assert.equal(malformedInput.blockers[0]?.code, 'NON_ATOMIC_COMPLETION_INPUT_INVALID');
+
+  const malformedEvents = simulateNonAtomicPaperGroupCompletion({
+    stakeVector: solved.value,
+    matrix: input.matrix,
+    manualKill: false,
+    events: null,
+  } as never);
+  assert.equal(malformedEvents.ok, false);
+  assert.equal(malformedEvents.blockers[0]?.code, 'NON_ATOMIC_COMPLETION_EVENTS_INVALID');
+
+  const malformedStakeVector = simulateNonAtomicPaperGroupCompletion({
+    stakeVector: null,
+    matrix: input.matrix,
+    manualKill: false,
+    events: [],
+  } as never);
+  assert.equal(malformedStakeVector.ok, false);
+  assert.equal(malformedStakeVector.blockers[0]?.code, 'NON_ATOMIC_COMPLETION_STAKE_VECTOR_INVALID');
+
+  const malformedStakeLeg = simulateNonAtomicPaperGroupCompletion({
+    stakeVector: {
+      ...solved.value,
+      stakes: [null],
+    },
+    matrix: input.matrix,
+    manualKill: false,
+    events: [],
+  } as never);
+  assert.equal(malformedStakeLeg.ok, false);
+  assert.equal(malformedStakeLeg.blockers[0]?.code, 'NON_ATOMIC_COMPLETION_STAKE_PLAN_INVALID');
+
+  const malformedMatrix = simulateNonAtomicPaperGroupCompletion({
+    stakeVector: solved.value,
+    matrix: null,
+    manualKill: false,
+    events: [],
+  } as never);
+  assert.equal(malformedMatrix.ok, false);
+  assert.equal(malformedMatrix.blockers[0]?.code, 'NON_ATOMIC_COMPLETION_MATRIX_INVALID');
+
+  const malformedEvent = simulateNonAtomicPaperGroupCompletion({
+    stakeVector: solved.value,
+    matrix: input.matrix,
+    manualKill: false,
+    events: [null],
+  } as never);
+  assert.equal(malformedEvent.ok, false);
+  assert.equal(malformedEvent.blockers[0]?.code, 'NON_ATOMIC_COMPLETION_EVENT_INVALID');
+
+  const malformedEventTimestamp = simulateNonAtomicPaperGroupCompletion({
+    stakeVector: solved.value,
+    matrix: input.matrix,
+    manualKill: false,
+    events: [
+      { legId: 'market-001:yes', type: 'reserve', stakeMinor: 100n, occurredAt: undefined },
+    ],
+  } as never);
+  assert.equal(malformedEventTimestamp.ok, false);
+  assert.equal(malformedEventTimestamp.blockers[0]?.code, 'NON_ATOMIC_COMPLETION_EVENT_TIMESTAMP_INVALID');
+});
+
 test('non-atomic completion rejects non-bigint event stake before arithmetic', () => {
   const input = createTwoUnitSolvedInput();
   const solved = solveStandardBinaryStakeVector(input);

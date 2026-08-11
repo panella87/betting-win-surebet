@@ -109,6 +109,50 @@ test('leg completion simulation rejects malformed manual kill evidence', () => {
   ]);
 });
 
+test('leg completion simulation rejects malformed top-level and leg containers without throwing', () => {
+  const malformedInput = simulatePaperGroupCompletion(null as never);
+  assert.equal(malformedInput.ok, false);
+  assert.equal(malformedInput.blockers[0]?.code, 'LEG_COMPLETION_INPUT_INVALID');
+
+  const malformedLegs = simulatePaperGroupCompletion({
+    legs: null,
+    manualKill: false,
+  } as never);
+  assert.equal(malformedLegs.ok, false);
+  assert.equal(malformedLegs.blockers[0]?.code, 'LEG_COMPLETION_LEGS_INVALID');
+
+  const malformedLeg = simulatePaperGroupCompletion({
+    legs: [null],
+    manualKill: false,
+  } as never);
+  assert.equal(malformedLeg.ok, false);
+  assert.equal(malformedLeg.blockers[0]?.code, 'LEG_COMPLETION_LEG_INVALID');
+
+  const malformedLegId = simulatePaperGroupCompletion({
+    legs: [
+      {
+        ...createLeg('leg-1', 'leg_open', 0n, 0n, '2026-07-02T00:17:05.000Z'),
+        legId: undefined,
+      },
+    ],
+    manualKill: false,
+  } as never);
+  assert.equal(malformedLegId.ok, false);
+  assert.equal(malformedLegId.blockers[0]?.code, 'LEG_COMPLETION_LEG_ID_MISSING');
+
+  const malformedTimestamp = simulatePaperGroupCompletion({
+    legs: [
+      {
+        ...createLeg('leg-1', 'leg_open', 0n, 0n, '2026-07-02T00:17:05.000Z'),
+        updatedAt: undefined,
+      },
+    ],
+    manualKill: false,
+  } as never);
+  assert.equal(malformedTimestamp.ok, false);
+  assert.equal(malformedTimestamp.blockers[0]?.code, 'LEG_COMPLETION_TIMESTAMP_INVALID');
+});
+
 test('leg completion simulation rejects malformed runtime stake field shapes', () => {
   const cases = [
     {

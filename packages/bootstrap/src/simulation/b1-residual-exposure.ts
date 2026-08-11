@@ -46,11 +46,19 @@ export function analyzeB1ResidualExposure(
       'Non-negative B1 residual exposure limit in integer minor units.',
     );
   }
+  if (typeof matrix !== 'object' || matrix === null || Array.isArray(matrix) || !Array.isArray(matrix.rows)) {
+    return blocked(
+      'B1_RESIDUAL_EXPOSURE_MATRIX_INVALID',
+      'B1 residual exposure simulation requires a structured scenario cash-flow matrix.',
+      'Structured B1 scenario cash-flow matrix with rows.',
+    );
+  }
 
   const matrixValidation = validateB1ScenarioCashflowMatrix(matrix.rows);
   if (!matrixValidation.ok) {
     return matrixValidation;
   }
+  const matrixRows = matrixValidation.value.rows;
 
   if (!Array.isArray(legs)) {
     return blocked(
@@ -61,12 +69,14 @@ export function analyzeB1ResidualExposure(
   }
 
   const legsByKey = new Map<string, B1ResidualExposureLeg>();
+  const validatedLegs: B1ResidualExposureLeg[] = [];
   for (const leg of legs) {
     const legValidation = validateB1ResidualExposureLeg(leg);
     if (!legValidation.ok) {
       return legValidation;
     }
-    const key = buildB1ResidualLegKey(leg.selectionEquivalenceKey, leg.venueOrBookmakerId);
+    const validatedLeg = legValidation.value;
+    const key = buildB1ResidualLegKey(validatedLeg.selectionEquivalenceKey, validatedLeg.venueOrBookmakerId);
     if (legsByKey.has(key)) {
       return blocked(
         'B1_RESIDUAL_EXPOSURE_LEG_DUPLICATE',
@@ -74,11 +84,12 @@ export function analyzeB1ResidualExposure(
         'Unique B1 residual exposure legs keyed by selection_equivalence_key and venue_or_bookmaker_id.',
       );
     }
-    legsByKey.set(key, legValidation.value);
+    legsByKey.set(key, validatedLeg);
+    validatedLegs.push(validatedLeg);
   }
 
   const matrixKeys = new Set<string>();
-  for (const row of matrix.rows) {
+  for (const row of matrixRows) {
     matrixKeys.add(buildB1ResidualLegKey(row.selectionEquivalenceKey, row.venueOrBookmakerId));
   }
   for (const key of matrixKeys) {
@@ -100,7 +111,7 @@ export function analyzeB1ResidualExposure(
     }
   }
 
-  const scenarioNets = buildScenarioNets(matrix.rows, legsByKey);
+  const scenarioNets = buildScenarioNets(matrixRows, legsByKey);
   if (!scenarioNets.ok) {
     return scenarioNets;
   }
@@ -110,11 +121,11 @@ export function analyzeB1ResidualExposure(
     throw new Error('B1 residual exposure scenario net calculation produced no scenarios after matrix validation.');
   }
 
-  const exposedLegIds = legs
+  const exposedLegIds = validatedLegs
     .filter((leg) => leg.liveFilledStakeMinor > 0n)
     .map((leg) => leg.legId)
     .sort();
-  const excludedLegIds = legs
+  const excludedLegIds = validatedLegs
     .filter((leg) => leg.liveFilledStakeMinor === 0n)
     .map((leg) => leg.legId)
     .sort();
@@ -134,7 +145,7 @@ export function analyzeB1ResidualExposure(
 function validateB1ResidualExposureLeg(
   leg: B1ResidualExposureLeg,
 ): BoundaryResult<B1ResidualExposureLeg> {
-  if (typeof leg !== 'object' || leg === null) {
+  if (typeof leg !== 'object' || leg === null || Array.isArray(leg)) {
     return blocked(
       'B1_RESIDUAL_EXPOSURE_LEG_INVALID',
       'B1 residual exposure simulation requires structured residual exposure leg snapshots.',

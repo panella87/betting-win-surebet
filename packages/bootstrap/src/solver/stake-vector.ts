@@ -41,13 +41,43 @@ interface SolverLegTerms {
 }
 
 export function solveStandardBinaryStakeVector(input: StakeVectorInputContract): BoundaryResult<StakeVectorSolution> {
+  if (typeof input !== 'object' || input === null || Array.isArray(input)) {
+    return blocked(
+      'STAKE_VECTOR_INPUT_INVALID',
+      'Stake-vector solving requires a structured input contract.',
+      'Structured stake-vector input contract.',
+    );
+  }
+  if (typeof input.matrix !== 'object' || input.matrix === null || Array.isArray(input.matrix) || !Array.isArray(input.matrix.rows)) {
+    return blocked(
+      'STAKE_VECTOR_MATRIX_INVALID',
+      'Stake-vector solving requires a structured scenario cash-flow matrix.',
+      'Structured scenario cash-flow matrix with rows.',
+    );
+  }
+  if (!Array.isArray(input.capacityConstraints)) {
+    return blocked(
+      'STAKE_VECTOR_CAPACITY_INVALID',
+      'Stake-vector solving requires capacity constraints as an array.',
+      'Array of local min/max capacity constraints.',
+    );
+  }
+  if (!Array.isArray(input.roundingConstraints)) {
+    return blocked(
+      'STAKE_VECTOR_ROUNDING_INVALID',
+      'Stake-vector solving requires rounding constraints as an array.',
+      'Array of local stake rounding constraints.',
+    );
+  }
+
   const matrixValidation = validateScenarioCashflowMatrix(input.matrix.rows);
   if (!matrixValidation.ok) {
     return matrixValidation;
   }
+  const matrixRows = matrixValidation.value.rows;
 
-  const scenarioIds = [...new Set(input.matrix.rows.map((row) => row.scenarioId))].sort();
-  const legIds = [...new Set(input.matrix.rows.map((row) => row.legId))].sort();
+  const scenarioIds = [...new Set(matrixRows.map((row) => row.scenarioId))].sort();
+  const legIds = [...new Set(matrixRows.map((row) => row.legId))].sort();
   const legIdSet = new Set(legIds);
   if (scenarioIds.length !== 2 || legIds.length !== 2) {
     return blocked(
@@ -123,7 +153,7 @@ export function solveStandardBinaryStakeVector(input: StakeVectorInputContract):
       );
     }
 
-    const rowsForLeg = input.matrix.rows.filter((row) => row.legId === legId);
+    const rowsForLeg = matrixRows.filter((row) => row.legId === legId);
     const extractedTerms = extractSolverLegTerms(legId, rowsForLeg, scenarioIds, capacity, rounding);
     if (!extractedTerms.ok) {
       return extractedTerms;
@@ -281,11 +311,18 @@ export function solveStandardBinaryStakeVector(input: StakeVectorInputContract):
 function validateStakeVectorRoundingConstraint(
   constraint: StakeVectorRoundingConstraint,
 ): BoundaryResult<StakeVectorRoundingConstraint> {
-  if (typeof constraint !== 'object' || constraint === null) {
+  if (typeof constraint !== 'object' || constraint === null || Array.isArray(constraint)) {
     return blocked(
-      'STAKE_VECTOR_ROUNDING_STEP_INVALID',
-      'Stake-vector solving requires a positive rounding step for every leg.',
-      'Positive local stake rounding step for each complete-set leg.',
+      'STAKE_VECTOR_ROUNDING_INVALID',
+      'Stake-vector solving requires structured rounding constraints.',
+      'Structured local stake rounding constraints keyed by leg id.',
+    );
+  }
+  if (typeof constraint.legId !== 'string' || constraint.legId.length === 0) {
+    return blocked(
+      'STAKE_VECTOR_ROUNDING_INVALID',
+      'Stake-vector solving requires rounding constraints with non-empty leg ids.',
+      'Structured local stake rounding constraints keyed by leg id.',
     );
   }
   if (typeof constraint.stepMinor !== 'bigint' || constraint.stepMinor <= 0n) {
@@ -295,7 +332,10 @@ function validateStakeVectorRoundingConstraint(
       'Positive local stake rounding step for each complete-set leg.',
     );
   }
-  return accepted(Object.freeze({ ...constraint }));
+  return accepted(Object.freeze({
+    legId: constraint.legId,
+    stepMinor: constraint.stepMinor,
+  }));
 }
 
 function extractSolverLegTerms(

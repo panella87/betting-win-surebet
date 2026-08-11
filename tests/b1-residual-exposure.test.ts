@@ -46,6 +46,30 @@ test('B1 residual exposure analysis scales filled legs across terminal scenarios
   });
 });
 
+test('B1 residual exposure analysis rejects malformed top-level containers without throwing', () => {
+  const malformedMatrix = analyzeB1ResidualExposure(null as never, Object.freeze([]), 0n);
+  assert.equal(malformedMatrix.ok, false);
+  assert.deepEqual(malformedMatrix.blockers, [
+    {
+      code: 'B1_RESIDUAL_EXPOSURE_MATRIX_INVALID',
+      message: 'B1 residual exposure simulation requires a structured scenario cash-flow matrix.',
+      evidenceRequired: 'Structured B1 scenario cash-flow matrix with rows.',
+    },
+  ]);
+
+  const malformedMatrixArray = analyzeB1ResidualExposure([] as never, Object.freeze([]), 0n);
+  assert.equal(malformedMatrixArray.ok, false);
+  assert.equal(malformedMatrixArray.blockers[0]?.code, 'B1_RESIDUAL_EXPOSURE_MATRIX_INVALID');
+
+  const malformedRows = analyzeB1ResidualExposure({ rows: null } as never, Object.freeze([]), 0n);
+  assert.equal(malformedRows.ok, false);
+  assert.equal(malformedRows.blockers[0]?.code, 'B1_RESIDUAL_EXPOSURE_MATRIX_INVALID');
+
+  const malformedLegs = analyzeB1ResidualExposure(twoWayMatrix(), null as never, 0n);
+  assert.equal(malformedLegs.ok, false);
+  assert.equal(malformedLegs.blockers[0]?.code, 'B1_RESIDUAL_EXPOSURE_LEG_INVALID');
+});
+
 test('B1 residual exposure analysis fails closed on missing leg snapshots', () => {
   const result = analyzeB1ResidualExposure(twoWayMatrix(), Object.freeze([
     Object.freeze({
@@ -70,6 +94,7 @@ test('B1 residual exposure analysis fails closed on missing leg snapshots', () =
 test('B1 residual exposure analysis fails closed on malformed leg evidence without throwing', () => {
   for (const malformedLeg of [
     null,
+    [],
     Object.freeze({
       legId: 'b1_leg:event-001:moneyline:away:venue-b',
       selectionEquivalenceKey: 'event-001:moneyline:away',
@@ -119,6 +144,34 @@ test('B1 residual exposure analysis fails closed on fractional partial payout sc
       code: 'B1_RESIDUAL_EXPOSURE_PAYOUT_SCALING_FRACTIONAL',
       message: 'B1 residual exposure simulation requires partial payout scaling to resolve to integer minor units.',
       evidenceRequired: 'B1 scenario cash-flow payout scaling with no fractional minor-unit remainder.',
+    },
+  ]);
+});
+
+test('B1 residual exposure analysis blocks zero-stake matrix rows before payout arithmetic', () => {
+  const result = analyzeB1ResidualExposure(zeroStakeMatrix(), Object.freeze([
+    Object.freeze({
+      legId: 'b1_leg:event-001:moneyline:away:venue-b',
+      selectionEquivalenceKey: 'event-001:moneyline:away',
+      venueOrBookmakerId: 'venue-b',
+      plannedStakeMinor: 10_000n,
+      liveFilledStakeMinor: 5_000n,
+    }),
+    Object.freeze({
+      legId: 'b1_leg:event-001:moneyline:home:venue-a',
+      selectionEquivalenceKey: 'event-001:moneyline:home',
+      venueOrBookmakerId: 'venue-a',
+      plannedStakeMinor: 10_000n,
+      liveFilledStakeMinor: 0n,
+    }),
+  ]), 5_000n);
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'B1_STAKE_NOT_POSITIVE',
+      message: 'B1 scenario cash-flow validation requires positive stake rows.',
+      evidenceRequired: 'Positive B1 scenario cash-flow stake amounts in integer minor units.',
     },
   ]);
 });
@@ -360,6 +413,15 @@ function fractionalPartialPayoutMatrix() {
         && row.selectionEquivalenceKey === 'event-001:moneyline:away'
         ? 21_001n
         : row.payoutMinor,
+    }))),
+  });
+}
+
+function zeroStakeMatrix() {
+  return Object.freeze({
+    rows: Object.freeze(twoWayMatrix().rows.map((row, index) => Object.freeze({
+      ...row,
+      stakeMinor: index === 0 ? 0n : row.stakeMinor,
     }))),
   });
 }

@@ -131,6 +131,50 @@ test('B1 generalized stake-vector solver returns deterministic 2-way integer sta
   assert.equal(result.value.liveReadiness, 'not_authorized_bws_900_parked');
 });
 
+test('B1 generalized stake-vector solver rejects malformed gross candidate containers without throwing', () => {
+  const result = solveB1GeneralizedStakeVector(null as never, twoWayPolicy());
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'B1_STAKE_VECTOR_GROSS_CANDIDATE_INVALID',
+      message: 'B1 generalized stake-vector solving requires a structured gross candidate input.',
+      evidenceRequired: 'Structured B1 gross opportunity candidate.',
+    },
+  ]);
+
+  const malformedCandidateArray = solveB1GeneralizedStakeVector([] as never, twoWayPolicy());
+  assert.equal(malformedCandidateArray.ok, false);
+  assert.equal(malformedCandidateArray.blockers[0]?.code, 'B1_STAKE_VECTOR_GROSS_CANDIDATE_INVALID');
+
+  const malformedCandidateOutcome = solveB1GeneralizedStakeVector({ ok: null } as never, twoWayPolicy());
+  assert.equal(malformedCandidateOutcome.ok, false);
+  assert.deepEqual(malformedCandidateOutcome.blockers, [
+    {
+      code: 'B1_STAKE_VECTOR_GROSS_CANDIDATE_INVALID',
+      message: 'B1 generalized stake-vector solving requires a typed gross candidate outcome.',
+      evidenceRequired: 'Structured B1 gross opportunity candidate with ok status.',
+    },
+  ]);
+
+  const malformedPolicyArray = solveB1GeneralizedStakeVector(acceptedTwoWayGrossCandidate(), [] as never);
+  assert.equal(malformedPolicyArray.ok, false);
+  assert.equal(malformedPolicyArray.blockers[0]?.code, 'B1_STAKE_VECTOR_POLICY_MISSING');
+
+  const malformedSelectedQuote = solveB1GeneralizedStakeVector(Object.freeze({
+    ...acceptedTwoWayGrossCandidate(),
+    selectedQuotes: Object.freeze([null]),
+  }) as never, twoWayPolicy());
+  assert.equal(malformedSelectedQuote.ok, false);
+  assert.deepEqual(malformedSelectedQuote.blockers, [
+    {
+      code: 'B1_STAKE_VECTOR_GROSS_CANDIDATE_INVALID',
+      message: 'B1 generalized stake-vector solving requires structured selected gross quote evidence.',
+      evidenceRequired: 'Accepted B1 gross candidate with structured selected quotes.',
+    },
+  ]);
+});
+
 test('B1 generalized stake-vector solver supports 3-way complete-market portfolios', () => {
   const result = solveB1GeneralizedStakeVector(threeWayGrossCandidate(), Object.freeze({
     legConstraints: Object.freeze([

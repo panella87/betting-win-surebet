@@ -4,6 +4,10 @@ import {
   type BoundaryResult,
   type IsoTimestamp,
 } from '../contracts/local-types.js';
+import {
+  validateB1ScenarioCashflowMatrix,
+  type B1ScenarioCashflowMatrix,
+} from '../scenarios/b1-scenario-cashflow.js';
 import type { B1GeneralizedStakeVectorSolution } from '../solver/b1-generalized-stake-vector.js';
 import {
   analyzeB1ResidualExposure,
@@ -104,7 +108,7 @@ export function simulateB1FillRejectionTimeout(
   }
 
   const residualExposure = analyzeB1ResidualExposure(
-    input.stakeVector.scenarioCashflowMatrix,
+    inputValidation.value.scenarioCashflowMatrix,
     legs.map((leg) => toB1ResidualExposureLeg(leg)),
     input.maxResidualExposureMinor,
   );
@@ -135,19 +139,39 @@ function validateB1FillabilityInput(
   input: B1FillabilitySimulationInput,
 ): BoundaryResult<{
   readonly legsByKey: ReadonlyMap<string, B1FillabilityLegAccumulator>;
+  readonly scenarioCashflowMatrix: B1ScenarioCashflowMatrix;
 }> {
-  if (typeof input !== 'object' || input === null || !Array.isArray(input.events)) {
+  if (typeof input !== 'object' || input === null || Array.isArray(input) || !Array.isArray(input.events)) {
     return blocked(
       'B1_FILLABILITY_INPUT_MISSING',
       'B1 fillability simulation requires an explicit stake vector, event list and residual exposure limit.',
       'Explicit B1 fillability simulation input.',
     );
   }
-  if (!input.stakeVector.ok) {
+  if (
+    typeof input.stakeVector !== 'object'
+    || input.stakeVector === null
+    || Array.isArray(input.stakeVector)
+    || input.stakeVector.ok !== true
+  ) {
     return blocked(
       'B1_FILLABILITY_REQUIRES_ACCEPTED_STAKE_VECTOR',
       'B1 fillability simulation requires an accepted generalized stake-vector solution.',
       'Accepted B1 generalized stake-vector solution.',
+    );
+  }
+  if (
+    typeof input.stakeVector.candidateId !== 'string'
+    || !Array.isArray(input.stakeVector.stakes)
+    || typeof input.stakeVector.scenarioCashflowMatrix !== 'object'
+    || input.stakeVector.scenarioCashflowMatrix === null
+    || Array.isArray(input.stakeVector.scenarioCashflowMatrix)
+    || !Array.isArray(input.stakeVector.scenarioCashflowMatrix.rows)
+  ) {
+    return blocked(
+      'B1_FILLABILITY_STAKE_VECTOR_INVALID',
+      'B1 fillability simulation requires a structured accepted stake-vector solution.',
+      'Accepted B1 generalized stake-vector solution with stakes and scenario matrix.',
     );
   }
   if (input.events.length === 0) {
@@ -164,11 +188,50 @@ function validateB1FillabilityInput(
       'Non-negative B1 residual exposure limit in integer minor units.',
     );
   }
+  const matrixValidation = validateB1ScenarioCashflowMatrix(input.stakeVector.scenarioCashflowMatrix.rows);
+  if (!matrixValidation.ok) {
+    return matrixValidation;
+  }
 
   const legsByKey = new Map<string, B1FillabilityLegAccumulator>();
   for (const stake of input.stakeVector.stakes) {
+    if (
+      typeof stake !== 'object'
+      || stake === null
+      || Array.isArray(stake)
+      || typeof stake.selectionEquivalenceKey !== 'string'
+      || typeof stake.venueOrBookmakerId !== 'string'
+      || typeof stake.stakeMinor !== 'bigint'
+    ) {
+      return blocked(
+        'B1_FILLABILITY_STAKE_VECTOR_INVALID',
+        'B1 fillability simulation requires structured solved stake-vector legs.',
+        'Accepted B1 generalized stake-vector solution with structured solved legs.',
+      );
+    }
     const legId = buildB1FillabilityLegId(stake.selectionEquivalenceKey, stake.venueOrBookmakerId);
     const key = buildB1FillabilityLegKey(stake.selectionEquivalenceKey, stake.venueOrBookmakerId);
+    if (stake.selectionEquivalenceKey.length === 0) {
+      return blocked(
+        'B1_SELECTION_EQUIVALENCE_MISSING',
+        'B1 fillability simulation requires selection equivalence evidence for every solved leg.',
+        'B1 solved stake-vector leg selection_equivalence_key.',
+      );
+    }
+    if (stake.venueOrBookmakerId.length === 0) {
+      return blocked(
+        'B1_VENUE_PAIR_INCOMPLETE',
+        'B1 fillability simulation requires venue evidence for every solved leg.',
+        'B1 solved stake-vector leg venue_or_bookmaker_id.',
+      );
+    }
+    if (stake.stakeMinor <= 0n) {
+      return blocked(
+        'B1_STAKE_NOT_POSITIVE',
+        'B1 fillability simulation requires positive solved stake amounts.',
+        'Positive B1 solved stake in integer minor units.',
+      );
+    }
     if (legsByKey.has(key)) {
       return blocked(
         'B1_FILLABILITY_LEG_DUPLICATE',
@@ -187,7 +250,10 @@ function validateB1FillabilityInput(
     });
   }
 
-  return accepted(Object.freeze({ legsByKey }));
+  return accepted(Object.freeze({
+    legsByKey,
+    scenarioCashflowMatrix: matrixValidation.value,
+  }));
 }
 
 function replayB1FillabilityEvents(
@@ -244,7 +310,7 @@ function replayB1FillabilityEvents(
 }
 
 function validateB1FillabilityEvent(event: B1FillabilityEvent): BoundaryResult<undefined> {
-  if (typeof event !== 'object' || event === null) {
+  if (typeof event !== 'object' || event === null || Array.isArray(event)) {
     return blocked(
       'B1_FILLABILITY_EVENT_INVALID',
       'B1 fillability simulation requires structured fillability events.',

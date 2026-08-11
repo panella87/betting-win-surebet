@@ -13,6 +13,13 @@ export interface ScenarioCashflowLegTerms {
 }
 
 export function validateScenarioCashflowMatrix(rows: readonly ScenarioCashflowRow[]): BoundaryResult<ScenarioCashflowMatrix> {
+  if (!Array.isArray(rows)) {
+    return blocked(
+      'SCENARIO_CASHFLOW_ROWS_INVALID',
+      'Scenario cash-flow rows must be supplied as an array.',
+      'Array of structured scenario cash-flow rows.',
+    );
+  }
   if (rows.length === 0) {
     return blocked('SCENARIO_CASHFLOW_EMPTY', 'Scenario cash-flow rows are required.', 'Complete scenario cash-flow matrix.');
   }
@@ -58,6 +65,26 @@ export function buildStandardBinaryScenarioCashflowMatrix(
   completeSet: StandardBinaryCompleteSet,
   legTerms: readonly ScenarioCashflowLegTerms[],
 ): BoundaryResult<ScenarioCashflowMatrix> {
+  if (
+    !isRecord(completeSet)
+    || !Array.isArray(completeSet.scenarioIds)
+    || !Array.isArray(completeSet.legs)
+    || !isRecord(completeSet.quotesByOutcome)
+  ) {
+    return blocked(
+      'SCENARIO_CASHFLOW_COMPLETE_SET_INVALID',
+      'Scenario cash-flow builder requires a structured standard-binary complete set.',
+      'Validated standard-binary complete set with scenarios, legs and quote terms.',
+    );
+  }
+  if (!Array.isArray(legTerms)) {
+    return blocked(
+      'SCENARIO_CASHFLOW_LEG_TERMS_INVALID',
+      'Scenario cash-flow terms must be supplied as an array.',
+      'Array of structured stake and payout terms for each complete-set leg.',
+    );
+  }
+
   const scenarioValidation = validateScenarioCoverage(completeSet.scenarioIds);
   if (!scenarioValidation.ok) {
     return scenarioValidation;
@@ -114,12 +141,30 @@ export function buildStandardBinaryScenarioCashflowMatrix(
         'Non-negative fixed-point payout amounts for each complete-set leg.',
       );
     }
-    termsByLegId.set(term.legId, Object.freeze({ ...term }));
+    termsByLegId.set(term.legId, Object.freeze({
+      legId: term.legId,
+      stakeMinor: term.stakeMinor,
+      payoutMinor: term.payoutMinor,
+    }));
   }
 
   const rows: ScenarioCashflowRow[] = [];
   for (const scenario of standardBinaryTerminalScenarios()) {
     for (const leg of completeSet.legs) {
+      if (!isRecord(leg)) {
+        return blocked(
+          'SCENARIO_CASHFLOW_LEG_INVALID',
+          'Scenario cash-flow builder requires structured complete-set legs.',
+          'Structured standard-binary complete-set legs.',
+        );
+      }
+      if (!isNonEmptyString(leg.legId)) {
+        return blocked(
+          'SCENARIO_CASHFLOW_LEG_INVALID',
+          'Scenario cash-flow builder requires complete-set legs with non-empty leg ids.',
+          'Structured standard-binary complete-set legs with legId.',
+        );
+      }
       if (!isOutcomeSide(leg.outcome)) {
         return blocked(
           'SCENARIO_CASHFLOW_OUTCOME_INVALID',
@@ -194,7 +239,7 @@ function validateScenarioCoverage(scenarioIds: readonly string[]): BoundaryResul
   return accepted(Object.freeze([...actualScenarios]));
 }
 
-function isOutcomeSide(value: string): value is OutcomeSide {
+function isOutcomeSide(value: unknown): value is OutcomeSide {
   return value === 'yes' || value === 'no';
 }
 
