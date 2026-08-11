@@ -1,3 +1,9 @@
+## 2026-08-11 - Boundary container hardening and legacy-parent regression isolation
+
+- Preserved the validated BWS-BIC-001/BWS-BIC-002 product repairs so malformed or null scenario, stake-vector, gross/net economics, fillability, residual-exposure, settlement, and void-rule containers return deterministic blocked boundary results instead of uncaught `TypeError`s.
+- Isolated the Wave 64 legacy-parent transition fixture from the real campaign's inherited parent boot/start identity variables, so the test exercises the intended identity-less one-generation compatibility path.
+- Kept production lock verification, unrelated-live-lock rejection, provider/execution boundaries, BWS-600 external evidence gating, and BWS-900 execution closure unchanged.
+
 ## 2026-08-11 - In-campaign parent/child identity transition repair
 
 - Preserved the validated area-7 automation, lock, manifest, and packaging implementation from the stopped bugfix campaign.
