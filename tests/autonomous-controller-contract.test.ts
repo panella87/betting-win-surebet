@@ -141,7 +141,7 @@ test('implementation controller exposes canonical flags and telegram wiring', ()
     '--stream','--no-stream','No --task flag is supported','docs/automation/current-implementation-task.md',
     'telegram_notify_send_final "run-autonomous-implementation.sh"','automation_require_cycle_artifacts',
     'automation_read_continue_status','check_only_validation_failed','AUTONOMOUS_GOAL_COMPLETE=yes',
-    'BLOCKED=yes','bugfix_handoff_validated_source_fix_accepting_for_reaudit=yes','bugfix_handoff_validated_source_fix_requires_reaudit','exit 3','Activate the repo runtime in the parent shell first','never sources nvm.sh','baseline_validation=enabled','strict_handoff_parser=enabled','exact_handoff_protected_allowlist=enabled','task_file_exact_protected_allowlist=enabled','manual_blanket_protected_override=disabled','configure_task_file_protected_policy()','read_optional_task_marker()','strict_schema_v1_key_allowlists=enabled','source_evidence_sha256_verification=enabled','source_fingerprint_reconciliation=enabled','input_handoff_immutable=enabled','machine_readable_final_stdout=enabled','lock_acquisition_before_run_dir=enabled','lock_release_failure_classification=enabled','lock_release_failed_lock_preserved',"printf 'lock_release_status=%s\\n'","printf 'lock_preserved=%s\\n'",'write_consumed_handoff_marker','remove_consumed_handoff_marker',
+    'BLOCKED=yes','bugfix_handoff_validated_source_fix_accepting_for_reaudit=yes','bugfix_handoff_validated_source_fix_requires_reaudit','exit 3','Activate the repo runtime in the parent shell first','never sources nvm.sh','baseline_validation=enabled','strict_handoff_parser=enabled','exact_handoff_protected_allowlist=enabled','task_file_exact_protected_allowlist=enabled','manual_blanket_protected_override=disabled','configure_task_file_protected_policy()','read_optional_task_marker()','strict_schema_v1_key_allowlists=enabled','source_evidence_sha256_verification=enabled','source_fingerprint_reconciliation=enabled','cycle_source_manifest_reconciliation=enabled','input_handoff_immutable=enabled','machine_readable_final_stdout=enabled','lock_acquisition_before_run_dir=enabled','lock_release_failure_classification=enabled','lock_release_failed_lock_preserved',"printf 'lock_release_status=%s\\n'","printf 'lock_preserved=%s\\n'",'write_consumed_handoff_marker','remove_consumed_handoff_marker',
   ]) assertContains(script, marker);
   assert.doesNotMatch(script, /scripts\/load-node-runtime\.sh/);
   assert.doesNotMatch(script, /source .*nvm/);
@@ -150,6 +150,89 @@ test('implementation controller exposes canonical flags and telegram wiring', ()
   assert.match(script, /Bounded repo-owned loopback child processes may be started only inside task-required tests or validation\./);
 });
 
+
+test('implementation controller reconciles SOURCE_MANIFEST before validation after a source-changing cycle', () => {
+  const script = read('run-autonomous-implementation.sh');
+  for (const marker of [
+    'regenerate_source_manifest_after_cycle_change()',
+    'scripts/regenerate_source_manifest.py',
+    'scripts/validate_source_manifest.py',
+    'CYCLE_SOURCE_FINGERPRINT_BEFORE="$(compute_source_fingerprint)"',
+    'CYCLE_SOURCE_FINGERPRINT_AFTER_CODEX="$(compute_source_fingerprint)"',
+    'source_manifest_refresh=completed',
+    'source_manifest_regeneration_failed_cycle_',
+  ]) assertContains(script, marker);
+
+  const protectedCheck = script.indexOf('if ! check_protected_policy');
+  const afterCodexFingerprint = script.indexOf('CYCLE_SOURCE_FINGERPRINT_AFTER_CODEX=', protectedCheck);
+  const manifestRefresh = script.indexOf('regenerate_source_manifest_after_cycle_change \\', afterCodexFingerprint);
+  const diffCapture = script.indexOf('diff --no-ext-diff > "$CYCLE_DIR/git_diff.patch"', manifestRefresh);
+  const validation = script.indexOf('automation_run_validations implementation', diffCapture);
+  assert.ok(protectedCheck >= 0);
+  assert.ok(afterCodexFingerprint > protectedCheck);
+  assert.ok(manifestRefresh > afterCodexFingerprint);
+  assert.ok(diffCapture > manifestRefresh);
+  assert.ok(validation > diffCapture);
+
+  const tempRoot = mkdtempSync(join(tmpdir(), 'surebet-cycle-manifest-refresh-'));
+  const fixtureRoot = join(tempRoot, 'fixture');
+  const fixtureScripts = join(fixtureRoot, 'scripts');
+  const harness = join(tempRoot, 'controller-functions.sh');
+  const shell = String.raw`
+set -Eeuo pipefail
+awk '/^parse_args "\$@"/ { exit } { print }' "$REPO_ROOT/run-autonomous-implementation.sh" \
+  | sed "s|^SCRIPT_DIR=.*|SCRIPT_DIR=\"$REPO_ROOT\"|" > "$1"
+. "$1"
+AUTOMATION_REPO_ROOT="$2"
+AUTOMATION_CONTROLLER_LOG="$2/controller.log"
+CYCLES_ATTEMPTED=7
+regenerate_source_manifest_after_cycle_change before after
+`;
+
+  try {
+    mkdirSync(fixtureScripts, { recursive: true });
+    writeFileSync(join(fixtureRoot, 'tracked.txt'), 'alpha\n', 'utf-8');
+    writeFileSync(
+      join(fixtureRoot, 'SOURCE_MANIFEST.json'),
+      '{"schema":"source-manifest-v1","generated":"2026-01-01T00:00:00Z","overlay":"fixture","files":[]}\n',
+      'utf-8',
+    );
+    for (const rel of ['regenerate_source_manifest.py', 'validate_source_manifest.py']) {
+      writeFileSync(
+        join(fixtureScripts, rel),
+        readFileSync(join(REPO_ROOT, 'scripts', rel), 'utf-8'),
+        'utf-8',
+      );
+    }
+    execFileSync(
+      'python3',
+      ['scripts/regenerate_source_manifest.py', '--overlay', 'fixture'],
+      { cwd: fixtureRoot, stdio: 'pipe' },
+    );
+    writeFileSync(join(fixtureRoot, 'tracked.txt'), 'beta\n', 'utf-8');
+
+    execFileSync(
+      'bash',
+      ['-lc', shell, 'bash', harness, fixtureRoot],
+      {
+        env: { ...process.env, REPO_ROOT },
+        stdio: 'pipe',
+      },
+    );
+    const validationOutput = execFileSync(
+      'python3',
+      ['scripts/validate_source_manifest.py'],
+      { cwd: fixtureRoot, encoding: 'utf-8' },
+    );
+    assert.match(validationOutput, /validate_source_manifest: ok/u);
+    assert.match(
+      readFileSync(join(fixtureRoot, 'controller.log'), 'utf-8'),
+      /source_manifest_refresh=completed cycle=7 overlay=autonomous-implementation-cycle-7/u,
+    );
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
 
 test('implementation bugfix handoff sends validated source fixes back to bugfix re-audit', () => {
   const script = read('run-autonomous-implementation.sh');

@@ -84,6 +84,10 @@ Autonomous cycles may not mutate pre-existing services or user sessions. Bounded
 Parent autopilots launch children with `TELEGRAM_NOTIFY=0` and emit one final parent notification. Standalone controllers retain their own final notification. Parent/child terminal state uses the atomic child-result side channel, never streamed human output. Bugfix autopilot validates the runtime-evidence identity keys emitted by the implementation return handoff; for ordinary bugfix campaigns they must remain `none`, so source re-audit cannot silently turn into a paper/runtime-evidence campaign. The standalone bugfix audit child must emit a confirmed-bug implementation handoff before post-Codex validation blocks on the same known red validation that justified the handoff.
 
 
+## Source-manifest reconciliation during implementation
+
+After a source-changing implementation cycle passes protected-file enforcement, `run-autonomous-implementation.sh` regenerates and validates `SOURCE_MANIFEST.json` before the full validation chain. This is deterministic repository metadata maintenance, not permission to expand the bounded product scope. Missing or invalid manifest tooling remains fail-closed.
+
 ## Clean validation bootstrap
 
 `npm test` now builds the root TypeScript graph, generates and verifies the exact committed-HEAD betting-win lock, creates the ignored repo-local `artifacts/` directory, and only then starts the serialized compiled test suite. Validation must not depend on stale generated state from a previous controller run.

@@ -63,3 +63,19 @@ allowed_protected_files=none
 Do not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`. Missing or disabled authorization must fail closed, and no autonomous cycle may broaden it.
 
 The check-only must fail contract remains binding. Standalone implementation sends its final Telegram result. A parent suppresses the child notification and sends the final campaign notification.
+
+## Controller-managed source-manifest refresh
+
+A bounded implementation handoff may name only the product and test files needed for a source fix. `CHANGELOG.md` remains an operator/reviewer concern unless the task names it, but `SOURCE_MANIFEST.json` is repository validation metadata and must never remain stale after a source-changing cycle.
+
+The implementation controller therefore:
+
+```text
+1. captures the cycle source fingerprint before Codex;
+2. enforces the exact protected-file policy after Codex;
+3. when the source fingerprint changed, runs scripts/regenerate_source_manifest.py;
+4. immediately runs scripts/validate_source_manifest.py;
+5. captures the cycle diff and starts controller-managed validation only after reconciliation passes.
+```
+
+A failed manifest refresh blocks the cycle. The controller does not use this mechanism to authorize unrelated files, hide validation failures, or weaken the bugfix parent's mandatory same-area re-audit.

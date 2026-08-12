@@ -10,7 +10,7 @@ AUTOMATION_REPO_ROOT="$SCRIPT_DIR"
 # shellcheck source=.automation/lib/telegram_notify.sh
 . "$AUTOMATION_REPO_ROOT/.automation/lib/telegram_notify.sh"
 
-SCRIPT_VERSION="2026-07-16.surebet-v9-task-file-exact-protected-policy"
+SCRIPT_VERSION="2026-08-12.surebet-v10-cycle-source-manifest-refresh"
 SCRIPT_NAME="run-autonomous-implementation.sh"
 DURATION_SECONDS="$(automation_parse_duration_seconds 72h)"
 PROMPT_FILE=""
@@ -245,6 +245,7 @@ manual_blanket_protected_override=disabled
 strict_schema_v1_key_allowlists=enabled
 source_evidence_sha256_verification=enabled
 source_fingerprint_reconciliation=enabled
+cycle_source_manifest_reconciliation=enabled
 input_handoff_immutable=enabled
 machine_readable_final_stdout=enabled
 lock_acquisition_before_run_dir=enabled
@@ -303,6 +304,50 @@ refresh_source_change_state() {
   else
     RUN_SOURCE_VALIDATION_PASSED="no"
   fi
+}
+
+regenerate_source_manifest_after_cycle_change() {
+  local source_fingerprint_before="$1"
+  local source_fingerprint_after="$2"
+  local manifest="$AUTOMATION_REPO_ROOT/SOURCE_MANIFEST.json"
+  local generator="$AUTOMATION_REPO_ROOT/scripts/regenerate_source_manifest.py"
+  local validator="$AUTOMATION_REPO_ROOT/scripts/validate_source_manifest.py"
+  local overlay="autonomous-implementation-cycle-${CYCLES_ATTEMPTED}"
+
+  [[ -n "$source_fingerprint_before" && -n "$source_fingerprint_after" ]] || {
+    echo "ERROR: cycle source fingerprints are required before source-manifest reconciliation" >&2
+    return 2
+  }
+  if [[ "$source_fingerprint_before" == "$source_fingerprint_after" ]]; then
+    automation_log "source_manifest_refresh=skipped reason=no_cycle_source_change cycle=$CYCLES_ATTEMPTED"
+    return 0
+  fi
+
+  [[ -f "$manifest" && ! -L "$manifest" ]] || {
+    echo "ERROR: SOURCE_MANIFEST.json must be a non-symlink regular file before validation" >&2
+    return 2
+  }
+  [[ -f "$generator" && ! -L "$generator" ]] || {
+    echo "ERROR: scripts/regenerate_source_manifest.py must be a non-symlink regular file" >&2
+    return 2
+  }
+  [[ -f "$validator" && ! -L "$validator" ]] || {
+    echo "ERROR: scripts/validate_source_manifest.py must be a non-symlink regular file" >&2
+    return 2
+  }
+  automation_require_command python3 || return 2
+
+  if ! (
+    cd "$AUTOMATION_REPO_ROOT"
+    PYTHONDONTWRITEBYTECODE=1 python3 scripts/regenerate_source_manifest.py --overlay "$overlay"
+    PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_source_manifest.py
+  ); then
+    echo "ERROR: deterministic source-manifest refresh failed for implementation cycle $CYCLES_ATTEMPTED" >&2
+    return 2
+  fi
+
+  automation_log "source_manifest_refresh=completed cycle=$CYCLES_ATTEMPTED overlay=$overlay"
+  return 0
 }
 
 handoff_value() {
@@ -1186,6 +1231,11 @@ while true; do
   CYCLES_ATTEMPTED=$((CYCLES_ATTEMPTED + 1))
   CYCLE_DIR="$AUTOMATION_RUN_DIR/cycles/cycle_${CYCLES_ATTEMPTED}"
   mkdir -p "$CYCLE_DIR"
+  CYCLE_SOURCE_FINGERPRINT_BEFORE="$(compute_source_fingerprint)" || {
+    FINAL_STATUS="BLOCKED=yes"
+    STOP_REASON="pre_codex_source_fingerprint_failed_cycle_${CYCLES_ATTEMPTED}"
+    exit 2
+  }
   PROMPT="$CYCLE_DIR/codex_prompt.md"
   cat > "$PROMPT" <<EOF_PROMPT
 Role:
@@ -1266,12 +1316,26 @@ EOF_PROMPT
     continue
   fi
 
-  git -C "$AUTOMATION_REPO_ROOT" diff --no-ext-diff > "$CYCLE_DIR/git_diff.patch" 2>/dev/null || true
   if ! check_protected_policy "$CYCLE_DIR/protected_after.sha256" "$CYCLE_DIR/protected_diff.patch" "$CYCLE_DIR/protected_changed_files.txt"; then
     FINAL_STATUS="BLOCKED=yes"
     STOP_REASON="protected_files_changed"
     exit 2
   fi
+
+  CYCLE_SOURCE_FINGERPRINT_AFTER_CODEX="$(compute_source_fingerprint)" || {
+    FINAL_STATUS="BLOCKED=yes"
+    STOP_REASON="post_codex_source_fingerprint_failed_cycle_${CYCLES_ATTEMPTED}"
+    exit 2
+  }
+  if ! regenerate_source_manifest_after_cycle_change \
+    "$CYCLE_SOURCE_FINGERPRINT_BEFORE" \
+    "$CYCLE_SOURCE_FINGERPRINT_AFTER_CODEX"; then
+    FINAL_STATUS="BLOCKED=yes"
+    STOP_REASON="source_manifest_regeneration_failed_cycle_${CYCLES_ATTEMPTED}"
+    exit 2
+  fi
+
+  git -C "$AUTOMATION_REPO_ROOT" diff --no-ext-diff > "$CYCLE_DIR/git_diff.patch" 2>/dev/null || true
   if ! automation_require_cycle_artifacts "$CYCLE_DIR" allow_empty_git_diff implementation_plan.md changes_made.md validation_results.md remaining_gaps.md final_status.md continue_status.txt git_diff.patch; then
     FINAL_STATUS="BLOCKED=yes"
     STOP_REASON="malformed_cycle_artifacts_cycle_${CYCLES_ATTEMPTED}"

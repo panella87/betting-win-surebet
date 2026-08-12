@@ -87,8 +87,15 @@ Executable command lists remain in `automation.config.sh`, `tools/required_execu
 ## Bugfix completion next-area contract
 
 `run-bugfix-autopilot.sh` remains protected. A clean audit child may report `NEXT_AUDIT_AREA=none` or the exact next non-closed campaign area. The parent validates any explicit slug against its campaign ledger and rejects skipped, stale, or arbitrary areas before closing the current row. This controller repair does not authorize protected changes during ordinary bugfix runs.
+
 ## Parent/child schema transition safety
 
 Protected controller helpers can change only through an exact reviewed maintenance handoff or external overlay. If an authorized child changes lock or terminal-result identity fields while the parent is already running, compatibility is limited to that exact direct parent-child process relationship for one generation. It is not permission to accept arbitrary legacy locks. The lock path, parent PID, direct-parent relationship, controller pairing, repository, script path, command identity, and non-symlink file type must all match. Any unrelated or malformed live lock remains blocking.
 
 New parents use boot ID and process-start ticks for both lock ownership and child-result reconciliation. `RUN_DIR=none` is accepted only for an identity-rich child result that reports an explicit pre-start setup failure with zero cycles and a nonzero exit code.
+
+## Implementation-cycle source-manifest reconciliation
+
+`run-autonomous-implementation.sh` remains protected. After a Codex cycle changes the source fingerprint and the exact protected-file policy passes, the controller deterministically regenerates and validates `SOURCE_MANIFEST.json` before capturing the final cycle diff and running repository validation.
+
+This metadata reconciliation does not broaden the handoff's product scope and does not authorize protected-file changes. A missing, symlinked, or failing manifest generator/validator is a blocking controller error. No manifest refresh occurs when the cycle makes no source change.

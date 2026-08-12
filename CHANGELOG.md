@@ -1,3 +1,10 @@
+## 2026-08-12 - Implementation-cycle source-manifest reconciliation
+
+- Preserved the validated BWS-RCBPAI-001 batch-summary integrity repair from the stopped area-6 implementation child.
+- Added deterministic controller-managed `SOURCE_MANIFEST.json` regeneration and immediate manifest validation after a source-changing implementation cycle and before repository validation.
+- Prevented bounded bugfix handoffs from repeatedly exhausting validation attempts solely because metadata files were outside the product-file implementation scope.
+- Kept protected-file enforcement ahead of manifest regeneration and preserved all provider, execution, BWS-600, BWS-900, artifact-retention, and same-area re-audit boundaries.
+
 ## 2026-08-11 - Boundary container hardening and legacy-parent regression isolation
 
 - Preserved the validated BWS-BIC-001/BWS-BIC-002 product repairs so malformed or null scenario, stake-vector, gross/net economics, fillability, residual-exposure, settlement, and void-rule containers return deterministic blocked boundary results instead of uncaught `TypeError`s.
