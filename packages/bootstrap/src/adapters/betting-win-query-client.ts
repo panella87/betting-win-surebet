@@ -721,7 +721,7 @@ function validateQueryResponseEnvelope<TResource extends ReadOnlyQueryResource>(
   if (!provenance.ok) {
     return provenance;
   }
-  const page = validateQueryPage(request.resource, config.maxPageSize, envelope['page']);
+  const page = validateQueryPage(request.resource, request.pageSize, config.maxPageSize, envelope['page']);
   if (!page.ok) {
     return page;
   }
@@ -820,6 +820,7 @@ function isIso8601UtcTimestamp(value: string): boolean {
 
 function validateQueryPage<TResource extends ReadOnlyQueryResource>(
   resource: TResource,
+  requestedPageSize: number,
   maxPageSize: number,
   pageValue: unknown,
 ): BoundaryResult<ReadOnlyQueryPage<TResource>> {
@@ -840,6 +841,13 @@ function validateQueryPage<TResource extends ReadOnlyQueryResource>(
       'QUERY_PAGE_FIELDS_INVALID',
       'Read-only query page must include pageSize, returnedCount, and items.',
       'Complete paginated read-only query response page.',
+    );
+  }
+  if (pageSize !== requestedPageSize) {
+    return blocked(
+      'QUERY_PAGE_SIZE_MISMATCH',
+      'Read-only query response pageSize must exactly match the requested pageSize.',
+      'Read-only betting-win API response preserving the requested page boundary.',
     );
   }
   if (pageSize <= 0 || pageSize > maxPageSize || returnedCount < 0 || returnedCount !== items.length || items.length > pageSize) {

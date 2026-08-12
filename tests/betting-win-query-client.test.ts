@@ -811,6 +811,52 @@ test('read-only query client rejects missing normalized-record provenance and in
   });
 });
 
+test('read-only query client rejects response pageSize that differs from the requested pageSize', async () => {
+  const client = createReadOnlyQueryApiClient({
+    baseUrl: 'http://betting-win-query.test/read-only',
+    contractVersion: '1.0.0',
+    fetchImplementation: async (input) => {
+      const url = new URL(input);
+      assert.equal(url.searchParams.get('pageSize'), '1');
+      return new Response(`${JSON.stringify(createEnvelope('rules', {
+        page: {
+          items: [
+            {
+              resultSource: { resultSourceId: 'result-source-001' },
+              ruleProfile: { ruleProfileId: 'rule-profile-001' },
+            },
+            {
+              resultSource: { resultSourceId: 'result-source-002' },
+              ruleProfile: { ruleProfileId: 'rule-profile-002' },
+            },
+          ],
+          pageSize: 2,
+          returnedCount: 2,
+        },
+      }))}\n`, {
+        headers: { 'content-type': 'application/json' },
+        status: 200,
+      });
+    },
+    maxPageSize: 50,
+    retryBackoffMs: 5,
+    retryLimit: 1,
+    timeoutMs: 50,
+    upstreamLock: sampleUpstreamLock(),
+  });
+  assert.equal(client.ok, true);
+
+  const result = await client.value.queryRules({
+    filters: {
+      provider: 'polymarket',
+    },
+    pageSize: 1,
+  });
+
+  assert.equal(result.ok, false);
+  assert.equal(result.blockers[0]?.code, 'QUERY_PAGE_SIZE_MISMATCH');
+});
+
 test('read-only query client rejects inconsistent pagination metadata', async () => {
   await withLoopbackServer(async (baseUrl) => {
     const client = createClient(baseUrl);

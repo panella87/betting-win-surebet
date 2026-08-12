@@ -89,6 +89,87 @@ test('settlement replay consumption rejects missing finality authority and malfo
   ]);
 });
 
+test('settlement replay consumption rejects empty matching identity and finality evidence', () => {
+  const completeSet = loadCompleteSet();
+  const settlementRecord = loadSettlementRecord();
+
+  const emptyCompleteSetIdentity = consumeStandardBinarySettlementReplay(
+    {
+      ...completeSet,
+      canonicalMarketId: '',
+      ruleProfileId: '   ',
+      resultSourceId: '',
+      finalityPolicyId: '   ',
+    },
+    {
+      ...settlementRecord,
+      canonicalMarketId: '',
+      ruleProfileId: '   ',
+      resultSourceId: '',
+      finalityPolicyId: '   ',
+    },
+  );
+  assert.equal(emptyCompleteSetIdentity.ok, false);
+  assert.deepEqual(emptyCompleteSetIdentity.blockers, [
+    {
+      code: 'SETTLEMENT_REPLAY_COMPLETE_SET_IDENTITY_MISSING',
+      message: 'Settlement replay consumption requires non-empty complete-set market, rule, result and finality evidence.',
+      evidenceRequired: 'Non-empty standard-binary complete-set identity and finality fields.',
+    },
+  ]);
+
+  const emptyRecordIdentity = consumeStandardBinarySettlementReplay(completeSet, {
+    ...settlementRecord,
+    canonicalMarketId: '',
+    ruleProfileId: '   ',
+    resultSourceId: '',
+    finalityPolicyId: '   ',
+  });
+  assert.equal(emptyRecordIdentity.ok, false);
+  assert.deepEqual(emptyRecordIdentity.blockers, [
+    {
+      code: 'SETTLEMENT_REPLAY_RECORD_IDENTITY_MISSING',
+      message: 'Settlement replay consumption requires non-empty settlement replay market, rule, result and finality evidence.',
+      evidenceRequired: 'Non-empty accepted settlement replay identity and finality fields.',
+    },
+  ]);
+
+  for (const field of ['canonicalMarketId', 'ruleProfileId', 'resultSourceId', 'finalityPolicyId'] as const) {
+    const result = consumeStandardBinarySettlementReplay(
+      {
+        ...completeSet,
+        [field]: '   ',
+      },
+      settlementRecord,
+    );
+
+    assert.equal(result.ok, false);
+    assert.deepEqual(result.blockers, [
+      {
+        code: 'SETTLEMENT_REPLAY_COMPLETE_SET_IDENTITY_MISSING',
+        message: 'Settlement replay consumption requires non-empty complete-set market, rule, result and finality evidence.',
+        evidenceRequired: 'Non-empty standard-binary complete-set identity and finality fields.',
+      },
+    ]);
+  }
+
+  for (const field of ['canonicalMarketId', 'ruleProfileId', 'resultSourceId', 'finalityPolicyId'] as const) {
+    const result = consumeStandardBinarySettlementReplay(completeSet, {
+      ...settlementRecord,
+      [field]: '   ',
+    });
+
+    assert.equal(result.ok, false);
+    assert.deepEqual(result.blockers, [
+      {
+        code: 'SETTLEMENT_REPLAY_RECORD_IDENTITY_MISSING',
+        message: 'Settlement replay consumption requires non-empty settlement replay market, rule, result and finality evidence.',
+        evidenceRequired: 'Non-empty accepted settlement replay identity and finality fields.',
+      },
+    ]);
+  }
+});
+
 test('settlement replay consumption rejects replay records that do not match the complete-set context', () => {
   const completeSet = loadCompleteSet();
   const settlementRecord = loadSettlementRecord();
@@ -107,25 +188,37 @@ test('settlement replay consumption rejects replay records that do not match the
   ]);
 });
 
-test('settlement replay consumption rejects final outcomes that cannot be mapped to a validated terminal scenario', () => {
+test('settlement replay consumption rejects incomplete, duplicate, or unknown standard-binary scenario coverage', () => {
   const completeSet = loadCompleteSet();
   const settlementRecord = loadSettlementRecord();
-  const result = consumeStandardBinarySettlementReplay(
-    {
-      ...completeSet,
-      scenarioIds: ['no_wins'],
-    },
-    settlementRecord,
-  );
 
-  assert.equal(result.ok, false);
-  assert.deepEqual(result.blockers, [
-    {
-      code: 'SETTLEMENT_REPLAY_SCENARIO_UNRESOLVED',
-      message: 'Settlement replay consumption requires a terminal scenario that matches the accepted final outcome.',
-      evidenceRequired: 'Validated standard-binary terminal scenarios for the complete-set.',
-    },
-  ]);
+  for (const scenarioIds of [
+    [],
+    ['yes_wins'],
+    ['no_wins'],
+    ['yes_wins', 'yes_wins'],
+    ['yes_wins', 'no_wins', 'yes_wins'],
+    ['yes_wins', '   '],
+    ['yes_wins', 'draw_wins'],
+    ['yes_wins', 'no_wins', 'draw_wins'],
+  ]) {
+    const result = consumeStandardBinarySettlementReplay(
+      {
+        ...completeSet,
+        scenarioIds,
+      },
+      settlementRecord,
+    );
+
+    assert.equal(result.ok, false);
+    assert.deepEqual(result.blockers, [
+      {
+        code: 'SETTLEMENT_REPLAY_SCENARIO_COVERAGE_INVALID',
+        message: 'Settlement replay consumption requires complete and unique standard-binary terminal scenario coverage.',
+        evidenceRequired: 'Exact yes_wins and no_wins standard-binary scenario ids.',
+      },
+    ]);
+  }
 });
 
 test('settlement replay sequence resolves idempotent duplicates and later corrections', () => {

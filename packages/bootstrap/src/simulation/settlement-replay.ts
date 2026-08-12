@@ -194,6 +194,22 @@ function validateSettlementReplayCompleteSet(
       );
     }
   }
+  if (
+    completeSet.canonicalMarketId.trim().length === 0
+    || completeSet.ruleProfileId.trim().length === 0
+    || completeSet.resultSourceId.trim().length === 0
+    || completeSet.finalityPolicyId.trim().length === 0
+  ) {
+    return blocked(
+      'SETTLEMENT_REPLAY_COMPLETE_SET_IDENTITY_MISSING',
+      'Settlement replay consumption requires non-empty complete-set market, rule, result and finality evidence.',
+      'Non-empty standard-binary complete-set identity and finality fields.',
+    );
+  }
+  const scenarioCoverage = validateStandardBinarySettlementReplayScenarioIds(completeSet.scenarioIds);
+  if (!scenarioCoverage.ok) {
+    return scenarioCoverage;
+  }
   return accepted(undefined);
 }
 
@@ -218,6 +234,51 @@ function validateSettlementReplayRecordShape(
       'SETTLEMENT_REPLAY_RECORD_INVALID',
       'Settlement replay consumption requires a structured settlement replay record.',
       'Structured accepted local settlement replay fixture record.',
+    );
+  }
+  if (
+    settlementRecord.canonicalMarketId.trim().length === 0
+    || settlementRecord.ruleProfileId.trim().length === 0
+    || settlementRecord.resultSourceId.trim().length === 0
+    || settlementRecord.finalityPolicyId.trim().length === 0
+  ) {
+    return blocked(
+      'SETTLEMENT_REPLAY_RECORD_IDENTITY_MISSING',
+      'Settlement replay consumption requires non-empty settlement replay market, rule, result and finality evidence.',
+      'Non-empty accepted settlement replay identity and finality fields.',
+    );
+  }
+  return accepted(undefined);
+}
+
+function validateStandardBinarySettlementReplayScenarioIds(
+  scenarioIds: readonly string[],
+): BoundaryResult<undefined> {
+  const expectedScenarioIds = standardBinaryTerminalScenarios()
+    .map((scenario) => scenario.scenarioId)
+    .sort();
+  const seenScenarioIds = new Set<string>();
+  for (const scenarioId of scenarioIds) {
+    if (
+      scenarioId.trim().length === 0
+      || seenScenarioIds.has(scenarioId)
+      || !expectedScenarioIds.includes(scenarioId)
+    ) {
+      return blocked(
+        'SETTLEMENT_REPLAY_SCENARIO_COVERAGE_INVALID',
+        'Settlement replay consumption requires complete and unique standard-binary terminal scenario coverage.',
+        'Exact yes_wins and no_wins standard-binary scenario ids.',
+      );
+    }
+    seenScenarioIds.add(scenarioId);
+  }
+
+  const actualScenarioIds = [...seenScenarioIds].sort();
+  if (!sameStringList(actualScenarioIds, expectedScenarioIds)) {
+    return blocked(
+      'SETTLEMENT_REPLAY_SCENARIO_COVERAGE_INVALID',
+      'Settlement replay consumption requires complete and unique standard-binary terminal scenario coverage.',
+      'Exact yes_wins and no_wins standard-binary scenario ids.',
     );
   }
   return accepted(undefined);

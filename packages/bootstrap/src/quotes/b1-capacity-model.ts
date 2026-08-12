@@ -29,6 +29,14 @@ export function evaluateB1QuoteCapacity(
   venueLimit: B1NormalizedVenueLimit,
   policy: B1CapacityPolicy,
 ): BoundaryResult<B1CapacityDecision> {
+  const validatedRow = validateCapacityRow(row);
+  if (!validatedRow.ok) {
+    return validatedRow;
+  }
+  const validatedVenueLimit = validateCapacityVenueLimit(venueLimit);
+  if (!validatedVenueLimit.ok) {
+    return validatedVenueLimit;
+  }
   if (typeof policy !== 'object' || policy === null) {
     return blocked(
       'B1_CAPACITY_POLICY_MISSING',
@@ -36,7 +44,9 @@ export function evaluateB1QuoteCapacity(
       'Explicit B1 capacity policy.',
     );
   }
-  if (venueLimit.venueOrBookmakerId !== row.venueOrBookmakerId) {
+  const capacityRow = validatedRow.value;
+  const capacityVenueLimit = validatedVenueLimit.value;
+  if (capacityVenueLimit.venueOrBookmakerId !== capacityRow.venueOrBookmakerId) {
     return blocked(
       'B1_CAPACITY_VENUE_LIMIT_MISMATCH',
       'B1 capacity evaluation requires venue limit evidence for the quote venue.',
@@ -57,7 +67,7 @@ export function evaluateB1QuoteCapacity(
       'Explicit B1 missing-capacity proxy policy.',
     );
   }
-  if (policy.requiredStakeMinor < venueLimit.minStakeMinor) {
+  if (policy.requiredStakeMinor < capacityVenueLimit.minStakeMinor) {
     return blocked(
       'B1_REQUIRED_STAKE_BELOW_VENUE_MIN',
       'B1 required stake is below the venue minimum stake.',
@@ -70,8 +80,8 @@ export function evaluateB1QuoteCapacity(
     return capacity;
   }
 
-  const acceptedCapacityMinor = minimumBigInt(capacity.value.capacityMinor, venueLimit.maxStakeMinor);
-  if (acceptedCapacityMinor < venueLimit.minStakeMinor) {
+  const acceptedCapacityMinor = minimumBigInt(capacity.value.capacityMinor, capacityVenueLimit.maxStakeMinor);
+  if (acceptedCapacityMinor < capacityVenueLimit.minStakeMinor) {
     return blocked(
       'B1_CAPACITY_BELOW_VENUE_MIN',
       'B1 accepted capacity is below the venue minimum stake.',
@@ -92,7 +102,7 @@ export function evaluateB1QuoteCapacity(
       venueLimit,
       capacitySource: capacity.value.capacitySource,
       requiredStakeMinor: policy.requiredStakeMinor,
-      observedAvailableSizeMinor: row.availableSizeMinor,
+      observedAvailableSizeMinor: capacityRow.availableSizeMinor,
       acceptedCapacityMinor,
       conservativeProxyCapacityMinor: capacity.value.capacityMinor,
     }));
@@ -103,9 +113,80 @@ export function evaluateB1QuoteCapacity(
     venueLimit,
     capacitySource: capacity.value.capacitySource,
     requiredStakeMinor: policy.requiredStakeMinor,
-    observedAvailableSizeMinor: row.availableSizeMinor,
+    observedAvailableSizeMinor: capacityRow.availableSizeMinor,
     acceptedCapacityMinor,
   }));
+}
+
+function validateCapacityRow(row: B1MultiVenueMarketRow): BoundaryResult<B1MultiVenueMarketRow> {
+  if (typeof row !== 'object' || row === null || Array.isArray(row)) {
+    return blocked(
+      'B1_CAPACITY_ROW_INVALID',
+      'B1 capacity evaluation requires a structured quote row.',
+      'Structured B1 quote row with venue and capacity evidence.',
+    );
+  }
+  if (typeof row.venueOrBookmakerId !== 'string' || row.venueOrBookmakerId.trim().length === 0) {
+    return blocked(
+      'B1_CAPACITY_ROW_VENUE_INVALID',
+      'B1 capacity evaluation requires a non-empty quote venue.',
+      'B1 quote row with venue_or_bookmaker_id.',
+    );
+  }
+  if (typeof row.availableSizeMinor !== 'bigint') {
+    return blocked(
+      'B1_CAPACITY_AVAILABLE_SIZE_INVALID',
+      'B1 capacity evaluation requires bigint quote capacity evidence.',
+      'Bigint B1 available_size_minor evidence.',
+    );
+  }
+  if (row.availableSizeMinor < 0n) {
+    return blocked(
+      'B1_CAPACITY_AVAILABLE_SIZE_NEGATIVE',
+      'B1 capacity evaluation requires non-negative quote capacity evidence.',
+      'Non-negative B1 available_size_minor evidence.',
+    );
+  }
+  return accepted(row);
+}
+
+function validateCapacityVenueLimit(venueLimit: B1NormalizedVenueLimit): BoundaryResult<B1NormalizedVenueLimit> {
+  if (typeof venueLimit !== 'object' || venueLimit === null || Array.isArray(venueLimit)) {
+    return blocked(
+      'B1_CAPACITY_VENUE_LIMIT_INVALID',
+      'B1 capacity evaluation requires a structured venue limit.',
+      'Structured B1 venue limit with bigint stake limits.',
+    );
+  }
+  if (typeof venueLimit.venueOrBookmakerId !== 'string' || venueLimit.venueOrBookmakerId.trim().length === 0) {
+    return blocked(
+      'B1_CAPACITY_VENUE_LIMIT_VENUE_INVALID',
+      'B1 capacity evaluation requires a non-empty venue limit venue.',
+      'B1 venue limit with venue_or_bookmaker_id.',
+    );
+  }
+  if (typeof venueLimit.minStakeMinor !== 'bigint' || typeof venueLimit.maxStakeMinor !== 'bigint') {
+    return blocked(
+      'B1_CAPACITY_VENUE_LIMIT_BIGINT_INVALID',
+      'B1 capacity evaluation requires bigint venue stake limits.',
+      'Bigint B1 venue min/max stake limits.',
+    );
+  }
+  if (venueLimit.minStakeMinor <= 0n || venueLimit.maxStakeMinor <= 0n) {
+    return blocked(
+      'B1_CAPACITY_VENUE_LIMIT_NON_POSITIVE',
+      'B1 capacity evaluation requires positive venue stake limits.',
+      'Positive B1 venue min/max stake limits.',
+    );
+  }
+  if (venueLimit.maxStakeMinor < venueLimit.minStakeMinor) {
+    return blocked(
+      'B1_CAPACITY_VENUE_LIMIT_RANGE_INVALID',
+      'B1 capacity evaluation requires venue maximum stake to cover the minimum stake.',
+      'Consistent B1 venue stake limits.',
+    );
+  }
+  return accepted(venueLimit);
 }
 
 function resolveCapacity(

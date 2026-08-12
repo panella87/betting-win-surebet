@@ -91,7 +91,8 @@ if [[ "$REBUILD_ARCHIVE" == "1" ]]; then
   TMP_ARCHIVE="$REPO/.artifacts.cleanup-rebuild.$$.zip"
   trap 'rm -f -- "$TMP_ARCHIVE"' EXIT
   rm -f -- "$TMP_ARCHIVE"
-  automation_v2_zip_with_timeout "$ZIP_TIMEOUT_SECONDS" "$TMP_ARCHIVE" "$REPO" artifacts
+  AUTOMATION_V2_ZIP_ARTIFACT_CLEANUP_MIN_AGE_SECONDS="$MIN_AGE_SECONDS" \
+    automation_v2_zip_with_timeout "$ZIP_TIMEOUT_SECONDS" "$TMP_ARCHIVE" "$REPO" artifacts
   unzip -tq "$TMP_ARCHIVE" >/dev/null
   automation_publish_final_artifacts_zip "$TMP_ARCHIVE" "$REPO"
   trap - EXIT

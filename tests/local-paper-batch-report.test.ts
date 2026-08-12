@@ -415,6 +415,138 @@ test('built dist local paper batch report entrypoint writes the batch summary pa
   }
 });
 
+test('private paper batch summary constructor rejects missing blocker codes for positive blocker counts', () => {
+  assert.throws(
+    () => createPrivatePaperBatchSummary('local-batch-test', [
+      {
+        bundlePath: 'artifacts/private-paper-mode/input-a.json',
+        reportPath: 'artifacts/private-paper-mode/input-a.report.json',
+        candidateCount: 1,
+        blockerCount: 1,
+      },
+    ]),
+    /requires blockerCodes when blockerCount is positive/u,
+  );
+});
+
+test('private paper batch summary constructor rejects blocker code count mismatches', () => {
+  assert.throws(
+    () => createPrivatePaperBatchSummary('local-batch-test', [
+      {
+        bundlePath: 'artifacts/private-paper-mode/input-a.json',
+        reportPath: 'artifacts/private-paper-mode/input-a.report.json',
+        candidateCount: 1,
+        blockerCount: 2,
+        blockerCodes: ['COMPLETE_SET_INCOMPLETE'],
+      },
+    ]),
+    /requires blockerCodes length to match blockerCount/u,
+  );
+  assert.throws(
+    () => createPrivatePaperBatchSummary('local-batch-test', [
+      {
+        bundlePath: 'artifacts/private-paper-mode/input-a.json',
+        reportPath: 'artifacts/private-paper-mode/input-a.report.json',
+        candidateCount: 1,
+        blockerCount: 1,
+        blockerCodes: ['COMPLETE_SET_INCOMPLETE', 'RESOURCE_RULES_MISSING'],
+      },
+    ]),
+    /requires blockerCodes length to match blockerCount/u,
+  );
+});
+
+test('private paper batch summary constructor rejects non-array blocker codes', () => {
+  assert.throws(
+    () => createPrivatePaperBatchSummary('local-batch-test', [
+      {
+        bundlePath: 'artifacts/private-paper-mode/input-a.json',
+        reportPath: 'artifacts/private-paper-mode/input-a.report.json',
+        candidateCount: 1,
+        blockerCount: 1,
+        blockerCodes: 'COMPLETE_SET_INCOMPLETE' as unknown as readonly string[],
+      },
+    ]),
+    /requires blockerCodes to be an array/u,
+  );
+});
+
+test('private paper batch summary constructor rejects empty blocker codes', () => {
+  assert.throws(
+    () => createPrivatePaperBatchSummary('local-batch-test', [
+      {
+        bundlePath: 'artifacts/private-paper-mode/input-a.json',
+        reportPath: 'artifacts/private-paper-mode/input-a.report.json',
+        candidateCount: 1,
+        blockerCount: 1,
+        blockerCodes: [''],
+      },
+    ]),
+    /requires non-empty blockerCodes/u,
+  );
+});
+
+test('private paper batch summary constructor snapshots blocker code evidence before counting', () => {
+  const blockerCodes = ['COMPLETE_SET_INCOMPLETE'];
+  let iteratorUseCount = 0;
+  Object.defineProperty(blockerCodes, Symbol.iterator, {
+    value: function* iterator(): Generator<string> {
+      iteratorUseCount += 1;
+      yield 'COMPLETE_SET_INCOMPLETE';
+      if (iteratorUseCount > 1) {
+        yield 'RESOURCE_RULES_MISSING';
+      }
+    },
+  });
+
+  const summary = createPrivatePaperBatchSummary('local-batch-test', [
+    {
+      bundlePath: 'artifacts/private-paper-mode/input-a.json',
+      reportPath: 'artifacts/private-paper-mode/input-a.report.json',
+      candidateCount: 1,
+      blockerCount: 1,
+      blockerCodes,
+    },
+  ]);
+
+  assert.equal(summary.totalBlockerCount, 1);
+  assert.deepEqual(summary.blockerFrequencies, [
+    { code: 'COMPLETE_SET_INCOMPLETE', count: 1 },
+  ]);
+  assert.equal(validatePrivatePaperBatchSummary(summary).ok, true);
+});
+
+test('private paper batch summary constructor aggregates deterministic blocker frequencies', () => {
+  const summary = createPrivatePaperBatchSummary('local-batch-test', [
+    {
+      bundlePath: 'artifacts/private-paper-mode/input-b.json',
+      reportPath: 'artifacts/private-paper-mode/input-b.report.json',
+      candidateCount: 2,
+      blockerCount: 2,
+      blockerCodes: ['RESOURCE_RULES_MISSING', 'COMPLETE_SET_INCOMPLETE'],
+    },
+    {
+      bundlePath: 'artifacts/private-paper-mode/input-a.json',
+      reportPath: 'artifacts/private-paper-mode/input-a.report.json',
+      candidateCount: 1,
+      blockerCount: 1,
+      blockerCodes: ['COMPLETE_SET_INCOMPLETE'],
+    },
+  ]);
+
+  assert.equal(summary.totalBlockerCount, 3);
+  assert.equal(
+    summary.blockerFrequencies.reduce((total, blockerFrequency) => total + blockerFrequency.count, 0),
+    summary.totalBlockerCount,
+  );
+  assert.deepEqual(summary.blockerFrequencies, [
+    { code: 'COMPLETE_SET_INCOMPLETE', count: 2 },
+    { code: 'RESOURCE_RULES_MISSING', count: 1 },
+  ]);
+  assert.deepEqual(summary.bundles.map((bundle) => bundle.blockerCount), [1, 2]);
+  assert.equal(validatePrivatePaperBatchSummary(summary).ok, true);
+});
+
 test('private paper batch summary validator rejects mismatched blocker frequencies', () => {
   const summary = createPrivatePaperBatchSummary('local-batch-test', [
     {

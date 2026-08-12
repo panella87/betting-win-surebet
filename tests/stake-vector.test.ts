@@ -187,6 +187,42 @@ test('stake-vector solver returns a blocker for malformed capacity numeric field
   ]);
 });
 
+test('stake-vector solver returns a blocker for zero capacity constraints before accepting zero stakes', () => {
+  for (const capacityConstraints of [
+    [
+      { legId: 'market-001:no', minStakeMinor: 0n, maxStakeMinor: 0n },
+      { legId: 'market-001:yes', minStakeMinor: 0n, maxStakeMinor: 0n },
+    ],
+    [
+      { legId: 'market-001:no', minStakeMinor: 0n, maxStakeMinor: 600n },
+      { legId: 'market-001:yes', minStakeMinor: 0n, maxStakeMinor: 600n },
+    ],
+  ]) {
+    const result = solveStandardBinaryStakeVector({
+      matrix: createScenarioMatrix([
+        { scenarioId: 'yes_wins', legId: 'market-001:no', stakeMinor: 100n, payoutMinor: 0n, feeMinor: 5n, costMinor: 0n },
+        { scenarioId: 'yes_wins', legId: 'market-001:yes', stakeMinor: 100n, payoutMinor: 215n, feeMinor: 5n, costMinor: 0n },
+        { scenarioId: 'no_wins', legId: 'market-001:no', stakeMinor: 100n, payoutMinor: 225n, feeMinor: 5n, costMinor: 0n },
+        { scenarioId: 'no_wins', legId: 'market-001:yes', stakeMinor: 100n, payoutMinor: 0n, feeMinor: 5n, costMinor: 0n },
+      ]),
+      capacityConstraints,
+      roundingConstraints: [
+        { legId: 'market-001:no', stepMinor: 50n },
+        { legId: 'market-001:yes', stepMinor: 50n },
+      ],
+    });
+
+    assert.equal(result.ok, false);
+    assert.deepEqual(result.blockers, [
+      {
+        code: 'CAPACITY_CONSTRAINT_NON_POSITIVE',
+        message: 'Capacity constraints must be positive.',
+        evidenceRequired: 'Positive min/max capacity constraint.',
+      },
+    ]);
+  }
+});
+
 test('stake-vector solver returns a blocker for unknown capacity constraints', () => {
   const result = solveStandardBinaryStakeVector({
     matrix: createScenarioMatrix([
@@ -385,6 +421,46 @@ test('stake-vector solver rounds to the local stake quantum and preserves determ
   assert.deepEqual(result.value.scenarioNets, [
     { scenarioId: 'no_wins', netMinor: 0n },
     { scenarioId: 'yes_wins', netMinor: 175n },
+  ]);
+  assert.equal(result.value.worstCaseNetMinor, 0n);
+});
+
+test('stake-vector solver uses a feasible smaller deterministic rounding quantum before exhausting capacity', () => {
+  const result = solveStandardBinaryStakeVector({
+    matrix: createScenarioMatrix([
+      { scenarioId: 'yes_wins', legId: 'market-001:no', stakeMinor: 100n, payoutMinor: 0n, feeMinor: 0n, costMinor: 0n },
+      { scenarioId: 'yes_wins', legId: 'market-001:yes', stakeMinor: 100n, payoutMinor: 150n, feeMinor: 0n, costMinor: 0n },
+      { scenarioId: 'no_wins', legId: 'market-001:no', stakeMinor: 100n, payoutMinor: 300n, feeMinor: 0n, costMinor: 0n },
+      { scenarioId: 'no_wins', legId: 'market-001:yes', stakeMinor: 100n, payoutMinor: 0n, feeMinor: 0n, costMinor: 0n },
+    ]),
+    capacityConstraints: [
+      { legId: 'market-001:no', minStakeMinor: 20n, maxStakeMinor: 100n },
+      { legId: 'market-001:yes', minStakeMinor: 20n, maxStakeMinor: 100n },
+    ],
+    roundingConstraints: [
+      { legId: 'market-001:no', stepMinor: 20n },
+      { legId: 'market-001:yes', stepMinor: 20n },
+    ],
+  });
+
+  assert.equal(result.ok, true);
+  assert.deepEqual(result.value.stakes, [
+    {
+      legId: 'market-001:no',
+      unitCount: 1n,
+      stakeQuantumMinor: 20n,
+      stakeMinor: 20n,
+    },
+    {
+      legId: 'market-001:yes',
+      unitCount: 2n,
+      stakeQuantumMinor: 20n,
+      stakeMinor: 40n,
+    },
+  ]);
+  assert.deepEqual(result.value.scenarioNets, [
+    { scenarioId: 'no_wins', netMinor: 0n },
+    { scenarioId: 'yes_wins', netMinor: 0n },
   ]);
   assert.equal(result.value.worstCaseNetMinor, 0n);
 });

@@ -1175,6 +1175,7 @@ automation_refresh_final_artifacts_zip() {
     printf 'ERROR: artifact refresh requires an existing non-symlink archive: %s\n' "$archive" >&2
     return 2
   }
+  automation_validate_artifact_zip_integrity "$archive" "published archive" || return $?
 
   for entry in final-summary.md final_summary.txt final/final-summary.md; do
     if [[ -f "$run_dir/$entry" && ! -L "$run_dir/$entry" ]]; then
@@ -1230,6 +1231,23 @@ automation_prune_artifact_zip_vcs_metadata() {
   esac
 }
 
+automation_validate_artifact_zip_integrity() {
+  local archive="${1:?archive path is required}"
+  local label="${2:?archive label is required}"
+  [[ -f "$archive" && ! -L "$archive" ]] || {
+    printf 'ERROR: artifact ZIP integrity validation requires a non-symlink regular file: %s\n' "$archive" >&2
+    return 2
+  }
+  command -v zip >/dev/null 2>&1 || {
+    printf 'ERROR: missing required command for artifact ZIP integrity validation: zip\n' >&2
+    return 127
+  }
+  zip -T "$archive" >/dev/null 2>&1 || {
+    printf 'ERROR: artifact ZIP integrity validation failed for %s: %s\n' "$label" "$archive" >&2
+    return 2
+  }
+}
+
 automation_publish_final_artifacts_zip() {
   local temp="${1:?temp archive path is required}"
   local root="${2:?repository root is required}"
@@ -1279,6 +1297,11 @@ automation_publish_final_artifacts_zip() {
       return 2
     }
   fi
+  automation_validate_artifact_zip_integrity "$temp_real" "candidate archive" || {
+    rc=$?
+    rm -f -- "$temp_real"
+    return "$rc"
+  }
   if ! mv -T -- "$temp_real" "$destination"; then
     rc=$?
     rm -f -- "$temp_real"

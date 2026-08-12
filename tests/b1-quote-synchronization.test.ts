@@ -254,6 +254,102 @@ test('B1 venue limit and capacity reject malformed required policy values', () =
   assert.equal(missingProxyCapacity.blockers[0]?.code, 'B1_CAPACITY_PROXY_MISSING');
 });
 
+test('B1 capacity fails closed on malformed row and venue limit inputs before comparisons', () => {
+  const [first] = fixturePair();
+  const limit = normalizeB1VenueLimitPolicy(first, venueLimit(first, 800000n));
+  assert.equal(limit.ok, true);
+
+  for (const [result, code] of [
+    [
+      evaluateB1QuoteCapacity(null as never, limit.value, capacityPolicy(700000n)),
+      'B1_CAPACITY_ROW_INVALID',
+    ],
+    [
+      evaluateB1QuoteCapacity(first, null as never, capacityPolicy(700000n)),
+      'B1_CAPACITY_VENUE_LIMIT_INVALID',
+    ],
+    [
+      evaluateB1QuoteCapacity(Object.freeze({
+        ...first,
+        availableSizeMinor: '1000',
+      }) as unknown as B1MultiVenueMarketRow, limit.value, capacityPolicy(700000n)),
+      'B1_CAPACITY_AVAILABLE_SIZE_INVALID',
+    ],
+    [
+      evaluateB1QuoteCapacity(Object.freeze({
+        ...first,
+        availableSizeMinor: 1000,
+      }) as unknown as B1MultiVenueMarketRow, limit.value, capacityPolicy(700000n)),
+      'B1_CAPACITY_AVAILABLE_SIZE_INVALID',
+    ],
+    [
+      evaluateB1QuoteCapacity(Object.freeze({
+        ...first,
+        availableSizeMinor: undefined,
+      }) as unknown as B1MultiVenueMarketRow, limit.value, Object.freeze({
+        requiredStakeMinor: 400000n,
+        allowMissingCapacityProxy: true,
+        conservativeProxyCapacityMinor: 450000n,
+      })),
+      'B1_CAPACITY_AVAILABLE_SIZE_INVALID',
+    ],
+    [
+      evaluateB1QuoteCapacity(Object.freeze({
+        ...first,
+        availableSizeMinor: -1n,
+      }), limit.value, capacityPolicy(700000n)),
+      'B1_CAPACITY_AVAILABLE_SIZE_NEGATIVE',
+    ],
+    [
+      evaluateB1QuoteCapacity(first, Object.freeze({
+        ...limit.value,
+        minStakeMinor: '100000',
+      }) as unknown as typeof limit.value, capacityPolicy(700000n)),
+      'B1_CAPACITY_VENUE_LIMIT_BIGINT_INVALID',
+    ],
+    [
+      evaluateB1QuoteCapacity(first, Object.freeze({
+        ...limit.value,
+        maxStakeMinor: '800000',
+      }) as unknown as typeof limit.value, capacityPolicy(700000n)),
+      'B1_CAPACITY_VENUE_LIMIT_BIGINT_INVALID',
+    ],
+  ] as const) {
+    assert.equal(result.ok, false);
+    assert.equal(result.blockers[0]?.code, code);
+  }
+});
+
+test('B1 capacity blocks stake requirements outside venue and quote capacity limits', () => {
+  const [first] = fixturePair();
+  const limit = normalizeB1VenueLimitPolicy(first, venueLimit(first, 800000n));
+  assert.equal(limit.ok, true);
+
+  const belowVenueMin = evaluateB1QuoteCapacity(first, limit.value, capacityPolicy(99999n));
+  assert.equal(belowVenueMin.ok, false);
+  assert.deepEqual(belowVenueMin.blockers, [
+    {
+      code: 'B1_REQUIRED_STAKE_BELOW_VENUE_MIN',
+      message: 'B1 required stake is below the venue minimum stake.',
+      evidenceRequired: 'B1 required stake at or above the venue minimum.',
+    },
+  ]);
+
+  const insufficientQuoteCapacity = evaluateB1QuoteCapacity(
+    cloneRow(first, { availableSizeMinor: 600000n }),
+    limit.value,
+    capacityPolicy(700000n),
+  );
+  assert.equal(insufficientQuoteCapacity.ok, false);
+  assert.deepEqual(insufficientQuoteCapacity.blockers, [
+    {
+      code: 'B1_CAPACITY_OR_LIMIT_INSUFFICIENT',
+      message: 'B1 required stake exceeds available quote capacity or venue limits.',
+      evidenceRequired: 'B1 quote capacity and venue limits sufficient for the required stake.',
+    },
+  ]);
+});
+
 test('B1 capacity blocks missing depth when no conservative proxy is configured', () => {
   const [first] = fixturePair();
   const noDepth = cloneRow(first, { availableSizeMinor: 0n });

@@ -121,6 +121,18 @@ zc_prune_zip_vcs_metadata() {
   esac
 }
 
+zc_validate_zip_integrity() {
+  local archive="$1"
+  if [ ! -f "$archive" ] || [ -L "$archive" ]; then
+    zc_fail "zip archive candidate must be a non-symlink regular file: $archive"
+    return 1
+  fi
+  if ! unzip -tq "$archive" >/dev/null; then
+    zc_fail "zip archive candidate failed ZIP integrity validation: $archive"
+    return 1
+  fi
+}
+
 zc_publish_zip_no_clobber() {
   local repo_root="$1" source="$2" destination="$3"
   zc_validate_zip_destination "$repo_root" "$destination" || return 1
@@ -231,6 +243,7 @@ zc_main() {
   repo_name="$(basename "$repo_root")"
 
   zc_have zip || { zc_fail "required command not found: zip"; return 127; }
+  zc_have unzip || { zc_fail "required command not found: unzip"; return 127; }
   zc_have sha256sum || { zc_fail "required command not found: sha256sum"; return 127; }
   zc_have find || { zc_fail "required command not found: find"; return 127; }
 
@@ -291,6 +304,10 @@ zc_main() {
     rm -f "$list_file"
   fi
   if ! zc_prune_zip_vcs_metadata "$tmp_zip"; then
+    rm -f "$list_file" "$tmp_zip"
+    return 1
+  fi
+  if ! zc_validate_zip_integrity "$tmp_zip"; then
     rm -f "$list_file" "$tmp_zip"
     return 1
   fi

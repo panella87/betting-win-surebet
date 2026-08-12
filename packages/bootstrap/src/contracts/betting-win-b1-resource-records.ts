@@ -21,6 +21,7 @@ const ISO_TIMESTAMP_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 const MANIFEST_HASH_REGEX = /^[0-9a-f]{64}$/;
 const MINOR_UNITS_REGEX = /^(0|[1-9][0-9]*)$/;
 const DECIMAL_STRING_REGEX = /^(0|[1-9][0-9]*)(\.[0-9]+)?$/;
+const SIGNED_DECIMAL_STRING_REGEX = /^-?(0|[1-9][0-9]*)(\.[0-9]+)?$/;
 const COMMIT_SHA_REGEX = /^[0-9a-f]{40}$/;
 const B1_CURRENCIES = ['USD', 'USDC'] as const;
 const B1_VENUE_TYPES = ['sportsbook', 'exchange', 'prediction_market'] as const;
@@ -343,7 +344,7 @@ export function parseB1MultiVenueMarketRow(value: unknown): BoundaryResult<B1Mul
   if (!period.ok) {
     return period;
   }
-  const lineValue = requireDecimalString(candidate.line_value, 'B1_LINE_VALUE_INVALID', 'B1 row line_value must be a decimal string.', 'B1 line value.');
+  const lineValue = requireSignedDecimalString(candidate.line_value, 'B1_LINE_VALUE_INVALID', 'B1 row line_value must be a signed decimal string.', 'B1 line value.');
   if (!lineValue.ok) {
     return lineValue;
   }
@@ -545,6 +546,18 @@ function requireDecimalString(
   evidenceRequired: string,
 ): BoundaryResult<string> {
   if (typeof value !== 'string' || !DECIMAL_STRING_REGEX.test(value)) {
+    return blocked(code, message, evidenceRequired);
+  }
+  return accepted(value);
+}
+
+function requireSignedDecimalString(
+  value: unknown,
+  code: string,
+  message: string,
+  evidenceRequired: string,
+): BoundaryResult<string> {
+  if (typeof value !== 'string' || !SIGNED_DECIMAL_STRING_REGEX.test(value)) {
     return blocked(code, message, evidenceRequired);
   }
   return accepted(value);

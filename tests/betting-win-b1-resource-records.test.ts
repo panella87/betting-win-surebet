@@ -34,6 +34,98 @@ test('B1 deterministic fixture parser accepts local contract rows without upstre
   assert.equal(firstRow.availableSizeMinor, 1200000n);
 });
 
+test('B1 deterministic fixture parser accepts signed spread line values', () => {
+  const fixture = readFixture();
+  const rows = fixture.rows as Array<Record<string, unknown>>;
+  for (const row of rows) {
+    row.market_type = 'spread';
+    row.market_equivalence_key = 'event-001:spread:-1.5:full-game';
+    row.line_value = '-1.5';
+  }
+
+  const result = parseBettingWinB1DeterministicFixture(fixture);
+
+  assert.equal(result.ok, true);
+  assert.equal(result.value.rows.length, 2);
+  assert.equal(result.value.rows[0]?.marketType, 'spread');
+  assert.equal(result.value.rows[0]?.lineValue, '-1.5');
+  assert.equal(result.value.rows[1]?.lineValue, '-1.5');
+});
+
+test('B1 deterministic fixture parser rejects malformed signed line values', () => {
+  for (const lineValue of ['--1.5', '-', '-.5', ' -1.5', '-1.5 ']) {
+    const fixture = readFixture();
+    const rows = fixture.rows as Array<Record<string, unknown>>;
+    const firstRow = rows[0];
+    assert.ok(firstRow);
+    firstRow.market_type = 'spread';
+    firstRow.line_value = lineValue;
+
+    const result = parseBettingWinB1DeterministicFixture(fixture);
+
+    assert.equal(result.ok, false);
+    assert.deepEqual(result.blockers, [
+      {
+        code: 'B1_LINE_VALUE_INVALID',
+        message: 'B1 row line_value must be a signed decimal string.',
+        evidenceRequired: 'B1 line value.',
+      },
+    ]);
+  }
+});
+
+test('B1 deterministic fixture parser preserves unsigned odds and minor-unit parsing', () => {
+  const malformedFields = [
+    {
+      field: 'decimal_odds',
+      value: '-2.10',
+      code: 'B1_DECIMAL_ODDS_INVALID',
+      message: 'B1 row decimal_odds must be a decimal string.',
+      evidenceRequired: 'B1 decimal odds.',
+    },
+    {
+      field: 'price_minor_or_probability_minor',
+      value: '-210000',
+      code: 'B1_PRICE_MINOR_OR_PROBABILITY_INVALID',
+      message: 'B1 row price_minor_or_probability_minor must be a non-negative integer string or bigint.',
+      evidenceRequired: 'B1 price or probability minor units.',
+    },
+    {
+      field: 'available_size_minor',
+      value: '-1200000',
+      code: 'B1_AVAILABLE_SIZE_INVALID',
+      message: 'B1 row available_size_minor must be a non-negative integer string or bigint.',
+      evidenceRequired: 'B1 available size minor units.',
+    },
+    {
+      field: 'quote_age_ms',
+      value: '-1',
+      code: 'B1_QUOTE_AGE_INVALID',
+      message: 'B1 row quote_age_ms must be a non-negative integer string or bigint.',
+      evidenceRequired: 'B1 quote age.',
+    },
+  ] as const;
+
+  for (const malformedField of malformedFields) {
+    const fixture = readFixture();
+    const rows = fixture.rows as Array<Record<string, unknown>>;
+    const firstRow = rows[0];
+    assert.ok(firstRow);
+    firstRow[malformedField.field] = malformedField.value;
+
+    const result = parseBettingWinB1DeterministicFixture(fixture);
+
+    assert.equal(result.ok, false);
+    assert.deepEqual(result.blockers, [
+      {
+        code: malformedField.code,
+        message: malformedField.message,
+        evidenceRequired: malformedField.evidenceRequired,
+      },
+    ]);
+  }
+});
+
 test('B1 deterministic fixture parser rejects runtime evidence claims', () => {
   const fixture = readFixture();
   fixture.runtimeEvidence = true;

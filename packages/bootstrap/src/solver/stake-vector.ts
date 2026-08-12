@@ -418,7 +418,6 @@ function extractSolverLegTerms(
     referenceRow.stakeMinor,
     rounding.stepMinor,
     unscaledContributionsByScenarioId,
-    capacity,
   );
   if (!quantumMinor.ok) {
     return quantumMinor;
@@ -463,13 +462,7 @@ function selectStakeQuantumMinor(
   referenceStakeMinor: bigint,
   stepMinor: bigint,
   contributionsByScenarioId: ReadonlyMap<string, bigint>,
-  capacity: CapacityConstraint,
 ): BoundaryResult<bigint> {
-  const referenceQuantumMinor = lcm(referenceStakeMinor, stepMinor);
-  if (capacityHasMultiple(capacity, referenceQuantumMinor)) {
-    return accepted(referenceQuantumMinor);
-  }
-
   let multiplier = 1n;
   for (const contributionMinor of contributionsByScenarioId.values()) {
     const scaledStepContribution = contributionMinor * stepMinor;
@@ -479,10 +472,6 @@ function selectStakeQuantumMinor(
 
   const quantumMinor = stepMinor * multiplier;
   return accepted(quantumMinor);
-}
-
-function capacityHasMultiple(capacity: CapacityConstraint, quantumMinor: bigint): boolean {
-  return capacity.maxStakeMinor / quantumMinor >= ceilDiv(capacity.minStakeMinor, quantumMinor);
 }
 
 function gcd(left: bigint, right: bigint): bigint {

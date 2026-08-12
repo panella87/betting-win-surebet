@@ -137,7 +137,7 @@ pa_publish_zip_no_clobber() {
   local source="$1" destination="$2"
   pa_validate_zip_integrity "$source" || return 1
   pa_validate_zip_publish_destination "$destination" || return 1
-  if ! ln "$source" "$destination"; then
+  if ! ln -T -- "$source" "$destination"; then
     pa_fail "target zip already exists or could not be published without clobbering: $destination"
     return 1
   fi

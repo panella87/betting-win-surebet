@@ -1,6 +1,5 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createHash } from 'node:crypto';
 import { existsSync, mkdtempSync, mkdirSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, relative } from 'node:path';
@@ -17,7 +16,6 @@ import {
   BWS_UPSTREAM_CONVERGENCE_MAX_BACKOFF_MS_ENV,
   BWS_UPSTREAM_CONVERGENCE_PASS_TIMEOUT_MS_ENV,
   BWS_UPSTREAM_CONVERGENCE_RETRY_BACKOFF_MS_ENV,
-  BWS_UPSTREAM_EXPORT_SELECTION_PATH_ENV,
   BWS_UPSTREAM_MODE_ENV,
   accepted,
   getBwsUpstreamConvergenceServiceStatus,
@@ -30,7 +28,6 @@ import {
   type BwsUpstreamConvergenceServiceConfig,
   type BwsUpstreamConvergenceServiceCounters,
   type BwsUpstreamConvergenceServiceEnvironment,
-  type BwsUpstreamExportConvergenceConfig,
   type BwsUpstreamConvergenceSignalRegistrar,
 } from '../packages/bootstrap/src/index.js';
 const TEST_TIMESTAMP = '2026-07-16T07:30:00.000Z';
@@ -43,7 +40,7 @@ const UPSTREAM_LOCK_SCHEMA = readFileSync(
 test('upstream convergence service persists success and no-change passes, then reports a running status snapshot', async () => {
   const fixture = createServiceFixture();
   try {
-    const config = createExportServiceConfig(fixture.repositoryRoot, fixture.upstreamRoot);
+    const config = createApiServiceConfig(fixture.repositoryRoot, fixture.upstreamRoot);
     const runtime = createFakeProcessRuntime();
     const signals = createSignalCapture();
     const now = createNowSequence([
@@ -60,21 +57,28 @@ test('upstream convergence service persists success and no-change passes, then r
     ]);
     const passOutcomes = [
       accepted({
-        checkpointId: 'checkpoint-001',
-        completed: false,
-        mode: 'export' as const,
-        nextSelectionIndex: 1,
+        checkpointId: 'checkpoint-api-001',
+        completedCycleCount: 0,
+        cycleCompleted: false,
+        cycleNumber: 1,
+        importRunId: 'import-run-001',
+        mode: 'api' as const,
+        nextResource: 'rules' as const,
+        pageNumber: 1,
         processedCount: 1 as const,
-        processedSelectionCursor: 'cursor-001',
-        selectionCount: 2,
+        resource: 'identity' as const,
       }),
       accepted({
-        checkpointId: 'checkpoint-001',
-        completed: true,
-        mode: 'export' as const,
-        nextSelectionIndex: 2,
+        checkpointId: 'checkpoint-api-001',
+        completedCycleCount: 0,
+        cycleCompleted: false,
+        cycleNumber: 1,
+        importRunId: 'import-run-002',
+        mode: 'api' as const,
+        nextResource: 'quotes' as const,
+        pageNumber: 1,
         processedCount: 0 as const,
-        selectionCount: 2,
+        resource: 'rules' as const,
       }),
     ];
 
@@ -84,7 +88,7 @@ test('upstream convergence service persists success and no-change passes, then r
       now,
       processRuntime: runtime.runtime,
       repositoryRoot: fixture.repositoryRoot,
-      runExportPass() {
+      runApiPass: async () => {
         const next = passOutcomes.shift();
         assert.notEqual(next, undefined);
         return next!;
@@ -206,7 +210,7 @@ test('upstream convergence service persists blocker state, applies retry backoff
 test('upstream convergence service fails closed on overlap, records timeout failures, and stops cleanly after SIGTERM', async () => {
   const fixture = createServiceFixture();
   try {
-    const config = createExportServiceConfig(fixture.repositoryRoot, fixture.upstreamRoot);
+    const config = createApiServiceConfig(fixture.repositoryRoot, fixture.upstreamRoot);
     const runtime = createFakeProcessRuntime();
     const overlapSignals = createSignalCapture();
     let releaseFirstPass: (() => void) | undefined;
@@ -223,17 +227,21 @@ test('upstream convergence service fails closed on overlap, records timeout fail
       ]),
       processRuntime: runtime.runtime,
       repositoryRoot: fixture.repositoryRoot,
-      runExportPass() {
+      runApiPass: async () => {
         return new Promise((resolve) => {
           releaseFirstPass = () => {
             resolve(
               accepted({
-                checkpointId: 'checkpoint-001',
-                completed: true,
-                mode: 'export' as const,
-                nextSelectionIndex: 1,
+                checkpointId: 'checkpoint-api-001',
+                completedCycleCount: 1,
+                cycleCompleted: true,
+                cycleNumber: 1,
+                importRunId: 'import-run-overlap',
+                mode: 'api' as const,
+                nextResource: 'identity' as const,
+                pageNumber: 1,
                 processedCount: 0 as const,
-                selectionCount: 1,
+                resource: 'settlement' as const,
               }),
             );
           };
@@ -259,14 +267,18 @@ test('upstream convergence service fails closed on overlap, records timeout fail
           now: () => '2026-07-16T07:50:01.500Z',
           processRuntime: runtime.runtime,
           repositoryRoot: fixture.repositoryRoot,
-          runExportPass() {
+          runApiPass: async () => {
             return accepted({
-              checkpointId: 'checkpoint-001',
-              completed: true,
-              mode: 'export' as const,
-              nextSelectionIndex: 1,
+              checkpointId: 'checkpoint-api-001',
+              completedCycleCount: 1,
+              cycleCompleted: true,
+              cycleNumber: 1,
+              importRunId: 'import-run-overlap-blocked',
+              mode: 'api' as const,
+              nextResource: 'identity' as const,
+              pageNumber: 1,
               processedCount: 0 as const,
-              selectionCount: 1,
+              resource: 'settlement' as const,
             });
           },
           runtimeStateDirectory: relative(fixture.repositoryRoot, fixture.runtimeStateDirectory),
@@ -296,19 +308,22 @@ test('upstream convergence service fails closed on overlap, records timeout fail
       ]),
       processRuntime: createFakeProcessRuntime(33001).runtime,
       repositoryRoot: fixture.repositoryRoot,
-      runExportPass() {
+      runApiPass: async () => {
         return new Promise((resolve) => {
           setTimeout(() => {
             timeoutSignals.require('SIGTERM')();
             resolve(
               accepted({
-                checkpointId: 'checkpoint-001',
-                completed: true,
-                mode: 'export' as const,
-                nextSelectionIndex: 1,
+                checkpointId: 'checkpoint-api-001',
+                completedCycleCount: 1,
+                cycleCompleted: true,
+                cycleNumber: 1,
+                importRunId: 'import-run-timeout',
+                mode: 'api' as const,
+                nextResource: 'identity' as const,
+                pageNumber: 1,
                 processedCount: 1 as const,
-                processedSelectionCursor: 'cursor-timeout',
-                selectionCount: 1,
+                resource: 'settlement' as const,
               }),
             );
           }, 25);
@@ -342,7 +357,7 @@ test('upstream convergence service CLI help stays explicit and config rejects fa
       async () => {
         resolveBwsUpstreamConvergenceServiceConfig(
           {
-            ...fixture.createExportEnvironment(),
+            ...fixture.createApiEnvironment(),
             [BWS_UPSTREAM_CONVERGENCE_INTERVAL_MS_ENV]: '',
           },
           fixture.repositoryRoot,
@@ -350,6 +365,35 @@ test('upstream convergence service CLI help stays explicit and config rejects fa
       },
       /BWS_UPSTREAM_CONVERGENCE_INTERVAL_MS must be a non-empty string/,
     );
+
+    assert.throws(
+      () => {
+        resolveBwsUpstreamConvergenceServiceConfig(
+          {
+            ...fixture.createApiEnvironment(),
+            [BWS_UPSTREAM_MODE_ENV]: 'export',
+          },
+          fixture.repositoryRoot,
+        );
+      },
+      /BWS_UPSTREAM_MODE must be exactly api/,
+    );
+
+    await assert.rejects(
+      async () => {
+        await runBwsUpstreamConvergenceService({
+          config: {
+            ...createApiServiceConfig(fixture.repositoryRoot, fixture.upstreamRoot),
+            mode: 'export',
+          } as unknown as BwsUpstreamConvergenceServiceConfig,
+          maxPasses: 1,
+          repositoryRoot: fixture.repositoryRoot,
+          runtimeStateDirectory: relative(fixture.repositoryRoot, fixture.runtimeStateDirectory),
+        });
+      },
+      /BWS upstream convergence service mode must be exactly api/,
+    );
+    assert.equal(existsSync(join(fixture.runtimeStateDirectory, 'state.json')), false);
   } finally {
     fixture.dispose();
   }
@@ -368,7 +412,7 @@ test('upstream convergence service rejects unsafe runtimeStateDirectory values b
     ]) {
       assert.throws(
         () => getBwsUpstreamConvergenceServiceStatus({
-          config: createExportServiceConfig(fixture.repositoryRoot, fixture.upstreamRoot),
+          config: createApiServiceConfig(fixture.repositoryRoot, fixture.upstreamRoot),
           repositoryRoot: fixture.repositoryRoot,
           runtimeStateDirectory: candidate,
         }),
@@ -386,7 +430,6 @@ test('upstream convergence service rejects unsafe runtimeStateDirectory values b
 
 function createServiceFixture(): {
   readonly createApiEnvironment: () => BwsUpstreamConvergenceServiceEnvironment;
-  readonly createExportEnvironment: () => BwsUpstreamConvergenceServiceEnvironment;
   readonly dispose: () => void;
   readonly repositoryRoot: string;
   readonly runtimeStateDirectory: string;
@@ -425,42 +468,6 @@ function createServiceFixture(): {
     `${JSON.stringify(sampleUpstreamLock(upstreamRoot), null, 2)}\n`,
     'utf-8',
   );
-  const exportManifestPath = join(repositoryRoot, 'config', 'selection.json');
-  writeFileSync(
-    exportManifestPath,
-    `${JSON.stringify({
-      schema: 'bws.upstream_export_selection.v1',
-      mode: 'export',
-      checkpointId: 'checkpoint-001',
-      contractSchema: 'betting-win.strategy-export.v1',
-      contractAlias: 'betting-win-strategy-export.v1',
-      surebetProfile: 'surebet_standard_binary_v0',
-      exports: [
-        {
-          cursor: 'cursor-001',
-          exportPath: join(repositoryRoot, 'artifacts', 'selection-export-001.json'),
-          expectedSha256: 'a'.repeat(64),
-          expectedProviderGenerationIds: ['generation-001'],
-          expectedSourceLineageRecordIds: ['lineage-001'],
-        },
-      ],
-    }, null, 2)}\n`,
-    'utf-8',
-  );
-  mkdirSync(join(repositoryRoot, 'artifacts'), { recursive: true });
-  writeFileSync(
-    join(repositoryRoot, 'artifacts', 'selection-export-001.json'),
-    JSON.stringify({
-      schema: 'betting-win.strategy-export.v1',
-      contractAlias: 'betting-win-strategy-export.v1',
-      surebetProfile: 'surebet_standard_binary_v0',
-      providerGenerationIds: ['generation-001'],
-      sourceLineageRecordIds: ['lineage-001'],
-      exportId: 'export-001',
-    }),
-    'utf-8',
-  );
-
   const baseEnvironment: BwsUpstreamConvergenceServiceEnvironment = Object.freeze({
     BETTING_WIN_REPO_PATH: upstreamRoot,
     BWS_UPSTREAM_LOCK_PATH: 'config/betting-win.upstream.lock.json',
@@ -490,13 +497,6 @@ function createServiceFixture(): {
         [BWS_UPSTREAM_API_RETRY_BACKOFF_MS_ENV]: '5',
         [BWS_UPSTREAM_API_RETRY_LIMIT_ENV]: '1',
         [BWS_UPSTREAM_API_TIMEOUT_MS_ENV]: '25',
-      });
-    },
-    createExportEnvironment() {
-      return Object.freeze({
-        ...baseEnvironment,
-        [BWS_UPSTREAM_MODE_ENV]: 'export',
-        [BWS_UPSTREAM_EXPORT_SELECTION_PATH_ENV]: 'config/selection.json',
       });
     },
     dispose() {
@@ -615,55 +615,6 @@ function captureStream(): Readonly<{
       return chunks.join('');
     },
     stream,
-  });
-}
-
-function createExportServiceConfig(
-  repositoryRoot: string,
-  upstreamRoot: string,
-): BwsUpstreamConvergenceServiceConfig {
-  const manifestPath = join(repositoryRoot, 'config', 'selection.json');
-  const manifestSha256 = createHash('sha256').update(readFileSync(manifestPath, 'utf-8')).digest('hex');
-  const passConfig: BwsUpstreamExportConvergenceConfig = Object.freeze({
-    mode: 'export',
-    persistence: Object.freeze({
-      database: 'surebet_test',
-      host: '127.0.0.1',
-      port: 5432,
-      user: 'surebet',
-    }),
-    repositoryRoot,
-    selection: Object.freeze({
-      checkpointId: 'checkpoint-001',
-      contractAlias: 'betting-win-strategy-export.v1',
-      contractSchema: 'betting-win.strategy-export.v1',
-      entries: Object.freeze([
-        Object.freeze({
-          cursor: 'cursor-001',
-          expectedProviderGenerationIds: Object.freeze(['generation-001']),
-          expectedSha256: 'a'.repeat(64),
-          expectedSourceLineageRecordIds: Object.freeze(['lineage-001']),
-          exportPath: join(repositoryRoot, 'artifacts', 'selection-export-001.json'),
-        }),
-      ]),
-      manifestPath,
-      manifestSha256,
-      surebetProfile: 'surebet_standard_binary_v0',
-    }),
-    upstream: Object.freeze({
-      lock: sampleUpstreamLock(upstreamRoot) as unknown as BwsUpstreamExportConvergenceConfig['upstream']['lock'],
-      lockPath: join(repositoryRoot, 'config', 'betting-win.upstream.lock.json'),
-      repoPath: upstreamRoot,
-    }),
-  });
-  return Object.freeze({
-    intervalMs: 25,
-    maxRetryBackoffMs: 100,
-    mode: 'export',
-    passConfig,
-    passTimeoutMs: 10,
-    repositoryRoot,
-    retryBackoffMs: 20,
   });
 }
 

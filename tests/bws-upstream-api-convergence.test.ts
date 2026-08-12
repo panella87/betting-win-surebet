@@ -414,6 +414,34 @@ test('upstream API convergence blocks pagination paths that exceed the explicit 
   }
 });
 
+test('upstream API convergence rejects response pageSize mismatches before persisting page outcomes', async () => {
+  const fixture = createApiFixture({
+    identity: [createEnvelope('identity', {
+      page: {
+        items: [createIdentityItem()],
+        pageSize: 1,
+        returnedCount: 1,
+      },
+    })],
+    rules: [createEnvelope('rules', { page: { items: [createRulesItem()], pageSize: 2, returnedCount: 1 } })],
+    quotes: [createEnvelope('quotes', { page: { items: [createNormalizedItem('quote-lineage-001')], pageSize: 2, returnedCount: 1 } })],
+    settlement: [createEnvelope('settlement', {
+      page: { items: [createNormalizedItem('settlement-lineage-001')], pageSize: 2, returnedCount: 1 },
+    })],
+  }, { pageSize: 2 });
+  try {
+    const repositories = createInMemoryRepositories();
+    const dependencies = asPassDependencies(repositories, fixture.fetch);
+    const result = await runPass(fixture.config, dependencies);
+
+    assert.equal(result.ok, false);
+    assert.equal(result.blockers[0]?.code, 'QUERY_PAGE_SIZE_MISMATCH');
+    assert.equal(repositories.importRuns.get('import:checkpoint-api-001:cycle:1:identity:page:1'), undefined);
+  } finally {
+    fixture.dispose();
+  }
+});
+
 test('upstream API convergence rejects mutated checkpoint configuration after initialization', async () => {
   const fixture = createApiFixture({
     identity: [createEnvelope('identity', { page: { items: [createIdentityItem()], pageSize: 1, returnedCount: 1 } })],

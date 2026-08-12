@@ -12,11 +12,6 @@ import { dirname, join, relative, resolve } from 'node:path';
 import { setTimeout as sleepFor } from 'node:timers/promises';
 import {
   BWS_UPSTREAM_MODE_ENV,
-  resolveBwsUpstreamExportConvergenceConfig,
-  runBwsUpstreamExportConvergencePass,
-  type BwsUpstreamExportConvergenceConfig,
-  type BwsUpstreamExportConvergenceEnvironment,
-  type BwsUpstreamExportConvergencePassResult,
 } from './upstream-export-convergence.js';
 import {
   resolveBwsUpstreamApiConvergenceConfig,
@@ -46,7 +41,7 @@ export const BWS_UPSTREAM_CONVERGENCE_RETRY_BACKOFF_MS_ENV = 'BWS_UPSTREAM_CONVE
 export const BWS_UPSTREAM_CONVERGENCE_MAX_BACKOFF_MS_ENV = 'BWS_UPSTREAM_CONVERGENCE_MAX_BACKOFF_MS';
 export const BWS_UPSTREAM_CONVERGENCE_PASS_TIMEOUT_MS_ENV = 'BWS_UPSTREAM_CONVERGENCE_PASS_TIMEOUT_MS';
 
-type BwsUpstreamConvergenceMode = 'api' | 'export';
+type BwsUpstreamConvergenceMode = 'api';
 type BwsSignal = 'SIGINT' | 'SIGTERM';
 type ServiceLifecycleState = 'running' | 'stopped';
 type PassOutcome = 'blocked' | 'failure' | 'no_change' | 'success';
@@ -56,43 +51,27 @@ type ServiceEvidenceEvent =
   | 'service_status'
   | 'service_stopped';
 
-type SelectedPassConfig =
-  | Readonly<{
-      readonly mode: 'api';
-      readonly passConfig: BwsUpstreamApiConvergenceConfig;
-    }>
-  | Readonly<{
-      readonly mode: 'export';
-      readonly passConfig: BwsUpstreamExportConvergenceConfig;
-    }>;
+type SelectedPassConfig = Readonly<{
+  readonly mode: 'api';
+  readonly passConfig: BwsUpstreamApiConvergenceConfig;
+}>;
 
-type ConvergencePassResult = BwsUpstreamApiConvergencePassResult | BwsUpstreamExportConvergencePassResult;
+type ConvergencePassResult = BwsUpstreamApiConvergencePassResult;
 
-type RedactedModeConfiguration =
-  | Readonly<{
-      readonly apiBaseUrl: string;
-      readonly checkpointId: string;
-      readonly contractVersion: string;
-      readonly maxPagesPerResource: number;
-      readonly mode: 'api';
-      readonly pageSize: number;
-      readonly retryBackoffMs: number;
-      readonly retryLimit: number;
-      readonly timeoutMs: number;
-    }>
-  | Readonly<{
-      readonly checkpointId: string;
-      readonly contractAlias: 'betting-win-strategy-export.v1';
-      readonly contractSchema: 'betting-win.strategy-export.v1';
-      readonly manifestPath: string;
-      readonly manifestSha256: string;
-      readonly mode: 'export';
-      readonly selectionCount: number;
-      readonly surebetProfile: 'surebet_standard_binary_v0';
-    }>;
+type RedactedModeConfiguration = Readonly<{
+  readonly apiBaseUrl: string;
+  readonly checkpointId: string;
+  readonly contractVersion: string;
+  readonly maxPagesPerResource: number;
+  readonly mode: 'api';
+  readonly pageSize: number;
+  readonly retryBackoffMs: number;
+  readonly retryLimit: number;
+  readonly timeoutMs: number;
+}>;
 
 export interface BwsUpstreamConvergenceServiceEnvironment
-  extends BwsUpstreamApiConvergenceEnvironment, BwsUpstreamExportConvergenceEnvironment {
+  extends BwsUpstreamApiConvergenceEnvironment {
   readonly BWS_UPSTREAM_CONVERGENCE_INTERVAL_MS?: string;
   readonly BWS_UPSTREAM_CONVERGENCE_RETRY_BACKOFF_MS?: string;
   readonly BWS_UPSTREAM_CONVERGENCE_MAX_BACKOFF_MS?: string;
@@ -113,7 +92,7 @@ export interface BwsUpstreamConvergenceServiceConfig {
   readonly intervalMs: number;
   readonly maxRetryBackoffMs: number;
   readonly mode: BwsUpstreamConvergenceMode;
-  readonly passConfig: BwsUpstreamApiConvergenceConfig | BwsUpstreamExportConvergenceConfig;
+  readonly passConfig: BwsUpstreamApiConvergenceConfig;
   readonly passTimeoutMs: number;
   readonly repositoryRoot: string;
   readonly retryBackoffMs: number;
@@ -263,9 +242,6 @@ export interface RunBwsUpstreamConvergenceServiceRequest {
   readonly runApiPass?: (
     request: Readonly<{ readonly config: BwsUpstreamApiConvergenceConfig }>,
   ) => Promise<BoundaryResult<BwsUpstreamApiConvergencePassResult>>;
-  readonly runExportPass?: (
-    request: Readonly<{ readonly config: BwsUpstreamExportConvergenceConfig }>,
-  ) => BoundaryResult<BwsUpstreamExportConvergencePassResult> | Promise<BoundaryResult<BwsUpstreamExportConvergencePassResult>>;
   readonly runtimeStateDirectory?: string;
   readonly signalRegistrar?: BwsUpstreamConvergenceSignalRegistrar;
   readonly sleep?: (milliseconds: number) => Promise<void>;
@@ -307,15 +283,10 @@ export function resolveBwsUpstreamConvergenceServiceConfig(
       `${BWS_UPSTREAM_CONVERGENCE_RETRY_BACKOFF_MS_ENV} must not exceed ${BWS_UPSTREAM_CONVERGENCE_MAX_BACKOFF_MS_ENV}.`,
     );
   }
-  const selectedConfig: SelectedPassConfig = mode === 'api'
-    ? Object.freeze({
-      mode,
-      passConfig: resolveBwsUpstreamApiConvergenceConfig(environment, resolvedRepositoryRoot),
-    })
-    : Object.freeze({
-      mode,
-      passConfig: resolveBwsUpstreamExportConvergenceConfig(environment, resolvedRepositoryRoot),
-    });
+  const selectedConfig: SelectedPassConfig = Object.freeze({
+    mode,
+    passConfig: resolveBwsUpstreamApiConvergenceConfig(environment, resolvedRepositoryRoot),
+  });
   return Object.freeze({
     intervalMs,
     maxRetryBackoffMs,
@@ -480,7 +451,6 @@ function createContext(
     | 'processRuntime'
     | 'repositoryRoot'
     | 'runApiPass'
-    | 'runExportPass'
     | 'runtimeStateDirectory'
     | 'signalRegistrar'
     | 'sleep'
@@ -496,9 +466,6 @@ function createContext(
   readonly runApiPass: (
     request: Readonly<{ readonly config: BwsUpstreamApiConvergenceConfig }>,
   ) => Promise<BoundaryResult<BwsUpstreamApiConvergencePassResult>>;
-  readonly runExportPass: (
-    request: Readonly<{ readonly config: BwsUpstreamExportConvergenceConfig }>,
-  ) => Promise<BoundaryResult<BwsUpstreamExportConvergencePassResult>>;
   readonly runtimeId: string;
   readonly signalRegistrar: BwsUpstreamConvergenceSignalRegistrar;
   readonly sleep: (milliseconds: number) => Promise<void>;
@@ -506,6 +473,7 @@ function createContext(
 }> {
   const repositoryRoot = realpathSync(request.repositoryRoot ?? process.cwd());
   const config = request.config ?? resolveBwsUpstreamConvergenceServiceConfig(request.environment, repositoryRoot);
+  assertApiOnlyServiceConfig(config);
   const paths = resolvePaths(repositoryRoot, request.runtimeStateDirectory ?? DEFAULT_RUNTIME_STATE_DIRECTORY);
   const configuration = redactBwsUpstreamConvergenceServiceConfig(config);
   const configFingerprint = sha256String(JSON.stringify(configuration));
@@ -518,8 +486,6 @@ function createContext(
     paths,
     processRuntime: request.processRuntime ?? createDefaultProcessRuntime(),
     runApiPass: request.runApiPass ?? ((runRequest) => runBwsUpstreamApiConvergencePass(runRequest)),
-    runExportPass: async (runRequest) =>
-      await Promise.resolve(request.runExportPass?.(runRequest) ?? runBwsUpstreamExportConvergencePass(runRequest)),
     runtimeId: resolveRuntimeId(),
     signalRegistrar: request.signalRegistrar ?? createDefaultSignalRegistrar(),
     sleep: request.sleep ?? defaultSleep,
@@ -530,13 +496,8 @@ function createContext(
 async function executePass(
   context: ReturnType<typeof createContext>,
 ): Promise<BoundaryResult<ConvergencePassResult>> {
-  if (context.config.mode === 'api') {
-    return await context.runApiPass({
-      config: context.config.passConfig as BwsUpstreamApiConvergenceConfig,
-    });
-  }
-  return await context.runExportPass({
-    config: context.config.passConfig as BwsUpstreamExportConvergenceConfig,
+  return await context.runApiPass({
+    config: context.config.passConfig,
   });
 }
 
@@ -614,16 +575,10 @@ function summarizeSuccessfulPass(
   result: ConvergencePassResult,
   outcome: 'no_change' | 'success',
 ): string {
-  if (mode === 'api') {
-    const apiResult = result as BwsUpstreamApiConvergencePassResult;
-    return outcome === 'success'
-      ? `API convergence processed ${apiResult.processedCount} records on ${apiResult.resource} page ${apiResult.pageNumber}.`
-      : `API convergence recorded no change on ${apiResult.resource} page ${apiResult.pageNumber}.`;
-  }
-  const exportResult = result as BwsUpstreamExportConvergencePassResult;
+  const apiResult = result;
   return outcome === 'success'
-    ? `Export convergence processed selection ${exportResult.processedSelectionCursor ?? exportResult.nextSelectionIndex}.`
-    : `Export convergence observed no new immutable export selections.`;
+    ? `API convergence processed ${apiResult.processedCount} records on ${apiResult.resource} page ${apiResult.pageNumber}.`
+    : `API convergence recorded no change on ${apiResult.resource} page ${apiResult.pageNumber}.`;
 }
 
 function summarizeBlockers(blockers: readonly Blocker[]): string {
@@ -947,10 +902,22 @@ function resolveEvidenceFilePath(
 function redactBwsUpstreamConvergenceServiceConfig(
   config: BwsUpstreamConvergenceServiceConfig,
 ): RedactedBwsUpstreamConvergenceServiceConfig {
-  const base = Object.freeze({
+  const apiConfig = config.passConfig;
+  return Object.freeze({
     intervalMs: config.intervalMs,
     maxRetryBackoffMs: config.maxRetryBackoffMs,
     mode: config.mode,
+    modeConfiguration: Object.freeze({
+      apiBaseUrl: apiConfig.query.baseUrl,
+      checkpointId: apiConfig.checkpointId,
+      contractVersion: apiConfig.query.contractVersion,
+      maxPagesPerResource: apiConfig.query.maxPagesPerResource,
+      mode: 'api' as const,
+      pageSize: apiConfig.query.pageSize,
+      retryBackoffMs: apiConfig.query.retryBackoffMs,
+      retryLimit: apiConfig.query.retryLimit,
+      timeoutMs: apiConfig.query.timeoutMs,
+    }),
     passTimeoutMs: config.passTimeoutMs,
     repositoryRoot: config.repositoryRoot,
     retryBackoffMs: config.retryBackoffMs,
@@ -968,37 +935,12 @@ function redactBwsUpstreamConvergenceServiceConfig(
       verifiedAt: config.passConfig.upstream.lock.verifiedAt,
     }),
   });
-  if (config.mode === 'api') {
-    const apiConfig = config.passConfig as BwsUpstreamApiConvergenceConfig;
-    return Object.freeze({
-      ...base,
-      modeConfiguration: Object.freeze({
-        apiBaseUrl: apiConfig.query.baseUrl,
-        checkpointId: apiConfig.checkpointId,
-        contractVersion: apiConfig.query.contractVersion,
-        maxPagesPerResource: apiConfig.query.maxPagesPerResource,
-        mode: 'api',
-        pageSize: apiConfig.query.pageSize,
-        retryBackoffMs: apiConfig.query.retryBackoffMs,
-        retryLimit: apiConfig.query.retryLimit,
-        timeoutMs: apiConfig.query.timeoutMs,
-      }),
-    });
+}
+
+function assertApiOnlyServiceConfig(config: BwsUpstreamConvergenceServiceConfig): void {
+  if (config.mode !== 'api' || config.passConfig.mode !== 'api') {
+    throw new Error('BWS upstream convergence service mode must be exactly api.');
   }
-  const exportConfig = config.passConfig as BwsUpstreamExportConvergenceConfig;
-  return Object.freeze({
-    ...base,
-    modeConfiguration: Object.freeze({
-      checkpointId: exportConfig.selection.checkpointId,
-      contractAlias: exportConfig.selection.contractAlias,
-      contractSchema: exportConfig.selection.contractSchema,
-      manifestPath: exportConfig.selection.manifestPath,
-      manifestSha256: exportConfig.selection.manifestSha256,
-      mode: 'export',
-      selectionCount: exportConfig.selection.entries.length,
-      surebetProfile: exportConfig.selection.surebetProfile,
-    }),
-  });
 }
 
 function collectSourceFingerprints(
@@ -1195,8 +1137,8 @@ function assertConfigFingerprintMatches(
 
 function requireMode(value: string | undefined): BwsUpstreamConvergenceMode {
   const normalized = requireNonEmptyString(value, BWS_UPSTREAM_MODE_ENV);
-  if (normalized !== 'api' && normalized !== 'export') {
-    throw new Error(`${BWS_UPSTREAM_MODE_ENV} must be exactly api or export.`);
+  if (normalized !== 'api') {
+    throw new Error(`${BWS_UPSTREAM_MODE_ENV} must be exactly api.`);
   }
   return normalized;
 }

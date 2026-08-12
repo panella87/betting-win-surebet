@@ -228,7 +228,15 @@ export function createPrivatePaperBatchSummary(
     .map((bundleSummary) => Object.freeze({ ...bundleSummary }))
     .sort((left, right) => left.bundlePath.localeCompare(right.bundlePath));
 
-  const blockerFrequencies = countBlockerFrequencies(sortedBundleSummaries);
+  const normalizedBundleSummaries = normalizeBatchSummaryBlockerCodeEvidence(sortedBundleSummaries);
+  const totalBlockerCount = normalizedBundleSummaries.reduce(
+    (currentBlockerCount, bundleSummary) => currentBlockerCount + bundleSummary.blockerCount,
+    0,
+  );
+  const blockerFrequencies = countBlockerFrequencies(normalizedBundleSummaries);
+  if (sumBlockerFrequencyCounts(blockerFrequencies) !== totalBlockerCount) {
+    throw new Error('Private paper batch summary requires blockerFrequencies to match blockerCount.');
+  }
   return Object.freeze({
     reportKind: 'private_paper_batch_summary',
     laneId: FIRST_LANE_SPEC.laneId,
@@ -241,13 +249,10 @@ export function createPrivatePaperBatchSummary(
       (currentCandidateCount, bundleSummary) => currentCandidateCount + bundleSummary.candidateCount,
       0,
     ),
-    totalBlockerCount: sortedBundleSummaries.reduce(
-      (currentBlockerCount, bundleSummary) => currentBlockerCount + bundleSummary.blockerCount,
-      0,
-    ),
+    totalBlockerCount,
     blockerFrequencies,
     bundles: Object.freeze(
-      sortedBundleSummaries.map((bundleSummary) =>
+      normalizedBundleSummaries.map((bundleSummary) =>
         Object.freeze({
           bundlePath: bundleSummary.bundlePath,
           reportPath: bundleSummary.reportPath,
@@ -257,6 +262,38 @@ export function createPrivatePaperBatchSummary(
       ),
     ),
   });
+}
+
+function normalizeBatchSummaryBlockerCodeEvidence(
+  bundleSummaries: readonly (PrivatePaperBatchBundleSummary & { readonly blockerCodes?: readonly string[] })[],
+): readonly (PrivatePaperBatchBundleSummary & { readonly blockerCodes?: readonly string[] })[] {
+  return Object.freeze(bundleSummaries.map((bundleSummary) => {
+    const blockerCodes = bundleSummary.blockerCodes;
+    if (blockerCodes === undefined) {
+      if (bundleSummary.blockerCount !== 0) {
+        throw new Error('Private paper batch summary requires blockerCodes when blockerCount is positive.');
+      }
+      return bundleSummary;
+    }
+    if (!Array.isArray(blockerCodes)) {
+      throw new Error('Private paper batch summary requires blockerCodes to be an array.');
+    }
+    if (blockerCodes.length !== bundleSummary.blockerCount) {
+      throw new Error('Private paper batch summary requires blockerCodes length to match blockerCount.');
+    }
+    const normalizedBlockerCodes: string[] = [];
+    for (let index = 0; index < blockerCodes.length; index += 1) {
+      const blockerCode = blockerCodes[index];
+      if (!isNonEmptyString(blockerCode)) {
+        throw new Error('Private paper batch summary requires non-empty blockerCodes.');
+      }
+      normalizedBlockerCodes.push(blockerCode);
+    }
+    return Object.freeze({
+      ...bundleSummary,
+      blockerCodes: Object.freeze(normalizedBlockerCodes),
+    });
+  }));
 }
 
 export function validatePrivatePaperBatchSummary(summary: unknown): BoundaryResult<undefined> {
@@ -845,8 +882,12 @@ function countBlockerFrequencies(
 ): readonly PrivatePaperBatchBlockerFrequency[] {
   const counts = new Map<string, number>();
   for (const bundleSummary of bundleSummaries) {
-    for (const blockerCode of bundleSummary.blockerCodes ?? []) {
-      counts.set(blockerCode, (counts.get(blockerCode) ?? 0) + 1);
+    if (bundleSummary.blockerCodes === undefined) {
+      continue;
+    }
+    for (const blockerCode of bundleSummary.blockerCodes) {
+      const currentCount = counts.get(blockerCode);
+      counts.set(blockerCode, currentCount === undefined ? 1 : currentCount + 1);
     }
   }
 
@@ -854,6 +895,13 @@ function countBlockerFrequencies(
     [...counts.entries()]
       .sort(([left], [right]) => left.localeCompare(right))
       .map(([code, count]) => Object.freeze({ code, count })),
+  );
+}
+
+function sumBlockerFrequencyCounts(blockerFrequencies: readonly PrivatePaperBatchBlockerFrequency[]): number {
+  return blockerFrequencies.reduce(
+    (currentBlockerCount, blockerFrequency) => currentBlockerCount + blockerFrequency.count,
+    0,
   );
 }
 

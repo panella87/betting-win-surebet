@@ -1145,11 +1145,21 @@ automation_v2_zip_with_timeout() {
   local timeout_seconds=${1:?timeout seconds are required}
   local destination=${2:?destination is required}
   local working_dir=${3:?working directory is required}
+  local artifact_cleanup_min_age_seconds
   shift 3
   command -v zip >/dev/null 2>&1 || return 127
   automation_v2_validate_zip_destination "$working_dir" "$destination" || return $?
   if [[ "$#" -eq 1 && "$1" == "artifacts" ]] && declare -F automation_cleanup_transient_artifact_residue >/dev/null 2>&1; then
-    automation_cleanup_transient_artifact_residue "$working_dir" apply 0 || return $?
+    if [[ -n "${AUTOMATION_V2_ZIP_ARTIFACT_CLEANUP_MIN_AGE_SECONDS+x}" ]]; then
+      artifact_cleanup_min_age_seconds="$AUTOMATION_V2_ZIP_ARTIFACT_CLEANUP_MIN_AGE_SECONDS"
+    else
+      artifact_cleanup_min_age_seconds=0
+    fi
+    [[ "$artifact_cleanup_min_age_seconds" =~ ^[0-9]+$ ]] || {
+      printf 'ERROR: artifact ZIP cleanup minimum age must be a non-negative integer; got %q.\n' "$artifact_cleanup_min_age_seconds" >&2
+      return 2
+    }
+    automation_cleanup_transient_artifact_residue "$working_dir" apply "$artifact_cleanup_min_age_seconds" || return $?
   fi
   automation_v2_reject_zip_symlink_entries "$working_dir" "$@" || return $?
   (
