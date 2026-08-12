@@ -141,17 +141,13 @@ test('final local acceptance stage 1 fails closed when the clean-room migration 
   }
 });
 
-test('final local acceptance runtime evidence binds api/export runtime proof plus paper autopilot summary', () => {
+test('final local acceptance runtime evidence binds api runtime proof plus paper autopilot summary', () => {
     const tempDirectory = mkdtempSync('/tmp/bws-final-acceptance-runtime-');
   try {
     const apiLifecycleEvidenceFile = join(tempDirectory, 'api-lifecycle.json');
     const apiDiagnosticsManifestFile = join(tempDirectory, 'api-diagnostics.json');
     const apiHandoffFile = join(tempDirectory, 'api-handoff.json');
-    const exportLifecycleEvidenceFile = join(tempDirectory, 'export-lifecycle.json');
-    const exportDiagnosticsManifestFile = join(tempDirectory, 'export-diagnostics.json');
-    const exportHandoffFile = join(tempDirectory, 'export-handoff.json');
     const apiRuntimeEvidenceFile = join(tempDirectory, 'api-runtime-evidence.json');
-    const exportRuntimeEvidenceFile = join(tempDirectory, 'export-runtime-evidence.json');
     const paperAutopilotSummaryFile = join(tempDirectory, 'paper-autopilot-summary.txt');
     const telegramCaptureFile = join(tempDirectory, 'paper-autopilot-telegram.txt');
     const outputFile = join(tempDirectory, 'runtime-result.json');
@@ -159,11 +155,7 @@ test('final local acceptance runtime evidence binds api/export runtime proof plu
     writeJsonFile(apiLifecycleEvidenceFile, { ok: true });
     writeJsonFile(apiDiagnosticsManifestFile, { ok: true });
     writeJsonFile(apiHandoffFile, { ok: true });
-    writeJsonFile(exportLifecycleEvidenceFile, { ok: true });
-    writeJsonFile(exportDiagnosticsManifestFile, { ok: true });
-    writeJsonFile(exportHandoffFile, { ok: true });
     writeJsonFile(apiRuntimeEvidenceFile, sampleRuntimeEvidenceDocument('api', apiLifecycleEvidenceFile, apiDiagnosticsManifestFile, apiHandoffFile));
-    writeJsonFile(exportRuntimeEvidenceFile, sampleRuntimeEvidenceDocument('export', exportLifecycleEvidenceFile, exportDiagnosticsManifestFile, exportHandoffFile));
     writeFileSync(
       paperAutopilotSummaryFile,
       'final_status=PAPER_AUTOPILOT_READY_RUNTIME_EVIDENCE_LOCAL_ONLY\nstop_reason=runtime_window_ready_local_only\n',
@@ -179,15 +171,38 @@ test('final local acceptance runtime evidence binds api/export runtime proof plu
       outputFile,
       paperAutopilotSummaryFile,
       repositoryRoot: REPO_ROOT,
-      runtimeEvidenceFiles: [exportRuntimeEvidenceFile, apiRuntimeEvidenceFile],
+      runtimeEvidenceFiles: [apiRuntimeEvidenceFile],
       telegramDryRunCaptureFile: telegramCaptureFile,
     });
 
     assert.equal(result.schema, 'bws.final_local_acceptance_runtime.v1');
-    assert.deepEqual(result.modesVerified, ['api', 'export']);
-    assert.equal(result.runtimeEvidence.length, 2);
+    assert.deepEqual(result.modesVerified, ['api']);
+    assert.equal(result.runtimeEvidence.length, 1);
     assert.equal(result.paperAutopilot.finalStatus, 'PAPER_AUTOPILOT_READY_RUNTIME_EVIDENCE_LOCAL_ONLY');
     assert.equal(existsSync(outputFile), true);
+
+    const exportLifecycleEvidenceFile = join(tempDirectory, 'export-lifecycle.json');
+    const exportDiagnosticsManifestFile = join(tempDirectory, 'export-diagnostics.json');
+    const exportHandoffFile = join(tempDirectory, 'export-handoff.json');
+    const exportRuntimeEvidenceFile = join(tempDirectory, 'export-runtime-evidence.json');
+    writeJsonFile(exportLifecycleEvidenceFile, { ok: true });
+    writeJsonFile(exportDiagnosticsManifestFile, { ok: true });
+    writeJsonFile(exportHandoffFile, { ok: true });
+    writeJsonFile(
+      exportRuntimeEvidenceFile,
+      sampleRetiredExportRuntimeEvidenceDocument(exportLifecycleEvidenceFile, exportDiagnosticsManifestFile, exportHandoffFile),
+    );
+    assert.throws(
+      () =>
+        createBwsFinalLocalAcceptanceRuntimeResult({
+          outputFile: join(tempDirectory, 'runtime-result-export.json'),
+          paperAutopilotSummaryFile,
+          repositoryRoot: REPO_ROOT,
+          runtimeEvidenceFiles: [exportRuntimeEvidenceFile],
+          telegramDryRunCaptureFile: telegramCaptureFile,
+        }),
+      /selectedUpstreamMode=api|export mode is retired/u,
+    );
   } finally {
     rmSync(tempDirectory, { force: true, recursive: true });
   }
@@ -463,8 +478,15 @@ function writePrivateEnvironmentFile(envFile: string, manifest: BwsReleaseManife
   const lines = [
     'BETTING_WIN_REPO_PATH=/operator/read-only/betting-win',
     'BWS_UPSTREAM_LOCK_PATH=./config/betting-win.upstream.lock.json',
-    'BWS_UPSTREAM_MODE=export',
-    'BWS_UPSTREAM_EXPORT_SELECTION_PATH=/operator/input/export-selection.json',
+    'BWS_UPSTREAM_MODE=api',
+    'BWS_UPSTREAM_API_CHECKPOINT_ID=api-checkpoint-001',
+    'BWS_UPSTREAM_API_BASE_URL=http://betting-win-query.test',
+    'BWS_UPSTREAM_API_CONTRACT_VERSION=1.0.0',
+    'BWS_UPSTREAM_API_PAGE_SIZE=25',
+    'BWS_UPSTREAM_API_MAX_PAGES_PER_RESOURCE=4',
+    'BWS_UPSTREAM_API_RETRY_LIMIT=1',
+    'BWS_UPSTREAM_API_RETRY_BACKOFF_MS=10',
+    'BWS_UPSTREAM_API_TIMEOUT_MS=1000',
     `BWS_API_PORT=${port}`,
     'BWS_WORKER_ID=worker-bws-final-acceptance-001',
     'BWS_WORKER_QUEUE_NAME=private-paper',
@@ -499,7 +521,7 @@ function writeJsonFile(path: string, value: unknown): void {
 }
 
 function sampleRuntimeEvidenceDocument(
-  mode: 'api' | 'export',
+  mode: 'api',
   lifecycleEvidenceFile: string,
   diagnosticsManifestFile: string,
   handoffFile: string,
@@ -616,6 +638,17 @@ function sampleRuntimeEvidenceDocument(
     stackOwnership: 'started',
     stackStopDisposition: 'stopped_started_stack',
     stopReason: 'runtime_window_ready_local_only',
+  };
+}
+
+function sampleRetiredExportRuntimeEvidenceDocument(
+  lifecycleEvidenceFile: string,
+  diagnosticsManifestFile: string,
+  handoffFile: string,
+): Record<string, unknown> {
+  return {
+    ...sampleRuntimeEvidenceDocument('api', lifecycleEvidenceFile, diagnosticsManifestFile, handoffFile),
+    selectedUpstreamMode: 'export',
   };
 }
 
@@ -751,7 +784,7 @@ function sampleRuntimeStageResultDocument(): Record<string, unknown> {
       providerConnections: 'disabled',
       runtimeMode: 'paper',
     },
-    modesVerified: ['api', 'export'],
+    modesVerified: ['api'],
     paperAutopilot: {
       finalStatus: 'PAPER_AUTOPILOT_READY_RUNTIME_EVIDENCE_LOCAL_ONLY',
       stopReason: 'runtime_window_ready_local_only',

@@ -260,6 +260,7 @@
       "additionalProperties": false,
       "required": [
         "apiBaseUrl",
+        "apiContractPath",
         "checkpointId",
         "contractInspection",
         "contractVersion",
@@ -272,6 +273,7 @@
       ],
       "properties": {
         "apiBaseUrl": { "type": "string", "format": "uri" },
+        "apiContractPath": { "type": "string", "pattern": "^/(?!/)[^?#\\\\]*$" },
         "checkpointId": { "type": "string", "pattern": "^[A-Za-z0-9._:/-]+$" },
         "contractInspection": {
           "type": "object",

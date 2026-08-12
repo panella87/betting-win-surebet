@@ -87,6 +87,39 @@ automation_v2_safe_repo_path() {
   esac
 }
 
+automation_v2_validate_retained_artifact_zip_hygiene() {
+  local archive=${1:?archive path is required}
+  local validator
+  [[ -f "$archive" && ! -L "$archive" ]] || {
+    printf 'ERROR: retained artifact ZIP hygiene validation requires a non-symlink regular file: %s\n' "$archive" >&2
+    return 2
+  }
+  command -v zip >/dev/null 2>&1 || {
+    printf 'ERROR: missing required command for retained artifact ZIP integrity validation: zip\n' >&2
+    return 127
+  }
+  zip -T "$archive" >/dev/null 2>&1 || {
+    printf 'ERROR: retained artifact ZIP integrity validation failed: %s\n' "$archive" >&2
+    return 2
+  }
+  command -v python3 >/dev/null 2>&1 || {
+    printf 'ERROR: missing required command for retained artifact ZIP hygiene validation: python3\n' >&2
+    return 127
+  }
+  validator=$(realpath -e -- "$(dirname "${BASH_SOURCE[0]}")/../../scripts/validate_artifact_hygiene.py" 2>/dev/null) || {
+    printf 'ERROR: missing retained artifact ZIP hygiene validator: %s\n' "$(dirname "${BASH_SOURCE[0]}")/../../scripts/validate_artifact_hygiene.py" >&2
+    return 2
+  }
+  [[ -f "$validator" && ! -L "$validator" ]] || {
+    printf 'ERROR: retained artifact ZIP hygiene validator must be a non-symlink regular file: %s\n' "$validator" >&2
+    return 2
+  }
+  python3 "$validator" --retained-artifact-zip "$archive" >/dev/null || {
+    printf 'ERROR: retained artifact ZIP member hygiene validation failed: %s\n' "$archive" >&2
+    return 2
+  }
+}
+
 automation_v2_validate_bugfix_from_artifacts() {
   local repo=${1:?repo is required}
   local candidate=${2:?--from-artifacts path is required}
@@ -158,6 +191,7 @@ automation_v2_validate_bugfix_from_artifacts() {
         printf 'ERROR: --from-artifacts artifact ZIP must be a non-symlink regular file: %s\n' "$candidate" >&2
         return 2
       }
+      automation_v2_validate_retained_artifact_zip_hygiene "$candidate_real" || return $?
       printf '%s\n' "$candidate_real"
       return 0
       ;;
@@ -167,6 +201,7 @@ automation_v2_validate_bugfix_from_artifacts() {
       printf 'ERROR: --from-artifacts artifact ZIP must be a non-symlink regular file: %s\n' "$candidate" >&2
       return 2
     }
+    automation_v2_validate_retained_artifact_zip_hygiene "$candidate_real" || return $?
     printf '%s\n' "$candidate_real"
     return 0
   fi
@@ -751,7 +786,7 @@ automation_v2_publish_regular_file_atomic() {
   local temp=${1:?temp file is required}
   local destination=${2:?destination is required}
   local working_dir=${3:?working directory is required}
-  local working_real temp_input temp_real destination_input destination_real parent_real rc
+  local working_real temp_input temp_real destination_input destination_real parent_real destination_base rc
   [[ -d "$working_dir" && ! -L "$working_dir" ]] || {
     printf 'ERROR: publish working directory must be a non-symlink directory: %s\n' "$working_dir" >&2
     return 2
@@ -804,6 +839,14 @@ automation_v2_publish_regular_file_atomic() {
       printf 'ERROR: publish destination must be absent or a non-symlink regular file: %s\n' "$destination_real" >&2
       rm -f -- "$temp_real"
       return 2
+    }
+  fi
+  destination_base="$(basename -- "$destination_real")"
+  if [[ "$destination_base" == "artifacts.zip" || "$destination_base" =~ ^artifacts[1-9][0-9]*\.zip$ ]]; then
+    automation_v2_validate_retained_artifact_zip_hygiene "$temp_real" || {
+      rc=$?
+      rm -f -- "$temp_real"
+      return "$rc"
     }
   fi
   if ! mv -T -- "$temp_real" "$destination_real"; then

@@ -247,6 +247,49 @@ test('release archive excludes secrets, runtime state, logs, and artifacts', asy
   assert.ok(entries.some((entry) => entry.endsWith('/deployment/systemd-user/bws-operator.service.template')));
 });
 
+test('install verification rejects retired export-mode operator inputs', async () => {
+  const fixture = await getReleaseFixture();
+  const extraction = extractReleaseArchive(fixture.result.archiveFile);
+  const privateEnvFile = join(extraction.tempDirectory, 'private.env');
+  const fakeBin = createFakePostgreSqlClient('16.3');
+  try {
+    writePrivateEnvironmentFile(privateEnvFile, extraction.manifest, TEST_PASSWORD);
+    writeFileSync(
+      privateEnvFile,
+      `${readFileSync(privateEnvFile, 'utf-8')}BWS_UPSTREAM_EXPORT_SELECTION_PATH=/operator/input/export-selection.json\n`,
+      'utf-8',
+    );
+
+    await assertRejectsWithoutSecret(
+      () => withFakePsqlPath(fakeBin, () => verifyBwsReleaseInstallation({
+        envFile: privateEnvFile,
+        releaseDirectory: extraction.rootDirectory,
+        scratchDirectory: join(extraction.tempDirectory, 'scratch-retired-export'),
+      })),
+      /forbids BWS_UPSTREAM_EXPORT_SELECTION_PATH|API-only/u,
+    );
+
+    const exportModeEnvFile = join(extraction.tempDirectory, 'export-mode.env');
+    writePrivateEnvironmentFile(exportModeEnvFile, extraction.manifest, TEST_PASSWORD, ['BWS_UPSTREAM_MODE']);
+    writeFileSync(
+      exportModeEnvFile,
+      `${readFileSync(exportModeEnvFile, 'utf-8')}BWS_UPSTREAM_MODE=export\n`,
+      'utf-8',
+    );
+    await assertRejectsWithoutSecret(
+      () => withFakePsqlPath(fakeBin, () => verifyBwsReleaseInstallation({
+        envFile: exportModeEnvFile,
+        releaseDirectory: extraction.rootDirectory,
+        scratchDirectory: join(extraction.tempDirectory, 'scratch-export-mode'),
+      })),
+      /BWS_UPSTREAM_MODE=api|export mode is retired/u,
+    );
+  } finally {
+    cleanupExtraction(extraction.tempDirectory);
+    rmSync(dirname(fakeBin), { force: true, recursive: true });
+  }
+});
+
 test('install verification rejects extracted release .env variants before runtime preflight', async () => {
   const fixture = await getReleaseFixture();
   const extraction = extractReleaseArchive(fixture.result.archiveFile);
@@ -903,8 +946,15 @@ function writePrivateEnvironmentFile(
   const lines = [
     'BETTING_WIN_REPO_PATH=/operator/read-only/betting-win',
     'BWS_UPSTREAM_LOCK_PATH=./config/betting-win.upstream.lock.json',
-    'BWS_UPSTREAM_MODE=export',
-    'BWS_UPSTREAM_EXPORT_SELECTION_PATH=/operator/input/export-selection.json',
+    'BWS_UPSTREAM_MODE=api',
+    'BWS_UPSTREAM_API_CHECKPOINT_ID=api-checkpoint-001',
+    'BWS_UPSTREAM_API_BASE_URL=http://betting-win-query.test',
+    'BWS_UPSTREAM_API_CONTRACT_VERSION=1.0.0',
+    'BWS_UPSTREAM_API_PAGE_SIZE=25',
+    'BWS_UPSTREAM_API_MAX_PAGES_PER_RESOURCE=4',
+    'BWS_UPSTREAM_API_RETRY_LIMIT=1',
+    'BWS_UPSTREAM_API_RETRY_BACKOFF_MS=10',
+    'BWS_UPSTREAM_API_TIMEOUT_MS=1000',
     `BWS_API_PORT=${port}`,
     'BWS_WORKER_ID=worker-bws-release-001',
     'BWS_WORKER_QUEUE_NAME=private-paper',

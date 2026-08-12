@@ -124,17 +124,103 @@ for marker in [
 external_preflight=(ROOT/'packages/bootstrap/src/operations/external-runtime-preflight.ts').read_text(encoding='utf-8')
 for marker in [
  "selectedInput.apiBaseUrl",
+ "readonly apiContractPath: string",
+ "normalizeContractPath(input.apiContractPath)",
  "must stay on an explicit loopback host",
  "must not target the local BWS API",
 ]:
  if marker not in external_preflight:
   errors.append(f'packages/bootstrap/src/operations/external-runtime-preflight.ts: missing {marker}')
+if "input.apiContractPath === undefined" in external_preflight or "? '/contract'" in external_preflight:
+ errors.append('packages/bootstrap/src/operations/external-runtime-preflight.ts: API contract path must not silently default to /contract')
+external_preflight_cli=(ROOT/'packages/bootstrap/src/cli/bws-external-runtime-preflight.ts').read_text(encoding='utf-8')
+for marker in [
+ "apiContractPath: requireFlagValue(options, '--api-contract-path')",
+ "--api-contract-path </contract>",
+]:
+ if marker not in external_preflight_cli:
+  errors.append(f'packages/bootstrap/src/cli/bws-external-runtime-preflight.ts: missing {marker}')
+if "[--api-contract-path" in external_preflight_cli:
+ errors.append('packages/bootstrap/src/cli/bws-external-runtime-preflight.ts: --api-contract-path must not be documented as optional')
+external_preflight_schema=(ROOT/'schemas/bws-external-runtime-campaign.v1.schema.json').read_text(encoding='utf-8')
+for marker in [
+ '"apiContractPath"',
+ '"pattern": "^/(?!/)[^?#\\\\\\\\]*$"',
+]:
+ if marker not in external_preflight_schema:
+  errors.append(f'schemas/bws-external-runtime-campaign.v1.schema.json: missing {marker}')
 retired=(ROOT/'packages/bootstrap/src/cli/bws-upstream-export-convergence.ts').read_text(encoding='utf-8')
 if 'export runtime has been removed' not in retired:
  errors.append('retired export CLI does not fail closed')
 barrel=(ROOT/'packages/bootstrap/src/index.ts').read_text(encoding='utf-8')
 if "./cli/bws-upstream-export-convergence.js" in barrel:
  errors.append('bootstrap public barrel still exposes export CLI')
+if "./operations/upstream-export-convergence.js" in barrel:
+ errors.append('bootstrap public barrel still exposes export convergence operation')
+compatibility=(ROOT/'src/operations/upstream-export-convergence.ts').read_text(encoding='utf-8')
+if 'export * from' in compatibility or 'upstream-export-convergence.js' in compatibility:
+ errors.append('compatibility operation shim still re-exports active export convergence implementation')
+if 'export runtime has been removed' not in compatibility:
+ errors.append('compatibility operation shim does not fail closed')
+for rel in [
+ 'packages/bootstrap/src/operations/upstream-api-convergence.ts',
+ 'packages/bootstrap/src/operations/upstream-convergence-service.ts',
+]:
+ text=(ROOT/rel).read_text(encoding='utf-8')
+ if "from './upstream-export-convergence.js'" in text:
+  errors.append(f'{rel}: API-only code imports retired export convergence implementation')
+
+release_api_tuple=[
+ 'BWS_UPSTREAM_API_CHECKPOINT_ID',
+ 'BWS_UPSTREAM_API_BASE_URL',
+ 'BWS_UPSTREAM_API_CONTRACT_VERSION',
+ 'BWS_UPSTREAM_API_PAGE_SIZE',
+ 'BWS_UPSTREAM_API_MAX_PAGES_PER_RESOURCE',
+ 'BWS_UPSTREAM_API_RETRY_LIMIT',
+ 'BWS_UPSTREAM_API_RETRY_BACKOFF_MS',
+ 'BWS_UPSTREAM_API_TIMEOUT_MS',
+]
+for rel in [
+ 'packages/bootstrap/src/operations/release-packaging.ts',
+ 'packages/bootstrap/src/operations/release-upgrade.ts',
+]:
+ text=(ROOT/rel).read_text(encoding='utf-8')
+ if "'api' | 'export'" in text or 'api or export' in text:
+  errors.append(f'{rel}: release boundary still accepts api/export upstream mode union')
+ if 'BWS_UPSTREAM_MODE=api' not in text:
+  errors.append(f'{rel}: missing explicit API-only mode rejection message')
+ if 'BWS_UPSTREAM_EXPORT_SELECTION_PATH' in text and 'forbid' not in text.lower():
+  errors.append(f'{rel}: retired export selector is referenced without fail-closed rejection')
+ for marker in release_api_tuple:
+  if marker not in text:
+   errors.append(f'{rel}: missing required API tuple marker {marker}')
+
+final_acceptance=(ROOT/'packages/bootstrap/src/operations/final-local-acceptance.ts').read_text(encoding='utf-8')
+if "'api' | 'export'" in final_acceptance or 'both api and export' in final_acceptance:
+ errors.append('packages/bootstrap/src/operations/final-local-acceptance.ts: final acceptance still requires export runtime evidence')
+if 'selectedUpstreamMode=api' not in final_acceptance:
+ errors.append('packages/bootstrap/src/operations/final-local-acceptance.ts: missing API-only runtime evidence rejection')
+
+for rel in [
+ 'tests/bws-release-packaging.test.ts',
+ 'tests/bws-release-upgrade.test.ts',
+ 'tests/bws-final-local-acceptance.test.ts',
+]:
+ text=(ROOT/rel).read_text(encoding='utf-8')
+ fixture_text=text
+ if rel == 'tests/bws-release-upgrade.test.ts':
+  fixture_text=text.split('function writeEnvironmentFile(',1)[1].split('function createCaptureStream',1)[0]
+ elif rel in {'tests/bws-release-packaging.test.ts','tests/bws-final-local-acceptance.test.ts'}:
+  fixture_text=text.split('function writePrivateEnvironmentFile(',1)[1].split('function writeJsonFile',1)[0]
+ for retired in [
+  'BWS_UPSTREAM_MODE=export',
+  'BWS_UPSTREAM_EXPORT_SELECTION_PATH=/operator/input/export-selection.json',
+ ]:
+  if retired in fixture_text:
+   errors.append(f'{rel}: release/operator fixture still contains retired export input {retired}')
+ for marker in release_api_tuple:
+  if marker not in fixture_text:
+   errors.append(f'{rel}: release/operator fixture missing required API tuple marker {marker}')
 
 
 api_doc=(ROOT/'docs/automation/api-only-upstream.md').read_text(encoding='utf-8')

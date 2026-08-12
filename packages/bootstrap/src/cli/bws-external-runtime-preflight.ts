@@ -68,9 +68,7 @@ export async function runBwsExternalRuntimePreflightCli(
     runtimeDirectory: requireFlagValue(options, '--runtime-dir'),
     selectedInput: Object.freeze({
       apiBaseUrl: requireFlagValue(options, '--api-base-url'),
-      ...(options.has('--api-contract-path')
-        ? { apiContractPath: requireFlagValue(options, '--api-contract-path') }
-        : {}),
+      apiContractPath: requireFlagValue(options, '--api-contract-path'),
       checkpointId: requireFlagValue(options, '--checkpoint-id'),
       contractVersion: requireFlagValue(options, '--contract-version'),
       expectedUpstreamLockFingerprint: requireFlagValue(options, '--expected-upstream-lock-fingerprint'),
@@ -95,7 +93,7 @@ export function printBwsExternalRuntimePreflightHelp(stream: NodeJS.WriteStream 
       '',
       'Fail-closed external runtime preflight and campaign-manifest generation for BWS-593.',
       'common options: --release-dir <dir> --env-file <path> --install-verification-file <path> --migration-status-file <path> --backup-manifest-file <path> --restore-verification-file <path> --soak-manifest-file <path> --soak-state-file <path> --runtime-dir <dir> --evidence-dir <dir> --output-file <path> --campaign-duration-hours <positive-integer> --campaign-max-cycles <positive-integer> --campaign-cycle-timeout-minutes <positive-integer> --minimum-available-bytes <positive-integer> --expected-upstream-lock-fingerprint <sha256>',
-      'API options: --checkpoint-id <token> --api-base-url <url> --contract-version <value> --page-size <positive-integer> --max-pages-per-resource <positive-integer> --timeout-ms <positive-integer> --retry-limit <positive-integer> --retry-backoff-ms <positive-integer> [--api-contract-path </contract>]',
+      'API options: --checkpoint-id <token> --api-base-url <url> --api-contract-path </contract> --contract-version <value> --page-size <positive-integer> --max-pages-per-resource <positive-integer> --timeout-ms <positive-integer> --retry-limit <positive-integer> --retry-backoff-ms <positive-integer>',
     ].join('\n'),
   );
 }

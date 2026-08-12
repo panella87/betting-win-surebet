@@ -63,7 +63,7 @@ const RELEASE_MANIFEST_FILE = 'release-manifest.json' as const;
 const ISO_8601_UTC_MILLISECONDS = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/;
 const SHA256_HEX_PATTERN = /^[a-f0-9]{64}$/;
 
-type FinalAcceptanceMode = 'api' | 'export';
+type FinalAcceptanceMode = 'api';
 
 interface FinalLocalAcceptanceStageOneDependencies {
   readonly applyMigrations: (persistenceConfig: SurebetPersistenceConfig) => void;
@@ -469,8 +469,8 @@ export function createBwsFinalLocalAcceptanceRuntimeResult(
     );
   }
 
-  if (!runtimeEvidenceByMode.has('api') || !runtimeEvidenceByMode.has('export')) {
-    throw new Error('Final local acceptance runtime evidence requires both api and export mode evidence files.');
+  if (!runtimeEvidenceByMode.has('api')) {
+    throw new Error('Final local acceptance runtime evidence requires api mode evidence.');
   }
 
   const paperAutopilotSummary = parseKeyValueFile(paperAutopilotSummaryFile, 'paperAutopilotSummaryFile');
@@ -746,8 +746,8 @@ export function createBwsFinalLocalAcceptanceManifest(
   if (!cleanup.verified) {
     throw new Error('Final local acceptance manifest requires cleanupResult.verified=true.');
   }
-  if (!runtime.modesVerified.includes('api') || !runtime.modesVerified.includes('export')) {
-    throw new Error('Final local acceptance manifest requires runtime evidence for both api and export modes.');
+  if (!runtime.modesVerified.includes('api')) {
+    throw new Error('Final local acceptance manifest requires api runtime evidence.');
   }
   if (stageOne.release.semanticFingerprint !== externalRuntimeCampaign.release.semanticFingerprint) {
     throw new Error('Final local acceptance manifest requires stage 1 and external runtime campaign release fingerprints to match.');
@@ -776,6 +776,9 @@ export function createBwsFinalLocalAcceptanceManifest(
   if (externalRuntimeCampaign.policy.runtimeMode !== 'paper') {
     throw new Error('Final local acceptance manifest requires runtimeMode=paper.');
   }
+  if (externalRuntimeCampaign.policy.selectedMode !== 'api') {
+    throw new Error('Final local acceptance manifest requires external runtime selectedMode=api; export mode is retired.');
+  }
 
   const semanticFingerprint = stableFingerprint(
     Object.freeze({
@@ -803,7 +806,7 @@ export function createBwsFinalLocalAcceptanceManifest(
     externalRuntimeCampaign: Object.freeze({
       manifestFile: resolve(request.externalRuntimeCampaignFile),
       semanticFingerprint: externalRuntimeCampaign.semanticFingerprint,
-      selectedMode: externalRuntimeCampaign.policy.selectedMode,
+      selectedMode: 'api',
     }),
     providerExecutionClosed: Object.freeze({
       executionEnabled: false,
@@ -938,6 +941,7 @@ function stableFingerprint(value: unknown): string {
 
 function readRuntimeEvidenceFile(path: string): BwsPaperRuntimeEvidenceResult & {
   readonly finalStatus: 'PAPER_EVALUATION_READY_RUNTIME_EVIDENCE_LOCAL_ONLY';
+  readonly selectedUpstreamMode: 'api';
 } {
   const parsed = readSchemaFile<BwsPaperRuntimeEvidenceResult>(
     path,
@@ -947,8 +951,12 @@ function readRuntimeEvidenceFile(path: string): BwsPaperRuntimeEvidenceResult & 
   if (parsed.finalStatus !== 'PAPER_EVALUATION_READY_RUNTIME_EVIDENCE_LOCAL_ONLY') {
     throw new Error(`Final local acceptance runtime evidence requires finalStatus=PAPER_EVALUATION_READY_RUNTIME_EVIDENCE_LOCAL_ONLY in ${path}.`);
   }
+  if (parsed.selectedUpstreamMode !== 'api') {
+    throw new Error('Final local acceptance runtime evidence requires selectedUpstreamMode=api; export mode is retired.');
+  }
   return parsed as BwsPaperRuntimeEvidenceResult & {
     readonly finalStatus: 'PAPER_EVALUATION_READY_RUNTIME_EVIDENCE_LOCAL_ONLY';
+    readonly selectedUpstreamMode: 'api';
   };
 }
 

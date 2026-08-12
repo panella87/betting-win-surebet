@@ -27,16 +27,18 @@ import {
   SUREBET_PROVIDER_CONNECTIONS_ENV,
   SUREBET_RUNTIME_MODE_ENV,
 } from './service-runtime.js';
+import {
+  BWS_UPSTREAM_API_BASE_URL_ENV,
+  BWS_UPSTREAM_API_TIMEOUT_MS_ENV,
+  BWS_UPSTREAM_EXPORT_SELECTION_PATH_ENV,
+  BWS_UPSTREAM_MODE_ENV,
+} from './upstream-transport-constants.js';
 
 const URL_SCHEME_PREFIX = /^[a-z][a-z0-9+.-]*:\/\//i;
 const LOWERCASE_SHA256_REGEX = /^[0-9a-f]{64}$/;
 const ISO_UTC_TIMESTAMP = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/;
 const ID_PATTERN = /^[A-Za-z0-9._:-]+$/;
 
-export const BWS_UPSTREAM_MODE_ENV = 'BWS_UPSTREAM_MODE';
-export const BWS_UPSTREAM_EXPORT_SELECTION_PATH_ENV = 'BWS_UPSTREAM_EXPORT_SELECTION_PATH';
-export const BWS_UPSTREAM_API_BASE_URL_ENV = 'BWS_UPSTREAM_API_BASE_URL';
-export const BWS_UPSTREAM_API_TIMEOUT_MS_ENV = 'BWS_UPSTREAM_API_TIMEOUT_MS';
 export const BWS_UPSTREAM_EXPORT_SELECTION_SCHEMA = 'bws.upstream_export_selection.v1' as const;
 
 export interface BwsUpstreamExportConvergenceEnvironment extends SurebetPersistenceEnvironment {

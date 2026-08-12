@@ -195,7 +195,7 @@ def check_source_tree() -> None:
             fail(f'forbidden generated archive/log/temp file in source tree: {rel}')
 
 
-def check_zip(zip_path: Path) -> None:
+def check_zip(zip_path: Path, *, enforce_codebase_policy: bool) -> None:
     if not zip_path.is_file():
         fail(f'archive not found: {zip_path}')
     seen_names: set[str] = set()
@@ -211,7 +211,7 @@ def check_zip(zip_path: Path) -> None:
             is_directory_entry = raw_name.endswith('/')
             name = raw_name[:-1] if is_directory_entry else raw_name
             if not name:
-                continue
+                fail('forbidden empty archive path')
             posix_path = PurePosixPath(name)
             windows_path = PureWindowsPath(name)
             if posix_path.is_absolute() or windows_path.is_absolute() or windows_path.drive:
@@ -240,23 +240,24 @@ def check_zip(zip_path: Path) -> None:
             file_type = stat.S_IFMT(mode)
             if file_type and not stat.S_ISREG(mode) and not stat.S_ISDIR(mode):
                 fail(f'forbidden special file entry in archive: {name}')
-            parts = tuple(raw_parts)
-            if parts and parts[0] in FORBIDDEN_ROOTS:
-                fail(f'forbidden root in archive: {name}')
-            if name in FORBIDDEN_EXACT or name in LOCAL_IGNORED_EXACT:
-                fail(f'forbidden exact path in archive: {name}')
-            if is_interrupted_zip_temp(parts[-1]):
-                fail(f'forbidden interrupted zip temp file in archive: {name}')
-            if name.endswith(FORBIDDEN_SUFFIXES):
-                fail(f'forbidden generated file in archive: {name}')
+            if enforce_codebase_policy:
+                parts = tuple(raw_parts)
+                if parts and parts[0] in FORBIDDEN_ROOTS:
+                    fail(f'forbidden root in archive: {name}')
+                if name in FORBIDDEN_EXACT or name in LOCAL_IGNORED_EXACT:
+                    fail(f'forbidden exact path in archive: {name}')
+                if is_interrupted_zip_temp(parts[-1]):
+                    fail(f'forbidden interrupted zip temp file in archive: {name}')
+                if name.endswith(FORBIDDEN_SUFFIXES):
+                    fail(f'forbidden generated file in archive: {name}')
 
 
 def main() -> None:
     args = sys.argv[1:]
     if args:
-        if len(args) != 2 or args[0] != '--codebase-zip':
-            fail('usage: validate_artifact_hygiene.py [--codebase-zip path]')
-        check_zip(Path(args[1]))
+        if len(args) != 2 or args[0] not in {'--codebase-zip', '--retained-artifact-zip'}:
+            fail('usage: validate_artifact_hygiene.py [--codebase-zip path|--retained-artifact-zip path]')
+        check_zip(Path(args[1]), enforce_codebase_policy=args[0] == '--codebase-zip')
     else:
         check_source_tree()
     print('validate_artifact_hygiene: ok')

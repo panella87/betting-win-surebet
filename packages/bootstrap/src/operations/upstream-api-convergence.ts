@@ -30,7 +30,7 @@ import {
   BWS_UPSTREAM_API_TIMEOUT_MS_ENV,
   BWS_UPSTREAM_EXPORT_SELECTION_PATH_ENV,
   BWS_UPSTREAM_MODE_ENV,
-} from './upstream-export-convergence.js';
+} from './upstream-transport-constants.js';
 import {
   BWS_UPSTREAM_LOCK_PATH_ENV,
   BWS_API_PORT_ENV,

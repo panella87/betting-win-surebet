@@ -80,8 +80,32 @@ test('root package and CLI expose no export runtime command', () => {
   assert.equal(packageJson.scripts['runtime:upstream-export'], undefined);
   const cli = readFileSync(resolve(repoRoot, 'cli.js'), 'utf8');
   const barrel = readFileSync(resolve(repoRoot, 'packages/bootstrap/src/index.ts'), 'utf8');
+  const compatibilityShim = readFileSync(resolve(repoRoot, 'src/operations/upstream-export-convergence.ts'), 'utf8');
   const retiredCli = readFileSync(resolve(repoRoot, 'packages/bootstrap/src/cli/bws-upstream-export-convergence.ts'), 'utf8');
   assert.doesNotMatch(cli, /runtime-upstream-export/);
   assert.doesNotMatch(barrel, /cli\/bws-upstream-export-convergence/);
+  assert.doesNotMatch(barrel, /operations\/upstream-export-convergence/);
+  assert.doesNotMatch(compatibilityShim, /export \* from .*upstream-export-convergence/);
   assert.match(retiredCli, /export runtime has been removed/);
+  assert.match(compatibilityShim, /export runtime has been removed/);
+});
+
+test('public bootstrap barrel does not expose retired export convergence operations', async () => {
+  const bootstrap = await import('../packages/bootstrap/src/index.js') as Record<string, unknown>;
+  assert.equal(bootstrap.resolveBwsUpstreamExportConvergenceConfig, undefined);
+  assert.equal(bootstrap.runBwsUpstreamExportConvergencePass, undefined);
+  assert.equal(bootstrap.parseBwsUpstreamExportSelectionManifest, undefined);
+  assert.equal(bootstrap.BWS_UPSTREAM_EXPORT_SELECTION_SCHEMA, undefined);
+});
+
+test('compatibility export convergence operation surface fails closed', async () => {
+  const retired = await import('../src/operations/upstream-export-convergence.js');
+  assert.throws(
+    () => retired.resolveBwsUpstreamExportConvergenceConfig(),
+    /export runtime has been removed/,
+  );
+  assert.throws(
+    () => retired.runBwsUpstreamExportConvergencePass(),
+    /export runtime has been removed/,
+  );
 });

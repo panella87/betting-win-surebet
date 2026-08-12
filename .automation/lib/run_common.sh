@@ -1234,6 +1234,7 @@ automation_prune_artifact_zip_vcs_metadata() {
 automation_validate_artifact_zip_integrity() {
   local archive="${1:?archive path is required}"
   local label="${2:?archive label is required}"
+  local validator
   [[ -f "$archive" && ! -L "$archive" ]] || {
     printf 'ERROR: artifact ZIP integrity validation requires a non-symlink regular file: %s\n' "$archive" >&2
     return 2
@@ -1244,6 +1245,22 @@ automation_validate_artifact_zip_integrity() {
   }
   zip -T "$archive" >/dev/null 2>&1 || {
     printf 'ERROR: artifact ZIP integrity validation failed for %s: %s\n' "$label" "$archive" >&2
+    return 2
+  }
+  command -v python3 >/dev/null 2>&1 || {
+    printf 'ERROR: missing required command for artifact ZIP hygiene validation: python3\n' >&2
+    return 127
+  }
+  validator="$(realpath -e -- "$AUTOMATION_RUN_COMMON_DIR/../../scripts/validate_artifact_hygiene.py" 2>/dev/null)" || {
+    printf 'ERROR: missing artifact ZIP hygiene validator: %s\n' "$AUTOMATION_RUN_COMMON_DIR/../../scripts/validate_artifact_hygiene.py" >&2
+    return 2
+  }
+  [[ -f "$validator" && ! -L "$validator" ]] || {
+    printf 'ERROR: artifact ZIP hygiene validator must be a non-symlink regular file: %s\n' "$validator" >&2
+    return 2
+  }
+  python3 "$validator" --retained-artifact-zip "$archive" >/dev/null || {
+    printf 'ERROR: artifact ZIP member hygiene validation failed for %s: %s\n' "$label" "$archive" >&2
     return 2
   }
 }

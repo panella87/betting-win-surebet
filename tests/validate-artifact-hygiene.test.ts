@@ -1,12 +1,38 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
+import { spawnSync } from 'node:child_process';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 const REPO_ROOT = process.cwd();
 const VALIDATOR = join(REPO_ROOT, 'scripts', 'validate_artifact_hygiene.py');
+
+function execFileSync(command: string, args: readonly string[], options: Readonly<{
+  cwd?: string;
+  encoding?: BufferEncoding;
+  stdio?: 'pipe' | 'ignore' | 'inherit';
+}>): string {
+  if (options.encoding === undefined) {
+    throw new Error('execFileSync test helper requires an explicit encoding');
+  }
+  if (options.stdio === undefined) {
+    throw new Error('execFileSync test helper requires an explicit stdio mode');
+  }
+  const result = spawnSync(command, args, {
+    ...options,
+    encoding: options.encoding,
+    stdio: options.stdio,
+  });
+  if (result.status !== 0) {
+    throw new Error([
+      `${command} ${args.join(' ')} failed with status ${result.status}`,
+      result.stderr,
+      result.stdout,
+    ].filter((part) => part.length > 0).join('\n'));
+  }
+  return result.stdout;
+}
 
 interface ZipEntry {
   readonly contents: string;
@@ -49,16 +75,25 @@ function makeZipFromEntries(entries: readonly ZipEntry[]): { dir: string; zipPat
   return { dir, zipPath };
 }
 
-function assertValidatorRejects(fixture: { dir: string; zipPath: string }, pattern: RegExp): void {
+function assertValidatorRejects(fixture: { dir: string; zipPath: string }, pattern: RegExp, mode: string): void {
   try {
     assert.throws(
-      () => execFileSync('python3', [VALIDATOR, '--codebase-zip', fixture.zipPath], { cwd: REPO_ROOT, encoding: 'utf-8', stdio: 'pipe' }),
+      () => execFileSync('python3', [VALIDATOR, mode, fixture.zipPath], { cwd: REPO_ROOT, encoding: 'utf-8', stdio: 'pipe' }),
       (error: unknown) => {
         assert.ok(error instanceof Error);
         assert.match(error.message, pattern);
         return true;
       },
     );
+  } finally {
+    rmSync(fixture.dir, { recursive: true, force: true });
+  }
+}
+
+function assertValidatorAccepts(fixture: { dir: string; zipPath: string }, mode: string): void {
+  try {
+    const output = execFileSync('python3', [VALIDATOR, mode, fixture.zipPath], { cwd: REPO_ROOT, encoding: 'utf-8', stdio: 'pipe' });
+    assert.match(output, /validate_artifact_hygiene: ok/);
   } finally {
     rmSync(fixture.dir, { recursive: true, force: true });
   }
@@ -138,6 +173,16 @@ test('artifact hygiene validator rejects unsafe ZIP entry metadata', () => {
       { contents: 'device\n', externalAttr: characterDeviceMode, name: 'device-entry' },
     ]), /special file entry/u],
   ] as const) {
-    assertValidatorRejects(fixture, pattern);
+    assertValidatorRejects(fixture, pattern, '--codebase-zip');
   }
+});
+
+test('artifact hygiene validator keeps retained artifact ZIP member safety separate from codebase exclusions', () => {
+  assertValidatorAccepts(makeZip({
+    'artifacts/autonomous_bugfix_20260101T000001Z/controller.log': 'retained log\n',
+    'artifacts/autonomous_bugfix_20260101T000001Z/repro/nested.zip': 'retained nested archive bytes\n',
+    'artifacts/autonomous_bugfix_20260101T000001Z/tmp/scratch.tmp': 'retained temp evidence\n',
+  }), '--retained-artifact-zip');
+
+  assertValidatorRejects(makeZip({ '../escape.txt': 'escape\n' }), /parent-directory traversal/u, '--retained-artifact-zip');
 });

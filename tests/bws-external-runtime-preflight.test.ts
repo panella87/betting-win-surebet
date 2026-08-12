@@ -44,6 +44,7 @@ test('external runtime preflight rejects retired export-mode manifests at the ex
     assert.equal(schema.properties.schema.const, 'bws.external_runtime_campaign.v1');
     assert.equal(schema.properties.policy.properties.selectedMode.const, 'api');
     assert.equal(schema.properties.selectedInput.$ref, '#/$defs/apiInput');
+    assert.equal(schema.$defs.apiInput.required.includes('apiContractPath'), true);
     assert.equal(schema.$defs.apiInput.required.includes('contractInspection'), true);
   } finally {
     fixture.dispose();
@@ -93,11 +94,57 @@ test('external runtime preflight CLI rejects unsafe integer flag values before f
   );
 });
 
-test('external runtime preflight API mode inspects a loopback contract endpoint and CLI prepare prints json', SEQUENTIAL_TEST_OPTIONS, async () => {
+test('external runtime preflight CLI requires an explicit API contract path before file IO', async () => {
+  await assert.rejects(
+    () =>
+      runBwsExternalRuntimePreflightCli([
+        'prepare',
+        '--release-dir',
+        'unused-release',
+        '--env-file',
+        'unused.env',
+        '--install-verification-file',
+        'unused-install.json',
+        '--migration-status-file',
+        'unused-migration.json',
+        '--backup-manifest-file',
+        'unused-backup.json',
+        '--restore-verification-file',
+        'unused-restore.json',
+        '--soak-manifest-file',
+        'unused-soak.json',
+        '--soak-state-file',
+        'unused-soak-state.json',
+        '--runtime-dir',
+        'unused-runtime',
+        '--evidence-dir',
+        'unused-evidence',
+        '--output-file',
+        'unused-output.json',
+        '--campaign-duration-hours',
+        '72',
+        '--campaign-max-cycles',
+        '200',
+        '--campaign-cycle-timeout-minutes',
+        '360',
+        '--minimum-available-bytes',
+        '1',
+        '--expected-upstream-lock-fingerprint',
+        'a'.repeat(64),
+        '--checkpoint-id',
+        'api-checkpoint-001',
+        '--api-base-url',
+        'http://127.0.0.1:4301',
+      ]),
+    /Missing required --api-contract-path value/,
+  );
+});
+
+test('external runtime preflight API mode inspects an explicit loopback contract endpoint and CLI prepare prints json', SEQUENTIAL_TEST_OPTIONS, async () => {
   const fixture = await createFixture();
   const capture = createCaptureStream();
   const server = createServer((request, response) => {
-    if (request.url === '/contract') {
+    if (request.url === '/strategy-contract') {
       response.writeHead(200, { 'content-type': 'application/json' });
       response.end(JSON.stringify({ contractVersion: '1.0.0' }));
       return;
@@ -155,6 +202,8 @@ test('external runtime preflight API mode inspects a loopback contract endpoint 
         'api-checkpoint-001',
         '--api-base-url',
         apiBaseUrl,
+        '--api-contract-path',
+        '/strategy-contract',
         '--contract-version',
         '1.0.0',
         '--page-size',
@@ -177,13 +226,15 @@ test('external runtime preflight API mode inspects a loopback contract endpoint 
       manifest: {
         selectedInput: {
           mode: 'api';
+          apiContractPath: string;
           contractInspection: { endpoint: string; verifiedContractVersion: string };
         };
       };
     };
     assert.equal(parsed.manifest.selectedInput.mode, 'api');
+    assert.equal(parsed.manifest.selectedInput.apiContractPath, '/strategy-contract');
     assert.equal(parsed.manifest.selectedInput.contractInspection.verifiedContractVersion, '1.0.0');
-    assert.equal(parsed.manifest.selectedInput.contractInspection.endpoint, `${apiBaseUrl}/contract`);
+    assert.equal(parsed.manifest.selectedInput.contractInspection.endpoint, `${apiBaseUrl}/strategy-contract`);
   } finally {
     await new Promise<void>((resolvePromise, rejectPromise) => {
       server.close((error) => {
@@ -194,6 +245,25 @@ test('external runtime preflight API mode inspects a loopback contract endpoint 
         rejectPromise(error);
       });
     });
+    fixture.dispose();
+  }
+});
+
+test('external runtime preflight rejects missing API contract path before probing', SEQUENTIAL_TEST_OPTIONS, async () => {
+  const fixture = await createFixture();
+  try {
+    const request = createApiRequest(fixture);
+    const selectedInputWithoutApiContractPath = { ...request.selectedInput } as Record<string, unknown>;
+    delete selectedInputWithoutApiContractPath.apiContractPath;
+    await assert.rejects(
+      () =>
+        createBwsExternalRuntimeCampaignManifest({
+          ...request,
+          selectedInput: Object.freeze(selectedInputWithoutApiContractPath) as unknown as typeof request.selectedInput,
+        }),
+      /selectedInput\.apiContractPath must be a non-empty string/,
+    );
+  } finally {
     fixture.dispose();
   }
 });
@@ -429,6 +499,7 @@ function createApiRequest(fixture: Awaited<ReturnType<typeof createFixture>>) {
     runtimeDirectory: fixture.runtimeDirectory,
     selectedInput: Object.freeze({
       apiBaseUrl: 'http://127.0.0.1:4301',
+      apiContractPath: '/strategy-contract',
       checkpointId: 'api-checkpoint-001',
       contractVersion: '1.0.0',
       expectedUpstreamLockFingerprint: fixture.upstreamLockFingerprint,

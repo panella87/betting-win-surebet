@@ -95,6 +95,41 @@ test('release upgrade plan is deterministic and fails closed when restore eviden
     assert.equal(planOne.planFingerprint, planTwo.planFingerprint);
     assert.notEqual(planOne.currentRelease.semanticFingerprint, planOne.targetRelease.semanticFingerprint);
 
+    const missingApiTupleEnvFile = join(fixture.evidenceDirectory, 'missing-api-tuple.env');
+    writeFileSync(
+      missingApiTupleEnvFile,
+      readFileSync(fixture.currentEnvFile, 'utf-8')
+        .split(/\r?\n/u)
+        .filter((line) => !line.startsWith('BWS_UPSTREAM_API_BASE_URL='))
+        .join('\n'),
+      'utf-8',
+    );
+    await assert.rejects(
+      () =>
+        createBwsReleaseUpgradePlan({
+          backupPath: fixture.backupDirectory,
+          currentReleaseDirectory: fixture.currentRelease.result.releaseDirectory,
+          envFile: missingApiTupleEnvFile,
+          evidenceDirectory: fixture.evidenceDirectory,
+          now: () => TEST_TIMESTAMP,
+          outputFile: join(fixture.evidenceDirectory, 'plan-missing-api-tuple.json'),
+          repositoryRoot: fixture.currentRelease.result.releaseDirectory,
+          restoreVerificationFile: fixture.restoreVerificationFile,
+          runtimeStateDirectory: fixture.runtimeStateDirectory,
+          targetInstallVerificationFile: fixture.targetInstallVerificationFile,
+          targetReleaseDirectory: fixture.targetRelease.result.releaseDirectory,
+          upgradeDependencies: {
+            async getLifecycleStatus() {
+              return sampleLifecycleSnapshot('not_running');
+            },
+            getMigrationStatus() {
+              return migrationStatus;
+            },
+          },
+        }),
+      /BWS_UPSTREAM_API_BASE_URL/u,
+    );
+
     await assert.rejects(
       () =>
         createBwsReleaseUpgradePlan({
@@ -646,8 +681,15 @@ function writeEnvironmentFile(
   const lines = [
     'BETTING_WIN_REPO_PATH=/operator/read-only/betting-win',
     'BWS_UPSTREAM_LOCK_PATH=./config/betting-win.upstream.lock.json',
-    'BWS_UPSTREAM_MODE=export',
-    'BWS_UPSTREAM_EXPORT_SELECTION_PATH=/operator/input/export-selection.json',
+    'BWS_UPSTREAM_MODE=api',
+    'BWS_UPSTREAM_API_CHECKPOINT_ID=api-checkpoint-001',
+    'BWS_UPSTREAM_API_BASE_URL=http://betting-win-query.test',
+    'BWS_UPSTREAM_API_CONTRACT_VERSION=1.0.0',
+    'BWS_UPSTREAM_API_PAGE_SIZE=25',
+    'BWS_UPSTREAM_API_MAX_PAGES_PER_RESOURCE=4',
+    'BWS_UPSTREAM_API_RETRY_LIMIT=1',
+    'BWS_UPSTREAM_API_RETRY_BACKOFF_MS=10',
+    'BWS_UPSTREAM_API_TIMEOUT_MS=1000',
     `BWS_API_PORT=${apiPort}`,
     'BWS_WORKER_ID=worker-bws-upgrade-001',
     'BWS_WORKER_QUEUE_NAME=private-paper',

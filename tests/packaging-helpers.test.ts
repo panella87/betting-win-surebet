@@ -26,10 +26,16 @@ function execFileSync(
     stdio?: 'pipe' | 'ignore' | 'inherit';
   }>,
 ): string {
+  if (options.encoding === undefined) {
+    throw new Error('execFileSync test helper requires an explicit encoding');
+  }
+  if (options.stdio === undefined) {
+    throw new Error('execFileSync test helper requires an explicit stdio mode');
+  }
   const result = spawnSync(command, args, {
     ...options,
-    encoding: options.encoding ?? 'utf-8',
-    stdio: options.stdio ?? 'pipe',
+    encoding: options.encoding,
+    stdio: options.stdio,
   });
   if (result.status !== 0) {
     throw new Error([
@@ -63,6 +69,38 @@ function listZipEntries(zipPath: string): string[] {
       { cwd: REPO_ROOT, encoding: 'utf-8', stdio: 'pipe' },
     ),
   ) as string[];
+}
+
+function writeZipEntries(zipPath: string, entries: Record<string, string>): void {
+  const dir = mkdtempSync(join(tmpdir(), 'surebet-zip-entry-manifest-'));
+  const manifestPath = join(dir, 'entries.json');
+  try {
+    writeFileSync(manifestPath, JSON.stringify(Object.entries(entries).map(([name, contents]) => ({ contents, name }))), {
+      encoding: 'utf-8',
+    });
+    execFileSync(
+      'python3',
+      [
+        '-c',
+        [
+          'import json',
+          'import pathlib',
+          'import sys',
+          'import zipfile',
+          'target = pathlib.Path(sys.argv[1])',
+          'entries = json.loads(pathlib.Path(sys.argv[2]).read_text(encoding="utf-8"))',
+          'with zipfile.ZipFile(target, "w", compression=zipfile.ZIP_STORED) as archive:',
+          '    for entry in entries:',
+          '        archive.writestr(entry["name"], entry["contents"])',
+        ].join('\n'),
+        zipPath,
+        manifestPath,
+      ],
+      { cwd: REPO_ROOT, encoding: 'utf-8', stdio: 'pipe' },
+    );
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 }
 
 function listTarEntries(archivePath: string): string[] {
@@ -113,10 +151,12 @@ function makeArtifactResidueCleanupFixture(prefix: string): {
   const repoDir = join(dir, 'repo');
   const artifactsDir = join(repoDir, 'artifacts');
   mkdirSync(join(repoDir, '.automation', 'lib'), { recursive: true });
+  mkdirSync(join(repoDir, 'scripts'), { recursive: true });
   mkdirSync(artifactsDir, { recursive: true });
   copyFileSync(RUN_COMMON, join(repoDir, '.automation', 'lib', 'run_common.sh'));
   copyFileSync(CONTROLLER_HARDENING, join(repoDir, '.automation', 'lib', 'controller_hardening_v2.sh'));
   copyFileSync(join(REPO_ROOT, '.automation', 'lib', 'temp_inode_guard.sh'), join(repoDir, '.automation', 'lib', 'temp_inode_guard.sh'));
+  copyFileSync(ARTIFACT_HYGIENE_VALIDATOR, join(repoDir, 'scripts', 'validate_artifact_hygiene.py'));
   copyFileSync(join(REPO_ROOT, 'cleanup_automation_artifact_residue.sh'), join(repoDir, 'cleanup_automation_artifact_residue.sh'));
   execFileSync('git', ['init'], { cwd: repoDir, encoding: 'utf-8', stdio: 'pipe' });
   return { artifactsDir, dir, repoDir };
@@ -285,6 +325,7 @@ function makePullArtifactsFixture(collisionTarget: 'artifact' | 'remote' | 'none
   const remoteArtifactZip = join(dir, 'remote-artifacts.zip');
   const remoteCodebaseZip = join(dir, 'remote-codebase.zip');
   mkdirSync(repoDir, { recursive: true });
+  mkdirSync(join(repoDir, 'scripts'), { recursive: true });
   mkdirSync(fakeBin, { recursive: true });
   writeFileSync(join(dir, 'remote-artifact.txt'), 'downloaded artifact bytes\n', { encoding: 'utf-8' });
   writeFileSync(join(dir, 'remote-codebase.txt'), 'downloaded remote codebase bytes\n', { encoding: 'utf-8' });
@@ -299,6 +340,7 @@ function makePullArtifactsFixture(collisionTarget: 'artifact' | 'remote' | 'none
     stdio: 'pipe',
   });
   copyFileSync(PULL_AND_ZIP, join(repoDir, 'pull_artifacts_and_zip_codebase.sh'));
+  copyFileSync(ARTIFACT_HYGIENE_VALIDATOR, join(repoDir, 'scripts', 'validate_artifact_hygiene.py'));
   writeFileSync(
     join(repoDir, 'zip_codebase.sh'),
     '#!/usr/bin/env bash\nprintf "zip called\\n" > zip-called\n',
@@ -702,6 +744,44 @@ test('final artifact refresh rejects invalid published artifact ZIP bytes before
   }
 });
 
+test('final artifact refresh rejects unsafe published artifact ZIP members before updating summaries', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'surebet-final-artifact-refresh-unsafe-published-'));
+  const repoDir = join(dir, 'repo');
+  const runDir = join(repoDir, 'artifacts', 'autonomous_implementation_test');
+  const archivePath = join(repoDir, 'artifacts.zip');
+  try {
+    mkdirSync(runDir, { recursive: true });
+    writeFileSync(join(runDir, 'final-summary.md'), 'lock_release_status=released\n', { encoding: 'utf-8' });
+    writeZipEntries(archivePath, {
+      'artifacts/autonomous_implementation_test/final-summary.md': 'lock_release_status=not_attempted\n',
+      '../escape.txt': 'escape\n',
+    });
+
+    const result = spawnSync(
+      'bash',
+      [
+        '-lc',
+        '. "$RUN_COMMON"; automation_refresh_final_artifacts_zip 30 "$REPO_DIR" "$RUN_DIR"',
+      ],
+      {
+        cwd: repoDir,
+        encoding: 'utf-8',
+        env: {
+          ...process.env,
+          REPO_DIR: repoDir,
+          RUN_COMMON,
+          RUN_DIR: runDir,
+        },
+      },
+    );
+    assert.equal(result.status, 2, `${result.stdout}\n${result.stderr}`);
+    assert.match(result.stderr, /member hygiene validation failed for published archive/u);
+    assert.equal(readdirSync(repoDir).some((entry) => entry.startsWith('.artifacts.zip.refresh.')), false);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test('final artifact refresh rejects artifact symlinks before publishing archive changes', () => {
   const dir = mkdtempSync(join(tmpdir(), 'surebet-final-artifact-refresh-symlink-'));
   const repoDir = join(dir, 'repo');
@@ -895,6 +975,107 @@ test('v2 atomic publish helper rejects a symlinked archive destination without r
   }
 });
 
+test('v2 atomic publish helper rejects invalid artifact ZIP bytes before replacing the published archive', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'surebet-v2-artifact-invalid-candidate-'));
+  const repoDir = join(dir, 'repo');
+  const archivePath = join(repoDir, 'artifacts.zip');
+  const tmpArchive = join(repoDir, '.artifacts.zip.tmp.v2-invalid.zip');
+  try {
+    mkdirSync(join(repoDir, 'artifacts', 'autonomous_implementation_test'), { recursive: true });
+    writeFileSync(join(repoDir, 'artifacts', 'autonomous_implementation_test', 'evidence.txt'), 'published evidence\n', {
+      encoding: 'utf-8',
+    });
+    execFileSync('zip', ['-q', '-1', '-r', archivePath, 'artifacts'], {
+      cwd: repoDir,
+      encoding: 'utf-8',
+      stdio: 'pipe',
+    });
+    writeFileSync(tmpArchive, 'invalid candidate artifact ZIP bytes\n', { encoding: 'utf-8' });
+
+    const result = spawnSync(
+      'bash',
+      [
+        '-lc',
+        '. "$CONTROLLER_HARDENING"; automation_v2_publish_regular_file_atomic "$TMP_ARCHIVE" "$ARTIFACTS_ZIP" "$REPO_DIR"',
+      ],
+      {
+        cwd: repoDir,
+        encoding: 'utf-8',
+        env: {
+          ...process.env,
+          ARTIFACTS_ZIP: archivePath,
+          CONTROLLER_HARDENING,
+          REPO_DIR: repoDir,
+          TMP_ARCHIVE: tmpArchive,
+        },
+      },
+    );
+
+    assert.equal(result.status, 2, `${result.stdout}\n${result.stderr}`);
+    assert.match(result.stderr, /retained artifact ZIP integrity validation failed/u);
+    assert.equal(existsSync(tmpArchive), false);
+    assert.deepEqual(listZipEntries(archivePath), [
+      'artifacts',
+      'artifacts/autonomous_implementation_test',
+      'artifacts/autonomous_implementation_test/evidence.txt',
+    ]);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('v2 atomic publish helper rejects unsafe artifact ZIP members before replacing the published archive', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'surebet-v2-artifact-unsafe-candidate-'));
+  const repoDir = join(dir, 'repo');
+  const archivePath = join(repoDir, 'artifacts.zip');
+  const tmpArchive = join(repoDir, '.artifacts.zip.tmp.v2-unsafe.zip');
+  try {
+    mkdirSync(join(repoDir, 'artifacts', 'autonomous_implementation_test'), { recursive: true });
+    writeFileSync(join(repoDir, 'artifacts', 'autonomous_implementation_test', 'evidence.txt'), 'published evidence\n', {
+      encoding: 'utf-8',
+    });
+    execFileSync('zip', ['-q', '-1', '-r', archivePath, 'artifacts'], {
+      cwd: repoDir,
+      encoding: 'utf-8',
+      stdio: 'pipe',
+    });
+    writeZipEntries(tmpArchive, {
+      'artifacts/autonomous_implementation_test/evidence.txt': 'candidate evidence\n',
+      '../escape.txt': 'escape\n',
+    });
+
+    const result = spawnSync(
+      'bash',
+      [
+        '-lc',
+        '. "$CONTROLLER_HARDENING"; automation_v2_publish_regular_file_atomic "$TMP_ARCHIVE" "$ARTIFACTS_ZIP" "$REPO_DIR"',
+      ],
+      {
+        cwd: repoDir,
+        encoding: 'utf-8',
+        env: {
+          ...process.env,
+          ARTIFACTS_ZIP: archivePath,
+          CONTROLLER_HARDENING,
+          REPO_DIR: repoDir,
+          TMP_ARCHIVE: tmpArchive,
+        },
+      },
+    );
+
+    assert.equal(result.status, 2, `${result.stdout}\n${result.stderr}`);
+    assert.match(result.stderr, /retained artifact ZIP member hygiene validation failed/u);
+    assert.equal(existsSync(tmpArchive), false);
+    assert.deepEqual(listZipEntries(archivePath), [
+      'artifacts',
+      'artifacts/autonomous_implementation_test',
+      'artifacts/autonomous_implementation_test/evidence.txt',
+    ]);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test('final artifacts.zip publish helper rejects invalid candidate ZIP bytes before replacing the published archive', () => {
   const dir = mkdtempSync(join(tmpdir(), 'surebet-final-artifact-invalid-candidate-'));
   const repoDir = join(dir, 'repo');
@@ -932,6 +1113,57 @@ test('final artifacts.zip publish helper rejects invalid candidate ZIP bytes bef
 
     assert.equal(result.status, 2, `${result.stdout}\n${result.stderr}`);
     assert.match(result.stderr, /integrity validation failed for candidate archive/u);
+    assert.equal(existsSync(tmpArchive), false);
+    assert.deepEqual(listZipEntries(archivePath), [
+      'artifacts',
+      'artifacts/autonomous_implementation_test',
+      'artifacts/autonomous_implementation_test/evidence.txt',
+    ]);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('final artifacts.zip publish helper rejects unsafe candidate ZIP members before replacing the published archive', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'surebet-final-artifact-unsafe-candidate-'));
+  const repoDir = join(dir, 'repo');
+  const archivePath = join(repoDir, 'artifacts.zip');
+  const tmpArchive = join(repoDir, '.artifacts.zip.tmp.unsafe-candidate.zip');
+  try {
+    mkdirSync(join(repoDir, 'artifacts', 'autonomous_implementation_test'), { recursive: true });
+    writeFileSync(join(repoDir, 'artifacts', 'autonomous_implementation_test', 'evidence.txt'), 'published evidence\n', {
+      encoding: 'utf-8',
+    });
+    execFileSync('zip', ['-q', '-1', '-r', archivePath, 'artifacts'], {
+      cwd: repoDir,
+      encoding: 'utf-8',
+      stdio: 'pipe',
+    });
+    writeZipEntries(tmpArchive, {
+      'artifacts/autonomous_implementation_test/evidence.txt': 'candidate evidence\n',
+      '../escape.txt': 'escape\n',
+    });
+
+    const result = spawnSync(
+      'bash',
+      [
+        '-lc',
+        '. "$RUN_COMMON"; automation_publish_final_artifacts_zip "$TMP_ARCHIVE" "$REPO_DIR"',
+      ],
+      {
+        cwd: repoDir,
+        encoding: 'utf-8',
+        env: {
+          ...process.env,
+          REPO_DIR: repoDir,
+          RUN_COMMON,
+          TMP_ARCHIVE: tmpArchive,
+        },
+      },
+    );
+
+    assert.equal(result.status, 2, `${result.stdout}\n${result.stderr}`);
+    assert.match(result.stderr, /member hygiene validation failed for candidate archive/u);
     assert.equal(existsSync(tmpArchive), false);
     assert.deepEqual(listZipEntries(archivePath), [
       'artifacts',
@@ -1569,6 +1801,25 @@ test('pull_artifacts_and_zip_codebase delegates codebase creation and rejects a 
   assert.doesNotMatch(script, /mv "\$tmp_remote" "\$local_remote"/);
 });
 
+test('pull_artifacts_and_zip_codebase accepts a clean retained artifact ZIP and then zips the local codebase', () => {
+  const fixture = makePullArtifactsFixture('none');
+  try {
+    const result = spawnSync('bash', ['pull_artifacts_and_zip_codebase.sh'], {
+      cwd: fixture.repoDir,
+      encoding: 'utf-8',
+      env: fixture.env,
+      stdio: 'pipe',
+    });
+    assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
+    assert.match(result.stdout, /downloaded_artifacts=/u);
+    assert.deepEqual(listZipEntries(join(fixture.repoDir, 'artifacts1.zip')), ['remote-artifact.txt']);
+    assert.equal(readFileSync(join(fixture.repoDir, 'zip-called'), 'utf-8'), 'zip called\n');
+    assert.equal(readdirSync(fixture.repoDir).some((entry) => entry.startsWith('.artifacts1.zip.tmp.')), false);
+  } finally {
+    rmSync(fixture.dir, { recursive: true, force: true });
+  }
+});
+
 test('pull_artifacts_and_zip_codebase refuses a late artifact target collision without clobbering it', () => {
   const fixture = makePullArtifactsFixture('artifact');
   try {
@@ -1690,6 +1941,32 @@ test('pull_artifacts_and_zip_codebase rejects invalid artifact ZIP bytes before 
   }
 });
 
+test('pull_artifacts_and_zip_codebase rejects unsafe retained artifact ZIP members before publishing', () => {
+  const fixture = makePullArtifactsFixture('none');
+  const invalidArtifact = join(fixture.dir, 'unsafe-artifacts.zip');
+  try {
+    writeZipEntries(invalidArtifact, {
+      '../escape.txt': 'escape\n',
+    });
+    const result = spawnSync('bash', ['pull_artifacts_and_zip_codebase.sh'], {
+      cwd: fixture.repoDir,
+      encoding: 'utf-8',
+      env: {
+        ...fixture.env,
+        PA_FAKE_ARTIFACT_ZIP: invalidArtifact,
+      },
+      stdio: 'pipe',
+    });
+    assert.equal(result.status, 1, `${result.stdout}\n${result.stderr}`);
+    assert.match(result.stderr, /ZIP member hygiene validation|parent-directory traversal/u);
+    assert.equal(existsSync(join(fixture.repoDir, 'artifacts1.zip')), false);
+    assert.equal(existsSync(join(fixture.repoDir, 'zip-called')), false);
+    assert.equal(readdirSync(fixture.repoDir).some((entry) => entry.startsWith('.artifacts1.zip.tmp.')), false);
+  } finally {
+    rmSync(fixture.dir, { recursive: true, force: true });
+  }
+});
+
 test('pull_artifacts_and_zip_codebase --remote-codebase rejects invalid remote codebase ZIP bytes before publishing', () => {
   const fixture = makePullArtifactsFixture('none');
   const invalidRemote = join(fixture.dir, 'invalid-remote-codebase.zip');
@@ -1706,6 +1983,34 @@ test('pull_artifacts_and_zip_codebase --remote-codebase rejects invalid remote c
     });
     assert.equal(result.status, 1, `${result.stdout}\n${result.stderr}`);
     assert.match(result.stderr, /failed ZIP integrity validation/u);
+    assert.equal(existsSync(join(fixture.repoDir, 'artifacts1.zip')), false);
+    assert.equal(existsSync(join(fixture.repoDir, 'remote-repo7.zip')), false);
+    assert.equal(existsSync(join(fixture.repoDir, 'zip-called')), false);
+    assert.equal(readdirSync(fixture.repoDir).some((entry) => entry.startsWith('.artifacts1.zip.tmp.')), false);
+    assert.equal(readdirSync(fixture.repoDir).some((entry) => entry.startsWith('.remote-repo7.zip.tmp.')), false);
+  } finally {
+    rmSync(fixture.dir, { recursive: true, force: true });
+  }
+});
+
+test('pull_artifacts_and_zip_codebase --remote-codebase rejects unsafe remote codebase ZIP members before publishing', () => {
+  const fixture = makePullArtifactsFixture('none');
+  const invalidRemote = join(fixture.dir, 'unsafe-remote-codebase.zip');
+  try {
+    writeZipEntries(invalidRemote, {
+      '../escape.txt': 'escape\n',
+    });
+    const result = spawnSync('bash', ['pull_artifacts_and_zip_codebase.sh', '--remote-codebase'], {
+      cwd: fixture.repoDir,
+      encoding: 'utf-8',
+      env: {
+        ...fixture.env,
+        PA_FAKE_REMOTE_CODEBASE_ZIP: invalidRemote,
+      },
+      stdio: 'pipe',
+    });
+    assert.equal(result.status, 1, `${result.stdout}\n${result.stderr}`);
+    assert.match(result.stderr, /ZIP member hygiene validation|parent-directory traversal/u);
     assert.equal(existsSync(join(fixture.repoDir, 'artifacts1.zip')), false);
     assert.equal(existsSync(join(fixture.repoDir, 'remote-repo7.zip')), false);
     assert.equal(existsSync(join(fixture.repoDir, 'zip-called')), false);

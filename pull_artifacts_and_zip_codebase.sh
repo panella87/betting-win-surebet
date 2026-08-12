@@ -56,12 +56,22 @@ pa_shell_quote() { printf '%q' "$1"; }
 
 pa_validate_zip_integrity() {
   local source="$1"
+  local hygiene_flag="$2"
+  local label="$3"
   if [ ! -f "$source" ] || [ -L "$source" ]; then
     pa_fail "downloaded zip candidate must be a non-symlink regular file: $source"
     return 1
   fi
   if ! unzip -tq "$source" >/dev/null; then
     pa_fail "downloaded zip candidate failed ZIP integrity validation: $source"
+    return 1
+  fi
+  if [ ! -f "$LOCAL_ROOT/scripts/validate_artifact_hygiene.py" ] || [ -L "$LOCAL_ROOT/scripts/validate_artifact_hygiene.py" ]; then
+    pa_fail "missing non-symlink artifact hygiene validator: $LOCAL_ROOT/scripts/validate_artifact_hygiene.py"
+    return 1
+  fi
+  if ! python3 "$LOCAL_ROOT/scripts/validate_artifact_hygiene.py" "$hygiene_flag" "$source"; then
+    pa_fail "downloaded zip candidate failed ZIP member hygiene validation for $label: $source"
     return 1
   fi
 }
@@ -134,8 +144,8 @@ pa_stream_remote_file() {
 }
 
 pa_publish_zip_no_clobber() {
-  local source="$1" destination="$2"
-  pa_validate_zip_integrity "$source" || return 1
+  local source="$1" destination="$2" hygiene_flag="$3" label="$4"
+  pa_validate_zip_integrity "$source" "$hygiene_flag" "$label" || return 1
   pa_validate_zip_publish_destination "$destination" || return 1
   if ! ln -T -- "$source" "$destination"; then
     pa_fail "target zip already exists or could not be published without clobbering: $destination"
@@ -161,10 +171,12 @@ pa_main() {
   repo_name="$(basename "$LOCAL_ROOT")"
 
   [ -x "$LOCAL_ROOT/zip_codebase.sh" ] || { pa_fail "missing executable ./zip_codebase.sh"; return 1; }
+  [ -f "$LOCAL_ROOT/scripts/validate_artifact_hygiene.py" ] && [ ! -L "$LOCAL_ROOT/scripts/validate_artifact_hygiene.py" ] || { pa_fail "missing non-symlink artifact hygiene validator: ./scripts/validate_artifact_hygiene.py"; return 1; }
   pa_have sshpass || { pa_fail "required command not found: sshpass"; return 127; }
   pa_have ssh || { pa_fail "required command not found: ssh"; return 127; }
   pa_have scp || { pa_fail "required command not found: scp"; return 127; }
   pa_have grep || { pa_fail "required command not found: grep"; return 127; }
+  pa_have python3 || { pa_fail "required command not found: python3"; return 127; }
   pa_have unzip || { pa_fail "required command not found: unzip"; return 127; }
 
   SSH_HOST="$(pa_get_config SSH_HOST "$ENV_FILE")" || { pa_fail "Missing SSH_HOST in .env"; return 2; }
@@ -195,7 +207,7 @@ pa_main() {
     pa_fail "artifact download failed"
     return 1
   fi
-  if ! pa_validate_zip_integrity "$tmp_artifact"; then
+  if ! pa_validate_zip_integrity "$tmp_artifact" --retained-artifact-zip "retained artifacts archive"; then
     rm -f "$tmp_artifact"
     return 1
   fi
@@ -218,7 +230,7 @@ pa_main() {
       pa_fail "remote codebase download failed"
       return 1
     fi
-    if ! pa_validate_zip_integrity "$tmp_remote"; then
+    if ! pa_validate_zip_integrity "$tmp_remote" --codebase-zip "remote codebase archive"; then
       rm -f "$tmp_artifact" "$tmp_remote"
       return 1
     fi
@@ -232,16 +244,16 @@ pa_main() {
       pa_fail "could not publish remote codebase"
       return 1
     fi
-    if ! pa_publish_zip_no_clobber "$tmp_artifact" "$local_artifact"; then
+    if ! pa_publish_zip_no_clobber "$tmp_artifact" "$local_artifact" --retained-artifact-zip "retained artifacts archive"; then
       rm -f "$tmp_artifact" "$tmp_remote"
       pa_fail "could not publish local artifact: $local_artifact"
       return 1
     fi
     printf 'downloaded_artifacts=%s\n' "$LOCAL_ROOT/$local_artifact"
-    pa_publish_zip_no_clobber "$tmp_remote" "$local_remote" || { rm -f "$tmp_remote"; pa_fail "could not publish remote codebase"; return 1; }
+    pa_publish_zip_no_clobber "$tmp_remote" "$local_remote" --codebase-zip "remote codebase archive" || { rm -f "$tmp_remote"; pa_fail "could not publish remote codebase"; return 1; }
     printf 'downloaded_remote_codebase=%s\n' "$LOCAL_ROOT/$local_remote"
   else
-    if ! pa_publish_zip_no_clobber "$tmp_artifact" "$local_artifact"; then
+    if ! pa_publish_zip_no_clobber "$tmp_artifact" "$local_artifact" --retained-artifact-zip "retained artifacts archive"; then
       rm -f "$tmp_artifact"
       pa_fail "could not publish local artifact: $local_artifact"
       return 1

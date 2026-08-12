@@ -160,9 +160,6 @@ const COMMON_ENVIRONMENT_KEYS = Object.freeze([
   'POSTGRES_PASSWORD',
   'POSTGRES_USER',
 ]);
-const EXPORT_MODE_KEYS = Object.freeze([
-  'BWS_UPSTREAM_EXPORT_SELECTION_PATH',
-]);
 const API_MODE_KEYS = Object.freeze([
   'BWS_UPSTREAM_API_CHECKPOINT_ID',
   'BWS_UPSTREAM_API_BASE_URL',
@@ -343,7 +340,7 @@ export interface BwsReleasePreflightResult {
     readonly executionEnabled: false;
     readonly providerConnections: 'disabled';
     readonly runtimeMode: 'paper';
-    readonly selectedMode: 'api' | 'export';
+    readonly selectedMode: 'api';
   }>;
   readonly postgresql: Readonly<{
     readonly actualClientVersion: string;
@@ -698,8 +695,9 @@ export function runBwsReleasePreflight(request: Readonly<{
   const nodeMajor = parseNodeMajor(nodeVersion);
   const psqlMajor = parsePostgreSqlMajor(psqlVersion);
   const selectedMode = requireSelectedMode(environment);
-  const configurationPresence = buildConfigurationPresence(environment, selectedMode);
+  const configurationPresence = buildConfigurationPresence(environment);
   validateEnvironmentPresence(configurationPresence);
+  validateNoRetiredExportInputs(environment);
   validateClosedPolicy(environment);
   validateUpstreamLockPath(environment, releaseDirectory);
   validateCockpitBinding(environment, manifest);
@@ -1472,16 +1470,12 @@ function loadRequiredExecutablePaths(repositoryRoot: string): Promise<readonly s
   });
 }
 
-function buildConfigurationPresence(
-  environment: ReadonlyMap<string, string>,
-  selectedMode: 'api' | 'export',
-): Readonly<Record<string, boolean>> {
+function buildConfigurationPresence(environment: ReadonlyMap<string, string>): Readonly<Record<string, boolean>> {
   const entries: Record<string, boolean> = {};
   for (const name of COMMON_ENVIRONMENT_KEYS) {
     entries[name] = environment.has(name);
   }
-  const modeKeys = selectedMode === 'export' ? EXPORT_MODE_KEYS : API_MODE_KEYS;
-  for (const name of modeKeys) {
+  for (const name of API_MODE_KEYS) {
     entries[name] = environment.has(name);
   }
   return Object.freeze(entries);
@@ -1504,6 +1498,12 @@ function validateClosedPolicy(environment: ReadonlyMap<string, string>): void {
   }
   if (environment.get('SUREBET_EXECUTION_ENABLED') !== 'false') {
     throw new Error('Release preflight requires SUREBET_EXECUTION_ENABLED=false.');
+  }
+}
+
+function validateNoRetiredExportInputs(environment: ReadonlyMap<string, string>): void {
+  if (environment.has('BWS_UPSTREAM_EXPORT_SELECTION_PATH')) {
+    throw new Error('Release preflight forbids BWS_UPSTREAM_EXPORT_SELECTION_PATH; release operator environments are API-only.');
   }
 }
 
@@ -1598,10 +1598,10 @@ function parseEnvironmentFileValue(rawValue: string, name: string, lineNumber: n
   return value;
 }
 
-function requireSelectedMode(environment: ReadonlyMap<string, string>): 'api' | 'export' {
+function requireSelectedMode(environment: ReadonlyMap<string, string>): 'api' {
   const mode = environment.get('BWS_UPSTREAM_MODE');
-  if (mode !== 'api' && mode !== 'export') {
-    throw new Error('Release preflight requires BWS_UPSTREAM_MODE to be exactly api or export.');
+  if (mode !== 'api') {
+    throw new Error('Release preflight requires BWS_UPSTREAM_MODE=api; export mode is retired.');
   }
   return mode;
 }

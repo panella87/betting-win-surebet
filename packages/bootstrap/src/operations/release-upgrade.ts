@@ -62,6 +62,16 @@ const ISO_8601_UTC = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/;
 const SHA256_PATTERN = /^[0-9a-f]{64}$/;
 const POSITIVE_INTEGER_PATTERN = /^\d+$/;
 const SENSITIVE_KEY_PATTERN = /credential|mnemonic|passphrase|password|private[_ -]?key|secret|seed|token/i;
+const API_MODE_KEYS = Object.freeze([
+  'BWS_UPSTREAM_API_CHECKPOINT_ID',
+  'BWS_UPSTREAM_API_BASE_URL',
+  'BWS_UPSTREAM_API_CONTRACT_VERSION',
+  'BWS_UPSTREAM_API_PAGE_SIZE',
+  'BWS_UPSTREAM_API_MAX_PAGES_PER_RESOURCE',
+  'BWS_UPSTREAM_API_RETRY_LIMIT',
+  'BWS_UPSTREAM_API_RETRY_BACKOFF_MS',
+  'BWS_UPSTREAM_API_TIMEOUT_MS',
+]);
 
 type UpgradeCheckpointClassification =
   | 'planned_not_started'
@@ -134,7 +144,7 @@ export interface BwsReleaseUpgradePlan {
   readonly environment: Readonly<{
     readonly envFile: string;
     readonly environmentFingerprintSha256: string;
-    readonly selectedMode: 'api' | 'export';
+    readonly selectedMode: 'api';
   }>;
   readonly evidenceEntries: readonly BwsEvidenceIndexEntry[];
   readonly lifecycle: Readonly<{
@@ -376,6 +386,7 @@ export async function createBwsReleaseUpgradePlan(
   const targetRelease = verifyAndReadReleaseIdentity(targetReleaseDirectory);
   const environment = readStrictEnvironmentFile(request.envFile);
   const selectedMode = requireSelectedMode(environment);
+  validateApiUpstreamEnvironment(environment);
   validateClosedPolicy(environment);
   const persistenceConfig = request.persistenceConfig === undefined
     ? resolveSurebetPersistenceConfig(
@@ -1618,12 +1629,23 @@ function parseEnvironmentFileValue(
   return value;
 }
 
-function requireSelectedMode(environment: ReadonlyMap<string, string>): 'api' | 'export' {
+function requireSelectedMode(environment: ReadonlyMap<string, string>): 'api' {
   const mode = environment.get('BWS_UPSTREAM_MODE');
-  if (mode !== 'api' && mode !== 'export') {
-    throw new Error('Upgrade planning requires BWS_UPSTREAM_MODE to be exactly api or export.');
+  if (mode !== 'api') {
+    throw new Error('Upgrade planning requires BWS_UPSTREAM_MODE=api; export mode is retired.');
   }
   return mode;
+}
+
+function validateApiUpstreamEnvironment(environment: ReadonlyMap<string, string>): void {
+  if (environment.has('BWS_UPSTREAM_EXPORT_SELECTION_PATH')) {
+    throw new Error('Upgrade planning forbids BWS_UPSTREAM_EXPORT_SELECTION_PATH; release operator environments are API-only.');
+  }
+  for (const name of API_MODE_KEYS) {
+    if (!environment.has(name)) {
+      throw new Error(`Upgrade planning requires ${name} to be present in the private environment file.`);
+    }
+  }
 }
 
 function validateClosedPolicy(environment: ReadonlyMap<string, string>): void {

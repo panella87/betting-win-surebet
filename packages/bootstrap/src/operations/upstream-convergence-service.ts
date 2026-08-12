@@ -12,7 +12,7 @@ import { dirname, join, relative, resolve } from 'node:path';
 import { setTimeout as sleepFor } from 'node:timers/promises';
 import {
   BWS_UPSTREAM_MODE_ENV,
-} from './upstream-export-convergence.js';
+} from './upstream-transport-constants.js';
 import {
   resolveBwsUpstreamApiConvergenceConfig,
   runBwsUpstreamApiConvergencePass,

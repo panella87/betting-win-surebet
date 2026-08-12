@@ -26,6 +26,7 @@ function procStartTicks(pid: number): string {
 function prepareTempRepo(): string {
   const repo = mkdtempSync('/tmp/surebet-bugfix-autopilot-');
   mkdirSync(join(repo, '.automation', 'lib'), { recursive: true });
+  mkdirSync(join(repo, 'scripts'), { recursive: true });
   for (const rel of [
     'run-bugfix-autopilot.sh',
     'run-autonomous-bugfix.sh',
@@ -33,6 +34,7 @@ function prepareTempRepo(): string {
     '.automation/lib/temp_inode_guard.sh',
     '.automation/lib/controller_hardening_v2.sh',
     '.automation/lib/telegram_notify.sh',
+    'scripts/validate_artifact_hygiene.py',
   ]) {
     const target = join(repo, rel);
     mkdirSync(join(target, '..'), { recursive: true });
@@ -64,6 +66,36 @@ AUTOMATION_PROTECTED_FILES=(
 )
 `, 'utf8');
   return repo;
+}
+
+function writeZipEntries(zipPath: string, entries: Record<string, string>): void {
+  const manifestPath = `${zipPath}.entries.json`;
+  writeFileSync(manifestPath, JSON.stringify(Object.entries(entries).map(([name, contents]) => ({ contents, name }))), 'utf8');
+  try {
+    const result = spawnSync(
+      'python3',
+      [
+        '-c',
+        [
+          'import json',
+          'import pathlib',
+          'import sys',
+          'import zipfile',
+          'target = pathlib.Path(sys.argv[1])',
+          'entries = json.loads(pathlib.Path(sys.argv[2]).read_text(encoding="utf-8"))',
+          'with zipfile.ZipFile(target, "w", compression=zipfile.ZIP_STORED) as archive:',
+          '    for entry in entries:',
+          '        archive.writestr(entry["name"], entry["contents"])',
+        ].join('\n'),
+        zipPath,
+        manifestPath,
+      ],
+      { cwd: ROOT, encoding: 'utf8' },
+    );
+    assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
+  } finally {
+    rmSync(manifestPath, { force: true });
+  }
 }
 
 function writeExecutable(path: string, body: string): void {
@@ -176,11 +208,19 @@ test('bugfix controllers accept only retained artifact evidence for --from-artif
       try {
         mkdirSync(join(repo, 'artifacts', 'autonomous_bugfix_20260101T000001Z'), { recursive: true });
         mkdirSync(join(repo, 'artifacts', 'autonomous_bugfix_20260101T000001Z', 'nested'), { recursive: true });
-        writeFileSync(join(repo, 'artifacts.zip'), 'retained zip\n', 'utf8');
-        writeFileSync(join(repo, 'artifacts1.zip'), 'retained numbered zip\n', 'utf8');
+        writeZipEntries(join(repo, 'artifacts.zip'), {
+          'artifacts/autonomous_bugfix_20260101T000001Z/evidence.md': 'retained zip\n',
+        });
+        writeZipEntries(join(repo, 'artifacts1.zip'), {
+          'artifacts/autonomous_bugfix_20260101T000001Z/evidence.md': 'retained numbered zip\n',
+        });
         writeFileSync(join(repo, 'AGENTS.md'), 'not retained evidence\n', 'utf8');
         writeFileSync(join(repo, 'artifacts', 'report.md'), 'not a retained evidence directory\n', 'utf8');
         writeFileSync(join(outside, 'artifacts.zip'), 'outside retained-looking zip\n', 'utf8');
+        writeZipEntries(join(repo, 'artifacts3.zip'), {
+          '../escape.txt': 'escape\n',
+        });
+        writeFileSync(join(repo, 'artifacts4.zip'), 'not a zip archive\n', 'utf8');
         symlinkSync(join(repo, 'artifacts.zip'), join(repo, 'artifacts2.zip'));
         symlinkSync(join(repo, 'artifacts', 'autonomous_bugfix_20260101T000001Z'), join(repo, 'artifacts', 'linked-run'));
 
@@ -206,12 +246,14 @@ test('bugfix controllers accept only retained artifact evidence for --from-artif
           'missing-artifacts.zip',
           join(outside, 'artifacts.zip'),
           'artifacts2.zip',
+          'artifacts3.zip',
+          'artifacts4.zip',
           'artifacts/linked-run',
           'artifacts/linked-run/nested',
         ]) {
           const result = runPrintConfig(repo, script, rejected);
           assert.notEqual(result.status, 0, `${script} unexpectedly accepted ${rejected}\n${result.stdout}`);
-          assert.match(result.stderr, /--from-artifacts/);
+          assert.match(result.stderr, /--from-artifacts|retained artifact ZIP (integrity|member hygiene) validation/u);
         }
       } finally {
         rmSync(repo, { recursive: true, force: true });

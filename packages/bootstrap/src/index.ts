@@ -128,7 +128,7 @@ export * from './operations/private-paper-scheduler-service.js';
 export * from './operations/private-paper-worker-service.js';
 export * from './operations/upstream-api-convergence.js';
 export * from './operations/upstream-convergence-service.js';
-export * from './operations/upstream-export-convergence.js';
+export * from './operations/upstream-transport-constants.js';
 export * from './quotes/b1-capacity-model.js';
 export * from './quotes/b1-quote-age-penalty.js';
 export * from './quotes/b1-quote-synchronization.js';

@@ -179,6 +179,7 @@ export type BwsExternalRuntimeCampaignSelectedInput =
   }>
   | Readonly<{
     readonly apiBaseUrl: string;
+    readonly apiContractPath: string;
     readonly checkpointId: string;
     readonly contractInspection?: Readonly<{
       readonly endpoint: string;
@@ -222,7 +223,7 @@ export interface CreateBwsExternalRuntimeCampaignManifestRequest {
     }>
     | Readonly<{
       readonly apiBaseUrl: string;
-      readonly apiContractPath?: string;
+      readonly apiContractPath: string;
       readonly checkpointId: string;
       readonly contractVersion: string;
       readonly expectedUpstreamLockFingerprint: string;
@@ -447,6 +448,7 @@ async function validateApiInput(
   const timeoutMs = requirePositiveInteger(input.timeoutMs, 'selectedInput.timeoutMs');
   const retryLimit = requirePositiveInteger(input.retryLimit, 'selectedInput.retryLimit');
   const retryBackoffMs = requirePositiveInteger(input.retryBackoffMs, 'selectedInput.retryBackoffMs');
+  const apiContractPath = normalizeContractPath(input.apiContractPath);
 
   requireModeSpecificEnvironmentPresence(environment, 'api');
   ensureApiBaseUrlDoesNotTargetLocalBwsApi(apiBaseUrl, environment);
@@ -463,6 +465,7 @@ async function validateApiInput(
 
   const manifestBase: Extract<BwsExternalRuntimeCampaignSelectedInput, { readonly mode: 'api' }> = Object.freeze({
     apiBaseUrl,
+    apiContractPath,
     checkpointId,
     contractVersion,
     maxPagesPerResource,
@@ -473,9 +476,6 @@ async function validateApiInput(
     timeoutMs,
   });
 
-  const apiContractPath = input.apiContractPath === undefined
-    ? '/contract'
-    : normalizeContractPath(input.apiContractPath);
   const contractInspection = await inspectApiContract({
     apiBaseUrl,
     apiContractPath,

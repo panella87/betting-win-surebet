@@ -9,16 +9,18 @@ import {
   BWS_UPSTREAM_API_BASE_URL_ENV,
   BWS_UPSTREAM_API_TIMEOUT_MS_ENV,
   BWS_UPSTREAM_EXPORT_SELECTION_PATH_ENV,
-  BWS_UPSTREAM_LOCK_PATH_ENV,
-  BWS_UPSTREAM_EXPORT_SELECTION_SCHEMA,
   BWS_UPSTREAM_MODE_ENV,
+  BWS_UPSTREAM_LOCK_PATH_ENV,
+} from '../packages/bootstrap/src/index.js';
+import {
+  BWS_UPSTREAM_EXPORT_SELECTION_SCHEMA,
   parseBwsUpstreamExportSelectionManifest,
   resolveBwsUpstreamExportConvergenceConfig,
   runBwsUpstreamExportConvergencePass,
   type BwsUpstreamExportConvergenceConfig,
   type BwsUpstreamExportSelectionEntry,
   type RunBwsUpstreamExportConvergencePassRequest,
-} from '../packages/bootstrap/src/index.js';
+} from '../packages/bootstrap/src/operations/upstream-export-convergence.js';
 import {
   runBwsUpstreamExportConvergenceCli,
 } from '../packages/bootstrap/src/cli/bws-upstream-export-convergence.js';
