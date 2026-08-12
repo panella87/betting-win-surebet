@@ -590,8 +590,6 @@ test('upstream API convergence config and CLI help stay explicit about api mode 
       'http://127.0.0.1:4312',
       'http://localhost:4312',
       'http://[::1]:4312',
-      'http://0.0.0.0:4312',
-      'http://[::]:4312',
     ]) {
       const localConfig = resolveBwsUpstreamApiConvergenceConfig({
         ...baseEnvironment,
@@ -605,6 +603,26 @@ test('upstream API convergence config and CLI help stay explicit about api mode 
       });
       assert.equal(result.ok, false);
       assert.equal(result.blockers[0]?.code, 'QUERY_BASE_URL_LOCAL_BWS_API_FORBIDDEN');
+    }
+
+    for (const apiBaseUrl of [
+      'http://0.0.0.0:4312',
+      'http://[::]:4312',
+      'http://0.0.0.0:4302',
+      'http://[::]:4302',
+    ]) {
+      const unspecifiedHostConfig = resolveBwsUpstreamApiConvergenceConfig({
+        ...baseEnvironment,
+        [BWS_UPSTREAM_API_BASE_URL_ENV]: apiBaseUrl,
+      }, fixture.bwsRoot);
+      const result = await runBwsUpstreamApiConvergencePass({
+        config: unspecifiedHostConfig,
+        fetchImplementation: async () => {
+          throw new Error('fetch should not be called for unspecified bind host');
+        },
+      });
+      assert.equal(result.ok, false);
+      assert.equal(result.blockers[0]?.code, 'QUERY_BASE_URL_UNSPECIFIED_HOST_FORBIDDEN');
     }
 
     const configuredLocalConfig = resolveBwsUpstreamApiConvergenceConfig({

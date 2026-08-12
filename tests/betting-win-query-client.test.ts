@@ -78,8 +78,6 @@ test('read-only query client rejects invalid base URLs and explicit credentialed
     'http://[::ffff:7f00:1]:4312',
     'http://[::ffff:7f01:203]:4312',
     'http://[::ffff:7f02:304]:4312',
-    'http://0.0.0.0:4312',
-    'http://[::]:4312',
   ]) {
     const localBwsApi = createReadOnlyQueryApiClient({
       baseUrl,
@@ -119,8 +117,15 @@ test('read-only query client rejects invalid base URLs and explicit credentialed
     assert.equal(configuredLocalBwsApi.blockers[0]?.code, 'QUERY_BASE_URL_LOCAL_BWS_API_FORBIDDEN');
   }
 
-  for (const baseUrl of ['http://0.0.0.0:4301', 'http://[::]:4301']) {
-    const configuredUnspecifiedLocalBwsApi = createReadOnlyQueryApiClient({
+  for (const baseUrl of [
+    'http://0.0.0.0:4312',
+    'http://[::]:4312',
+    'http://0.0.0.0:4301',
+    'http://[::]:4301',
+    'http://0.0.0.0:4302',
+    'http://[::]:4302',
+  ]) {
+    const unspecifiedBindHost = createReadOnlyQueryApiClient({
       baseUrl,
       contractVersion: '1.0.0',
       fetchImplementation: globalThis.fetch.bind(globalThis),
@@ -131,22 +136,9 @@ test('read-only query client rejects invalid base URLs and explicit credentialed
       timeoutMs: 25,
       upstreamLock: sampleUpstreamLock(),
     });
-    assert.equal(configuredUnspecifiedLocalBwsApi.ok, false);
-    assert.equal(configuredUnspecifiedLocalBwsApi.blockers[0]?.code, 'QUERY_BASE_URL_LOCAL_BWS_API_FORBIDDEN');
+    assert.equal(unspecifiedBindHost.ok, false);
+    assert.equal(unspecifiedBindHost.blockers[0]?.code, 'QUERY_BASE_URL_UNSPECIFIED_HOST_FORBIDDEN');
   }
-
-  const externalUnspecifiedPort = createReadOnlyQueryApiClient({
-    baseUrl: 'http://0.0.0.0:4302',
-    contractVersion: '1.0.0',
-    fetchImplementation: globalThis.fetch.bind(globalThis),
-    localBwsApiPort: 4301,
-    maxPageSize: 50,
-    retryBackoffMs: 5,
-    retryLimit: 1,
-    timeoutMs: 25,
-    upstreamLock: sampleUpstreamLock(),
-  });
-  assert.equal(externalUnspecifiedPort.ok, true);
 
   for (const localBwsApiPort of [1, 65_535]) {
     const validLocalBwsApiPort = createReadOnlyQueryApiClient({

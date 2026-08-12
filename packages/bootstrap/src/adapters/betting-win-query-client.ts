@@ -385,6 +385,13 @@ export function validateReadOnlyBaseUrl(baseUrl: string, localBwsApiPort?: numbe
       'Clean read-only betting-win API base URL.',
     );
   }
+  if (targetsUnspecifiedBindHost(parsed)) {
+    return blocked(
+      'QUERY_BASE_URL_UNSPECIFIED_HOST_FORBIDDEN',
+      'Read-only query base URL must not target an unspecified bind host as upstream betting-win evidence.',
+      'Explicit read-only betting-win API host distinct from unspecified bind listeners.',
+    );
+  }
   if (targetsForbiddenLocalBwsApi(parsed, localBwsApiPort)) {
     return blocked(
       'QUERY_BASE_URL_LOCAL_BWS_API_FORBIDDEN',
@@ -407,11 +414,14 @@ function targetsForbiddenLocalBwsApi(parsed: URL, localBwsApiPort: number | unde
   return localBwsApiPort !== undefined && port === String(localBwsApiPort);
 }
 
+function targetsUnspecifiedBindHost(parsed: URL): boolean {
+  return UNSPECIFIED_LOCAL_HOSTS.has(parsed.hostname.toLowerCase());
+}
+
 function normalizeAuthorityHostname(hostname: string): string {
   const normalized = hostname.toLowerCase();
   return LOOPBACK_HOSTS.has(normalized)
     || IPV4_MAPPED_IPV6_LOOPBACK_HOSTS.has(normalized)
-    || UNSPECIFIED_LOCAL_HOSTS.has(normalized)
     || isIpv4LoopbackAlias(normalized)
     || isIpv4MappedIpv6LoopbackAlias(normalized)
     ? LOOPBACK_AUTHORITY_HOST

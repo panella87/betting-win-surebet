@@ -610,12 +610,15 @@ function queryPrivatePaperRuntimeCycles(
         'API-only private-paper scheduler checkpoints.',
       );
     }
-    const upperCycleNumber = schedulerCheckpoint.lastScheduledApiCycleNumber ?? 0;
+    const upperCycleNumber = validateSchedulerCheckpointUpperCycleNumber(schedulerCheckpoint);
+    if (!upperCycleNumber.ok) {
+      return upperCycleNumber;
+    }
     const lowerCycleNumber = Math.max(
       1,
-      upperCycleNumber - (normalized.value.pageSize * PRIVATE_PAPER_RUNTIME_CYCLE_SCAN_MULTIPLIER) + 1,
+      upperCycleNumber.value - (normalized.value.pageSize * PRIVATE_PAPER_RUNTIME_CYCLE_SCAN_MULTIPLIER) + 1,
     );
-    for (let cycleNumber = upperCycleNumber; cycleNumber >= lowerCycleNumber; cycleNumber -= 1) {
+    for (let cycleNumber = upperCycleNumber.value; cycleNumber >= lowerCycleNumber; cycleNumber -= 1) {
       const item = buildPrivatePaperRuntimeCycleItem(
         dependencies,
         schedulerCheckpoint,
@@ -673,6 +676,20 @@ function queryPrivatePaperRuntimeCycles(
       resource: 'private_paper_runtime_cycles',
     }),
   );
+}
+
+function validateSchedulerCheckpointUpperCycleNumber(
+  schedulerCheckpoint: SurebetPrivatePaperRuntimeSchedulerCheckpointRecord,
+): BoundaryResult<number> {
+  const upperCycleNumber = schedulerCheckpoint.lastScheduledApiCycleNumber;
+  if (typeof upperCycleNumber !== 'number' || !Number.isSafeInteger(upperCycleNumber) || upperCycleNumber < 1) {
+    return blocked(
+      'BWS_READ_ONLY_PRIVATE_PAPER_RUNTIME_CYCLE_INVALID',
+      `BWS read-only private-paper runtime cycles require scheduler checkpoint ${schedulerCheckpoint.schedulerCheckpointId} to persist a positive lastScheduledApiCycleNumber before cycle expansion.`,
+      'Advanced API-only private-paper scheduler checkpoints.',
+    );
+  }
+  return accepted(upperCycleNumber);
 }
 
 function expandStrategyLedgerRecord(

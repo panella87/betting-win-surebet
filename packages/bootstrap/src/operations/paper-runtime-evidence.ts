@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { closeSync, existsSync, lstatSync, mkdirSync, openSync, readFileSync, realpathSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
@@ -22,7 +23,9 @@ import {
 } from './operator-lifecycle.js';
 
 const BWS_PAPER_RUNTIME_EVIDENCE_SCHEMA = 'bws.paper_runtime_evidence.v1' as const;
+const BWS_DIAGNOSTICS_BUNDLE_SCHEMA = 'bws.diagnostics_bundle.v1' as const;
 const BETTING_WIN_API_UNAVAILABLE_BLOCKER = 'PAPER_EVALUATION_BLOCKED_BETTING_WIN_API_UNAVAILABLE' as const;
+const SHA256_PATTERN = /^[0-9a-f]{64}$/;
 const LOOPBACK_HOSTS = new Set(['127.0.0.1', '::1', '[::1]', 'localhost']);
 const LOOPBACK_AUTHORITY_HOST = 'loopback';
 const IPV4_MAPPED_IPV6_LOOPBACK_HOSTS = new Set(['[::ffff:7f00:1]', '[::ffff:127.0.0.1]', '::ffff:7f00:1', '::ffff:127.0.0.1']);
@@ -292,7 +295,7 @@ export async function createBwsPaperRuntimeEvidence(
         activeStage = 'diagnostics_collection';
         const diagnostics = await collectDiagnostics({ repositoryRoot });
         activeStage = 'diagnostics_manifest_read';
-        const manifest = readDiagnosticsManifest(repositoryRoot, diagnostics.bundleManifestFile);
+        const manifest = readDiagnosticsManifest(repositoryRoot, diagnostics);
         activeStage = 'evidence_index_summary';
         const evidenceIndex = summarizeEvidenceIndex(repositoryRoot);
         const sample = buildObservationSample(
@@ -705,13 +708,32 @@ async function runBettingWinUpstreamApiPreflight(
   }
 }
 
-function readDiagnosticsManifest(repositoryRoot: string, manifestFile: string): RuntimeEvidenceManifest {
+function readDiagnosticsManifest(
+  repositoryRoot: string,
+  diagnostics: BwsDiagnosticsBundleResult,
+): RuntimeEvidenceManifest {
+  if (diagnostics.schema !== BWS_DIAGNOSTICS_BUNDLE_SCHEMA) {
+    throw new Error(`diagnostics bundle result schema must be ${BWS_DIAGNOSTICS_BUNDLE_SCHEMA}.`);
+  }
+  if (!SHA256_PATTERN.test(diagnostics.manifestSha256)) {
+    throw new Error('diagnostics bundle result manifestSha256 must be a lowercase SHA-256 hex digest.');
+  }
+  const manifestFile = diagnostics.bundleManifestFile;
   const manifestPath = resolveRepositoryPath(repositoryRoot, manifestFile, 'diagnostics manifest path');
   rejectExistingSymlinkSegments(repositoryRoot, manifestPath, 'diagnostics manifest path');
   if (!existsSync(manifestPath) || lstatSync(manifestPath).isSymbolicLink()) {
     throw new Error(`diagnostics manifest must be a non-symlink artifact file: ${manifestFile}`);
   }
-  return JSON.parse(readFileSync(manifestPath, 'utf-8')) as RuntimeEvidenceManifest;
+  const manifestText = readFileSync(manifestPath, 'utf-8');
+  const manifestSha256 = createHash('sha256').update(manifestText).digest('hex');
+  if (manifestSha256 !== diagnostics.manifestSha256) {
+    throw new Error('diagnostics manifest SHA-256 does not match diagnostics bundle result manifestSha256.');
+  }
+  const manifest = requireRecord(JSON.parse(manifestText), 'diagnostics manifest') as RuntimeEvidenceManifest;
+  if ((manifest as { readonly schema?: unknown }).schema !== BWS_DIAGNOSTICS_BUNDLE_SCHEMA) {
+    throw new Error(`diagnostics manifest schema must be ${BWS_DIAGNOSTICS_BUNDLE_SCHEMA}.`);
+  }
+  return manifest;
 }
 
 function resolveRepositoryPath(repositoryRoot: string, requestedPath: string, label: string): string {

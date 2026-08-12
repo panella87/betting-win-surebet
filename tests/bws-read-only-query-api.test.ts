@@ -549,6 +549,46 @@ test('BWS read-only query service fails closed on non-api scheduler checkpoints'
   assert.match(response.blockers[0]?.message ?? '', /mode=api/);
 });
 
+test('BWS read-only query service fails closed on incomplete scheduler checkpoints before cycle expansion', () => {
+  const dependencies = createRuntimeCycleStubDependencies(Object.freeze({}));
+  const service = createBwsReadOnlyQueryService({
+    ...dependencies,
+    privatePaperSchedulerCheckpoints: Object.freeze({
+      list() {
+        return Object.freeze([
+          Object.freeze({
+            configSha256: 'a'.repeat(64),
+            insertedAt: TEST_TIMESTAMP,
+            mode: 'api',
+            queueName: 'private-paper',
+            runtimeId: 'runtime-001',
+            schedulerCheckpointId: 'scheduler-001',
+            updatedAt: TEST_TIMESTAMP,
+            upstreamCheckpointId: 'checkpoint-api-001',
+            upstreamLockRecordId: 'lock-001',
+          }),
+        ]);
+      },
+    }),
+  } satisfies BwsReadOnlyQueryDependencies, {
+    generatedAt: () => TEST_TIMESTAMP,
+    maxPageSize: 50,
+  });
+  assert.equal(service.ok, true);
+
+  const response = service.value.queryPrivatePaperRuntimeCycles({
+    expand: 'provenance',
+    filters: Object.freeze({
+      acceptanceState: 'blocked',
+    }),
+    pageSize: 1,
+  });
+
+  assert.equal(response.ok, false);
+  assert.equal(response.blockers[0]?.code, 'BWS_READ_ONLY_PRIVATE_PAPER_RUNTIME_CYCLE_INVALID');
+  assert.match(response.blockers[0]?.message ?? '', /lastScheduledApiCycleNumber/);
+});
+
 test('BWS read-only query service rejects uppercase emitted runtime source hashes before response construction', () => {
   const service = createBwsReadOnlyQueryService({
     ...createStubDependencies(),

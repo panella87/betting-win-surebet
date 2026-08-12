@@ -1,6 +1,7 @@
 import test, { type TestContext } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { createServer } from 'node:http';
 import { existsSync, lstatSync, mkdtempSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import type { AddressInfo } from 'node:net';
@@ -235,10 +236,13 @@ function createDiagnosticsBundleResult(
   }>,
 ): BwsDiagnosticsBundleResult {
   const bundle = writeDiagnosticsBundle(repositoryRoot, bundleName, sample);
+  const manifestSha256 = createHash('sha256')
+    .update(readFileSync(join(repositoryRoot, bundle.bundleManifestFile), 'utf-8'))
+    .digest('hex');
   return Object.freeze({
     ...bundle,
     generatedAt: '2026-07-16T00:00:00.000Z',
-    manifestSha256: 'manifest-sha',
+    manifestSha256,
     schema: 'bws.diagnostics_bundle.v1' as const,
   });
 }
@@ -594,6 +598,97 @@ test('paper runtime evidence starts an owned stack, records ready observations, 
   assert.equal(result.observation.samples[0]?.runtimeLifecycleState, 'running');
   assert.equal(result.latestRuntimeHandoffFile, 'runtime/bws-paper-runtime-handoff/handoff.json');
   assert.deepEqual(observedCalls, ['status:not_running', 'start', 'status:running', 'diagnostics', 'stop']);
+});
+
+test('paper runtime evidence validates diagnostics bundle schema and manifest hash before readiness use', async (t) => {
+  const originalFetch = globalThis.fetch;
+  t.after(() => {
+    globalThis.fetch = originalFetch;
+  });
+  globalThis.fetch = async (input) => {
+    const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
+    if (url.endsWith('/contract')) {
+      return new Response(JSON.stringify({ contractVersion: '1.0.0' }), {
+        headers: { 'content-type': 'application/json' },
+        status: 200,
+      });
+    }
+    return new Response(JSON.stringify({ error: 'not_found' }), {
+      headers: { 'content-type': 'application/json' },
+      status: 404,
+    });
+  };
+
+  for (const invalidCase of [
+    'result_schema',
+    'manifest_sha_shape',
+    'manifest_sha_mismatch',
+    'manifest_schema',
+  ] as const) {
+    const repositoryRoot = createTestRepositoryRoot(t);
+    configureUpstreamApiPreflightEnvironment(t, repositoryRoot, { apiBaseUrl: 'http://127.0.0.1:4301' });
+    let runtimeHandoffCreated = false;
+    const result = await createBwsPaperRuntimeEvidence({
+      collectDiagnostics: async ({ repositoryRoot: root }) => {
+        const diagnostics = createDiagnosticsBundleResult(root, `bundle-invalid-${invalidCase}`, {
+          apiStatus: 'ready',
+          cockpitStatus: 'ready',
+          databaseStatus: 'compatible',
+          healthStatus: 'healthy',
+          readinessStatus: 'ready',
+          runtimeLifecycleState: 'running',
+          schedulerLifecycleState: 'running',
+          upstreamLastBlockerCodes: Object.freeze([]),
+          upstreamLastSuccessAt: '2026-07-16T00:00:00.000Z',
+          upstreamLifecycleState: 'running',
+          workerLifecycleState: 'running',
+        });
+        if (invalidCase === 'result_schema') {
+          return Object.freeze({
+            ...diagnostics,
+            schema: 'bws.diagnostics_bundle.v0',
+          }) as unknown as BwsDiagnosticsBundleResult;
+        }
+        if (invalidCase === 'manifest_sha_shape') {
+          return Object.freeze({
+            ...diagnostics,
+            manifestSha256: 'manifest-sha',
+          });
+        }
+        if (invalidCase === 'manifest_sha_mismatch') {
+          return Object.freeze({
+            ...diagnostics,
+            manifestSha256: 'a'.repeat(64),
+          });
+        }
+        const manifestPath = join(root, diagnostics.bundleManifestFile);
+        const manifest = JSON.parse(readFileSync(manifestPath, 'utf-8')) as Record<string, unknown>;
+        const manifestText = `${JSON.stringify({
+          ...manifest,
+          schema: 'bws.diagnostics_bundle.v0',
+        }, null, 2)}\n`;
+        writeFileSync(manifestPath, manifestText, 'utf-8');
+        return Object.freeze({
+          ...diagnostics,
+          manifestSha256: createHash('sha256').update(manifestText).digest('hex'),
+        });
+      },
+      createRuntimeHandoff: async () => {
+        runtimeHandoffCreated = true;
+        return createRuntimeHandoffResult(repositoryRoot);
+      },
+      getLifecycleStatus: async () => createLifecycleStatus('running'),
+      intervalMs: 1000,
+      maxDurationMs: 1000,
+      repositoryRoot,
+      sleep: async () => undefined,
+    });
+
+    assert.equal(result.finalStatus, 'PAPER_EVALUATION_BLOCKED_RUNTIME_EVIDENCE_COLLECTION_FAILED');
+    assert.equal(result.collectionFailure?.stage, 'diagnostics_manifest_read');
+    assert.equal(result.observation.sampleCount, 0);
+    assert.equal(runtimeHandoffCreated, false);
+  }
 });
 
 test('paper runtime evidence writer rejects output paths outside repo artifacts', async (t) => {
