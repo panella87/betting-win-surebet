@@ -67,9 +67,9 @@ export function parseBettingWinB1DeterministicFixture(value: unknown): BoundaryR
   if (!rows.ok) {
     return rows;
   }
-  const lineageBinding = validateFixtureLineageBinding(manifest.value, rows.value);
-  if (!lineageBinding.ok) {
-    return lineageBinding;
+  const provenanceBinding = validateFixtureProvenanceBinding(manifest.value, rows.value);
+  if (!provenanceBinding.ok) {
+    return provenanceBinding;
   }
 
   return accepted(
@@ -93,21 +93,21 @@ export function parseB1MultiVenueManifest(value: unknown): BoundaryResult<B1Mult
   }
 
   const candidate = value as Record<string, unknown>;
-  if (candidate.contractSchema !== B1_MULTI_VENUE_MARKETS_SCHEMA) {
+  if (candidate.contract_schema !== B1_MULTI_VENUE_MARKETS_SCHEMA) {
     return blocked(
       'B1_CONTRACT_SCHEMA_MISMATCH',
       'B1 manifest must use the accepted schema marker.',
       'betting-win B1 multi-venue schema marker.',
     );
   }
-  if (candidate.contractAlias !== B1_MULTI_VENUE_MARKETS_ALIAS) {
+  if (candidate.contract_alias !== B1_MULTI_VENUE_MARKETS_ALIAS) {
     return blocked(
       'B1_CONTRACT_ALIAS_MISMATCH',
       'B1 manifest must use the accepted schema alias.',
       'betting-win B1 multi-venue schema alias.',
     );
   }
-  if (candidate.surebetProfile !== 'b1_cross_venue_offline_falsification_v1') {
+  if (candidate.surebet_profile !== 'b1_cross_venue_offline_falsification_v1') {
     return blocked(
       'B1_SUREBET_PROFILE_MISMATCH',
       'B1 manifest must declare the offline falsification profile.',
@@ -116,72 +116,72 @@ export function parseB1MultiVenueManifest(value: unknown): BoundaryResult<B1Mult
   }
 
   const sourceManifestHash = requireManifestHash(
-    candidate.sourceManifestHash,
+    candidate.source_manifest_hash,
     'B1_SOURCE_MANIFEST_HASH_INVALID',
-    'B1 manifest sourceManifestHash must be 64 hexadecimal characters.',
+    'B1 manifest source_manifest_hash must be 64 hexadecimal characters.',
     'B1 source manifest hash.',
   );
   if (!sourceManifestHash.ok) {
     return sourceManifestHash;
   }
   const upstreamLockFingerprint = requireManifestHash(
-    candidate.upstreamLockFingerprint,
+    candidate.upstream_lock_fingerprint,
     'B1_UPSTREAM_LOCK_FINGERPRINT_INVALID',
-    'B1 manifest upstreamLockFingerprint must be 64 hexadecimal characters.',
+    'B1 manifest upstream_lock_fingerprint must be 64 hexadecimal characters.',
     'B1 upstream lock fingerprint.',
   );
   if (!upstreamLockFingerprint.ok) {
     return upstreamLockFingerprint;
   }
   const providerGenerationIds = requireNonEmptyStringArray(
-    candidate.providerGenerationIds,
+    candidate.provider_generation_ids,
     'B1_PROVIDER_GENERATION_IDS_MISSING',
-    'B1 manifest providerGenerationIds must contain at least one id.',
+    'B1 manifest provider_generation_ids must contain at least one id.',
     'B1 provider generation ids from betting-win.',
   );
   if (!providerGenerationIds.ok) {
     return providerGenerationIds;
   }
   const sourceLineageRecordIds = requireNonEmptyStringArray(
-    candidate.sourceLineageRecordIds,
+    candidate.source_lineage_record_ids,
     'B1_SOURCE_LINEAGE_RECORD_IDS_MISSING',
-    'B1 manifest sourceLineageRecordIds must contain at least one id.',
+    'B1 manifest source_lineage_record_ids must contain at least one id.',
     'B1 source lineage record ids from betting-win.',
   );
   if (!sourceLineageRecordIds.ok) {
     return sourceLineageRecordIds;
   }
   const normalizedEvidenceIds = requireNonEmptyStringArray(
-    candidate.normalizedEvidenceIds,
+    candidate.normalized_evidence_ids,
     'B1_NORMALIZED_EVIDENCE_IDS_MISSING',
-    'B1 manifest normalizedEvidenceIds must contain at least one id.',
+    'B1 manifest normalized_evidence_ids must contain at least one id.',
     'B1 normalized evidence ids from betting-win.',
   );
   if (!normalizedEvidenceIds.ok) {
     return normalizedEvidenceIds;
   }
   const retentionPolicy = requireNonEmptyString(
-    candidate.retentionPolicy,
+    candidate.retention_policy,
     'B1_RETENTION_POLICY_MISSING',
-    'B1 manifest retentionPolicy is required.',
+    'B1 manifest retention_policy is required.',
     'B1 retention policy.',
   );
   if (!retentionPolicy.ok) {
     return retentionPolicy;
   }
   const licenseScope = requireNonEmptyString(
-    candidate.licenseScope,
+    candidate.license_scope,
     'B1_LICENSE_SCOPE_MISSING',
-    'B1 manifest licenseScope is required.',
+    'B1 manifest license_scope is required.',
     'B1 license scope.',
   );
   if (!licenseScope.ok) {
     return licenseScope;
   }
   const knownCoverageGaps = requireStringArray(
-    candidate.knownCoverageGaps,
+    candidate.known_coverage_gaps,
     'B1_KNOWN_COVERAGE_GAPS_INVALID',
-    'B1 manifest knownCoverageGaps must be an array of strings.',
+    'B1 manifest known_coverage_gaps must be an array of strings.',
     'B1 known coverage gap list.',
   );
   if (!knownCoverageGaps.ok) {
@@ -232,28 +232,75 @@ export function parseB1MultiVenueMarketRows(value: unknown): BoundaryResult<read
   return accepted(Object.freeze(rows));
 }
 
-function validateFixtureLineageBinding(
+function validateFixtureProvenanceBinding(
   manifest: B1MultiVenueManifest,
   rows: readonly B1MultiVenueMarketRow[],
 ): BoundaryResult<undefined> {
-  const manifestLineageIds = new Set(manifest.sourceLineageRecordIds);
-  const rowLineageIds = new Set(rows.map((row) => row.sourceLineageId));
-  for (const rowLineageId of rowLineageIds) {
-    if (!manifestLineageIds.has(rowLineageId)) {
-      return blocked(
-        'B1_SOURCE_LINEAGE_ROW_NOT_IN_MANIFEST',
-        'B1 fixture rows must be bound to manifest sourceLineageRecordIds.',
-        'Every row source_lineage_id represented in the B1 manifest lineage ids.',
-      );
+  const providerGenerationBinding = validateManifestRowIdBinding(
+    manifest.providerGenerationIds,
+    rows.map((row) => row.providerGenerationId),
+    'B1_PROVIDER_GENERATION_ROW_NOT_IN_MANIFEST',
+    'B1 fixture rows must be bound to manifest provider_generation_ids.',
+    'Every row provider_generation_id represented in the B1 manifest provider generation ids.',
+    'B1_PROVIDER_GENERATION_MANIFEST_ID_UNUSED',
+    'B1 manifest provider_generation_ids must be represented by fixture rows.',
+    'Every manifest provider generation id represented by at least one B1 row.',
+  );
+  if (!providerGenerationBinding.ok) {
+    return providerGenerationBinding;
+  }
+
+  const sourceLineageBinding = validateManifestRowIdBinding(
+    manifest.sourceLineageRecordIds,
+    rows.map((row) => row.sourceLineageId),
+    'B1_SOURCE_LINEAGE_ROW_NOT_IN_MANIFEST',
+    'B1 fixture rows must be bound to manifest source_lineage_record_ids.',
+    'Every row source_lineage_id represented in the B1 manifest lineage ids.',
+    'B1_SOURCE_LINEAGE_MANIFEST_ID_UNUSED',
+    'B1 manifest source_lineage_record_ids must be represented by fixture rows.',
+    'Every manifest source lineage id represented by at least one B1 row.',
+  );
+  if (!sourceLineageBinding.ok) {
+    return sourceLineageBinding;
+  }
+
+  const normalizedEvidenceBinding = validateManifestRowIdBinding(
+    manifest.normalizedEvidenceIds,
+    rows.map((row) => row.normalizedEvidenceId),
+    'B1_NORMALIZED_EVIDENCE_ROW_NOT_IN_MANIFEST',
+    'B1 fixture rows must be bound to manifest normalized_evidence_ids.',
+    'Every row normalized_evidence_id represented in the B1 manifest normalized evidence ids.',
+    'B1_NORMALIZED_EVIDENCE_MANIFEST_ID_UNUSED',
+    'B1 manifest normalized_evidence_ids must be represented by fixture rows.',
+    'Every manifest normalized evidence id represented by at least one B1 row.',
+  );
+  if (!normalizedEvidenceBinding.ok) {
+    return normalizedEvidenceBinding;
+  }
+
+  return accepted(undefined);
+}
+
+function validateManifestRowIdBinding(
+  manifestIds: readonly string[],
+  rowIds: readonly string[],
+  rowNotInManifestCode: string,
+  rowNotInManifestMessage: string,
+  rowNotInManifestEvidenceRequired: string,
+  manifestIdUnusedCode: string,
+  manifestIdUnusedMessage: string,
+  manifestIdUnusedEvidenceRequired: string,
+): BoundaryResult<undefined> {
+  const manifestIdSet = new Set(manifestIds);
+  const rowIdSet = new Set(rowIds);
+  for (const rowId of rowIdSet) {
+    if (!manifestIdSet.has(rowId)) {
+      return blocked(rowNotInManifestCode, rowNotInManifestMessage, rowNotInManifestEvidenceRequired);
     }
   }
-  for (const manifestLineageId of manifestLineageIds) {
-    if (!rowLineageIds.has(manifestLineageId)) {
-      return blocked(
-        'B1_SOURCE_LINEAGE_MANIFEST_ID_UNUSED',
-        'B1 manifest sourceLineageRecordIds must be represented by fixture rows.',
-        'Every manifest source lineage id represented by at least one B1 row.',
-      );
+  for (const manifestId of manifestIdSet) {
+    if (!rowIdSet.has(manifestId)) {
+      return blocked(manifestIdUnusedCode, manifestIdUnusedMessage, manifestIdUnusedEvidenceRequired);
     }
   }
   return accepted(undefined);
@@ -360,6 +407,10 @@ export function parseB1MultiVenueMarketRow(value: unknown): BoundaryResult<B1Mul
   if (!providerId.ok) {
     return providerId;
   }
+  const providerGenerationId = requireNonEmptyString(candidate.provider_generation_id, 'B1_PROVIDER_GENERATION_ID_MISSING', 'B1 row provider_generation_id is required.', 'B1 provider generation id from betting-win.');
+  if (!providerGenerationId.ok) {
+    return providerGenerationId;
+  }
   const venueOrBookmakerId = requireNonEmptyString(candidate.venue_or_bookmaker_id, 'B1_VENUE_OR_BOOKMAKER_ID_MISSING', 'B1 row venue_or_bookmaker_id is required.', 'B1 venue or bookmaker id.');
   if (!venueOrBookmakerId.ok) {
     return venueOrBookmakerId;
@@ -416,6 +467,10 @@ export function parseB1MultiVenueMarketRow(value: unknown): BoundaryResult<B1Mul
   if (!sourceLineageId.ok) {
     return sourceLineageId;
   }
+  const normalizedEvidenceId = requireNonEmptyString(candidate.normalized_evidence_id, 'B1_NORMALIZED_EVIDENCE_ID_MISSING', 'B1 row normalized_evidence_id is required.', 'B1 normalized evidence id.');
+  if (!normalizedEvidenceId.ok) {
+    return normalizedEvidenceId;
+  }
   const rawPayloadHash = requireManifestHash(candidate.raw_payload_hash, 'B1_RAW_PAYLOAD_HASH_INVALID', 'B1 row raw_payload_hash must be 64 hexadecimal characters.', 'B1 raw payload hash.');
   if (!rawPayloadHash.ok) {
     return rawPayloadHash;
@@ -449,6 +504,7 @@ export function parseB1MultiVenueMarketRow(value: unknown): BoundaryResult<B1Mul
       outcomeName: outcomeName.value,
       outcomeSide: outcomeSide.value,
       providerId: providerId.value,
+      providerGenerationId: providerGenerationId.value,
       venueOrBookmakerId: venueOrBookmakerId.value,
       venueType: venueType.value,
       snapshotTimeUtc: snapshotTimeUtc.value,
@@ -463,6 +519,7 @@ export function parseB1MultiVenueMarketRow(value: unknown): BoundaryResult<B1Mul
       settlementCompatibilityFlag: settlementCompatibilityFlag.value,
       voidRuleId: voidRuleId.value,
       sourceLineageId: sourceLineageId.value,
+      normalizedEvidenceId: normalizedEvidenceId.value,
       rawPayloadHash: rawPayloadHash.value,
       qualityFlags: qualityFlags.value,
     }),

@@ -22,8 +22,15 @@ test('standard-binary opportunity derivation groups candidates deterministically
       candidateId: 'market-002',
       canonicalMarketId: 'market-002',
       blockerCodes: [],
-      marketGroupKey:
-        'event-002|market-002|generation-002|rules-002|result-source-002|finality-002|standard_binary_terminal_scenarios_v0',
+      marketGroupKey: JSON.stringify([[
+        'event-002',
+        'market-002',
+        'generation-002',
+        'rules-002',
+        'result-source-002',
+        'finality-002',
+        'standard_binary_terminal_scenarios_v0',
+      ]]),
       quoteOutcomes: ['no', 'yes'],
     },
     {
@@ -31,8 +38,15 @@ test('standard-binary opportunity derivation groups candidates deterministically
       candidateId: 'market-003',
       canonicalMarketId: 'market-003',
       blockerCodes: [],
-      marketGroupKey:
-        'event-003|market-003|generation-003|rules-003|result-source-003|finality-003|standard_binary_terminal_scenarios_v0',
+      marketGroupKey: JSON.stringify([[
+        'event-003',
+        'market-003',
+        'generation-003',
+        'rules-003',
+        'result-source-003',
+        'finality-003',
+        'standard_binary_terminal_scenarios_v0',
+      ]]),
       quoteOutcomes: ['no', 'yes'],
     },
   ]);

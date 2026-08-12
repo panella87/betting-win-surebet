@@ -110,7 +110,6 @@ function validatePinnedBundleRecordCoverage(records: readonly BettingWinResource
 }
 
 function resolvePinnedBundlePath(bundlePath: string, repoRoot: string): string {
-  const trimmedBundlePath = bundlePath.trim();
-  const resolvedRepoRoot = resolve(repoRoot.trim());
-  return isAbsolute(trimmedBundlePath) ? resolve(trimmedBundlePath) : resolve(resolvedRepoRoot, trimmedBundlePath);
+  const resolvedRepoRoot = resolve(repoRoot);
+  return isAbsolute(bundlePath) ? resolve(bundlePath) : resolve(resolvedRepoRoot, bundlePath);
 }

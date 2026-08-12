@@ -10,7 +10,15 @@ test('equivalence precheck accepts canonical standard-binary legs and returns th
   assert.equal(result.value.legCount, 2);
   assert.equal(
     result.value.marketGroupKey,
-    'event-001|market-001|generation-001|rules-001|result-source-001|finality-001|standard_binary_terminal_scenarios_v0',
+    JSON.stringify([[
+      'event-001',
+      'market-001',
+      'generation-001',
+      'rules-001',
+      'result-source-001',
+      'finality-001',
+      'standard_binary_terminal_scenarios_v0',
+    ]]),
   );
   assert.deepEqual(result.value.scenarioIds, ['yes_wins', 'no_wins']);
 });

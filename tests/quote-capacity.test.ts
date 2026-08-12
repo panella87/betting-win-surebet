@@ -9,20 +9,22 @@ test('capacity requires positive available size', () => {
 });
 
 test('capacity rejects malformed leg identity before accepted construction', () => {
-  const result = toCapacityConstraint(
-    '' as unknown as string,
-    { evidenceId: 'quote-001', observedAt: '2026-06-30T00:00:00.000Z', priceMinor: 51n, availableSizeMinor: 250n, currency: 'USDC' },
-    100n,
-  );
+  for (const legId of ['', '   ']) {
+    const result = toCapacityConstraint(
+      legId as unknown as string,
+      { evidenceId: 'quote-001', observedAt: '2026-06-30T00:00:00.000Z', priceMinor: 51n, availableSizeMinor: 250n, currency: 'USDC' },
+      100n,
+    );
 
-  assert.equal(result.ok, false);
-  assert.deepEqual(result.blockers, [
-    {
-      code: 'CAPACITY_LEG_ID_INVALID',
-      message: 'Capacity derivation requires a non-empty leg identity.',
-      evidenceRequired: 'Non-empty local leg id for each quote/depth capacity constraint.',
-    },
-  ]);
+    assert.equal(result.ok, false, legId);
+    assert.deepEqual(result.blockers, [
+      {
+        code: 'CAPACITY_LEG_ID_INVALID',
+        message: 'Capacity derivation requires a non-empty leg identity.',
+        evidenceRequired: 'Non-empty local leg id for each quote/depth capacity constraint.',
+      },
+    ]);
+  }
 });
 
 test('capacity rejects malformed retained depth before comparisons and construction', () => {

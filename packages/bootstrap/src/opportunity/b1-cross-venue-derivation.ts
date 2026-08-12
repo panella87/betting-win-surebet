@@ -419,6 +419,7 @@ function isB1GrossInputRow(value: unknown): value is B1MultiVenueMarketRow {
     && typeof (value as { readonly lineValue?: unknown }).lineValue === 'string'
     && typeof (value as { readonly outcomeName?: unknown }).outcomeName === 'string'
     && typeof (value as { readonly outcomeSide?: unknown }).outcomeSide === 'string'
+    && typeof (value as { readonly providerGenerationId?: unknown }).providerGenerationId === 'string'
     && typeof (value as { readonly venueOrBookmakerId?: unknown }).venueOrBookmakerId === 'string'
     && typeof (value as { readonly selectionEquivalenceKey?: unknown }).selectionEquivalenceKey === 'string'
     && typeof (value as { readonly snapshotTimeUtc?: unknown }).snapshotTimeUtc === 'string'
@@ -429,7 +430,8 @@ function isB1GrossInputRow(value: unknown): value is B1MultiVenueMarketRow {
     && typeof (value as { readonly marketStatus?: unknown }).marketStatus === 'string'
     && typeof (value as { readonly settlementRuleVersion?: unknown }).settlementRuleVersion === 'string'
     && typeof (value as { readonly settlementCompatibilityFlag?: unknown }).settlementCompatibilityFlag === 'string'
-    && typeof (value as { readonly voidRuleId?: unknown }).voidRuleId === 'string';
+    && typeof (value as { readonly voidRuleId?: unknown }).voidRuleId === 'string'
+    && typeof (value as { readonly normalizedEvidenceId?: unknown }).normalizedEvidenceId === 'string';
 }
 
 function maxComparisonWindow(synchronizedQuotePairs: readonly B1SynchronizedQuotePair[]): bigint {

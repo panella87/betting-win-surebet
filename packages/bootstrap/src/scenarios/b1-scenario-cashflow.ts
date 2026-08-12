@@ -190,6 +190,19 @@ export function validateB1ScenarioCashflowMatrix(
       'Complete B1 scenario-by-leg-key cash-flow matrix.',
     );
   }
+  const stakeByLegKey = new Map<string, bigint>();
+  for (const row of rows) {
+    const legKey = buildB1ScenarioLegKey(row.selectionEquivalenceKey, row.venueOrBookmakerId);
+    const existingStakeMinor = stakeByLegKey.get(legKey);
+    if (existingStakeMinor !== undefined && existingStakeMinor !== row.stakeMinor) {
+      return blocked(
+        'B1_SCENARIO_CASHFLOW_STAKE_DRIFT',
+        'B1 scenario cash-flow validation requires each leg to keep one stable stake across terminal scenarios.',
+        'Stable B1 scenario-by-leg-key stake amounts keyed by selection_equivalence_key and venue_or_bookmaker_id.',
+      );
+    }
+    stakeByLegKey.set(legKey, row.stakeMinor);
+  }
 
   const scenarioWinningSelectionKeys: string[] = [];
   for (const scenarioId of scenarioIds) {

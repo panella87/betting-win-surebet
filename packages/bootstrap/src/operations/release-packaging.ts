@@ -671,7 +671,19 @@ export async function verifyBwsReleaseInstallation(
     verifiedChecks,
   });
   writeJsonFile(resultFile, result);
-  registerReleaseEvidence(releaseDirectory, manifest.releaseId, manifest.semanticFingerprint, [resultFile]);
+  const verificationEvidenceEntries = registerReleaseEvidence(
+    scratchDirectory,
+    manifest.releaseId,
+    manifest.semanticFingerprint,
+    [resultFile],
+  );
+  if (verificationEvidenceEntries.length !== 1) {
+    throw new Error('Release install verification result was not retained in the evidence index.');
+  }
+  const verificationEvidenceEntry = verificationEvidenceEntries[0];
+  if (verificationEvidenceEntry === undefined || verificationEvidenceEntry.path !== RELEASE_VERIFICATION_RESULT_FILE) {
+    throw new Error('Release install verification result was not retained in the evidence index.');
+  }
   void manifestSha256;
   return result;
 }
@@ -755,13 +767,10 @@ function registerReleaseEvidence(
   sourceFingerprint: string,
   artifactPaths: readonly string[],
 ): readonly BwsEvidenceIndexEntry[] {
-  if (!isWithinResolved(repositoryRoot, repositoryRoot)) {
-    return Object.freeze([] as BwsEvidenceIndexEntry[]);
-  }
   const entries: BwsEvidenceIndexEntry[] = [];
   for (const artifactPath of artifactPaths) {
     if (!isWithinResolved(repositoryRoot, artifactPath)) {
-      continue;
+      throw new Error(`Release evidence artifact escapes evidence root: ${artifactPath}`);
     }
     entries.push(
       registerBwsEvidenceArtifact({
@@ -798,12 +807,8 @@ function verifyArchiveIfPresent(
   }
   const resolvedArchivePath = resolve(archivePath);
   const archiveSha256File = `${resolvedArchivePath}.sha256`;
-  if (!existsSync(resolvedArchivePath) || !statSync(resolvedArchivePath).isFile()) {
-    throw new Error(`Release archive does not exist: ${resolvedArchivePath}`);
-  }
-  if (!existsSync(archiveSha256File) || !statSync(archiveSha256File).isFile()) {
-    throw new Error(`Release archive checksum file does not exist: ${archiveSha256File}`);
-  }
+  ensureNonSymlinkRegularFile(resolvedArchivePath, 'Release archive');
+  ensureNonSymlinkRegularFile(archiveSha256File, 'Release archive checksum file');
   const actualArchiveSha256 = fileSha256(resolvedArchivePath);
   const expectedArchiveSha256 = readArchiveChecksumFile(archiveSha256File, basename(resolvedArchivePath));
   if (actualArchiveSha256 !== expectedArchiveSha256) {
@@ -1035,6 +1040,9 @@ function collectReleaseSourceFiles(
   for (const entry of sourceManifest.files) {
     const relativePath = normalizeRelativePath(entry.path);
     if (!isAllowedReleasePath(relativePath)) {
+      if (isForbiddenSourceManifestMetadataPath(relativePath)) {
+        throw new Error(`SOURCE_MANIFEST.json contains a forbidden release source path: ${relativePath}`);
+      }
       continue;
     }
     const releaseEntry = createReleaseFileEntry(repositoryRoot, relativePath);
@@ -1731,6 +1739,28 @@ function isForbiddenExtractedReleasePath(relativePath: string): boolean {
   return false;
 }
 
+function isForbiddenSourceManifestMetadataPath(relativePath: string): boolean {
+  const normalized = normalizeRelativePath(relativePath);
+  if (FORBIDDEN_EXACT_PATHS.has(normalized)) {
+    return true;
+  }
+  const parts = normalized.split('/');
+  if (isForbiddenEnvPath(parts[parts.length - 1])) {
+    return true;
+  }
+  const firstPart = parts[0];
+  if (firstPart !== undefined && FORBIDDEN_SOURCE_ROOTS.has(firstPart)) {
+    return true;
+  }
+  const lowered = normalized.toLowerCase();
+  for (const suffix of FORBIDDEN_SUFFIXES) {
+    if (lowered.endsWith(suffix) && normalized !== PACKAGE_LOCK_PATH) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function isForbiddenEnvPath(baseName: string | undefined): boolean {
   if (baseName === undefined) {
     return false;
@@ -1790,6 +1820,23 @@ function ensureFile(path: string, label: string, boundaryRoot?: string): Stats {
     if (!(realPath === realRoot || realPath.startsWith(`${realRoot}/`))) {
       throw new Error(`Required release path escapes repository: ${label}`);
     }
+  }
+  return stats;
+}
+
+function ensureNonSymlinkRegularFile(path: string, label: string): Stats {
+  if (!existsSync(path)) {
+    throw new Error(`${label} does not exist: ${path}`);
+  }
+  if (realpathSync(path) !== resolve(path)) {
+    throw new Error(`${label} must not contain symlinks: ${path}`);
+  }
+  const stats = lstatSync(path);
+  if (stats.isSymbolicLink()) {
+    throw new Error(`${label} must not be a symlink: ${path}`);
+  }
+  if (!stats.isFile()) {
+    throw new Error(`${label} must be a regular file: ${path}`);
   }
   return stats;
 }

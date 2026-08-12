@@ -398,6 +398,11 @@ function replayLegEvents(
     }
   }
 
+  const timestampTieValidation = validateNoSameLegTimestampTies(events);
+  if (!timestampTieValidation.ok) {
+    return timestampTieValidation;
+  }
+
   const indexedEvents = events.map((event, index) => ({ event, index }));
   indexedEvents.sort((left, right) => {
     const timestampOrder = left.event.occurredAt.localeCompare(right.event.occurredAt);
@@ -474,6 +479,27 @@ function validateNonAtomicCompletionEventShape(event: NonAtomicCompletionEvent):
       'Non-atomic completion simulation requires ISO-8601 UTC timestamps for every event.',
       'ISO-8601 UTC event timestamps for the non-atomic completion replay.',
     );
+  }
+  return accepted(undefined);
+}
+
+function validateNoSameLegTimestampTies(
+  events: readonly NonAtomicCompletionEvent[],
+): BoundaryResult<undefined> {
+  const seenLegTimestamps = new Set<string>();
+  for (const event of events) {
+    if (!isIsoTimestamp(event.occurredAt)) {
+      continue;
+    }
+    const key = `${event.legId}\u0000${event.occurredAt}`;
+    if (seenLegTimestamps.has(key)) {
+      return blocked(
+        'NON_ATOMIC_COMPLETION_EVENT_ORDER_AMBIGUOUS',
+        'Non-atomic completion simulation rejects same-leg events with identical timestamps.',
+        'Unambiguous non-atomic completion event ordering per leg and timestamp.',
+      );
+    }
+    seenLegTimestamps.add(key);
   }
   return accepted(undefined);
 }

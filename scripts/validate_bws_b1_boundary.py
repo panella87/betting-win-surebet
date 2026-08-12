@@ -201,7 +201,7 @@ def main() -> None:
     for marker in [
         '"runtimeEvidence": false',
         '"fixtureKind": "deterministic_b1_multi_venue_fixture"',
-        '"knownCoverageGaps": ["not_upstream_runtime_evidence"]',
+        '"known_coverage_gaps": ["not_upstream_runtime_evidence"]',
     ]:
         if marker not in fixture:
             fail(f'B1 deterministic fixture missing non-evidence marker: {marker}')

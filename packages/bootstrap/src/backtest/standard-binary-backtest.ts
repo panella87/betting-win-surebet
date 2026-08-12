@@ -100,6 +100,11 @@ interface IndexedCompletionEvent {
 export function runDeterministicStandardBinaryBacktest(
   input: StandardBinaryBacktestRunInput,
 ): BoundaryResult<StandardBinaryBacktestRun> {
+  const inputValidation = validateStandardBinaryBacktestInput(input);
+  if (!inputValidation.ok) {
+    return inputValidation;
+  }
+
   if (input.bundle.bundleKind !== 'resource_export') {
     return blocked(
       'BACKTEST_EXPORT_KIND_UNSUPPORTED',
@@ -178,6 +183,41 @@ export function runDeterministicStandardBinaryBacktest(
       blockedCandidateCount,
     }),
   );
+}
+
+function validateStandardBinaryBacktestInput(input: unknown): BoundaryResult<undefined> {
+  if (typeof input !== 'object' || input === null) {
+    return blocked(
+      'BACKTEST_INPUT_MISSING',
+      'Deterministic standard-binary backtesting requires explicit bundle, records and execution plans.',
+      'Explicit deterministic standard-binary backtest input.',
+    );
+  }
+
+  const candidate = input as Record<string, unknown>;
+  if (typeof candidate.bundle !== 'object' || candidate.bundle === null) {
+    return blocked(
+      'BACKTEST_BUNDLE_MISSING',
+      'Deterministic standard-binary backtesting requires an explicit pinned bundle object.',
+      'Pinned betting-win export bundle input.',
+    );
+  }
+  if (!Array.isArray(candidate.records)) {
+    return blocked(
+      'BACKTEST_RECORDS_INVALID',
+      'Deterministic standard-binary backtesting requires parsed betting-win resource records as an array.',
+      'Parsed betting-win resource record array.',
+    );
+  }
+  if (!Array.isArray(candidate.executionPlans)) {
+    return blocked(
+      'BACKTEST_EXECUTION_PLANS_MISSING',
+      'Deterministic standard-binary backtesting requires at least one execution plan.',
+      'Execution plans for the canonical market candidates under backtest.',
+    );
+  }
+
+  return accepted(undefined);
 }
 
 function validatePinnedBundleRecordProvenance(

@@ -3,17 +3,17 @@
   "runtimeEvidence": false,
   "upstreamReadiness": "blocked_until_betting_win_b1_multi_venue_markets_v1",
   "manifest": {
-    "contractSchema": "betting-win.b1_multi_venue_markets.v1",
-    "contractAlias": "betting-win-b1-multi-venue-markets.v1",
-    "surebetProfile": "b1_cross_venue_offline_falsification_v1",
-    "sourceManifestHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-    "upstreamLockFingerprint": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-    "providerGenerationIds": ["generation-001"],
-    "sourceLineageRecordIds": ["lineage-001", "lineage-002"],
-    "normalizedEvidenceIds": ["normalized-001"],
-    "retentionPolicy": "repo_local_test_fixture_only",
-    "licenseScope": "private_offline_validation_only",
-    "knownCoverageGaps": ["not_upstream_runtime_evidence"]
+    "contract_schema": "betting-win.b1_multi_venue_markets.v1",
+    "contract_alias": "betting-win-b1-multi-venue-markets.v1",
+    "surebet_profile": "b1_cross_venue_offline_falsification_v1",
+    "source_manifest_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "upstream_lock_fingerprint": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "provider_generation_ids": ["generation-001"],
+    "source_lineage_record_ids": ["lineage-001", "lineage-002"],
+    "normalized_evidence_ids": ["normalized-001"],
+    "retention_policy": "repo_local_test_fixture_only",
+    "license_scope": "private_offline_validation_only",
+    "known_coverage_gaps": ["not_upstream_runtime_evidence"]
   },
   "rows": [
     {
@@ -39,6 +39,7 @@
       "outcome_name": "Home",
       "outcome_side": "home",
       "provider_id": "provider-a",
+      "provider_generation_id": "generation-001",
       "venue_or_bookmaker_id": "venue-a",
       "venue_type": "sportsbook",
       "snapshot_time_utc": "2026-07-01T00:00:01.000Z",
@@ -53,6 +54,7 @@
       "settlement_compatibility_flag": "compatible",
       "void_rule_id": "void-rule-a",
       "source_lineage_id": "lineage-001",
+      "normalized_evidence_id": "normalized-001",
       "raw_payload_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
       "quality_flags": []
     },
@@ -79,6 +81,7 @@
       "outcome_name": "Home",
       "outcome_side": "home",
       "provider_id": "provider-b",
+      "provider_generation_id": "generation-001",
       "venue_or_bookmaker_id": "venue-b",
       "venue_type": "exchange",
       "snapshot_time_utc": "2026-07-01T00:00:01.500Z",
@@ -93,6 +96,7 @@
       "settlement_compatibility_flag": "compatible",
       "void_rule_id": "void-rule-a",
       "source_lineage_id": "lineage-002",
+      "normalized_evidence_id": "normalized-001",
       "raw_payload_hash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
       "quality_flags": []
     }

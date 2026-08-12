@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -282,6 +282,79 @@ test('bugfix controller emits terminal implementation handoffs before post-codex
   assert.ok(deferredMarker > terminalCase);
   assert.ok(writeHandoff > terminalCase);
   assert.ok(postValidation > writeHandoff);
+});
+
+test('bugfix controller rejects confirmed-bug metadata on non-handoff request flags', async (t) => {
+  const validate = (status: 'CONTINUE_REQUIRED=yes' | 'BLOCKED=yes', flags: string) => {
+    const tempRoot = mkdtempSync(join(tmpdir(), 'surebet-bugfix-request-flags-'));
+    const harness = join(tempRoot, 'controller-functions.sh');
+    const requestFlags = join(tempRoot, 'request_flags.txt');
+    const shell = String.raw`
+set -Eeuo pipefail
+awk '/^parse_args "\$@"/ { exit } { print }' "$REPO_ROOT/run-autonomous-bugfix.sh" \
+  | sed "s|^SCRIPT_DIR=.*|SCRIPT_DIR=\"$REPO_ROOT\"|" > "$1"
+. "$1"
+CAMPAIGN_AREA=cross_area_regression_and_campaign_closure
+LAST_VALIDATION_STATUS=passed
+if load_and_validate_request_flags "$2" "$3"; then
+  printf 'validation=accepted\n'
+else
+  rc=$?
+  printf 'validation=rejected\n'
+  exit "$rc"
+fi
+`;
+    try {
+      writeFileSync(requestFlags, flags, 'utf-8');
+      return spawnSync(
+        'bash',
+        ['-lc', shell, 'bash', harness, requestFlags, status],
+        { env: { ...process.env, REPO_ROOT }, encoding: 'utf-8' },
+      );
+    } finally {
+      rmSync(tempRoot, { recursive: true, force: true });
+    }
+  };
+
+  for (const status of ['CONTINUE_REQUIRED=yes', 'BLOCKED=yes'] as const) {
+    await t.test(status, () => {
+      const valid = [
+        'BUGS_FOUND=no',
+        'HANDOVER_AUTONOMOUS_IMPLEMENTATION_REQUIRED=no',
+        'NEXT_AUDIT_AREA=none',
+        'CAMPAIGN_AREA=cross_area_regression_and_campaign_closure',
+        'CAMPAIGN_AREA_COMPLETE=no',
+        'SOURCE_EVIDENCE_COMPLETE=no',
+        'BUG_IDS=none',
+        'IMPLEMENTATION_SCOPE=none',
+        'BUGFIX_MODE_AUTOMATION_MAINTENANCE_ALLOWED=no',
+        'ALLOWED_PROTECTED_FILES=none',
+        '',
+      ].join('\n');
+      const contradictory = [
+        'BUGS_FOUND=yes',
+        'HANDOVER_AUTONOMOUS_IMPLEMENTATION_REQUIRED=no',
+        'NEXT_AUDIT_AREA=none',
+        'CAMPAIGN_AREA=cross_area_regression_and_campaign_closure',
+        'CAMPAIGN_AREA_COMPLETE=no',
+        'SOURCE_EVIDENCE_COMPLETE=yes',
+        'BUG_IDS=BWS-CROSS-CLOSURE-001',
+        'IMPLEMENTATION_SCOPE=fix_confirmed_bug',
+        'BUGFIX_MODE_AUTOMATION_MAINTENANCE_ALLOWED=no',
+        'ALLOWED_PROTECTED_FILES=none',
+        '',
+      ].join('\n');
+
+      const accepted = validate(status, valid);
+      assert.equal(accepted.status, 0, `${accepted.stdout}\n${accepted.stderr}`);
+      assert.match(accepted.stdout, /validation=accepted/u);
+
+      const rejected = validate(status, contradictory);
+      assert.equal(rejected.status, 2, `${rejected.stdout}\n${rejected.stderr}`);
+      assert.match(rejected.stdout, /validation=rejected/u);
+      assert.match(rejected.stderr, /cannot report confirmed bugs|cannot include complete source evidence/u);
+    });
+  }
 });
 
 test('bugfix artifact evidence is resolved before the active run directory exists', () => {

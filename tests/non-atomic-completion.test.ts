@@ -86,6 +86,56 @@ test('non-atomic completion reconstructs the same state after replay restart reg
   assert.equal(original.value.residualExposure?.worstCaseScenarioId, 'no_wins');
 });
 
+test('non-atomic completion rejects same-leg same-timestamp reserve and fill ties in every input order', () => {
+  const input = createTwoUnitSolvedInput();
+  const solved = solveStandardBinaryStakeVector(input);
+  assert.equal(solved.ok, true);
+
+  const reserveEvent = { legId: 'market-001:yes', type: 'reserve' as const, stakeMinor: 100n, occurredAt: '2026-07-13T10:00:00.000Z' };
+  const fillEvent = { legId: 'market-001:yes', type: 'fill' as const, stakeMinor: 100n, occurredAt: '2026-07-13T10:00:00.000Z' };
+
+  for (const events of [
+    [reserveEvent, fillEvent],
+    [fillEvent, reserveEvent],
+  ]) {
+    const result = simulateNonAtomicPaperGroupCompletion({
+      stakeVector: solved.value,
+      matrix: input.matrix,
+      manualKill: false,
+      events,
+    });
+
+    assert.equal(result.ok, false);
+    assert.deepEqual(result.blockers, [
+      {
+        code: 'NON_ATOMIC_COMPLETION_EVENT_ORDER_AMBIGUOUS',
+        message: 'Non-atomic completion simulation rejects same-leg events with identical timestamps.',
+        evidenceRequired: 'Unambiguous non-atomic completion event ordering per leg and timestamp.',
+      },
+    ]);
+  }
+});
+
+test('non-atomic completion accepts cross-leg same-timestamp events when replay order is otherwise valid', () => {
+  const input = createTwoUnitSolvedInput();
+  const solved = solveStandardBinaryStakeVector(input);
+  assert.equal(solved.ok, true);
+
+  const result = simulateNonAtomicPaperGroupCompletion({
+    stakeVector: solved.value,
+    matrix: input.matrix,
+    manualKill: false,
+    events: [
+      { legId: 'market-001:yes', type: 'fill', stakeMinor: 200n, occurredAt: '2026-07-13T10:00:00.000Z' },
+      { legId: 'market-001:no', type: 'fill', stakeMinor: 200n, occurredAt: '2026-07-13T10:00:00.000Z' },
+    ],
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.value.completion.groupState, 'group_complete');
+  assert.equal(result.value.residualExposure, undefined);
+});
+
 test('non-atomic completion rejects rollback amounts that exceed the currently live fill', () => {
   const input = createTwoUnitSolvedInput();
   const solved = solveStandardBinaryStakeVector(input);

@@ -16,6 +16,13 @@ export function readLocalBettingWinExportBundle(
       'Repo-local JSON export bundle path.',
     );
   }
+  if (bundlePath !== bundlePath.trim()) {
+    return blocked(
+      'LOCAL_EXPORT_PATH_INVALID',
+      'Export bundle path must be canonical as supplied.',
+      'Canonical repo-local JSON export bundle path.',
+    );
+  }
   if (typeof repoRoot !== 'string' || repoRoot.trim().length === 0) {
     return blocked(
       'LOCAL_EXPORT_REPO_ROOT_INVALID',
@@ -23,8 +30,14 @@ export function readLocalBettingWinExportBundle(
       'Repository root containing the local export bundle.',
     );
   }
-  const trimmedBundlePath = bundlePath.trim();
-  if (URL_SCHEME_PREFIX.test(trimmedBundlePath)) {
+  if (repoRoot !== repoRoot.trim()) {
+    return blocked(
+      'LOCAL_EXPORT_REPO_ROOT_INVALID',
+      'Local export repository root must be canonical as supplied.',
+      'Canonical repository root containing the local export bundle.',
+    );
+  }
+  if (URL_SCHEME_PREFIX.test(bundlePath)) {
     return blocked(
       'LOCAL_EXPORT_REMOTE_URL_FORBIDDEN',
       'Export bundle path must be a repo-local filesystem path, not a URL.',
@@ -32,8 +45,8 @@ export function readLocalBettingWinExportBundle(
     );
   }
 
-  const resolvedRepoRoot = resolve(repoRoot.trim());
-  const resolvedBundlePath = isAbsolute(trimmedBundlePath) ? resolve(trimmedBundlePath) : resolve(resolvedRepoRoot, trimmedBundlePath);
+  const resolvedRepoRoot = resolve(repoRoot);
+  const resolvedBundlePath = isAbsolute(bundlePath) ? resolve(bundlePath) : resolve(resolvedRepoRoot, bundlePath);
 
   if (!isPathInsideRoot(resolvedRepoRoot, resolvedBundlePath)) {
     return blocked(

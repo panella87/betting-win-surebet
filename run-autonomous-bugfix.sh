@@ -408,6 +408,22 @@ validate_protected_allowlist() {
   done
 }
 
+validate_non_handoff_request_flags() {
+  local status="$1"
+  [[ "${AUTOMATION_V2_ENV[BUGFIX_MODE_AUTOMATION_MAINTENANCE_ALLOWED]}" == no && "${AUTOMATION_V2_ENV[ALLOWED_PROTECTED_FILES]}" == none ]] || {
+    echo "ERROR: $status request flags cannot authorize protected maintenance" >&2
+    return 2
+  }
+  [[ "${AUTOMATION_V2_ENV[BUGS_FOUND]}" == no && "${AUTOMATION_V2_ENV[HANDOVER_AUTONOMOUS_IMPLEMENTATION_REQUIRED]}" == no && "${AUTOMATION_V2_ENV[CAMPAIGN_AREA_COMPLETE]}" == no ]] || {
+    echo "ERROR: $status request flags cannot report confirmed bugs, handoff requirement, or area completion" >&2
+    return 2
+  }
+  [[ "${AUTOMATION_V2_ENV[SOURCE_EVIDENCE_COMPLETE]}" == no && "${AUTOMATION_V2_ENV[BUG_IDS]}" == none && "${AUTOMATION_V2_ENV[IMPLEMENTATION_SCOPE]}" == none ]] || {
+    echo "ERROR: $status request flags cannot include complete source evidence, bug IDs, or implementation scope" >&2
+    return 2
+  }
+}
+
 load_and_validate_request_flags() {
   local file="$1" status="$2" key value
   local -A allowed=(
@@ -447,12 +463,10 @@ load_and_validate_request_flags() {
       [[ "${AUTOMATION_V2_ENV[BUGS_FOUND]}" == yes && "${AUTOMATION_V2_ENV[HANDOVER_AUTONOMOUS_IMPLEMENTATION_REQUIRED]}" == yes && "${AUTOMATION_V2_ENV[CAMPAIGN_AREA_COMPLETE]}" == no && "${AUTOMATION_V2_ENV[SOURCE_EVIDENCE_COMPLETE]}" == yes && "${AUTOMATION_V2_ENV[BUG_IDS]}" != none && "${AUTOMATION_V2_ENV[IMPLEMENTATION_SCOPE]}" != none ]] || return 2
       ;;
     CONTINUE_REQUIRED=yes)
-      [[ "${AUTOMATION_V2_ENV[BUGFIX_MODE_AUTOMATION_MAINTENANCE_ALLOWED]}" == no && "${AUTOMATION_V2_ENV[ALLOWED_PROTECTED_FILES]}" == none ]] || return 2
-      [[ "${AUTOMATION_V2_ENV[HANDOVER_AUTONOMOUS_IMPLEMENTATION_REQUIRED]}" == no && "${AUTOMATION_V2_ENV[CAMPAIGN_AREA_COMPLETE]}" == no ]] || return 2
+      validate_non_handoff_request_flags "$status" || return 2
       ;;
     BLOCKED=yes)
-      [[ "${AUTOMATION_V2_ENV[BUGFIX_MODE_AUTOMATION_MAINTENANCE_ALLOWED]}" == no && "${AUTOMATION_V2_ENV[ALLOWED_PROTECTED_FILES]}" == none ]] || return 2
-      [[ "${AUTOMATION_V2_ENV[HANDOVER_AUTONOMOUS_IMPLEMENTATION_REQUIRED]}" == no && "${AUTOMATION_V2_ENV[CAMPAIGN_AREA_COMPLETE]}" == no ]] || return 2
+      validate_non_handoff_request_flags "$status" || return 2
       ;;
   esac
 }

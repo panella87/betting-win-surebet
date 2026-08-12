@@ -186,6 +186,55 @@ test('deterministic standard-binary backtest rejects parsed records that do not 
   ]);
 });
 
+test('deterministic standard-binary backtest fails closed on malformed top-level input', () => {
+  const malformedInputs = [
+    {
+      name: 'undefined input',
+      input: undefined as never,
+      blocker: {
+        code: 'BACKTEST_INPUT_MISSING',
+        message: 'Deterministic standard-binary backtesting requires explicit bundle, records and execution plans.',
+        evidenceRequired: 'Explicit deterministic standard-binary backtest input.',
+      },
+    },
+    {
+      name: 'missing bundle',
+      input: { records: [], executionPlans: [] } as never,
+      blocker: {
+        code: 'BACKTEST_BUNDLE_MISSING',
+        message: 'Deterministic standard-binary backtesting requires an explicit pinned bundle object.',
+        evidenceRequired: 'Pinned betting-win export bundle input.',
+      },
+    },
+    {
+      name: 'missing records',
+      input: { bundle: {}, executionPlans: [] } as never,
+      blocker: {
+        code: 'BACKTEST_RECORDS_INVALID',
+        message: 'Deterministic standard-binary backtesting requires parsed betting-win resource records as an array.',
+        evidenceRequired: 'Parsed betting-win resource record array.',
+      },
+    },
+    {
+      name: 'missing execution plans',
+      input: { bundle: {}, records: [] } as never,
+      blocker: {
+        code: 'BACKTEST_EXECUTION_PLANS_MISSING',
+        message: 'Deterministic standard-binary backtesting requires at least one execution plan.',
+        evidenceRequired: 'Execution plans for the canonical market candidates under backtest.',
+      },
+    },
+  ] as const;
+
+  for (const malformedInput of malformedInputs) {
+    assert.doesNotThrow(() => runDeterministicStandardBinaryBacktest(malformedInput.input), malformedInput.name);
+    const result = runDeterministicStandardBinaryBacktest(malformedInput.input);
+
+    assert.equal(result.ok, false, malformedInput.name);
+    assert.deepEqual(result.blockers, [malformedInput.blocker], malformedInput.name);
+  }
+});
+
 function adjustRawYesQuoteManifest(record: unknown, quoteSourceManifestHash: string): unknown {
   if (typeof record !== 'object' || record === null) {
     return record;

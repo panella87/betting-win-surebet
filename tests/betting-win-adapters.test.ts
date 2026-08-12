@@ -308,6 +308,51 @@ test('local export bundle reader and pinned intake reject malformed path argumen
   assert.equal(missingPinnedRepoRoot.blockers[0]?.code, 'LOCAL_EXPORT_REPO_ROOT_INVALID');
 });
 
+test('local export bundle reader and pinned intake reject whitespace-wrapped canonical path arguments', () => {
+  const validLocalBundlePath = 'tests/fixtures/local-only-export-bundles/valid-resource-export.json';
+  const validPinnedBundlePath = 'tests/fixtures/local-only-export-bundles/solver-ready-resource-export.json';
+
+  const localBundlePath = readLocalBettingWinExportBundle(` ${validLocalBundlePath} `, REPO_ROOT);
+  assert.equal(localBundlePath.ok, false);
+  assert.deepEqual(localBundlePath.blockers, [
+    {
+      code: 'LOCAL_EXPORT_PATH_INVALID',
+      message: 'Export bundle path must be canonical as supplied.',
+      evidenceRequired: 'Canonical repo-local JSON export bundle path.',
+    },
+  ]);
+
+  const localRepoRoot = readLocalBettingWinExportBundle(validLocalBundlePath, ` ${REPO_ROOT} `);
+  assert.equal(localRepoRoot.ok, false);
+  assert.deepEqual(localRepoRoot.blockers, [
+    {
+      code: 'LOCAL_EXPORT_REPO_ROOT_INVALID',
+      message: 'Local export repository root must be canonical as supplied.',
+      evidenceRequired: 'Canonical repository root containing the local export bundle.',
+    },
+  ]);
+
+  const pinnedBundlePath = validatePinnedBettingWinBundleIntake(` ${validPinnedBundlePath} `, REPO_ROOT);
+  assert.equal(pinnedBundlePath.ok, false);
+  assert.deepEqual(pinnedBundlePath.blockers, [
+    {
+      code: 'LOCAL_EXPORT_PATH_INVALID',
+      message: 'Export bundle path must be canonical as supplied.',
+      evidenceRequired: 'Canonical repo-local JSON export bundle path.',
+    },
+  ]);
+
+  const pinnedRepoRoot = validatePinnedBettingWinBundleIntake(validPinnedBundlePath, ` ${REPO_ROOT} `);
+  assert.equal(pinnedRepoRoot.ok, false);
+  assert.deepEqual(pinnedRepoRoot.blockers, [
+    {
+      code: 'LOCAL_EXPORT_REPO_ROOT_INVALID',
+      message: 'Local export repository root must be canonical as supplied.',
+      evidenceRequired: 'Canonical repository root containing the local export bundle.',
+    },
+  ]);
+});
+
 test('local export bundle reader rejects remote URLs and repo-escaping paths', () => {
   const remoteUrl = readLocalBettingWinExportBundle('https://example.com/export.json', REPO_ROOT);
   assert.equal(remoteUrl.ok, false);
@@ -409,10 +454,10 @@ test('pinned bundle intake validator accepts a repo-local bundle with full recor
   assert.equal(result.value.records.length, 5);
 });
 
-test('pinned bundle intake validator reuses normalized repo-local bundle paths', () => {
+test('pinned bundle intake validator accepts absolute canonical repo-local bundle paths', () => {
   const result = validatePinnedBettingWinBundleIntake(
-    ' tests/fixtures/local-only-export-bundles/solver-ready-resource-export.json ',
-    ` ${REPO_ROOT} `,
+    join(REPO_ROOT, 'tests/fixtures/local-only-export-bundles/solver-ready-resource-export.json'),
+    REPO_ROOT,
   );
 
   assert.equal(result.ok, true);

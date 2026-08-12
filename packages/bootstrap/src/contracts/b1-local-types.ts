@@ -50,6 +50,7 @@ export interface B1MultiVenueMarketRow {
   readonly outcomeName: string;
   readonly outcomeSide: string;
   readonly providerId: string;
+  readonly providerGenerationId: string;
   readonly venueOrBookmakerId: string;
   readonly venueType: B1VenueType;
   readonly snapshotTimeUtc: B1IsoTimestamp;
@@ -64,6 +65,7 @@ export interface B1MultiVenueMarketRow {
   readonly settlementCompatibilityFlag: B1SettlementCompatibilityFlag;
   readonly voidRuleId: string;
   readonly sourceLineageId: string;
+  readonly normalizedEvidenceId: string;
   readonly rawPayloadHash: string;
   readonly qualityFlags: readonly string[];
 }

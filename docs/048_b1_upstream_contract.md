@@ -40,6 +40,7 @@ line_value
 outcome_name
 outcome_side
 provider_id
+provider_generation_id
 venue_or_bookmaker_id
 venue_type
 snapshot_time_utc
@@ -54,6 +55,7 @@ settlement_rule_version
 settlement_compatibility_flag
 void_rule_id
 source_lineage_id
+normalized_evidence_id
 raw_payload_hash
 quality_flags
 ```

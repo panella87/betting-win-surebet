@@ -217,6 +217,52 @@ test('B1 generalized stake-vector solver supports 3-way complete-market portfoli
   assert.equal(result.value.scenarioCashflowMatrix.rows.length, 9);
 });
 
+test('B1 generalized stake-vector solver continues past transient rounding loss to later feasible target', () => {
+  const result = solveB1GeneralizedStakeVector(acceptedTwoWayGrossCandidate(), twoWayPolicy({
+    legConstraints: Object.freeze([
+      Object.freeze({
+        selectionEquivalenceKey: 'event-001:moneyline:away',
+        venueOrBookmakerId: 'venue-b',
+        minStakeMinor: 10_000n,
+        maxStakeMinor: 50_000n,
+        stakeStepMinor: 3n,
+      }),
+      Object.freeze({
+        selectionEquivalenceKey: 'event-001:moneyline:home',
+        venueOrBookmakerId: 'venue-a',
+        minStakeMinor: 10_000n,
+        maxStakeMinor: 50_000n,
+        stakeStepMinor: 3n,
+      }),
+    ]),
+    maximumTotalRoundingLossMinor: 0n,
+    maxSearchIterations: 8,
+  }));
+
+  assert.equal(result.ok, true);
+  assert.deepEqual(result.value.stakeAssumptions, [
+    { selectionEquivalenceKey: 'event-001:moneyline:away', stakeMinor: 10_002n },
+    { selectionEquivalenceKey: 'event-001:moneyline:home', stakeMinor: 10_002n },
+  ]);
+  assert.equal(result.value.totalStakeMinor, 20_004n);
+  assert.equal(result.value.totalRoundingLossMinor, 0n);
+  assert.equal(result.value.worstCaseNetMinor, 1_000n);
+  assert.deepEqual(result.value.scenarioNets, [
+    {
+      scenarioId: 'b1_terminal:event-001:moneyline:away',
+      winningSelectionEquivalenceKey: 'event-001:moneyline:away',
+      payoutMinor: 21_004n,
+      netMinor: 1_000n,
+    },
+    {
+      scenarioId: 'b1_terminal:event-001:moneyline:home',
+      winningSelectionEquivalenceKey: 'event-001:moneyline:home',
+      payoutMinor: 21_004n,
+      netMinor: 1_000n,
+    },
+  ]);
+});
+
 test('B1 generalized stake-vector solver fails closed on explicit rounding-loss limits', () => {
   const result = solveB1GeneralizedStakeVector(acceptedTwoWayGrossCandidate(), twoWayPolicy({
     legConstraints: Object.freeze([
@@ -236,6 +282,7 @@ test('B1 generalized stake-vector solver fails closed on explicit rounding-loss 
       }),
     ]),
     maximumTotalRoundingLossMinor: 0n,
+    maxSearchIterations: 1,
   }));
 
   assert.equal(result.ok, false);

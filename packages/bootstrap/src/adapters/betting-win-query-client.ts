@@ -191,7 +191,11 @@ export function buildReadOnlyQueryContractRequest(request: ReadOnlyQueryContract
       'Object-shaped pinned betting-win read-only query contract request.',
     );
   }
-  if (typeof request.contractVersion !== 'string' || request.contractVersion.trim().length === 0) {
+  if (
+    typeof request.contractVersion !== 'string'
+    || request.contractVersion.length === 0
+    || request.contractVersion !== request.contractVersion.trim()
+  ) {
     return blocked(
       'QUERY_CONTRACT_NOT_PINNED',
       'A pinned betting-win read-only query contract is required before BWS-140.',
@@ -205,18 +209,21 @@ export function buildReadOnlyQueryContractRequest(request: ReadOnlyQueryContract
       'Supported pinned betting-win read-only query resource.',
     );
   }
-  if (request.cursor !== undefined && (typeof request.cursor !== 'string' || request.cursor.trim().length === 0)) {
+  if (
+    request.cursor !== undefined
+    && (typeof request.cursor !== 'string' || request.cursor.length === 0 || request.cursor !== request.cursor.trim())
+  ) {
     return blocked(
       'QUERY_CURSOR_INVALID',
-      'Read-only query cursor must be a non-empty string when provided.',
+      'Read-only query cursor must be a canonical non-empty string when provided.',
       'Pagination cursor from a prior read-only query response.',
     );
   }
   return accepted(
     Object.freeze({
-      contractVersion: request.contractVersion.trim(),
+      contractVersion: request.contractVersion,
       resource: request.resource,
-      ...(request.cursor === undefined ? {} : { cursor: request.cursor.trim() }),
+      ...(request.cursor === undefined ? {} : { cursor: request.cursor }),
     }),
   );
 }
@@ -345,11 +352,18 @@ function validateClientConfig(config: ReadOnlyQueryClientConfig): BoundaryResult
 }
 
 export function validateReadOnlyBaseUrl(baseUrl: string, localBwsApiPort?: number): BoundaryResult<string> {
-  if (typeof baseUrl !== 'string' || baseUrl.trim().length === 0) {
+  if (typeof baseUrl !== 'string' || baseUrl.length === 0) {
     return blocked(
       'QUERY_BASE_URL_MISSING',
       'Read-only query API mode requires an explicit betting-win base URL.',
       'Explicit read-only betting-win API base URL.',
+    );
+  }
+  if (baseUrl !== baseUrl.trim()) {
+    return blocked(
+      'QUERY_BASE_URL_INVALID',
+      'Read-only query base URL must be canonical as supplied.',
+      'Canonical read-only betting-win API base URL.',
     );
   }
 
@@ -376,6 +390,13 @@ export function validateReadOnlyBaseUrl(baseUrl: string, localBwsApiPort?: numbe
       'QUERY_BASE_URL_CREDENTIALS_FORBIDDEN',
       'Read-only query base URL must not embed credentials.',
       'Credential-free read-only betting-win API base URL.',
+    );
+  }
+  if (parsed.pathname !== '/') {
+    return blocked(
+      'QUERY_BASE_URL_COMPONENTS_INVALID',
+      'Read-only query base URL must not include path components.',
+      'Authority-only read-only betting-win API base URL.',
     );
   }
   if (parsed.search.length > 0 || parsed.hash.length > 0) {

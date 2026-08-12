@@ -17,7 +17,7 @@ test('read-only query client exposes the BWS-140 boundary marker', () => {
 });
 
 test('read-only query client rejects malformed contract versions before config dereference escapes', () => {
-  for (const contractVersion of [undefined, 42, '   ']) {
+  for (const contractVersion of [undefined, 42, '   ', ' 1.0.0 ', '\t1.0.0']) {
     const result = createReadOnlyQueryApiClient({
       baseUrl: 'http://betting-win-query.test',
       contractVersion,
@@ -35,9 +35,63 @@ test('read-only query client rejects malformed contract versions before config d
   const request = buildReadOnlyQueryContractRequest(undefined as never);
   assert.equal(request.ok, false);
   assert.equal(request.blockers[0]?.code, 'QUERY_CONTRACT_REQUEST_INVALID');
+
+  const noncanonicalContract = buildReadOnlyQueryContractRequest({
+    contractVersion: ' 1.0.0 ',
+    resource: 'identity',
+  });
+  assert.equal(noncanonicalContract.ok, false);
+  assert.equal(noncanonicalContract.blockers[0]?.code, 'QUERY_CONTRACT_NOT_PINNED');
+});
+
+test('read-only query client rejects noncanonical cursors before fetch', async () => {
+  let fetchTouched = false;
+  const client = createReadOnlyQueryApiClient({
+    baseUrl: 'http://127.0.0.1:9999',
+    contractVersion: '1.0.0',
+    fetchImplementation: async () => {
+      fetchTouched = true;
+      throw new Error('fetch should not be called');
+    },
+    maxPageSize: 50,
+    retryBackoffMs: 5,
+    retryLimit: 1,
+    timeoutMs: 25,
+    upstreamLock: sampleUpstreamLock(),
+  });
+  assert.equal(client.ok, true);
+
+  const contractRequest = buildReadOnlyQueryContractRequest({
+    contractVersion: '1.0.0',
+    cursor: ' cursor.identity.1 ',
+    resource: 'identity',
+  });
+  assert.equal(contractRequest.ok, false);
+  assert.equal(contractRequest.blockers[0]?.code, 'QUERY_CURSOR_INVALID');
+
+  const queryResult = await client.value.queryIdentity({
+    cursor: ' cursor.identity.1 ',
+    pageSize: 1,
+  });
+  assert.equal(queryResult.ok, false);
+  assert.equal(queryResult.blockers[0]?.code, 'QUERY_CURSOR_INVALID');
+  assert.equal(fetchTouched, false);
 });
 
 test('read-only query client rejects invalid base URLs and explicit credentialed endpoints', () => {
+  const noncanonicalUrl = createReadOnlyQueryApiClient({
+    baseUrl: ' http://betting-win-query.test ',
+    contractVersion: '1.0.0',
+    fetchImplementation: globalThis.fetch.bind(globalThis),
+    maxPageSize: 50,
+    retryBackoffMs: 5,
+    retryLimit: 1,
+    timeoutMs: 25,
+    upstreamLock: sampleUpstreamLock(),
+  });
+  assert.equal(noncanonicalUrl.ok, false);
+  assert.equal(noncanonicalUrl.blockers[0]?.code, 'QUERY_BASE_URL_INVALID');
+
   const invalidUrl = createReadOnlyQueryApiClient({
     baseUrl: 'not-a-url',
     contractVersion: '1.0.0',
@@ -63,6 +117,25 @@ test('read-only query client rejects invalid base URLs and explicit credentialed
   });
   assert.equal(credentialedUrl.ok, false);
   assert.equal(credentialedUrl.blockers[0]?.code, 'QUERY_BASE_URL_CREDENTIALS_FORBIDDEN');
+
+  const pathBearingUrl = createReadOnlyQueryApiClient({
+    baseUrl: 'http://betting-win-query.test/read-only',
+    contractVersion: '1.0.0',
+    fetchImplementation: globalThis.fetch.bind(globalThis),
+    maxPageSize: 50,
+    retryBackoffMs: 5,
+    retryLimit: 1,
+    timeoutMs: 25,
+    upstreamLock: sampleUpstreamLock(),
+  });
+  assert.equal(pathBearingUrl.ok, false);
+  assert.deepEqual(pathBearingUrl.blockers, [
+    {
+      code: 'QUERY_BASE_URL_COMPONENTS_INVALID',
+      message: 'Read-only query base URL must not include path components.',
+      evidenceRequired: 'Authority-only read-only betting-win API base URL.',
+    },
+  ]);
 
   for (const baseUrl of [
     'http://127.0.0.1:4312',
@@ -142,7 +215,7 @@ test('read-only query client rejects invalid base URLs and explicit credentialed
 
   for (const localBwsApiPort of [1, 65_535]) {
     const validLocalBwsApiPort = createReadOnlyQueryApiClient({
-      baseUrl: 'http://betting-win-query.test/read-only',
+      baseUrl: 'http://betting-win-query.test',
       contractVersion: '1.0.0',
       fetchImplementation: globalThis.fetch.bind(globalThis),
       localBwsApiPort,
@@ -175,7 +248,7 @@ test('read-only query client rejects invalid base URLs and explicit credentialed
 test('read-only query client rejects unsupported per-resource filter keys before fetch', async () => {
   let fetchTouched = false;
   const client = createReadOnlyQueryApiClient({
-    baseUrl: 'http://127.0.0.1:9999/read-only',
+    baseUrl: 'http://127.0.0.1:9999',
     contractVersion: '1.0.0',
     fetchImplementation: async () => {
       fetchTouched = true;
@@ -205,7 +278,7 @@ test('read-only query client rejects unsupported per-resource filter keys before
 test('read-only query client rejects noncanonical per-resource filter values before fetch', async () => {
   let fetchTouched = false;
   const client = createReadOnlyQueryApiClient({
-    baseUrl: 'http://127.0.0.1:9999/read-only',
+    baseUrl: 'http://127.0.0.1:9999',
     contractVersion: '1.0.0',
     fetchImplementation: async () => {
       fetchTouched = true;
@@ -338,7 +411,7 @@ test('read-only query client negotiates identity queries and validates paginatio
 test('read-only query client rejects noncanonical identity rules and normalized response strings', async () => {
   let requestCount = 0;
   const client = createReadOnlyQueryApiClient({
-    baseUrl: 'http://betting-win-query.test/read-only',
+    baseUrl: 'http://betting-win-query.test',
     contractVersion: '1.0.0',
     fetchImplementation: async () => {
       requestCount += 1;
@@ -502,7 +575,7 @@ test('read-only query client fails closed on contract negotiation mismatches', a
 
 test('read-only query client rejects response provenance with mismatched lock verification time', async () => {
   const client = createReadOnlyQueryApiClient({
-    baseUrl: 'http://betting-win-query.test/read-only',
+    baseUrl: 'http://betting-win-query.test',
     contractVersion: '1.0.0',
     fetchImplementation: async () => new Response(`${JSON.stringify(createEnvelope('rules', {
       page: {
@@ -551,7 +624,7 @@ test('read-only query client rejects regex-shaped impossible response provenance
     Object.freeze({ verifiedAt: '2026-99-99T99:99:99.999Z' }),
   ] as const) {
     const client = createReadOnlyQueryApiClient({
-      baseUrl: 'http://betting-win-query.test/read-only',
+      baseUrl: 'http://betting-win-query.test',
       contractVersion: '1.0.0',
       fetchImplementation: async () => new Response(`${JSON.stringify(createEnvelope('rules', {
         page: {
@@ -805,7 +878,7 @@ test('read-only query client rejects missing normalized-record provenance and in
 
 test('read-only query client rejects response pageSize that differs from the requested pageSize', async () => {
   const client = createReadOnlyQueryApiClient({
-    baseUrl: 'http://betting-win-query.test/read-only',
+    baseUrl: 'http://betting-win-query.test',
     contractVersion: '1.0.0',
     fetchImplementation: async (input) => {
       const url = new URL(input);

@@ -177,6 +177,30 @@ test('extracted release verifies itself through the bundled release-packaging CL
     assert.equal(verification.semanticFingerprint, extraction.manifest.semanticFingerprint);
     assert.equal(verification.archiveCheck.verified, true);
     assert.ok(verification.verifiedChecks.includes('archive_checksum_and_inventory_verified'));
+    const evidenceIndexPath = join(scratchDirectory, 'runtime', 'bws-observability', 'evidence-index', 'index.jsonl');
+    assert.equal(existsSync(evidenceIndexPath), true);
+    const evidenceEntries = readFileSync(evidenceIndexPath, 'utf-8')
+      .trim()
+      .split('\n')
+      .map((line) => {
+        const entry = JSON.parse(line) as { artifactSchema: string; path: string; runtimeId: string };
+        return {
+          artifactSchema: entry.artifactSchema,
+          path: entry.path,
+          runtimeId: entry.runtimeId,
+        };
+      });
+    assert.deepEqual(
+      evidenceEntries.filter((entry) => entry.artifactSchema === 'bws.release_install_verification.v1'),
+      [
+        {
+          artifactSchema: 'bws.release_install_verification.v1',
+          path: 'install-verification.json',
+          runtimeId: extraction.manifest.releaseId,
+        },
+      ],
+    );
+    assert.equal(existsSync(join(scratchDirectory, 'runtime', 'bws-observability', 'evidence-index', 'latest.json')), true);
 
     const symlinkArchive = join(fixture.outputDirectory, 'tampered-symlink-release.tar.gz');
     createArchiveWithSymlinkMember(extraction.rootDirectory, extraction.manifest.releaseId, symlinkArchive);
@@ -224,6 +248,47 @@ test('extracted release verifies itself through the bundled release-packaging CL
         scratchDirectory: join(extraction.tempDirectory, 'scratch-mode-tamper'),
       })),
       /archive file executability mismatch/i,
+    );
+  } finally {
+    cleanupExtraction(extraction.tempDirectory);
+    rmSync(dirname(fakeBin), { force: true, recursive: true });
+  }
+});
+
+test('install verification rejects symlinked archive and checksum inputs', async () => {
+  const fixture = await getReleaseFixture();
+  const extraction = extractReleaseArchive(fixture.result.archiveFile);
+  const privateEnvFile = join(extraction.tempDirectory, 'private.env');
+  const fakeBin = createFakePostgreSqlClient('16.3');
+  try {
+    writePrivateEnvironmentFile(privateEnvFile, extraction.manifest, TEST_PASSWORD);
+
+    const archiveLink = join(fixture.outputDirectory, 'archive-input-link.tar.gz');
+    symlinkSync(fixture.result.archiveFile, archiveLink);
+    writeArchiveChecksumFile(archiveLink, fixture.result.archiveFile, `${archiveLink}.sha256`);
+    await assertRejectsWithoutSecret(
+      () => withFakePsqlPath(fakeBin, () => verifyBwsReleaseInstallation({
+        archivePath: archiveLink,
+        envFile: privateEnvFile,
+        releaseDirectory: extraction.rootDirectory,
+        scratchDirectory: join(extraction.tempDirectory, 'scratch-archive-input-link'),
+      })),
+      /Release archive.*symlink/i,
+    );
+
+    const archiveWithChecksumLink = join(fixture.outputDirectory, 'archive-checksum-input.tar.gz');
+    copyFileSync(fixture.result.archiveFile, archiveWithChecksumLink);
+    const checksumTarget = join(fixture.outputDirectory, 'archive-checksum-input-real.sha256');
+    writeArchiveChecksumFile(archiveWithChecksumLink, fixture.result.archiveFile, checksumTarget);
+    symlinkSync(checksumTarget, `${archiveWithChecksumLink}.sha256`);
+    await assertRejectsWithoutSecret(
+      () => withFakePsqlPath(fakeBin, () => verifyBwsReleaseInstallation({
+        archivePath: archiveWithChecksumLink,
+        envFile: privateEnvFile,
+        releaseDirectory: extraction.rootDirectory,
+        scratchDirectory: join(extraction.tempDirectory, 'scratch-checksum-input-link'),
+      })),
+      /Release archive checksum file.*symlink/i,
     );
   } finally {
     cleanupExtraction(extraction.tempDirectory);
@@ -441,6 +506,54 @@ test('release packaging rejects repo-local source manifest symlink entries befor
     );
   } finally {
     rmSync(dir, { force: true, recursive: true });
+  }
+});
+
+test('release packaging rejects forbidden SOURCE_MANIFEST entries before payload staging', async () => {
+  for (const forbiddenPath of [
+    '.env',
+    'artifacts/private.json',
+    'logs/app.log',
+    'node_modules/leak.js',
+    'runtime/state.json',
+  ]) {
+    const fixture = createMinimalReleaseRepositoryFixture(`release forbidden manifest ${forbiddenPath} fixture`);
+    try {
+      const forbiddenContents = 'forbidden release metadata\n';
+      const absoluteForbiddenPath = join(fixture.repositoryRoot, forbiddenPath);
+      mkdirSync(dirname(absoluteForbiddenPath), { recursive: true });
+      writeFileSync(absoluteForbiddenPath, forbiddenContents, 'utf-8');
+      writeFileSync(
+        join(fixture.repositoryRoot, 'SOURCE_MANIFEST.json'),
+        JSON.stringify(
+          {
+            schema: 'betting-win-surebet-source-manifest-v1',
+            generated: '2026-07-02T00:00:00Z',
+            overlay: fixture.overlay,
+            files: [
+              {
+                path: forbiddenPath,
+                sha256: createHash('sha256').update(forbiddenContents).digest('hex'),
+                size: Buffer.byteLength(forbiddenContents, 'utf-8'),
+              },
+            ],
+          },
+          null,
+          2,
+        ) + '\n',
+        'utf-8',
+      );
+
+      await assert.rejects(
+        () => createBwsReleasePackage({
+          outputDirectory: join(fixture.repositoryRoot, 'artifacts', 'out'),
+          repositoryRoot: fixture.repositoryRoot,
+        }),
+        new RegExp(`SOURCE_MANIFEST\\.json contains a forbidden release source path: ${escapeRegExp(forbiddenPath)}`, 'u'),
+      );
+    } finally {
+      rmSync(fixture.tempDirectory, { force: true, recursive: true });
+    }
   }
 });
 
@@ -680,6 +793,11 @@ function createArchiveWithSymlinkMember(releaseDirectory: string, releaseId: str
   );
   const digest = createHash('sha256').update(readFileSync(archivePath)).digest('hex');
   writeFileSync(`${archivePath}.sha256`, `${digest}  ${basename(archivePath)}\n`, 'utf-8');
+}
+
+function writeArchiveChecksumFile(archivePath: string, digestSourcePath: string, checksumPath: string): void {
+  const digest = createHash('sha256').update(readFileSync(digestSourcePath)).digest('hex');
+  writeFileSync(checksumPath, `${digest}  ${basename(archivePath)}\n`, 'utf-8');
 }
 
 function createArchiveWithTamperedMemberContent(
@@ -933,7 +1051,11 @@ function semanticFingerprintForManifest(manifest: BwsReleaseManifest): string {
     source: manifest.source,
     templates: manifest.templates,
     upstreamLock: manifest.upstreamLock,
-  })).digest('hex');
+})).digest('hex');
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 function writePrivateEnvironmentFile(

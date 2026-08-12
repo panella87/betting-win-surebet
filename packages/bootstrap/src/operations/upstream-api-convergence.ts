@@ -20,6 +20,7 @@ import {
 } from '../../../upstream/src/index.js';
 import {
   createReadOnlyQueryApiClient,
+  validateReadOnlyBaseUrl,
   type ReadOnlyQueryApiClient,
   type ReadOnlyQueryFetchLike,
   type ReadOnlyQueryResponseEnvelope,
@@ -170,9 +171,45 @@ export function resolveBwsUpstreamApiConvergenceConfig(
 
   const resolvedRepositoryRoot = realpathSync(repositoryRoot);
   const upstreamRepoPath = requireNonEmptyString(environment.BETTING_WIN_REPO_PATH, 'BETTING_WIN_REPO_PATH');
+  const configuredLockPath = requireNonEmptyString(environment[BWS_UPSTREAM_LOCK_PATH_ENV], BWS_UPSTREAM_LOCK_PATH_ENV);
+  const checkpointId = requireDeterministicId(
+    environment[BWS_UPSTREAM_API_CHECKPOINT_ID_ENV],
+    BWS_UPSTREAM_API_CHECKPOINT_ID_ENV,
+  );
+  const contractVersion = requireNonEmptyString(
+    environment[BWS_UPSTREAM_API_CONTRACT_VERSION_ENV],
+    BWS_UPSTREAM_API_CONTRACT_VERSION_ENV,
+  );
+  const localBwsApiPort = environment[BWS_API_PORT_ENV] === undefined
+    ? undefined
+    : requireTcpPortString(environment[BWS_API_PORT_ENV], BWS_API_PORT_ENV);
+  const baseUrl = requireReadOnlyBaseUrl(
+    requireNonEmptyString(environment[BWS_UPSTREAM_API_BASE_URL_ENV], BWS_UPSTREAM_API_BASE_URL_ENV),
+    localBwsApiPort,
+  );
+  const maxPagesPerResource = requirePositiveIntegerString(
+    environment[BWS_UPSTREAM_API_MAX_PAGES_PER_RESOURCE_ENV],
+    BWS_UPSTREAM_API_MAX_PAGES_PER_RESOURCE_ENV,
+  );
+  const pageSize = requirePositiveIntegerString(
+    environment[BWS_UPSTREAM_API_PAGE_SIZE_ENV],
+    BWS_UPSTREAM_API_PAGE_SIZE_ENV,
+  );
+  const retryBackoffMs = requirePositiveIntegerString(
+    environment[BWS_UPSTREAM_API_RETRY_BACKOFF_MS_ENV],
+    BWS_UPSTREAM_API_RETRY_BACKOFF_MS_ENV,
+  );
+  const retryLimit = requireNonNegativeIntegerString(
+    environment[BWS_UPSTREAM_API_RETRY_LIMIT_ENV],
+    BWS_UPSTREAM_API_RETRY_LIMIT_ENV,
+  );
+  const timeoutMs = requirePositiveIntegerString(
+    environment[BWS_UPSTREAM_API_TIMEOUT_MS_ENV],
+    BWS_UPSTREAM_API_TIMEOUT_MS_ENV,
+  );
   const lockPath = requireRepositoryFile(
     resolvedRepositoryRoot,
-    requireNonEmptyString(environment[BWS_UPSTREAM_LOCK_PATH_ENV], BWS_UPSTREAM_LOCK_PATH_ENV),
+    configuredLockPath,
     BWS_UPSTREAM_LOCK_PATH_ENV,
   );
   const upstreamLock = verifyBettingWinUpstreamLock(
@@ -184,41 +221,18 @@ export function resolveBwsUpstreamApiConvergenceConfig(
   );
 
   return Object.freeze({
-    checkpointId: requireDeterministicId(
-      environment[BWS_UPSTREAM_API_CHECKPOINT_ID_ENV],
-      BWS_UPSTREAM_API_CHECKPOINT_ID_ENV,
-    ),
+    checkpointId,
     mode: 'api',
     persistence: resolveSurebetPersistenceConfig(environment),
     query: Object.freeze({
-      baseUrl: requireNonEmptyString(environment[BWS_UPSTREAM_API_BASE_URL_ENV], BWS_UPSTREAM_API_BASE_URL_ENV),
-      contractVersion: requireNonEmptyString(
-        environment[BWS_UPSTREAM_API_CONTRACT_VERSION_ENV],
-        BWS_UPSTREAM_API_CONTRACT_VERSION_ENV,
-      ),
-      ...(environment[BWS_API_PORT_ENV] === undefined
-        ? {}
-        : { localBwsApiPort: requireTcpPortString(environment[BWS_API_PORT_ENV], BWS_API_PORT_ENV) }),
-      maxPagesPerResource: requirePositiveIntegerString(
-        environment[BWS_UPSTREAM_API_MAX_PAGES_PER_RESOURCE_ENV],
-        BWS_UPSTREAM_API_MAX_PAGES_PER_RESOURCE_ENV,
-      ),
-      pageSize: requirePositiveIntegerString(
-        environment[BWS_UPSTREAM_API_PAGE_SIZE_ENV],
-        BWS_UPSTREAM_API_PAGE_SIZE_ENV,
-      ),
-      retryBackoffMs: requirePositiveIntegerString(
-        environment[BWS_UPSTREAM_API_RETRY_BACKOFF_MS_ENV],
-        BWS_UPSTREAM_API_RETRY_BACKOFF_MS_ENV,
-      ),
-      retryLimit: requireNonNegativeIntegerString(
-        environment[BWS_UPSTREAM_API_RETRY_LIMIT_ENV],
-        BWS_UPSTREAM_API_RETRY_LIMIT_ENV,
-      ),
-      timeoutMs: requirePositiveIntegerString(
-        environment[BWS_UPSTREAM_API_TIMEOUT_MS_ENV],
-        BWS_UPSTREAM_API_TIMEOUT_MS_ENV,
-      ),
+      baseUrl,
+      contractVersion,
+      ...(localBwsApiPort === undefined ? {} : { localBwsApiPort }),
+      maxPagesPerResource,
+      pageSize,
+      retryBackoffMs,
+      retryLimit,
+      timeoutMs,
     }),
     repositoryRoot: resolvedRepositoryRoot,
     upstream: Object.freeze({
@@ -968,10 +982,18 @@ function requireLiteral(value: string | undefined, name: string, expected: strin
 }
 
 function requireNonEmptyString(value: unknown, name: string): string {
-  if (typeof value !== 'string' || value.trim().length === 0) {
-    throw new Error(`${name} must be a non-empty string.`);
+  if (typeof value !== 'string' || value.length === 0 || value !== value.trim()) {
+    throw new Error(`${name} must be a canonical non-empty string.`);
   }
-  return value.trim();
+  return value;
+}
+
+function requireReadOnlyBaseUrl(value: string, localBwsApiPort: number | undefined): string {
+  const result = validateReadOnlyBaseUrl(value, localBwsApiPort);
+  if (!result.ok) {
+    throw new Error(result.blockers[0]?.message ?? `${BWS_UPSTREAM_API_BASE_URL_ENV} is invalid.`);
+  }
+  return result.value;
 }
 
 function requireRepositoryFile(repositoryRoot: string, value: string, name: string): string {
@@ -999,10 +1021,10 @@ function requireDeterministicId(value: unknown, name: string): string {
 }
 
 function requirePositiveIntegerString(value: unknown, name: string): number {
-  if (typeof value !== 'string' || !/^\d+$/.test(value.trim())) {
+  if (typeof value !== 'string' || !/^\d+$/.test(value)) {
     throw new Error(`${name} must be a base-10 positive integer.`);
   }
-  const parsed = Number.parseInt(value.trim(), 10);
+  const parsed = Number.parseInt(value, 10);
   if (!Number.isSafeInteger(parsed) || parsed <= 0) {
     throw new Error(`${name} must be a base-10 positive integer.`);
   }
@@ -1018,10 +1040,10 @@ function requireTcpPortString(value: unknown, name: string): number {
 }
 
 function requireNonNegativeIntegerString(value: unknown, name: string): number {
-  if (typeof value !== 'string' || !/^\d+$/.test(value.trim())) {
+  if (typeof value !== 'string' || !/^\d+$/.test(value)) {
     throw new Error(`${name} must be a base-10 non-negative integer.`);
   }
-  const parsed = Number.parseInt(value.trim(), 10);
+  const parsed = Number.parseInt(value, 10);
   if (!Number.isSafeInteger(parsed) || parsed < 0) {
     throw new Error(`${name} must be a base-10 non-negative integer.`);
   }

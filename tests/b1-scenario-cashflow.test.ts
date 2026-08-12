@@ -449,6 +449,43 @@ function venueDriftRows(): B1ScenarioCashflowMatrix['rows'] {
   ]);
 }
 
+function stakeDriftRows(): B1ScenarioCashflowMatrix['rows'] {
+  return Object.freeze([
+    Object.freeze({
+      scenarioId: 'b1_terminal:event-001:moneyline:away',
+      winningSelectionEquivalenceKey: 'event-001:moneyline:away',
+      selectionEquivalenceKey: 'event-001:moneyline:away',
+      venueOrBookmakerId: 'venue-b',
+      stakeMinor: 1_000n,
+      payoutMinor: 3_600n,
+    }),
+    Object.freeze({
+      scenarioId: 'b1_terminal:event-001:moneyline:away',
+      winningSelectionEquivalenceKey: 'event-001:moneyline:away',
+      selectionEquivalenceKey: 'event-001:moneyline:home',
+      venueOrBookmakerId: 'venue-a',
+      stakeMinor: 1_125n,
+      payoutMinor: 0n,
+    }),
+    Object.freeze({
+      scenarioId: 'b1_terminal:event-001:moneyline:home',
+      winningSelectionEquivalenceKey: 'event-001:moneyline:home',
+      selectionEquivalenceKey: 'event-001:moneyline:away',
+      venueOrBookmakerId: 'venue-b',
+      stakeMinor: 1_001n,
+      payoutMinor: 0n,
+    }),
+    Object.freeze({
+      scenarioId: 'b1_terminal:event-001:moneyline:home',
+      winningSelectionEquivalenceKey: 'event-001:moneyline:home',
+      selectionEquivalenceKey: 'event-001:moneyline:home',
+      venueOrBookmakerId: 'venue-a',
+      stakeMinor: 1_125n,
+      payoutMinor: 3_600n,
+    }),
+  ]);
+}
+
 function validThreeWayTerms(): readonly B1ScenarioCashflowLegTerms[] {
   return Object.freeze([
     Object.freeze({
@@ -511,6 +548,19 @@ test('B1 scenario cash-flow validation rejects selection venue drift across term
       code: 'B1_SCENARIO_CASHFLOW_LEG_KEY_DRIFT',
       message: 'B1 scenario cash-flow validation requires each selection to keep one stable venue across terminal scenarios.',
       evidenceRequired: 'Stable B1 scenario-by-leg-key coverage keyed by selection_equivalence_key and venue_or_bookmaker_id.',
+    },
+  ]);
+});
+
+test('B1 scenario cash-flow validation rejects per-leg stake drift across terminal scenarios', () => {
+  const result = validateB1ScenarioCashflowMatrix(stakeDriftRows());
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'B1_SCENARIO_CASHFLOW_STAKE_DRIFT',
+      message: 'B1 scenario cash-flow validation requires each leg to keep one stable stake across terminal scenarios.',
+      evidenceRequired: 'Stable B1 scenario-by-leg-key stake amounts keyed by selection_equivalence_key and venue_or_bookmaker_id.',
     },
   ]);
 });

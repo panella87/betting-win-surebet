@@ -146,6 +146,7 @@ export function solveB1GeneralizedStakeVector(
 
   const maxTargetPayoutMinor = maxTargetPayout(candidate, policyValidation.value);
   let targetPayoutMinor = initialTargetPayout(candidate, policyValidation.value);
+  let roundingLossBlocker: BoundaryResult<never> | undefined;
   for (let iteration = 0; iteration < policy.maxSearchIterations; iteration += 1) {
     if (targetPayoutMinor > maxTargetPayoutMinor) {
       return blocked(
@@ -160,11 +161,16 @@ export function solveB1GeneralizedStakeVector(
       return stakes;
     }
     if (stakes.value.totalRoundingLossMinor > policy.maximumTotalRoundingLossMinor) {
-      return blocked(
+      roundingLossBlocker = blocked(
         'B1_STAKE_VECTOR_ROUNDING_LOSS',
         'B1 generalized stake-vector solving rejects stake rounding loss above the explicit policy limit.',
         'B1 stake steps fine enough to keep total rounding loss within policy.',
       );
+      const nextTargetPayoutMinor = minimumStakePayout(stakes.value.stakes);
+      targetPayoutMinor = nextTargetPayoutMinor > targetPayoutMinor
+        ? nextTargetPayoutMinor
+        : targetPayoutMinor + 1n;
+      continue;
     }
 
     const scenarioCashflowMatrix = buildB1ScenarioCashflowMatrix(
@@ -208,6 +214,9 @@ export function solveB1GeneralizedStakeVector(
     targetPayoutMinor += deficitMinor;
   }
 
+  if (roundingLossBlocker !== undefined) {
+    return roundingLossBlocker;
+  }
   return blocked(
     'B1_STAKE_VECTOR_SEARCH_EXHAUSTED',
     'B1 generalized stake-vector solving exhausted the explicit bounded integer search.',
@@ -469,6 +478,20 @@ function minimumScenarioNet(scenarioNets: readonly B1StakeVectorScenarioNet[]): 
   for (const scenarioNet of scenarioNets.slice(1)) {
     if (scenarioNet.netMinor < minimum) {
       minimum = scenarioNet.netMinor;
+    }
+  }
+  return minimum;
+}
+
+function minimumStakePayout(stakes: readonly B1SolvedStakeVectorLeg[]): bigint {
+  const first = stakes[0];
+  if (first === undefined) {
+    throw new Error('B1 generalized stake-vector target advance requires solved stakes.');
+  }
+  let minimum = first.payoutIfWonMinor;
+  for (const stake of stakes.slice(1)) {
+    if (stake.payoutIfWonMinor < minimum) {
+      minimum = stake.payoutIfWonMinor;
     }
   }
   return minimum;

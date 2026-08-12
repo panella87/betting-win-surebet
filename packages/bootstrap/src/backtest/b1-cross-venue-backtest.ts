@@ -249,6 +249,8 @@ function validateB1BacktestFixtureRows(rows: readonly B1MultiVenueMarketRow[]): 
       'voidRuleId',
       'outcomeName',
       'outcomeSide',
+      'providerGenerationId',
+      'normalizedEvidenceId',
       'snapshotTimeUtc',
       'retrievedAtUtc',
       'decimalOdds',

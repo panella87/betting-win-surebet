@@ -5,6 +5,7 @@ import { copyFileSync, mkdtempSync, mkdirSync, readFileSync, rmSync, symlinkSync
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
+  BWS_API_PORT_ENV,
   BWS_UPSTREAM_API_BASE_URL_ENV,
   BWS_UPSTREAM_API_CHECKPOINT_ID_ENV,
   BWS_UPSTREAM_API_CONTRACT_VERSION_ENV,
@@ -516,6 +517,61 @@ test('upstream API convergence config rejects lock paths that escape the reposit
   }
 });
 
+test('upstream API convergence config rejects whitespace-wrapped canonical env inputs before lock verification', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'bws-api-canonical-env-'));
+  const repositoryRoot = join(tempRoot, 'betting-win-surebet');
+  try {
+    mkdirSync(repositoryRoot, { recursive: true });
+    const baseEnvironment = {
+      BETTING_WIN_REPO_PATH: join(tempRoot, 'betting-win'),
+      [BWS_UPSTREAM_API_BASE_URL_ENV]: 'http://127.0.0.1:4301',
+      [BWS_UPSTREAM_API_CHECKPOINT_ID_ENV]: 'checkpoint-api-001',
+      [BWS_UPSTREAM_API_CONTRACT_VERSION_ENV]: '1.0.0',
+      [BWS_UPSTREAM_API_MAX_PAGES_PER_RESOURCE_ENV]: '2',
+      [BWS_UPSTREAM_API_PAGE_SIZE_ENV]: '1',
+      [BWS_UPSTREAM_API_RETRY_BACKOFF_MS_ENV]: '5',
+      [BWS_UPSTREAM_API_RETRY_LIMIT_ENV]: '1',
+      [BWS_UPSTREAM_API_TIMEOUT_MS_ENV]: '1000',
+      [BWS_UPSTREAM_LOCK_PATH_ENV]: 'config/betting-win.upstream.lock.json',
+      [BWS_UPSTREAM_MODE_ENV]: 'api',
+      SUREBET_EXECUTION_ENABLED: 'false',
+      SUREBET_PG_DATABASE: 'surebet',
+      SUREBET_PG_HOST: '127.0.0.1',
+      SUREBET_PG_PORT: '5432',
+      SUREBET_PG_USER: 'surebet',
+      SUREBET_PROVIDER_CONNECTIONS: 'disabled',
+      SUREBET_RUNTIME_MODE: 'paper',
+    } as const;
+
+    for (const [key, value, message] of [
+      [BWS_UPSTREAM_API_BASE_URL_ENV, ' http://127.0.0.1:4301 ', /must be a canonical non-empty string/],
+      [BWS_UPSTREAM_API_CHECKPOINT_ID_ENV, ' checkpoint-api-001 ', /must be a canonical non-empty string/],
+      [BWS_UPSTREAM_LOCK_PATH_ENV, ' config\/betting-win.upstream.lock.json ', /must be a canonical non-empty string/],
+      [BWS_UPSTREAM_API_CONTRACT_VERSION_ENV, ' 1.0.0 ', /must be a canonical non-empty string/],
+      [BWS_UPSTREAM_API_MAX_PAGES_PER_RESOURCE_ENV, ' 2 ', /must be a base-10 positive integer/],
+      [BWS_UPSTREAM_API_PAGE_SIZE_ENV, ' 1 ', /must be a base-10 positive integer/],
+      [BWS_UPSTREAM_API_RETRY_BACKOFF_MS_ENV, ' 5 ', /must be a base-10 positive integer/],
+      [BWS_UPSTREAM_API_RETRY_LIMIT_ENV, ' 1 ', /must be a base-10 non-negative integer/],
+      [BWS_UPSTREAM_API_TIMEOUT_MS_ENV, ' 1000 ', /must be a base-10 positive integer/],
+      [BWS_API_PORT_ENV, ' 4301 ', /must be a base-10 positive integer/],
+      [BWS_UPSTREAM_API_BASE_URL_ENV, 'https://user:pass@example.test/read-only', /must not embed credentials/],
+      [BWS_UPSTREAM_API_BASE_URL_ENV, 'http://betting-win-query.test/read-only', /must not include path components/],
+      [BWS_UPSTREAM_API_BASE_URL_ENV, 'http://0.0.0.0:4301', /must not target an unspecified bind host/],
+      [BWS_UPSTREAM_API_BASE_URL_ENV, 'http://127.0.0.1:4312', /must not target the local BWS API listener/],
+    ] as const) {
+      assert.throws(
+        () => resolveBwsUpstreamApiConvergenceConfig({
+          ...baseEnvironment,
+          [key]: value,
+        }, repositoryRoot),
+        message,
+      );
+    }
+  } finally {
+    rmSync(tempRoot, { force: true, recursive: true });
+  }
+});
+
 test('upstream API convergence config and CLI help stay explicit about api mode and forbid fallback inputs or secret-style settings', async () => {
   const fixture = createBettingWinFixture();
   try {
@@ -591,18 +647,13 @@ test('upstream API convergence config and CLI help stay explicit about api mode 
       'http://localhost:4312',
       'http://[::1]:4312',
     ]) {
-      const localConfig = resolveBwsUpstreamApiConvergenceConfig({
-        ...baseEnvironment,
-        [BWS_UPSTREAM_API_BASE_URL_ENV]: apiBaseUrl,
-      }, fixture.bwsRoot);
-      const result = await runBwsUpstreamApiConvergencePass({
-        config: localConfig,
-        fetchImplementation: async () => {
-          throw new Error('fetch should not be called for local BWS API authority');
-        },
-      });
-      assert.equal(result.ok, false);
-      assert.equal(result.blockers[0]?.code, 'QUERY_BASE_URL_LOCAL_BWS_API_FORBIDDEN');
+      assert.throws(
+        () => resolveBwsUpstreamApiConvergenceConfig({
+          ...baseEnvironment,
+          [BWS_UPSTREAM_API_BASE_URL_ENV]: apiBaseUrl,
+        }, fixture.bwsRoot),
+        /must not target the local BWS API listener/,
+      );
     }
 
     for (const apiBaseUrl of [
@@ -611,32 +662,22 @@ test('upstream API convergence config and CLI help stay explicit about api mode 
       'http://0.0.0.0:4302',
       'http://[::]:4302',
     ]) {
-      const unspecifiedHostConfig = resolveBwsUpstreamApiConvergenceConfig({
-        ...baseEnvironment,
-        [BWS_UPSTREAM_API_BASE_URL_ENV]: apiBaseUrl,
-      }, fixture.bwsRoot);
-      const result = await runBwsUpstreamApiConvergencePass({
-        config: unspecifiedHostConfig,
-        fetchImplementation: async () => {
-          throw new Error('fetch should not be called for unspecified bind host');
-        },
-      });
-      assert.equal(result.ok, false);
-      assert.equal(result.blockers[0]?.code, 'QUERY_BASE_URL_UNSPECIFIED_HOST_FORBIDDEN');
+      assert.throws(
+        () => resolveBwsUpstreamApiConvergenceConfig({
+          ...baseEnvironment,
+          [BWS_UPSTREAM_API_BASE_URL_ENV]: apiBaseUrl,
+        }, fixture.bwsRoot),
+        /must not target an unspecified bind host/,
+      );
     }
 
-    const configuredLocalConfig = resolveBwsUpstreamApiConvergenceConfig({
-      ...baseEnvironment,
-      BWS_API_PORT: '4301',
-    }, fixture.bwsRoot);
-    const configuredLocalResult = await runBwsUpstreamApiConvergencePass({
-      config: configuredLocalConfig,
-      fetchImplementation: async () => {
-        throw new Error('fetch should not be called for configured local BWS API authority');
-      },
-    });
-    assert.equal(configuredLocalResult.ok, false);
-    assert.equal(configuredLocalResult.blockers[0]?.code, 'QUERY_BASE_URL_LOCAL_BWS_API_FORBIDDEN');
+    assert.throws(
+      () => resolveBwsUpstreamApiConvergenceConfig({
+        ...baseEnvironment,
+        BWS_API_PORT: '4301',
+      }, fixture.bwsRoot),
+      /must not target the local BWS API listener/,
+    );
 
     assert.throws(
       () => resolveBwsUpstreamApiConvergenceConfig({

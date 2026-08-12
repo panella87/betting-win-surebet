@@ -25,13 +25,46 @@ test('B1 deterministic fixture parser accepts local contract rows without upstre
   assert.equal(result.value.runtimeEvidence, false);
   assert.equal(result.value.upstreamReadiness, B1_UPSTREAM_READINESS_BLOCKER);
   assert.equal(result.value.manifest.contractSchema, B1_MULTI_VENUE_MARKETS_SCHEMA);
+  assert.deepEqual(result.value.manifest.providerGenerationIds, ['generation-001']);
+  assert.deepEqual(result.value.manifest.sourceLineageRecordIds, ['lineage-001', 'lineage-002']);
+  assert.deepEqual(result.value.manifest.normalizedEvidenceIds, ['normalized-001']);
   assert.equal(result.value.rows.length, 2);
   const firstRow = result.value.rows[0];
   assert.ok(firstRow);
   assert.equal(firstRow.marketEquivalenceKey, 'event-001:moneyline:full-game');
   assert.equal(firstRow.selectionEquivalenceKey, 'event-001:moneyline:home');
+  assert.equal(firstRow.providerGenerationId, 'generation-001');
+  assert.equal(firstRow.normalizedEvidenceId, 'normalized-001');
   assert.equal(firstRow.quoteAgeMs, 1250n);
   assert.equal(firstRow.availableSizeMinor, 1200000n);
+});
+
+test('B1 deterministic fixture parser rejects camelCase-only manifest contracts', () => {
+  const fixture = readFixture();
+  fixture.manifest = {
+    contractSchema: B1_MULTI_VENUE_MARKETS_SCHEMA,
+    contractAlias: 'betting-win-b1-multi-venue-markets.v1',
+    surebetProfile: 'b1_cross_venue_offline_falsification_v1',
+    sourceManifestHash: 'a'.repeat(64),
+    upstreamLockFingerprint: 'b'.repeat(64),
+    providerGenerationIds: ['generation-001'],
+    sourceLineageRecordIds: ['lineage-001', 'lineage-002'],
+    normalizedEvidenceIds: ['normalized-001'],
+    retentionPolicy: 'repo_local_test_fixture_only',
+    licenseScope: 'private_offline_validation_only',
+    knownCoverageGaps: ['not_upstream_runtime_evidence'],
+  };
+
+  const result = parseBettingWinB1DeterministicFixture(fixture);
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.blockers, [
+    {
+      code: 'B1_CONTRACT_SCHEMA_MISMATCH',
+      message: 'B1 manifest must use the accepted schema marker.',
+      evidenceRequired: 'betting-win B1 multi-venue schema marker.',
+    },
+  ]);
 });
 
 test('B1 deterministic fixture parser accepts signed spread line values', () => {
@@ -183,7 +216,7 @@ test('B1 deterministic fixture parser rejects unknown settlement compatibility',
 test('B1 deterministic fixture parser rejects missing manifest lineage evidence', () => {
   const fixture = readFixture();
   const manifest = fixture.manifest as Record<string, unknown>;
-  manifest.sourceLineageRecordIds = [];
+  manifest.source_lineage_record_ids = [];
 
   const result = parseBettingWinB1DeterministicFixture(fixture);
 
@@ -191,7 +224,7 @@ test('B1 deterministic fixture parser rejects missing manifest lineage evidence'
   assert.deepEqual(result.blockers, [
     {
       code: 'B1_SOURCE_LINEAGE_RECORD_IDS_MISSING',
-      message: 'B1 manifest sourceLineageRecordIds must contain at least one id.',
+      message: 'B1 manifest source_lineage_record_ids must contain at least one id.',
       evidenceRequired: 'B1 source lineage record ids from betting-win.',
     },
   ]);
@@ -200,7 +233,7 @@ test('B1 deterministic fixture parser rejects missing manifest lineage evidence'
 test('B1 deterministic fixture parser rejects noncanonical manifest metadata identifiers', () => {
   const whitespaceFixture = readFixture();
   const whitespaceManifest = whitespaceFixture.manifest as Record<string, unknown>;
-  whitespaceManifest.providerGenerationIds = [' generation-001 '];
+  whitespaceManifest.provider_generation_ids = [' generation-001 '];
 
   const whitespaceResult = parseBettingWinB1DeterministicFixture(whitespaceFixture);
 
@@ -208,14 +241,14 @@ test('B1 deterministic fixture parser rejects noncanonical manifest metadata ide
   assert.deepEqual(whitespaceResult.blockers, [
     {
       code: 'B1_PROVIDER_GENERATION_IDS_MISSING',
-      message: 'B1 manifest providerGenerationIds must contain at least one id.',
+      message: 'B1 manifest provider_generation_ids must contain at least one id.',
       evidenceRequired: 'B1 provider generation ids from betting-win.',
     },
   ]);
 
   const duplicateFixture = readFixture();
   const duplicateManifest = duplicateFixture.manifest as Record<string, unknown>;
-  duplicateManifest.sourceLineageRecordIds = ['lineage-001', 'lineage-001'];
+  duplicateManifest.source_lineage_record_ids = ['lineage-001', 'lineage-001'];
 
   const duplicateResult = parseBettingWinB1DeterministicFixture(duplicateFixture);
 
@@ -223,14 +256,14 @@ test('B1 deterministic fixture parser rejects noncanonical manifest metadata ide
   assert.deepEqual(duplicateResult.blockers, [
     {
       code: 'B1_SOURCE_LINEAGE_RECORD_IDS_MISSING',
-      message: 'B1 manifest sourceLineageRecordIds must contain at least one id.',
+      message: 'B1 manifest source_lineage_record_ids must contain at least one id.',
       evidenceRequired: 'B1 source lineage record ids from betting-win.',
     },
   ]);
 
   const uppercaseHashFixture = readFixture();
   const uppercaseHashManifest = uppercaseHashFixture.manifest as Record<string, unknown>;
-  uppercaseHashManifest.sourceManifestHash = 'A'.repeat(64);
+  uppercaseHashManifest.source_manifest_hash = 'A'.repeat(64);
 
   const uppercaseHashResult = parseBettingWinB1DeterministicFixture(uppercaseHashFixture);
 
@@ -238,16 +271,48 @@ test('B1 deterministic fixture parser rejects noncanonical manifest metadata ide
   assert.deepEqual(uppercaseHashResult.blockers, [
     {
       code: 'B1_SOURCE_MANIFEST_HASH_INVALID',
-      message: 'B1 manifest sourceManifestHash must be 64 hexadecimal characters.',
+      message: 'B1 manifest source_manifest_hash must be 64 hexadecimal characters.',
       evidenceRequired: 'B1 source manifest hash.',
     },
   ]);
 });
 
-test('B1 deterministic fixture parser binds manifest lineage ids to row lineage ids', () => {
+test('B1 deterministic fixture parser binds manifest provenance ids to row evidence ids', () => {
+  const fixtureWithUnusedProviderGeneration = readFixture();
+  const providerManifest = fixtureWithUnusedProviderGeneration.manifest as Record<string, unknown>;
+  providerManifest.provider_generation_ids = ['generation-001', 'generation-unused'];
+
+  const providerUnusedResult = parseBettingWinB1DeterministicFixture(fixtureWithUnusedProviderGeneration);
+
+  assert.equal(providerUnusedResult.ok, false);
+  assert.deepEqual(providerUnusedResult.blockers, [
+    {
+      code: 'B1_PROVIDER_GENERATION_MANIFEST_ID_UNUSED',
+      message: 'B1 manifest provider_generation_ids must be represented by fixture rows.',
+      evidenceRequired: 'Every manifest provider generation id represented by at least one B1 row.',
+    },
+  ]);
+
+  const fixtureWithUnboundRowProviderGeneration = readFixture();
+  const providerRows = fixtureWithUnboundRowProviderGeneration.rows as Array<Record<string, unknown>>;
+  const providerRow = providerRows[0];
+  assert.ok(providerRow);
+  providerRow.provider_generation_id = 'generation-not-in-manifest';
+
+  const providerRowResult = parseBettingWinB1DeterministicFixture(fixtureWithUnboundRowProviderGeneration);
+
+  assert.equal(providerRowResult.ok, false);
+  assert.deepEqual(providerRowResult.blockers, [
+    {
+      code: 'B1_PROVIDER_GENERATION_ROW_NOT_IN_MANIFEST',
+      message: 'B1 fixture rows must be bound to manifest provider_generation_ids.',
+      evidenceRequired: 'Every row provider_generation_id represented in the B1 manifest provider generation ids.',
+    },
+  ]);
+
   const fixtureWithUnusedManifestLineage = readFixture();
   const unusedManifest = fixtureWithUnusedManifestLineage.manifest as Record<string, unknown>;
-  unusedManifest.sourceLineageRecordIds = ['lineage-001', 'lineage-002', 'lineage-unused'];
+  unusedManifest.source_lineage_record_ids = ['lineage-001', 'lineage-002', 'lineage-unused'];
 
   const unusedResult = parseBettingWinB1DeterministicFixture(fixtureWithUnusedManifestLineage);
 
@@ -255,7 +320,7 @@ test('B1 deterministic fixture parser binds manifest lineage ids to row lineage 
   assert.deepEqual(unusedResult.blockers, [
     {
       code: 'B1_SOURCE_LINEAGE_MANIFEST_ID_UNUSED',
-      message: 'B1 manifest sourceLineageRecordIds must be represented by fixture rows.',
+      message: 'B1 manifest source_lineage_record_ids must be represented by fixture rows.',
       evidenceRequired: 'Every manifest source lineage id represented by at least one B1 row.',
     },
   ]);
@@ -272,8 +337,40 @@ test('B1 deterministic fixture parser binds manifest lineage ids to row lineage 
   assert.deepEqual(rowResult.blockers, [
     {
       code: 'B1_SOURCE_LINEAGE_ROW_NOT_IN_MANIFEST',
-      message: 'B1 fixture rows must be bound to manifest sourceLineageRecordIds.',
+      message: 'B1 fixture rows must be bound to manifest source_lineage_record_ids.',
       evidenceRequired: 'Every row source_lineage_id represented in the B1 manifest lineage ids.',
+    },
+  ]);
+
+  const fixtureWithUnusedNormalizedEvidence = readFixture();
+  const normalizedManifest = fixtureWithUnusedNormalizedEvidence.manifest as Record<string, unknown>;
+  normalizedManifest.normalized_evidence_ids = ['normalized-001', 'normalized-unused'];
+
+  const normalizedUnusedResult = parseBettingWinB1DeterministicFixture(fixtureWithUnusedNormalizedEvidence);
+
+  assert.equal(normalizedUnusedResult.ok, false);
+  assert.deepEqual(normalizedUnusedResult.blockers, [
+    {
+      code: 'B1_NORMALIZED_EVIDENCE_MANIFEST_ID_UNUSED',
+      message: 'B1 manifest normalized_evidence_ids must be represented by fixture rows.',
+      evidenceRequired: 'Every manifest normalized evidence id represented by at least one B1 row.',
+    },
+  ]);
+
+  const fixtureWithUnboundRowNormalizedEvidence = readFixture();
+  const normalizedRows = fixtureWithUnboundRowNormalizedEvidence.rows as Array<Record<string, unknown>>;
+  const normalizedRow = normalizedRows[0];
+  assert.ok(normalizedRow);
+  normalizedRow.normalized_evidence_id = 'normalized-not-in-manifest';
+
+  const normalizedRowResult = parseBettingWinB1DeterministicFixture(fixtureWithUnboundRowNormalizedEvidence);
+
+  assert.equal(normalizedRowResult.ok, false);
+  assert.deepEqual(normalizedRowResult.blockers, [
+    {
+      code: 'B1_NORMALIZED_EVIDENCE_ROW_NOT_IN_MANIFEST',
+      message: 'B1 fixture rows must be bound to manifest normalized_evidence_ids.',
+      evidenceRequired: 'Every row normalized_evidence_id represented in the B1 manifest normalized evidence ids.',
     },
   ]);
 });
