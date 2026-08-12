@@ -85,11 +85,13 @@ function makeStubRepo(noop: boolean): string {
   const repo = mkdtempSync('/tmp/surebet-paper-autopilot-stub-');
   mkdirSync(join(repo, '.automation', 'lib'), { recursive: true });
   mkdirSync(join(repo, 'artifacts'), { recursive: true });
+  mkdirSync(join(repo, 'scripts'), { recursive: true });
   cpSync(join(ROOT, 'run-paper-autopilot.sh'), join(repo, 'run-paper-autopilot.sh'));
   cpSync(join(ROOT, '.automation', 'lib', 'run_common.sh'), join(repo, '.automation', 'lib', 'run_common.sh'));
   cpSync(join(ROOT, '.automation', 'lib', 'temp_inode_guard.sh'), join(repo, '.automation', 'lib', 'temp_inode_guard.sh'));
   cpSync(join(ROOT, '.automation', 'lib', 'controller_hardening_v2.sh'), join(repo, '.automation', 'lib', 'controller_hardening_v2.sh'));
   cpSync(join(ROOT, '.automation', 'lib', 'telegram_notify.sh'), join(repo, '.automation', 'lib', 'telegram_notify.sh'));
+  cpSync(join(ROOT, 'scripts', 'validate_artifact_hygiene.py'), join(repo, 'scripts', 'validate_artifact_hygiene.py'));
   chmodSync(join(repo, 'run-paper-autopilot.sh'), 0o755);
   writeFileSync(join(repo, 'source.txt'), 'baseline\n', 'utf-8');
   writeFileSync(join(repo, 'automation.config.sh'), [

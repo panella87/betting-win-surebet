@@ -69,6 +69,9 @@ function makeControllerRepo(): string {
   ]) {
     copyExecutable(join(ROOT, rel), join(repo, rel));
   }
+  const artifactHygieneValidator = join(repo, 'scripts', 'validate_artifact_hygiene.py');
+  mkdirSync(dirname(artifactHygieneValidator), { recursive: true });
+  copyFileSync(join(ROOT, 'scripts', 'validate_artifact_hygiene.py'), artifactHygieneValidator);
 
   const nodeMajor = process.versions.node.split('.')[0];
   writeFileSync(join(repo, '.nvmrc'), `${nodeMajor}\n`, 'utf8');

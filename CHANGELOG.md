@@ -1,3 +1,9 @@
+## 2026-08-12 - Retained artifact hygiene fixture completeness repair
+
+- Preserved the BWS-FPAS-001 retained artifact ZIP member-hygiene implementation from the stopped filesystem/artifact-safety campaign.
+- Updated isolated paper-controller fixture repositories to include the required retained-artifact hygiene validator used by the hardened packaging helper.
+- Kept missing-validator behavior fail-closed in production and preserved artifact, provider, execution, BWS-600, BWS-900, and same-area re-audit boundaries.
+
 ## 2026-08-12 - Implementation-cycle source-manifest reconciliation
 
 - Preserved the validated BWS-RCBPAI-001 batch-summary integrity repair from the stopped area-6 implementation child.
