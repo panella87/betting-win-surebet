@@ -1,9 +1,12 @@
 # 046 - Final local acceptance implementation blueprint
 
+> **Completed historical implementation blueprint.** `BWS-599` is validated. This file remains acceptance and recovery history, not current controller routing. Current authority is `docs/automation/current-implementation-task.md`; the selected route is `run-paper-autopilot.sh` for the externally gated BWS-600 campaign.
+
 ```text
 parent_task=BWS-599
 cohesive_tranche=final_acceptance
-status=READY_FOR_BWS_599
+status=VALIDATED
+routing_status=HISTORICAL_COMPLETED_BLUEPRINT
 safe_local_terminal_gate=BWS-599
 ```
 

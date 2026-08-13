@@ -1,7 +1,7 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-08-12T22:31:49Z",
-  "overlay": "bws107-documentation-alignment-after-bugfix-completion",
+  "generated": "2026-08-13T05:31:16Z",
+  "overlay": "betting-win-surebet108-documentation-alignment-wave69",
   "files": [
     {
       "path": ".automation/README.md",
@@ -115,13 +115,13 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "d03202289a50ea8968e7ee3dd6e0154f97290b43c63b7a4640a885988ef54b69",
-      "size": 78907
+      "sha256": "ebb8affad87bfca2523e8f4c4864b1dcaf8783669641cf11cbe0015b98f1d0e2",
+      "size": 79722
     },
     {
       "path": "PROJECT_STATUS.md",
-      "sha256": "5317bf5d1c7cc18d23fefce8a9866ced822d0439fe168593c6f6f64deff3b619",
-      "size": 6166
+      "sha256": "374eb29c53c8b60ce0b8c3a45fe2c36ebb75d42a0af31488ea32846350cc01e5",
+      "size": 6188
     },
     {
       "path": "README.md",
@@ -410,8 +410,8 @@
     },
     {
       "path": "docs/000_documentation_index.md",
-      "sha256": "e97a995a1ed1852e7636fd2076f3e17c0c296b6e141da0cc5a381b68bf064de5",
-      "size": 8153
+      "sha256": "6f3f660435c2877501deede8a646e43f72782d227c18cb6bd0943339c1adddaf",
+      "size": 8721
     },
     {
       "path": "docs/001_scope_and_boundaries.md",
@@ -550,8 +550,8 @@
     },
     {
       "path": "docs/034_remaining_operator_runtime_implementation_program.md",
-      "sha256": "1519503fc24d6501faf5ba634cc70e3d72854e6c28f2bd2e19bd6f9372d63389",
-      "size": 4917
+      "sha256": "1eb45e0e50b8759bebb8508178cbb6625f229baeb1e5056daa71e4a0835d3605",
+      "size": 5294
     },
     {
       "path": "docs/035_continuous_service_supervisor_contract.md",
@@ -560,8 +560,8 @@
     },
     {
       "path": "docs/036_root_wrappers_and_paper_automation_integration.md",
-      "sha256": "1efb21415c62917f19f805ff49bd0b1df3911175e186b4c84148d0f981f92384",
-      "size": 3683
+      "sha256": "36192a5ab38a83d09ee4a96a062ce0e9a3712e57adfeb246543d62b182f3892f",
+      "size": 4397
     },
     {
       "path": "docs/037_database_backup_retention_and_recovery.md",
@@ -590,28 +590,28 @@
     },
     {
       "path": "docs/042_release_packaging_implementation_blueprint.md",
-      "sha256": "14196a39bf1d7e8764cc93a822954d9d0c07deb87f431f1b5228889d363dcde6",
-      "size": 5845
+      "sha256": "1118376616fba138c8b70b6274a9799f812c7ccd3a9b177f08f7fe013406ea99",
+      "size": 6213
     },
     {
       "path": "docs/043_upgrade_rollback_recovery_implementation_blueprint.md",
-      "sha256": "2f49190c9b3a3bf3d07242221fc4d96f84a523abb6993e712c0d335d15e2e56c",
-      "size": 4470
+      "sha256": "46513efa6bd4be9b897a26dae42431a8c0b5438f3f9c44f2a42af70a4dc811a3",
+      "size": 4838
     },
     {
       "path": "docs/044_soak_failure_injection_implementation_blueprint.md",
-      "sha256": "abe6f4113cd4cab096183628b6d1e3394a63f77f3c678ca7e1286708e1b97f59",
-      "size": 4136
+      "sha256": "f0367fe32d79481e714482610c5eefe948dc15e945d201ffb1ee5b9993e867c9",
+      "size": 4508
     },
     {
       "path": "docs/045_external_runtime_preflight_implementation_blueprint.md",
-      "sha256": "fa4ea46a445c53b161f478c725063f0aae307bd6de3aaf79258f092d1924d442",
-      "size": 3624
+      "sha256": "31a308e5cb3674ecff770b5c47f7156c3698fd1e07a230e33ebaf8fe45e14ab1",
+      "size": 3982
     },
     {
       "path": "docs/046_final_local_acceptance_implementation_blueprint.md",
-      "sha256": "d2a1e28995af2389f5d3479533c66b0e55e5d18bbd6636adf91366838dc05ac1",
-      "size": 3906
+      "sha256": "7227c8780f0f8c4dc128fcf3076996d37e8135c0c371315f4459d8cee2f7f1de",
+      "size": 4266
     },
     {
       "path": "docs/047_b1_cross_venue_offline_falsification_program.md",

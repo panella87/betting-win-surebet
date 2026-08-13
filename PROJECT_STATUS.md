@@ -1,6 +1,6 @@
 # PROJECT_STATUS
 
-## Active B1 implementation status
+## Completed B1 implementation and active BWS-600 status
 
 The operator explicitly opened `BWS-700` as a research/offline implementation authority for B1 cross-venue arbitrage falsification, and the dependency-ready local queue is now validated through `BWS-820`. This does not mark `BWS-600` runtime evidence complete and does not authorize execution. The next selected controller is `run-paper-autopilot.sh` for the carry-forward BWS-600 runtime-evidence gate.
 

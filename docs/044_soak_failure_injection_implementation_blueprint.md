@@ -1,9 +1,12 @@
 # 044 - Soak and failure-injection implementation blueprint
 
+> **Completed historical implementation blueprint.** `BWS-592` is validated. This file remains acceptance and recovery history, not current controller routing. Current authority is `docs/automation/current-implementation-task.md`; the selected route is `run-paper-autopilot.sh` for the externally gated BWS-600 campaign.
+
 ```text
 parent_task=BWS-592
 cohesive_tranche=soak_and_preflight
-status=READY
+status=VALIDATED
+routing_status=HISTORICAL_COMPLETED_BLUEPRINT
 canonical_server_soak_duration=2h
 ```
 

@@ -109,9 +109,13 @@ legacy_stage=SURE-002B_PRIVATE_PAPER_MODE_INTAKE
 
 `SURE-002B_PRIVATE_PAPER_MODE_INTAKE` proved fixture-only intake, private report artifacts and the controller smoke path. Those facts do not constitute the final BWS paper platform. The full paper platform is represented by `BWS-310`, `BWS-320`, `BWS-410`, `BWS-500`, `BWS-510`, `BWS-520`, `BWS-580` and the externally gated `BWS-600` runtime-evidence campaign.
 
-## Still-binding implementation history
+## Retained implementation history and still-binding operating contracts
 
-The safe-local product queue is complete through `BWS-599`. The following docs are retained because validators, regression tests, or operator recovery flows still rely on them:
+The safe-local product queue is complete through `BWS-599`. Current controller routing never comes from the completed implementation blueprints below; it comes from `docs/automation/current-implementation-task.md` and `docs/repo_status_current.md`.
+
+The completed historical authorities are `docs/028`, `docs/029`, `docs/034`, `docs/036`, and implementation blueprints `docs/042` through `docs/046`. The remaining documents in this section preserve still-binding runtime, recovery, evidence, preflight, and safety contracts. They do not reopen a completed task or protected-file authorization.
+
+The following docs are retained because validators, regression tests, or operator recovery flows still rely on them:
 
 ```text
 docs/028_full_implementation_program.md

@@ -1,3 +1,11 @@
+## 2026-08-13 - Retained blueprint and protected-authorization documentation alignment
+
+- Reclassified the BWS-587 through BWS-589 protected-file allowlist as closed historical authorization and preserved the current `allowed_protected_files=none` boundary.
+- Reconciled the retained BWS-592, BWS-593, and BWS-599 implementation-blueprint status markers to `VALIDATED` and labeled BWS-590 through BWS-599 blueprints as non-routing historical authority.
+- Converted the remaining-operator-runtime document from present-tense gap and queue language to completed-program history.
+- Clarified the documentation index and project-status heading so current routing remains unambiguously BWS-600 via `run-paper-autopilot.sh`.
+- Made no application, test, runtime, controller, package-script, or automation-config change.
+
 ## 2026-08-13 - Documentation alignment after accepted bugfix closure
 
 - Recorded the accepted `BUGFIX_AUTOPILOT_COMPLETE` result for `bugfix_autopilot_20260812T133805Z`: 22 rounds and all 8 campaign areas closed.

@@ -1,9 +1,12 @@
 # 045 - External runtime preflight and campaign-manifest implementation blueprint
 
+> **Completed historical implementation blueprint.** `BWS-593` is validated. This file remains acceptance and recovery history, not current controller routing. Current authority is `docs/automation/current-implementation-task.md`; the selected route is `run-paper-autopilot.sh` for the externally gated BWS-600 campaign.
+
 ```text
 parent_task=BWS-593
 cohesive_tranche=soak_and_preflight
-status=WAITING_FOR_BWS_592
+status=VALIDATED
+routing_status=HISTORICAL_COMPLETED_BLUEPRINT
 output_schema=bws.external_runtime_campaign.v1
 ```
 

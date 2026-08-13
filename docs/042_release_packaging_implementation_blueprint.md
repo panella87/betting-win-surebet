@@ -1,9 +1,12 @@
 # 042 - Release packaging implementation blueprint
 
+> **Completed historical implementation blueprint.** `BWS-590` is validated. This file remains acceptance and recovery history, not current controller routing. Current authority is `docs/automation/current-implementation-task.md`; the selected route is `run-paper-autopilot.sh` for the externally gated BWS-600 campaign.
+
 ```text
 parent_task=BWS-590
 cohesive_tranche=release_and_recovery
 status=VALIDATED
+routing_status=HISTORICAL_COMPLETED_BLUEPRINT
 ```
 
 ## Goal

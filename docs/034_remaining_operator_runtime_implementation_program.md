@@ -4,17 +4,21 @@
 
 ```text
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
+marker_scope=historical_completed_program
 current_task=BWS-599
+historical_status=VALIDATED_COMPLETE
+current_repository_task=BWS-600
+current_selected_controller=run-paper-autopilot.sh
 safe_local_terminal_gate=BWS-599
 external_runtime_gate=BWS-600
 execution_gate=BWS-900
 ```
 
-## Why the program continues
+## Historical reason the program continued
 
-`BWS-580` validated a substantial closed-stack test surface, bounded convergence passes, a machine-readable runtime handoff, and `BWS-584` completed the full-stack lifecycle owner. The operator-runnable application is still incomplete.
+`BWS-580` validated a substantial closed-stack test surface, bounded convergence passes, a machine-readable runtime handoff, and `BWS-584` completed the full-stack lifecycle owner. At that point, the operator-runnable application was still incomplete.
 
-The current source still has these concrete local gaps:
+At the time this program was active, these were the tracked local gaps. Every listed surface is now validated:
 
 ```text
 start/stop wrappers=validated_product_lifecycle_delegation
@@ -30,11 +34,11 @@ external preflight=validated
 final acceptance=validated
 ```
 
-These are source and automation implementation gaps. They are not external evidence blockers. `BWS-600` remains external only after the local queue through `BWS-599` is validated.
+These were source and automation implementation gaps. They are now closed through `BWS-599`; `BWS-600` is the remaining external runtime-evidence gate.
 
-## Binding queue
+## Historical binding queue
 
-The machine-readable authority is `backlog/bws_full_implementation.csv`. Select the first `PENDING` row whose internal dependencies are `VALIDATED`.
+The machine-readable authority during this completed program was `backlog/bws_full_implementation.csv`. Its selection rule was to choose the first `PENDING` row whose internal dependencies were `VALIDATED`; it is not a current routing instruction.
 
 ### Runtime service construction
 
@@ -62,9 +66,9 @@ The machine-readable authority is `backlog/bws_full_implementation.csv`. Select 
 - `BWS-593`: accepted-runtime preflight and `BWS-600` campaign manifest (validated).
 - `BWS-599`: integrated operator/runtime/automation/recovery acceptance.
 
-## Detailed implementation authority
+## Retained implementation authority
 
-The remaining parent rows are decomposed in `backlog/bws_remaining_safe_local_map.csv`. Detailed implementation and acceptance blueprints are:
+The completed parent rows remain decomposed in `backlog/bws_remaining_safe_local_map.csv`. Their retained implementation and acceptance blueprints are:
 
 - `docs/042_release_packaging_implementation_blueprint.md`
 - `docs/043_upgrade_rollback_recovery_implementation_blueprint.md`
@@ -72,7 +76,7 @@ The remaining parent rows are decomposed in `backlog/bws_remaining_safe_local_ma
 - `docs/045_external_runtime_preflight_implementation_blueprint.md`
 - `docs/046_final_local_acceptance_implementation_blueprint.md`
 
-The controller should complete the largest safe cohesive tranche while preserving separate parent-row validation.
+During the completed program, the controller was required to complete the largest safe cohesive tranche while preserving separate parent-row validation.
 
 ## Continuation contract
 

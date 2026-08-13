@@ -1,12 +1,22 @@
 # 036 - Root wrappers and paper automation integration
 
+> **Completed historical protected-file authorization.** BWS-587 through BWS-589 are validated. This document preserves the exact allowlist and acceptance contract used during that closed phase; it does not authorize current protected automation changes. Current authority is `docs/automation/current-implementation-task.md`, where `automation_maintenance_allowed=no`, `allowed_protected_files=none`, and `run-paper-autopilot.sh` is selected for BWS-600.
+
+```text
+historical_tasks=BWS-587..BWS-589
+historical_status=VALIDATED_COMPLETE
+current_automation_maintenance_allowed=no
+current_allowed_protected_files=none
+current_selected_controller=run-paper-autopilot.sh
+```
+
 ## Scope
 
 This contract defines `BWS-587` through `BWS-589`. These tasks intentionally modify a small exact subset of protected automation files after the product-owned full-stack lifecycle is validated.
 
 ## Exact protected-file authorization
 
-The active implementation campaign may modify only these protected files:
+During the completed BWS-587 through BWS-589 campaign, the reviewed authorization allowed only these protected files:
 
 ```text
 start.sh
