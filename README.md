@@ -1,6 +1,6 @@
 # betting-win-surebet
 
-## B1 implementation authority
+## Completed B1 implementation authority and active BWS-600 route
 
 The BWS-700 implementation authority `BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1` is validated through `BWS-820` for dependency-ready local deterministic offline/private-paper B1 work. It preserves `BWS-100` through `BWS-599`, the external `BWS-600` runtime-evidence gate, and parked `BWS-900` execution. The completed B1 queue is `backlog/bws_b1_cross_venue_implementation.csv`; the completed B1 implementation map is `backlog/bws_b1_cross_venue_map.csv`.
 

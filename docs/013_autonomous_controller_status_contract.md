@@ -19,4 +19,6 @@ RUNTIME_EVIDENCE_REQUIRED=no
 
 Required reports must be present and non-placeholder. Codex nonzero exit, timeout, or failed post-cycle `npm run validate` blocks status acceptance.
 
-For `BWS_FULL_PLATFORM_IMPLEMENTATION_V1`, use `CONTINUE_REQUIRED=yes` while a dependency-ready safe task through `BWS-599` remains. Use `AUTONOMOUS_GOAL_COMPLETE=yes` only when every safe local task is `VALIDATED`. Historical SURE completion is not an active stop condition.
+For a task that explicitly opens an implementation queue, use `CONTINUE_REQUIRED=yes` while another dependency-ready safe task remains. Use `AUTONOMOUS_GOAL_COMPLETE=yes` only when that authorized queue is validated or truthfully blocked. Historical SURE completion is not an active stop condition.
+
+The current repository task opens no implementation queue: `BWS-100` through `BWS-599` and dependency-ready BWS-700 rows through `BWS-820` are complete, and `run-paper-autopilot.sh` is selected for the externally gated `BWS-600` runtime-evidence phase. This status contract is carry-forward implementation behavior, not current routing authority.

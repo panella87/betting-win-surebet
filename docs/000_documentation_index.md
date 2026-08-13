@@ -69,9 +69,15 @@ The B1 authority is offline/private-paper only. `BWS-710` remains blocked until 
 README.md
 PROJECT_STATUS.md
 STARTER_PACK.md
+docs/010_paper_evaluation_and_kill_criteria.md
 docs/012_runbook.md
 docs/018_private_paper_mode_runbook.md
+docs/027_bws_target_architecture.md
+docs/032_database_and_data_lifecycle.md
+docs/035_continuous_service_supervisor_contract.md
+docs/040_soak_failure_injection_and_operator_acceptance.md
 docs/automation/README.md
+docs/automation/api-only-upstream.md
 docs/automation/paper-autopilot.md
 docs/automation/repository-temp-inode-safety.md
 docs/automation/artifact-retention-and-cleanup.md
@@ -115,7 +121,7 @@ legacy_stage=SURE-002B_PRIVATE_PAPER_MODE_INTAKE
 
 The safe-local product queue is complete through `BWS-599`. Current controller routing never comes from the completed implementation blueprints below; it comes from `docs/automation/current-implementation-task.md` and `docs/repo_status_current.md`.
 
-The completed historical authorities are `docs/028`, `docs/029`, `docs/034`, `docs/036`, and implementation blueprints `docs/042` through `docs/046`. The remaining documents in this section preserve still-binding runtime, recovery, evidence, preflight, and safety contracts. They do not reopen a completed task or protected-file authorization.
+The completed historical authorities are `docs/028`, `docs/029`, `docs/033`, `docs/034`, `docs/036`, and implementation blueprints `docs/042` through `docs/046`. The remaining documents in this section preserve still-binding runtime, recovery, evidence, preflight, and safety contracts. `docs/035` and `docs/040` are validated carry-forward contracts whose current interpretation is API-only; their historical export compatibility does not reopen an export runtime selector. None of these documents reopens a completed task or protected-file authorization.
 
 The following docs are retained because validators, regression tests, or operator recovery flows still rely on them:
 

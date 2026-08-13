@@ -1,3 +1,11 @@
+## 2026-08-13 - Final architecture and API-only carry-forward documentation alignment
+
+- Reconciled the remaining pre-BWS-599 runtime documents with the validated consolidated workspace architecture and completed safe-local platform.
+- Reclassified the BWS-520 through BWS-599 runtime foundation as completed history instead of an active remaining implementation program.
+- Corrected the continuous supervisor, soak, and final-acceptance contracts so current managed runtime is API-only and historical export compatibility cannot be mistaken for an operator runtime selector.
+- Updated the paper, database, backlog, master-plan, and documentation-index wording so no completed queue or missing safe-local gap can reopen implementation.
+- Preserved the selected externally gated BWS-600 `run-paper-autopilot.sh` route, accepted 8/8 bugfix closure, protected-file policy, and parked BWS-900 execution.
+
 ## 2026-08-13 - Final active-document routing and continuation-package alignment
 
 - Reclassified the top-level agent and implementation-runbook wording so the completed BWS-700 queue cannot be mistaken for an active implementation campaign.

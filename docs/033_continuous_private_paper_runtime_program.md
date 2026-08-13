@@ -1,53 +1,52 @@
 # 033 - Continuous private-paper runtime foundation
 
+> **Completed historical implementation authority with current carry-forward boundaries.** This document preserves the BWS-520 through BWS-599 runtime build sequence. It is not current implementation routing. Current authority is `docs/automation/current-implementation-task.md`.
+
 ```text
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-validated_foundation_gate=BWS-580
-active_remaining_program=docs/034_remaining_operator_runtime_implementation_program.md
-safe_local_terminal_gate=BWS-599
-continuous_runtime_evidence_gate=BWS-600
-execution_gate=BWS-900
+document_status=VALIDATED_COMPLETE_HISTORICAL_PROGRAM
+historical_foundation_gate=BWS-580
+safe_local_terminal_gate=BWS-599_VALIDATED
+current_task=BWS-600
+active_implementation_queue=none
+selected_controller=run-paper-autopilot.sh
+runtime_upstream_mode=api_only
+continuous_runtime_evidence_gate=BWS-600_BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
+execution_gate=BWS-900_PARKED
 ```
 
-## Validated foundation
+## Validated closure
 
-`BWS-520` through `BWS-587` are validated. They added:
+`BWS-520` through `BWS-599` are validated. In particular, `BWS-581` through `BWS-584` close the continuous-service and lifecycle layer. They provide:
 
 - executable loopback-only API and bounded worker entrypoints;
-- explicit immutable-export and typed read-only API convergence passes;
+- API-only read-only upstream convergence with exact lock and provenance checks;
 - persisted convergence and scheduler checkpoints;
 - deterministic private-paper jobs and bounded worker processing;
+- long-running convergence, scheduler, and worker services;
 - a full-stack lifecycle owner with exact process identity and ordered shutdown;
 - protected root start/stop/progress/log wrappers delegated to product-owned lifecycle and runtime evidence;
 - persisted runtime/API/cockpit visibility plus managed loopback cockpit serving;
-- integrated loopback acceptance and machine-readable runtime handoff packaging.
+- service-owned paper evaluation and runtime-evidence paper autopilot;
+- database backup, restore verification, and retention operations;
+- deterministic release, upgrade/rollback/recovery, soak/failure, external preflight, and final clean-room acceptance evidence;
+- integrated machine-readable runtime handoff packaging.
 
 These results remain binding and must not regress.
 
-## Why BWS-580 is not the final local gate
+## Historical BWS-580 gap and its closure
 
-The validated components are still assembled as bounded passes and component-level acceptance. Current source inspection shows:
+After `BWS-580`, service-owned paper evaluation, paper-autopilot lifecycle integration, and release/recovery/soak acceptance were still missing. The completed historical program in `docs/034_remaining_operator_runtime_implementation_program.md` closed those gaps through `BWS-599`. That document is retained traceability, not an active queue.
 
-```text
-complete product-owned lifecycle=validated
-root lifecycle wrappers=validated
-service-owned paper evaluation=missing
-paper autopilot lifecycle integration=missing
-database backup/restore/retention=validated
-release/upgrade/recovery/soak acceptance=missing
-```
+## Current carry-forward requirements
 
-The safe local terminal gate therefore moves to `BWS-599`. The active program is `docs/034_remaining_operator_runtime_implementation_program.md`.
-
-## Carry-forward requirements
-
-All remaining tasks must preserve:
+The validated runtime must preserve:
 
 - exact committed-HEAD upstream lock;
-- explicit export or API mode with no fallback;
+- fixed API-only runtime transport with no export, fixture, mock, or pinned-bundle fallback;
 - fixed-point calculations;
 - `surebet.*` ownership only;
-- deterministic job, checkpoint and evidence identities;
+- deterministic job, checkpoint, and evidence identities;
 - private-only strategy evidence;
 - loopback-only BWS listeners;
 - provider connections and execution disabled;
@@ -56,12 +55,17 @@ All remaining tasks must preserve:
 - parent-only Telegram for autopilots;
 - post-lock artifact refresh and atomic child results.
 
-## Protected automation sequencing
+## Protected automation state
 
-Product service work `BWS-581` through `BWS-586` should prefer unprotected package and CLI surfaces. `BWS-587` through `BWS-589` intentionally integrate the exact protected subset declared in the current task and `docs/036_root_wrappers_and_paper_automation_integration.md`.
+The BWS-587 through BWS-589 protected integration phase is complete. The current task authorizes no protected automation change:
 
-`AUTOMATION_ALLOW_PROTECTED_CHANGES=1` does not authorize arbitrary protected changes. The implementation controller must enforce the task-file exact allowlist.
+```text
+automation_maintenance_allowed=no
+allowed_protected_files=none
+```
+
+Do not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` during ordinary implementation, paper, or bugfix runs.
 
 ## External gate
 
-`BWS-600` remains blocked until `BWS-599` is validated and the operator supplies accepted read-only betting-win runtime input plus private configuration and retained evidence.
+`BWS-600` remains blocked until the operator-approved betting-win read-only API, private BWS PostgreSQL configuration, approved repo-local private-paper schedule, and retained runtime evidence are available. Local fixtures, export files, and the BWS API on `127.0.0.1:4312` cannot satisfy this gate.

@@ -1,19 +1,27 @@
 # 040 - Soak, failure injection and operator acceptance
 
-## Scope
+> **Validated carry-forward acceptance contract.** `BWS-592` and `BWS-599` are complete. The current external phase is `BWS-600`, and all managed runtime evidence is API-only.
 
-This contract defines `BWS-592` and `BWS-599`.
+```text
+document_status=VALIDATED_CARRY_FORWARD_CONTRACT
+BWS-592=VALIDATED_SOAK_FAILURE_INJECTION
+BWS-599=VALIDATED_FINAL_LOCAL_ACCEPTANCE
+current_task=BWS-600
+selected_controller=run-paper-autopilot.sh
+runtime_upstream_mode=api_only
+execution_gate=BWS-900_PARKED
+```
 
 ## Bounded soak campaign
 
-The soak harness must support an explicit duration, interval, maximum cycles and deterministic seed. It must run only loopback or repo-local deterministic inputs.
+The soak harness supports an explicit duration, interval, maximum cycles, and deterministic seed. It runs only loopback or repo-local deterministic inputs and cannot contact providers or execute orders.
 
-The campaign must retain:
+The campaign retains:
 
-- selected upstream mode and exact lock;
+- fixed API runtime mode and exact upstream lock;
 - source and release fingerprints;
 - lifecycle events;
-- convergence, scheduler and worker checkpoints;
+- convergence, scheduler, and worker checkpoints;
 - queue and metrics time series;
 - API/cockpit probes;
 - database state summaries;
@@ -22,11 +30,11 @@ The campaign must retain:
 
 ## Failure matrix
 
-At minimum cover:
+The validated matrix covers at minimum:
 
 ```text
 upstream timeout and malformed response
-immutable export replacement or SHA mismatch
+retained fixture/export parser tamper or SHA mismatch (non-runtime compatibility only)
 database connection interruption
 scheduler crash before and after job creation
 worker crash before and after checkpoint
@@ -39,23 +47,27 @@ log/evidence publication failure
 backup, restore and upgrade interruption
 ```
 
-Every failure must remain bounded, preserve evidence and demonstrate no provider or execution access.
+Every failure remains bounded, preserves evidence, and demonstrates no provider or execution access. Historical export compatibility tests do not authorize an export runtime path.
 
 ## BWS-599 integrated acceptance
 
-Final local acceptance must prove from a clean extraction:
+Final local acceptance is validated from a clean extraction and proves:
 
 - dependency install and build under Node 20;
 - migration status and disposable database proof;
-- both explicit upstream modes against deterministic inputs;
-- full-stack start, status, progress, logs and stop;
+- API-only managed runtime convergence and retained non-runtime parser compatibility;
+- full-stack start, status, progress, logs, and stop;
 - continuous scheduler and worker loops;
-- API, cockpit, health, readiness and metrics;
-- paper evaluation and paper autopilot source-fix/re-evaluation flow;
-- backup, restore, retention dry-run and recovery;
-- release package, deployment-template validation and upgrade preflight;
+- API, cockpit, health, readiness, and metrics;
+- paper evaluation and paper-autopilot source-fix/re-evaluation flow;
+- backup, restore, retention dry-run, and recovery;
+- release package, deployment-template validation, and upgrade preflight;
 - bounded soak and failure recovery;
 - machine-readable `BWS-600` campaign handoff;
 - execution closed and provider connections disabled.
 
-`BWS-599` cannot be validated by unit tests alone. It requires integrated child-process and disposable PostgreSQL proof with complete cleanup.
+`BWS-599` was not validated by unit tests alone; its accepted proof includes integrated child-process and disposable PostgreSQL coverage with complete cleanup.
+
+## Current external gate
+
+`BWS-600` must use the operator-approved running betting-win read-only API and private BWS database configuration. Export, fixture, mock, local BWS API, or synthesized schedule evidence cannot validate it. `BWS-900` remains separately parked execution.

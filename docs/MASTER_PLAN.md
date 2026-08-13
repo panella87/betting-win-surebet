@@ -1,6 +1,6 @@
 # Master Plan - betting-win-surebet
 
-## B1 implementation program
+## Completed B1 implementation program and active BWS-600 gate
 
 The current program authority is `BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1`, opened by explicit operator approval after the OpenAlex B1 research review. Dependency-ready local implementation is complete through `BWS-820`, the broad bugfix campaign is accepted across all eight areas, and the active task has returned to the external `BWS-600` runtime-evidence gate.
 
@@ -79,11 +79,13 @@ Latest validated carry-forward tranche:
 - `BWS-593`: exact-mode external runtime preflight and campaign-manifest generation.
 - `BWS-599`: integrated final local operator/runtime/automation/recovery acceptance.
 
-## Continuation
+## Implementation continuation contract
 
-The implementation controller writes `CONTINUE_REQUIRED=yes` while any dependency-ready row in `backlog/bws_b1_cross_venue_implementation.csv` remains `PENDING`. It may write `AUTONOMOUS_GOAL_COMPLETE=yes` only after the authorized BWS-700 queue is validated or truthfully blocked, while preserving `BWS-600` as an external runtime-evidence gate and `BWS-900` as parked.
+No implementation queue is active now. The BWS-700 dependency-ready local queue is complete, `BWS-710` is externally blocked, and the selected controller is `run-paper-autopilot.sh` for `BWS-600`.
 
-Completing one bounded task quickly is valid. It does not end the campaign when another dependency-ready B1 row exists.
+For a future task that explicitly reopens and names an implementation queue, the implementation controller writes `CONTINUE_REQUIRED=yes` while another dependency-ready row remains `PENDING`. It may write `AUTONOMOUS_GOAL_COMPLETE=yes` only after that authorized queue is validated or truthfully blocked, while preserving `BWS-600` and parked `BWS-900` boundaries.
+
+Completing one bounded task quickly is valid, but it does not end a future campaign while another dependency-ready authorized row exists.
 
 ## Validation model
 

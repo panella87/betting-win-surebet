@@ -27,6 +27,8 @@ canonical POSTGRES_* settings from process environment or repo-local .env
 
 A partial tuple is rejected and never mixed with `POSTGRES_*` settings. The selected PostgreSQL role behind `POSTGRES_USER` must already have `CREATEDB` for disposable validation databases. Tests create uniquely named disposable databases and drop only those databases after proof.
 
-## Remaining operations
+## Validated operations
 
-`BWS-585` implements migration status, BWS-owned backup manifests, disposable restore verification and fingerprinted retention plans. `BWS-591` consumes verified backup evidence during upgrade, rollback and disaster-recovery proof.
+`BWS-585` validates migration status, BWS-owned backup manifests, disposable restore verification, and fingerprinted retention plans. `BWS-591` validates use of verified backup evidence during upgrade, rollback, and disaster-recovery proof. `BWS-599` closes the integrated safe-local database acceptance chain.
+
+`BWS-600` still requires retained evidence from the private BWS PostgreSQL configuration while consuming the operator-approved betting-win read-only API. No runtime or autonomous command may read the betting-win database directly or restore over an active project database.
