@@ -8,6 +8,8 @@ parent_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 current_task=BWS-600
 selected_controller=run-paper-autopilot.sh
 active_implementation_queue=none
+broad_bugfix_campaign_status=COMPLETED_AND_ACCEPTED
+broad_bugfix_areas_closed=8_of_8
 completed_b1_queue=backlog/bws_b1_cross_venue_implementation.csv
 completed_b1_map=backlog/bws_b1_cross_venue_map.csv
 bws700_completion_status=DEPENDENCY_READY_LOCAL_IMPLEMENTATION_COMPLETE
@@ -45,4 +47,4 @@ BWS-593  external-runtime preflight and campaign manifest (validated)
 BWS-599  final local acceptance (validated)
 ```
 
-The full-platform safe-local queue remains complete through `BWS-599`; `BWS-600` remains externally blocked on real betting-win API runtime evidence. BWS-700 dependency-ready local implementation is validated through BWS-820, so the selected route is now `run-paper-autopilot.sh` for BWS-600 runtime evidence.
+The full-platform safe-local queue remains complete through `BWS-599`; `BWS-600` remains externally blocked on real betting-win API runtime evidence. BWS-700 dependency-ready local implementation is validated through BWS-820, and the broad bugfix campaign is complete across 8/8 areas. The selected route is now `run-paper-autopilot.sh` for BWS-600 runtime evidence.

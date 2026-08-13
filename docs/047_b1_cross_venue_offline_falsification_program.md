@@ -8,6 +8,7 @@ operator_approval=explicit_2026_08_02
 bws700_authority_task=BWS-700
 bws700_completion_status=DEPENDENCY_READY_LOCAL_IMPLEMENTATION_COMPLETE
 active_implementation_queue=none
+broad_bugfix_campaign_status=COMPLETED_AND_ACCEPTED
 completed_b1_queue=backlog/bws_b1_cross_venue_implementation.csv
 safe_local_terminal_gate=BWS-599
 external_runtime_gate=BWS-600
@@ -65,9 +66,9 @@ profitability_claims=prohibited
 shared_bankroll_with_betting-win-betting=prohibited
 ```
 
-## Binding implementation sequence
+## Completed dependency-ready implementation sequence
 
-The queue is `backlog/bws_b1_cross_venue_implementation.csv`. The controller should implement the largest safe cohesive tranche that remains dependency-ready, while keeping real upstream API intake and private observation blocked until the required upstream B1 contract exists.
+The retained queue is `backlog/bws_b1_cross_venue_implementation.csv`. All dependency-ready local rows through BWS-820 are validated. BWS-710 remains blocked until the required upstream B1 contract exists, and BWS-830/BWS-840 remain parked. No B1 implementation controller is selected by the current task.
 
 ```text
 BWS-700  B1 authority, docs, backlog and validators
@@ -95,7 +96,7 @@ BWS-840  C/G offline microstructure design stubs only, parked
 ## Acceptance for this authority
 
 ```text
-fresh_ai_can_identify_active_b1_queue=yes
+fresh_ai_can_identify_completed_b1_queue_and_blocked_rows=yes
 bws600_external_runtime_gate_preserved=yes
 bws900_execution_gate_parked=yes
 no_provider_or_execution_paths=yes

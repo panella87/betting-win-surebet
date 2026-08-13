@@ -9,6 +9,8 @@ The active source implementation route is closed for dependency-ready BWS-700 wo
 program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
 parent_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 current_task=BWS-600
+broad_bugfix_campaign_status=COMPLETED_AND_ACCEPTED
+broad_bugfix_areas_closed=8_of_8
 safe_local_terminal_gate=BWS-599
 bws600_current_task=BWS-600
 bws600_upstream_api_preflight_source_fix=present
@@ -16,7 +18,7 @@ selected_controller=run-paper-autopilot.sh
 bws600_selected_controller=run-paper-autopilot.sh
 ```
 
-`BWS-100` through `BWS-599` are validated. The `BWS-600` upstream API preflight source fix is present, and the BWS-700 implementation parent is complete for dependency-ready local rows. The external runtime-evidence parent is now the selected route once the operator starts and approves the betting-win read-only API.
+`BWS-100` through `BWS-599` are validated. The broad bugfix campaign is complete across 8/8 areas and does not need another parent unless new evidence opens a new bounded audit scope. The `BWS-600` upstream API preflight source fix is present, and the BWS-700 implementation parent is complete for dependency-ready local rows. The external runtime-evidence parent is now the selected route once the operator starts and approves the betting-win read-only API.
 
 # `.automation/`
 

@@ -7,6 +7,8 @@ documentation_index_status=active
 documentation_slimming_phase=complete
 current_task=BWS-600
 active_implementation_queue=none
+broad_bugfix_campaign_status=COMPLETED_AND_ACCEPTED
+broad_bugfix_areas_closed=8_of_8
 completed_b1_queue=backlog/bws_b1_cross_venue_implementation.csv
 completed_b1_map=backlog/bws_b1_cross_venue_map.csv
 bws700_completion_status=DEPENDENCY_READY_LOCAL_IMPLEMENTATION_COMPLETE
@@ -26,13 +28,13 @@ This is the short map for the BWS documentation set. Use it before opening older
 3. `docs/automation/current-implementation-task.md` - active BWS-600 runtime-evidence routing authority after BWS-700 local completion.
 4. `docs/047_b1_cross_venue_offline_falsification_program.md` - B1 program authority.
 5. `docs/048_b1_upstream_contract.md` - B1 upstream contract gate.
-6. `backlog/bws_b1_cross_venue_implementation.csv` - active B1 implementation queue.
-7. `backlog/bws_b1_cross_venue_map.csv` - active B1 implementation map.
+6. `backlog/bws_b1_cross_venue_implementation.csv` - completed dependency-ready B1 queue, with BWS-710 blocked and BWS-830/BWS-840 parked.
+7. `backlog/bws_b1_cross_venue_map.csv` - completed B1 implementation map and retained source/validation traceability.
 8. `docs/automation/api-only-upstream.md` - binding upstream transport contract.
 9. `docs/041_external_runtime_preflight_and_bws600_campaign.md` - carry-forward BWS-600 runtime-evidence gate.
 
 
-## Active B1 implementation authority
+## Completed B1 implementation authority and active BWS-600 route
 
 ```text
 program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
@@ -46,7 +48,7 @@ safe_local_terminal_gate=BWS-599
 BWS-900=parked
 ```
 
-Read these B1 documents before starting or auditing the implementation controller:
+Use these B1 documents as completed dependency-ready authority. Start the implementation controller only for a reviewed source handoff or an accepted BWS-710 upstream contract:
 
 ```text
 docs/047_b1_cross_venue_offline_falsification_program.md

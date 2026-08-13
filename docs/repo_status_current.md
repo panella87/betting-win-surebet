@@ -2,7 +2,7 @@
 
 ## Active post-B1 binding state
 
-The `BWS-700` dependency-ready local implementation route for `BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1` is complete through `BWS-820`. This was an explicit operator-approved research/offline authority based on the OpenAlex B1 blueprint. It does not supersede the accepted BWS full-platform foundation and does not complete the external `BWS-600` runtime-evidence gate. The selected route is now the carry-forward `BWS-600` runtime-evidence parent.
+The `BWS-700` dependency-ready local implementation route for `BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1` is complete through `BWS-820`. This was an explicit operator-approved research/offline authority based on the OpenAlex B1 blueprint. The broad bugfix campaign is also complete and accepted across all eight audit areas. Neither result completes the external `BWS-600` runtime-evidence gate. The selected route is now the carry-forward `BWS-600` runtime-evidence parent.
 
 ```text
 b1_authority=opened
@@ -26,6 +26,11 @@ upstream_platform=betting-win
 current_task=BWS-600
 current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
 active_implementation_queue=none
+broad_bugfix_campaign_status=COMPLETED_AND_ACCEPTED
+broad_bugfix_parent_run=bugfix_autopilot_20260812T133805Z
+broad_bugfix_rounds_completed=22
+broad_bugfix_areas_closed=8
+broad_bugfix_total_areas=8
 completed_b1_queue=backlog/bws_b1_cross_venue_implementation.csv
 completed_b1_map=backlog/bws_b1_cross_venue_map.csv
 bws700_completion_status=DEPENDENCY_READY_LOCAL_IMPLEMENTATION_COMPLETE
@@ -69,6 +74,28 @@ final acceptance=validated
 The completed B1 local queue is `backlog/bws_b1_cross_venue_implementation.csv`; the completed B1 implementation map is `backlog/bws_b1_cross_venue_map.csv`. The full-platform queue `backlog/bws_full_implementation.csv` and map `backlog/bws_remaining_safe_local_map.csv` are validated carry-forward history through `BWS-599`. `BWS-600` remains an external operator-approved runtime-evidence gate and is now the selected controller route after BWS-700 dependency-ready local completion.
 
 Documentation slimming is complete for the active operator map: `docs/000_documentation_index.md` is the compact routing entry point, stale completion snapshots were removed, and BWS-599 carry-forward contracts plus legacy research archives remain retained.
+
+## Completed broad bugfix campaign
+
+The broad bugfix campaign is complete and accepted. The terminal parent `artifacts/bugfix_autopilot_20260812T133805Z` finished with `BUGFIX_AUTOPILOT_COMPLETE`, `all_campaign_areas_closed`, 22 rounds, and all 8 campaign areas closed. Its final cross-area audit passed the full baseline and PostgreSQL-backed loopback acceptance. No active bugfix or implementation queue remains; the next selected phase is the externally gated `BWS-600` paper/runtime-evidence campaign.
+
+```text
+broad_bugfix_campaign_status=COMPLETED_AND_ACCEPTED
+broad_bugfix_parent_run=bugfix_autopilot_20260812T133805Z
+broad_bugfix_final_status=BUGFIX_AUTOPILOT_COMPLETE
+broad_bugfix_stop_reason=all_campaign_areas_closed
+broad_bugfix_rounds_completed=22
+broad_bugfix_areas_closed=8
+broad_bugfix_total_areas=8
+broad_bugfix_lock_release_status=released
+broad_bugfix_next_action=none
+bugfix_final_baseline=passed
+bugfix_final_compiled_tests=890
+bugfix_final_test_passed=880
+bugfix_final_test_failed=0
+bugfix_final_test_skipped=10
+bugfix_final_loopback_acceptance=1_of_1_passed
+```
 
 ## Validated upstream facts
 

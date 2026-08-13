@@ -1,5 +1,11 @@
 # Bugfix autopilot: betting-win-surebet
 
+## Current repository state
+
+The broad bugfix campaign is complete and accepted. The terminal parent `artifacts/bugfix_autopilot_20260812T133805Z` finished with `BUGFIX_AUTOPILOT_COMPLETE`, `all_campaign_areas_closed`, 22 rounds, and all 8 campaign areas closed. Its final cross-area audit passed the full baseline and PostgreSQL-backed loopback acceptance. No active bugfix or implementation queue remains; the next selected phase is the externally gated `BWS-600` paper/runtime-evidence campaign.
+
+`run-bugfix-autopilot.sh` remains available for a future, newly evidenced broad audit. It is not the selected controller for the current BWS-600 runtime-evidence task.
+
 `run-bugfix-autopilot.sh` is the unattended parent for bounded source-audit hardening. It is separate from `run-paper-autopilot.sh` and enforces a mandatory same-area re-audit after every validated implementation. The enforced lifecycle is `audit -> implementation -> same-area re-audit`.
 
 Default command after activating Node 20 in the parent shell:

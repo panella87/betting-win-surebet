@@ -12,6 +12,8 @@ current_task=BWS-600
 current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
 selected_controller=run-paper-autopilot.sh
 active_implementation_queue=none
+broad_bugfix_campaign_status=COMPLETED_AND_ACCEPTED
+broad_bugfix_areas_closed=8_of_8
 completed_b1_queue=backlog/bws_b1_cross_venue_implementation.csv
 completed_b1_map=backlog/bws_b1_cross_venue_map.csv
 bws700_completion_status=DEPENDENCY_READY_LOCAL_IMPLEMENTATION_COMPLETE
@@ -26,7 +28,7 @@ bws600_upstream_api_preflight_source_fix=present
 
 `BWS-100` through `BWS-599` are validated carry-forward foundations. The runtime has full product lifecycle ownership, database lifecycle, observability, root wrappers, service-owned paper evaluation, runtime-evidence paper autopilot, release/recovery/soak/preflight proof and final local acceptance.
 
-The safe-local queue through `BWS-599` is complete. `BWS-592` soak/failure injection, `BWS-593` external preflight, and `BWS-599` final acceptance are validated carry-forward surfaces. The BWS-700 dependency-ready local implementation gate is complete through `BWS-820`; `BWS-600` remains an external runtime-evidence gate and is now the selected route.
+The safe-local queue through `BWS-599` is complete. The broad bugfix audit/repair campaign is also complete and accepted across all eight campaign areas; it is not the selected route without new bounded evidence. `BWS-592` soak/failure injection, `BWS-593` external preflight, and `BWS-599` final acceptance are validated carry-forward surfaces. The BWS-700 dependency-ready local implementation gate is complete through `BWS-820`; `BWS-600` remains an external runtime-evidence gate and is now the selected route.
 
 `BETTING_WIN_REPO_PATH` remains a read-only pointer to the existing betting-win checkout. BWS reads committed `HEAD` through Git objects and must not clone, clean, reset or modify that checkout.
 

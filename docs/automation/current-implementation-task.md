@@ -9,6 +9,11 @@ current_task=BWS-600
 current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
 active_implementation_queue=none
 active_implementation_map=none
+broad_bugfix_campaign_status=COMPLETED_AND_ACCEPTED
+broad_bugfix_parent_run=bugfix_autopilot_20260812T133805Z
+broad_bugfix_final_status=BUGFIX_AUTOPILOT_COMPLETE
+broad_bugfix_rounds_completed=22
+broad_bugfix_areas_closed=8_of_8
 completed_b1_queue=backlog/bws_b1_cross_venue_implementation.csv
 completed_b1_map=backlog/bws_b1_cross_venue_map.csv
 bws700_completion_status=DEPENDENCY_READY_LOCAL_IMPLEMENTATION_COMPLETE
@@ -21,6 +26,12 @@ external_runtime_gate=BWS-600
 execution_gate=BWS-900_PARKED
 operator_approval=explicit_2026_08_02
 ```
+
+## Completed broad bugfix state
+
+The broad bugfix campaign is complete and accepted. The terminal parent `artifacts/bugfix_autopilot_20260812T133805Z` finished with `BUGFIX_AUTOPILOT_COMPLETE`, `all_campaign_areas_closed`, 22 rounds, and all 8 campaign areas closed. Its final cross-area audit passed the full baseline and PostgreSQL-backed loopback acceptance. No active bugfix or implementation queue remains; the next selected phase is the externally gated `BWS-600` paper/runtime-evidence campaign.
+
+Do not start another broad bugfix parent without fresh evidence defining a new bounded audit scope.
 
 ## Campaign objective
 

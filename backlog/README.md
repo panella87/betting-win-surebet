@@ -1,8 +1,8 @@
 # BWS implementation backlog
 
-`bws_full_implementation.csv` is the binding dependency ledger for `BWS_FULL_PLATFORM_IMPLEMENTATION_V1`.
+`bws_full_implementation.csv` is the retained completed dependency ledger for `BWS_FULL_PLATFORM_IMPLEMENTATION_V1`.
 
-`bws_remaining_safe_local_map.csv` is the supporting implementation map for the remaining `BWS-591` through `BWS-599` work. It decomposes each binding row into dependency-ordered, acceptance-backed subtasks without replacing the parent ledger.
+`bws_remaining_safe_local_map.csv` is the retained supporting map for the completed `BWS-591` through `BWS-599` work. It preserves dependency and acceptance traceability but is not an active implementation route.
 
 Status values in the binding ledger:
 

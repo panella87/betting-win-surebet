@@ -6,6 +6,8 @@ The operator explicitly opened `BWS-700` as a research/offline implementation au
 
 The real upstream B1 API intake remains blocked on `betting-win.b1_multi_venue_markets.v1`; that blocker is not solved by fixtures or local BWS runtime evidence.
 
+The broad bugfix campaign is complete and accepted. The terminal parent `artifacts/bugfix_autopilot_20260812T133805Z` finished with `BUGFIX_AUTOPILOT_COMPLETE`, `all_campaign_areas_closed`, 22 rounds, and all 8 campaign areas closed. Its final cross-area audit passed the full baseline and PostgreSQL-backed loopback acceptance. No active bugfix or implementation queue remains; the next selected phase is the externally gated `BWS-600` paper/runtime-evidence campaign.
+
 
 ```text
 program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
@@ -15,6 +17,9 @@ repo_role=surebet_strategy_application
 current_task=BWS-600
 current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
 active_implementation_queue=none
+broad_bugfix_campaign_status=COMPLETED_AND_ACCEPTED
+broad_bugfix_parent_run=bugfix_autopilot_20260812T133805Z
+broad_bugfix_areas_closed=8_of_8
 completed_b1_queue=backlog/bws_b1_cross_venue_implementation.csv
 completed_b1_map=backlog/bws_b1_cross_venue_map.csv
 bws700_completion_status=DEPENDENCY_READY_LOCAL_IMPLEMENTATION_COMPLETE
@@ -56,6 +61,7 @@ These markers preserve the accepted three-repo boundary after the BWS-700 B1 res
 - Database backup/restore/retention, structured observability, diagnostics and evidence indexing.
 - Root lifecycle/progress/log wrappers, service-owned paper evaluation and runtime-evidence paper autopilot.
 - Hardened controller infrastructure with atomic child results, truthful lock finalization and parent-only Telegram routing.
+- Broad bugfix audit/repair campaign completed and accepted across all eight areas, with final full validation and loopback acceptance green.
 
 ## Validated safe local work
 
@@ -84,7 +90,8 @@ selected_task=BWS-600
 implementation_queue=none
 paper_autopilot_selected=selected_after_bws700_dependency_ready_queue_complete
 bws600_paper_autopilot_route=available_after_operator_approved_upstream_api_and_no_binding_implementation_queue
-bugfix_autopilot_selected=no
+bugfix_autopilot_status=COMPLETED_AND_ACCEPTED
+bugfix_autopilot_selected=no_no_new_bounded_audit_scope
 force_unlock_required=no_evidence
 automation_maintenance_allowed=no
 ```

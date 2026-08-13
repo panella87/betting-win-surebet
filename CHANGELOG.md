@@ -1,3 +1,11 @@
+## 2026-08-13 - Documentation alignment after accepted bugfix closure
+
+- Recorded the accepted `BUGFIX_AUTOPILOT_COMPLETE` result for `bugfix_autopilot_20260812T133805Z`: 22 rounds and all 8 campaign areas closed.
+- Aligned active status, routing, starter, agent and automation docs on the next selected phase: externally gated BWS-600 via `run-paper-autopilot.sh`.
+- Reclassified completed full-platform and B1 queue documents as retained historical/completed authority instead of active implementation queues.
+- Reconciled the B1 implementation map with the source files and consolidated implementation surfaces that actually exist in the repository.
+- Preserved canonical command names, 72-hour standalone defaults, `update_git.sh --acp`/`GITHUB_TOKEN`, artifact-pull behavior, protected-file policy, API-only runtime, and parked BWS-900 execution.
+
 ## 2026-08-12 - Retained artifact hygiene fixture completeness repair
 
 - Preserved the BWS-FPAS-001 retained artifact ZIP member-hygiene implementation from the stopped filesystem/artifact-safety campaign.

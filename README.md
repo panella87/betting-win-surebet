@@ -6,6 +6,22 @@ The BWS-700 implementation authority `BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V
 
 `BWS-710` real upstream intake remains blocked until `betting-win` exposes an accepted read-only `betting-win.b1_multi_venue_markets.v1` resource. Dependency-ready local work may implement contract skeletons, equivalence, gross/net calculations, stake-vector solving, fill/rejection/timeout simulation, settlement false-positive analysis, deterministic offline backtesting, private persistence, read-only reporting and acceptance/kill criteria. Fixtures are not runtime evidence.
 
+## Verified bugfix campaign completion
+
+The broad bugfix campaign is complete and accepted. The terminal parent `artifacts/bugfix_autopilot_20260812T133805Z` finished with `BUGFIX_AUTOPILOT_COMPLETE`, `all_campaign_areas_closed`, 22 rounds, and all 8 campaign areas closed. Its final cross-area audit passed the full baseline and PostgreSQL-backed loopback acceptance. No active bugfix or implementation queue remains; the next selected phase is the externally gated `BWS-600` paper/runtime-evidence campaign.
+
+```text
+broad_bugfix_campaign_status=COMPLETED_AND_ACCEPTED
+broad_bugfix_parent_run=bugfix_autopilot_20260812T133805Z
+broad_bugfix_final_status=BUGFIX_AUTOPILOT_COMPLETE
+broad_bugfix_stop_reason=all_campaign_areas_closed
+broad_bugfix_rounds_completed=22
+broad_bugfix_areas_closed=8
+broad_bugfix_total_areas=8
+broad_bugfix_lock_release_status=released
+broad_bugfix_next_action=none
+```
+
 
 `betting-win-surebet` is the surebet and complete-set application built on top of the `betting-win` provider, data, history, export and read-only query platform.
 
@@ -26,6 +42,8 @@ account_policy=separate_from_betting-win-betting
 current_task=BWS-600
 current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
 active_implementation_queue=none
+broad_bugfix_campaign_status=COMPLETED_AND_ACCEPTED
+broad_bugfix_areas_closed=8_of_8
 completed_b1_queue=backlog/bws_b1_cross_venue_implementation.csv
 completed_b1_map=backlog/bws_b1_cross_venue_map.csv
 bws700_completion_status=DEPENDENCY_READY_LOCAL_IMPLEMENTATION_COMPLETE
@@ -114,7 +132,7 @@ npm run validate
 
 ## Current automation route
 
-The selected controller is now `run-paper-autopilot.sh` for the carry-forward `BWS-600` runtime-evidence gate after BWS-700 dependency-ready local completion. The source of task authority is `docs/automation/current-implementation-task.md` plus the accepted B1 docs and backlog. `run-paper-autopilot.sh` remains blocked until the operator-approved betting-win read-only API is available, but no dependency-ready BWS-700 source queue remains binding.
+The selected controller is now `run-paper-autopilot.sh` for the carry-forward `BWS-600` runtime-evidence gate after BWS-700 dependency-ready local completion. The accepted 8/8 broad bugfix closure means `run-bugfix-autopilot.sh` is not selected again unless new evidence opens a new bounded audit scope. The source of task authority is `docs/automation/current-implementation-task.md` plus the accepted B1 docs and backlog. `run-paper-autopilot.sh` remains blocked until the operator-approved betting-win read-only API is available, but no dependency-ready BWS-700 source queue remains binding.
 
 The standardized helper surface is active: `zip_codebase.sh` creates numbered repo-root zips without a manifest; `pull_artifacts_and_zip_codebase.sh` pulls server `artifacts.zip` and then calls local `zip_codebase.sh` without reading `automation.config.sh`; `update_git.sh --acp` is the add/commit/push shorthand and preserves `GITHUB_TOKEN` support. `run-autonomous-implementation.sh`, `run-paper-evaluation.sh` and `run-autonomous-bugfix.sh` default to 72-hour standalone ceilings. `run-paper-evaluation.sh` replaces the old 12-hour helper and writes root `artifacts.zip`; the canonical operator flag is `--adaptive`, and active commands must keep explicit observation intervals inside the 5..60 minute policy until a reviewed protected-controller change implements automatic explicit-interval clamping. `run-autonomous-bugfix.sh` has no proactive/reactive mode flags. `stop-autonomous-run.sh` is intentionally absent.
 

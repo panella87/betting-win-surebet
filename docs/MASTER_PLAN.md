@@ -2,11 +2,11 @@
 
 ## B1 implementation program
 
-The current implementation plan is `BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1`, opened by explicit operator approval after the OpenAlex B1 research review. It adds a new BWS-700 series without reopening the validated `BWS-100` through `BWS-599` platform or claiming `BWS-600` runtime evidence.
+The current program authority is `BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1`, opened by explicit operator approval after the OpenAlex B1 research review. Dependency-ready local implementation is complete through `BWS-820`, the broad bugfix campaign is accepted across all eight areas, and the active task has returned to the external `BWS-600` runtime-evidence gate.
 
 Primary task source: `docs/automation/current-implementation-task.md`.
-Primary queue: `backlog/bws_b1_cross_venue_implementation.csv`.
-Primary map: `backlog/bws_b1_cross_venue_map.csv`.
+Completed B1 queue: `backlog/bws_b1_cross_venue_implementation.csv`.
+Completed B1 map: `backlog/bws_b1_cross_venue_map.csv`.
 
 
 ## Goal
@@ -21,6 +21,8 @@ upstream_platform=betting-win
 current_task=BWS-600
 current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
 active_implementation_queue=none
+broad_bugfix_campaign_status=COMPLETED_AND_ACCEPTED
+broad_bugfix_areas_closed=8_of_8
 completed_b1_queue=backlog/bws_b1_cross_venue_implementation.csv
 completed_b1_map=backlog/bws_b1_cross_venue_map.csv
 bws700_completion_status=DEPENDENCY_READY_LOCAL_IMPLEMENTATION_COMPLETE
@@ -53,7 +55,7 @@ BWS does not duplicate provider collection or canonical history. It may retain i
 
 ## Program
 
-The active machine-readable queue is `backlog/bws_b1_cross_venue_implementation.csv`; the active map is `backlog/bws_b1_cross_venue_map.csv`. The old full-platform queue, `backlog/bws_full_implementation.csv`, is validated carry-forward history through `BWS-599`.
+The completed dependency-ready B1 queue is `backlog/bws_b1_cross_venue_implementation.csv`; its retained map is `backlog/bws_b1_cross_venue_map.csv`. BWS-710 remains blocked on the real upstream contract, BWS-830/BWS-840 remain parked, and no B1 implementation row is currently active. The old full-platform queue, `backlog/bws_full_implementation.csv`, is validated carry-forward history through `BWS-599`.
 
 Primary phases:
 

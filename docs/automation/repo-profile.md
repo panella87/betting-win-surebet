@@ -9,6 +9,8 @@ current_task=BWS-600
 current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
 selected_controller=run-paper-autopilot.sh
 active_implementation_queue=none
+broad_bugfix_campaign_status=COMPLETED_AND_ACCEPTED
+broad_bugfix_areas_closed=8_of_8
 completed_b1_queue=backlog/bws_b1_cross_venue_implementation.csv
 completed_b1_map=backlog/bws_b1_cross_venue_map.csv
 bws700_completion_status=DEPENDENCY_READY_LOCAL_IMPLEMENTATION_COMPLETE
@@ -55,4 +57,4 @@ run-paper-evaluation.sh           72h default, fixture evaluator plus runtime-ev
 run-paper-autopilot.sh            seven-day BWS-600 runtime-evidence parent selected after BWS-700 local completion and upstream API readiness
 ```
 
-The current product has long-running API convergence, scheduler and worker services, managed loopback cockpit serving, a validated full-stack lifecycle owner, database lifecycle operations, observability, root-wrapper integration, runtime-evidence paper automation, release packaging, upgrade/recovery proof, soak/failure injection, external preflight, final local acceptance, and the BWS-600 upstream API preflight source fix. The BWS-700 dependency-ready local implementation route is validated through BWS-820; external BWS-600 runtime evidence remains a carry-forward gate against an operator-approved betting-win read-only API.
+The current product has long-running API convergence, scheduler and worker services, managed loopback cockpit serving, a validated full-stack lifecycle owner, database lifecycle operations, observability, root-wrapper integration, runtime-evidence paper automation, release packaging, upgrade/recovery proof, soak/failure injection, external preflight, final local acceptance, the BWS-600 upstream API preflight source fix, and an accepted 8/8 broad bugfix campaign. The BWS-700 dependency-ready local implementation route is validated through BWS-820; external BWS-600 runtime evidence remains a carry-forward gate against an operator-approved betting-win read-only API.

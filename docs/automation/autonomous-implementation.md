@@ -1,8 +1,8 @@
 # Autonomous implementation rules: betting-win-surebet
 
-## Active BWS-700 authority
+## Completed BWS-700 authority and future implementation use
 
-The implementation controller is now selected for B1 offline falsification work. It must implement dependency-ready queue rows from `backlog/bws_b1_cross_venue_implementation.csv`, preserve `BWS-100` through `BWS-599`, keep `BWS-600` externally gated, and keep `BWS-900` parked. Real upstream B1 API intake remains blocked until `betting-win.b1_multi_venue_markets.v1` exists.
+The implementation controller is not currently selected. Dependency-ready B1 work is complete through BWS-820, the broad bugfix campaign is accepted, BWS-600 remains externally gated, and BWS-900 remains parked. Use this controller only for a future reviewed source handoff or after BWS-710 is unblocked by an accepted `betting-win.b1_multi_venue_markets.v1` contract.
 
 
 ```text

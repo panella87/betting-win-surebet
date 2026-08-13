@@ -1,5 +1,7 @@
 # 034 - Remaining operator runtime implementation program
 
+> **Completed historical authority.** This document preserves the implementation sequence and acceptance rules that closed BWS-100 through BWS-599. It is not current controller routing. Current authority is `docs/automation/current-implementation-task.md`, with no active implementation queue and `run-paper-autopilot.sh` selected for BWS-600.
+
 ```text
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 current_task=BWS-599

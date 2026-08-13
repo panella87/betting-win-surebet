@@ -8,9 +8,13 @@ parent_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 current_task=BWS-600
 safe_local_terminal_gate=BWS-599
 selected_controller=run-paper-autopilot.sh
+broad_bugfix_campaign_status=COMPLETED_AND_ACCEPTED
+broad_bugfix_areas_closed=8_of_8
 bws600_current_task=BWS-600
 bws600_selected_controller=run-paper-autopilot.sh
 ```
+
+The broad bugfix campaign is complete; do not rerun it without new evidence defining a new bounded audit scope. The next operational phase is BWS-600 paper/runtime evidence.
 
 1. Use Node 20.
 2. Keep `~/app_testing/betting-win-surebet` as the working repository.
