@@ -63,7 +63,7 @@ backlog/bws_b1_cross_venue_map.csv
 
 The B1 authority is offline/private-paper only. `BWS-710` remains blocked until `betting-win` exposes an accepted read-only `betting-win.b1_multi_venue_markets.v1` resource. `BWS-600` remains the external runtime-evidence gate for the accepted same-venue platform, and `BWS-900` remains parked.
 
-## Active operating docs
+## Active and carry-forward operating docs
 
 ```text
 README.md
@@ -78,6 +78,8 @@ docs/automation/artifact-retention-and-cleanup.md
 docs/operations/autonomous_72h_runbook.md
 docs/operations/service_run.md
 ```
+
+`docs/operations/autonomous_72h_runbook.md` is carry-forward guidance for a future reviewed implementation/source-fix handoff. It is not the current controller route.
 
 
 ## Removed bootstrap snapshots

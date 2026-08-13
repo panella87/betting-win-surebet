@@ -1,3 +1,10 @@
+## 2026-08-13 - Final active-document routing and continuation-package alignment
+
+- Reclassified the top-level agent and implementation-runbook wording so the completed BWS-700 queue cannot be mistaken for an active implementation campaign.
+- Corrected the autonomous implementation guide to state that a queue is active only when the current task explicitly opens and names it.
+- Documented the exact continuation package for a fresh review: the newest numbered `artifactsN.zip` plus `betting-win-surebetN.zip`, with secrets and generated dependency trees excluded.
+- Preserved the selected `run-paper-autopilot.sh` BWS-600 route, the accepted 8/8 broad bugfix closure, and the no-provider/no-execution/protected-file boundaries.
+
 ## 2026-08-13 - Retained blueprint and protected-authorization documentation alignment
 
 - Reclassified the BWS-587 through BWS-589 protected-file allowlist as closed historical authorization and preserved the current `allowed_protected_files=none` boundary.

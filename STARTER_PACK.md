@@ -48,3 +48,7 @@ BWS-599  final local acceptance (validated)
 ```
 
 The full-platform safe-local queue remains complete through `BWS-599`; `BWS-600` remains externally blocked on real betting-win API runtime evidence. BWS-700 dependency-ready local implementation is validated through BWS-820, and the broad bugfix campaign is complete across 8/8 areas. The selected route is now `run-paper-autopilot.sh` for BWS-600 runtime evidence.
+
+## Evidence to return for continuation
+
+After a server controller stops, run `pull_artifacts_and_zip_codebase.sh` from the local repository root. Provide both newly numbered outputs to the next review: `artifactsN.zip` for retained server evidence and `betting-win-surebetN.zip` for the current repository source. Command output is supplemental, not a substitute for either ZIP. Never include `.env`, credentials, databases, `node_modules`, or unretained server logs.

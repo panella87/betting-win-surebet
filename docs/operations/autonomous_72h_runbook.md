@@ -1,11 +1,13 @@
 # Autonomous 72-hour implementation runbook
 
-## Current and carry-forward implementation campaign
+## Carry-forward implementation and source-fix runbook
 
 ```text
 program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
 parent_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-controller=run-autonomous-implementation.sh
+runbook_status=CARRY_FORWARD_FUTURE_HANDOFF_ONLY
+controller_when_invoked=run-autonomous-implementation.sh
+selected_controller=run-paper-autopilot.sh
 current_task=BWS-600
 active_implementation_queue=none
 completed_b1_queue=backlog/bws_b1_cross_venue_implementation.csv

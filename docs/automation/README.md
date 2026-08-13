@@ -102,6 +102,8 @@ All root controllers archive the complete retained-evidence portion of `artifact
 
 For status, inspect machine-readable retained evidence. Do not infer success from elapsed time or exit code alone.
 
+For a fresh ChatGPT continuation, provide both numbered outputs produced locally by `pull_artifacts_and_zip_codebase.sh`: `artifactsN.zip` for retained server evidence and `betting-win-surebetN.zip` for the current repository source. The codebase ZIP controls current files; the artifact ZIP describes the attempt. Command output may supplement those files but must not replace them. Never provide `.env`, credentials, databases, `node_modules`, or unretained server logs.
+
 ## Temporary-file and inode safety
 
 `docs/automation/repository-temp-inode-safety.md` is binding for every autonomous, bugfix, paper, and parent-autopilot controller. `run_common.sh` creates one `.automation/tmp/sessions/...` root per controller, propagates `TMPDIR`/`TMP`/`TEMP`, performs byte and inode preflight, and runs a bounded capacity watchdog. Parent and child controllers receive distinct roots.

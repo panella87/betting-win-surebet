@@ -1,6 +1,6 @@
 # 012 - Operator runbook
 
-## Current BWS-700 campaign and carry-forward BWS-600 runtime runbook
+## Completed BWS-700 implementation and active BWS-600 runtime runbook
 
 ```text
 program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1

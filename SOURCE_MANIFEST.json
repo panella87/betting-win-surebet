@@ -1,7 +1,7 @@
 {
   "schema": "betting-win-surebet-source-manifest-v1",
-  "generated": "2026-08-13T05:31:16Z",
-  "overlay": "betting-win-surebet108-documentation-alignment-wave69",
+  "generated": "2026-08-13T06:03:34Z",
+  "overlay": "betting-win-surebet109-documentation-alignment-wave70",
   "files": [
     {
       "path": ".automation/README.md",
@@ -110,13 +110,13 @@
     },
     {
       "path": "AGENTS.md",
-      "sha256": "60f7b4527019dd5bcb18593130e23da263863ae0a6903e0aa51706dcfb177590",
-      "size": 9899
+      "sha256": "66d236bfd1a8ca2938e5cdde4db15427c4637489a13696ac5207ff8520111dd7",
+      "size": 10067
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "ebb8affad87bfca2523e8f4c4864b1dcaf8783669641cf11cbe0015b98f1d0e2",
-      "size": 79722
+      "sha256": "ea48f0b2086b5b2ed5a8cb9108ed513a93208e6fb716532d5cb948779d2a49c7",
+      "size": 80454
     },
     {
       "path": "PROJECT_STATUS.md",
@@ -130,8 +130,8 @@
     },
     {
       "path": "STARTER_PACK.md",
-      "sha256": "63611f60e35c592260b0361f1b528c18e570173db67e453eb0a3f0613cd8564c",
-      "size": 2131
+      "sha256": "4d5b299e153dbb99f37b7b58988c5fc3f905a5fd7727f76524d6d077cf75cba8",
+      "size": 2600
     },
     {
       "path": "apps/web/index.html",
@@ -410,8 +410,8 @@
     },
     {
       "path": "docs/000_documentation_index.md",
-      "sha256": "6f3f660435c2877501deede8a646e43f72782d227c18cb6bd0943339c1adddaf",
-      "size": 8721
+      "sha256": "cda05e2964bb0a9d9cabc61aba8f540e86e6d3fc634f4b23e99cb715005ebf4a",
+      "size": 8907
     },
     {
       "path": "docs/001_scope_and_boundaries.md",
@@ -470,8 +470,8 @@
     },
     {
       "path": "docs/012_runbook.md",
-      "sha256": "bbad87f4fe84ab0cd3152e3c56ebde68788246762c485eb5506fa67343dc4308",
-      "size": 2877
+      "sha256": "3ca7cc572431465e6dfac187c1bb85ad4d499220747e80bcabf56b93bf5fad57",
+      "size": 2878
     },
     {
       "path": "docs/013_autonomous_controller_status_contract.md",
@@ -660,8 +660,8 @@
     },
     {
       "path": "docs/automation/README.md",
-      "sha256": "30904f3696b73edc4a6c9518853f2dfdec12ba841a5727c12989e77d7e9e70c9",
-      "size": 12615
+      "sha256": "8cc237f94b14b855b36a94b5f30f8bf06b66ca506ecc5e3f7916f195f52ca908",
+      "size": 13089
     },
     {
       "path": "docs/automation/SSH_KEY_SETUP.md",
@@ -685,8 +685,8 @@
     },
     {
       "path": "docs/automation/autonomous-implementation.md",
-      "sha256": "ac8bdaa896c9ae0c6607b5676e6fef04ed98cb4cd2f74bd257f70ff91d1f5e28",
-      "size": 4640
+      "sha256": "cca2d793d2188cd4f0de612e9a642293b4ec8eb5835b8326c891c61eff68221e",
+      "size": 4774
     },
     {
       "path": "docs/automation/bugfix-autopilot.md",
@@ -765,8 +765,8 @@
     },
     {
       "path": "docs/operations/autonomous_72h_runbook.md",
-      "sha256": "62d6ff5b7b31f1208ba56ebb760ec28d76931321434eff297213a5466b3c645e",
-      "size": 2006
+      "sha256": "2decae143e8b8f0c9446cd5542735bae94c1541b4d72174ed1c72c961df5521c",
+      "size": 2113
     },
     {
       "path": "docs/operations/service_run.md",

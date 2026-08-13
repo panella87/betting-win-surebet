@@ -1,6 +1,6 @@
 # Agent Instructions
 
-## Active B1 implementation authority
+## Completed B1 implementation authority and active BWS-600 route
 
 ```text
 program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
@@ -19,7 +19,7 @@ safe_local_terminal_gate=BWS-599
 BWS-900=parked
 ```
 
-Use the B1 docs and backlog only for deterministic offline/private-paper implementation. Preserve validated same-venue platform behavior, the API-only upstream boundary, no-provider/no-execution contracts, and the external BWS-600 runtime-evidence blocker. B1 fixtures are allowed for deterministic tests but must never be treated as upstream runtime evidence or profitability proof.
+Use the B1 docs and backlog as completed deterministic offline/private-paper authority and traceability. Reopen implementation only when the current task names a reviewed source handoff or the accepted BWS-710 upstream contract. Preserve validated same-venue platform behavior, the API-only upstream boundary, no-provider/no-execution contracts, and the external BWS-600 runtime-evidence blocker. B1 fixtures are allowed for deterministic tests but must never be treated as upstream runtime evidence or profitability proof.
 
 
 ## Repository purpose

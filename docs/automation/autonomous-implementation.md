@@ -21,7 +21,7 @@ bws600_current_task=BWS-600
 bws600_selected_controller=run-paper-autopilot.sh
 ```
 
-`run-autonomous-implementation.sh` defaults to a 72-hour ceiling and is driven by repository docs, `docs/automation/current-implementation-task.md`, validated handoffs, and the active queue `backlog/bws_b1_cross_venue_implementation.csv`. The historical `backlog/bws_full_implementation.csv` and `backlog/bws_remaining_safe_local_map.csv` stay as carry-forward context. There is no `--task` flag. A separate `--prompt-file` is not part of normal operator routing.
+`run-autonomous-implementation.sh` defaults to a 72-hour ceiling and is driven by repository docs, `docs/automation/current-implementation-task.md`, validated handoffs, and—only when the current task explicitly opens one—the queue named by that task. No implementation queue is active now. The completed B1 queue `backlog/bws_b1_cross_venue_implementation.csv` and the historical `backlog/bws_full_implementation.csv` and `backlog/bws_remaining_safe_local_map.csv` remain carry-forward traceability. There is no `--task` flag. A separate `--prompt-file` is not part of normal operator routing.
 
 `BWS-100` through `BWS-589` are validated carry-forward foundations inside the wider complete safe-local program through `BWS-599`.
 
