@@ -1,6 +1,15 @@
 # Autonomous Loop Contract
 
-The autonomous loop is a repo-local implementation controller. It is allowed to edit source/docs/tests only through a bounded Codex cycle. It is not allowed to run providers, services, wallets, signers, orders, or external trading operations.
+```text
+document_role=CANONICAL_IMPLEMENTATION_CONTROLLER_STATUS_CONTRACT
+current_task=BWS-600
+active_implementation_queue=none
+selected_controller=run-paper-autopilot.sh
+```
+
+This is the canonical implementation-cycle status and request-flags contract. `docs/013_autonomous_controller_status_contract.md` is retained only as a compatibility pointer. Current controller routing comes from `docs/automation/current-implementation-task.md`, not from this carry-forward implementation contract.
+
+The autonomous loop is a repo-local implementation controller. It is allowed to edit source, docs, and tests only through a bounded Codex cycle. It is not allowed to run providers, wallets, signers, orders, or external trading operations. Bounded uniquely identified loopback child processes are permitted only inside required tests or validation and must be cleaned up by their owner.
 
 Each cycle must write `continue_status.txt` with exactly one non-empty line. The only valid lines are:
 
@@ -16,7 +25,7 @@ CONTINUE_REQUIRED=yes
 BLOCKED=yes
 ```
 
-Use `CONTINUE_REQUIRED=yes` only when another safe, documented repo-local task remains in the active backlog. Do not route from stale SURE-001/SURE-002A/SURE-002B wording after those backlogs are exhausted. Use `BLOCKED=yes` only when the first required task needs unavailable upstream `betting-win` contract/export evidence, external credentials, unsafe actions, or a human decision. A malformed, missing, combined, or unknown status must fail closed; the controller must not treat it as continue.
+Use `CONTINUE_REQUIRED=yes` only when another safe, documented repo-local task remains in an explicitly active backlog or reviewed source-fix handoff. Do not route from stale SURE-001, SURE-002A, SURE-002B, BWS-100..BWS-599, or completed dependency-ready BWS-700 queue wording. Use `BLOCKED=yes` only when the first required task needs unavailable upstream contract evidence, external credentials, unsafe actions, or a human decision. A malformed, missing, combined, or unknown status must fail closed.
 
 Each cycle must also write `request_flags.txt` with exactly two lines and in this exact order:
 
@@ -31,7 +40,7 @@ Each required cycle report artifact must be real. The controller may create plac
 
 `AUTONOMOUS_GOAL_COMPLETE=yes` is accepted only after the post-cycle `npm run validate` gate passes. A nonzero Codex exit code must fail closed even if validation still passes.
 
-Hard bans under the current gate: provider SDKs/URLs, wallet/signer/order/transaction paths, `.env` mutation, git branch mutation, long services, live operations, weakened validators, fabricated upstream evidence, predictive/value-betting work, and shared-account coordination.
+Hard bans under the current gate: provider SDKs or URLs, wallet/signer/order/transaction paths, `.env` mutation, git branch mutation, long external services, live operations, weakened validators, fabricated upstream evidence, predictive/value-betting work, and shared-account coordination.
 
 ## Runtime loader invariant
 

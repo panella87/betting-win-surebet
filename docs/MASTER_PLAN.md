@@ -65,7 +65,7 @@ Primary phases:
 4. `BWS-300` to `BWS-320`: backtest, bounded private paper, strategy ledger and reports.
 5. `BWS-400` to `BWS-500`: API, workers, cockpit, security, observability and process contracts.
 6. `BWS-510`: integrated clean-install and loopback acceptance.
-7. `BWS-520` to `BWS-580`: executable bounded runtime components, explicit convergence, bounded scheduling, persisted visibility and component-level continuous-runtime acceptance.
+7. `BWS-520` to `BWS-580`: executable bounded runtime components, bounded API convergence with retained export compatibility coverage, bounded scheduling, persisted visibility, and component-level continuous-runtime acceptance.
 8. `BWS-581` to `BWS-584`: real long-running services, cockpit serving and complete full-stack lifecycle.
 9. `BWS-586` to `BWS-589`: evidence operations plus root wrapper and paper-controller integration.
 10. `BWS-590` to `BWS-593`: release, upgrade/recovery, soak/failure injection and accepted-runtime preflight.
@@ -76,7 +76,7 @@ Primary phases:
 Latest validated carry-forward tranche:
 
 - `BWS-592`: deterministic managed-runtime soak and bounded failure injection.
-- `BWS-593`: exact-mode external runtime preflight and campaign-manifest generation.
+- `BWS-593`: API-only external runtime preflight and campaign-manifest generation, with historical export fixtures retained only for compatibility regression.
 - `BWS-599`: integrated final local operator/runtime/automation/recovery acceptance.
 
 ## Implementation continuation contract
@@ -91,7 +91,7 @@ Completing one bounded task quickly is valid, but it does not end a future campa
 
 Every task requires focused success/failure proof, stateful restart/idempotency/cleanup coverage where applicable, `npm run validate`, updated ledger/status evidence and a regenerated `SOURCE_MANIFEST.json`.
 
-No task may pass by weakening validators, inventing upstream evidence, accepting unknown schemas, using floating-point money, silently falling back between upstream modes or treating a one-shot command as a continuous service.
+No task may pass by weakening validators, inventing upstream evidence, accepting unknown schemas, using floating-point money, falling back from API runtime to retained file inputs, or treating a one-shot command as a continuous service.
 
 ## Automation operating model
 

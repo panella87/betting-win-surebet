@@ -1,24 +1,14 @@
 # 013 - Autonomous controller status contract
 
-Each implementation cycle writes exactly one non-empty `continue_status.txt` line:
+> **Superseded compatibility entry point.** The canonical implementation-cycle status, request-flags, validation, and runtime-loader contract is `docs/autonomous_loop_contract.md`. Current routing authority is `docs/automation/current-implementation-task.md`.
 
 ```text
-AUTONOMOUS_GOAL_COMPLETE=yes
-CONTINUE_REQUIRED=yes
-BLOCKED=yes
+document_classification=superseded
+retained_for=path_compatibility_and_validation_inventory
+canonical_contract=docs/autonomous_loop_contract.md
+current_task=BWS-600
+active_implementation_queue=none
+selected_controller=run-paper-autopilot.sh
 ```
 
-Malformed, missing, combined, or unknown values fail closed.
-
-`request_flags.txt` remains a strict two-line contract:
-
-```text
-SERVICE_REFRESH_REQUIRED=no
-RUNTIME_EVIDENCE_REQUIRED=no
-```
-
-Required reports must be present and non-placeholder. Codex nonzero exit, timeout, or failed post-cycle `npm run validate` blocks status acceptance.
-
-For a task that explicitly opens an implementation queue, use `CONTINUE_REQUIRED=yes` while another dependency-ready safe task remains. Use `AUTONOMOUS_GOAL_COMPLETE=yes` only when that authorized queue is validated or truthfully blocked. Historical SURE completion is not an active stop condition.
-
-The current repository task opens no implementation queue: `BWS-100` through `BWS-599` and dependency-ready BWS-700 rows through `BWS-820` are complete, and `run-paper-autopilot.sh` is selected for the externally gated `BWS-600` runtime-evidence phase. This status contract is carry-forward implementation behavior, not current routing authority.
+This file intentionally owns no duplicate procedure. Historical references to `docs/013_autonomous_controller_status_contract.md` should resolve here and continue to the canonical contract.

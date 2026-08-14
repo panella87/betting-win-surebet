@@ -4,23 +4,24 @@
 
 ```text
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-current_task=BWS-599
+historical_final_task=BWS-599
+historical_final_task_status=VALIDATED
 safe_local_terminal_gate=BWS-599
 external_runtime_gate=BWS-600
 execution_gate=BWS-900
 ```
 
-Objective: implement every safe local component required for a private operator-runnable continuous private-paper and surebet backtest application on betting-win.
+The historical objective was to implement every safe local component required for an operator-runnable continuous private-paper and surebet backtest application on betting-win.
 
-`BWS-100` through `BWS-593` are validated foundations. `BWS-580` closed the integrated bounded runtime handoff, `BWS-581` through `BWS-589` closed the continuous service, lifecycle, operations and paper-automation layers, `BWS-590` closed deterministic private release packaging, `BWS-591` closed exact-version upgrade, rollback and disaster-recovery proof, `BWS-592` closed deterministic managed-runtime soak plus bounded failure injection, and `BWS-593` closed exact-mode external runtime preflight and campaign-manifest generation. They include exact upstream pinning, the validated workspace migration, domain and persistence layers, immutable export and typed API intake, long-running convergence, scheduler and worker services, read-only API and cockpit, complete product lifecycle, database lifecycle, observability, root wrappers, service-owned paper evaluation, runtime-evidence paper autopilot, deterministic release/install verification, checkpointed upgrade/recovery evidence, managed-runtime soak evidence and external-runtime campaign preparation.
+`BWS-100` through `BWS-599` are validated. `BWS-580` closed the bounded integrated runtime handoff, and `BWS-581` began the continuous service phase. The program completed the exact upstream pin, workspace migration, domain and persistence layers, immutable compatibility intake, typed API intake, long-running API convergence, scheduler and worker services, read-only API and cockpit, complete product lifecycle, database lifecycle, observability, root wrappers, service-owned paper evaluation, runtime-evidence paper autopilot, deterministic release and install verification, checkpointed upgrade and recovery, managed-runtime soak and failure evidence, external-runtime preflight, and integrated clean-room final local acceptance.
 
-The remaining program is:
+The historical remaining program ended with:
 
 ```text
-BWS-599  integrated clean-room final local acceptance
+BWS-599  integrated clean-room final local acceptance (validated)
 ```
 
-Binding and supporting authority:
+Retained authority and proof:
 
 - `backlog/bws_full_implementation.csv`
 - `backlog/bws_remaining_safe_local_map.csv`
@@ -34,10 +35,8 @@ Binding and supporting authority:
 - `docs/045_external_runtime_preflight_implementation_blueprint.md`
 - `docs/046_final_local_acceptance_implementation_blueprint.md`
 
-The implementation controller selects the first dependency-ready `PENDING` row, implements the largest safe cohesive tranche, validates each parent row separately, updates evidence/ledger and continues through `BWS-599`.
+During the completed program, the implementation controller selected the first dependency-ready `PENDING` row, implemented the largest safe cohesive tranche, validated each parent row separately, updated evidence and the ledger, and continued through `BWS-599`. That selection rule is historical and does not reopen the queue.
 
-It must not modify the betting-win checkout, copy provider adapters, invent upstream contracts/commits, use direct provider endpoints/credentials, write betting-win `core.*`, add execution paths, silently fall back between upstream modes or mark tasks validated without proof.
+The program prohibited modifying the betting-win checkout, copying provider adapters, inventing upstream contracts or commits, using provider endpoints or credentials, writing betting-win `core.*`, adding execution paths, silently falling back between upstream modes, or marking tasks validated without proof.
 
-The protected wrapper and paper-controller integration phase is complete. Current `BWS-590` through `BWS-599` implementation authorizes no protected automation changes.
-
-`BWS-600` remains external and `BWS-900` remains separately authorized.
+The protected wrapper and paper-controller integration phase is complete. Current work authorizes no protected automation changes. `BWS-600` remains external and `BWS-900` remains separately authorized.

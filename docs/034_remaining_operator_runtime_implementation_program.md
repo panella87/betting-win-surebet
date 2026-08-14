@@ -14,11 +14,13 @@ external_runtime_gate=BWS-600
 execution_gate=BWS-900
 ```
 
+The `current_task=BWS-599` marker records the terminal task of this closed program. It is not the current repository task.
+
 ## Historical reason the program continued
 
-`BWS-580` validated a substantial closed-stack test surface, bounded convergence passes, a machine-readable runtime handoff, and `BWS-584` completed the full-stack lifecycle owner. At that point, the operator-runnable application was still incomplete.
+`BWS-580` validated a substantial closed-stack test surface, bounded convergence passes, a machine-readable runtime handoff, and `BWS-584` completed the full-stack lifecycle owner. At that checkpoint, the operator-runnable application was still incomplete.
 
-At the time this program was active, these were the tracked local gaps. Every listed surface is now validated:
+The program then closed these local gaps:
 
 ```text
 start/stop wrappers=validated_product_lifecycle_delegation
@@ -34,37 +36,37 @@ external preflight=validated
 final acceptance=validated
 ```
 
-These were source and automation implementation gaps. They are now closed through `BWS-599`; `BWS-600` is the remaining external runtime-evidence gate.
+They were source and automation implementation gaps and are now closed through `BWS-599`. `BWS-600` is the remaining external runtime-evidence gate.
 
 ## Historical binding queue
 
-The machine-readable authority during this completed program was `backlog/bws_full_implementation.csv`. Its selection rule was to choose the first `PENDING` row whose internal dependencies were `VALIDATED`; it is not a current routing instruction.
+The machine-readable authority during this completed program was `backlog/bws_full_implementation.csv`. Its historical selection rule was to choose the first `PENDING` row whose internal dependencies were `VALIDATED`; it is not a current routing instruction.
 
 ### Runtime service construction
 
-- `BWS-581`: validated long-running explicit-mode upstream convergence service.
-- `BWS-582`: long-running scheduler and worker loops with lease, backpressure and graceful-drain semantics.
+- `BWS-581`: validated the historical explicit export/API convergence design and the final API-only long-running upstream convergence service. Retained export code is non-runtime compatibility only.
+- `BWS-582`: validated long-running scheduler and worker loops with lease, backpressure, and graceful-drain semantics.
 - `BWS-583`: validated loopback cockpit serving and full typed API/UI convergence.
-- `BWS-584`: validated complete product-owned lifecycle for API, convergence, scheduler, worker and cockpit processes.
+- `BWS-584`: validated complete product-owned lifecycle for API, API convergence, scheduler, worker, and cockpit processes.
 
 ### Operations and evidence
 
-- `BWS-585`: validated database migration status, retention, backup and disposable restore verification.
-- `BWS-586`: structured logs, metrics, diagnostics, evidence index and bounded retention (validated).
-- `BWS-587`: exact protected root wrapper integration for lifecycle, status, progress and logs (validated).
+- `BWS-585`: validated database migration status, retention, backup, and disposable restore verification.
+- `BWS-586`: validated structured logs, metrics, diagnostics, evidence index, and bounded retention.
+- `BWS-587`: validated exact protected root wrapper integration for lifecycle, status, progress, and logs.
 
 ### Paper automation
 
 - `BWS-588`: validated standalone service-owned continuous paper evaluation.
-- `BWS-589`: paper autopilot lifecycle and runtime handoff integration (validated).
+- `BWS-589`: validated paper autopilot lifecycle and runtime handoff integration.
 
 ### Release and resilience
 
-- `BWS-590`: validated reproducible release/deployment packaging and user-service templates.
-- `BWS-591`: validated upgrade, rollback and disaster-recovery proof.
-- `BWS-592`: bounded long-running soak and failure-injection acceptance (validated).
-- `BWS-593`: accepted-runtime preflight and `BWS-600` campaign manifest (validated).
-- `BWS-599`: integrated operator/runtime/automation/recovery acceptance.
+- `BWS-590`: validated reproducible release and deployment packaging and user-service templates.
+- `BWS-591`: validated upgrade, rollback, and disaster-recovery proof.
+- `BWS-592`: validated bounded long-running soak and failure-injection acceptance.
+- `BWS-593`: validated external-runtime preflight and `BWS-600` campaign manifest generation.
+- `BWS-599`: validated integrated operator, runtime, automation, and recovery acceptance.
 
 ## Retained implementation authority
 
@@ -78,20 +80,20 @@ The completed parent rows remain decomposed in `backlog/bws_remaining_safe_local
 
 During the completed program, the controller was required to complete the largest safe cohesive tranche while preserving separate parent-row validation.
 
-## Continuation contract
+## Historical continuation contract
 
 ```text
 CONTINUE_REQUIRED=yes
-  while any dependency-ready row through BWS-599 is PENDING
+  while any dependency-ready row through BWS-599 was PENDING
 
 AUTONOMOUS_GOAL_COMPLETE=yes
-  only after BWS-590 through BWS-599 are VALIDATED and BWS-100 through BWS-589 remain closed
+  only after BWS-590 through BWS-599 were VALIDATED and BWS-100 through BWS-589 remained closed
 
 BLOCKED=yes
   only for a concrete unrecoverable repository state or exact missing external evidence
 ```
 
-A short cycle is not a campaign completion. Completing one bounded slice must advance to the next dependency-ready row while time and cycle budget remain.
+A short cycle was not campaign completion. Completing one bounded slice advanced to the next dependency-ready row while time and cycle budget remained. The current repository has no active implementation row.
 
 ## Safety boundary
 
@@ -108,4 +110,4 @@ floating_point_money=prohibited
 pre_existing_service_mutation=prohibited
 ```
 
-Bounded repo-owned test child processes are allowed when required for lifecycle or recovery proof. They must be uniquely identified, loopback-only, cleaned up by the test that created them and must never replace, detach, stop or kill an unrelated session or service.
+Bounded repo-owned test child processes are allowed when required for lifecycle or recovery proof. They must be uniquely identified, loopback-only, cleaned up by the test that created them, and must never replace, detach, stop, or kill an unrelated session or service.

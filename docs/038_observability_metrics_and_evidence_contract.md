@@ -2,7 +2,7 @@
 
 ## Scope
 
-This contract defines `BWS-586` and contributes to the final acceptance tasks.
+This contract defines the still-binding observability behavior implemented by `BWS-586` and used by later acceptance tasks. Current managed runtime and BWS-600 evidence are API-only. Historical export, workspace, fixture, and pinned-bundle identifiers may appear only in retained compatibility evidence; they are not selectable runtime modes.
 
 ## Structured logs
 
@@ -14,7 +14,7 @@ level
 service role
 runtime id
 process identity
-selected upstream mode
+upstream transport (`api` for current managed runtime)
 checkpoint or job id when applicable
 event code
 bounded details

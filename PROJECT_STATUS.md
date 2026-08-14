@@ -28,6 +28,8 @@ bws710_status=BLOCKED_ACCEPTED_BETTING_WIN_B1_MULTI_VENUE_API_REQUIRED
 safe_local_completion_gate=BWS-599
 external_runtime_gate=BWS-600
 bws600_status=RUNTIME_EVIDENCE_READY
+bws600_status_scope=SOURCE_AND_PREFLIGHT_CAPABILITY_ONLY
+bws600_campaign_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
 bws600_current_task=BWS-600
 bws600_current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
 selected_controller=run-paper-autopilot.sh
@@ -35,6 +37,7 @@ bws600_selected_controller=run-paper-autopilot.sh
 execution_gate=closed
 ```
 
+`bws600_status=RUNTIME_EVIDENCE_READY` is a retained capability marker required by repository validation. It means the source and preflight path can collect runtime evidence once external inputs exist; it does not mean the BWS-600 campaign has started, completed, or passed. The authoritative campaign state is `bws600_campaign_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE`.
 
 ## Three-repo ownership carry-forward markers
 

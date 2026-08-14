@@ -1,3 +1,14 @@
+## 2026-08-14 - Documentation ownership, historical-state, and reference curation
+
+- Inventoried and classified all 107 retained Markdown documents: 15 canonical active, 62 supporting active, 29 historical, and one superseded compatibility pointer.
+- Consolidated the duplicate autonomous status contract by making `docs/autonomous_loop_contract.md` canonical and reducing `docs/013_autonomous_controller_status_contract.md` to a path-compatible pointer.
+- Reconciled stale active-language in ADRs, completed implementation ledgers, protected-file history, external-preflight and final-acceptance blueprints, and the private-paper runbook.
+- Clarified that retained export, workspace, fixture, and pinned-bundle surfaces are non-runtime compatibility inputs while current managed runtime and BWS-600 evidence are API-only, including observability and completed soak-campaign terminology.
+- Disambiguated the retained `bws600_status=RUNTIME_EVIDENCE_READY` capability marker from the still-blocked external campaign status.
+- Repaired historical research next-step references to point to the retained Stage 27 and Prompt 28 outputs instead of a missing prompt path.
+- Consolidated removed-document history and complete classification ownership into `docs/000_documentation_index.md`; no additional file removal was safe or useful without changing validation contracts.
+- Made no application, test, runtime, controller, package-script, or automation-config change.
+
 ## 2026-08-13 - Final architecture and API-only carry-forward documentation alignment
 
 - Reconciled the remaining pre-BWS-599 runtime documents with the validated consolidated workspace architecture and completed safe-local platform.

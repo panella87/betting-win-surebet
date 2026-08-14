@@ -5,6 +5,14 @@ program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
 parent_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 documentation_index_status=active
 documentation_slimming_phase=complete
+documentation_curation_wave=72
+documentation_inventory_count=107
+canonical_active_count=15
+supporting_active_count=62
+historical_count=29
+superseded_count=1
+duplicate_count=0
+obsolete_count=0
 current_task=BWS-600
 active_implementation_queue=none
 broad_bugfix_campaign_status=COMPLETED_AND_ACCEPTED
@@ -19,85 +27,185 @@ safe_local_terminal_gate=BWS-599
 execution_gate=BWS-900
 ```
 
-This is the short map for the BWS documentation set. Use it before opening older detailed blueprints.
+This file is the complete documentation inventory and ownership map. It classifies every Markdown document retained in the repository, including repo-local Graphify tooling documentation. Current commands and status must not be inferred from historical blueprints, research checkpoints, or compatibility entry points.
+
+## Ownership rules
+
+- `docs/automation/current-implementation-task.md` owns current task and controller routing.
+- `docs/repo_status_current.md` owns the detailed current operational state.
+- `PROJECT_STATUS.md` is the concise operator-facing status mirror.
+- `docs/automation/README.md` owns the standardized automation command surface.
+- `docs/autonomous_loop_contract.md` owns implementation-cycle status and request-flag semantics.
+- `docs/041_external_runtime_preflight_and_bws600_campaign.md` owns the BWS-600 external evidence gate.
+- `docs/047` through `docs/051` own the accepted B1 program, upstream, equivalence, acceptance, and implementation map.
+- Historical and superseded files retain audit, decision, migration, recovery, or validation value but own no current route.
 
 ## Read first
 
-1. `AGENTS.md` - repository authority, safety boundaries and source-of-truth order.
-2. `docs/repo_status_current.md` - current operational state and controller routing.
-3. `docs/automation/current-implementation-task.md` - active BWS-600 runtime-evidence routing authority after BWS-700 local completion.
-4. `docs/047_b1_cross_venue_offline_falsification_program.md` - B1 program authority.
-5. `docs/048_b1_upstream_contract.md` - B1 upstream contract gate.
-6. `backlog/bws_b1_cross_venue_implementation.csv` - completed dependency-ready B1 queue, with BWS-710 blocked and BWS-830/BWS-840 parked.
-7. `backlog/bws_b1_cross_venue_map.csv` - completed B1 implementation map and retained source/validation traceability.
-8. `docs/automation/api-only-upstream.md` - binding upstream transport contract.
-9. `docs/041_external_runtime_preflight_and_bws600_campaign.md` - carry-forward BWS-600 runtime-evidence gate.
+1. `AGENTS.md` - repository authority, safety boundaries, and source-of-truth order.
+2. `docs/automation/current-implementation-task.md` - current BWS-600 route and protected-file policy.
+3. `docs/repo_status_current.md` - detailed operational state and blocker.
+4. `PROJECT_STATUS.md` - concise status mirror.
+5. `docs/automation/README.md` - canonical automation command surface.
+6. `docs/041_external_runtime_preflight_and_bws600_campaign.md` - BWS-600 preflight and campaign gate.
+7. `docs/047_b1_cross_venue_offline_falsification_program.md` through `docs/051_b1_implementation_map.md` - completed dependency-ready B1 authority.
+8. `docs/automation/api-only-upstream.md` - binding API-only runtime transport contract.
 
-
-## Completed B1 implementation authority and active BWS-600 route
+## Current route
 
 ```text
-program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
-parent_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 current_task=BWS-600
 current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
 active_implementation_queue=none
 bws600_current_task=BWS-600
 bws600_current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
 safe_local_terminal_gate=BWS-599
+selected_controller=run-paper-autopilot.sh
 BWS-900=parked
 ```
 
-Use these B1 documents as completed dependency-ready authority. Start the implementation controller only for a reviewed source handoff or an accepted BWS-710 upstream contract:
+`BWS-100` through `BWS-599` are validated. The BWS-700 dependency-ready local queue is validated through `BWS-820`; `BWS-710` remains blocked until betting-win exposes an accepted read-only `betting-win.b1_multi_venue_markets.v1` resource. BWS-600 runtime evidence is still blocked on the operator-approved running betting-win API and private campaign inputs. Fixtures and retained export compatibility inputs are not runtime evidence.
+
+## Complete documentation classification
+
+### Canonical active
 
 ```text
+AGENTS.md
+PROJECT_STATUS.md
+README.md
+STARTER_PACK.md
+docs/000_documentation_index.md
+docs/041_external_runtime_preflight_and_bws600_campaign.md
 docs/047_b1_cross_venue_offline_falsification_program.md
 docs/048_b1_upstream_contract.md
 docs/049_b1_market_equivalence.md
 docs/050_b1_falsification_acceptance.md
 docs/051_b1_implementation_map.md
-docs/052_b1_future_strategy_stubs.md
-backlog/bws_b1_cross_venue_implementation.csv
-backlog/bws_b1_cross_venue_map.csv
+docs/MASTER_PLAN.md
+docs/automation/README.md
+docs/automation/current-implementation-task.md
+docs/repo_status_current.md
 ```
 
-The B1 authority is offline/private-paper only. `BWS-710` remains blocked until `betting-win` exposes an accepted read-only `betting-win.b1_multi_venue_markets.v1` resource. `BWS-600` remains the external runtime-evidence gate for the accepted same-venue platform, and `BWS-900` remains parked.
+These files own current purpose, status, task routing, automation, BWS-600, or B1 authority.
 
-## Active and carry-forward operating docs
+### Supporting active
 
 ```text
-README.md
-PROJECT_STATUS.md
-STARTER_PACK.md
+.automation/README.md
+.codex/skills/graphify/SKILL.md
+.codex/skills/graphify/references/add-watch.md
+.codex/skills/graphify/references/exports.md
+.codex/skills/graphify/references/extraction-spec.md
+.codex/skills/graphify/references/github-and-merge.md
+.codex/skills/graphify/references/hooks.md
+.codex/skills/graphify/references/query.md
+.codex/skills/graphify/references/transcribe.md
+.codex/skills/graphify/references/update.md
+CHANGELOG.md
+backlog/README.md
+decisions/ADR-0001-repo-boundary-and-no-provider-connections.md
+decisions/ADR-0002-first-lane-polymarket-standard-binary-complete-set.md
+decisions/ADR-0003-paper-only-no-execution.md
+decisions/ADR-0004-three-repo-surebet-strategy-execution-boundary.md
+decisions/ADR-0005-bws-built-on-betting-win-platform.md
+decisions/ADR-0006-full-stack-runtime-and-automation-boundary.md
+docs/001_scope_and_boundaries.md
+docs/002_dependency_contract_with_betting_win.md
+docs/003_surebet_family_decision.md
+docs/004_market_identity_and_rule_equivalence.md
+docs/005_terminal_scenario_cashflow_model.md
+docs/006_quote_depth_capacity_requirements.md
+docs/007_stake_vector_solver_contract.md
+docs/008_leg_completion_and_residual_exposure.md
+docs/009_settlement_replay_contract.md
 docs/010_paper_evaluation_and_kill_criteria.md
+docs/011_validation_matrix.md
 docs/012_runbook.md
+docs/016_pinned_betting_win_interface_readiness.md
 docs/018_private_paper_mode_runbook.md
+docs/019_three_repo_surebet_strategy_boundary.md
+docs/020_strategy_data_and_state_ownership.md
+docs/021_backtest_paper_live_mode_roadmap.md
+docs/022_separate_account_policy.md
 docs/027_bws_target_architecture.md
+docs/030_upstream_compatibility_and_pin_contract.md
+docs/031_bws_api_ui_worker_contract.md
 docs/032_database_and_data_lifecycle.md
 docs/035_continuous_service_supervisor_contract.md
+docs/037_database_backup_retention_and_recovery.md
+docs/038_observability_metrics_and_evidence_contract.md
+docs/039_release_deployment_and_upgrade_contract.md
 docs/040_soak_failure_injection_and_operator_acceptance.md
-docs/automation/README.md
+docs/052_b1_future_strategy_stubs.md
+docs/automation/POST_OVERLAY_CLEANUP.md
+docs/automation/PROTECTED_AUTOMATION_FILES.md
+docs/automation/SSH_KEY_SETUP.md
 docs/automation/api-only-upstream.md
-docs/automation/paper-autopilot.md
-docs/automation/repository-temp-inode-safety.md
 docs/automation/artifact-retention-and-cleanup.md
+docs/automation/autonomous-bugfix.md
+docs/automation/autonomous-implementation.md
+docs/automation/bugfix-autopilot.md
+docs/automation/paper-autopilot.md
+docs/automation/paper-evaluation.md
+docs/automation/repo-profile.md
+docs/automation/repository-temp-inode-safety.md
+docs/automation/telegram-notifications.md
+docs/autonomous_loop_contract.md
 docs/operations/autonomous_72h_runbook.md
 docs/operations/service_run.md
 ```
 
-`docs/operations/autonomous_72h_runbook.md` is carry-forward guidance for a future reviewed implementation/source-fix handoff. It is not the current controller route.
+These files provide still-binding architecture, safety, validation, setup, automation, operator, decision, or tooling support. `.automation/README.md` mirrors required controller markers but is not routing authority. `.codex/skills/graphify/` is external tooling documentation and does not own product behavior.
 
-
-## Removed bootstrap snapshots
-
-The following completed bootstrap snapshots are intentionally removed from the active repository tree. Their contracts are represented by current validators, ledgers and implementation history.
+### Historical
 
 ```text
-removed=
-  docs/014_sure_001_remaining_hardening_backlog.md
-  docs/015_local_engine_implementation_backlog.md
-  docs/017_private_paper_mode_implementation_backlog.md
+docs/026_betting_win_platform_baseline.md
+docs/028_full_implementation_program.md
+docs/029_full_implementation_task_ledger.md
+docs/033_continuous_private_paper_runtime_program.md
+docs/034_remaining_operator_runtime_implementation_program.md
+docs/036_root_wrappers_and_paper_automation_integration.md
+docs/042_release_packaging_implementation_blueprint.md
+docs/043_upgrade_rollback_recovery_implementation_blueprint.md
+docs/044_soak_failure_injection_implementation_blueprint.md
+docs/045_external_runtime_preflight_implementation_blueprint.md
+docs/046_final_local_acceptance_implementation_blueprint.md
+docs/legacy/surebet-research/105_polymarket_complete_set_paper_experiment_gate_after_prompt28.md
+docs/legacy/surebet-research/90_stage25_prompt26_surebet_academic_review_and_next_steps.md
+docs/legacy/surebet-research/91_surebet_math_and_execution_corrections_after_prompt26.md
+docs/legacy/surebet-research/92_surebet_operational_research_plan_after_prompt26.md
+docs/legacy/surebet-research/98_stage27_reference_bot_repository_audit_and_next_steps.md
+docs/legacy/surebet-research/99_surebet_system_design_lessons_from_reference_bots.md
+docs/legacy/surebet-research/README.md
+research/imported-from-betting-win/legacy/surebet/README.md
+research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/2026-06-18_prompt_26_result_surebet_academic_review.md
+research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/2026-06-18_stage25_prompt26_reviewed_assessment.md
+research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/README.md
+research/imported-from-betting-win/legacy/surebet/bots/2026-06-18_stage27_reference_bot_repository_audit.md
+research/imported-from-betting-win/legacy/surebet/bots/README.md
+research/imported-from-betting-win/legacy/surebet/synthesis/2026-06-18_prompt_28_result_academic_strategy_provider_reference_bot_synthesis.md
+research/imported-from-betting-win/legacy/surebet/synthesis/2026-06-18_stage28_reviewed_assessment.md
+schemas/imported-from-betting-win/legacy/surebet/README.md
+templates/imported-from-betting-win/legacy/surebet/README.md
+templates/imported-from-betting-win/legacy/surebet/surebet_market_identity_and_cashflow_review_template.md
 ```
+
+These files retain decision, implementation, acceptance, recovery, research, migration, or provenance value. Historical next-step language is classified as completed context and cannot route current work.
+
+### Superseded compatibility pointer
+
+```text
+docs/013_autonomous_controller_status_contract.md
+```
+
+`docs/013_autonomous_controller_status_contract.md` is retained because the path is part of repository inventory and historical references. Its duplicate procedure was removed; it now points to `docs/autonomous_loop_contract.md`.
+
+### Duplicate or obsolete documents
+
+None remain in the reviewed tree. No cleanup command is required. Candidate removals were retained only when they have unique audit or recovery value, are referenced by validators, or provide repo-local tooling instructions. Their ownership is now explicit.
 
 ## Historical bootstrap summary
 
@@ -111,43 +219,21 @@ legacy_stage=SURE-002A_LOCAL_INTERFACE_AND_ENGINE_BOOTSTRAP
 legacy_stage=SURE-002B_PRIVATE_PAPER_MODE_INTAKE
 ```
 
-`SURE-001` established strict cycle artifacts, source-manifest validation, archive hygiene, shell safety and fail-closed controller behavior. Those controls survive as regression contracts under the current automation validators.
+`SURE-001` established strict cycle artifacts, source-manifest validation, archive hygiene, shell safety, and fail-closed controller behavior. Those controls survive as regression contracts under the current automation validators.
 
-`SURE-002A_LOCAL_INTERFACE_AND_ENGINE_BOOTSTRAP` proved deterministic bundle parsing, stake-vector math, completion and residual simulation, settlement replay consumption and private report assembly. It was a bootstrap, not the complete application. Its behavior is incorporated into `BWS-110`, `BWS-200` through `BWS-240`, `BWS-300` and `BWS-310`.
+`SURE-002A_LOCAL_INTERFACE_AND_ENGINE_BOOTSTRAP` proved deterministic bundle parsing, stake-vector math, completion and residual simulation, settlement replay consumption, and private report assembly. It was a bootstrap, not the complete application. Its behavior is incorporated into `BWS-110`, `BWS-200` through `BWS-240`, `BWS-300`, and `BWS-310`.
 
-`SURE-002B_PRIVATE_PAPER_MODE_INTAKE` proved fixture-only intake, private report artifacts and the controller smoke path. Those facts do not constitute the final BWS paper platform. The full paper platform is represented by `BWS-310`, `BWS-320`, `BWS-410`, `BWS-500`, `BWS-510`, `BWS-520`, `BWS-580` and the externally gated `BWS-600` runtime-evidence campaign.
+`SURE-002B_PRIVATE_PAPER_MODE_INTAKE` proved fixture-only intake, private report artifacts, and the controller smoke path. Those facts do not constitute the final BWS paper platform. The full platform is represented by `BWS-310`, `BWS-320`, `BWS-410`, `BWS-500`, `BWS-510`, `BWS-520`, `BWS-580`, validated work through `BWS-599`, and the externally gated `BWS-600` campaign.
 
-## Retained implementation history and still-binding operating contracts
+## Retained implementation history
 
-The safe-local product queue is complete through `BWS-599`. Current controller routing never comes from the completed implementation blueprints below; it comes from `docs/automation/current-implementation-task.md` and `docs/repo_status_current.md`.
+The completed historical authorities are `docs/028`, `docs/029`, `docs/033`, `docs/034`, `docs/036`, and implementation blueprints `docs/042` through `docs/046`. They preserve exact acceptance and recovery context but cannot reopen an implementation queue, export runtime selector, or protected-file authorization.
 
-The completed historical authorities are `docs/028`, `docs/029`, `docs/033`, `docs/034`, `docs/036`, and implementation blueprints `docs/042` through `docs/046`. The remaining documents in this section preserve still-binding runtime, recovery, evidence, preflight, and safety contracts. `docs/035` and `docs/040` are validated carry-forward contracts whose current interpretation is API-only; their historical export compatibility does not reopen an export runtime selector. None of these documents reopens a completed task or protected-file authorization.
-
-The following docs are retained because validators, regression tests, or operator recovery flows still rely on them:
-
-```text
-docs/028_full_implementation_program.md
-docs/029_full_implementation_task_ledger.md
-docs/030_upstream_compatibility_and_pin_contract.md
-docs/033_continuous_private_paper_runtime_program.md
-docs/034_remaining_operator_runtime_implementation_program.md
-docs/035_continuous_service_supervisor_contract.md
-docs/036_root_wrappers_and_paper_automation_integration.md
-docs/037_database_backup_retention_and_recovery.md
-docs/038_observability_metrics_and_evidence_contract.md
-docs/039_release_deployment_and_upgrade_contract.md
-docs/040_soak_failure_injection_and_operator_acceptance.md
-docs/041_external_runtime_preflight_and_bws600_campaign.md
-docs/042_release_packaging_implementation_blueprint.md
-docs/043_upgrade_rollback_recovery_implementation_blueprint.md
-docs/044_soak_failure_injection_implementation_blueprint.md
-docs/045_external_runtime_preflight_implementation_blueprint.md
-docs/046_final_local_acceptance_implementation_blueprint.md
-```
+The current managed runtime is API-only. Historical export parser, convergence, release, preflight, and clean-room cases are retained non-runtime compatibility evidence.
 
 ## Archive and research material
 
-Historical surebet research imported from `betting-win` remains under:
+Historical surebet research imported from betting-win remains under:
 
 ```text
 docs/legacy/surebet-research/
@@ -156,44 +242,26 @@ schemas/imported-from-betting-win/legacy/surebet/
 templates/imported-from-betting-win/legacy/surebet/
 ```
 
-These files are not active product authority. They remain retained evidence for provenance and regression context.
+These files are not active product authority. Stage 27 and Prompt 28 work is complete; old “next step” headings are historical sequence notes, not commands.
 
 ```text
 archive_is_active_product_authority=no
 ```
 
-## Removed in phase 1
+## Removed documents
 
-The following stale completion snapshots were removed because their current facts are now covered by this index, `docs/repo_status_current.md`, the retained archive manifests, and `docs/legacy/surebet-research/README.md`:
+The following stale snapshots and superseded bootstrap ledgers remain intentionally absent. Their useful facts are merged into current status, this index, retained validators, and historical summaries.
 
 ```text
 DOCUMENTATION_CHECK_REPORT.md
+docs/014_sure_001_remaining_hardening_backlog.md
+docs/015_local_engine_implementation_backlog.md
+docs/017_private_paper_mode_implementation_backlog.md
+docs/023_legacy_betting_win_surebet_import_manifest.md
 docs/024_three_repo_documentation_completion_status.md
 docs/025_research_archive_completion_status.md
 ```
 
-## Removed in phase 2
-
-The following superseded bootstrap ledgers were merged into the compact historical summary above:
-
-```text
-docs/014_sure_001_remaining_hardening_backlog.md
-docs/015_local_engine_implementation_backlog.md
-docs/017_private_paper_mode_implementation_backlog.md
-```
-
 ## Completion state
 
-Documentation slimming is complete for the active operator map. Further compaction of `docs/026` through `docs/046` requires explicit operator approval because those documents preserve implementation contracts, acceptance history, recovery procedures, and the externally gated `BWS-600` runtime-evidence boundary.
-
-
-## Removed completion-only migration snapshots
-
-The following documents were completion records, not active contracts. Their information is represented by current ownership, archive and status documents.
-
-```text
-removed=
-  docs/023_legacy_betting_win_surebet_import_manifest.md
-  docs/024_three_repo_documentation_completion_status.md
-  docs/025_research_archive_completion_status.md
-```
+Documentation slimming and full ownership classification are complete for the current tree. The repository contains no unclassified, duplicate, or obsolete Markdown file after this curation pass. Future removals must preserve unique evidence and pass the existing validation contracts; historical documents must not be deleted merely because they are non-routing.

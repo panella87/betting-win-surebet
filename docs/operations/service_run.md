@@ -24,7 +24,7 @@ active_source_route=NONE_BWS700_DEPENDENCY_READY_LOCAL_COMPLETE
 The managed loopback stack owns:
 
 ```text
-explicit-mode upstream convergence
+API-only upstream convergence
 private-paper scheduler
 bounded worker or worker pool
 read-only API

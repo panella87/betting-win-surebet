@@ -7,6 +7,8 @@ parent_task=BWS-592
 cohesive_tranche=soak_and_preflight
 status=VALIDATED
 routing_status=HISTORICAL_COMPLETED_BLUEPRINT
+historical_input_contract=export_or_api
+current_runtime_upstream_mode=api_only
 canonical_server_soak_duration=2h
 ```
 
@@ -25,7 +27,7 @@ duration
 observation interval
 maximum cycles
 deterministic seed
-selected upstream mode
+historically selected upstream mode
 release semantic fingerprint
 upstream-lock fingerprint
 disposable database identity
@@ -40,7 +42,7 @@ The campaign manifest and checkpoints must support exact resume. Resume fails wh
 The harness must:
 
 - create only uniquely identified loopback listeners and child processes;
-- use deterministic local export and loopback API inputs;
+- use the deterministic local export and loopback API inputs required by this completed historical soak campaign; these do not authorize export as a current managed runtime mode;
 - own a disposable PostgreSQL database or explicitly authorized test database;
 - start, observe, restart and stop only the stack it owns;
 - retain lifecycle, convergence, scheduler, worker, API, cockpit and database checkpoints;
@@ -79,7 +81,7 @@ The campaign fails if any of these occur:
 
 - provider connection or credential use;
 - execution, account, wallet, signer, order or transaction path activation;
-- automatic upstream mode fallback;
+- automatic upstream mode fallback within the historical campaign contract;
 - duplicate finalization or missing durable checkpoint;
 - lost or orphaned worker lease;
 - unbounded queue growth or retry loop;

@@ -13,7 +13,7 @@ automatic_file_fallback=prohibited
 
 ## Validated foundation
 
-`BWS-310` validates bounded private-paper domain behavior, `BWS-510` validates integrated loopback behavior, `BWS-582` validates long-running scheduler and worker services, and `BWS-520` through `BWS-584` validate executable components, bounded convergence/scheduling, managed loopback cockpit serving, a complete product-owned lifecycle owner and runtime handoff.
+`BWS-310` validates bounded private-paper domain behavior, `BWS-510` validates integrated loopback behavior, `BWS-582` validates long-running scheduler and worker services, and `BWS-520` through `BWS-584` validate executable components, bounded convergence and scheduling, managed loopback cockpit serving, a complete product-owned lifecycle owner, and runtime handoff.
 
 ## Current runtime evidence
 
@@ -23,12 +23,12 @@ The operator does not select an upstream mode. Runtime transport is fixed to API
 
 ## Evidence
 
-Evidence includes upstream lock, source/release fingerprints, selected mode, convergence and scheduler checkpoints, worker jobs/checkpoints/dead letters, strategy ledger, lifecycle ownership, database state, health/readiness/metrics, cockpit probes, backups/restores, failure injections and immutable artifact indexes.
+Evidence includes upstream lock, source and release fingerprints, API transport, convergence and scheduler checkpoints, worker jobs, checkpoints and dead letters, strategy ledger, lifecycle ownership, database state, health/readiness/metrics, cockpit probes, backups/restores, failure injections, and immutable artifact indexes.
 
 ## External gate
 
-`BWS-600` remains blocked until `BWS-599` is validated and an operator-approved read-only input plus accepted campaign manifest exist. Loopback or fixture success cannot satisfy this gate.
+`BWS-599` is validated. `BWS-600` remains blocked until an operator-approved running read-only betting-win API, compatible private BWS configuration, accepted campaign manifest, and retained external campaign evidence exist. Loopback, fixture, export, mock, local-BWS API, or synthesized-schedule success cannot satisfy this gate.
 
 ## Prohibited
 
-No direct provider connection, provider credentials, account mutation, wallet, signer, order, public signal, profitability claim or real-money execution is authorized.
+No direct provider connection, provider credentials, account mutation, wallet, signer, order, public signal, profitability claim, or real-money execution is authorized.

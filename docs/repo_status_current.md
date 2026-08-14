@@ -41,6 +41,8 @@ selected_controller=run-paper-autopilot.sh
 safe_local_terminal_gate=BWS-599
 external_runtime_gate=BWS-600
 bws600_status=RUNTIME_EVIDENCE_READY
+bws600_status_scope=SOURCE_AND_PREFLIGHT_CAPABILITY_ONLY
+bws600_campaign_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
 bws600_current_task=BWS-600
 bws600_current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
 provider_truth_owner=betting-win
@@ -51,9 +53,11 @@ execution_gate=closed
 BWS-900=parked
 ```
 
+`bws600_status=RUNTIME_EVIDENCE_READY` is a retained source-capability marker, not a readiness or completion verdict for the external campaign. It means the repository contains the validated API preflight and evidence-collection path. The campaign remains `BLOCKED_EXTERNAL_RUNTIME_EVIDENCE` until the real operator-approved API, private configuration, schedule, and retained evidence are available.
+
 ## Binding state
 
-`BWS-100` through `BWS-599` are validated. The earlier autonomous cycles closed `BWS-580`, `BWS-581` and the foundation, domain, persistence, upstream-lock, API, cockpit, long-running service, lifecycle, database, observability, root-wrapper and paper-automation layers through `BWS-589`; later cycles closed deterministic private release packaging, upgrade/rollback/recovery, soak/failure injection, exact-mode external runtime preflight and final local acceptance through `BWS-599`.
+`BWS-100` through `BWS-599` are validated. The earlier autonomous cycles closed `BWS-580`, `BWS-581` and the foundation, domain, persistence, upstream-lock, API, cockpit, long-running service, lifecycle, database, observability, root-wrapper and paper-automation layers through `BWS-589`; later cycles closed deterministic private release packaging, upgrade and rollback recovery, soak and failure injection, API-only external runtime preflight, and final local acceptance through `BWS-599`.
 
 The safe-local implementation program is complete through `BWS-599`. The bounded source-fix tranche for the `BWS-600` runtime-evidence campaign is present. It prevents BWS from treating its own API on `127.0.0.1:4312` as upstream `betting-win` evidence and fails fast before the 72-hour evidence window when the upstream `betting-win` read-only API is unavailable. The `BWS-700` B1 dependency-ready local implementation queue is complete through `BWS-820`; the selected route is now the externally gated `BWS-600` API runtime-evidence campaign:
 
@@ -115,7 +119,7 @@ api_web_workers=present
 
 ## Existing source
 
-The validated source under `packages/bootstrap`, `packages/persistence`, `packages/upstream`, `apps/web` and compatibility `src/` shims includes the domain engine, `surebet.*` persistence, immutable export intake, API-only convergence passes, a long-running explicit-mode upstream convergence service, typed read-only client, bounded private-paper runtime, strategy ledger, read-only API, bounded workers, cockpit, managed loopback cockpit serving, runtime configuration, loopback acceptance, complete full-stack lifecycle evidence and runtime handoff packaging.
+The validated source under `packages/bootstrap`, `packages/persistence`, `packages/upstream`, `apps/web`, and compatibility `src/` shims includes the domain engine, `surebet.*` persistence, retained immutable export compatibility intake, API-only convergence passes, an API-only long-running upstream convergence service, typed read-only client, bounded private-paper runtime, strategy ledger, read-only API, bounded workers, cockpit, managed loopback cockpit serving, runtime configuration, loopback acceptance, complete full-stack lifecycle evidence, and runtime handoff packaging.
 
 ## Gate state
 
@@ -162,7 +166,7 @@ bws600_paper_autopilot=available_after_upstream_api_preflight_and_no_binding_imp
 
 ## Safety
 
-Direct provider connections, provider credentials, betting-win `core.*` writes, public signals, profitability claims and execution paths remain prohibited. Runtime work must stay private, loopback-only where BWS owns listeners, explicit-mode and fail closed.
+Direct provider connections, provider credentials, betting-win `core.*` writes, public signals, profitability claims, and execution paths remain prohibited. Runtime work must stay private, loopback-only where BWS owns listeners, API-only for upstream transport, and fail closed.
 
 ## Standard automation status
 
