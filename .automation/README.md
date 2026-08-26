@@ -9,7 +9,7 @@ mirrored_route_only=yes
 
 ## Mirrored B1 routing
 
-The active source implementation route is closed for dependency-ready BWS-700 work. Parent paper autopilot is now the selected BWS-600 runtime-evidence route after BWS-700 local completion, but it still requires the operator-approved real upstream betting-win read-only API.
+The active source implementation route is closed for dependency-ready BWS-700 work. Parent paper autopilot is now the selected BWS-600 runtime-evidence route after BWS-700 local completion. Selection is not permission to launch: launch requires an operator-approved, authorized, contract-compatible betting-win downstream API handoff and accepted real provider-to-PostgreSQL-to-API parity.
 
 ```text
 program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
@@ -26,7 +26,20 @@ bws600_selected_controller=run-paper-autopilot.sh
 
 These markers are a support-library mirror required by controller validation. They do not compete with the binding task and status documents.
 
-`BWS-100` through `BWS-599` are validated. The broad bugfix campaign is complete across 8/8 areas and does not need another parent unless new evidence opens a new bounded audit scope. The BWS-700 implementation parent is complete for dependency-ready local rows. The external runtime-evidence parent is selected once the operator starts and approves the betting-win read-only API.
+`BWS-100` through `BWS-599` are validated. The broad bugfix campaign is complete across 8/8 areas and does not need another parent unless new evidence opens a new bounded audit scope. The BWS-700 implementation parent is complete for dependency-ready local rows. The external runtime-evidence parent is selected for future use only after betting-win accepts the downstream route/envelope/provenance contract and real provider-to-PostgreSQL-to-API parity. Starting the current dashboard server alone is insufficient.
+
+## Cross-repository integration mirror
+
+```text
+canonical_integration_contract=docs/002_dependency_contract_with_betting_win.md
+betting_win_operator_api_route_family=/dashboard/*
+betting_win_downstream_runtime_api_handoff_allowed=no
+bws_required_contract_probe=/contract
+bws_required_query_route_family=/query/*
+bws600_launch=blocked_until_accepted_cross_repo_handoff
+```
+
+This support library must not infer an adapter, scrape the upstream dashboard API, or start paper autopilot merely because betting-win is reachable. The binding task remains blocked until the accepted data-plane handoff exists. Future provider mechanics belong to `@betting-win/execution-sdk` after BWS-900, not to controller support code.
 
 ## `.automation/` support surface
 
@@ -58,7 +71,7 @@ Do not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`. The blanket manual protected-
 
 ## Current paper limitation
 
-`run-paper-evaluation.sh` and `run-paper-autopilot.sh` expose the validated runtime-evidence lifecycle from `BWS-588` and `BWS-589`. They are the selected path for `BWS-600`, with upstream API readiness still required. The upstream betting-win API availability gate is source-side fail-fast before the long runtime-evidence window. The runtime child uses explicit process values before selective `.env` fill, passes the operator-approved repo-local private-paper schedule path, and enforces API-only paper-safe policy before lifecycle status is read. It never substitutes a fixture schedule.
+`run-paper-evaluation.sh` and `run-paper-autopilot.sh` expose the validated runtime-evidence lifecycle from `BWS-588` and `BWS-589`. They are the selected path for `BWS-600`, but launch remains blocked until the cross-repository route, envelope, provenance, and parity contract is accepted. API availability and compatibility are source-side fail-fast gates before the long runtime-evidence window. The runtime child uses explicit process values before selective `.env` fill, passes the operator-approved repo-local private-paper schedule path, and enforces API-only paper-safe policy before lifecycle status is read. It never substitutes a fixture schedule.
 
 ## Repository temp and inode containment
 

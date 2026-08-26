@@ -29,6 +29,12 @@ full-stack lifecycle owner
 
 The lifecycle owner may run these roles as child processes or as one in-process supervisor, but process identity, role state, and shutdown ownership must remain explicit and machine-readable.
 
+## External platform lifecycle boundary
+
+The betting-win collector, PostgreSQL, read-only API, and web dashboard are independently operated platform processes. The BWS lifecycle owner manages only BWS processes. It must never start, stop, restart, or mutate betting-win.
+
+The upstream service is accepted only when its downstream contract matches BWS route, envelope, version, provenance, pagination, and real provider-to-PostgreSQL-to-API parity requirements. Current inspected source does not satisfy that cross-repository gate.
+
 ## BWS-581: upstream convergence service
 
 Current required behavior:

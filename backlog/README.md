@@ -27,8 +27,20 @@ A controller selects the first dependency-ready `PENDING` row only when `docs/au
 
 Historical SURE ledgers are retained evidence, not routing authority.
 
+## External ecosystem gates
+
+The completed local ledgers do not authorize a new implementation cycle. Current unresolved work is cross-repository:
+
+```text
+BWS-600=BLOCKED_ACCEPTED_BETTING_WIN_DOWNSTREAM_API_HANDOFF_AND_RUNTIME_EVIDENCE
+BWS-710=BLOCKED_ACCEPTED_BETTING_WIN_B1_MULTI_VENUE_API_REQUIRED
+BWS-900=PARKED_EXECUTION
+```
+
+The inspected `betting-win` source contains the B1 schema target but does not expose an accepted BWS runtime resource. It also exposes a `/dashboard/*` operator API rather than the `/contract` and `/query/*` contract currently required by BWS. These are external integration gates, not dependency-ready rows in a BWS implementation CSV.
+
 ## BWS-700 B1 implementation queue
 
 `backlog/bws_b1_cross_venue_implementation.csv` is the completed operator-approved B1 implementation queue for dependency-ready local rows. `backlog/bws_b1_cross_venue_map.csv` maps tasks to docs, source areas, validation targets, and hard blockers.
 
-`BWS-700`, `BWS-705`, and dependency-ready local rows `BWS-720` through `BWS-820` are validated. `BWS-710` real upstream intake remains blocked until `betting-win` exposes `betting-win.b1_multi_venue_markets.v1`; `BWS-830` and `BWS-840` remain parked. No B1 row is currently active, and fixtures remain prohibited as runtime evidence.
+`BWS-700`, `BWS-705`, and dependency-ready local rows `BWS-720` through `BWS-820` are validated. `BWS-710` real upstream intake remains blocked until `betting-win` exposes and authorizes an accepted read-only runtime resource for `betting-win.b1_multi_venue_markets.v1`; the schema declaration alone is insufficient. `BWS-830` and `BWS-840` remain parked. No B1 row is currently active, and fixtures remain prohibited as runtime evidence.

@@ -21,6 +21,20 @@ bws600_current_task=BWS-600
 bws600_selected_controller=run-paper-autopilot.sh
 ```
 
+## Ecosystem profile
+
+```text
+betting_win_role=provider_truth_canonical_history_read_only_api_execution_sdk_owner
+betting_win_api_handoff=current_not_authorized
+betting_win_b1_schema=declared_stub
+betting_win_b1_runtime_resource=not_accepted
+betting_win_execution_sdk=partial_fail_closed
+bws_runtime_data_client=current_not_wire_compatible
+bws_execution_sdk_dependency=absent
+```
+
+The BWS-700 dependency-ready local implementation route is validated through BWS-820, but external integration still gates BWS-600, BWS-710, and BWS-900 independently.
+
 ## Standard helper scripts
 
 ```text
@@ -54,7 +68,7 @@ run-autonomous-implementation.sh  72h default, future reviewed source handoff or
 run-autonomous-bugfix.sh          72h default, standalone read-only audit and handoff
 run-bugfix-autopilot.sh           seven-day broad unattended audit and repair parent
 run-paper-evaluation.sh           72h default, fixture evaluator plus runtime-evidence mode after BWS-588
-run-paper-autopilot.sh            seven-day BWS-600 runtime-evidence parent selected after BWS-700 local completion and upstream API readiness
+run-paper-autopilot.sh            seven-day BWS-600 parent selected; launch blocked on accepted cross-repo API contract and real-provider parity
 ```
 
-The current product has long-running API convergence, scheduler and worker services, managed loopback cockpit serving, a validated full-stack lifecycle owner, database lifecycle operations, observability, root-wrapper integration, runtime-evidence paper automation, release packaging, upgrade/recovery proof, soak/failure injection, external preflight, final local acceptance, the BWS-600 upstream API preflight source fix, and an accepted 8/8 broad bugfix campaign. The BWS-700 dependency-ready local implementation route is validated through BWS-820; external BWS-600 runtime evidence remains a carry-forward gate against an operator-approved betting-win read-only API.
+The current product has long-running API convergence, scheduler and worker services, managed loopback cockpit serving, a validated full-stack lifecycle owner, database lifecycle operations, observability, root-wrapper integration, runtime-evidence paper automation, release packaging, upgrade/recovery proof, soak/failure injection, external preflight, final local acceptance, the BWS-600 upstream API preflight source fix, and an accepted 8/8 broad bugfix campaign. The BWS-700 dependency-ready local implementation route is validated through BWS-820; external BWS-600 runtime evidence remains a carry-forward gate against an authorized contract-compatible betting-win downstream API handoff and accepted real provider-to-PostgreSQL-to-API parity.

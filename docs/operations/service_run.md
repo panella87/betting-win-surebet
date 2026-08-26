@@ -19,6 +19,12 @@ external_runtime_gate=BWS-600_BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
 active_source_route=NONE_BWS700_DEPENDENCY_READY_LOCAL_COMPLETE
 ```
 
+## External betting-win service boundary
+
+BWS consumes an independently operated betting-win service. BWS `start.sh`, `stop.sh`, lifecycle, paper controllers, and recovery tooling must not start, stop, restart, replace, or mutate betting-win.
+
+The current inspected betting-win server is not yet an accepted BWS upstream. It exposes `/dashboard/*`; BWS expects `/contract` and `/query/*` with an exact contract/provenance envelope. BWS-600 remains blocked until the cross-repository handoff and real provider-to-PostgreSQL-to-API parity are accepted.
+
 ## Runtime ownership
 
 The managed loopback stack owns:

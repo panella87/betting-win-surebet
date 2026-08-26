@@ -23,19 +23,20 @@ BWS-900=parked
 Read:
 
 1. `AGENTS.md`
-2. `docs/automation/current-implementation-task.md`
-3. `docs/repo_status_current.md`
-4. `docs/000_documentation_index.md`
-5. `docs/047_b1_cross_venue_offline_falsification_program.md`
-6. `docs/048_b1_upstream_contract.md`
-7. `docs/049_b1_market_equivalence.md`
-8. `docs/050_b1_falsification_acceptance.md`
-9. `docs/051_b1_implementation_map.md`
-10. `backlog/bws_b1_cross_venue_implementation.csv`
-11. `backlog/bws_b1_cross_venue_map.csv`
-12. `docs/041_external_runtime_preflight_and_bws600_campaign.md`
-13. `backlog/bws_full_implementation.csv`
-14. `backlog/bws_remaining_safe_local_map.csv`
+2. `docs/002_dependency_contract_with_betting_win.md`
+3. `docs/automation/current-implementation-task.md`
+4. `docs/repo_status_current.md`
+5. `docs/000_documentation_index.md`
+6. `docs/047_b1_cross_venue_offline_falsification_program.md`
+7. `docs/048_b1_upstream_contract.md`
+8. `docs/049_b1_market_equivalence.md`
+9. `docs/050_b1_falsification_acceptance.md`
+10. `docs/051_b1_implementation_map.md`
+11. `backlog/bws_b1_cross_venue_implementation.csv`
+12. `backlog/bws_b1_cross_venue_map.csv`
+13. `docs/041_external_runtime_preflight_and_bws600_campaign.md`
+14. `backlog/bws_full_implementation.csv`
+15. `backlog/bws_remaining_safe_local_map.csv`
 
 `BWS-599` is validated. The protected integration phase is complete, so the current campaign does not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`.
 
@@ -47,7 +48,19 @@ BWS-593  external-runtime preflight and campaign manifest (validated)
 BWS-599  final local acceptance (validated)
 ```
 
-The full-platform safe-local queue remains complete through `BWS-599`; `BWS-600` remains externally blocked on real betting-win API runtime evidence. BWS-700 dependency-ready local implementation is validated through BWS-820, and the broad bugfix campaign is complete across 8/8 areas. The selected route is now `run-paper-autopilot.sh` for BWS-600 runtime evidence.
+The full-platform safe-local queue remains complete through `BWS-599`; `BWS-600` remains externally blocked on an accepted cross-repository API contract, authorized real-provider parity, and retained runtime evidence. BWS-700 dependency-ready local implementation is validated through BWS-820, and the broad bugfix campaign is complete across 8/8 areas. The selected route is now `run-paper-autopilot.sh` for BWS-600 runtime evidence.
+
+## Cross-repository reviews
+
+For a task that changes the betting-win integration contract, provide both current repository ZIPs plus the relevant upstream architecture/status evidence. The surebet ZIP remains authority for BWS files; the betting-win ZIP is authority for upstream source capabilities. An uploaded archive never replaces the committed-HEAD runtime lock.
+
+Current ecosystem reconciliation baseline:
+
+```text
+betting_win_source_archive=betting-win218(3).zip
+betting_win_source_archive_sha256=7b2c3a48bbc4cba95bcace384bb20892916a5958e6477d49651c983b16d11dc2
+canonical_integration_contract=docs/002_dependency_contract_with_betting_win.md
+```
 
 ## Evidence to return for continuation
 

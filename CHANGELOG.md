@@ -279,6 +279,16 @@
 
 # Changelog
 
+## 2026-08-26 - Wave 73 betting-win ecosystem integration alignment
+
+- Reconciled BWS documentation against `betting-win218(3).zip` and the full three-repository architecture.
+- Established `docs/002_dependency_contract_with_betting_win.md` as canonical cross-repository integration authority.
+- Documented the current runtime wire mismatch: betting-win operator `/dashboard/*` and disabled downstream handoff versus BWS `/contract` plus `/query/*` and pinned provenance envelope.
+- Clarified that `betting-win.b1_multi_venue_markets.v1` exists as a declared/sample-validated schema but is not an accepted runtime resource.
+- Documented `@betting-win/execution-sdk` as an upstream-owned partial fail-closed library, with BWS integration parked at BWS-900 and requiring a separate package lock.
+- Recorded the previous source-manifest diagnostic as resolved: exact 617-of-617 match with no path/content/order discrepancy.
+- Changed documentation and generated source-manifest metadata only; application, runtime, tests, controllers, and business logic remain unchanged.
+
 ## 2026-07-17 - Repository temp and inode safety
 
 - Fixed the unbounded `bws-paper-runtime-evidence-*` test fixture leak by registering recursive `node:test` teardown.

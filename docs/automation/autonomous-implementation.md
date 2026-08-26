@@ -51,6 +51,17 @@ Canonical standalone campaign settings include:
 --fallback-model none
 ```
 
+## Cross-repository implementation rule
+
+No implementation queue is active now. The current integration audit found a real external wire-contract mismatch, but this documentation overlay does not authorize source changes. Any implementation must come from a reviewed cross-repository handoff identifying the owning repository:
+
+```text
+betting_win_owned_option=publish accepted versioned downstream data API facade
+bws_owned_option=adopt an explicitly accepted betting-win API contract
+forbidden=runtime parent invents route or envelope adapter
+future_sdk_owner=betting-win package, BWS-900 consumer integration only
+```
+
 ## Protected automation policy
 
 Task-file automation maintenance is disabled for the current state.

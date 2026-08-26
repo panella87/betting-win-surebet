@@ -2,7 +2,7 @@
 
 ## Active post-BWS-700 controller route
 
-`run-paper-autopilot.sh` is selected for `BWS-600` runtime evidence after BWS-700 dependency-ready local completion. `run-autonomous-implementation.sh` is not the selected route now; it is available only for future reviewed source handoffs or unblocked BWS-710 intake. Normal implementation remains docs/current-task driven; do not use `--task` and do not use `--prompt-file` for normal routing. If the operator-approved betting-win read-only API is unavailable, the paper route must stop with a truthful upstream API blocker instead of starting another source implementation queue.
+`run-paper-autopilot.sh` is selected for `BWS-600` runtime evidence after BWS-700 dependency-ready local completion. `run-autonomous-implementation.sh` is not the selected route now; it is available only for future reviewed source handoffs or unblocked BWS-710 intake. Normal implementation remains docs/current-task driven; do not use `--task` and do not use `--prompt-file` for normal routing. If the operator-approved betting-win downstream API handoff is unavailable, incompatible, unauthorized, or lacks accepted real-provider parity, the paper route must stop with a truthful upstream API blocker instead of starting another source implementation queue.
 
 
 ```text
@@ -35,6 +35,20 @@ The safe-local queue through `BWS-599` is complete. The broad bugfix audit/repai
 Documentation lookup starts at `docs/000_documentation_index.md`. Stale completion snapshots are intentionally removed from active validation; retained blueprints and archive files stay discoverable through that index.
 
 
+## Cross-repository gate
+
+The canonical integration contract is `docs/002_dependency_contract_with_betting_win.md`. The inspected betting-win source does not yet authorize the BWS runtime wire contract:
+
+```text
+upstream_operator_api=/dashboard/*
+upstream_downstream_runtime_api_handoff_allowed=no
+bws_required_probe=/contract
+bws_required_queries=/query/*
+bws600_launch=blocked_until_accepted_handoff
+```
+
+Paper autopilot is selected for BWS-600 after BWS-700 dependency-ready local completion, but selection is not permission to launch. A future cross-repo source fix must be explicitly reviewed; it must not be invented by the runtime parent.
+
 ## Standardized command surface
 
 ```text
@@ -59,7 +73,7 @@ run-autonomous-implementation.sh  available only for future reviewed source hand
 run-autonomous-bugfix.sh          standalone audit only
 run-bugfix-autopilot.sh           broad audit and automatic repair after implementation
 run-paper-evaluation.sh           fixture evaluator plus validated runtime-evidence mode
-run-paper-autopilot.sh            selected runtime-evidence parent for BWS-600 after BWS-700 local completion and upstream API readiness
+run-paper-autopilot.sh            selected future BWS-600 parent; launch requires accepted cross-repo API contract and real-provider parity
 ```
 
 Paper autopilot is selected for BWS-600 after BWS-700 dependency-ready local completion. Implementation is available only for a future reviewed source handoff or unblocked BWS-710 intake.
@@ -111,7 +125,7 @@ For a fresh ChatGPT continuation, provide both numbered outputs produced locally
 The operator maintenance command is `cleanup_automation_temp_inode_residue.sh`. It is dry-run by default and never performs a generic `/tmp` purge. `--skip-legacy-temp` may be used only to omit the optional bounded scan for historical `bws-paper-runtime-evidence-*` directories; repository-owned marker cleanup and all temp/inode guards still run.
 ## API-only upstream transport
 
-The BWS runtime consumes betting-win only through its accepted read-only API. `BWS_UPSTREAM_MODE` and the file-export runtime selector are removed. Missing API readiness is a runtime-evidence blocker; there is no automatic file fallback.
+The BWS runtime is permitted to consume betting-win only through an accepted, authorized, contract-compatible read-only downstream API. `BWS_UPSTREAM_MODE` and the file-export runtime selector are removed. Missing availability, compatibility, authorization, or accepted real-provider parity is a runtime-evidence blocker; there is no automatic file fallback.
 
 The supported root runtime path enforces `SUREBET_RUNTIME_MODE=paper`, `SUREBET_PROVIDER_CONNECTIONS=disabled`, and `SUREBET_EXECUTION_ENABLED=false`. Explicit process values win for approved non-policy connection settings; the selective `.env` reader accepts the canonical `POSTGRES_ADDRESS`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_DB` tuple and derives internal `SUREBET_PG_*` values. Repo-owned defaults cover BWS runtime intervals, worker identity, API transport, cockpit mode, upstream lock path, and the standard private-paper schedule path. Retired export selectors, pinned bundles, and URL-style database variables are rejected or scrubbed before runtime child startup. The root paper-runtime-evidence wrapper rebuilds the compiled runtime and managed cockpit assets immediately before evidence collection, so BWS-600 does not depend on stale `dist/apps/web/index.html` output from earlier validation stages. Runtime-evidence startup requires the managed API health endpoint to be observable, then records readiness as evidence over the requested window; if health is not observable, the lifecycle error includes bounded repo-local child stdout/stderr log paths, redacted log tails, and last probe details. The runtime-evidence command timeout is the requested duration plus 300 seconds.
 

@@ -9,6 +9,21 @@ Completed B1 queue: `backlog/bws_b1_cross_venue_implementation.csv`.
 Completed B1 map: `backlog/bws_b1_cross_venue_map.csv`.
 
 
+## Betting-win ecosystem integration state
+
+```text
+canonical_integration_contract=docs/002_dependency_contract_with_betting_win.md
+betting_win_source_audit_sha256=7b2c3a48bbc4cba95bcace384bb20892916a5958e6477d49651c983b16d11dc2
+data_plane_runtime=accepted_read_only_api_required
+current_cross_repo_wire_status=NOT_ACCEPTED_NOT_COMPATIBLE
+b1_schema_status=DECLARED_STUB_AND_SAMPLE_VALIDATED
+b1_runtime_resource_status=NOT_ACCEPTED_NOT_AUTHORIZED
+execution_sdk_status=PARTIAL_FAIL_CLOSED
+execution_sdk_bws_integration=BWS-900_PARKED
+```
+
+The current plan does not add a new safe-local implementation queue. BWS-600 remains the selected future runtime-evidence phase, but it cannot start until betting-win accepts the downstream API route/envelope/provenance contract and real provider-to-PostgreSQL-to-API parity. BWS-710 and BWS-900 remain separate gates.
+
 ## Goal
 
 Build the complete private surebet application on top of the read-only betting-win platform while preserving strict repository ownership, deterministic evidence and fail-closed safety.
@@ -42,7 +57,8 @@ betting-win
   quotes/depth/trades/settlement, generated contracts, pinned exports,
   read-only query/API, provider-neutral primitives
         |
-        | exact lock + immutable exports + typed read-only API/client
+        | exact source lock; immutable exports for history/replay;
+        | accepted typed read-only API for current runtime truth
         v
 betting-win-surebet
   upstream compatibility, surebet.* persistence, equivalence/scenario checks,
@@ -55,7 +71,7 @@ BWS does not duplicate provider collection or canonical history. It may retain i
 
 ## Program
 
-The completed dependency-ready B1 queue is `backlog/bws_b1_cross_venue_implementation.csv`; its retained map is `backlog/bws_b1_cross_venue_map.csv`. BWS-710 remains blocked on the real upstream contract, BWS-830/BWS-840 remain parked, and no B1 implementation row is currently active. The old full-platform queue, `backlog/bws_full_implementation.csv`, is validated carry-forward history through `BWS-599`.
+The completed dependency-ready B1 queue is `backlog/bws_b1_cross_venue_implementation.csv`; its retained map is `backlog/bws_b1_cross_venue_map.csv`. BWS-710 remains blocked on an accepted complete B1 runtime resource and downstream API handoff, BWS-830/BWS-840 remain parked, and no B1 implementation row is currently active. The old full-platform queue, `backlog/bws_full_implementation.csv`, is validated carry-forward history through `BWS-599`.
 
 Primary phases:
 

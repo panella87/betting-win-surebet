@@ -12,24 +12,27 @@ broad_bugfix_campaign_status=COMPLETED_AND_ACCEPTED
 broad_bugfix_areas_closed=8_of_8
 bws600_current_task=BWS-600
 bws600_selected_controller=run-paper-autopilot.sh
+bws600_launch_status=BLOCKED_CROSS_REPO_API_HANDOFF_NOT_ACCEPTED
 ```
 
-The broad bugfix campaign is complete; do not rerun it without new evidence defining a new bounded audit scope. The next operational phase is BWS-600 paper/runtime evidence.
+The broad bugfix campaign is complete; do not rerun it without new evidence defining a bounded audit scope. The next phase remains BWS-600, but the current inspected betting-win source does not yet expose the accepted wire contract required by the BWS client and `/contract` preflight.
 
 1. Use Node 20.
-2. Keep `~/app_testing/betting-win-surebet` as the working repository.
-3. Set `BETTING_WIN_REPO_PATH` to the existing read-only `~/app_testing/betting-win` checkout. Do not clone or mutate it.
-4. Keep the private BWS `.env` configured with `POSTGRES_ADDRESS`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_DB`; remove `DB_URL` and `DB_URL_TEST`. The wrapper owns the accepted betting-win read-only API defaults and uses the standard `BWS_PRIVATE_PAPER_SCHEDULE_PATH` under `runtime/operator-inputs/` unless explicitly overridden. Explicit shell values win; the runtime wrapper fills only missing approved non-policy keys from `.env` and enforces API mode, paper mode, provider-disabled operation, and execution-disabled operation. It never substitutes a fixture schedule.
-5. The active selected route is now the canonical seven-day BWS-600 `run-paper-autopilot.sh` parent after operator-approved upstream API readiness. Use `run-autonomous-implementation.sh` only for a future reviewed source handoff or if BWS-710 becomes unblocked by an accepted real B1 upstream API contract. Never set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` for ordinary campaigns.
-6. Treat missing or incompatible betting-win API evidence as a precise BWS-600 runtime blocker. For B1, treat the missing `betting-win.b1_multi_venue_markets.v1` API as a BWS-710 blocker while still allowing dependency-ready local offline implementation. There is no export fallback.
-7. Inspect the newest retained machine-readable artifacts and ledger, not elapsed time alone.
+2. Keep `~/app_testing/betting-win-surebet` as the BWS working repository.
+3. Treat `~/app_testing/betting-win` as an independently operated upstream repository. `BETTING_WIN_REPO_PATH` may inspect committed `HEAD`; BWS must not clone, mutate, start, stop, or deploy it.
+4. Verify the exact cross-repository API contract before any long run. The current betting-win operator server uses `/dashboard/*`; BWS currently expects `/contract`, `/query/identity-entities`, `/query/rule-profiles`, `/query/normalized-records`, and a pinned contract/provenance envelope. Endpoint similarity is not acceptance.
+5. Keep the private BWS `.env` configured with `POSTGRES_ADDRESS`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_DB`; remove `DB_URL` and `DB_URL_TEST`. The wrapper owns approved BWS defaults and the standard repo-local schedule path. Explicit shell values win; `.env` fills only missing approved non-policy keys. It never substitutes a fixture schedule.
+6. Start `run-paper-autopilot.sh` only after betting-win has accepted the downstream API handoff, real provider-to-PostgreSQL-to-API parity is retained, the exact committed-HEAD lock passes, and BWS preflight succeeds. Use `run-autonomous-implementation.sh` only for a reviewed BWS source handoff or unblocked BWS-710 intake.
+7. Treat `betting-win.b1_multi_venue_markets.v1` as a declared schema target but not an accepted runtime resource. BWS-710 remains blocked until the runtime resource and API handoff are accepted.
+8. Do not integrate `@betting-win/execution-sdk` in the current route. That package is upstream-owned, still fail-closed for real writes, and belongs to separately authorized BWS-900 work with an independent package lock.
+9. Inspect retained machine-readable artifacts and ledgers, not elapsed time alone.
 
 ## Runtime safety
 
-The implementation may launch bounded, uniquely identified, loopback-only child processes inside tests. Tests must keep them attached and clean them up. Do not stop, replace, detach or kill any pre-existing user service or session.
+Bounded BWS tests may launch uniquely identified loopback-only child processes and must clean them up. Do not stop, replace, detach, or kill pre-existing BWS or betting-win services.
 
 ## After local completion
 
-`BWS-599` is validated. Use the `BWS-593` preflight and accepted betting-win API configuration as the input boundary for `run-paper-autopilot.sh` at `BWS-600`. The upstream API preflight source fix is already present and must fail fast if the betting-win read-only API is unavailable or points at the local BWS API.
+`BWS-599` is validated. `BWS-593` and `BWS-600` require an accepted external betting-win data-plane handoff, not merely an available HTTP server. The local BWS API on `127.0.0.1:4312`, dataset files, exports, fixtures, mocks, and synthetic schedules cannot satisfy the gate.
 
 `BWS-600` remains private paper. `BWS-900` remains separately parked execution.

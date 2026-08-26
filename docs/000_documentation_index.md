@@ -5,11 +5,11 @@ program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
 parent_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 documentation_index_status=active
 documentation_slimming_phase=complete
-documentation_curation_wave=72
+documentation_curation_wave=73
 documentation_inventory_count=107
-canonical_active_count=15
+canonical_active_count=16
 supporting_active_count=62
-historical_count=29
+historical_count=28
 superseded_count=1
 duplicate_count=0
 obsolete_count=0
@@ -29,8 +29,21 @@ execution_gate=BWS-900
 
 This file is the complete documentation inventory and ownership map. It classifies every Markdown document retained in the repository, including repo-local Graphify tooling documentation. Current commands and status must not be inferred from historical blueprints, research checkpoints, or compatibility entry points.
 
+## Wave 73 ecosystem integration authority
+
+`docs/002_dependency_contract_with_betting_win.md` is the sole canonical owner of the cross-repository data-plane, B1-resource, execution-SDK, lifecycle, lock, and readiness boundary. Other active documents summarize or apply that contract and must not independently redefine upstream routes, response envelopes, package ownership, or readiness.
+
+```text
+betting_win_source_audit=betting-win218(3).zip
+betting_win_source_audit_sha256=7b2c3a48bbc4cba95bcace384bb20892916a5958e6477d49651c983b16d11dc2
+bws600_wire_contract=not_accepted
+bws710_runtime_resource=not_accepted
+bws900_execution=parked
+```
+
 ## Ownership rules
 
+- `docs/002_dependency_contract_with_betting_win.md` owns the canonical cross-repository ecosystem contract.
 - `docs/automation/current-implementation-task.md` owns current task and controller routing.
 - `docs/repo_status_current.md` owns the detailed current operational state.
 - `PROJECT_STATUS.md` is the concise operator-facing status mirror.
@@ -43,13 +56,14 @@ This file is the complete documentation inventory and ownership map. It classifi
 ## Read first
 
 1. `AGENTS.md` - repository authority, safety boundaries, and source-of-truth order.
-2. `docs/automation/current-implementation-task.md` - current BWS-600 route and protected-file policy.
-3. `docs/repo_status_current.md` - detailed operational state and blocker.
-4. `PROJECT_STATUS.md` - concise status mirror.
-5. `docs/automation/README.md` - canonical automation command surface.
-6. `docs/041_external_runtime_preflight_and_bws600_campaign.md` - BWS-600 preflight and campaign gate.
-7. `docs/047_b1_cross_venue_offline_falsification_program.md` through `docs/051_b1_implementation_map.md` - completed dependency-ready B1 authority.
-8. `docs/automation/api-only-upstream.md` - binding API-only runtime transport contract.
+2. `docs/002_dependency_contract_with_betting_win.md` - canonical betting-win ecosystem integration contract.
+3. `docs/automation/current-implementation-task.md` - current BWS-600 route and protected-file policy.
+4. `docs/repo_status_current.md` - detailed operational state and blocker.
+5. `PROJECT_STATUS.md` - concise status mirror.
+6. `docs/automation/README.md` - canonical automation command surface.
+7. `docs/041_external_runtime_preflight_and_bws600_campaign.md` - BWS-600 preflight and campaign gate.
+8. `docs/047_b1_cross_venue_offline_falsification_program.md` through `docs/051_b1_implementation_map.md` - completed dependency-ready B1 authority.
+9. `docs/automation/api-only-upstream.md` - binding API-only runtime transport contract.
 
 ## Current route
 
@@ -64,7 +78,7 @@ selected_controller=run-paper-autopilot.sh
 BWS-900=parked
 ```
 
-`BWS-100` through `BWS-599` are validated. The BWS-700 dependency-ready local queue is validated through `BWS-820`; `BWS-710` remains blocked until betting-win exposes an accepted read-only `betting-win.b1_multi_venue_markets.v1` resource. BWS-600 runtime evidence is still blocked on the operator-approved running betting-win API and private campaign inputs. Fixtures and retained export compatibility inputs are not runtime evidence.
+`BWS-100` through `BWS-599` are validated. The BWS-700 dependency-ready local queue is validated through `BWS-820`; the B1 schema name exists upstream, but `BWS-710` remains blocked until betting-win exposes and authorizes an accepted runtime resource and API handoff. BWS-600 runtime evidence is still blocked on an accepted cross-repository API wire contract, provider-to-PostgreSQL-to-API parity, and private campaign inputs. Fixtures and retained export compatibility inputs are not runtime evidence.
 
 ## Complete documentation classification
 
@@ -76,6 +90,7 @@ PROJECT_STATUS.md
 README.md
 STARTER_PACK.md
 docs/000_documentation_index.md
+docs/002_dependency_contract_with_betting_win.md
 docs/041_external_runtime_preflight_and_bws600_campaign.md
 docs/047_b1_cross_venue_offline_falsification_program.md
 docs/048_b1_upstream_contract.md
@@ -112,7 +127,6 @@ decisions/ADR-0004-three-repo-surebet-strategy-execution-boundary.md
 decisions/ADR-0005-bws-built-on-betting-win-platform.md
 decisions/ADR-0006-full-stack-runtime-and-automation-boundary.md
 docs/001_scope_and_boundaries.md
-docs/002_dependency_contract_with_betting_win.md
 docs/003_surebet_family_decision.md
 docs/004_market_identity_and_rule_equivalence.md
 docs/005_terminal_scenario_cashflow_model.md
@@ -129,6 +143,7 @@ docs/019_three_repo_surebet_strategy_boundary.md
 docs/020_strategy_data_and_state_ownership.md
 docs/021_backtest_paper_live_mode_roadmap.md
 docs/022_separate_account_policy.md
+docs/026_betting_win_platform_baseline.md
 docs/027_bws_target_architecture.md
 docs/030_upstream_compatibility_and_pin_contract.md
 docs/031_bws_api_ui_worker_contract.md
@@ -162,7 +177,6 @@ These files provide still-binding architecture, safety, validation, setup, autom
 ### Historical
 
 ```text
-docs/026_betting_win_platform_baseline.md
 docs/028_full_implementation_program.md
 docs/029_full_implementation_task_ledger.md
 docs/033_continuous_private_paper_runtime_program.md

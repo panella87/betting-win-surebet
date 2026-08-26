@@ -22,7 +22,7 @@ cycle_timeout=6h
 validation_timeout=45m
 ```
 
-This runbook is now carry-forward for future reviewed implementation/source-fix handoffs. The BWS-700 dependency-ready local queue is complete through BWS-820, BWS-710 remains externally blocked, and the selected controller has returned to the BWS-600 `run-paper-autopilot.sh` runtime-evidence parent after upstream API readiness.
+This runbook is now carry-forward for future reviewed implementation/source-fix handoffs. The BWS-700 dependency-ready local queue is complete through BWS-820, BWS-710 remains externally blocked, and the selected future controller has returned to the BWS-600 `run-paper-autopilot.sh` runtime-evidence parent, whose launch remains blocked on the accepted cross-repository API contract and real-provider parity.
 
 Launch from `~/app_testing/betting-win-surebet` under Node 20. Point `BETTING_WIN_REPO_PATH` to the existing read-only checkout when a task requires upstream-lock proof. Do not clone, reset or clean betting-win.
 

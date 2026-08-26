@@ -68,6 +68,10 @@ Final local acceptance is validated from a clean extraction and proves:
 
 `BWS-599` was not validated by unit tests alone; its accepted proof includes integrated child-process and disposable PostgreSQL coverage with complete cleanup.
 
+## Cross-repository acceptance limitation
+
+The completed local soak proves BWS lifecycle and failure handling only. It does not prove that betting-win `/dashboard/*` is compatible with BWS `/contract` and `/query/*`, that the downstream handoff is authorized, or that bounded real provider observations survive provider-to-PostgreSQL-to-API readback.
+
 ## Current external gate
 
-`BWS-600` must use the operator-approved running betting-win read-only API and private BWS database configuration. Export, fixture, mock, local BWS API, or synthesized schedule evidence cannot validate it. `BWS-900` remains separately parked execution.
+`BWS-600` must use an operator-approved, authorized, contract-compatible betting-win downstream read-only API handoff, retained real provider-to-PostgreSQL-to-API parity, and private BWS database configuration. Export, fixture, mock, dashboard-only, local BWS API, or synthesized schedule evidence cannot validate it. `BWS-900` remains separately parked execution.

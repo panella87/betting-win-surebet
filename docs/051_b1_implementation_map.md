@@ -6,13 +6,13 @@ completed_implementation_queue=backlog/bws_b1_cross_venue_implementation.csv
 completed_implementation_map=backlog/bws_b1_cross_venue_map.csv
 implementation_queue_status=COMPLETED_DEPENDENCY_READY
 selected_controller=run-paper-autopilot.sh
-real_upstream_intake_gate=BWS-710_BLOCKED_UNTIL_BETTING_WIN_CONTRACT
+real_upstream_intake_gate=BWS-710_BLOCKED_UNTIL_ACCEPTED_BETTING_WIN_RUNTIME_RESOURCE_AND_API_HANDOFF
 broad_bugfix_campaign_status=COMPLETED_AND_ACCEPTED
 ```
 
 ## Current state
 
-The dependency-ready local B1 implementation is complete through BWS-820. This file is retained as source and validation traceability, not as an open implementation queue. BWS-710 remains blocked on the accepted real `betting-win.b1_multi_venue_markets.v1` API contract; BWS-830 and BWS-840 remain parked.
+The dependency-ready local B1 implementation is complete through BWS-820. This file is retained as source and validation traceability, not as an open implementation queue. The schema name exists upstream, but BWS-710 remains blocked on the accepted real `betting-win.b1_multi_venue_markets.v1` runtime resource and API handoff; BWS-830 and BWS-840 remain parked.
 
 ## Implemented contracts and identity
 
@@ -100,6 +100,8 @@ The compiled B1 test set includes resource records, equivalence, quote synchroni
 ```text
 BWS-600=external_runtime_evidence_selected
 BWS-710=blocked_until_real_upstream_contract
+BWS-710_schema_definition=declared_stub_and_sample_validated
+BWS-710_runtime_resource=not_accepted_not_authorized
 BWS-830=parked
 BWS-840=parked
 BWS-900=parked

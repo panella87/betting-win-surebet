@@ -59,7 +59,7 @@ BWS-900=parked
 
 `BWS-100` through `BWS-599` are validated. The earlier autonomous cycles closed `BWS-580`, `BWS-581` and the foundation, domain, persistence, upstream-lock, API, cockpit, long-running service, lifecycle, database, observability, root-wrapper and paper-automation layers through `BWS-589`; later cycles closed deterministic private release packaging, upgrade and rollback recovery, soak and failure injection, API-only external runtime preflight, and final local acceptance through `BWS-599`.
 
-The safe-local implementation program is complete through `BWS-599`. The bounded source-fix tranche for the `BWS-600` runtime-evidence campaign is present. It prevents BWS from treating its own API on `127.0.0.1:4312` as upstream `betting-win` evidence and fails fast before the 72-hour evidence window when the upstream `betting-win` read-only API is unavailable. The `BWS-700` B1 dependency-ready local implementation queue is complete through `BWS-820`; the selected route is now the externally gated `BWS-600` API runtime-evidence campaign:
+The safe-local implementation program is complete through `BWS-599`. The bounded source-fix tranche for the `BWS-600` runtime-evidence campaign is present. It prevents BWS from treating its own API on `127.0.0.1:4312` or the upstream dashboard API as accepted `betting-win` evidence and fails fast before the 72-hour evidence window when the downstream handoff is unavailable, incompatible, or unauthorized. The `BWS-700` B1 dependency-ready local implementation queue is complete through `BWS-820`; the selected route is now the externally gated `BWS-600` API runtime-evidence campaign:
 
 ```text
 start.sh=validated_product_owned_lifecycle_start
@@ -168,6 +168,28 @@ bws600_paper_autopilot=available_after_upstream_api_preflight_and_no_binding_imp
 
 Direct provider connections, provider credentials, betting-win `core.*` writes, public signals, profitability claims, and execution paths remain prohibited. Runtime work must stay private, loopback-only where BWS owns listeners, API-only for upstream transport, and fail closed.
 
+## Betting-win ecosystem integration status
+
+```text
+canonical_integration_contract=docs/002_dependency_contract_with_betting_win.md
+betting_win_source_audit_archive=betting-win218(3).zip
+betting_win_source_audit_sha256=7b2c3a48bbc4cba95bcace384bb20892916a5958e6477d49651c983b16d11dc2
+betting_win_downstream_runtime_api_handoff_allowed=no
+betting_win_operator_api_route_family=/dashboard/*
+bws_required_contract_probe=/contract
+bws_required_query_route_family=/query/*
+bws600_cross_repo_wire_status=BLOCKED_NOT_ACCEPTED
+b1_schema_definition_status=DECLARED_STUB_AND_SAMPLE_VALIDATED
+b1_runtime_resource_status=BLOCKED_NOT_ACCEPTED
+execution_sdk_package=@betting-win/execution-sdk
+execution_sdk_status=PARTIAL_FAIL_CLOSED
+bws_execution_sdk_dependency=absent
+bws900_execution_status=PARKED
+source_manifest_previous_diagnostic=EXACT_MATCH_617_OF_617
+```
+
+The selected controller remains `run-paper-autopilot.sh`, but launch is prohibited until the accepted upstream API handoff exists. No BWS-local fixture, export, dashboard route, or local listener can satisfy the external gate.
+
 ## Standard automation status
 
 ```text
@@ -212,4 +234,4 @@ paper_runtime_startup_child_logs=bounded_redacted
 The safe-local product implementation remains accepted. The root runtime wrapper now treats API transport, paper mode, provider-disabled operation, and execution-disabled operation as controller-owned invariants; private `.env` values provide the canonical `POSTGRES_ADDRESS`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_DB` tuple while repo-owned runtime defaults cover internal intervals, worker identity, API transport, cockpit mode, upstream lock path, and the standard private-paper schedule path. Explicit shell values can override approved non-policy settings; legacy URL-style database variables are rejected. The root wrapper rebuilds the TypeScript runtime and managed cockpit assets immediately before paper-runtime-evidence collection so runtime startup does not rely on stale validation output. Runtime-evidence preflights the upstream betting-win read-only API before starting or attaching the BWS stack, rejects the local BWS API on `127.0.0.1:4312` and loopback aliases as upstream evidence, and retains bounded non-secret blocker evidence when unavailable. Runtime-evidence start records a managed stack once the BWS API health endpoint is observable; blocked readiness is measured inside the evidence window instead of aborting startup. If BWS API health never becomes observable, lifecycle startup now retains bounded per-child stdout/stderr log files and reports redacted log tails with the last health/readiness probes. The runtime-evidence managed-command timeout follows the requested evidence duration plus a fixed 300-second margin. That BWS-600 route is now selected again after BWS-700 dependency-ready local completion; the repository temp/inode guard remains a mandatory startup preflight.
 ## API-only upstream transport
 
-The BWS runtime consumes betting-win only through its accepted read-only API. `BWS_UPSTREAM_MODE` and the file-export runtime selector are removed. Missing upstream API readiness must fail fast before the long BWS runtime-evidence window; there is no automatic file fallback. The BWS local API on `127.0.0.1:4312` is not upstream evidence and cannot satisfy the betting-win API preflight.
+The BWS runtime consumes betting-win only through an accepted read-only downstream API contract. `BWS_UPSTREAM_MODE` and the file-export runtime selector are removed. Missing availability, route/envelope/provenance compatibility, authorization, or accepted real-provider parity must fail fast before the long BWS runtime-evidence window; there is no automatic file fallback. The BWS local API on `127.0.0.1:4312` is not upstream evidence and cannot satisfy the betting-win API preflight.

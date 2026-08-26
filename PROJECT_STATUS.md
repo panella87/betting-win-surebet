@@ -4,7 +4,7 @@
 
 The operator explicitly opened `BWS-700` as a research/offline implementation authority for B1 cross-venue arbitrage falsification, and the dependency-ready local queue is now validated through `BWS-820`. This does not mark `BWS-600` runtime evidence complete and does not authorize execution. The next selected controller is `run-paper-autopilot.sh` for the carry-forward BWS-600 runtime-evidence gate.
 
-The real upstream B1 API intake remains blocked on `betting-win.b1_multi_venue_markets.v1`; that blocker is not solved by fixtures or local BWS runtime evidence.
+The upstream source declares `betting-win.b1_multi_venue_markets.v1`, but real B1 API intake remains blocked until that schema is exposed and authorized as an accepted runtime resource and downstream handoff. Fixtures or local BWS runtime evidence cannot solve the blocker.
 
 The broad bugfix campaign is complete and accepted. The terminal parent `artifacts/bugfix_autopilot_20260812T133805Z` finished with `BUGFIX_AUTOPILOT_COMPLETE`, `all_campaign_areas_closed`, 22 rounds, and all 8 campaign areas closed. Its final cross-area audit passed the full baseline and PostgreSQL-backed loopback acceptance. No active bugfix or implementation queue remains; the next selected phase is the externally gated `BWS-600` paper/runtime-evidence campaign.
 
@@ -66,6 +66,25 @@ These markers preserve the accepted three-repo boundary after the BWS-700 B1 res
 - Hardened controller infrastructure with atomic child results, truthful lock finalization and parent-only Telegram routing.
 - Broad bugfix audit/repair campaign completed and accepted across all eight areas, with final full validation and loopback acceptance green.
 
+## Cross-repository integration status
+
+```text
+betting_win_source_audit_sha256=7b2c3a48bbc4cba95bcace384bb20892916a5958e6477d49651c983b16d11dc2
+betting_win_package_version=0.48.0
+betting_win_downstream_runtime_api_handoff_allowed=no
+betting_win_operator_server_route_family=/dashboard/*
+bws_required_contract_probe=/contract
+bws_required_query_route_family=/query/*
+bws600_cross_repo_wire_status=BLOCKED_NOT_ACCEPTED
+bws710_schema_definition_status=DECLARED_STUB_AND_SAMPLE_VALIDATED
+bws710_runtime_resource_status=BLOCKED_NOT_ACCEPTED
+betting_win_execution_sdk_status=PARTIAL_FAIL_CLOSED
+bws_execution_sdk_dependency=absent
+bws900_execution_status=PARKED_NOT_AUTHORIZED
+```
+
+The previous source-manifest diagnostic is resolved: 617 manifest entries exactly matched 617 locally expected entries with no missing, extra, duplicate, reordered, or content-mismatched path. The prior transient-file hypothesis is rejected for the current checkout.
+
 ## Validated safe local work
 
 ```text
@@ -80,8 +99,9 @@ The short documentation map is `docs/000_documentation_index.md`. Detailed depen
 
 ## Blocked or parked
 
-- `BWS-600` now requires accepted operator-approved continuous read-only betting-win runtime evidence. The source-side fail-fast upstream API preflight is present and prevents BWS from treating its local API as upstream evidence.
-- `BWS-900` requires separate execution authorization and remains parked.
+- `BWS-600` requires an accepted operator-approved betting-win downstream API contract, retained provider-to-PostgreSQL-to-API parity, and continuous private runtime evidence. The source-side fail-fast preflight prevents BWS from treating its local API or the upstream dashboard API as accepted evidence.
+- `BWS-710` requires the declared B1 schema to become an accepted runtime resource/API handoff.
+- `BWS-900` requires separate SDK/package/account/execution authorization and remains parked.
 
 ## Controller selection
 
@@ -112,4 +132,4 @@ next_controller=run-paper-autopilot.sh
 ```
 ## API-only upstream transport
 
-The BWS runtime consumes betting-win only through its accepted read-only API. `BWS_UPSTREAM_MODE` and the file-export runtime selector are removed. Missing API readiness is a runtime-evidence blocker; there is no automatic file fallback. The root runtime wrapper enforces paper mode, provider-disabled operation, and execution-disabled operation, uses explicit process values before selective `.env` fill, derives internal PostgreSQL settings from the canonical `POSTGRES_*` tuple, uses repo-owned defaults for internal runtime settings, and scrubs retired export and pinned-bundle runtime inputs. It does not invent private-paper manifest content.
+The BWS runtime is permitted to consume betting-win only through an accepted, authorized, contract-compatible read-only downstream API. `BWS_UPSTREAM_MODE` and the file-export runtime selector are removed. Missing availability, compatibility, authorization, or accepted real-provider parity is a runtime-evidence blocker; there is no automatic file fallback. The root runtime wrapper enforces paper mode, provider-disabled operation, and execution-disabled operation, uses explicit process values before selective `.env` fill, derives internal PostgreSQL settings from the canonical `POSTGRES_*` tuple, uses repo-owned defaults for internal runtime settings, and scrubs retired export and pinned-bundle runtime inputs. It does not invent private-paper manifest content.

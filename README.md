@@ -4,7 +4,7 @@
 
 The BWS-700 implementation authority `BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1` is validated through `BWS-820` for dependency-ready local deterministic offline/private-paper B1 work. It preserves `BWS-100` through `BWS-599`, the external `BWS-600` runtime-evidence gate, and parked `BWS-900` execution. The completed B1 queue is `backlog/bws_b1_cross_venue_implementation.csv`; the completed B1 implementation map is `backlog/bws_b1_cross_venue_map.csv`.
 
-`BWS-710` real upstream intake remains blocked until `betting-win` exposes an accepted read-only `betting-win.b1_multi_venue_markets.v1` resource. Dependency-ready local work may implement contract skeletons, equivalence, gross/net calculations, stake-vector solving, fill/rejection/timeout simulation, settlement false-positive analysis, deterministic offline backtesting, private persistence, read-only reporting and acceptance/kill criteria. Fixtures are not runtime evidence.
+`BWS-710` real upstream intake remains blocked until `betting-win` exposes and authorizes an accepted read-only `betting-win.b1_multi_venue_markets.v1` runtime resource. The inspected upstream source declares and sample-validates the schema name, but that is not an accepted multi-venue runtime handoff. Dependency-ready local work may implement contract skeletons, equivalence, gross/net calculations, stake-vector solving, fill/rejection/timeout simulation, settlement false-positive analysis, deterministic offline backtesting, private persistence, read-only reporting and acceptance/kill criteria. Fixtures are not runtime evidence.
 
 ## Verified bugfix campaign completion
 
@@ -57,10 +57,36 @@ execution_gate=closed
 BWS-900=parked
 ```
 
+## Betting-win ecosystem integration status
+
+The current documentation is reconciled against `betting-win218(3).zip` (`7b2c3a48bbc4cba95bcace384bb20892916a5958e6477d49651c983b16d11dc2`) and the full three-repository architecture.
+
+```text
+upstream_package_version=0.48.0
+upstream_data_api=GET_ONLY
+upstream_operator_route_family=/dashboard/*
+upstream_downstream_runtime_api_handoff_allowed=no
+bws_required_contract_probe=/contract
+bws_required_query_route_family=/query/*
+current_cross_repo_runtime_wire_status=NOT_ACCEPTED_NOT_COMPATIBLE
+upstream_b1_schema_status=DECLARED_STUB_AND_SAMPLE_VALIDATED
+upstream_b1_runtime_resource_status=NOT_ACCEPTED_NOT_AUTHORIZED
+upstream_execution_sdk=@betting-win/execution-sdk
+upstream_execution_sdk_status=PARTIAL_FAIL_CLOSED
+bws_execution_sdk_dependency=absent
+```
+
+BWS-600 is not blocked merely because an HTTP service is stopped. It is blocked because the inspected repositories do not yet share one accepted deployable runtime route/envelope/provenance contract. BWS must not point its query client at the betting-win dashboard API, infer an adapter, or call local fixtures runtime evidence.
+
+The execution SDK is a separate library plane. Betting-win owns provider mechanics; BWS owns strategy, stake sizing, accounts, credentials/signers, transport, order state, partial-leg policy, and recovery. SDK integration remains future BWS-900 work and requires a separate package lock.
+
+Canonical detail: `docs/002_dependency_contract_with_betting_win.md`.
+
 ## Upstream surfaces
 
 ```text
-upstream_archive_sha256=9a9eee490918ff69182acdaa302d216859a5009b0943adb41e56171c1ee9ef8f
+historical_upstream_archive_sha256=9a9eee490918ff69182acdaa302d216859a5009b0943adb41e56171c1ee9ef8f
+ecosystem_source_audit_sha256=7b2c3a48bbc4cba95bcace384bb20892916a5958e6477d49651c983b16d11dc2
 strategy_export_schema=betting-win.strategy-export.v1
 surebet_profile=surebet_standard_binary_v0
 ```
@@ -71,6 +97,7 @@ BWS consumes:
 2. Immutable `betting-win.strategy-export.v1` bundles using profile `surebet_standard_binary_v0`.
 3. Typed read-only betting-win query/API surfaces.
 4. Canonical identity, rule, provider-generation, quote, trade, settlement and source-lineage references.
+5. Future provider mechanics only through a separately pinned `@betting-win/execution-sdk` package after BWS-900 authorization.
 
 BWS must not connect directly to providers, write betting-win `core.*`, treat snapshots as canonical provider history, or silently fall back between compatibility inputs. Managed service and BWS-600 runtime transport are API-only; retained workspace, export, pinned-bundle, and fixture paths are non-runtime development, parser, backtest, migration, or regression inputs.
 
@@ -80,7 +107,7 @@ BWS must not connect directly to providers, write betting-win `core.*`, treat sn
 
 Validated executable and integration composition remains under `packages/bootstrap`; future implementation work must come from a reviewed source-fix handoff or explicit dependency-ready task, not from a stale safe-local queue.
 
-The safe local operator service boundary is complete. The current source now has long-running API-only upstream convergence, long-running scheduler and worker services, managed loopback cockpit serving, a full product-owned lifecycle owner, integrated root lifecycle, progress, and log wrappers, product runtime evidence surfaces, service-owned paper runtime-evidence mode, runtime-evidence paper autopilot inside the owned lifecycle, exact-version upgrade, rollback, and recovery proof, deterministic soak and failure evidence, API-only external-runtime preflight, and final clean-room acceptance. The next gate is external `BWS-600` accepted-runtime evidence with a running operator-approved betting-win read-only API. The BWS runtime now fails fast before the long evidence window when the upstream API is unavailable or points at the local BWS API.
+The safe local operator service boundary is complete. The current source now has long-running API-only upstream convergence, long-running scheduler and worker services, managed loopback cockpit serving, a full product-owned lifecycle owner, integrated root lifecycle, progress, and log wrappers, product runtime evidence surfaces, service-owned paper runtime-evidence mode, runtime-evidence paper autopilot inside the owned lifecycle, exact-version upgrade, rollback, and recovery proof, deterministic soak and failure evidence, API-only external-runtime preflight, and final clean-room acceptance. The next gate is external `BWS-600` accepted-runtime evidence through an authorized, contract-compatible betting-win downstream API handoff with retained real provider-to-PostgreSQL-to-API parity. The BWS runtime fails fast before the long evidence window when the upstream API is unavailable, incompatible, or points at the local BWS API.
 
 ## Validated safe local program
 
@@ -105,20 +132,21 @@ BWS-900  separately authorized execution
 Read in this order:
 
 1. `AGENTS.md`
-2. `docs/automation/current-implementation-task.md`
-3. `docs/repo_status_current.md`
-4. `docs/000_documentation_index.md`
-5. `docs/047_b1_cross_venue_offline_falsification_program.md`
-6. `docs/048_b1_upstream_contract.md`
-7. `docs/049_b1_market_equivalence.md`
-8. `docs/050_b1_falsification_acceptance.md`
-9. `docs/051_b1_implementation_map.md`
-10. `docs/052_b1_future_strategy_stubs.md`
-11. `backlog/bws_b1_cross_venue_implementation.csv`
-12. `backlog/bws_b1_cross_venue_map.csv`
-13. `docs/041_external_runtime_preflight_and_bws600_campaign.md`
-14. `backlog/bws_full_implementation.csv`
-15. `backlog/bws_remaining_safe_local_map.csv`
+2. `docs/002_dependency_contract_with_betting_win.md`
+3. `docs/automation/current-implementation-task.md`
+4. `docs/repo_status_current.md`
+5. `docs/000_documentation_index.md`
+6. `docs/047_b1_cross_venue_offline_falsification_program.md`
+7. `docs/048_b1_upstream_contract.md`
+8. `docs/049_b1_market_equivalence.md`
+9. `docs/050_b1_falsification_acceptance.md`
+10. `docs/051_b1_implementation_map.md`
+11. `docs/052_b1_future_strategy_stubs.md`
+12. `backlog/bws_b1_cross_venue_implementation.csv`
+13. `backlog/bws_b1_cross_venue_map.csv`
+14. `docs/041_external_runtime_preflight_and_bws600_campaign.md`
+15. `backlog/bws_full_implementation.csv`
+16. `backlog/bws_remaining_safe_local_map.csv`
 
 Detailed BWS-599 carry-forward contracts and historical blueprints stay discoverable from `docs/000_documentation_index.md`. Historical SURE ledgers remain regression evidence only and do not authorize implementation to stop. BWS-600 paper/runtime evidence is now the selected route because the BWS-700 dependency-ready local queue is complete.
 
@@ -132,7 +160,7 @@ npm run validate
 
 ## Current automation route
 
-The selected controller is now `run-paper-autopilot.sh` for the carry-forward `BWS-600` runtime-evidence gate after BWS-700 dependency-ready local completion. The accepted 8/8 broad bugfix closure means `run-bugfix-autopilot.sh` is not selected again unless new evidence opens a new bounded audit scope. The source of task authority is `docs/automation/current-implementation-task.md` plus the accepted B1 docs and backlog. `run-paper-autopilot.sh` remains blocked until the operator-approved betting-win read-only API is available, but no dependency-ready BWS-700 source queue remains binding.
+The selected controller is now `run-paper-autopilot.sh` for the carry-forward `BWS-600` runtime-evidence gate after BWS-700 dependency-ready local completion. The accepted 8/8 broad bugfix closure means `run-bugfix-autopilot.sh` is not selected again unless new evidence opens a new bounded audit scope. The source of task authority is `docs/automation/current-implementation-task.md` plus the accepted B1 docs and backlog. `run-paper-autopilot.sh` remains launch-blocked until the operator-approved betting-win downstream API contract and real provider-to-PostgreSQL-to-API parity are accepted, but no dependency-ready BWS-700 source queue remains binding.
 
 The standardized helper surface is active: `zip_codebase.sh` creates numbered repo-root zips without a manifest; `pull_artifacts_and_zip_codebase.sh` pulls server `artifacts.zip` and then calls local `zip_codebase.sh` without reading `automation.config.sh`; `update_git.sh --acp` is the add/commit/push shorthand and preserves `GITHUB_TOKEN` support. `run-autonomous-implementation.sh`, `run-paper-evaluation.sh` and `run-autonomous-bugfix.sh` default to 72-hour standalone ceilings. `run-paper-evaluation.sh` replaces the old 12-hour helper and writes root `artifacts.zip`; the canonical operator flag is `--adaptive`, and active commands must keep explicit observation intervals inside the 5..60 minute policy until a reviewed protected-controller change implements automatic explicit-interval clamping. `run-autonomous-bugfix.sh` has no proactive/reactive mode flags. `stop-autonomous-run.sh` is intentionally absent.
 
@@ -149,4 +177,4 @@ Long autonomous and paper campaigns use one private repository-owned temp sessio
 See `docs/automation/repository-temp-inode-safety.md`. The maintenance command `cleanup_automation_temp_inode_residue.sh` is dry-run by default and does not perform generic `/tmp` deletion.
 ## API-only upstream transport
 
-The BWS runtime consumes betting-win only through its accepted read-only API. `BWS_UPSTREAM_MODE` and the file-export runtime selector are removed. Missing API readiness is a runtime-evidence blocker; there is no automatic file fallback. Supported root runtime commands enforce `paper`, provider-disabled, and execution-disabled policy; explicit process connection settings take precedence, `.env` supplies the canonical `POSTGRES_*` tuple, and repo-owned defaults cover internal runtime settings including the standard repo-local schedule path. No private-paper manifest content is synthesized.
+The BWS runtime is permitted to consume betting-win only through an accepted, authorized, contract-compatible read-only downstream API. `BWS_UPSTREAM_MODE` and the file-export runtime selector are removed. The current wire contract is not accepted; missing availability, compatibility, authorization, or real-provider parity is a runtime-evidence blocker, and there is no automatic file fallback. Supported root runtime commands enforce `paper`, provider-disabled, and execution-disabled policy; explicit process connection settings take precedence, `.env` supplies the canonical `POSTGRES_*` tuple, and repo-owned defaults cover internal runtime settings including the standard repo-local schedule path. No private-paper manifest content is synthesized.

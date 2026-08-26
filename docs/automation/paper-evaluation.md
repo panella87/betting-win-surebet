@@ -18,4 +18,4 @@ It is not the selected implementation controller and cannot prove continuous `BW
 
 `BWS-589` integrated this child mode into paper autopilot with selected upstream mode, campaign identity, source-defect handoffs, atomic child results and parent-owned final notification. The selected `BWS-600` route is the parent `run-paper-autopilot.sh`, not a standalone paper child.
 
-Fixture success and local-only runtime evidence cannot validate `BWS-600`. Direct provider calls, direct betting-win database reads, execution, public signals and profitability claims remain prohibited.
+Fixture success, dashboard-only availability, and local-only runtime evidence cannot validate `BWS-600`; runtime evidence requires the accepted route/envelope/provenance contract and real provider-to-PostgreSQL-to-API parity. Direct provider calls, direct betting-win database reads, execution, public signals and profitability claims remain prohibited.

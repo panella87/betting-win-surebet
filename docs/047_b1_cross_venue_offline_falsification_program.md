@@ -68,12 +68,12 @@ shared_bankroll_with_betting-win-betting=prohibited
 
 ## Completed dependency-ready implementation sequence
 
-The retained queue is `backlog/bws_b1_cross_venue_implementation.csv`. All dependency-ready local rows through BWS-820 are validated. BWS-710 remains blocked until the required upstream B1 contract exists, and BWS-830/BWS-840 remain parked. No B1 implementation controller is selected by the current task.
+The retained queue is `backlog/bws_b1_cross_venue_implementation.csv`. All dependency-ready local rows through BWS-820 are validated. BWS-710 remains blocked until the declared upstream B1 schema is promoted to an accepted runtime resource and downstream API handoff, and BWS-830/BWS-840 remain parked. No B1 implementation controller is selected by the current task.
 
 ```text
 BWS-700  B1 authority, docs, backlog and validators
 BWS-705  B1 local contract/type skeleton and deterministic fixture contract
-BWS-710  real betting-win B1 read-only API intake, blocked until upstream contract exists
+BWS-710  real betting-win B1 read-only API intake, blocked until accepted runtime resource and API handoff exist
 BWS-720  cross-venue market and selection equivalence
 BWS-730  quote synchronization, freshness, capacity and venue limits
 BWS-740  cross-venue gross opportunity derivation
@@ -91,7 +91,7 @@ BWS-840  C/G offline microstructure design stubs only, parked
 
 ## Implementation rule
 
-`BWS-710` is the real upstream API gate. It must remain blocked until `betting-win` exposes `betting-win.b1_multi_venue_markets.v1` or an accepted equivalent read-only API. The controller may still implement local B1 contracts, equivalence, gross/net math, solver, simulation, deterministic backtest structure, persistence schema and private read-only reporting against deterministic repo-local fixtures. Those fixtures are not runtime evidence and must not be treated as proof of upstream readiness, profitability or live readiness.
+`BWS-710` is the real upstream API gate. The inspected betting-win source already declares and sample-validates `betting-win.b1_multi_venue_markets.v1`, but it must remain blocked until betting-win exposes and authorizes that schema as an accepted complete runtime resource and downstream read-only API handoff. The controller may still implement local B1 contracts, equivalence, gross/net math, solver, simulation, deterministic backtest structure, persistence schema and private read-only reporting against deterministic repo-local fixtures. Those fixtures are not runtime evidence and must not be treated as proof of upstream readiness, profitability or live readiness.
 
 ## Acceptance for this authority
 

@@ -66,6 +66,10 @@ allowed_protected_files=none
 
 Do not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` during ordinary implementation, paper, or bugfix runs.
 
+## Cross-repository compatibility carry-forward
+
+The completed BWS runtime assumes an accepted upstream API contract. The inspected betting-win server currently exposes `/dashboard/*`, while BWS requires `/contract` and `/query/*` with exact provenance. This is an external integration blocker, not permission to reopen the historical BWS-520 through BWS-599 queue.
+
 ## External gate
 
-`BWS-600` remains blocked until the operator-approved betting-win read-only API, private BWS PostgreSQL configuration, approved repo-local private-paper schedule, and retained runtime evidence are available. Local fixtures, export files, and the BWS API on `127.0.0.1:4312` cannot satisfy this gate.
+`BWS-600` remains blocked until the operator-approved betting-win downstream API handoff is accepted, real provider-to-PostgreSQL-to-API parity is retained, and the private BWS PostgreSQL configuration, approved repo-local private-paper schedule, and runtime evidence are available. Local fixtures, export files, and the BWS API on `127.0.0.1:4312` cannot satisfy this gate.

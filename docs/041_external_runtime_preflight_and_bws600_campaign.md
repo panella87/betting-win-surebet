@@ -10,6 +10,20 @@ automatic_file_fallback=prohibited
 selected_controller=run-paper-autopilot.sh
 ```
 
+## Inspected cross-repository wire status
+
+```text
+betting_win_source_audit_sha256=7b2c3a48bbc4cba95bcace384bb20892916a5958e6477d49651c983b16d11dc2
+betting_win_operator_api_route_family=/dashboard/*
+betting_win_downstream_runtime_api_handoff_allowed=no
+bws_contract_probe=/contract
+bws_query_route_family=/query/*
+bws_expected_response_envelope=contractVersion,contractSchema,contractAlias,surebetProfile,resource,provenance,page
+bws600_current_wire_status=BLOCKED_NOT_ACCEPTED
+```
+
+BWS-593 must reject a merely reachable dashboard API. It must prove the exact accepted downstream data contract and committed-HEAD provenance. The preflight cannot invent an adapter or infer that `/dashboard/*` is equivalent to the BWS `/query/*` contract.
+
 ## BWS-593 preflight tooling
 
 Provide a fail-closed preflight command for the fixed API-only runtime input:
@@ -51,7 +65,7 @@ After the upstream API preflight source fix, the campaign uses `run-paper-autopi
 - readiness progression;
 - campaign completion or continuation.
 
-Loopback fixtures cannot validate `BWS-600`. The gate remains blocked until real operator-approved read-only input and retained evidence exist.
+Loopback fixtures cannot validate `BWS-600`. The gate remains blocked until an authorized contract-compatible downstream API handoff, accepted provider-to-PostgreSQL-to-API parity, real operator-approved input, and retained evidence exist.
 
 ## Execution boundary
 
@@ -65,4 +79,4 @@ bws_local_api_4312_does_not_satisfy_upstream_preflight=true
 post_source_fix_controller=run-paper-autopilot.sh
 ```
 
-BWS must fail fast if the upstream betting-win read-only API is unavailable before starting the long runtime-evidence observation window. The BWS local read-only API on `127.0.0.1:4312` is only a BWS listener and cannot satisfy the upstream preflight.
+BWS must fail fast if the upstream betting-win read-only API is unavailable before starting the long runtime-evidence observation window. Availability alone is insufficient: the downstream handoff must also be contract-compatible, authorized, and backed by accepted real provider-to-PostgreSQL-to-API parity. The BWS local read-only API on `127.0.0.1:4312` is only a BWS listener and cannot satisfy the upstream preflight.

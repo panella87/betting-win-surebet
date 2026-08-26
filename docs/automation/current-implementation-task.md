@@ -27,6 +27,19 @@ execution_gate=BWS-900_PARKED
 operator_approval=explicit_2026_08_02
 ```
 
+## Ecosystem integration blocker
+
+```text
+canonical_integration_contract=docs/002_dependency_contract_with_betting_win.md
+betting_win_source_audit_sha256=7b2c3a48bbc4cba95bcace384bb20892916a5958e6477d49651c983b16d11dc2
+betting_win_downstream_runtime_api_handoff_allowed=no
+bws600_cross_repo_wire_status=BLOCKED_NOT_ACCEPTED
+bws710_schema_status=DECLARED_STUB_NOT_RUNTIME_RESOURCE
+bws900_execution_sdk_status=PARTIAL_FAIL_CLOSED_NOT_CONSUMED
+```
+
+This does not open a BWS implementation queue. The selected paper parent remains launch-blocked until an accepted external API handoff exists. A reviewed source handoff must identify whether betting-win publishes the required facade or BWS adopts a different accepted versioned contract.
+
 ## Completed broad bugfix state
 
 The broad bugfix campaign is complete and accepted. The terminal parent `artifacts/bugfix_autopilot_20260812T133805Z` finished with `BUGFIX_AUTOPILOT_COMPLETE`, `all_campaign_areas_closed`, 22 rounds, and all 8 campaign areas closed. Its final cross-area audit passed the full baseline and PostgreSQL-backed loopback acceptance. No active bugfix or implementation queue remains; the next selected phase is the externally gated `BWS-600` paper/runtime-evidence campaign.
@@ -37,29 +50,30 @@ Do not start another broad bugfix parent without fresh evidence defining a new b
 
 The BWS-700 cross-venue offline falsification implementation queue is complete for every dependency-ready local row. `BWS-700`, `BWS-705`, and `BWS-720` through `BWS-820` are validated; `BWS-710` remains externally blocked until `betting-win` exposes an accepted read-only `betting-win.b1_multi_venue_markets.v1` resource; `BWS-830` and `BWS-840` remain parked future strategy stubs requiring separate reviewed authority.
 
-The next selected controller is the carry-forward `BWS-600` runtime-evidence parent, `run-paper-autopilot.sh`, not another implementation pass. The paper route must prove or truthfully block runtime/database convergence against an operator-approved running `betting-win` read-only API. It must not use the local BWS API on `127.0.0.1:4312` as upstream evidence and must not fall back to file exports, fixtures, mocks or synthesized private-paper schedules.
+The next selected controller is the carry-forward `BWS-600` runtime-evidence parent, `run-paper-autopilot.sh`, not another implementation pass. The paper route must prove or truthfully block runtime/database convergence against an authorized, contract-compatible `betting-win` downstream read-only API handoff with accepted real provider-to-PostgreSQL-to-API parity. It must not use the local BWS API on `127.0.0.1:4312` as upstream evidence and must not fall back to file exports, fixtures, mocks or synthesized private-paper schedules.
 
 ## Required reading
 
 1. `AGENTS.md`
 2. `README.md`
-3. `docs/repo_status_current.md`
-4. `docs/000_documentation_index.md`
-5. `docs/041_external_runtime_preflight_and_bws600_campaign.md`
-6. `docs/034_remaining_operator_runtime_implementation_program.md`
-7. `docs/018_private_paper_mode_runbook.md`
-8. `docs/047_b1_cross_venue_offline_falsification_program.md`
-9. `docs/048_b1_upstream_contract.md`
-10. `docs/049_b1_market_equivalence.md`
-11. `docs/050_b1_falsification_acceptance.md`
-12. `docs/051_b1_implementation_map.md`
-13. `docs/052_b1_future_strategy_stubs.md`
-14. `backlog/bws_b1_cross_venue_implementation.csv`
-15. `backlog/bws_b1_cross_venue_map.csv`
-16. `backlog/bws_full_implementation.csv`
-17. `backlog/bws_remaining_safe_local_map.csv`
-18. `docs/042_release_packaging_implementation_blueprint.md`
-19. `docs/046_final_local_acceptance_implementation_blueprint.md`
+3. `docs/002_dependency_contract_with_betting_win.md`
+4. `docs/repo_status_current.md`
+5. `docs/000_documentation_index.md`
+6. `docs/041_external_runtime_preflight_and_bws600_campaign.md`
+7. `docs/034_remaining_operator_runtime_implementation_program.md`
+8. `docs/018_private_paper_mode_runbook.md`
+9. `docs/047_b1_cross_venue_offline_falsification_program.md`
+10. `docs/048_b1_upstream_contract.md`
+11. `docs/049_b1_market_equivalence.md`
+12. `docs/050_b1_falsification_acceptance.md`
+13. `docs/051_b1_implementation_map.md`
+14. `docs/052_b1_future_strategy_stubs.md`
+15. `backlog/bws_b1_cross_venue_implementation.csv`
+16. `backlog/bws_b1_cross_venue_map.csv`
+17. `backlog/bws_full_implementation.csv`
+18. `backlog/bws_remaining_safe_local_map.csv`
+19. `docs/042_release_packaging_implementation_blueprint.md`
+20. `docs/046_final_local_acceptance_implementation_blueprint.md`
 
 ## Verified carry-forward state
 
@@ -133,7 +147,7 @@ recommended_interval=5m
 adaptive=true
 ```
 
-Use the parent paper controller only. Do not invent `--task` or `--prompt-file`. Do not run implementation unless paper evidence creates a valid handoff or `BWS-710` becomes unblocked by an accepted real upstream contract.
+Use the parent paper controller only after the cross-repository API contract, authorization, real-provider parity, private PostgreSQL, approved schedule, and campaign preflight are accepted. Do not invent `--task` or `--prompt-file`. Do not run implementation unless paper evidence creates a valid handoff or `BWS-710` becomes unblocked by an accepted real upstream resource and handoff.
 
 ## Safety
 
@@ -152,7 +166,7 @@ profitability_claims=prohibited
 BWS-900=parked
 ```
 
-Do not clone the betting-win checkout. Do not invent an upstream B1 contract, endpoint, acceptance result or external runtime evidence. If the real upstream API is absent, record the blocker truthfully.
+Do not clone the betting-win checkout. Do not invent an upstream B1 contract, endpoint, adapter, acceptance result or external runtime evidence. If the downstream API handoff is absent, incompatible, unauthorized, or lacks accepted real-provider parity, record the blocker truthfully.
 
 # BWS-600 carry-forward runtime boundary markers
 

@@ -16,7 +16,7 @@ current_runtime_upstream_mode=api_only
 
 The completed task implemented a fail-closed, check-only preflight that validated exactly one operator-selected read-only upstream input and generated the immutable manifest required to start `BWS-600`. Local implementation and tests could not contact providers or start the external campaign.
 
-The historical implementation accepted export and API input shapes for deterministic local compatibility proof. The current BWS-600 runtime boundary has since retired export mode: only an operator-approved running betting-win read-only API may satisfy the campaign gate.
+The historical implementation accepted export and API input shapes for deterministic local compatibility proof. The current BWS-600 runtime boundary has since retired export mode: only an operator-approved, authorized, contract-compatible betting-win downstream read-only API handoff with accepted real-provider parity may satisfy the campaign gate.
 
 ## Historical Exactly-one-mode input
 
