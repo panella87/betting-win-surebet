@@ -1,8 +1,14 @@
-# BEGIN GRAPHIFY_CODE_ONLY_MANAGED
-# Keep Graphify local, deterministic, and code-only.
-# Generated/runtime output
+# BEGIN GRAPHIFY_REPO_ONLINE_AI_MANAGED_V2
+# Graphify output and repository internals
 graphify-out/
+.git/
+
+# Dependencies, generated files, caches, and runtime output
 node_modules/
+.pnpm-store/
+.yarn/
+.venv/
+venv/
 dist/
 build/
 coverage/
@@ -10,33 +16,39 @@ coverage/
 .next/
 .nuxt/
 __pycache__/
+*.pyc
 artifacts/
 logs/
 tmp/
 temp/
 runtime/
 
-# Archives and logs
+# Archives, logs, and local databases
 *.log
 *.zip
 *.tar
 *.tar.gz
+*.sqlite
+*.sqlite3
+*.db
 
 # Secrets and private state
 .env
 .env.*
 !.env.example
+!.env.sample
+!.env.template
 *.pem
 *.key
 *.p12
 *.pfx
 secrets/
+.secrets/
 credentials/
 
-# Non-code semantic inputs intentionally excluded.
-# The refresh script uses --code-only, so no LLM API key is needed.
-*.md
-*.mdx
+# Markdown, MDX, YAML, and text documentation are deliberately included.
+# They are sent online only by an explicit --online refresh command.
+# Binary/media semantic inputs remain excluded from unattended fleet runs.
 *.pdf
 *.png
 *.jpg
@@ -44,4 +56,8 @@ credentials/
 *.gif
 *.webp
 *.svg
-# END GRAPHIFY_CODE_ONLY_MANAGED
+*.mp3
+*.wav
+*.mp4
+*.mov
+# END GRAPHIFY_REPO_ONLINE_AI_MANAGED_V2

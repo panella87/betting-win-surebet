@@ -27,15 +27,8 @@ Commands:
   -h, --help
 
 Graphify:
-  If graphify is installed, --acp refreshes the local code-only Graphify graph
-  after a successful commit and push. Missing or failing Graphify only prints a
-  warning.
-
-Auth:
-  Reads GITHUB_TOKEN from environment first, then .env.
-  Uses GIT_ASKPASS for GitHub HTTPS auth.
-  Does not inject Authorization extraheaders.
-  Does not persist token in .git/config.
+  After a successful --acp commit and push, graphify_repo_refresh.sh runs
+  in non-fatal local AST mode. Hosted AI is never invoked by update_git.sh.
 USAGE
 }
 
@@ -322,46 +315,19 @@ warn_graphify() {
 }
 
 run_graphify_after_acp_nonfatal() {
-  local repo
+  local graphify_repo
 
-  repo="$(git rev-parse --show-toplevel 2>/dev/null || pwd -P)"
+  graphify_repo="$(git rev-parse --show-toplevel 2>/dev/null)" || {
+    printf 'WARNING: Graphify refresh skipped because repository root could not be resolved\n' >&2
+    return 0
+  }
 
-  if ! command -v graphify >/dev/null 2>&1; then
-    warn_graphify "Graphify not found; skipping post-acp graph refresh"
+  if [ ! -x "$graphify_repo/graphify_repo_refresh.sh" ]; then
+    printf 'WARNING: graphify_repo_refresh.sh is missing or not executable; skipping post-acp refresh\n' >&2
     return 0
   fi
 
-  printf '%s\n' 'GRAPHIFY_AFTER_ACP_REFRESH_START'
-
-  if ! GRAPHIFY_QUERY_LOG_DISABLE=1 graphify . --code-only --no-viz; then
-    warn_graphify "Graphify code-only extraction failed; continuing"
-    return 0
-  fi
-
-  if graphify cluster-only --help 2>/dev/null | grep -q -- '--no-viz'; then
-    if ! GRAPHIFY_QUERY_LOG_DISABLE=1 graphify cluster-only "$repo" --no-label --no-viz; then
-      warn_graphify "Graphify cluster/report generation failed; continuing"
-      return 0
-    fi
-  else
-    if ! GRAPHIFY_QUERY_LOG_DISABLE=1 graphify cluster-only "$repo" --no-label; then
-      warn_graphify "Graphify cluster/report generation failed; continuing"
-      return 0
-    fi
-  fi
-
-  if [ ! -s "$repo/graphify-out/graph.json" ]; then
-    warn_graphify "Graphify refresh finished but graphify-out/graph.json is missing or empty"
-    return 0
-  fi
-
-  if [ ! -s "$repo/graphify-out/GRAPH_REPORT.md" ]; then
-    warn_graphify "Graphify refresh finished but graphify-out/GRAPH_REPORT.md is missing or empty"
-    return 0
-  fi
-
-  printf '%s\n' 'GRAPHIFY_AFTER_ACP_REFRESH_DONE'
-  return 0
+  "$graphify_repo/graphify_repo_refresh.sh" --nonfatal
 }
 
 clone_repo() {
