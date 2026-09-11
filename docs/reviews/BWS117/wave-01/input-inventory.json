@@ -1,0 +1,214 @@
+{
+  "inputs": [
+    {
+      "accepted_authority_class": "CURRENT_REPOSITORY_AUTHORITY",
+      "derivative_or_primary": "primary",
+      "filename": "betting-win-surebet117.zip",
+      "format": "ZIP",
+      "notes": "",
+      "role": "current repository archive",
+      "sha256": "0d234e00d015dcab0989b47372ded516bddee9705d9021a0694916dc91a9d494",
+      "stated_baseline": "BWS117",
+      "supersession_status": "current"
+    },
+    {
+      "accepted_authority_class": "SOURCE_EQUIVALENCE_REFERENCE",
+      "derivative_or_primary": "primary",
+      "filename": "betting-win-surebet116.zip",
+      "format": "ZIP",
+      "notes": "",
+      "role": "review source archive and byte-equivalent predecessor",
+      "sha256": "6cc5be4e7f3a637d7c0ed9485f246ade4975b5a8e60d3895943e0471afc29376",
+      "stated_baseline": "BWS116",
+      "supersession_status": "source-equivalent-to-current"
+    },
+    {
+      "accepted_authority_class": "HISTORICAL_ATTEMPT_EVIDENCE_ONLY",
+      "derivative_or_primary": "primary",
+      "filename": "artifacts62(6).zip",
+      "format": "ZIP",
+      "notes": "",
+      "role": "historical BWS bugfix/runtime evidence context",
+      "sha256": "25f8b16d63787f0641f11d779e8e0ff1830f07cda482e1b2df002df3a3aa86b4",
+      "stated_baseline": "historical BWS evidence",
+      "supersession_status": "not used for current source findings"
+    },
+    {
+      "accepted_authority_class": "COMPLETED_SOURCE_PINNED_REVIEW",
+      "derivative_or_primary": "primary",
+      "filename": "BWS116-R01-report(1).md",
+      "format": "MD",
+      "notes": "",
+      "role": "R01 completed review report",
+      "sha256": "6cfd000b19fcaf1b26800bf55a665e479cebc6c24164e2972c6e1eeb971916f7",
+      "stated_baseline": "BWS116",
+      "supersession_status": "accepted source-compatible"
+    },
+    {
+      "accepted_authority_class": "COMPLETED_SOURCE_PINNED_REVIEW",
+      "derivative_or_primary": "derivative",
+      "filename": "BWS116-R01-findings(1).json",
+      "format": "JSON",
+      "notes": "",
+      "role": "R01 completed review findings",
+      "sha256": "4bd18eb0bc50b5467f5eedbe5184468fe986df914329dcb0e1b819e0b4d839b8",
+      "stated_baseline": "BWS116",
+      "supersession_status": "accepted source-compatible"
+    },
+    {
+      "accepted_authority_class": "COMPLETED_SOURCE_PINNED_REVIEW",
+      "derivative_or_primary": "derivative",
+      "filename": "BWS116-R01-coverage(1).tsv",
+      "format": "TSV",
+      "notes": "",
+      "role": "R01 completed review coverage",
+      "sha256": "4b1d1c2c18326496e4ff7fc4d97421d0e77e48b569e581a476c3a729018396d8",
+      "stated_baseline": "BWS116",
+      "supersession_status": "accepted source-compatible"
+    },
+    {
+      "accepted_authority_class": "COMPLETED_SOURCE_PINNED_REVIEW",
+      "derivative_or_primary": "derivative",
+      "filename": "BWS116-R01-validation(1).json",
+      "format": "JSON",
+      "notes": "",
+      "role": "R01 completed review validation",
+      "sha256": "fbcc8e0a27b2318eac3ea7713af7a05c4c2cf49b9be6593774af7e3d45139213",
+      "stated_baseline": "BWS116",
+      "supersession_status": "accepted source-compatible"
+    },
+    {
+      "accepted_authority_class": "COMPLETED_SOURCE_PINNED_REVIEW",
+      "derivative_or_primary": "primary",
+      "filename": "BWS116-R02-report(1).md",
+      "format": "MD",
+      "notes": "",
+      "role": "R02 completed review report",
+      "sha256": "bb79c1e588a84f2a40e26c0fbe2894994d161fe78046aab9b4b70823343c1115",
+      "stated_baseline": "BWS116",
+      "supersession_status": "accepted source-compatible"
+    },
+    {
+      "accepted_authority_class": "COMPLETED_SOURCE_PINNED_REVIEW",
+      "derivative_or_primary": "derivative",
+      "filename": "BWS116-R02-findings(1).json",
+      "format": "JSON",
+      "notes": "",
+      "role": "R02 completed review findings",
+      "sha256": "6b7c5ed9a323dfc6ecdca4712f6af5ae6c86dd5a717d6da8adcef72a1ace9762",
+      "stated_baseline": "BWS116",
+      "supersession_status": "accepted source-compatible"
+    },
+    {
+      "accepted_authority_class": "COMPLETED_SOURCE_PINNED_REVIEW",
+      "derivative_or_primary": "derivative",
+      "filename": "BWS116-R02-coverage(1).tsv",
+      "format": "TSV",
+      "notes": "",
+      "role": "R02 completed review coverage",
+      "sha256": "e0340faa06151791835da27af6083970084f46b14e2ec5c1b4c5b041cda5fb4f",
+      "stated_baseline": "BWS116",
+      "supersession_status": "accepted source-compatible"
+    },
+    {
+      "accepted_authority_class": "COMPLETED_SOURCE_PINNED_REVIEW",
+      "derivative_or_primary": "derivative",
+      "filename": "BWS116-R02-validation(1).json",
+      "format": "JSON",
+      "notes": "",
+      "role": "R02 completed review validation",
+      "sha256": "ac69b84873efaf13a62790dec4b990255fee1472dbbafe54dbc7e7bfdcf52026",
+      "stated_baseline": "BWS116",
+      "supersession_status": "accepted source-compatible"
+    },
+    {
+      "accepted_authority_class": "COMPLETED_SOURCE_PINNED_REVIEW",
+      "derivative_or_primary": "primary",
+      "filename": "BWS116-R03-report(1).md",
+      "format": "MD",
+      "notes": "",
+      "role": "R03 completed review report",
+      "sha256": "4e0b0df07b38d024f22b3354e3c0eedb32d0217e393b765cb67d1f3d28531e9b",
+      "stated_baseline": "BWS116",
+      "supersession_status": "accepted source-compatible"
+    },
+    {
+      "accepted_authority_class": "COMPLETED_SOURCE_PINNED_REVIEW",
+      "derivative_or_primary": "derivative",
+      "filename": "BWS116-R03-findings(1).json",
+      "format": "JSON",
+      "notes": "",
+      "role": "R03 completed review findings",
+      "sha256": "cea3736eb48ed8617aa7f1288be7f668c3367ea6a048f6b72bfea9e33e61d693",
+      "stated_baseline": "BWS116",
+      "supersession_status": "accepted source-compatible"
+    },
+    {
+      "accepted_authority_class": "COMPLETED_SOURCE_PINNED_REVIEW",
+      "derivative_or_primary": "derivative",
+      "filename": "BWS116-R03-coverage(1).tsv",
+      "format": "TSV",
+      "notes": "",
+      "role": "R03 completed review coverage",
+      "sha256": "93b446e8c2be430b1215591674626bd9d0986b01f48ebb8e9eb7be0b10719342",
+      "stated_baseline": "BWS116",
+      "supersession_status": "accepted source-compatible"
+    },
+    {
+      "accepted_authority_class": "COMPLETED_SOURCE_PINNED_REVIEW",
+      "derivative_or_primary": "derivative",
+      "filename": "BWS116-R03-validation(1).json",
+      "format": "JSON",
+      "notes": "",
+      "role": "R03 completed review validation",
+      "sha256": "5d1b65c4e92cebd7db9c9d70398abca7fa6e20e1de595b62e4c873959d788083",
+      "stated_baseline": "BWS116",
+      "supersession_status": "accepted source-compatible"
+    },
+    {
+      "accepted_authority_class": "PROCESS_EVIDENCE_ONLY",
+      "derivative_or_primary": "primary",
+      "filename": "conversation transcript",
+      "format": "conversation",
+      "notes": "",
+      "role": "process lineage and operator intent",
+      "sha256": "NOT_AVAILABLE_AS_FILE",
+      "stated_baseline": "mixed historical context",
+      "supersession_status": "current"
+    },
+    {
+      "accepted_authority_class": "PROCESS_EVIDENCE_ONLY",
+      "derivative_or_primary": "primary",
+      "filename": "BW Wave 07 MIXED_OR_DRIFTED terminal output",
+      "format": "terminal text",
+      "notes": "",
+      "role": "wrong-repository prior overlay attempt evidence",
+      "sha256": "NOT_AVAILABLE_AS_FILE",
+      "stated_baseline": "betting-win BW239",
+      "supersession_status": "failed before apply; irrelevant to BWS source"
+    },
+    {
+      "accepted_authority_class": "PROCESS_EVIDENCE_ONLY",
+      "derivative_or_primary": "derivative",
+      "filename": "betting-win-cross-review-docs-overlay-r13-r17-r18-wave07-rebased-baeb4bfc-20260910.zip",
+      "format": "ZIP",
+      "notes": "",
+      "role": "wrong-repository BW documentation overlay",
+      "sha256": "633fadc571274fe724b1ad12f237e0fa45ecae858d7783ba0f1bf5833487f5c3",
+      "stated_baseline": "betting-win BW239",
+      "supersession_status": "failed before apply; retired from BWS workflow"
+    },
+    {
+      "accepted_authority_class": "PROCESS_EVIDENCE_ONLY",
+      "derivative_or_primary": "derivative",
+      "filename": "apply-betting-win-cross-review-docs-overlay-r13-r17-r18-wave07-rebased-baeb4bfc-20260910.sh",
+      "format": "BASH",
+      "notes": "",
+      "role": "wrong-repository BW apply script",
+      "sha256": "32fdf8bf4d6d2dc4e2c3de14c5a60d8a65c927d91e9fd9ab916529fa21b0c75b",
+      "stated_baseline": "betting-win BW239",
+      "supersession_status": "failed before apply; retired from BWS workflow"
+    }
+  ],
+  "schema": "betting-win-surebet-wave01-input-inventory-v1"
+}

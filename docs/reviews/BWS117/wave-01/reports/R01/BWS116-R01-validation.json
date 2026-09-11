@@ -1,0 +1,530 @@
+{
+  "review_id": "BWS116-R01",
+  "actual_archive": {
+    "path": "/mnt/data/betting-win-surebet116(1).zip",
+    "sha256": "6cc5be4e7f3a637d7c0ed9485f246ade4975b5a8e60d3895943e0471afc29376",
+    "expected_sha256": "6cc5be4e7f3a637d7c0ed9485f246ade4975b5a8e60d3895943e0471afc29376",
+    "sha256_matches": true,
+    "regular_file_count": 618,
+    "expected_regular_file_count": 618,
+    "count_matches": true,
+    "archive_safety": {
+      "absolute_paths": [],
+      "parent_traversal_paths": [],
+      "nul_paths": [],
+      "backslash_paths": [],
+      "duplicate_paths": [],
+      "non_regular_entries": [],
+      "encrypted_entries": [],
+      "safe": true
+    },
+    "canonical_member_digest": "60474f8d91a4a8e4afb73171c7045c0d55c457249508c65e35c67844e7a7b881"
+  },
+  "package_identity": {
+    "actual_name": "betting-win-surebet",
+    "actual_version": "0.1.0-bws-full-platform",
+    "name_matches": true,
+    "version_matches": true
+  },
+  "non_authoritative_newer_archive_comparison": {
+    "available": true,
+    "path": "/mnt/data/betting-win-surebet117(1).zip",
+    "archive_sha256": "0d234e00d015dcab0989b47372ded516bddee9705d9021a0694916dc91a9d494",
+    "regular_file_count": 618,
+    "archive_safe": true,
+    "member_paths_identical": true,
+    "member_bytes_identical": true,
+    "added": [],
+    "removed": [],
+    "changed": [],
+    "authority_used": false,
+    "note": "Compared only to confirm the previous statement; exact BWS116 ZIP remains source authority."
+  },
+  "runtime_and_tool_versions": {
+    "node": {
+      "available": true,
+      "version": "v22.16.0",
+      "exit_code": 0
+    },
+    "npm": {
+      "available": true,
+      "version": "10.9.2",
+      "exit_code": 0
+    },
+    "python": {
+      "available": true,
+      "version": "Python 3.13.5",
+      "exit_code": 0
+    },
+    "git": {
+      "available": true,
+      "version": "git version 2.47.3",
+      "exit_code": 0
+    },
+    "unzip": {
+      "available": true,
+      "version": "UnZip 6.00 of 20 April 2009, by Debian. Original by Info-ZIP.",
+      "exit_code": 0
+    },
+    "sha256sum": {
+      "available": true,
+      "version": "sha256sum (GNU coreutils) 9.7",
+      "exit_code": 0
+    },
+    "canonical_node": {
+      "required": "v20.20.2",
+      "available": false,
+      "actual": "v22.16.0",
+      "classification": "supplementary_only"
+    }
+  },
+  "commands_executed": [
+    {
+      "argv": [
+        "node",
+        "--version"
+      ],
+      "cwd": null,
+      "duration_seconds": 0.004647,
+      "timeout_seconds": 20,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout_excerpt": "v22.16.0\n",
+      "stderr_excerpt": ""
+    },
+    {
+      "argv": [
+        "npm",
+        "--version"
+      ],
+      "cwd": null,
+      "duration_seconds": 0.062581,
+      "timeout_seconds": 20,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout_excerpt": "10.9.2\n",
+      "stderr_excerpt": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "--version"
+      ],
+      "cwd": null,
+      "duration_seconds": 0.001217,
+      "timeout_seconds": 20,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout_excerpt": "Python 3.13.5\n",
+      "stderr_excerpt": ""
+    },
+    {
+      "argv": [
+        "git",
+        "--version"
+      ],
+      "cwd": null,
+      "duration_seconds": 0.00105,
+      "timeout_seconds": 20,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout_excerpt": "git version 2.47.3\n",
+      "stderr_excerpt": ""
+    },
+    {
+      "argv": [
+        "unzip",
+        "-v"
+      ],
+      "cwd": null,
+      "duration_seconds": 0.001087,
+      "timeout_seconds": 20,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout_excerpt": "UnZip 6.00 of 20 April 2009, by Debian. Original by Info-ZIP.\n\nLatest sources and executables are at ftp://ftp.info-zip.org/pub/infozip/ ;\nsee ftp://ftp.info-zip.org/pub/infozip/UnZip.html for other sites.\n\nCompiled with gcc 14.2.0 for Unix (Linux ELF).\n\nUnZip special compilation options:\n        ACORN_FTYPE_NFS\n        COPYRIGHT_CLEAN (PKZIP 0.9x unreducing method not supported)\n        SET_DIR_ATTRIB\n        SYMLINKS (symbolic links supported, if RTL and file system permit)\n        TIMESTAMP\n ",
+      "stderr_excerpt": ""
+    },
+    {
+      "argv": [
+        "sha256sum",
+        "--version"
+      ],
+      "cwd": null,
+      "duration_seconds": 0.00315,
+      "timeout_seconds": 20,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout_excerpt": "sha256sum (GNU coreutils) 9.7\nPackaged by Debian (9.7-3)\nCopyright (C) 2025 Free Software Foundation, Inc.\nLicense GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>.\nThis is free software: you are free to change and redistribute it.\nThere is NO WARRANTY, to the extent permitted by law.\n\nWritten by Ulrich Drepper, Scott Miller, and David Madore.\n",
+      "stderr_excerpt": ""
+    },
+    {
+      "argv": [
+        "/usr/bin/git",
+        "init",
+        "-q"
+      ],
+      "cwd": "/mnt/data/BWS116-R01-work/tmp/git-replace-harness",
+      "duration_seconds": 0.002398,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout_excerpt": "",
+      "stderr_excerpt": ""
+    },
+    {
+      "argv": [
+        "/usr/bin/git",
+        "config",
+        "user.name",
+        "R01"
+      ],
+      "cwd": "/mnt/data/BWS116-R01-work/tmp/git-replace-harness",
+      "duration_seconds": 0.001386,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout_excerpt": "",
+      "stderr_excerpt": ""
+    },
+    {
+      "argv": [
+        "/usr/bin/git",
+        "config",
+        "user.email",
+        "r01@example.invalid"
+      ],
+      "cwd": "/mnt/data/BWS116-R01-work/tmp/git-replace-harness",
+      "duration_seconds": 0.001549,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout_excerpt": "",
+      "stderr_excerpt": ""
+    },
+    {
+      "argv": [
+        "/usr/bin/git",
+        "add",
+        "value.txt"
+      ],
+      "cwd": "/mnt/data/BWS116-R01-work/tmp/git-replace-harness",
+      "duration_seconds": 0.00164,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout_excerpt": "",
+      "stderr_excerpt": ""
+    },
+    {
+      "argv": [
+        "/usr/bin/git",
+        "commit",
+        "-q",
+        "-m",
+        "original"
+      ],
+      "cwd": "/mnt/data/BWS116-R01-work/tmp/git-replace-harness",
+      "duration_seconds": 0.003535,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout_excerpt": "",
+      "stderr_excerpt": ""
+    },
+    {
+      "argv": [
+        "/usr/bin/git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "/mnt/data/BWS116-R01-work/tmp/git-replace-harness",
+      "duration_seconds": 0.001147,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout_excerpt": "0498e34d032df7a2e931a622644015149f585413\n",
+      "stderr_excerpt": ""
+    },
+    {
+      "argv": [
+        "/usr/bin/git",
+        "rev-parse",
+        "HEAD^{tree}"
+      ],
+      "cwd": "/mnt/data/BWS116-R01-work/tmp/git-replace-harness",
+      "duration_seconds": 0.001186,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout_excerpt": "c1ce1aa2e3f5d78cd57791fca65a6993b9b95206\n",
+      "stderr_excerpt": ""
+    },
+    {
+      "argv": [
+        "/usr/bin/git",
+        "commit",
+        "-qam",
+        "replacement"
+      ],
+      "cwd": "/mnt/data/BWS116-R01-work/tmp/git-replace-harness",
+      "duration_seconds": 0.003846,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout_excerpt": "",
+      "stderr_excerpt": ""
+    },
+    {
+      "argv": [
+        "/usr/bin/git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "/mnt/data/BWS116-R01-work/tmp/git-replace-harness",
+      "duration_seconds": 0.001126,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout_excerpt": "68226d0aec1c045d39151eedb8719e80d92d2af3\n",
+      "stderr_excerpt": ""
+    },
+    {
+      "argv": [
+        "/usr/bin/git",
+        "rev-parse",
+        "HEAD^{tree}"
+      ],
+      "cwd": "/mnt/data/BWS116-R01-work/tmp/git-replace-harness",
+      "duration_seconds": 0.001305,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout_excerpt": "27bd4a99543edada9848d22f9c09396b9f2d81ec\n",
+      "stderr_excerpt": ""
+    },
+    {
+      "argv": [
+        "/usr/bin/git",
+        "reset",
+        "--hard",
+        "0498e34d032df7a2e931a622644015149f585413"
+      ],
+      "cwd": "/mnt/data/BWS116-R01-work/tmp/git-replace-harness",
+      "duration_seconds": 0.002143,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout_excerpt": "HEAD is now at 0498e34 original\n",
+      "stderr_excerpt": ""
+    },
+    {
+      "argv": [
+        "/usr/bin/git",
+        "replace",
+        "0498e34d032df7a2e931a622644015149f585413",
+        "68226d0aec1c045d39151eedb8719e80d92d2af3"
+      ],
+      "cwd": "/mnt/data/BWS116-R01-work/tmp/git-replace-harness",
+      "duration_seconds": 0.001485,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout_excerpt": "",
+      "stderr_excerpt": ""
+    },
+    {
+      "argv": [
+        "/usr/bin/git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "/mnt/data/BWS116-R01-work/tmp/git-replace-harness",
+      "duration_seconds": 0.001109,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout_excerpt": "0498e34d032df7a2e931a622644015149f585413\n",
+      "stderr_excerpt": ""
+    },
+    {
+      "argv": [
+        "/usr/bin/git",
+        "rev-parse",
+        "HEAD^{tree}"
+      ],
+      "cwd": "/mnt/data/BWS116-R01-work/tmp/git-replace-harness",
+      "duration_seconds": 0.00124,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout_excerpt": "27bd4a99543edada9848d22f9c09396b9f2d81ec\n",
+      "stderr_excerpt": ""
+    },
+    {
+      "argv": [
+        "/usr/bin/git",
+        "show",
+        "HEAD:value.txt"
+      ],
+      "cwd": "/mnt/data/BWS116-R01-work/tmp/git-replace-harness",
+      "duration_seconds": 0.001334,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout_excerpt": "REPLACEMENT\n",
+      "stderr_excerpt": ""
+    },
+    {
+      "argv": [
+        "/usr/bin/git",
+        "rev-parse",
+        "HEAD^{tree}"
+      ],
+      "cwd": "/mnt/data/BWS116-R01-work/tmp/git-replace-harness",
+      "duration_seconds": 0.001337,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout_excerpt": "c1ce1aa2e3f5d78cd57791fca65a6993b9b95206\n",
+      "stderr_excerpt": ""
+    },
+    {
+      "argv": [
+        "/usr/bin/git",
+        "show",
+        "HEAD:value.txt"
+      ],
+      "cwd": "/mnt/data/BWS116-R01-work/tmp/git-replace-harness",
+      "duration_seconds": 0.001252,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout_excerpt": "ORIGINAL\n",
+      "stderr_excerpt": ""
+    }
+  ],
+  "checks": {
+    "passed": [
+      "exact archive SHA-256",
+      "618 regular-file count",
+      "archive path/type safety",
+      "extracted byte equality",
+      "package name/version",
+      "coverage exactly one row per archive member",
+      "finding source path/hash/range validation",
+      "post-review repository mutation check",
+      "API-only/local-evidence policy static trace",
+      "disposable Git replacement-object harness"
+    ],
+    "failed": [
+      "release readiness",
+      "BWS-600 acceptance readiness",
+      "BWS-710 runtime resource acceptance readiness"
+    ],
+    "skipped": [
+      "provider/API/service contact",
+      "persistent database access",
+      "betting-win checkout/archive inspection",
+      "controllers/workers/schedulers",
+      "dependency installation/update"
+    ],
+    "unavailable": [
+      "canonical Node v20.20.2 runtime execution",
+      "external currentness verification by operating-mode prohibition",
+      "accepted external betting-win B1 multi-venue runtime resource"
+    ]
+  },
+  "git_replacement_object_inert_harness": {
+    "available": true,
+    "replace_command_exit": 0,
+    "original_commit": "0498e34d032df7a2e931a622644015149f585413",
+    "replacement_commit": "68226d0aec1c045d39151eedb8719e80d92d2af3",
+    "head_name_unchanged": true,
+    "default_tree_is_replacement": true,
+    "literal_tree_is_original": true,
+    "default_content": "REPLACEMENT",
+    "literal_content": "ORIGINAL",
+    "confirmed": true,
+    "location": "/mnt/data/BWS116-R01-work/tmp/git-replace-harness",
+    "source_repo_touched": false
+  },
+  "known_baseline_manifest_drift": {
+    "parseable": true,
+    "known_expected_paths": [
+      ".codex/skills/graphify/.graphify_version",
+      ".codex/skills/graphify/SKILL.md",
+      ".codex/skills/graphify/references/update.md",
+      ".graphifyignore",
+      "graphify_repo_install.sh",
+      "graphify_repo_refresh.sh",
+      "update_git.sh"
+    ],
+    "entry_count": 617,
+    "non_self_archive_count": 617,
+    "path_set_matches": true,
+    "mismatched_hash_or_size_paths": [
+      ".codex/skills/graphify/.graphify_version",
+      ".codex/skills/graphify/SKILL.md",
+      ".codex/skills/graphify/references/update.md",
+      ".graphifyignore",
+      "graphify_repo_install.sh",
+      "graphify_repo_refresh.sh",
+      "update_git.sh"
+    ],
+    "matches_known_qualification": true
+  },
+  "coverage_reconciliation": {
+    "archive_members": 618,
+    "coverage_rows_excluding_header": 618,
+    "unique_coverage_paths": 618,
+    "missing_paths": [],
+    "extra_paths": [],
+    "reconciled": true
+  },
+  "finding_counts": {
+    "by_classification": {
+      "CONFIRMED_FINDING": 10,
+      "CROSS_AREA_HANDOFF": 2,
+      "EXTERNAL_UPSTREAM_BLOCKER": 1,
+      "INTENTIONAL_SAFEGUARD": 1,
+      "REJECTED_SUSPICION": 1,
+      "TEST_GAP": 1
+    },
+    "confirmed_by_severity": {
+      "P1": 7,
+      "P2": 3
+    },
+    "confirmed_total": 10
+  },
+  "known_limitations": [
+    "Canonical Node 20.20.2 results are unavailable unless actual runtime matches exactly; other Node results are supplementary.",
+    "No external provider/current deployment authority was contacted, so runtime availability/currentness remains an external blocker.",
+    "Static line-range extraction uses declaration/body boundaries where parseable and conservative full-file ranges otherwise.",
+    "The attached betting-win and artifacts archives were deliberately not inspected under the R01 safety boundary."
+  ],
+  "repository_mutation_check": {
+    "source_tree_before_digest": "60474f8d91a4a8e4afb73171c7045c0d55c457249508c65e35c67844e7a7b881",
+    "source_tree_after_digest": "60474f8d91a4a8e4afb73171c7045c0d55c457249508c65e35c67844e7a7b881",
+    "unchanged": true,
+    "outputs_outside_extracted_repository": true
+  },
+  "access_attestation": {
+    "network_access_performed": false,
+    "provider_access_performed": false,
+    "external_api_access_performed": false,
+    "deployed_service_access_performed": false,
+    "account_or_credential_access_performed": false,
+    "wallet_or_signer_access_performed": false,
+    "persistent_database_access_performed": false,
+    "betting_win_checkout_accessed": false,
+    "betting_win_attached_archive_accessed": false,
+    "source_repository_modified": false,
+    "implementation_or_overlay_produced": false
+  },
+  "artifact_validation": {
+    "report_path": "/mnt/data/BWS116-R01-work/out/BWS116-R01-report.md",
+    "findings_path": "/mnt/data/BWS116-R01-work/out/BWS116-R01-findings.json",
+    "coverage_path": "/mnt/data/BWS116-R01-work/out/BWS116-R01-coverage.tsv",
+    "validation_path": "/mnt/data/BWS116-R01-work/out/BWS116-R01-validation.json"
+  }
+}

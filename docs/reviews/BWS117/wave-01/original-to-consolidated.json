@@ -1,0 +1,837 @@
+{
+  "mappings": [
+    {
+      "canonical_id": "BWS116-R01-001",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R01-001",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R01",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R01-002",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R01-002",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R01",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R01-003",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R01-003",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R01",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R01-004",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R01-004",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R01",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R01-005",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R01-005",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R01",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R01-006",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R01-006",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R01",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R01-007",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R01-007",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R01",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R01-008",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R01-008",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R01",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R01-009",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R01-009",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R01",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R01-010",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R01-010",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R01",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R01-EUB-001",
+      "consolidation_status": "CONFIRMED_CROSS_AREA",
+      "original_id": "BWS116-R01-EUB-001",
+      "rationale": "Retained as an external or environment blocker rather than an application defect.",
+      "source_area": "R01",
+      "source_classification": "EXTERNAL_UPSTREAM_BLOCKER"
+    },
+    {
+      "canonical_id": "BWS116-R01-SG-001",
+      "consolidation_status": "OUT_OF_SCOPE",
+      "original_id": "BWS116-R01-SG-001",
+      "rationale": "Retained as non-defect context.",
+      "source_area": "R01",
+      "source_classification": "INTENTIONAL_SAFEGUARD"
+    },
+    {
+      "canonical_id": "BWS116-R01-RS-001",
+      "consolidation_status": "NOT_REPRODUCED",
+      "original_id": "BWS116-R01-RS-001",
+      "rationale": "The review explicitly rejected the suspicion on the frozen baseline.",
+      "source_area": "R01",
+      "source_classification": "REJECTED_SUSPICION"
+    },
+    {
+      "canonical_id": "BWS116-R01-HO-001",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "original_id": "BWS116-R01-HO-001",
+      "rationale": "Retained as a handoff or assurance obligation, not a duplicate source defect.",
+      "source_area": "R01",
+      "source_classification": "CROSS_AREA_HANDOFF"
+    },
+    {
+      "canonical_id": "BWS116-R01-TG-001",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "original_id": "BWS116-R01-TG-001",
+      "rationale": "Retained as a handoff or assurance obligation, not a duplicate source defect.",
+      "source_area": "R01",
+      "source_classification": "TEST_GAP"
+    },
+    {
+      "canonical_id": "KNOWN_BASELINE_MANIFEST_DRIFT",
+      "consolidation_status": "CONFIRMED_DUPLICATE",
+      "original_id": "BWS116-R01-HO-002",
+      "rationale": "All three records describe the same seven-path stale SOURCE_MANIFEST.json baseline and assign final ownership to R11.",
+      "source_area": "R01",
+      "source_classification": "CROSS_AREA_HANDOFF"
+    },
+    {
+      "canonical_id": "BWS116-R02-001",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R02-001",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R02",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R02-002",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R02-002",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R02",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R02-003",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R02-003",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R02",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R02-004",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R02-004",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R02",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R02-005",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R02-005",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R02",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R02-006",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R02-006",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R02",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R02-007",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R02-007",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R02",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R02-008",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R02-008",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R02",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R02-009",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R02-009",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R02",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R02-010",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R02-010",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R02",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R02-011",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R02-011",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R02",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R02-012",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R02-012",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R02",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R02-013",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R02-013",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R02",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R02-014",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R02-014",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R02",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R02-PF-001",
+      "consolidation_status": "INSUFFICIENT_EVIDENCE",
+      "original_id": "BWS116-R02-PF-001",
+      "rationale": "Retained for targeted proof; not promoted to a confirmed defect.",
+      "source_area": "R02",
+      "source_classification": "PROBABLE_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R02-HYP-001",
+      "consolidation_status": "INSUFFICIENT_EVIDENCE",
+      "original_id": "BWS116-R02-HYP-001",
+      "rationale": "Retained for targeted proof; not promoted to a confirmed defect.",
+      "source_area": "R02",
+      "source_classification": "HYPOTHESIS"
+    },
+    {
+      "canonical_id": "BWS116-R02-HYP-002",
+      "consolidation_status": "INSUFFICIENT_EVIDENCE",
+      "original_id": "BWS116-R02-HYP-002",
+      "rationale": "Retained for targeted proof; not promoted to a confirmed defect.",
+      "source_area": "R02",
+      "source_classification": "HYPOTHESIS"
+    },
+    {
+      "canonical_id": "BWS116-R02-HYP-003",
+      "consolidation_status": "INSUFFICIENT_EVIDENCE",
+      "original_id": "BWS116-R02-HYP-003",
+      "rationale": "Retained for targeted proof; not promoted to a confirmed defect.",
+      "source_area": "R02",
+      "source_classification": "HYPOTHESIS"
+    },
+    {
+      "canonical_id": "BWS116-R02-HYP-004",
+      "consolidation_status": "INSUFFICIENT_EVIDENCE",
+      "original_id": "BWS116-R02-HYP-004",
+      "rationale": "Retained for targeted proof; not promoted to a confirmed defect.",
+      "source_area": "R02",
+      "source_classification": "HYPOTHESIS"
+    },
+    {
+      "canonical_id": "BWS116-R02-EXT-001",
+      "consolidation_status": "CONFIRMED_CROSS_AREA",
+      "original_id": "BWS116-R02-EXT-001",
+      "rationale": "Retained as an external or environment blocker rather than an application defect.",
+      "source_area": "R02",
+      "source_classification": "EXTERNAL_INPUT_BLOCKER"
+    },
+    {
+      "canonical_id": "KNOWN_BASELINE_MANIFEST_DRIFT",
+      "consolidation_status": "CONFIRMED_DUPLICATE",
+      "original_id": "KNOWN_BASELINE_MANIFEST_DRIFT",
+      "rationale": "All three records describe the same seven-path stale SOURCE_MANIFEST.json baseline and assign final ownership to R11.",
+      "source_area": "R02",
+      "source_classification": "CROSS_AREA_HANDOFF"
+    },
+    {
+      "canonical_id": "BWS116-R02-HO-001",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "original_id": "BWS116-R02-HO-001",
+      "rationale": "Retained as a handoff or assurance obligation, not a duplicate source defect.",
+      "source_area": "R02",
+      "source_classification": "CROSS_AREA_HANDOFF"
+    },
+    {
+      "canonical_id": "BWS116-R02-HO-002",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "original_id": "BWS116-R02-HO-002",
+      "rationale": "Retained as a handoff or assurance obligation, not a duplicate source defect.",
+      "source_area": "R02",
+      "source_classification": "CROSS_AREA_HANDOFF"
+    },
+    {
+      "canonical_id": "BWS116-R02-TG-001",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "original_id": "BWS116-R02-TG-001",
+      "rationale": "Retained as a handoff or assurance obligation, not a duplicate source defect.",
+      "source_area": "R02",
+      "source_classification": "TEST_GAP"
+    },
+    {
+      "canonical_id": "BWS116-R02-TG-002",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "original_id": "BWS116-R02-TG-002",
+      "rationale": "Retained as a handoff or assurance obligation, not a duplicate source defect.",
+      "source_area": "R02",
+      "source_classification": "TEST_GAP"
+    },
+    {
+      "canonical_id": "BWS116-R02-TG-003",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "original_id": "BWS116-R02-TG-003",
+      "rationale": "Retained as a handoff or assurance obligation, not a duplicate source defect.",
+      "source_area": "R02",
+      "source_classification": "TEST_GAP"
+    },
+    {
+      "canonical_id": "BWS116-R02-TG-004",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "original_id": "BWS116-R02-TG-004",
+      "rationale": "Retained as a handoff or assurance obligation, not a duplicate source defect.",
+      "source_area": "R02",
+      "source_classification": "TEST_GAP"
+    },
+    {
+      "canonical_id": "BWS116-R02-TG-005",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "original_id": "BWS116-R02-TG-005",
+      "rationale": "Retained as a handoff or assurance obligation, not a duplicate source defect.",
+      "source_area": "R02",
+      "source_classification": "TEST_GAP"
+    },
+    {
+      "canonical_id": "BWS116-R02-TG-006",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "original_id": "BWS116-R02-TG-006",
+      "rationale": "Retained as a handoff or assurance obligation, not a duplicate source defect.",
+      "source_area": "R02",
+      "source_classification": "TEST_GAP"
+    },
+    {
+      "canonical_id": "BWS116-R02-TG-007",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "original_id": "BWS116-R02-TG-007",
+      "rationale": "Retained as a handoff or assurance obligation, not a duplicate source defect.",
+      "source_area": "R02",
+      "source_classification": "TEST_GAP"
+    },
+    {
+      "canonical_id": "BWS116-R02-TG-008",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "original_id": "BWS116-R02-TG-008",
+      "rationale": "Retained as a handoff or assurance obligation, not a duplicate source defect.",
+      "source_area": "R02",
+      "source_classification": "TEST_GAP"
+    },
+    {
+      "canonical_id": "BWS116-R02-TG-009",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "original_id": "BWS116-R02-TG-009",
+      "rationale": "Retained as a handoff or assurance obligation, not a duplicate source defect.",
+      "source_area": "R02",
+      "source_classification": "TEST_GAP"
+    },
+    {
+      "canonical_id": "BWS116-R02-SG-001",
+      "consolidation_status": "OUT_OF_SCOPE",
+      "original_id": "BWS116-R02-SG-001",
+      "rationale": "Retained as non-defect context.",
+      "source_area": "R02",
+      "source_classification": "INTENTIONAL_SAFEGUARD"
+    },
+    {
+      "canonical_id": "BWS116-R02-SG-002",
+      "consolidation_status": "OUT_OF_SCOPE",
+      "original_id": "BWS116-R02-SG-002",
+      "rationale": "Retained as non-defect context.",
+      "source_area": "R02",
+      "source_classification": "INTENTIONAL_SAFEGUARD"
+    },
+    {
+      "canonical_id": "BWS116-R02-SG-003",
+      "consolidation_status": "OUT_OF_SCOPE",
+      "original_id": "BWS116-R02-SG-003",
+      "rationale": "Retained as non-defect context.",
+      "source_area": "R02",
+      "source_classification": "INTENTIONAL_SAFEGUARD"
+    },
+    {
+      "canonical_id": "BWS116-R02-SG-004",
+      "consolidation_status": "OUT_OF_SCOPE",
+      "original_id": "BWS116-R02-SG-004",
+      "rationale": "Retained as non-defect context.",
+      "source_area": "R02",
+      "source_classification": "INTENTIONAL_SAFEGUARD"
+    },
+    {
+      "canonical_id": "BWS116-R02-SG-005",
+      "consolidation_status": "OUT_OF_SCOPE",
+      "original_id": "BWS116-R02-SG-005",
+      "rationale": "Retained as non-defect context.",
+      "source_area": "R02",
+      "source_classification": "INTENTIONAL_SAFEGUARD"
+    },
+    {
+      "canonical_id": "BWS116-R02-SG-006",
+      "consolidation_status": "OUT_OF_SCOPE",
+      "original_id": "BWS116-R02-SG-006",
+      "rationale": "Retained as non-defect context.",
+      "source_area": "R02",
+      "source_classification": "INTENTIONAL_SAFEGUARD"
+    },
+    {
+      "canonical_id": "BWS116-R02-RS-001",
+      "consolidation_status": "NOT_REPRODUCED",
+      "original_id": "BWS116-R02-RS-001",
+      "rationale": "The review explicitly rejected the suspicion on the frozen baseline.",
+      "source_area": "R02",
+      "source_classification": "REJECTED_SUSPICION"
+    },
+    {
+      "canonical_id": "BWS116-R02-RS-002",
+      "consolidation_status": "NOT_REPRODUCED",
+      "original_id": "BWS116-R02-RS-002",
+      "rationale": "The review explicitly rejected the suspicion on the frozen baseline.",
+      "source_area": "R02",
+      "source_classification": "REJECTED_SUSPICION"
+    },
+    {
+      "canonical_id": "BWS116-R02-RS-003",
+      "consolidation_status": "NOT_REPRODUCED",
+      "original_id": "BWS116-R02-RS-003",
+      "rationale": "The review explicitly rejected the suspicion on the frozen baseline.",
+      "source_area": "R02",
+      "source_classification": "REJECTED_SUSPICION"
+    },
+    {
+      "canonical_id": "BWS116-R02-RS-004",
+      "consolidation_status": "NOT_REPRODUCED",
+      "original_id": "BWS116-R02-RS-004",
+      "rationale": "The review explicitly rejected the suspicion on the frozen baseline.",
+      "source_area": "R02",
+      "source_classification": "REJECTED_SUSPICION"
+    },
+    {
+      "canonical_id": "BWS116-R02-RS-005",
+      "consolidation_status": "NOT_REPRODUCED",
+      "original_id": "BWS116-R02-RS-005",
+      "rationale": "The review explicitly rejected the suspicion on the frozen baseline.",
+      "source_area": "R02",
+      "source_classification": "REJECTED_SUSPICION"
+    },
+    {
+      "canonical_id": "BWS116-R03-001",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R03-001",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R03",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R03-002",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R03-002",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R03",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R03-003",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R03-003",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R03",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R03-004",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R03-004",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R03",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R03-005",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R03-005",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R03",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R03-006",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R03-006",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R03",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R03-007",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R03-007",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R03",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R03-008",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R03-008",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R03",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R03-009",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R03-009",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R03",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R03-010",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R03-010",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R03",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R03-011",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R03-011",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R03",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R03-012",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R03-012",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R03",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R03-013",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R03-013",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R03",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R03-014",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R03-014",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R03",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R03-015",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R03-015",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R03",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R03-016",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R03-016",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R03",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R03-017",
+      "consolidation_status": "CONFIRMED_UNIQUE",
+      "original_id": "BWS116-R03-017",
+      "rationale": "No other Wave 01 record has the same trigger, root cause, and minimal correction boundary.",
+      "source_area": "R03",
+      "source_classification": "CONFIRMED_FINDING"
+    },
+    {
+      "canonical_id": "BWS116-R03-ENV-001",
+      "consolidation_status": "CONFIRMED_CROSS_AREA",
+      "original_id": "BWS116-R03-ENV-001",
+      "rationale": "Retained as an external or environment blocker rather than an application defect.",
+      "source_area": "R03",
+      "source_classification": "ENVIRONMENT_BLOCKER"
+    },
+    {
+      "canonical_id": "BWS116-R03-ENV-002",
+      "consolidation_status": "CONFIRMED_CROSS_AREA",
+      "original_id": "BWS116-R03-ENV-002",
+      "rationale": "Retained as an external or environment blocker rather than an application defect.",
+      "source_area": "R03",
+      "source_classification": "ENVIRONMENT_BLOCKER"
+    },
+    {
+      "canonical_id": "BWS116-R03-HYP-001",
+      "consolidation_status": "INSUFFICIENT_EVIDENCE",
+      "original_id": "BWS116-R03-HYP-001",
+      "rationale": "Retained for targeted proof; not promoted to a confirmed defect.",
+      "source_area": "R03",
+      "source_classification": "HYPOTHESIS"
+    },
+    {
+      "canonical_id": "BWS116-R03-TG-001",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "original_id": "BWS116-R03-TG-001",
+      "rationale": "Retained as a handoff or assurance obligation, not a duplicate source defect.",
+      "source_area": "R03",
+      "source_classification": "TEST_GAP"
+    },
+    {
+      "canonical_id": "BWS116-R03-TG-002",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "original_id": "BWS116-R03-TG-002",
+      "rationale": "Retained as a handoff or assurance obligation, not a duplicate source defect.",
+      "source_area": "R03",
+      "source_classification": "TEST_GAP"
+    },
+    {
+      "canonical_id": "BWS116-R03-TG-003",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "original_id": "BWS116-R03-TG-003",
+      "rationale": "Retained as a handoff or assurance obligation, not a duplicate source defect.",
+      "source_area": "R03",
+      "source_classification": "TEST_GAP"
+    },
+    {
+      "canonical_id": "BWS116-R03-TG-004",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "original_id": "BWS116-R03-TG-004",
+      "rationale": "Retained as a handoff or assurance obligation, not a duplicate source defect.",
+      "source_area": "R03",
+      "source_classification": "TEST_GAP"
+    },
+    {
+      "canonical_id": "BWS116-R03-TG-005",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "original_id": "BWS116-R03-TG-005",
+      "rationale": "Retained as a handoff or assurance obligation, not a duplicate source defect.",
+      "source_area": "R03",
+      "source_classification": "TEST_GAP"
+    },
+    {
+      "canonical_id": "BWS116-R03-TG-006",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "original_id": "BWS116-R03-TG-006",
+      "rationale": "Retained as a handoff or assurance obligation, not a duplicate source defect.",
+      "source_area": "R03",
+      "source_classification": "TEST_GAP"
+    },
+    {
+      "canonical_id": "BWS116-R03-SAFE-001",
+      "consolidation_status": "OUT_OF_SCOPE",
+      "original_id": "BWS116-R03-SAFE-001",
+      "rationale": "Retained as non-defect context.",
+      "source_area": "R03",
+      "source_classification": "INTENTIONAL_SAFEGUARD"
+    },
+    {
+      "canonical_id": "BWS116-R03-SAFE-002",
+      "consolidation_status": "OUT_OF_SCOPE",
+      "original_id": "BWS116-R03-SAFE-002",
+      "rationale": "Retained as non-defect context.",
+      "source_area": "R03",
+      "source_classification": "INTENTIONAL_SAFEGUARD"
+    },
+    {
+      "canonical_id": "BWS116-R03-SAFE-003",
+      "consolidation_status": "OUT_OF_SCOPE",
+      "original_id": "BWS116-R03-SAFE-003",
+      "rationale": "Retained as non-defect context.",
+      "source_area": "R03",
+      "source_classification": "INTENTIONAL_SAFEGUARD"
+    },
+    {
+      "canonical_id": "BWS116-R03-SAFE-004",
+      "consolidation_status": "OUT_OF_SCOPE",
+      "original_id": "BWS116-R03-SAFE-004",
+      "rationale": "Retained as non-defect context.",
+      "source_area": "R03",
+      "source_classification": "INTENTIONAL_SAFEGUARD"
+    },
+    {
+      "canonical_id": "BWS116-R03-SAFE-005",
+      "consolidation_status": "OUT_OF_SCOPE",
+      "original_id": "BWS116-R03-SAFE-005",
+      "rationale": "Retained as non-defect context.",
+      "source_area": "R03",
+      "source_classification": "INTENTIONAL_SAFEGUARD"
+    },
+    {
+      "canonical_id": "BWS116-R03-SAFE-006",
+      "consolidation_status": "OUT_OF_SCOPE",
+      "original_id": "BWS116-R03-SAFE-006",
+      "rationale": "Retained as non-defect context.",
+      "source_area": "R03",
+      "source_classification": "INTENTIONAL_SAFEGUARD"
+    },
+    {
+      "canonical_id": "BWS116-R03-REJ-001",
+      "consolidation_status": "NOT_REPRODUCED",
+      "original_id": "BWS116-R03-REJ-001",
+      "rationale": "The review explicitly rejected the suspicion on the frozen baseline.",
+      "source_area": "R03",
+      "source_classification": "REJECTED_SUSPICION"
+    },
+    {
+      "canonical_id": "BWS116-R03-REJ-002",
+      "consolidation_status": "NOT_REPRODUCED",
+      "original_id": "BWS116-R03-REJ-002",
+      "rationale": "The review explicitly rejected the suspicion on the frozen baseline.",
+      "source_area": "R03",
+      "source_classification": "REJECTED_SUSPICION"
+    },
+    {
+      "canonical_id": "BWS116-R03-REJ-003",
+      "consolidation_status": "NOT_REPRODUCED",
+      "original_id": "BWS116-R03-REJ-003",
+      "rationale": "The review explicitly rejected the suspicion on the frozen baseline.",
+      "source_area": "R03",
+      "source_classification": "REJECTED_SUSPICION"
+    },
+    {
+      "canonical_id": "BWS116-R03-REJ-004",
+      "consolidation_status": "NOT_REPRODUCED",
+      "original_id": "BWS116-R03-REJ-004",
+      "rationale": "The review explicitly rejected the suspicion on the frozen baseline.",
+      "source_area": "R03",
+      "source_classification": "REJECTED_SUSPICION"
+    },
+    {
+      "canonical_id": "BWS116-R03-REJ-005",
+      "consolidation_status": "NOT_REPRODUCED",
+      "original_id": "BWS116-R03-REJ-005",
+      "rationale": "The review explicitly rejected the suspicion on the frozen baseline.",
+      "source_area": "R03",
+      "source_classification": "REJECTED_SUSPICION"
+    },
+    {
+      "canonical_id": "KNOWN_BASELINE_MANIFEST_DRIFT",
+      "consolidation_status": "CONFIRMED_DUPLICATE",
+      "original_id": "KNOWN_BASELINE_MANIFEST_DRIFT",
+      "rationale": "All three records describe the same seven-path stale SOURCE_MANIFEST.json baseline and assign final ownership to R11.",
+      "source_area": "R03",
+      "source_classification": "CROSS_AREA_HANDOFF"
+    },
+    {
+      "canonical_id": "BWS116-R03-HO-001",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "original_id": "BWS116-R03-HO-001",
+      "rationale": "Retained as a handoff or assurance obligation, not a duplicate source defect.",
+      "source_area": "R03",
+      "source_classification": "CROSS_AREA_HANDOFF"
+    },
+    {
+      "canonical_id": "BWS116-R03-HO-002",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "original_id": "BWS116-R03-HO-002",
+      "rationale": "Retained as a handoff or assurance obligation, not a duplicate source defect.",
+      "source_area": "R03",
+      "source_classification": "CROSS_AREA_HANDOFF"
+    },
+    {
+      "canonical_id": "BWS116-R03-HO-003",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "original_id": "BWS116-R03-HO-003",
+      "rationale": "Retained as a handoff or assurance obligation, not a duplicate source defect.",
+      "source_area": "R03",
+      "source_classification": "CROSS_AREA_HANDOFF"
+    },
+    {
+      "canonical_id": "BWS116-R03-HO-004",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "original_id": "BWS116-R03-HO-004",
+      "rationale": "Retained as a handoff or assurance obligation, not a duplicate source defect.",
+      "source_area": "R03",
+      "source_classification": "CROSS_AREA_HANDOFF"
+    },
+    {
+      "canonical_id": "BWS116-R03-HO-005",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "original_id": "BWS116-R03-HO-005",
+      "rationale": "Retained as a handoff or assurance obligation, not a duplicate source defect.",
+      "source_area": "R03",
+      "source_classification": "CROSS_AREA_HANDOFF"
+    },
+    {
+      "canonical_id": "BWS116-R03-HO-006",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "original_id": "BWS116-R03-HO-006",
+      "rationale": "Retained as a handoff or assurance obligation, not a duplicate source defect.",
+      "source_area": "R03",
+      "source_classification": "CROSS_AREA_HANDOFF"
+    },
+    {
+      "canonical_id": "BWS116-R03-HO-007",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "original_id": "BWS116-R03-HO-007",
+      "rationale": "Retained as a handoff or assurance obligation, not a duplicate source defect.",
+      "source_area": "R03",
+      "source_classification": "CROSS_AREA_HANDOFF"
+    }
+  ],
+  "schema": "betting-win-surebet-wave01-original-to-consolidated-v1"
+}

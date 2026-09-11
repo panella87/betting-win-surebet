@@ -6,9 +6,10 @@ parent_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 documentation_index_status=active
 documentation_slimming_phase=complete
 documentation_curation_wave=73
-documentation_inventory_count=107
+documentation_inventory_count=123
 canonical_active_count=16
 supporting_active_count=62
+independent_review_evidence_count=16
 historical_count=28
 superseded_count=1
 duplicate_count=0
@@ -52,6 +53,7 @@ bws900_execution=parked
 - `docs/041_external_runtime_preflight_and_bws600_campaign.md` owns the BWS-600 external evidence gate.
 - `docs/047` through `docs/051` own the accepted B1 program, upstream, equivalence, acceptance, and implementation map.
 - Historical and superseded files retain audit, decision, migration, recovery, or validation value but own no current route.
+- `docs/reviews/README.md` owns independent-review navigation only. Review documents cannot override current task, status, runtime, release, or controller authority.
 
 ## Read first
 
@@ -64,6 +66,7 @@ bws900_execution=parked
 7. `docs/041_external_runtime_preflight_and_bws600_campaign.md` - BWS-600 preflight and campaign gate.
 8. `docs/047_b1_cross_venue_offline_falsification_program.md` through `docs/051_b1_implementation_map.md` - completed dependency-ready B1 authority.
 9. `docs/automation/api-only-upstream.md` - binding API-only runtime transport contract.
+10. `docs/reviews/README.md` - independent source-review evidence and next-wave handoff; never current runtime authority.
 
 ## Current route
 
@@ -173,6 +176,29 @@ docs/operations/service_run.md
 ```
 
 These files provide still-binding architecture, safety, validation, setup, automation, operator, decision, or tooling support. `.automation/README.md` mirrors required controller markers but is not routing authority. `.codex/skills/graphify/` is external tooling documentation and does not own product behavior.
+
+### Independent review evidence
+
+```text
+docs/reviews/README.md
+docs/reviews/BWS117/wave-01/README.md
+docs/reviews/BWS117/wave-01/area-coverage.md
+docs/reviews/BWS117/wave-01/authority-map.md
+docs/reviews/BWS117/wave-01/baseline-compatibility.md
+docs/reviews/BWS117/wave-01/cumulative-consolidated-ledger.md
+docs/reviews/BWS117/wave-01/decisions.md
+docs/reviews/BWS117/wave-01/dependency-and-tranches.md
+docs/reviews/BWS117/wave-01/incremental-consolidation.md
+docs/reviews/BWS117/wave-01/next-wave-handoff.md
+docs/reviews/BWS117/wave-01/prior-overlay-lineage.md
+docs/reviews/BWS117/wave-01/repository-profile.md
+docs/reviews/BWS117/wave-01/reports/R01/BWS116-R01-report.md
+docs/reviews/BWS117/wave-01/reports/R02/BWS116-R02-report.md
+docs/reviews/BWS117/wave-01/reports/R03/BWS116-R03-report.md
+docs/reviews/BWS117/wave-01/test-evidence-matrix.md
+```
+
+These 16 Markdown files document the independent Wave 01 source review. JSON and TSV companions under the same tree are machine-readable evidence and are not included in `documentation_inventory_count`. This material is subordinate to current task and status authority and does not mark implementation, BWS-600, BWS-710, release, deployment, or execution complete.
 
 ### Historical
 

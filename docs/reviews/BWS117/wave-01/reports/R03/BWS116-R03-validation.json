@@ -1,0 +1,548 @@
+{
+  "schema": "bws116-r03-validation-v1",
+  "review_id": "BWS116-R03",
+  "repository": "betting-win-surebet",
+  "archive": {
+    "reviewed_path": "/mnt/data/betting-win-surebet116(2).zip",
+    "actual_sha256": "6cc5be4e7f3a637d7c0ed9485f246ade4975b5a8e60d3895943e0471afc29376",
+    "expected_sha256": "6cc5be4e7f3a637d7c0ed9485f246ade4975b5a8e60d3895943e0471afc29376",
+    "sha256_matches": true,
+    "archive_member_count": 618,
+    "regular_file_count": 618,
+    "expected_regular_file_count": 618,
+    "duplicate_paths": [],
+    "unsafe_paths": [],
+    "symlinks": [],
+    "special_entries": [],
+    "extraction_path_size_hash_match": true
+  },
+  "package_identity": {
+    "name": "betting-win-surebet",
+    "version": "0.1.0-bws-full-platform",
+    "canonical_runtime": "Node 20.20.2"
+  },
+  "runtime_and_tools": {
+    "actual_node": "v22.16.0",
+    "node_20_20_2_available": false,
+    "node_classification": "SUPPLEMENTARY_NONCANONICAL",
+    "npm": "10.9.2",
+    "typescript_compiler": "Version 5.8.3",
+    "python": "3.13.5",
+    "platform": "Linux-6.18.35-x86_64-with-glibc2.41",
+    "psql_path": null,
+    "pg_isready_path": null
+  },
+  "postgresql": {
+    "availability": "UNAVAILABLE_NO_LOCAL_PSQL_OR_SERVER_CONFIGURATION",
+    "database_created": false,
+    "database_contacted": false,
+    "persistent_database_mutated": false,
+    "classification": "ENVIRONMENT_BLOCKER",
+    "consequence": "PostgreSQL-specific isolation, constraints, concurrent sessions, execution plans, and crash behavior were analyzed statically but not executed."
+  },
+  "commands_executed": [
+    {
+      "command": [
+        "python3",
+        "scripts/validate_repo.py"
+      ],
+      "cwd": "/tmp/bws116-r03-review/extracted",
+      "duration_ms": 787,
+      "exit_code": 0,
+      "timed_out": false,
+      "stdout_file": "/tmp/bws116-r03-review/harness/validation-01.stdout",
+      "stderr_file": "/tmp/bws116-r03-review/harness/validation-01.stderr"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/validate_contract_boundary.py"
+      ],
+      "cwd": "/tmp/bws116-r03-review/extracted",
+      "duration_ms": 689,
+      "exit_code": 0,
+      "timed_out": false,
+      "stdout_file": "/tmp/bws116-r03-review/harness/validation-02.stdout",
+      "stderr_file": "/tmp/bws116-r03-review/harness/validation-02.stderr"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/validate_no_provider_connections.py"
+      ],
+      "cwd": "/tmp/bws116-r03-review/extracted",
+      "duration_ms": 763,
+      "exit_code": 0,
+      "timed_out": false,
+      "stdout_file": "/tmp/bws116-r03-review/harness/validation-03.stdout",
+      "stderr_file": "/tmp/bws116-r03-review/harness/validation-03.stderr"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/validate_no_execution_paths.py"
+      ],
+      "cwd": "/tmp/bws116-r03-review/extracted",
+      "duration_ms": 728,
+      "exit_code": 0,
+      "timed_out": false,
+      "stdout_file": "/tmp/bws116-r03-review/harness/validation-04.stdout",
+      "stderr_file": "/tmp/bws116-r03-review/harness/validation-04.stderr"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/validate_full_implementation_program.py"
+      ],
+      "cwd": "/tmp/bws116-r03-review/extracted",
+      "duration_ms": 540,
+      "exit_code": 0,
+      "timed_out": false,
+      "stdout_file": "/tmp/bws116-r03-review/harness/validation-05.stdout",
+      "stderr_file": "/tmp/bws116-r03-review/harness/validation-05.stderr"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/validate_remaining_operator_runtime_program.py"
+      ],
+      "cwd": "/tmp/bws116-r03-review/extracted",
+      "duration_ms": 564,
+      "exit_code": 0,
+      "timed_out": false,
+      "stdout_file": "/tmp/bws116-r03-review/harness/validation-06.stdout",
+      "stderr_file": "/tmp/bws116-r03-review/harness/validation-06.stderr"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/validate_bws_b1_authority.py"
+      ],
+      "cwd": "/tmp/bws116-r03-review/extracted",
+      "duration_ms": 508,
+      "exit_code": 0,
+      "timed_out": false,
+      "stdout_file": "/tmp/bws116-r03-review/harness/validation-07.stdout",
+      "stderr_file": "/tmp/bws116-r03-review/harness/validation-07.stderr"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/validate_bws_b1_boundary.py"
+      ],
+      "cwd": "/tmp/bws116-r03-review/extracted",
+      "duration_ms": 525,
+      "exit_code": 0,
+      "timed_out": false,
+      "stdout_file": "/tmp/bws116-r03-review/harness/validation-08.stdout",
+      "stderr_file": "/tmp/bws116-r03-review/harness/validation-08.stderr"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/validate_bws_b1_acceptance.py"
+      ],
+      "cwd": "/tmp/bws116-r03-review/extracted",
+      "duration_ms": 534,
+      "exit_code": 0,
+      "timed_out": false,
+      "stdout_file": "/tmp/bws116-r03-review/harness/validation-09.stdout",
+      "stderr_file": "/tmp/bws116-r03-review/harness/validation-09.stderr"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/validate_source_manifest.py"
+      ],
+      "cwd": "/tmp/bws116-r03-review/extracted",
+      "duration_ms": 579,
+      "exit_code": 1,
+      "timed_out": false,
+      "stdout_file": "/tmp/bws116-r03-review/harness/validation-10.stdout",
+      "stderr_file": "/tmp/bws116-r03-review/harness/validation-10.stderr"
+    },
+    {
+      "command": [
+        "tsc",
+        "-p",
+        "/tmp/bws116-r03-review/extracted/tsconfig.json",
+        "--outDir",
+        "/tmp/bws116-r03-review/harness/compiled-formal",
+        "--noEmitOnError",
+        "false"
+      ],
+      "cwd": "/tmp/bws116-r03-review/extracted",
+      "duration_ms": 5377,
+      "exit_code": 2,
+      "timed_out": false,
+      "stdout_file": "/tmp/bws116-r03-review/harness/formal-01.stdout",
+      "stderr_file": "/tmp/bws116-r03-review/harness/formal-01.stderr"
+    },
+    {
+      "command": [
+        "node",
+        "/tmp/bws116-r03-review/harness/migration-scope-harness.mjs"
+      ],
+      "cwd": "/tmp/bws116-r03-review/extracted",
+      "duration_ms": 35,
+      "exit_code": 0,
+      "timed_out": false,
+      "stdout_file": "/tmp/bws116-r03-review/harness/formal-02.stdout",
+      "stderr_file": "/tmp/bws116-r03-review/harness/formal-02.stderr"
+    },
+    {
+      "command": [
+        "node",
+        "--test",
+        "--test-concurrency=1",
+        "/tmp/bws116-r03-review/harness/compiled-full/tests/surebet-persistence.test.js",
+        "/tmp/bws116-r03-review/harness/compiled-full/tests/b1-persistence.test.js",
+        "/tmp/bws116-r03-review/harness/compiled-full/tests/strategy-ledger.test.js",
+        "/tmp/bws116-r03-review/harness/compiled-full/tests/private-paper-runtime.test.js",
+        "/tmp/bws116-r03-review/harness/compiled-full/tests/bounded-worker-jobs.test.js",
+        "/tmp/bws116-r03-review/harness/compiled-full/tests/b1-private-observation-jobs.test.js",
+        "/tmp/bws116-r03-review/harness/compiled-full/tests/bws-private-paper-scheduler.test.js",
+        "/tmp/bws116-r03-review/harness/compiled-full/tests/bws-private-paper-scheduler-service.test.js",
+        "/tmp/bws116-r03-review/harness/compiled-full/tests/bws-private-paper-worker-service.test.js",
+        "/tmp/bws116-r03-review/harness/compiled-full/tests/bws-database-lifecycle.test.js"
+      ],
+      "cwd": "/tmp/bws116-r03-review/extracted",
+      "duration_ms": 1683,
+      "exit_code": 0,
+      "timed_out": false,
+      "tests": [
+        "surebet-persistence.test.js",
+        "b1-persistence.test.js",
+        "strategy-ledger.test.js",
+        "private-paper-runtime.test.js",
+        "bounded-worker-jobs.test.js",
+        "b1-private-observation-jobs.test.js",
+        "bws-private-paper-scheduler.test.js",
+        "bws-private-paper-scheduler-service.test.js",
+        "bws-private-paper-worker-service.test.js",
+        "bws-database-lifecycle.test.js"
+      ]
+    },
+    {
+      "command": [
+        "python3",
+        "/tmp/bws116-r03-review/harness/r03_static_evidence.py"
+      ],
+      "cwd": "/tmp/bws116-r03-review/extracted",
+      "duration_ms": 63,
+      "exit_code": 0,
+      "timed_out": false,
+      "classification": "READ_ONLY_STATIC_HARNESS"
+    }
+  ],
+  "exploratory_read_only_commands": {
+    "description": "Additional nl, rg, find, sha256sum, wc, and Python archive/source inspection command groups were used to trace exact symbols and lines. They were run through a 120-second container boundary but were not individually duration-instrumented.",
+    "all_read_only": true,
+    "known_nonzero_event": "The first combined shell inspection exited 141 because head closed a pipe under set -o pipefail after archive verification; no repository mutation occurred."
+  },
+  "checks": {
+    "passed": [
+      "archive_sha256",
+      "regular_file_count",
+      "archive_path_safety",
+      "archive_entry_type_safety",
+      "extraction_integrity",
+      "package_identity",
+      "migration_inventory_12_files",
+      "current_migration_surebet_qualification_static_inventory",
+      "validate_repo.py",
+      "validate_contract_boundary.py",
+      "validate_no_provider_connections.py",
+      "validate_no_execution_paths.py",
+      "validate_full_implementation_program.py",
+      "validate_remaining_operator_runtime_program.py",
+      "validate_bws_b1_authority.py",
+      "validate_bws_b1_boundary.py",
+      "validate_bws_b1_acceptance.py",
+      "focused_R03_tests_under_Node_22_62_pass_0_fail_6_skip",
+      "inert_migration_escape_harness"
+    ],
+    "failed": [
+      "validate_source_manifest.py: expected known baseline drift"
+    ],
+    "skipped": [
+      "six environment-gated focused tests, including disposable PostgreSQL persistence proof"
+    ],
+    "unavailable": [
+      "canonical Node 20.20.2 execution",
+      "dependency-complete TypeScript build",
+      "disposable PostgreSQL execution",
+      "PostgreSQL concurrency and isolation harnesses"
+    ],
+    "supplementary": [
+      "Node 22 TypeScript emit produced JavaScript but exited 2 because @types/node/dependencies were not installed; no install was permitted.",
+      "Node 22 focused R03 suite: 68 tests, 62 pass, 0 fail, 6 skip.",
+      "An initial 75-test selection had 5 failures solely because config/betting-win.upstream.lock.json is intentionally absent from the frozen source archive; the prerequisite-dependent bws-service-runtime test was removed from the focused R03 execution and is not treated as a source finding."
+    ]
+  },
+  "adversarial_harnesses": [
+    {
+      "name": "migration-source-and-scope escape",
+      "path": "/tmp/bws116-r03-review/harness/migration-scope-harness.mjs",
+      "runtime": "v22.16.0",
+      "database_used": false,
+      "cases": [
+        "absolute external migration directory",
+        "../ traversal migration directory",
+        "CREATE FUNCTION public.*",
+        "dynamic DO block"
+      ],
+      "result": "all cases accepted by loader; supports BWS116-R03-001"
+    },
+    {
+      "name": "archive/source static evidence",
+      "path": "/tmp/bws116-r03-review/harness/r03_static_evidence.py",
+      "database_used": false,
+      "result": "archive/extraction/source assertions passed"
+    }
+  ],
+  "migration_inventory_reconciliation": {
+    "migration_count": 12,
+    "ordered_names": [
+      "001_create_upstream_locks_and_import_runs.sql",
+      "002_create_pinned_strategy_exports.sql",
+      "003_create_strategy_ledger_entries.sql",
+      "004_create_worker_jobs.sql",
+      "005_create_upstream_export_convergence_checkpoints.sql",
+      "006_create_upstream_api_convergence_checkpoints.sql",
+      "007_create_private_paper_runtime_scheduler_checkpoints.sql",
+      "008_create_b1_upstream_convergence_checkpoints.sql",
+      "009_create_b1_backtest_runs.sql",
+      "010_create_b1_candidate_snapshots.sql",
+      "011_create_b1_simulation_results.sql",
+      "012_create_b1_private_observation_cycles.sql"
+    ],
+    "duplicate_names": [],
+    "entries": [
+      {
+        "name": "001_create_upstream_locks_and_import_runs.sql",
+        "path": "database/migrations/surebet/001_create_upstream_locks_and_import_runs.sql",
+        "size": 2004,
+        "sha256": "9e42a36b06adc858c25e72c4fd6ab41500cdfdcbbb3e0a7ae556efd2ec771584",
+        "tables": [
+          "surebet.upstream_locks",
+          "surebet.import_runs"
+        ],
+        "indexes": [
+          "upstream_locks_commit_sha_idx",
+          "import_runs_upstream_lock_record_id_idx"
+        ]
+      },
+      {
+        "name": "002_create_pinned_strategy_exports.sql",
+        "path": "database/migrations/surebet/002_create_pinned_strategy_exports.sql",
+        "size": 1503,
+        "sha256": "ade03b500f36cfc1bd1b85aaa551db6945918e25a64f6934b3d85f6eec245e3d",
+        "tables": [
+          "surebet.pinned_strategy_exports"
+        ],
+        "indexes": [
+          "pinned_strategy_exports_upstream_lock_record_id_idx"
+        ]
+      },
+      {
+        "name": "003_create_strategy_ledger_entries.sql",
+        "path": "database/migrations/surebet/003_create_strategy_ledger_entries.sql",
+        "size": 2530,
+        "sha256": "b3a7695bfba8fedaa0bb3fccefdde9ae11d893e63a67b493647f0818ce507071",
+        "tables": [
+          "surebet.strategy_ledger_entries"
+        ],
+        "indexes": [
+          "strategy_ledger_entries_upstream_lock_record_id_idx",
+          "strategy_ledger_entries_acceptance_state_idx"
+        ]
+      },
+      {
+        "name": "004_create_worker_jobs.sql",
+        "path": "database/migrations/surebet/004_create_worker_jobs.sql",
+        "size": 5389,
+        "sha256": "9756445dbfbdac6226413098d1253527578d9420543287842c30d034df162b9c",
+        "tables": [
+          "surebet.worker_jobs",
+          "surebet.worker_job_checkpoints",
+          "surebet.worker_job_dead_letters"
+        ],
+        "indexes": [
+          "worker_jobs_lease_token_idx",
+          "worker_jobs_claim_idx",
+          "worker_jobs_dead_letter_idx",
+          "worker_job_checkpoints_job_recorded_idx",
+          "worker_job_dead_letters_queue_idx"
+        ]
+      },
+      {
+        "name": "005_create_upstream_export_convergence_checkpoints.sql",
+        "path": "database/migrations/surebet/005_create_upstream_export_convergence_checkpoints.sql",
+        "size": 2040,
+        "sha256": "8d3c09c06b61e4fb1774879c51467381b70bbe6f46c86c660345c63667089e3c",
+        "tables": [
+          "surebet.upstream_export_convergence_checkpoints"
+        ],
+        "indexes": [
+          "upstream_export_convergence_lock_idx"
+        ]
+      },
+      {
+        "name": "006_create_upstream_api_convergence_checkpoints.sql",
+        "path": "database/migrations/surebet/006_create_upstream_api_convergence_checkpoints.sql",
+        "size": 1652,
+        "sha256": "3d5ac1c0f2d89aac08acb057668b87b2e9116f274ff78020568dc82522f270f7",
+        "tables": [
+          "surebet.upstream_api_convergence_checkpoints"
+        ],
+        "indexes": [
+          "upstream_api_convergence_lock_idx"
+        ]
+      },
+      {
+        "name": "007_create_private_paper_runtime_scheduler_checkpoints.sql",
+        "path": "database/migrations/surebet/007_create_private_paper_runtime_scheduler_checkpoints.sql",
+        "size": 1181,
+        "sha256": "b0ec918132e247f3265145787e3bf9b30320ae2c415937c0578d373e5ec8be57",
+        "tables": [
+          "surebet.private_paper_runtime_scheduler_checkpoints"
+        ],
+        "indexes": [
+          "private_paper_runtime_scheduler_checkpoints_queue_idx"
+        ]
+      },
+      {
+        "name": "008_create_b1_upstream_convergence_checkpoints.sql",
+        "path": "database/migrations/surebet/008_create_b1_upstream_convergence_checkpoints.sql",
+        "size": 1265,
+        "sha256": "33a2287c537afe1aa2a666b14365fa3a3247900d41d4303116fdcecd04b54672",
+        "tables": [
+          "surebet.b1_upstream_convergence_checkpoints"
+        ],
+        "indexes": [
+          "b1_upstream_convergence_checkpoints_updated_idx"
+        ]
+      },
+      {
+        "name": "009_create_b1_backtest_runs.sql",
+        "path": "database/migrations/surebet/009_create_b1_backtest_runs.sql",
+        "size": 1575,
+        "sha256": "c5b9b66325ca16346c48176236b73dea7fd79f51b5b18aba8ae73d33d7ad12ea",
+        "tables": [
+          "surebet.b1_backtest_runs"
+        ],
+        "indexes": [
+          "b1_backtest_runs_run_hash_idx",
+          "b1_backtest_runs_observed_idx"
+        ]
+      },
+      {
+        "name": "010_create_b1_candidate_snapshots.sql",
+        "path": "database/migrations/surebet/010_create_b1_candidate_snapshots.sql",
+        "size": 832,
+        "sha256": "83da55cee8bc46ca6f47b8584aaa81c08794a268f5147fc9bef320201a79b78a",
+        "tables": [
+          "surebet.b1_candidate_snapshots"
+        ],
+        "indexes": [
+          "b1_candidate_snapshots_run_idx"
+        ]
+      },
+      {
+        "name": "011_create_b1_simulation_results.sql",
+        "path": "database/migrations/surebet/011_create_b1_simulation_results.sql",
+        "size": 826,
+        "sha256": "3e748cb212558268e675df42f809ce9e3cd29b8527a83fd9c00c5897341d15fa",
+        "tables": [
+          "surebet.b1_simulation_results"
+        ],
+        "indexes": [
+          "b1_simulation_results_run_idx"
+        ]
+      },
+      {
+        "name": "012_create_b1_private_observation_cycles.sql",
+        "path": "database/migrations/surebet/012_create_b1_private_observation_cycles.sql",
+        "size": 1529,
+        "sha256": "5c4858bb130178460e45226677c6cc74610628badeca3632425c0a0838a474a6",
+        "tables": [
+          "surebet.b1_private_observation_cycles"
+        ],
+        "indexes": [
+          "b1_private_observation_cycles_runtime_idx"
+        ]
+      }
+    ],
+    "application_order": "lexical localeCompare order; current names 001 through 012 reconcile"
+  },
+  "coverage_reconciliation": {
+    "expected_rows": 618,
+    "actual_rows": 618,
+    "unique_paths": 618,
+    "all_archive_members_present": true,
+    "extra_paths": [],
+    "missing_paths": []
+  },
+  "finding_counts": {
+    "classification": {
+      "CONFIRMED_FINDING": 17,
+      "CROSS_AREA_HANDOFF": 8,
+      "ENVIRONMENT_BLOCKER": 2,
+      "HYPOTHESIS": 1,
+      "INTENTIONAL_SAFEGUARD": 6,
+      "REJECTED_SUSPICION": 5,
+      "TEST_GAP": 6
+    },
+    "severity": {
+      "P0": 1,
+      "P1": 13,
+      "P2": 3
+    },
+    "confirmed": 17,
+    "blocking": {
+      "release": 17,
+      "BWS-600": 15,
+      "B1": 15,
+      "deployment": 17
+    }
+  },
+  "known_limitations": [
+    "No PostgreSQL server/client was available, so source-clear SQL races were not executed under PostgreSQL isolation.",
+    "Canonical Node 20.20.2 and repository dependencies were unavailable; Node 22 observations are supplementary.",
+    "The known SOURCE_MANIFEST.json drift was preserved and assigned only to R11.",
+    "No provider, account, credential, signer, deployed service, betting-win checkout, or betting-win database was accessed."
+  ],
+  "repository_mutation_attestation": {
+    "source_tree_modified": false,
+    "archive_modified": false,
+    "temporary_files_location": "/tmp/bws116-r03-review outside extracted source",
+    "extracted_tree_matches_archive": true
+  },
+  "network_provider_database_attestation": {
+    "external_network_access": false,
+    "provider_access": false,
+    "account_or_credential_access": false,
+    "deployed_service_access": false,
+    "betting_win_checkout_access": false,
+    "database_access": false,
+    "live_operation": false
+  },
+  "output_files": {
+    "report": {
+      "path": "/tmp/bws116-r03-review/output/BWS116-R03-report.md",
+      "sha256": "4e0b0df07b38d024f22b3354e3c0eedb32d0217e393b765cb67d1f3d28531e9b",
+      "size": 87428
+    },
+    "findings": {
+      "path": "/tmp/bws116-r03-review/output/BWS116-R03-findings.json",
+      "sha256": "cea3736eb48ed8617aa7f1288be7f668c3367ea6a048f6b72bfea9e33e61d693",
+      "size": 100529
+    },
+    "coverage": {
+      "path": "/tmp/bws116-r03-review/output/BWS116-R03-coverage.tsv",
+      "sha256": "93b446e8c2be430b1215591674626bd9d0986b01f48ebb8e9eb7be0b10719342",
+      "size": 148939
+    }
+  }
+}

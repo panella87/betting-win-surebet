@@ -1,0 +1,480 @@
+{
+  "canonical_node_20_20_2": "NOT_RUN_BY_SUPPLIED_REVIEWS",
+  "coverage_results": [
+    {
+      "area": "R01",
+      "mismatches": [],
+      "reconciled": true,
+      "rows": 618,
+      "unique_paths": 618
+    },
+    {
+      "area": "R02",
+      "mismatches": [],
+      "reconciled": true,
+      "rows": 618,
+      "unique_paths": 618
+    },
+    {
+      "area": "R03",
+      "mismatches": [],
+      "reconciled": true,
+      "rows": 618,
+      "unique_paths": 618
+    }
+  ],
+  "current_archive": {
+    "filename": "betting-win-surebet117.zip",
+    "regular_files": 618,
+    "sha256": "0d234e00d015dcab0989b47372ded516bddee9705d9021a0694916dc91a9d494"
+  },
+  "member_equivalence": true,
+  "postgresql_execution": "UNAVAILABLE_IN_R03_REVIEW",
+  "review_archive": {
+    "filename": "betting-win-surebet116.zip",
+    "regular_files": 618,
+    "sha256": "6cc5be4e7f3a637d7c0ed9485f246ade4975b5a8e60d3895943e0471afc29376"
+  },
+  "schema": "betting-win-surebet-wave01-source-verification-v1",
+  "source_guard": [
+    {
+      "mode": 484,
+      "path": "AGENTS.md",
+      "sha256": "94c414fbc522623678b3c5e468e7e5d7e8787d842546776f741d36a9e6beeb73"
+    },
+    {
+      "mode": 484,
+      "path": "PROJECT_STATUS.md",
+      "sha256": "1b08809e477a4fd233464cea1388cede73ac6b9c05c06c15eea960c698004449"
+    },
+    {
+      "mode": 484,
+      "path": "README.md",
+      "sha256": "b0312d4abfa03fad81c6e69ab66c7024647816e305db2c99724c83dacd8f79a4"
+    },
+    {
+      "mode": 484,
+      "path": "SOURCE_MANIFEST.json",
+      "sha256": "d9ea618c19fac733cf070c7e9b811ace8a1a0d637680b0b9f8233be5879aba6a"
+    },
+    {
+      "mode": 420,
+      "path": "database/migrations/surebet/001_create_upstream_locks_and_import_runs.sql",
+      "sha256": "9e42a36b06adc858c25e72c4fd6ab41500cdfdcbbb3e0a7ae556efd2ec771584"
+    },
+    {
+      "mode": 420,
+      "path": "database/migrations/surebet/003_create_strategy_ledger_entries.sql",
+      "sha256": "b3a7695bfba8fedaa0bb3fccefdde9ae11d893e63a67b493647f0818ce507071"
+    },
+    {
+      "mode": 420,
+      "path": "database/migrations/surebet/004_create_worker_jobs.sql",
+      "sha256": "9756445dbfbdac6226413098d1253527578d9420543287842c30d034df162b9c"
+    },
+    {
+      "mode": 420,
+      "path": "database/migrations/surebet/005_create_upstream_export_convergence_checkpoints.sql",
+      "sha256": "8d3c09c06b61e4fb1774879c51467381b70bbe6f46c86c660345c63667089e3c"
+    },
+    {
+      "mode": 420,
+      "path": "database/migrations/surebet/006_create_upstream_api_convergence_checkpoints.sql",
+      "sha256": "3d5ac1c0f2d89aac08acb057668b87b2e9116f274ff78020568dc82522f270f7"
+    },
+    {
+      "mode": 420,
+      "path": "database/migrations/surebet/009_create_b1_backtest_runs.sql",
+      "sha256": "c5b9b66325ca16346c48176236b73dea7fd79f51b5b18aba8ae73d33d7ad12ea"
+    },
+    {
+      "mode": 420,
+      "path": "database/migrations/surebet/010_create_b1_candidate_snapshots.sql",
+      "sha256": "83da55cee8bc46ca6f47b8584aaa81c08794a268f5147fc9bef320201a79b78a"
+    },
+    {
+      "mode": 420,
+      "path": "database/migrations/surebet/011_create_b1_simulation_results.sql",
+      "sha256": "3e748cb212558268e675df42f809ce9e3cd29b8527a83fd9c00c5897341d15fa"
+    },
+    {
+      "mode": 420,
+      "path": "database/migrations/surebet/012_create_b1_private_observation_cycles.sql",
+      "sha256": "5c4858bb130178460e45226677c6cc74610628badeca3632425c0a0838a474a6"
+    },
+    {
+      "mode": 484,
+      "path": "docs/002_dependency_contract_with_betting_win.md",
+      "sha256": "bdba05055d9c507d4d4ba1901d1cb5d18a15e8359b6c84a4027a6eaadb87ec3b"
+    },
+    {
+      "mode": 484,
+      "path": "docs/012_runbook.md",
+      "sha256": "c0cfe1e75e4dde78561dae7905411a1b308c3d9c760c735e88ee81c81fdec21c"
+    },
+    {
+      "mode": 484,
+      "path": "docs/035_continuous_service_supervisor_contract.md",
+      "sha256": "cae4ce541c65848974de8c4568e72b6d2d3d151d9f2c3eaf52cb50e6777c8505"
+    },
+    {
+      "mode": 484,
+      "path": "docs/037_database_backup_retention_and_recovery.md",
+      "sha256": "6d65630b7d351c1e59318f4761cbb05de099d1661c37fea18d5bf603fd560d10"
+    },
+    {
+      "mode": 484,
+      "path": "docs/041_external_runtime_preflight_and_bws600_campaign.md",
+      "sha256": "2b660f97040f6893f0110172a0f3e5ebe0b6e25f64f0e8ea4daf8ab310242620"
+    },
+    {
+      "mode": 484,
+      "path": "docs/047_b1_cross_venue_offline_falsification_program.md",
+      "sha256": "6f0099cd31db79c590159c7134895821072a37209b0daf01a884e8652b8a1c24"
+    },
+    {
+      "mode": 420,
+      "path": "docs/048_b1_upstream_contract.md",
+      "sha256": "a37339908cf947ab24dc9580345f0c742f39e1ca167544221a6f4ae138e2cecc"
+    },
+    {
+      "mode": 420,
+      "path": "docs/049_b1_market_equivalence.md",
+      "sha256": "8b6dc3fb7d20213e0a60906d9bb217d4d19bdb5339a79bdd45b9fa4bceb4f543"
+    },
+    {
+      "mode": 420,
+      "path": "docs/050_b1_falsification_acceptance.md",
+      "sha256": "3ea87cc62935c08af9d0535ec13a90be3825c4d8f579a53c58a6beaeeae50735"
+    },
+    {
+      "mode": 484,
+      "path": "docs/051_b1_implementation_map.md",
+      "sha256": "a7505e399280e62a17ca90460e135802627c850dbc47a7d8200bb77274774dde"
+    },
+    {
+      "mode": 484,
+      "path": "docs/MASTER_PLAN.md",
+      "sha256": "66114721e6be77ab24e896cfda2e1ae8df32eea2382f03bd696eb39ed4b20dac"
+    },
+    {
+      "mode": 484,
+      "path": "docs/automation/README.md",
+      "sha256": "54ac0cd2f3819bccd6748db480b5d870d0b21dbac8f42f003a411b72eacdbf10"
+    },
+    {
+      "mode": 420,
+      "path": "docs/automation/api-only-upstream.md",
+      "sha256": "52031ce84c470b72aeb2f70b02de0f63035794c74481b2c3c687f5fdfa12d3ad"
+    },
+    {
+      "mode": 484,
+      "path": "docs/automation/current-implementation-task.md",
+      "sha256": "f67db876487f2ac92ad8bb56fa3f8b851e980f6fd37cbc85476f6370a45a8b4d"
+    },
+    {
+      "mode": 484,
+      "path": "docs/repo_status_current.md",
+      "sha256": "af4f9d0fa5c84385d3d4fae2cf401410f4aa563c9f2649df5d16577ea3ca34b8"
+    },
+    {
+      "mode": 420,
+      "path": "packages/bootstrap/src/adapters/betting-win-pinned-bundle-intake.ts",
+      "sha256": "d22fc6007f4d2980bab9419126ec00652dc5b27114e4347871bc66ff3abc5026"
+    },
+    {
+      "mode": 420,
+      "path": "packages/bootstrap/src/adapters/betting-win-query-client.ts",
+      "sha256": "7b50ba9a6c6e0dd5486bdca723a6f6c605bd7609151e062fe72ee36100d307ae"
+    },
+    {
+      "mode": 420,
+      "path": "packages/bootstrap/src/backtest/b1-cross-venue-backtest.ts",
+      "sha256": "b367b8880c8461a50912e13b3cb1489a1f5c8e2c235dfd556d2ef615b6a575d4"
+    },
+    {
+      "mode": 420,
+      "path": "packages/bootstrap/src/contracts/b1-local-types.ts",
+      "sha256": "22a43ced9a713e4144e343529a8940edfa00676659aa01f48f739e3f28ca03e1"
+    },
+    {
+      "mode": 420,
+      "path": "packages/bootstrap/src/contracts/betting-win-b1-resource-records.ts",
+      "sha256": "2068f5dea3a115cbbc4e7b7fde16774b9a0fc9c964be1550215cc2c7508604e8"
+    },
+    {
+      "mode": 484,
+      "path": "packages/bootstrap/src/contracts/betting-win-resource-records.ts",
+      "sha256": "8ca3a040b691242eb1025ab74f545157c1072b85332fdc1313924e57396c6903"
+    },
+    {
+      "mode": 420,
+      "path": "packages/bootstrap/src/economics/b1-fee-matrix.ts",
+      "sha256": "081e148be8c1e3ffce089cca44c14cb16fa94ee25ae06a320d422b23e9e37175"
+    },
+    {
+      "mode": 420,
+      "path": "packages/bootstrap/src/economics/b1-net-spread.ts",
+      "sha256": "0f4bbd52d105d75aef34baa43bea49b09b5c6fde8e3afc8ef7f51383cda0947b"
+    },
+    {
+      "mode": 420,
+      "path": "packages/bootstrap/src/identity/b1-market-equivalence.ts",
+      "sha256": "b7bd85ede3224740021fdc676db69c690820e2634c13c32a6719190feedb6f75"
+    },
+    {
+      "mode": 420,
+      "path": "packages/bootstrap/src/identity/b1-selection-equivalence.ts",
+      "sha256": "ac7dcc2ddf2d9bf660931b639e10b6659ffe90ec8115ab80b765884784bc0ae2"
+    },
+    {
+      "mode": 420,
+      "path": "packages/bootstrap/src/identity/b1-venue-pair-key.ts",
+      "sha256": "3c1f4864a055c479d758ec070804a285aa1441ad7b14418061039d45d44517fa"
+    },
+    {
+      "mode": 420,
+      "path": "packages/bootstrap/src/operations/b1-runtime-evidence.ts",
+      "sha256": "80ea2ca2a8b071dc1fdafc614594fac3d642b0416bcf6beec4c515cd707adbe8"
+    },
+    {
+      "mode": 420,
+      "path": "packages/bootstrap/src/operations/database-lifecycle.ts",
+      "sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377"
+    },
+    {
+      "mode": 420,
+      "path": "packages/bootstrap/src/operations/external-runtime-preflight.ts",
+      "sha256": "724a419567dc2c6f737166660092d5c0d8e09be24a4b22bc9377c324949ec427"
+    },
+    {
+      "mode": 484,
+      "path": "packages/bootstrap/src/operations/private-paper-runtime-scheduler.ts",
+      "sha256": "46311916b8d4df07c09183f7e8563bd69fae1d5330927e325a45e21e5f48be58"
+    },
+    {
+      "mode": 420,
+      "path": "packages/bootstrap/src/operations/private-paper-scheduler-service.ts",
+      "sha256": "876cd3d1b142d369b999f10a49e7a01e9b8469af14d84bbef64efdc6ae3bc967"
+    },
+    {
+      "mode": 420,
+      "path": "packages/bootstrap/src/operations/private-paper-worker-service.ts",
+      "sha256": "1527b3a36e20f2221793a612011b65edf34d0d190534b95f43136ab9ebe58d36"
+    },
+    {
+      "mode": 420,
+      "path": "packages/bootstrap/src/operations/upstream-api-convergence.ts",
+      "sha256": "4f066cc40d08e6ad4748866073c0a14683bd8b7066cb9f41c87f239e28ae5a63"
+    },
+    {
+      "mode": 420,
+      "path": "packages/bootstrap/src/operations/upstream-transport-constants.ts",
+      "sha256": "dd5591b1c0fd7d57aeeacba4c49d25d8bca77f6acfee324cc6441c87f0175c15"
+    },
+    {
+      "mode": 420,
+      "path": "packages/bootstrap/src/opportunity/b1-cross-venue-derivation.ts",
+      "sha256": "29866c6839497502a2f9371166dd3865026bc8bca7a8cc57dad12c5717ba2543"
+    },
+    {
+      "mode": 420,
+      "path": "packages/bootstrap/src/opportunity/b1-gross-spread.ts",
+      "sha256": "48ecd0e6402a23610f9582222e86e31c943948f31b6edf0896a66751edfddafb"
+    },
+    {
+      "mode": 420,
+      "path": "packages/bootstrap/src/opportunity/standard-binary-derivation.ts",
+      "sha256": "04059b7cd11e946fd8f997d215732e514b5d03cf9faaf9ba86bb42910f25d653"
+    },
+    {
+      "mode": 420,
+      "path": "packages/bootstrap/src/opportunity/standard-binary-stake-solver.ts",
+      "sha256": "a68d4ea89b2ec4a7d83d8e2ced929732522e0e4af5a36efaac4712e88255dc92"
+    },
+    {
+      "mode": 420,
+      "path": "packages/bootstrap/src/quotes/b1-capacity-model.ts",
+      "sha256": "6a98bd374fff19cd414d04fc3410ad944b234043733d8f258a383537e0a28617"
+    },
+    {
+      "mode": 420,
+      "path": "packages/bootstrap/src/quotes/b1-quote-synchronization.ts",
+      "sha256": "4746d1bd364a7389a95b4aa912e66f66041c44fc51083dcd02a12e9ad1fa9bde"
+    },
+    {
+      "mode": 484,
+      "path": "packages/bootstrap/src/quotes/quote-freshness.ts",
+      "sha256": "38a0042d488084145e2438fe30d9e5b0ed665733af97b561587ca78d5bb9718f"
+    },
+    {
+      "mode": 420,
+      "path": "packages/bootstrap/src/runtime/private-paper-runtime.ts",
+      "sha256": "252e38a52693f3fa598c9ea92a83b184de0c4b29c4ab0bd5c952b750d009c6f5"
+    },
+    {
+      "mode": 420,
+      "path": "packages/bootstrap/src/scenarios/b1-scenario-cashflow.ts",
+      "sha256": "f48a4d0f697fcc2d9d48328ef665689807f3f97d6c74fbcba67b01520293a580"
+    },
+    {
+      "mode": 420,
+      "path": "packages/bootstrap/src/scenarios/b1-terminal-scenario.ts",
+      "sha256": "4f3ee12a400f4a034a177043213f785df2c6a60f33f8cdd85a84be652401b47c"
+    },
+    {
+      "mode": 420,
+      "path": "packages/bootstrap/src/scenarios/complete-set.ts",
+      "sha256": "bdea2ee4db048e553d69f379ab4599c28bae68e372b2821bacb2a64611c98bac"
+    },
+    {
+      "mode": 420,
+      "path": "packages/bootstrap/src/scenarios/scenario-cashflow.ts",
+      "sha256": "11c1608a8d1cb5341f6125b9a30af4afd7c22aac64e228545636446b38476228"
+    },
+    {
+      "mode": 420,
+      "path": "packages/bootstrap/src/solver/b1-generalized-stake-vector.ts",
+      "sha256": "822a6ca6802ffb6fbfd52145679b2575536701d4c936a16ab06ab7d70123d1a0"
+    },
+    {
+      "mode": 420,
+      "path": "packages/bootstrap/src/solver/b1-rounding.ts",
+      "sha256": "32275d20e5de782278e33df95e94e207bee5b662a3fd23fb695ab98bed0ac281"
+    },
+    {
+      "mode": 420,
+      "path": "packages/bootstrap/src/solver/stake-vector.ts",
+      "sha256": "d5022b515bbac8672ed337933887276d590424c89b75c3e5acd290f3a5561029"
+    },
+    {
+      "mode": 420,
+      "path": "packages/bootstrap/src/strategy/strategy-ledger.ts",
+      "sha256": "d05e339a5692a9218f2146c153570ee7d9c8d79ae88282e162b7ece0c0cb5dbc"
+    },
+    {
+      "mode": 420,
+      "path": "packages/bootstrap/src/workers/b1-private-observation-jobs.ts",
+      "sha256": "ee293ef0e7a3edeef6ef6729c987f477f049523ccd3d0b150b874796e032a5cc"
+    },
+    {
+      "mode": 420,
+      "path": "packages/bootstrap/src/workers/bounded-job-worker.ts",
+      "sha256": "3f319fc5ad09636121698b36817f1762c4431dffb775535a2d62e3289b111dd7"
+    },
+    {
+      "mode": 484,
+      "path": "packages/bootstrap/src/workers/private-paper-runtime-jobs.ts",
+      "sha256": "cbf9794410c3c374c7cd22844c5fd1c5fc4e51c7322856b921753479f4b0ca5c"
+    },
+    {
+      "mode": 420,
+      "path": "packages/persistence/src/config.ts",
+      "sha256": "03cc5a97ec98091f4a47b9f2ac65682ad298b03617185884e75fea0999ecd4cb"
+    },
+    {
+      "mode": 420,
+      "path": "packages/persistence/src/migrations.ts",
+      "sha256": "2ae8d8e9d9cdb6c08003371083c2065dd803ad5d82258f5be3166a17da01f57b"
+    },
+    {
+      "mode": 420,
+      "path": "packages/persistence/src/psql.ts",
+      "sha256": "86053cd5690b15a2ba6ea210e3073c3324017d12fb36ec1fe815c84edab50343"
+    },
+    {
+      "mode": 484,
+      "path": "packages/persistence/src/repositories/b1-backtest-run-repository.ts",
+      "sha256": "fca39b72d06d2685cf82445e95d033830af1eea4b60d9896b8bce69d1d53ec04"
+    },
+    {
+      "mode": 420,
+      "path": "packages/persistence/src/repositories/b1-private-observation-repository.ts",
+      "sha256": "a057be720b8d7794b5d3a29cac35879ea555a65f2238e085b98fb7ea730f9941"
+    },
+    {
+      "mode": 420,
+      "path": "packages/persistence/src/repositories/b1-upstream-convergence-repository.ts",
+      "sha256": "468cde29f264349925fe65e33d5b7e05fb34390877bb0f2503345154160d6884"
+    },
+    {
+      "mode": 420,
+      "path": "packages/persistence/src/repositories/import-run-repository.ts",
+      "sha256": "9bb1a79b2b27ea6cd3eaaf38cb22bb20148615a2400ff929b834ad2dbd08e00b"
+    },
+    {
+      "mode": 420,
+      "path": "packages/persistence/src/repositories/private-paper-runtime-scheduler-checkpoint-repository.ts",
+      "sha256": "fd997e6c563e93a0055066ae7ffc64173402495429983e0574b6e929aa743489"
+    },
+    {
+      "mode": 420,
+      "path": "packages/persistence/src/repositories/strategy-ledger-repository.ts",
+      "sha256": "a3874447d9cf6334eafd4eaf1e7a45c3cd95b48fe865fcc68ba1f5583ca32528"
+    },
+    {
+      "mode": 420,
+      "path": "packages/persistence/src/repositories/upstream-api-convergence-repository.ts",
+      "sha256": "298c9e2b2d874f5e11e7278893f00acaaaf16b48a47fde0cab41c33e59017ba0"
+    },
+    {
+      "mode": 420,
+      "path": "packages/persistence/src/repositories/upstream-export-convergence-repository.ts",
+      "sha256": "dbfac37a5aac9e6139532312a0635f25f655c8739782e186f72bc6717bd79600"
+    },
+    {
+      "mode": 420,
+      "path": "packages/persistence/src/repositories/upstream-lock-repository.ts",
+      "sha256": "c77663c55b41255a4c1f455012d5427b55f8a5cf1c733e7b800cc334f407a8bc"
+    },
+    {
+      "mode": 420,
+      "path": "packages/persistence/src/repositories/worker-job-repository.ts",
+      "sha256": "263481bca4ae76ceda0e134e7b1d707f17b9de89679c5e0a51f0f5e10431b57e"
+    },
+    {
+      "mode": 484,
+      "path": "packages/upstream/src/upstream/betting-win-upstream-lock.ts",
+      "sha256": "8c0badbfc3dc776eb71e01e1a76280debab30c64739274b06d1ce7343382a6c2"
+    },
+    {
+      "mode": 484,
+      "path": "tests/b1-persistence.test.ts",
+      "sha256": "c51b6a753d32397ac0b20e0e4040bf035bf759dda505175a6155d848fcf8caf9"
+    },
+    {
+      "mode": 420,
+      "path": "tests/bounded-worker-jobs.test.ts",
+      "sha256": "59aa7be3ad2725cdbb8aad00e205dd3ab758b9ace08dd605d337943b0a079e2d"
+    },
+    {
+      "mode": 420,
+      "path": "tests/bws-private-paper-scheduler-service.test.ts",
+      "sha256": "63c1067cb56985ebc2eb41392dae471d3885e4c58d4e91a3ad643991f348d96a"
+    },
+    {
+      "mode": 420,
+      "path": "tests/bws-private-paper-worker-service.test.ts",
+      "sha256": "1a25191b979481a30d998bda9d5f2b3f8579114d72d80ee26464f09a65284175"
+    },
+    {
+      "mode": 420,
+      "path": "tests/bws-upstream-api-convergence.test.ts",
+      "sha256": "3852ccb8defc6625a76297c0e3f7e4786e3d86009e9e045d8f88ea24ebe7318b"
+    },
+    {
+      "mode": 420,
+      "path": "tests/private-paper-runtime.test.ts",
+      "sha256": "93edf430d20eb63a5e60cd743f5a7fcc4964b31940a4164b3810849b9be5662d"
+    },
+    {
+      "mode": 484,
+      "path": "tests/surebet-persistence.test.ts",
+      "sha256": "76ad61f52a0cefd1885dc8413197378cc85e2c041540b3568b9afaed03b11310"
+    }
+  ],
+  "source_manifest_status": "KNOWN_STALE_SEVEN_PATHS_BEFORE_OVERLAY; overlay leaves SOURCE_MANIFEST.json unchanged",
+  "source_reference_count": 155,
+  "source_reference_hash_mismatches": [],
+  "source_reference_missing": []
+}

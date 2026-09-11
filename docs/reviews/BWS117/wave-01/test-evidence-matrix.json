@@ -1,0 +1,2108 @@
+{
+  "records": [
+    {
+      "category": "identity_or_determinism",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R01-001-TEST-01",
+      "issue_ids": [
+        "BWS116-R01-001"
+      ],
+      "production_entrypoint_required": true,
+      "source_area": "R01",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Production-entrypoint test with a disposable repository containing a replacement commit and replacement blob; lock generation must reject or produce the literal original graph."
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R01-001-TEST-02",
+      "issue_ids": [
+        "BWS116-R01-001"
+      ],
+      "production_entrypoint_required": true,
+      "source_area": "R01",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Control test proving ordinary committed HEAD, worktree, and bare-repository forms remain accepted as intended."
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R01-002-TEST-01",
+      "issue_ids": [
+        "BWS116-R01-002"
+      ],
+      "production_entrypoint_required": true,
+      "source_area": "R01",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Instrumented disposable-repository test that advances the branch between each Git subprocess and proves either stable old/new lock output or fail-closed behavior, never a mixed record."
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R01-002-TEST-02",
+      "issue_ids": [
+        "BWS116-R01-002"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R01",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Test uncommitted and untracked changes remain excluded without reading mutable worktree files."
+    },
+    {
+      "category": "upstream_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R01-003-TEST-01",
+      "issue_ids": [
+        "BWS116-R01-003"
+      ],
+      "production_entrypoint_required": true,
+      "source_area": "R01",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Production-path test where the fake external API changes after convergence; downstream must consume the first immutable cycle or explicitly start a second cycle."
+    },
+    {
+      "category": "restart_or_recovery",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R01-003-TEST-02",
+      "issue_ids": [
+        "BWS116-R01-003"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R01",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Crash/restart test proving cycle identity and exact page set survive process restart."
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R01-003-TEST-03",
+      "issue_ids": [
+        "BWS116-R01-003"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R01",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Correction/deletion test proving no record can disappear between convergence proof and consumption."
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R01-004-TEST-01",
+      "issue_ids": [
+        "BWS116-R01-004"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R01",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Two bodies with identical required fields but different extra bytes must produce distinct receipts."
+    },
+    {
+      "category": "upstream_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R01-004-TEST-02",
+      "issue_ids": [
+        "BWS116-R01-004"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R01",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Route/query/profile/generation/page substitutions must fail convergence even when record arrays match."
+    },
+    {
+      "category": "restart_or_recovery",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R01-004-TEST-03",
+      "issue_ids": [
+        "BWS116-R01-004"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R01",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Restart must preserve and revalidate the ordered page receipt chain."
+    },
+    {
+      "category": "upstream_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R01-005-TEST-01",
+      "issue_ids": [
+        "BWS116-R01-005"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R01",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Page-2 contract/profile/generation/commit/resource drift cases must fail without advancing the durable cursor."
+    },
+    {
+      "category": "restart_or_recovery",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R01-005-TEST-02",
+      "issue_ids": [
+        "BWS116-R01-005"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R01",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Reordered and replayed pages must converge deterministically only when the ordered receipt chain is identical."
+    },
+    {
+      "category": "upstream_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R01-006-TEST-01",
+      "issue_ids": [
+        "BWS116-R01-006"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R01",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Repeated cursor and two-node cursor cycle"
+    },
+    {
+      "category": "upstream_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R01-006-TEST-02",
+      "issue_ids": [
+        "BWS116-R01-006"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R01",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Empty page with nonterminal cursor"
+    },
+    {
+      "category": "cancellation_or_timeout",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R01-006-TEST-03",
+      "issue_ids": [
+        "BWS116-R01-006"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R01",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Unique cursor stream beyond page/record/byte/deadline budgets"
+    },
+    {
+      "category": "restart_or_recovery",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R01-006-TEST-04",
+      "issue_ids": [
+        "BWS116-R01-006"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R01",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Restart after bounded failure"
+    },
+    {
+      "category": "cancellation_or_timeout",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R01-007-TEST-01",
+      "issue_ids": [
+        "BWS116-R01-007"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R01",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Late fetch resolution after abort"
+    },
+    {
+      "category": "upstream_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R01-007-TEST-02",
+      "issue_ids": [
+        "BWS116-R01-007"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R01",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Multi-page worst-case retry budget"
+    },
+    {
+      "category": "cancellation_or_timeout",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R01-007-TEST-03",
+      "issue_ids": [
+        "BWS116-R01-007"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R01",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Cancellation between parse and persistence"
+    },
+    {
+      "category": "cancellation_or_timeout",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R01-007-TEST-04",
+      "issue_ids": [
+        "BWS116-R01-007"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R01",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "No duplicate cycle effects after caller timeout"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R01-008-TEST-01",
+      "issue_ids": [
+        "BWS116-R01-008"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R01",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Chunked body that crosses limit"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R01-008-TEST-02",
+      "issue_ids": [
+        "BWS116-R01-008"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R01",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Incorrect/missing Content-Length"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R01-008-TEST-03",
+      "issue_ids": [
+        "BWS116-R01-008"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R01",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Compressed expansion beyond limit"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R01-008-TEST-04",
+      "issue_ids": [
+        "BWS116-R01-008"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R01",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Abort cleanup and no partial persistence"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R01-009-TEST-01",
+      "issue_ids": [
+        "BWS116-R01-009"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R01",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "IPv6 loopback"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R01-009-TEST-02",
+      "issue_ids": [
+        "BWS116-R01-009"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R01",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "IPv4-mapped IPv6 loopback"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R01-009-TEST-03",
+      "issue_ids": [
+        "BWS116-R01-009"
+      ],
+      "production_entrypoint_required": true,
+      "source_area": "R01",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "integer/legacy IPv4 forms accepted by runtime"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R01-009-TEST-04",
+      "issue_ids": [
+        "BWS116-R01-009"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R01",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "DNS to loopback/private"
+    },
+    {
+      "category": "upstream_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R01-009-TEST-05",
+      "issue_ids": [
+        "BWS116-R01-009"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R01",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "redirect to local target"
+    },
+    {
+      "category": "upstream_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R01-009-TEST-06",
+      "issue_ids": [
+        "BWS116-R01-009"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R01",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "userinfo and credential-bearing URL"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R01-010-TEST-01",
+      "issue_ids": [
+        "BWS116-R01-010"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R01",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Fresh receive + stale source"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R01-010-TEST-02",
+      "issue_ids": [
+        "BWS116-R01-010"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R01",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Future source time"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R01-010-TEST-03",
+      "issue_ids": [
+        "BWS116-R01-010"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R01",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Missing source time"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R01-010-TEST-04",
+      "issue_ids": [
+        "BWS116-R01-010"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R01",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Boundary skew"
+    },
+    {
+      "category": "restart_or_recovery",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R01-010-TEST-05",
+      "issue_ids": [
+        "BWS116-R01-010"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R01",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Restart/consumption after evidence expiry"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-001-TEST-01",
+      "issue_ids": [
+        "BWS116-R02-001"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Two-way home/home, away/away, yes/yes, no/no, over/over, under/under rejection tests."
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-001-TEST-02",
+      "issue_ids": [
+        "BWS116-R02-001"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Three-way duplicate-side and missing-draw tests."
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-001-TEST-03",
+      "issue_ids": [
+        "BWS116-R02-001"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Permutation/property tests proving exactly one terminal winner per valid market shape."
+    },
+    {
+      "category": "identity_or_determinism",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-002-TEST-01",
+      "issue_ids": [
+        "BWS116-R02-002"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Mixed-provider and mixed-generation rejection tests."
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-002-TEST-02",
+      "issue_ids": [
+        "BWS116-R02-002"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Same venue ID under different providers collision tests."
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-002-TEST-03",
+      "issue_ids": [
+        "BWS116-R02-002"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Selected quote evidence retention tests."
+    },
+    {
+      "category": "identity_or_determinism",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-002-TEST-04",
+      "issue_ids": [
+        "BWS116-R02-002"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Permutation tests across generation partitions."
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-003-TEST-01",
+      "issue_ids": [
+        "BWS116-R02-003"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Two- and three-way cross-outcome skew tests."
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-003-TEST-02",
+      "issue_ids": [
+        "BWS116-R02-003"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Boundary tests at window-1, window, and window+1."
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-003-TEST-03",
+      "issue_ids": [
+        "BWS116-R02-003"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Permutation tests proving identical global span and decision."
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-004-TEST-01",
+      "issue_ids": [
+        "BWS116-R02-004"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Detached-odds mutation rejection."
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-004-TEST-02",
+      "issue_ids": [
+        "BWS116-R02-004"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "OutcomeName/outcomeSide mutation rejection."
+    },
+    {
+      "category": "identity_or_determinism",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-004-TEST-03",
+      "issue_ids": [
+        "BWS116-R02-004"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Provider-generation/evidence/time mutation rejection."
+    },
+    {
+      "category": "mathematics_or_property",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-004-TEST-04",
+      "issue_ids": [
+        "BWS116-R02-004"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Exact derivation-to-net round-trip tests."
+    },
+    {
+      "category": "mathematics_or_property",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-005-TEST-01",
+      "issue_ids": [
+        "BWS116-R02-005"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "End-to-end quote-depth-to-solver constraint tests."
+    },
+    {
+      "category": "mathematics_or_property",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-005-TEST-02",
+      "issue_ids": [
+        "BWS116-R02-005"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Stake above quote, venue, market, and portfolio cap rejection tests."
+    },
+    {
+      "category": "mathematics_or_property",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-005-TEST-03",
+      "issue_ids": [
+        "BWS116-R02-005"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Missing capacity/proxy and missing venue-limit tests."
+    },
+    {
+      "category": "mathematics_or_property",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-005-TEST-04",
+      "issue_ids": [
+        "BWS116-R02-005"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Capacity changes after selection must invalidate the candidate."
+    },
+    {
+      "category": "mathematics_or_property",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-006-TEST-01",
+      "issue_ids": [
+        "BWS116-R02-006"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Brute-force oracle comparison over small domains for 2-way and 3-way cases."
+    },
+    {
+      "category": "mathematics_or_property",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-006-TEST-02",
+      "issue_ids": [
+        "BWS116-R02-006"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Unequal payout feasibility cases."
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-006-TEST-03",
+      "issue_ids": [
+        "BWS116-R02-006"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Positive target-net, one-unit residual, tight cap, and non-unit step cases."
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-006-TEST-04",
+      "issue_ids": [
+        "BWS116-R02-006"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Metamorphic scaling and permutation tests."
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-006-TEST-05",
+      "issue_ids": [
+        "BWS116-R02-006"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Proof that returned vectors satisfy all constraints."
+    },
+    {
+      "category": "identity_or_determinism",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-007-TEST-01",
+      "issue_ids": [
+        "BWS116-R02-007"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Delimiter injection for every key constructor."
+    },
+    {
+      "category": "mathematics_or_property",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-007-TEST-02",
+      "issue_ids": [
+        "BWS116-R02-007"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Round-trip/injectivity property tests over Unicode and control characters."
+    },
+    {
+      "category": "mathematics_or_property",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-007-TEST-03",
+      "issue_ids": [
+        "BWS116-R02-007"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Cross-module consistency tests for candidate, constraint, fee, and scenario keys."
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-008-TEST-01",
+      "issue_ids": [
+        "BWS116-R02-008"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Equivalent textual forms tests."
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-008-TEST-02",
+      "issue_ids": [
+        "BWS116-R02-008"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Negative-zero normalization."
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-008-TEST-03",
+      "issue_ids": [
+        "BWS116-R02-008"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Scale/precision overflow and unsupported precision tests."
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-008-TEST-04",
+      "issue_ids": [
+        "BWS116-R02-008"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Spread sign/viewpoint inversion tests."
+    },
+    {
+      "category": "identity_or_determinism",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-009-TEST-01",
+      "issue_ids": [
+        "BWS116-R02-009"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Mixed-manifest rejection."
+    },
+    {
+      "category": "identity_or_determinism",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-009-TEST-02",
+      "issue_ids": [
+        "BWS116-R02-009"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Missing/unknown manifest rejection."
+    },
+    {
+      "category": "mathematics_or_property",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-009-TEST-03",
+      "issue_ids": [
+        "BWS116-R02-009"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Single-manifest round trip."
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-009-TEST-04",
+      "issue_ids": [
+        "BWS116-R02-009"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Explicit synchronization receipt path only if separately authorized."
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-010-TEST-01",
+      "issue_ids": [
+        "BWS116-R02-010"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Pair-skew boundary tests."
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-010-TEST-02",
+      "issue_ids": [
+        "BWS116-R02-010"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Individually fresh but mutually stale rejection."
+    },
+    {
+      "category": "identity_or_determinism",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-010-TEST-03",
+      "issue_ids": [
+        "BWS116-R02-010"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Same manifest with divergent timestamps."
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-010-TEST-04",
+      "issue_ids": [
+        "BWS116-R02-010"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Permutation invariance."
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-011-TEST-01",
+      "issue_ids": [
+        "BWS116-R02-011"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "min != step cases."
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-011-TEST-02",
+      "issue_ids": [
+        "BWS116-R02-011"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "min not divisible by step cases."
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-011-TEST-03",
+      "issue_ids": [
+        "BWS116-R02-011"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "step greater/less than min."
+    },
+    {
+      "category": "mathematics_or_property",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-011-TEST-04",
+      "issue_ids": [
+        "BWS116-R02-011"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Capacity boundary after rounding."
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-011-TEST-05",
+      "issue_ids": [
+        "BWS116-R02-011"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Missing increment fail-closed test."
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-012-TEST-01",
+      "issue_ids": [
+        "BWS116-R02-012"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "One-leg/two-scenario rejection."
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-012-TEST-02",
+      "issue_ids": [
+        "BWS116-R02-012"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Duplicate cell and missing cell tests."
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-012-TEST-03",
+      "issue_ids": [
+        "BWS116-R02-012"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Extra leg/scenario rejection."
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-012-TEST-04",
+      "issue_ids": [
+        "BWS116-R02-012"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Permutation and rectangularity property tests."
+    },
+    {
+      "category": "identity_or_determinism",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-013-TEST-01",
+      "issue_ids": [
+        "BWS116-R02-013"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Cross-locale golden tests."
+    },
+    {
+      "category": "identity_or_determinism",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-013-TEST-02",
+      "issue_ids": [
+        "BWS116-R02-013"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Unicode normalization and code-unit ordering property tests."
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-013-TEST-03",
+      "issue_ids": [
+        "BWS116-R02-013"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Input permutation determinism tests."
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-013-TEST-04",
+      "issue_ids": [
+        "BWS116-R02-013"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Stable serialized artifact hash tests."
+    },
+    {
+      "category": "mathematics_or_property",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-014-TEST-01",
+      "issue_ids": [
+        "BWS116-R02-014"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Stake, payout, profit, liability, maker/taker, fixed, minimum, maximum, and conditional fee cases."
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-014-TEST-02",
+      "issue_ids": [
+        "BWS116-R02-014"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Scenario-only charge tests."
+    },
+    {
+      "category": "mathematics_or_property",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-014-TEST-03",
+      "issue_ids": [
+        "BWS116-R02-014"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Unknown fee basis must block."
+    },
+    {
+      "category": "mathematics_or_property",
+      "environment": "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE",
+      "id": "BWS116-R02-014-TEST-04",
+      "issue_ids": [
+        "BWS116-R02-014"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R02",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Independent cash-flow oracle tests."
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-001-TEST-01",
+      "issue_ids": [
+        "BWS116-R03-001"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Absolute-path and ../ traversal rejection"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-001-TEST-02",
+      "issue_ids": [
+        "BWS116-R03-001"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Symlink escape rejection"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-001-TEST-03",
+      "issue_ids": [
+        "BWS116-R03-001"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "CREATE FUNCTION/PROCEDURE/TRIGGER/TYPE/EXTENSION and GRANT/REVOKE rejection"
+    },
+    {
+      "category": "persistence_or_migration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-001-TEST-04",
+      "issue_ids": [
+        "BWS116-R03-001"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "DO and dynamic SQL rejection"
+    },
+    {
+      "category": "persistence_or_migration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-001-TEST-05",
+      "issue_ids": [
+        "BWS116-R03-001"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Disposable PostgreSQL proof that the migration role cannot write outside surebet.*"
+    },
+    {
+      "category": "persistence_or_migration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-002-TEST-01",
+      "issue_ids": [
+        "BWS116-R03-002"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Status against an empty disposable database leaves schema/table counts unchanged"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-002-TEST-02",
+      "issue_ids": [
+        "BWS116-R03-002"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Status under a read-only role reports absence rather than failing or mutating"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-002-TEST-03",
+      "issue_ids": [
+        "BWS116-R03-002"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Repeated status is observationally idempotent"
+    },
+    {
+      "category": "persistence_or_migration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-003-TEST-01",
+      "issue_ids": [
+        "BWS116-R03-003"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Ledger with one unknown applied migration is incompatible"
+    },
+    {
+      "category": "persistence_or_migration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-003-TEST-02",
+      "issue_ids": [
+        "BWS116-R03-003"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Renamed migration and same-SQL/different-name cases"
+    },
+    {
+      "category": "persistence_or_migration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-003-TEST-03",
+      "issue_ids": [
+        "BWS116-R03-003"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Older binary against newer schema"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-003-TEST-04",
+      "issue_ids": [
+        "BWS116-R03-003"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Exact known set remains compatible"
+    },
+    {
+      "category": "concurrency_or_fencing",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-004-TEST-01",
+      "issue_ids": [
+        "BWS116-R03-004"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Two concurrent migrators against a disposable database"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-004-TEST-02",
+      "issue_ids": [
+        "BWS116-R03-004"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Second migrator waits and returns skipped rather than failing"
+    },
+    {
+      "category": "restart_or_recovery",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-004-TEST-03",
+      "issue_ids": [
+        "BWS116-R03-004"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Crash while holding the lock and subsequent recovery"
+    },
+    {
+      "category": "persistence_or_migration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-005-TEST-01",
+      "issue_ids": [
+        "BWS116-R03-005"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Sleeping fake psql is terminated at the configured budget"
+    },
+    {
+      "category": "cancellation_or_timeout",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-005-TEST-02",
+      "issue_ids": [
+        "BWS116-R03-005"
+      ],
+      "production_entrypoint_required": true,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Blocked database query does not prevent service shutdown indefinitely"
+    },
+    {
+      "category": "persistence_or_migration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-005-TEST-03",
+      "issue_ids": [
+        "BWS116-R03-005"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Timeout is distinct from SQL failure and authentication failure"
+    },
+    {
+      "category": "concurrency_or_fencing",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-006-TEST-01",
+      "issue_ids": [
+        "BWS116-R03-006"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Concurrent equal creates converge to one success result"
+    },
+    {
+      "category": "concurrency_or_fencing",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-006-TEST-02",
+      "issue_ids": [
+        "BWS116-R03-006"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Concurrent different creates return the typed conflict"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-006-TEST-03",
+      "issue_ids": [
+        "BWS116-R03-006"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Unique secondary identities such as fingerprint/report hash are classified deterministically"
+    },
+    {
+      "category": "restart_or_recovery",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-006-TEST-04",
+      "issue_ids": [
+        "BWS116-R03-006"
+      ],
+      "production_entrypoint_required": true,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Scheduler/job restart uses the production repository, not an in-memory fake"
+    },
+    {
+      "category": "concurrency_or_fencing",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-007-TEST-01",
+      "issue_ids": [
+        "BWS116-R03-007"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Two concurrent import finalizers with equal and conflicting outcomes"
+    },
+    {
+      "category": "upstream_integration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-007-TEST-02",
+      "issue_ids": [
+        "BWS116-R03-007"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Two API/export cursor advances from one expected cursor"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-007-TEST-03",
+      "issue_ids": [
+        "BWS116-R03-007"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Two scheduler instances advancing one checkpoint"
+    },
+    {
+      "category": "concurrency_or_fencing",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-007-TEST-04",
+      "issue_ids": [
+        "BWS116-R03-007"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Concurrent B1 complete versus block"
+    },
+    {
+      "category": "concurrency_or_fencing",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-008-TEST-01",
+      "issue_ids": [
+        "BWS116-R03-008"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Old worker completion after new claim"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-008-TEST-02",
+      "issue_ids": [
+        "BWS116-R03-008"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Heartbeat racing retry and replacement claim"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-008-TEST-03",
+      "issue_ids": [
+        "BWS116-R03-008"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Checkpoint racing success/dead-letter"
+    },
+    {
+      "category": "concurrency_or_fencing",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-008-TEST-04",
+      "issue_ids": [
+        "BWS116-R03-008"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Completion versus retry race"
+    },
+    {
+      "category": "concurrency_or_fencing",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-008-TEST-05",
+      "issue_ids": [
+        "BWS116-R03-008"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Exactly-once release of lease fields"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-009-TEST-01",
+      "issue_ids": [
+        "BWS116-R03-009"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Future-skew claim cannot claim not-yet-available work"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-009-TEST-02",
+      "issue_ids": [
+        "BWS116-R03-009"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Past-skew completion after real expiry is rejected"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-009-TEST-03",
+      "issue_ids": [
+        "BWS116-R03-009"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Exact expiry instant has one result"
+    },
+    {
+      "category": "concurrency_or_fencing",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-009-TEST-04",
+      "issue_ids": [
+        "BWS116-R03-009"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Heartbeat cannot regress last_heartbeat_at or lease_expires_at"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-010-TEST-01",
+      "issue_ids": [
+        "BWS116-R03-010"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Expired first attempt with remaining retries moves to retry_wait"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-010-TEST-02",
+      "issue_ids": [
+        "BWS116-R03-010"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Expired final attempt dead-letters"
+    },
+    {
+      "category": "concurrency_or_fencing",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-010-TEST-03",
+      "issue_ids": [
+        "BWS116-R03-010"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Concurrent reapers transition once"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-010-TEST-04",
+      "issue_ids": [
+        "BWS116-R03-010"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Unknown-side-effect policy remains fail-closed"
+    },
+    {
+      "category": "concurrency_or_fencing",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-010-TEST-05",
+      "issue_ids": [
+        "BWS116-R03-010"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Recovered job cannot be finalized by stale worker"
+    },
+    {
+      "category": "concurrency_or_fencing",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-011-TEST-01",
+      "issue_ids": [
+        "BWS116-R03-011"
+      ],
+      "production_entrypoint_required": true,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Never-settling worker handler exits service within timeout"
+    },
+    {
+      "category": "concurrency_or_fencing",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-011-TEST-02",
+      "issue_ids": [
+        "BWS116-R03-011"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "SIGTERM during handler stops lease renewal and prevents new durable writes"
+    },
+    {
+      "category": "cancellation_or_timeout",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-011-TEST-03",
+      "issue_ids": [
+        "BWS116-R03-011"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Late handler resolution cannot complete the job"
+    },
+    {
+      "category": "cancellation_or_timeout",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-011-TEST-04",
+      "issue_ids": [
+        "BWS116-R03-011"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Scheduler pass timeout returns without awaiting the pass"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-011-TEST-05",
+      "issue_ids": [
+        "BWS116-R03-011"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Timer/listener cleanup occurs exactly once"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-012-TEST-01",
+      "issue_ids": [
+        "BWS116-R03-012"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Large-cardinality query plans use indexes and fixed limits"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-012-TEST-02",
+      "issue_ids": [
+        "BWS116-R03-012"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Reaper handles at most batchSize and is repeatable"
+    },
+    {
+      "category": "concurrency_or_fencing",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-012-TEST-03",
+      "issue_ids": [
+        "BWS116-R03-012"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Stable keyset ordering under concurrent inserts"
+    },
+    {
+      "category": "persistence_or_migration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-012-TEST-04",
+      "issue_ids": [
+        "BWS116-R03-012"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "psql output remains below configured maximum"
+    },
+    {
+      "category": "upstream_integration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-013-TEST-01",
+      "issue_ids": [
+        "BWS116-R03-013"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "API-referenced import is excluded"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-013-TEST-02",
+      "issue_ids": [
+        "BWS116-R03-013"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Export-referenced import is excluded"
+    },
+    {
+      "category": "concurrency_or_fencing",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-013-TEST-03",
+      "issue_ids": [
+        "BWS116-R03-013"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Concurrent new reference between plan and apply is preserved"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-013-TEST-04",
+      "issue_ids": [
+        "BWS116-R03-013"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Plan/apply deletedCount and protectedCount reconcile"
+    },
+    {
+      "category": "persistence_or_migration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-014-TEST-01",
+      "issue_ids": [
+        "BWS116-R03-014"
+      ],
+      "production_entrypoint_required": true,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Crash after runtime result, after ledger insert, and after final checkpoint"
+    },
+    {
+      "category": "persistence_or_migration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-014-TEST-02",
+      "issue_ids": [
+        "BWS116-R03-014"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Equal retry returns the same ledger/result"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-014-TEST-03",
+      "issue_ids": [
+        "BWS116-R03-014"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Changed upstream bytes for same cycle are rejected"
+    },
+    {
+      "category": "persistence_or_migration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-014-TEST-04",
+      "issue_ids": [
+        "BWS116-R03-014"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Fresh process reconstructs previousState from PostgreSQL"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-015-TEST-01",
+      "issue_ids": [
+        "BWS116-R03-015"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Fault after parent insert"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-015-TEST-02",
+      "issue_ids": [
+        "BWS116-R03-015"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Fault after each candidate and simulation insert boundary"
+    },
+    {
+      "category": "restart_or_recovery",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-015-TEST-03",
+      "issue_ids": [
+        "BWS116-R03-015"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Replay repairs or rejects partial graph"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-015-TEST-04",
+      "issue_ids": [
+        "BWS116-R03-015"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Readers never expose incomplete run as complete"
+    },
+    {
+      "category": "concurrency_or_fencing",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-015-TEST-05",
+      "issue_ids": [
+        "BWS116-R03-015"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Concurrent equal creates converge"
+    },
+    {
+      "category": "restart_or_recovery",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-016-TEST-01",
+      "issue_ids": [
+        "BWS116-R03-016"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Crash after observation complete before job complete"
+    },
+    {
+      "category": "restart_or_recovery",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-016-TEST-02",
+      "issue_ids": [
+        "BWS116-R03-016"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Crash after observation block before job dead-letter"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-016-TEST-03",
+      "issue_ids": [
+        "BWS116-R03-016"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Retry converges without rerunning backtest"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-016-TEST-04",
+      "issue_ids": [
+        "BWS116-R03-016"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Conflicting retained terminal payload is rejected"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-017-TEST-01",
+      "issue_ids": [
+        "BWS116-R03-017"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Import requested/start/complete permutations"
+    },
+    {
+      "category": "concurrency_or_fencing",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-017-TEST-02",
+      "issue_ids": [
+        "BWS116-R03-017"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Worker claim/heartbeat/checkpoint/complete regression"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-017-TEST-03",
+      "issue_ids": [
+        "BWS116-R03-017"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "B1 cycle completion before start"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-017-TEST-04",
+      "issue_ids": [
+        "BWS116-R03-017"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Boundary equality cases"
+    },
+    {
+      "category": "persistence_or_migration",
+      "environment": "DISPOSABLE_POSTGRESQL_AND_NODE20",
+      "id": "BWS116-R03-017-TEST-05",
+      "issue_ids": [
+        "BWS116-R03-017"
+      ],
+      "production_entrypoint_required": false,
+      "source_area": "R03",
+      "status": "REQUIRED_NOT_RUN_BY_CONSOLIDATION",
+      "test_requirement": "Migration of any existing invalid rows is fail-closed and reported"
+    },
+    {
+      "category": "concurrency_or_fencing",
+      "environment": "AS_DECLARED_BY_OWNING_REVIEW",
+      "id": "BWS116-R01-TG-001",
+      "issue_ids": [
+        "BWS116-R01-001",
+        "BWS116-R01-002",
+        "BWS116-R01-003",
+        "BWS116-R01-004",
+        "BWS116-R01-005",
+        "BWS116-R01-006",
+        "BWS116-R01-007",
+        "BWS116-R01-008",
+        "BWS116-R01-009",
+        "BWS116-R01-010"
+      ],
+      "production_entrypoint_required": true,
+      "source_area": "R01",
+      "status": "CONFIRMED_TEST_GAP",
+      "test_requirement": "Focused tests do not adversarially exercise the full production entrypoint for identity drift and lifecycle races"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "AS_DECLARED_BY_OWNING_REVIEW",
+      "id": "BWS116-R02-TG-001",
+      "issue_ids": [],
+      "production_entrypoint_required": true,
+      "source_area": "R02",
+      "status": "CONFIRMED_TEST_GAP",
+      "test_requirement": "No outcome-semantic exclusivity/exhaustiveness property tests"
+    },
+    {
+      "category": "identity_or_determinism",
+      "environment": "AS_DECLARED_BY_OWNING_REVIEW",
+      "id": "BWS116-R02-TG-002",
+      "issue_ids": [],
+      "production_entrypoint_required": true,
+      "source_area": "R02",
+      "status": "CONFIRMED_TEST_GAP",
+      "test_requirement": "No provider/generation partition tests for B1 equivalence and quote selection"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "AS_DECLARED_BY_OWNING_REVIEW",
+      "id": "BWS116-R02-TG-003",
+      "issue_ids": [],
+      "production_entrypoint_required": true,
+      "source_area": "R02",
+      "status": "CONFIRMED_TEST_GAP",
+      "test_requirement": "No candidate-global quote synchronization tests"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "AS_DECLARED_BY_OWNING_REVIEW",
+      "id": "BWS116-R02-TG-004",
+      "issue_ids": [],
+      "production_entrypoint_required": true,
+      "source_area": "R02",
+      "status": "CONFIRMED_TEST_GAP",
+      "test_requirement": "No adversarial mutation test binds selected quote values to synchronized evidence"
+    },
+    {
+      "category": "mathematics_or_property",
+      "environment": "AS_DECLARED_BY_OWNING_REVIEW",
+      "id": "BWS116-R02-TG-005",
+      "issue_ids": [],
+      "production_entrypoint_required": true,
+      "source_area": "R02",
+      "status": "CONFIRMED_TEST_GAP",
+      "test_requirement": "Capacity primitives are unit-tested but not composed into the solver/net/backtest path"
+    },
+    {
+      "category": "mathematics_or_property",
+      "environment": "AS_DECLARED_BY_OWNING_REVIEW",
+      "id": "BWS116-R02-TG-006",
+      "issue_ids": [],
+      "production_entrypoint_required": true,
+      "source_area": "R02",
+      "status": "CONFIRMED_TEST_GAP",
+      "test_requirement": "No independent brute-force oracle for generalized solver completeness"
+    },
+    {
+      "category": "identity_or_determinism",
+      "environment": "AS_DECLARED_BY_OWNING_REVIEW",
+      "id": "BWS116-R02-TG-007",
+      "issue_ids": [],
+      "production_entrypoint_required": true,
+      "source_area": "R02",
+      "status": "CONFIRMED_TEST_GAP",
+      "test_requirement": "No delimiter injectivity, Unicode, or cross-locale determinism tests"
+    },
+    {
+      "category": "identity_or_determinism",
+      "environment": "AS_DECLARED_BY_OWNING_REVIEW",
+      "id": "BWS116-R02-TG-008",
+      "issue_ids": [],
+      "production_entrypoint_required": true,
+      "source_area": "R02",
+      "status": "CONFIRMED_TEST_GAP",
+      "test_requirement": "Standard lane lacks mixed-manifest, pair-skew, independent-increment, and malformed-matrix tests"
+    },
+    {
+      "category": "mathematics_or_property",
+      "environment": "AS_DECLARED_BY_OWNING_REVIEW",
+      "id": "BWS116-R02-TG-009",
+      "issue_ids": [],
+      "production_entrypoint_required": true,
+      "source_area": "R02",
+      "status": "CONFIRMED_TEST_GAP",
+      "test_requirement": "Fee tests mirror the only implemented stake-bps formula rather than independently covering fee-basis unions"
+    },
+    {
+      "category": "persistence_or_migration",
+      "environment": "AS_DECLARED_BY_OWNING_REVIEW",
+      "id": "BWS116-R03-TG-001",
+      "issue_ids": [],
+      "production_entrypoint_required": true,
+      "source_area": "R03",
+      "status": "CONFIRMED_TEST_GAP",
+      "test_requirement": "Migration tests do not exercise repository escape or unrecognized executable SQL"
+    },
+    {
+      "category": "persistence_or_migration",
+      "environment": "AS_DECLARED_BY_OWNING_REVIEW",
+      "id": "BWS116-R03-TG-002",
+      "issue_ids": [],
+      "production_entrypoint_required": true,
+      "source_area": "R03",
+      "status": "CONFIRMED_TEST_GAP",
+      "test_requirement": "PostgreSQL idempotency proof is sequential and skipped without explicit disposable configuration"
+    },
+    {
+      "category": "concurrency_or_fencing",
+      "environment": "AS_DECLARED_BY_OWNING_REVIEW",
+      "id": "BWS116-R03-TG-003",
+      "issue_ids": [],
+      "production_entrypoint_required": true,
+      "source_area": "R03",
+      "status": "CONFIRMED_TEST_GAP",
+      "test_requirement": "Worker tests do not model stale completion after lease transition or takeover"
+    },
+    {
+      "category": "restart_or_recovery",
+      "environment": "AS_DECLARED_BY_OWNING_REVIEW",
+      "id": "BWS116-R03-TG-004",
+      "issue_ids": [],
+      "production_entrypoint_required": true,
+      "source_area": "R03",
+      "status": "CONFIRMED_TEST_GAP",
+      "test_requirement": "Standard private-paper restart tests reuse in-memory previousState rather than reconstructing production durable state"
+    },
+    {
+      "category": "unit_or_integration",
+      "environment": "AS_DECLARED_BY_OWNING_REVIEW",
+      "id": "BWS116-R03-TG-005",
+      "issue_ids": [],
+      "production_entrypoint_required": true,
+      "source_area": "R03",
+      "status": "CONFIRMED_TEST_GAP",
+      "test_requirement": "B1 persistence tests do not inject failure between parent and child commits"
+    },
+    {
+      "category": "concurrency_or_fencing",
+      "environment": "AS_DECLARED_BY_OWNING_REVIEW",
+      "id": "BWS116-R03-TG-006",
+      "issue_ids": [],
+      "production_entrypoint_required": true,
+      "source_area": "R03",
+      "status": "CONFIRMED_TEST_GAP",
+      "test_requirement": "Service timeout and shutdown tests use promises that are eventually released"
+    }
+  ],
+  "schema": "betting-win-surebet-wave01-test-evidence-matrix-v1"
+}

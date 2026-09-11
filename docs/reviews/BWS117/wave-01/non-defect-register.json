@@ -1,0 +1,1813 @@
+{
+  "records": [
+    {
+      "canonical_id": "BWS116-R01-EUB-001",
+      "classification": "EXTERNAL_UPSTREAM_BLOCKER",
+      "confidence": "HIGH",
+      "consolidation_status": "CONFIRMED_CROSS_AREA",
+      "details": {
+        "blocks": {
+          "bws_600": false,
+          "bws_710": true,
+          "deployment": true,
+          "release": true,
+          "review_progression": false
+        },
+        "classification": "EXTERNAL_UPSTREAM_BLOCKER",
+        "confidence": "HIGH",
+        "current_behavior": "The repository correctly declares/validates B1 shapes but the required accepted external runtime resource is not established by the supplied archive.",
+        "current_file_path": "packages/bootstrap/src/operations/b1-runtime-evidence.ts",
+        "evidence": [
+          "Current status authority declares BWS710 blocked on an accepted betting-win B1 multi-venue API resource.",
+          "No external service was contacted, so current upstream availability cannot be established from this archive."
+        ],
+        "evidence_locations": [
+          {
+            "current_file_path": "packages/bootstrap/src/operations/b1-runtime-evidence.ts",
+            "exact_line_range": "L98-L229",
+            "full_file_sha256": "80ea2ca2a8b071dc1fdafc614594fac3d642b0416bcf6beec4c515cd707adbe8",
+            "symbol": "classifyB1OfflineAcceptanceAndKillCriteria"
+          }
+        ],
+        "exact_line_range": "L98-L229",
+        "existing_aliases_or_dependencies": [
+          "bws710_status=BLOCKED_ACCEPTED_BETTING_WIN_B1_MULTI_VENUE_API_REQUIRED"
+        ],
+        "expected_behavior": "An externally served resource matching the declared B1 contract, profile, currentness, provenance, and multi-venue requirements is present and accepted.",
+        "explicitly_unchanged_areas": [
+          "betting-win source",
+          "BWS execution remains parked"
+        ],
+        "full_file_sha256": "80ea2ca2a8b071dc1fdafc614594fac3d642b0416bcf6beec4c515cd707adbe8",
+        "id": "BWS116-R01-EUB-001",
+        "impact": "BWS-710 remains blocked; schema declarations and local fixtures cannot substitute for runtime resource acceptance.",
+        "minimal_fix_boundary": "No BWS source change is prescribed. Supply and independently accept the required betting-win runtime resource through the existing external boundary after R01 findings are fixed.",
+        "preconditions": "BWS-710 acceptance is requested.",
+        "primary_owner": "EXTERNAL_UPSTREAM",
+        "regression_risks": [
+          "Do not convert local fixtures, export bundles, or schema markers into accepted evidence."
+        ],
+        "reproduction_status": "ARCHIVE_AUTHORITY_ONLY; external verification prohibited",
+        "required_tests": [
+          "Acceptance test against an authorized immutable external-runtime capture/receipt when available."
+        ],
+        "root_cause": "Missing external upstream runtime evidence, not a BWS implementation defect by itself.",
+        "secondary_sectors": [
+          "R07 evidence publication",
+          "R11 validator truth"
+        ],
+        "severity": "P1",
+        "symbol": "classifyB1OfflineAcceptanceAndKillCriteria",
+        "title": "Accepted external betting-win B1 multi-venue runtime resource is absent from supplied BWS authority",
+        "trigger": "The preflight seeks an accepted live B1 multi-venue resource from betting-win."
+      },
+      "id": "BWS116-R01-EUB-001",
+      "primary_owner": "EXTERNAL_UPSTREAM",
+      "severity": "P1",
+      "source_area": "R01",
+      "title": "Accepted external betting-win B1 multi-venue runtime resource is absent from supplied BWS authority"
+    },
+    {
+      "canonical_id": "BWS116-R01-SG-001",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "confidence": "HIGH",
+      "consolidation_status": "OUT_OF_SCOPE",
+      "details": {
+        "blocks": {
+          "bws_600": false,
+          "bws_710": false,
+          "deployment": false,
+          "release": false,
+          "review_progression": false
+        },
+        "classification": "INTENTIONAL_SAFEGUARD",
+        "confidence": "HIGH",
+        "current_behavior": "The documented and validated policy explicitly preserves that hold; this review found no intended authority allowing those substitutes.",
+        "current_file_path": "docs/041_external_runtime_preflight_and_bws600_campaign.md",
+        "evidence": [
+          "Status, scope, and BWS-600 campaign documents maintain API-only external evidence requirements."
+        ],
+        "evidence_locations": [
+          {
+            "current_file_path": "docs/041_external_runtime_preflight_and_bws600_campaign.md",
+            "exact_line_range": "L1-L82",
+            "full_file_sha256": "2b660f97040f6893f0110172a0f3e5ebe0b6e25f64f0e8ea4daf8ab310242620",
+            "symbol": "041 - External runtime preflight and BWS-600 campaign"
+          }
+        ],
+        "exact_line_range": "L1-L82",
+        "existing_aliases_or_dependencies": [
+          "current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE"
+        ],
+        "expected_behavior": "The input remains historical/test-only and cannot satisfy external-runtime acceptance.",
+        "explicitly_unchanged_areas": [
+          "BWS-900 remains parked",
+          "No execution authorization"
+        ],
+        "full_file_sha256": "2b660f97040f6893f0110172a0f3e5ebe0b6e25f64f0e8ea4daf8ab310242620",
+        "id": "BWS116-R01-SG-001",
+        "impact": "Prevents local self-attestation and false campaign readiness.",
+        "minimal_fix_boundary": "Preserve while correcting the concrete R01 defects.",
+        "preconditions": "Current routing/status files remain authoritative.",
+        "primary_owner": "R01",
+        "regression_risks": [
+          "Generic URL/capability refactors must not erase source-type distinctions."
+        ],
+        "reproduction_status": "STATIC_POLICY_TRACE_CONFIRMED",
+        "required_tests": [
+          "Retain negative tests for local/fixture/export/mock/dashboard evidence."
+        ],
+        "root_cause": "Intentional fail-closed design.",
+        "secondary_sectors": [
+          "R07",
+          "R11",
+          "R12"
+        ],
+        "severity": "P3",
+        "symbol": "041 - External runtime preflight and BWS-600 campaign",
+        "title": "API-only and external-runtime holds are explicit in current routing authority",
+        "trigger": "An operator attempts to use a local BWS endpoint, fixture, export, mock, dashboard, or synthesized schedule as BWS-600 runtime evidence."
+      },
+      "id": "BWS116-R01-SG-001",
+      "primary_owner": "R01",
+      "severity": "P3",
+      "source_area": "R01",
+      "title": "API-only and external-runtime holds are explicit in current routing authority"
+    },
+    {
+      "canonical_id": "BWS116-R01-RS-001",
+      "classification": "REJECTED_SUSPICION",
+      "confidence": "HIGH",
+      "consolidation_status": "NOT_REPRODUCED",
+      "details": {
+        "blocks": {
+          "bws_600": false,
+          "bws_710": false,
+          "deployment": false,
+          "release": false,
+          "review_progression": false
+        },
+        "classification": "REJECTED_SUSPICION",
+        "confidence": "HIGH",
+        "current_behavior": "The intended authority keeps them distinct; no direct accepted route was confirmed from those readers into BWS-600 completion.",
+        "current_file_path": "packages/bootstrap/src/adapters/betting-win-pinned-bundle-intake.ts",
+        "evidence": [
+          "Separate adapters and convergence paths retain explicit source-mode distinctions in the reviewed archive."
+        ],
+        "evidence_locations": [
+          {
+            "current_file_path": "packages/bootstrap/src/adapters/betting-win-pinned-bundle-intake.ts",
+            "exact_line_range": "L36-L66",
+            "full_file_sha256": "d22fc6007f4d2980bab9419126ec00652dc5b27114e4347871bc66ff3abc5026",
+            "symbol": "validatePinnedBettingWinBundleIntake"
+          }
+        ],
+        "exact_line_range": "L36-L66",
+        "existing_aliases_or_dependencies": [],
+        "expected_behavior": "They remain replay/compatibility inputs and require separate external runtime evidence for BWS-600.",
+        "explicitly_unchanged_areas": [
+          "Historical replay/export support"
+        ],
+        "full_file_sha256": "d22fc6007f4d2980bab9419126ec00652dc5b27114e4347871bc66ff3abc5026",
+        "id": "BWS116-R01-RS-001",
+        "impact": "No finding assigned for this suspicion. The distinction must remain covered during fixes.",
+        "minimal_fix_boundary": "No change required for this record.",
+        "preconditions": "Historical/pinned input paths are invoked in their documented role.",
+        "primary_owner": "R01",
+        "regression_risks": [
+          "Future unification of convergence modes"
+        ],
+        "reproduction_status": "STATIC_NEGATIVE_TRACE",
+        "required_tests": [
+          "Keep end-to-end negative tests proving these paths cannot satisfy external runtime acceptance."
+        ],
+        "root_cause": "Suspicion rejected under current source; risk remains as regression surface.",
+        "secondary_sectors": [
+          "R11",
+          "R12"
+        ],
+        "severity": "P3",
+        "symbol": "validatePinnedBettingWinBundleIntake",
+        "title": "Pinned bundles and exports are not accepted as current BWS-600 runtime proof by intended authority",
+        "trigger": "A reviewer suspects their mere successful parsing satisfies external preflight."
+      },
+      "id": "BWS116-R01-RS-001",
+      "primary_owner": "R01",
+      "severity": "P3",
+      "source_area": "R01",
+      "title": "Pinned bundles and exports are not accepted as current BWS-600 runtime proof by intended authority"
+    },
+    {
+      "canonical_id": "BWS116-R01-HO-001",
+      "classification": "CROSS_AREA_HANDOFF",
+      "confidence": "HIGH",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "details": {
+        "blocks": {
+          "bws_600": true,
+          "bws_710": true,
+          "deployment": true,
+          "release": true,
+          "review_progression": false
+        },
+        "classification": "CROSS_AREA_HANDOFF",
+        "confidence": "HIGH",
+        "current_behavior": "The semantic correction is R01-owned, while generic transaction, lease, crash, and fencing behavior belongs to R03.",
+        "current_file_path": "packages/persistence/src/repositories/upstream-api-convergence-repository.ts",
+        "evidence": [
+          "Findings 003-005 cross the persistence-facing boundary."
+        ],
+        "evidence_locations": [
+          {
+            "current_file_path": "packages/persistence/src/repositories/upstream-api-convergence-repository.ts",
+            "exact_line_range": "L71-L238",
+            "full_file_sha256": "298c9e2b2d874f5e11e7278893f00acaaaf16b48a47fde0cab41c33e59017ba0",
+            "symbol": "SurebetUpstreamApiConvergenceRepository"
+          }
+        ],
+        "exact_line_range": "L71-L238",
+        "existing_aliases_or_dependencies": [
+          "BWS116-R01-003",
+          "BWS116-R01-004",
+          "BWS116-R01-005"
+        ],
+        "expected_behavior": "Record set, ordered receipt chain, cursor/checkpoint, and readiness transition commit atomically with lease/fencing semantics.",
+        "explicitly_unchanged_areas": [
+          "R02 economic logic"
+        ],
+        "full_file_sha256": "298c9e2b2d874f5e11e7278893f00acaaaf16b48a47fde0cab41c33e59017ba0",
+        "id": "BWS116-R01-HO-001",
+        "impact": "R01 fixes would remain incomplete if persistence can commit only part of the new cycle state.",
+        "minimal_fix_boundary": "R03 reviews/implements atomic storage mechanics after R01 defines the exact semantic receipt/cycle contract.",
+        "preconditions": "R01 introduces immutable cycle/page receipts and exact record ownership.",
+        "primary_owner": "R03",
+        "regression_risks": [
+          "Schema and migration compatibility"
+        ],
+        "reproduction_status": "HANDOFF_IDENTIFIED",
+        "required_tests": [
+          "Crash-before/after-commit, duplicate replay, stale lease, and conflicting cycle persistence."
+        ],
+        "root_cause": "Ownership boundary, not a duplicate R03 finding.",
+        "secondary_sectors": [
+          "R01",
+          "R07",
+          "R12"
+        ],
+        "severity": "P1",
+        "symbol": "SurebetUpstreamApiConvergenceRepository",
+        "title": "Atomic persistence and checkpoint fencing for immutable API cycles",
+        "trigger": "Those semantic objects are persisted, resumed, or promoted."
+      },
+      "id": "BWS116-R01-HO-001",
+      "primary_owner": "R03",
+      "severity": "P1",
+      "source_area": "R01",
+      "title": "Atomic persistence and checkpoint fencing for immutable API cycles"
+    },
+    {
+      "canonical_id": "BWS116-R01-TG-001",
+      "classification": "TEST_GAP",
+      "confidence": "HIGH",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "details": {
+        "blocks": {
+          "bws_600": true,
+          "bws_710": true,
+          "deployment": true,
+          "release": true,
+          "review_progression": false
+        },
+        "classification": "TEST_GAP",
+        "confidence": "HIGH",
+        "current_behavior": "Coverage is strong on declared shapes and intended holds but insufficient on the confirmed cross-step invariants. Marker/schema success can therefore coexist with the defects above.",
+        "current_file_path": "tests/bws-upstream-api-convergence.test.ts",
+        "evidence": [
+          "Static comparison of focused tests/validators against production branches identified unexercised adversarial paths listed in findings 001-010."
+        ],
+        "evidence_locations": [
+          {
+            "current_file_path": "tests/bws-upstream-api-convergence.test.ts",
+            "exact_line_range": "L52-L148",
+            "full_file_sha256": "3852ccb8defc6625a76297c0e3f7e4786e3d86009e9e045d8f88ea24ebe7318b",
+            "symbol": "test('upstream API convergence advances one deterministic page per pass and recovers checkpoint advancement from persisted import metadata', async () => {"
+          }
+        ],
+        "exact_line_range": "L52-L148",
+        "existing_aliases_or_dependencies": [
+          "BWS116-R01-001",
+          "BWS116-R01-002",
+          "BWS116-R01-003",
+          "BWS116-R01-004",
+          "BWS116-R01-005",
+          "BWS116-R01-006",
+          "BWS116-R01-007",
+          "BWS116-R01-008",
+          "BWS116-R01-009",
+          "BWS116-R01-010"
+        ],
+        "expected_behavior": "Tests invoke the production lock, client, convergence, preflight, repository-facing adapters, and CLI wiring with hostile exact-shape inputs.",
+        "explicitly_unchanged_areas": [
+          "No source/test implementation produced in this review"
+        ],
+        "full_file_sha256": "3852ccb8defc6625a76297c0e3f7e4786e3d86009e9e045d8f88ea24ebe7318b",
+        "id": "BWS116-R01-TG-001",
+        "impact": "Fixes can regress or validators can remain green without proving production-boundary truth.",
+        "minimal_fix_boundary": "R11 owns aggregate suite/validator integration; each R01 fix owns focused production-entrypoint regression tests.",
+        "preconditions": "Focused unit tests and validators are treated as evidence of boundary correctness.",
+        "primary_owner": "R11",
+        "regression_risks": [
+          "False greens from circular expected-value helpers",
+          "Over-mocked transport/persistence"
+        ],
+        "reproduction_status": "STATIC_TEST_TO_PRODUCTION_GAP_TRACE",
+        "required_tests": [
+          "All per-finding required tests",
+          "Validator negative controls that mutate one receipt/identity field at a time"
+        ],
+        "root_cause": "Tests assert local return values and accepted markers more often than immutable end-to-end state-machine properties.",
+        "secondary_sectors": [
+          "R01"
+        ],
+        "severity": "P2",
+        "symbol": "test('upstream API convergence advances one deterministic page per pass and recovers checkpoint advancement from persisted import metadata', async () => {",
+        "title": "Focused tests do not adversarially exercise the full production entrypoint for identity drift and lifecycle races",
+        "trigger": "The suite runs nominal/enriched fixtures without replacement refs, moving HEAD, page identity drift, repeated cursor cycles, late fetch completion, or stale-source/fresh-receive combinations through the real entrypoints."
+      },
+      "id": "BWS116-R01-TG-001",
+      "primary_owner": "R11",
+      "severity": "P2",
+      "source_area": "R01",
+      "title": "Focused tests do not adversarially exercise the full production entrypoint for identity drift and lifecycle races"
+    },
+    {
+      "canonical_id": "KNOWN_BASELINE_MANIFEST_DRIFT",
+      "classification": "CROSS_AREA_HANDOFF",
+      "confidence": "HIGH",
+      "consolidation_status": "CONFIRMED_DUPLICATE",
+      "details": {
+        "blocks": {
+          "bws_600": false,
+          "bws_710": false,
+          "deployment": false,
+          "release": false,
+          "review_progression": false
+        },
+        "classification": "CROSS_AREA_HANDOFF",
+        "confidence": "HIGH",
+        "current_behavior": "The ZIP is authoritative; the 617 non-self path set is retained, with known stale metadata for seven files.",
+        "current_file_path": "SOURCE_MANIFEST.json",
+        "evidence": [
+          "Known baseline qualification supplied by the review contract and independently checked against archive membership where parseable."
+        ],
+        "evidence_locations": [
+          {
+            "current_file_path": "SOURCE_MANIFEST.json",
+            "exact_line_range": "L1-L3092",
+            "full_file_sha256": "d9ea618c19fac733cf070c7e9b811ace8a1a0d637680b0b9f8233be5879aba6a",
+            "symbol": "{"
+          }
+        ],
+        "exact_line_range": "L1-L3092",
+        "existing_aliases_or_dependencies": [
+          "KNOWN_BASELINE_MANIFEST_DRIFT"
+        ],
+        "expected_behavior": "The known seven-file drift is recorded without creating an R01 finding unless it causes an independent upstream-trust defect.",
+        "explicitly_unchanged_areas": [
+          "ZIP source authority",
+          "All R01 findings"
+        ],
+        "full_file_sha256": "d9ea618c19fac733cf070c7e9b811ace8a1a0d637680b0b9f8233be5879aba6a",
+        "id": "BWS116-R01-HO-002",
+        "impact": "No R01 finding. Future R11 must correct aggregate manifest trust without changing R01 source conclusions.",
+        "minimal_fix_boundary": "R11 only; do not regenerate during this read-only review.",
+        "preconditions": "Archive/member integrity is evaluated.",
+        "primary_owner": "R11",
+        "regression_risks": [
+          "Accidental source mutation or baseline redefinition"
+        ],
+        "reproduction_status": "KNOWN_BASELINE_MANIFEST_DRIFT",
+        "required_tests": [
+          "Manifest self-exclusion and exact member hash/size reconciliation."
+        ],
+        "root_cause": "Aggregate source-manifest maintenance outside R01 ownership.",
+        "secondary_sectors": [
+          "R01 archive qualification"
+        ],
+        "severity": "P3",
+        "symbol": "{",
+        "title": "Known SOURCE_MANIFEST drift remains assigned to R11",
+        "trigger": "SOURCE_MANIFEST hashes/sizes are compared with ZIP members."
+      },
+      "id": "BWS116-R01-HO-002",
+      "primary_owner": "R11",
+      "severity": "P3",
+      "source_area": "R01",
+      "title": "Known SOURCE_MANIFEST drift remains assigned to R11"
+    },
+    {
+      "canonical_id": "BWS116-R02-PF-001",
+      "classification": "PROBABLE_FINDING",
+      "confidence": "0.86",
+      "consolidation_status": "INSUFFICIENT_EVIDENCE",
+      "details": {
+        "classification": "PROBABLE_FINDING",
+        "confidence": 0.86,
+        "current_files_symbols_line_ranges_hashes": [
+          {
+            "full_file_sha256": "29866c6839497502a2f9371166dd3865026bc8bca7a8cc57dad12c5717ba2543",
+            "line_range": "238-315",
+            "path": "packages/bootstrap/src/opportunity/b1-cross-venue-derivation.ts",
+            "symbol": "selectBestGrossQuote / acceptedCandidate"
+          }
+        ],
+        "evidence": "Harness emitted venuePair=[venue-a,venue-b] while selected_venues=[venue-a,venue-a]. This can duplicate a same-venue opportunity across multiple pair IDs and misstate cross-venue counts. Current authority calls the program cross-venue but does not explicitly state that selected legs must span both venues, so final classification requires product-authority confirmation.",
+        "id": "BWS116-R02-PF-001",
+        "primary_owner": "R02",
+        "proof_required": "Confirm whether B1 candidate semantics require at least one selected leg from each venue; then test duplicate metrics across three venues.",
+        "secondary_sectors": [
+          "R07 metrics",
+          "R05 projection"
+        ],
+        "severity": "P2",
+        "title": "B1 venue-pair candidate may select every leg from one venue"
+      },
+      "id": "BWS116-R02-PF-001",
+      "primary_owner": "R02",
+      "severity": "P2",
+      "source_area": "R02",
+      "title": "B1 venue-pair candidate may select every leg from one venue"
+    },
+    {
+      "canonical_id": "BWS116-R02-HYP-001",
+      "classification": "HYPOTHESIS",
+      "confidence": "0.72",
+      "consolidation_status": "INSUFFICIENT_EVIDENCE",
+      "details": {
+        "classification": "HYPOTHESIS",
+        "confidence": 0.72,
+        "current_files_symbols_line_ranges_hashes": [
+          {
+            "full_file_sha256": "32275d20e5de782278e33df95e94e207bee5b662a3fd23fb695ab98bed0ac281",
+            "line_range": "1-48",
+            "path": "packages/bootstrap/src/solver/b1-rounding.ts",
+            "symbol": "roundUpB1StakeMinor"
+          }
+        ],
+        "evidence": "Rounding is to multiples of step from zero. Some venues define valid stakes as min + k*step. The supplied current authority does not specify the origin convention.",
+        "id": "BWS116-R02-HYP-001",
+        "primary_owner": "R02",
+        "proof_required": "Accepted upstream venue-limit contract defining increment origin.",
+        "secondary_sectors": [
+          "R01"
+        ],
+        "severity": "P2",
+        "title": "Stake increment origin is unspecified"
+      },
+      "id": "BWS116-R02-HYP-001",
+      "primary_owner": "R02",
+      "severity": "P2",
+      "source_area": "R02",
+      "title": "Stake increment origin is unspecified"
+    },
+    {
+      "canonical_id": "BWS116-R02-HYP-002",
+      "classification": "HYPOTHESIS",
+      "confidence": "0.7",
+      "consolidation_status": "INSUFFICIENT_EVIDENCE",
+      "details": {
+        "classification": "HYPOTHESIS",
+        "confidence": 0.7,
+        "current_files_symbols_line_ranges_hashes": [
+          {
+            "full_file_sha256": "822a6ca6802ffb6fbfd52145679b2575536701d4c936a16ab06ab7d70123d1a0",
+            "line_range": "28-41",
+            "path": "packages/bootstrap/src/solver/b1-generalized-stake-vector.ts",
+            "symbol": "B1GeneralizedStakeVectorPolicy"
+          }
+        ],
+        "evidence": "The policy supplies per-leg caps and a target worst-case net, but no total bankroll/budget or residual allocation rule. This may be intentional because BWS is no-bankroll/offline, but the requested residual-budget semantics cannot be proven.",
+        "id": "BWS116-R02-HYP-002",
+        "primary_owner": "R02",
+        "proof_required": "Product authority deciding whether the solver is feasibility-only or budget-allocation.",
+        "secondary_sectors": [
+          "R04"
+        ],
+        "severity": "P2",
+        "title": "No explicit total portfolio budget or residual-budget objective exists in the B1 solver policy"
+      },
+      "id": "BWS116-R02-HYP-002",
+      "primary_owner": "R02",
+      "severity": "P2",
+      "source_area": "R02",
+      "title": "No explicit total portfolio budget or residual-budget objective exists in the B1 solver policy"
+    },
+    {
+      "canonical_id": "BWS116-R02-HYP-003",
+      "classification": "HYPOTHESIS",
+      "confidence": "0.76",
+      "consolidation_status": "INSUFFICIENT_EVIDENCE",
+      "details": {
+        "classification": "HYPOTHESIS",
+        "confidence": 0.76,
+        "current_files_symbols_line_ranges_hashes": [
+          {
+            "full_file_sha256": "ac7dcc2ddf2d9bf660931b639e10b6659ffe90ec8115ab80b765884784bc0ae2",
+            "line_range": "15-51",
+            "path": "packages/bootstrap/src/identity/b1-selection-equivalence.ts",
+            "symbol": "compareB1SelectionEquivalence"
+          }
+        ],
+        "evidence": "The comparator checks key and outcomeSide but returns outcomeName only from the first row. Whether differing names are aliases or contradictions requires upstream canonical-selection authority.",
+        "id": "BWS116-R02-HYP-003",
+        "primary_owner": "R02",
+        "proof_required": "R01 definition of selection key and display-label equivalence.",
+        "secondary_sectors": [
+          "R01"
+        ],
+        "severity": "P2",
+        "title": "Selection-equivalence key is trusted over outcomeName consistency"
+      },
+      "id": "BWS116-R02-HYP-003",
+      "primary_owner": "R02",
+      "severity": "P2",
+      "source_area": "R02",
+      "title": "Selection-equivalence key is trusted over outcomeName consistency"
+    },
+    {
+      "canonical_id": "BWS116-R02-HYP-004",
+      "classification": "HYPOTHESIS",
+      "confidence": "0.78",
+      "consolidation_status": "INSUFFICIENT_EVIDENCE",
+      "details": {
+        "classification": "HYPOTHESIS",
+        "confidence": 0.78,
+        "current_files_symbols_line_ranges_hashes": [
+          {
+            "full_file_sha256": "a68d4ea89b2ec4a7d83d8e2ced929732522e0e4af5a36efaac4712e88255dc92",
+            "line_range": "13-45",
+            "path": "packages/bootstrap/src/opportunity/standard-binary-stake-solver.ts",
+            "symbol": "DEFAULT_STANDARD_BINARY_MAX_QUOTE_AGE_MS / options default"
+          }
+        ],
+        "evidence": "maxQuoteAgeMs is optional and defaults to 60,000 ms. Runtime plans usually supply explicit values, but direct callers can omit it. Current docs require explicit freshness but do not establish 60 seconds as universal authority.",
+        "id": "BWS116-R02-HYP-004",
+        "primary_owner": "R02",
+        "proof_required": "Current lane-specific freshness authority or make the pure API require an explicit bound.",
+        "secondary_sectors": [
+          "R10"
+        ],
+        "severity": "P2",
+        "title": "Standard 60-second quote-age default lacks explicit policy binding at the pure solver API"
+      },
+      "id": "BWS116-R02-HYP-004",
+      "primary_owner": "R02",
+      "severity": "P2",
+      "source_area": "R02",
+      "title": "Standard 60-second quote-age default lacks explicit policy binding at the pure solver API"
+    },
+    {
+      "canonical_id": "BWS116-R02-EXT-001",
+      "classification": "EXTERNAL_INPUT_BLOCKER",
+      "confidence": "1.0",
+      "consolidation_status": "CONFIRMED_CROSS_AREA",
+      "details": {
+        "blocks": {
+          "b1_acceptance": true,
+          "bws_600_evidence": true,
+          "later_execution": true,
+          "release": true
+        },
+        "classification": "EXTERNAL_INPUT_BLOCKER",
+        "confidence": 1.0,
+        "evidence": "BWS-710 remains BLOCKED_ACCEPTED_BETTING_WIN_B1_MULTI_VENUE_API_REQUIRED. Local fixtures cannot establish real provider generation, fee, capacity, or settlement truth.",
+        "id": "BWS116-R02-EXT-001",
+        "primary_owner": "R01/external betting-win handoff",
+        "secondary_sectors": [
+          "R02",
+          "R07"
+        ],
+        "severity": "P1",
+        "title": "Accepted betting-win B1 runtime resource and fee/capacity authority remain unavailable"
+      },
+      "id": "BWS116-R02-EXT-001",
+      "primary_owner": "R01/external betting-win handoff",
+      "severity": "P1",
+      "source_area": "R02",
+      "title": "Accepted betting-win B1 runtime resource and fee/capacity authority remain unavailable"
+    },
+    {
+      "canonical_id": "KNOWN_BASELINE_MANIFEST_DRIFT",
+      "classification": "CROSS_AREA_HANDOFF",
+      "confidence": "1.0",
+      "consolidation_status": "CONFIRMED_DUPLICATE",
+      "details": {
+        "classification": "CROSS_AREA_HANDOFF",
+        "confidence": 1.0,
+        "evidence": "The 617-path non-self inventory is correct, but seven Graphify/update-tooling sizes or hashes are stale. This is explicitly excluded from R02 finding ownership.",
+        "id": "KNOWN_BASELINE_MANIFEST_DRIFT",
+        "primary_owner": "R11",
+        "secondary_sectors": [
+          "R02 validation only"
+        ],
+        "severity": "P3",
+        "title": "Known seven-path SOURCE_MANIFEST drift"
+      },
+      "id": "KNOWN_BASELINE_MANIFEST_DRIFT",
+      "primary_owner": "R11",
+      "severity": "P3",
+      "source_area": "R02",
+      "title": "Known seven-path SOURCE_MANIFEST drift"
+    },
+    {
+      "canonical_id": "BWS116-R02-HO-001",
+      "classification": "CROSS_AREA_HANDOFF",
+      "confidence": "0.94",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "details": {
+        "classification": "CROSS_AREA_HANDOFF",
+        "confidence": 0.94,
+        "current_files_symbols_line_ranges_hashes": [
+          {
+            "full_file_sha256": "22a43ced9a713e4144e343529a8940edfa00676659aa01f48f739e3f28ca03e1",
+            "line_range": "56-62",
+            "path": "packages/bootstrap/src/contracts/b1-local-types.ts",
+            "symbol": "B1MultiVenueMarketRow price fields"
+          },
+          {
+            "full_file_sha256": "2068f5dea3a115cbbc4e7b7fde16774b9a0fc9c964be1550215cc2c7508604e8",
+            "line_range": "430-440",
+            "path": "packages/bootstrap/src/contracts/betting-win-b1-resource-records.ts",
+            "symbol": "B1 row price parsing"
+          },
+          {
+            "full_file_sha256": "48ecd0e6402a23610f9582222e86e31c943948f31b6edf0896a66751edfddafb",
+            "line_range": "10-16",
+            "path": "packages/bootstrap/src/opportunity/b1-gross-spread.ts",
+            "symbol": "gross quote input"
+          }
+        ],
+        "evidence": "Harness used decimalOdds=2.20 with priceMinorOrProbabilityMinor=999999; gross derivation used only decimalOdds and accepted. The archive does not define whether the second field must be mathematically consistent, provider-specific, or informational.",
+        "id": "BWS116-R02-HO-001",
+        "primary_owner": "R01",
+        "secondary_sectors": [
+          "R02"
+        ],
+        "severity": "P1",
+        "title": "Define consistency rules between decimalOdds and priceMinorOrProbabilityMinor"
+      },
+      "id": "BWS116-R02-HO-001",
+      "primary_owner": "R01",
+      "severity": "P1",
+      "source_area": "R02",
+      "title": "Define consistency rules between decimalOdds and priceMinorOrProbabilityMinor"
+    },
+    {
+      "canonical_id": "BWS116-R02-HO-002",
+      "classification": "CROSS_AREA_HANDOFF",
+      "confidence": "1.0",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "details": {
+        "classification": "CROSS_AREA_HANDOFF",
+        "confidence": 1.0,
+        "evidence": "Fixes for BWS116-R02-002, -005, and -007 will change source identity, capacity evidence, or key encoding. Atomic storage, migration, and replay compatibility are R03-owned.",
+        "id": "BWS116-R02-HO-002",
+        "primary_owner": "R03",
+        "secondary_sectors": [
+          "R02"
+        ],
+        "severity": "P1",
+        "title": "Persisted capacity receipts and candidate-key migration belong outside R02"
+      },
+      "id": "BWS116-R02-HO-002",
+      "primary_owner": "R03",
+      "severity": "P1",
+      "source_area": "R02",
+      "title": "Persisted capacity receipts and candidate-key migration belong outside R02"
+    },
+    {
+      "canonical_id": "BWS116-R02-TG-001",
+      "classification": "TEST_GAP",
+      "confidence": "1.0",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "details": {
+        "classification": "TEST_GAP",
+        "confidence": 1.0,
+        "evidence": "Focused equivalence tests cover cardinality and duplicate keys but not distinct keys carrying the same semantic side or incomplete three-way market shapes.",
+        "id": "BWS116-R02-TG-001",
+        "primary_owner": "R11",
+        "related_findings": [
+          "BWS116-R02-001"
+        ],
+        "severity": "P2",
+        "title": "No outcome-semantic exclusivity/exhaustiveness property tests"
+      },
+      "id": "BWS116-R02-TG-001",
+      "primary_owner": "R11",
+      "severity": "P2",
+      "source_area": "R02",
+      "title": "No outcome-semantic exclusivity/exhaustiveness property tests"
+    },
+    {
+      "canonical_id": "BWS116-R02-TG-002",
+      "classification": "TEST_GAP",
+      "confidence": "1.0",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "details": {
+        "classification": "TEST_GAP",
+        "confidence": 1.0,
+        "evidence": "The 147 focused tests passed while the mixed-generation harness was accepted.",
+        "id": "BWS116-R02-TG-002",
+        "primary_owner": "R11",
+        "related_findings": [
+          "BWS116-R02-002"
+        ],
+        "severity": "P2",
+        "title": "No provider/generation partition tests for B1 equivalence and quote selection"
+      },
+      "id": "BWS116-R02-TG-002",
+      "primary_owner": "R11",
+      "severity": "P2",
+      "source_area": "R02",
+      "title": "No provider/generation partition tests for B1 equivalence and quote selection"
+    },
+    {
+      "canonical_id": "BWS116-R02-TG-003",
+      "classification": "TEST_GAP",
+      "confidence": "1.0",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "details": {
+        "classification": "TEST_GAP",
+        "confidence": 1.0,
+        "evidence": "Existing tests validate pair-local or per-leg freshness only; they do not vary timestamp spans across selected terminal outcomes.",
+        "id": "BWS116-R02-TG-003",
+        "primary_owner": "R11",
+        "related_findings": [
+          "BWS116-R02-003",
+          "BWS116-R02-010"
+        ],
+        "severity": "P2",
+        "title": "No candidate-global quote synchronization tests"
+      },
+      "id": "BWS116-R02-TG-003",
+      "primary_owner": "R11",
+      "severity": "P2",
+      "source_area": "R02",
+      "title": "No candidate-global quote synchronization tests"
+    },
+    {
+      "canonical_id": "BWS116-R02-TG-004",
+      "classification": "TEST_GAP",
+      "confidence": "1.0",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "details": {
+        "classification": "TEST_GAP",
+        "confidence": 1.0,
+        "evidence": "Net tests mutate malformed shapes but not a valid same-key selected quote with altered odds, side, generation, or timestamp.",
+        "id": "BWS116-R02-TG-004",
+        "primary_owner": "R11",
+        "related_findings": [
+          "BWS116-R02-004"
+        ],
+        "severity": "P2",
+        "title": "No adversarial mutation test binds selected quote values to synchronized evidence"
+      },
+      "id": "BWS116-R02-TG-004",
+      "primary_owner": "R11",
+      "severity": "P2",
+      "source_area": "R02",
+      "title": "No adversarial mutation test binds selected quote values to synchronized evidence"
+    },
+    {
+      "canonical_id": "BWS116-R02-TG-005",
+      "classification": "TEST_GAP",
+      "confidence": "1.0",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "details": {
+        "classification": "TEST_GAP",
+        "confidence": 1.0,
+        "evidence": "evaluateB1QuoteCapacity appears only in its module and quote-synchronization tests, not production solver/backtest code.",
+        "id": "BWS116-R02-TG-005",
+        "primary_owner": "R11",
+        "related_findings": [
+          "BWS116-R02-005"
+        ],
+        "severity": "P1",
+        "title": "Capacity primitives are unit-tested but not composed into the solver/net/backtest path"
+      },
+      "id": "BWS116-R02-TG-005",
+      "primary_owner": "R11",
+      "severity": "P1",
+      "source_area": "R02",
+      "title": "Capacity primitives are unit-tested but not composed into the solver/net/backtest path"
+    },
+    {
+      "canonical_id": "BWS116-R02-TG-006",
+      "classification": "TEST_GAP",
+      "confidence": "1.0",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "details": {
+        "classification": "TEST_GAP",
+        "confidence": 1.0,
+        "evidence": "Existing examples pass, but independent enumeration exposed feasible vectors the common-target search rejects.",
+        "id": "BWS116-R02-TG-006",
+        "primary_owner": "R11",
+        "related_findings": [
+          "BWS116-R02-006"
+        ],
+        "severity": "P1",
+        "title": "No independent brute-force oracle for generalized solver completeness"
+      },
+      "id": "BWS116-R02-TG-006",
+      "primary_owner": "R11",
+      "severity": "P1",
+      "source_area": "R02",
+      "title": "No independent brute-force oracle for generalized solver completeness"
+    },
+    {
+      "canonical_id": "BWS116-R02-TG-007",
+      "classification": "TEST_GAP",
+      "confidence": "1.0",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "details": {
+        "classification": "TEST_GAP",
+        "confidence": 1.0,
+        "evidence": "Focused tests use simple ASCII identifiers and one ambient locale.",
+        "id": "BWS116-R02-TG-007",
+        "primary_owner": "R11",
+        "related_findings": [
+          "BWS116-R02-007",
+          "BWS116-R02-013"
+        ],
+        "severity": "P2",
+        "title": "No delimiter injectivity, Unicode, or cross-locale determinism tests"
+      },
+      "id": "BWS116-R02-TG-007",
+      "primary_owner": "R11",
+      "severity": "P2",
+      "source_area": "R02",
+      "title": "No delimiter injectivity, Unicode, or cross-locale determinism tests"
+    },
+    {
+      "canonical_id": "BWS116-R02-TG-008",
+      "classification": "TEST_GAP",
+      "confidence": "1.0",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "details": {
+        "classification": "TEST_GAP",
+        "confidence": 1.0,
+        "evidence": "All focused standard tests passed while the adversarial harness reproduced each defect.",
+        "id": "BWS116-R02-TG-008",
+        "primary_owner": "R11",
+        "related_findings": [
+          "BWS116-R02-009",
+          "BWS116-R02-010",
+          "BWS116-R02-011",
+          "BWS116-R02-012"
+        ],
+        "severity": "P1",
+        "title": "Standard lane lacks mixed-manifest, pair-skew, independent-increment, and malformed-matrix tests"
+      },
+      "id": "BWS116-R02-TG-008",
+      "primary_owner": "R11",
+      "severity": "P1",
+      "source_area": "R02",
+      "title": "Standard lane lacks mixed-manifest, pair-skew, independent-increment, and malformed-matrix tests"
+    },
+    {
+      "canonical_id": "BWS116-R02-TG-009",
+      "classification": "TEST_GAP",
+      "confidence": "0.98",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "details": {
+        "classification": "TEST_GAP",
+        "confidence": 0.98,
+        "evidence": "Tests cover missing entries and arithmetic for feeBps+fixedFeeMinor but cannot test unsupported winnings/liability/maker/taker bases because the contract has no representation.",
+        "id": "BWS116-R02-TG-009",
+        "primary_owner": "R11",
+        "related_findings": [
+          "BWS116-R02-014"
+        ],
+        "severity": "P1",
+        "title": "Fee tests mirror the only implemented stake-bps formula rather than independently covering fee-basis unions"
+      },
+      "id": "BWS116-R02-TG-009",
+      "primary_owner": "R11",
+      "severity": "P1",
+      "source_area": "R02",
+      "title": "Fee tests mirror the only implemented stake-bps formula rather than independently covering fee-basis unions"
+    },
+    {
+      "canonical_id": "BWS116-R02-SG-001",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "confidence": "1.0",
+      "consolidation_status": "OUT_OF_SCOPE",
+      "details": {
+        "classification": "INTENTIONAL_SAFEGUARD",
+        "confidence": 1.0,
+        "evidence": "ceil(1e12/decimalOddsMicro) overstates implied probability rather than overstating gross edge.",
+        "id": "BWS116-R02-SG-001",
+        "primary_owner": "R02",
+        "severity": "P3",
+        "title": "B1 gross implied probability uses conservative ceiling division"
+      },
+      "id": "BWS116-R02-SG-001",
+      "primary_owner": "R02",
+      "severity": "P3",
+      "source_area": "R02",
+      "title": "B1 gross implied probability uses conservative ceiling division"
+    },
+    {
+      "canonical_id": "BWS116-R02-SG-002",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "confidence": "1.0",
+      "consolidation_status": "OUT_OF_SCOPE",
+      "details": {
+        "classification": "INTENTIONAL_SAFEGUARD",
+        "confidence": 1.0,
+        "evidence": "synchronizeB1VenueQuotePair validates canonical timestamps and explicit non-negative policy limits before acceptance.",
+        "id": "BWS116-R02-SG-002",
+        "primary_owner": "R02",
+        "severity": "P3",
+        "title": "B1 timestamp, future-skew, quote-age, retrieval-lag, and market-status checks fail closed pairwise"
+      },
+      "id": "BWS116-R02-SG-002",
+      "primary_owner": "R02",
+      "severity": "P3",
+      "source_area": "R02",
+      "title": "B1 timestamp, future-skew, quote-age, retrieval-lag, and market-status checks fail closed pairwise"
+    },
+    {
+      "canonical_id": "BWS116-R02-SG-003",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "confidence": "1.0",
+      "consolidation_status": "OUT_OF_SCOPE",
+      "details": {
+        "classification": "INTENTIONAL_SAFEGUARD",
+        "confidence": 1.0,
+        "evidence": "calculateB1FeeCharge requires exactly one explicit matrix entry.",
+        "id": "BWS116-R02-SG-003",
+        "primary_owner": "R02",
+        "severity": "P3",
+        "title": "Missing B1 fee entry does not default to zero"
+      },
+      "id": "BWS116-R02-SG-003",
+      "primary_owner": "R02",
+      "severity": "P3",
+      "source_area": "R02",
+      "title": "Missing B1 fee entry does not default to zero"
+    },
+    {
+      "canonical_id": "BWS116-R02-SG-004",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "confidence": "1.0",
+      "consolidation_status": "OUT_OF_SCOPE",
+      "details": {
+        "classification": "INTENTIONAL_SAFEGUARD",
+        "confidence": 1.0,
+        "evidence": "No Number conversion was found in the reviewed B1 economic arithmetic; maxSearchIterations is the bounded control counter.",
+        "id": "BWS116-R02-SG-004",
+        "primary_owner": "R02",
+        "severity": "P3",
+        "title": "B1 core money, stake, payout, fee, penalty, capacity, and time arithmetic uses bigint"
+      },
+      "id": "BWS116-R02-SG-004",
+      "primary_owner": "R02",
+      "severity": "P3",
+      "source_area": "R02",
+      "title": "B1 core money, stake, payout, fee, penalty, capacity, and time arithmetic uses bigint"
+    },
+    {
+      "canonical_id": "BWS116-R02-SG-005",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "confidence": "1.0",
+      "consolidation_status": "OUT_OF_SCOPE",
+      "details": {
+        "classification": "INTENTIONAL_SAFEGUARD",
+        "confidence": 1.0,
+        "evidence": "Gross candidates are typed gross-only; net candidates remain executable=false and liveReadiness=not_authorized_bws_900_parked.",
+        "id": "BWS116-R02-SG-005",
+        "primary_owner": "R02",
+        "severity": "P3",
+        "title": "Gross, net, executable, and live-readiness labels remain distinct in accepted B1 contracts"
+      },
+      "id": "BWS116-R02-SG-005",
+      "primary_owner": "R02",
+      "severity": "P3",
+      "source_area": "R02",
+      "title": "Gross, net, executable, and live-readiness labels remain distinct in accepted B1 contracts"
+    },
+    {
+      "canonical_id": "BWS116-R02-SG-006",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "confidence": "1.0",
+      "consolidation_status": "OUT_OF_SCOPE",
+      "details": {
+        "classification": "INTENTIONAL_SAFEGUARD",
+        "confidence": 1.0,
+        "evidence": "maxSearchIterations must be 1..1000, preventing unbounded pure search.",
+        "id": "BWS116-R02-SG-006",
+        "primary_owner": "R02",
+        "severity": "P3",
+        "title": "Generalized solver search is explicitly bounded"
+      },
+      "id": "BWS116-R02-SG-006",
+      "primary_owner": "R02",
+      "severity": "P3",
+      "source_area": "R02",
+      "title": "Generalized solver search is explicitly bounded"
+    },
+    {
+      "canonical_id": "BWS116-R02-RS-001",
+      "classification": "REJECTED_SUSPICION",
+      "confidence": "0.94",
+      "consolidation_status": "NOT_REPRODUCED",
+      "details": {
+        "classification": "REJECTED_SUSPICION",
+        "confidence": 0.94,
+        "evidence": "Harness showed the same market+venue-pair candidate ID across snapshots, but docs/049 defines B1MarketPair as market-equivalence key plus venue pair; persistence scopes snapshots by run. Generation omission remains separately confirmed in BWS116-R02-002.",
+        "id": "BWS116-R02-RS-001",
+        "primary_owner": "R02",
+        "severity": "P3",
+        "title": "Candidate ID reuse across snapshots is not independently an R02 defect"
+      },
+      "id": "BWS116-R02-RS-001",
+      "primary_owner": "R02",
+      "severity": "P3",
+      "source_area": "R02",
+      "title": "Candidate ID reuse across snapshots is not independently an R02 defect"
+    },
+    {
+      "canonical_id": "BWS116-R02-RS-002",
+      "classification": "REJECTED_SUSPICION",
+      "confidence": "1.0",
+      "consolidation_status": "NOT_REPRODUCED",
+      "details": {
+        "classification": "REJECTED_SUSPICION",
+        "confidence": 1.0,
+        "evidence": "Independent recomputation matched ceil(capitalLocked * durationMs * annualizedBps / (365d_ms*10000)), including buffer and explicit ms units.",
+        "id": "BWS116-R02-RS-002",
+        "primary_owner": "R02",
+        "severity": "P3",
+        "title": "Capital-lock annualization arithmetic matched the encoded model"
+      },
+      "id": "BWS116-R02-RS-002",
+      "primary_owner": "R02",
+      "severity": "P3",
+      "source_area": "R02",
+      "title": "Capital-lock annualization arithmetic matched the encoded model"
+    },
+    {
+      "canonical_id": "BWS116-R02-RS-003",
+      "classification": "REJECTED_SUSPICION",
+      "confidence": "1.0",
+      "consolidation_status": "NOT_REPRODUCED",
+      "details": {
+        "classification": "REJECTED_SUSPICION",
+        "confidence": 1.0,
+        "evidence": "Independent recomputation matched ceil(stake*ageMs*bpsPerSecond/(1000*10000))+fixed.",
+        "id": "BWS116-R02-RS-003",
+        "primary_owner": "R02",
+        "severity": "P3",
+        "title": "Quote-age penalty arithmetic matched the encoded model"
+      },
+      "id": "BWS116-R02-RS-003",
+      "primary_owner": "R02",
+      "severity": "P3",
+      "source_area": "R02",
+      "title": "Quote-age penalty arithmetic matched the encoded model"
+    },
+    {
+      "canonical_id": "BWS116-R02-RS-004",
+      "classification": "REJECTED_SUSPICION",
+      "confidence": "0.97",
+      "consolidation_status": "NOT_REPRODUCED",
+      "details": {
+        "classification": "REJECTED_SUSPICION",
+        "confidence": 0.97,
+        "evidence": "A structurally forged zero-odds candidate did not throw, and downstream validation blocked it; no false acceptance was reproduced.",
+        "id": "BWS116-R02-RS-004",
+        "primary_owner": "R02",
+        "severity": "P3",
+        "title": "Malformed zero odds did not create an accepted opportunity in the tested path"
+      },
+      "id": "BWS116-R02-RS-004",
+      "primary_owner": "R02",
+      "severity": "P3",
+      "source_area": "R02",
+      "title": "Malformed zero odds did not create an accepted opportunity in the tested path"
+    },
+    {
+      "canonical_id": "BWS116-R02-RS-005",
+      "classification": "REJECTED_SUSPICION",
+      "confidence": "0.95",
+      "consolidation_status": "NOT_REPRODUCED",
+      "details": {
+        "classification": "REJECTED_SUSPICION",
+        "confidence": 0.95,
+        "evidence": "The 12,163-case independent domain found false-infeasible cases but zero false-feasible cases. This is not a general proof.",
+        "id": "BWS116-R02-RS-005",
+        "primary_owner": "R02",
+        "severity": "P3",
+        "title": "No false-feasible generalized solver result was found in the bounded three-way oracle domain"
+      },
+      "id": "BWS116-R02-RS-005",
+      "primary_owner": "R02",
+      "severity": "P3",
+      "source_area": "R02",
+      "title": "No false-feasible generalized solver result was found in the bounded three-way oracle domain"
+    },
+    {
+      "canonical_id": "BWS116-R03-ENV-001",
+      "classification": "ENVIRONMENT_BLOCKER",
+      "confidence": "HIGH",
+      "consolidation_status": "CONFIRMED_CROSS_AREA",
+      "details": {
+        "classification": "ENVIRONMENT_BLOCKER",
+        "confidence": "HIGH",
+        "details": "The review environment exposed Node v22.16.0. TypeScript emit and focused tests under Node 22 are supplementary only and are not canonical acceptance.",
+        "id": "BWS116-R03-ENV-001",
+        "primary_owner": "R03",
+        "severity": null,
+        "source_evidence": [],
+        "title": "Canonical Node 20.20.2 runtime unavailable"
+      },
+      "id": "BWS116-R03-ENV-001",
+      "primary_owner": "R03",
+      "severity": "NOT_ASSIGNED",
+      "source_area": "R03",
+      "title": "Canonical Node 20.20.2 runtime unavailable"
+    },
+    {
+      "canonical_id": "BWS116-R03-ENV-002",
+      "classification": "ENVIRONMENT_BLOCKER",
+      "confidence": "HIGH",
+      "consolidation_status": "CONFIRMED_CROSS_AREA",
+      "details": {
+        "classification": "ENVIRONMENT_BLOCKER",
+        "confidence": "HIGH",
+        "details": "psql and pg_isready were not installed and no local credentials/server were supplied. No database was created or contacted. PostgreSQL isolation, constraint, concurrency, and query-plan behavior therefore remain unexecuted.",
+        "id": "BWS116-R03-ENV-002",
+        "primary_owner": "R03",
+        "severity": null,
+        "source_evidence": [],
+        "title": "Disposable PostgreSQL execution unavailable"
+      },
+      "id": "BWS116-R03-ENV-002",
+      "primary_owner": "R03",
+      "severity": "NOT_ASSIGNED",
+      "source_area": "R03",
+      "title": "Disposable PostgreSQL execution unavailable"
+    },
+    {
+      "canonical_id": "BWS116-R03-HYP-001",
+      "classification": "HYPOTHESIS",
+      "confidence": "HIGH",
+      "consolidation_status": "INSUFFICIENT_EVIDENCE",
+      "details": {
+        "classification": "HYPOTHESIS",
+        "confidence": "HIGH",
+        "details": "runPsql inherits process.env and only overrides PGPASSWORD when an explicit password is supplied. PGPASSFILE, PGSERVICE, PGOPTIONS, SSL variables, and ambient PGPASSWORD require R10 policy review. Explicit -d/-U/-p/-h arguments prevent the main target tuple from silently falling back.",
+        "id": "BWS116-R03-HYP-001",
+        "primary_owner": "R10",
+        "severity": null,
+        "source_evidence": [
+          {
+            "full_file_sha256": "86053cd5690b15a2ba6ea210e3073c3324017d12fb36ec1fe815c84edab50343",
+            "line_range": "191-217",
+            "note": "Inherits process.env.",
+            "path": "packages/persistence/src/psql.ts",
+            "symbol": "runPsql"
+          }
+        ],
+        "title": "Ambient libpq environment may alter authentication or session behavior"
+      },
+      "id": "BWS116-R03-HYP-001",
+      "primary_owner": "R10",
+      "severity": "NOT_ASSIGNED",
+      "source_area": "R03",
+      "title": "Ambient libpq environment may alter authentication or session behavior"
+    },
+    {
+      "canonical_id": "BWS116-R03-TG-001",
+      "classification": "TEST_GAP",
+      "confidence": "HIGH",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "details": {
+        "classification": "TEST_GAP",
+        "confidence": "HIGH",
+        "details": "The focused migration tests cover empty files, transaction keywords, deterministic order, and selected direct targets, but not absolute/traversal/symlink directories, functions, DO blocks, dynamic SQL, grants, or database privilege confinement.",
+        "id": "BWS116-R03-TG-001",
+        "primary_owner": "R11",
+        "severity": null,
+        "source_evidence": [
+          {
+            "full_file_sha256": "76ad61f52a0cefd1885dc8413197378cc85e2c041540b3568b9afaed03b11310",
+            "line_range": "114-172",
+            "note": "Non-adversarial migration-scope coverage.",
+            "path": "tests/surebet-persistence.test.ts",
+            "symbol": "migration loader tests"
+          }
+        ],
+        "title": "Migration tests do not exercise repository escape or unrecognized executable SQL"
+      },
+      "id": "BWS116-R03-TG-001",
+      "primary_owner": "R11",
+      "severity": "NOT_ASSIGNED",
+      "source_area": "R03",
+      "title": "Migration tests do not exercise repository escape or unrecognized executable SQL"
+    },
+    {
+      "canonical_id": "BWS116-R03-TG-002",
+      "classification": "TEST_GAP",
+      "confidence": "HIGH",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "details": {
+        "classification": "TEST_GAP",
+        "confidence": "HIGH",
+        "details": "The focused suite reported six skipped tests, including the disposable PostgreSQL persistence proof. No two-connection race, injected commit failure, or isolation-level test ran.",
+        "id": "BWS116-R03-TG-002",
+        "primary_owner": "R11",
+        "severity": null,
+        "source_evidence": [
+          {
+            "full_file_sha256": "76ad61f52a0cefd1885dc8413197378cc85e2c041540b3568b9afaed03b11310",
+            "line_range": "173-374",
+            "note": "Environment-gated and primarily sequential.",
+            "path": "tests/surebet-persistence.test.ts",
+            "symbol": "disposable PostgreSQL proof"
+          }
+        ],
+        "title": "PostgreSQL idempotency proof is sequential and skipped without explicit disposable configuration"
+      },
+      "id": "BWS116-R03-TG-002",
+      "primary_owner": "R11",
+      "severity": "NOT_ASSIGNED",
+      "source_area": "R03",
+      "title": "PostgreSQL idempotency proof is sequential and skipped without explicit disposable configuration"
+    },
+    {
+      "canonical_id": "BWS116-R03-TG-003",
+      "classification": "TEST_GAP",
+      "confidence": "HIGH",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "details": {
+        "classification": "TEST_GAP",
+        "confidence": "HIGH",
+        "details": "Worker tests exercise normal claim/heartbeat/retry/dead-letter paths, but do not interleave the production repository methods across two PostgreSQL sessions to prove fencing.",
+        "id": "BWS116-R03-TG-003",
+        "primary_owner": "R11",
+        "severity": null,
+        "source_evidence": [
+          {
+            "full_file_sha256": "59aa7be3ad2725cdbb8aad00e205dd3ab758b9ace08dd605d337943b0a079e2d",
+            "line_range": "31-306",
+            "note": "Sequential clock-driven paths.",
+            "path": "tests/bounded-worker-jobs.test.ts",
+            "symbol": "bounded worker persistence tests"
+          }
+        ],
+        "title": "Worker tests do not model stale completion after lease transition or takeover"
+      },
+      "id": "BWS116-R03-TG-003",
+      "primary_owner": "R11",
+      "severity": "NOT_ASSIGNED",
+      "source_area": "R03",
+      "title": "Worker tests do not model stale completion after lease transition or takeover"
+    },
+    {
+      "canonical_id": "BWS116-R03-TG-004",
+      "classification": "TEST_GAP",
+      "confidence": "HIGH",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "details": {
+        "classification": "TEST_GAP",
+        "confidence": "HIGH",
+        "details": "The runtime unit tests demonstrate the optional previousState contract, while the production job payload omits it. There is no fresh-process PostgreSQL crash-window test spanning ledger persistence and worker completion.",
+        "id": "BWS116-R03-TG-004",
+        "primary_owner": "R11",
+        "severity": null,
+        "source_evidence": [
+          {
+            "full_file_sha256": "93edf430d20eb63a5e60cd743f5a7fcc4964b31940a4164b3810849b9be5662d",
+            "line_range": "1-520",
+            "note": "Pure runtime state, not production durable recovery.",
+            "path": "tests/private-paper-runtime.test.ts",
+            "symbol": "restart/idempotency tests"
+          }
+        ],
+        "title": "Standard private-paper restart tests reuse in-memory previousState rather than reconstructing production durable state"
+      },
+      "id": "BWS116-R03-TG-004",
+      "primary_owner": "R11",
+      "severity": "NOT_ASSIGNED",
+      "source_area": "R03",
+      "title": "Standard private-paper restart tests reuse in-memory previousState rather than reconstructing production durable state"
+    },
+    {
+      "canonical_id": "BWS116-R03-TG-005",
+      "classification": "TEST_GAP",
+      "confidence": "HIGH",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "details": {
+        "classification": "TEST_GAP",
+        "confidence": "HIGH",
+        "details": "No disposable PostgreSQL test crashes after b1_backtest_runs insertion or between candidate/simulation inserts, and no replay-completeness assertion exists.",
+        "id": "BWS116-R03-TG-005",
+        "primary_owner": "R11",
+        "severity": null,
+        "source_evidence": [
+          {
+            "full_file_sha256": "c51b6a753d32397ac0b20e0e4040bf035bf759dda505175a6155d848fcf8caf9",
+            "line_range": "1-520",
+            "note": "Static/fake and happy-path coverage.",
+            "path": "tests/b1-persistence.test.ts",
+            "symbol": "B1 persistence tests"
+          }
+        ],
+        "title": "B1 persistence tests do not inject failure between parent and child commits"
+      },
+      "id": "BWS116-R03-TG-005",
+      "primary_owner": "R11",
+      "severity": "NOT_ASSIGNED",
+      "source_area": "R03",
+      "title": "B1 persistence tests do not inject failure between parent and child commits"
+    },
+    {
+      "canonical_id": "BWS116-R03-TG-006",
+      "classification": "TEST_GAP",
+      "confidence": "HIGH",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "details": {
+        "classification": "TEST_GAP",
+        "confidence": "HIGH",
+        "details": "The tests can classify timeout/drain only after fakes settle; they do not prove a never-settling pass is cancelled, lease renewal stops, or late durable calls are fenced.",
+        "id": "BWS116-R03-TG-006",
+        "primary_owner": "R11",
+        "severity": null,
+        "source_evidence": [
+          {
+            "full_file_sha256": "1a25191b979481a30d998bda9d5f2b3f8579114d72d80ee26464f09a65284175",
+            "line_range": "1-470",
+            "note": "Controlled resolving fakes.",
+            "path": "tests/bws-private-paper-worker-service.test.ts",
+            "symbol": "worker service lifecycle tests"
+          },
+          {
+            "full_file_sha256": "63c1067cb56985ebc2eb41392dae471d3885e4c58d4e91a3ad643991f348d96a",
+            "line_range": "1-520",
+            "note": "Controlled resolving fakes.",
+            "path": "tests/bws-private-paper-scheduler-service.test.ts",
+            "symbol": "scheduler service lifecycle tests"
+          }
+        ],
+        "title": "Service timeout and shutdown tests use promises that are eventually released"
+      },
+      "id": "BWS116-R03-TG-006",
+      "primary_owner": "R11",
+      "severity": "NOT_ASSIGNED",
+      "source_area": "R03",
+      "title": "Service timeout and shutdown tests use promises that are eventually released"
+    },
+    {
+      "canonical_id": "BWS116-R03-SAFE-001",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "confidence": "HIGH",
+      "consolidation_status": "OUT_OF_SCOPE",
+      "details": {
+        "classification": "INTENTIONAL_SAFEGUARD",
+        "confidence": "HIGH",
+        "details": "resolveSurebetPersistenceConfig requires database, user, port, and exactly one of host or socketDirectory.",
+        "id": "BWS116-R03-SAFE-001",
+        "primary_owner": "R03",
+        "severity": null,
+        "source_evidence": [
+          {
+            "full_file_sha256": "03cc5a97ec98091f4a47b9f2ac65682ad298b03617185884e75fea0999ecd4cb",
+            "line_range": "7-42",
+            "note": "Fail-fast tuple validation.",
+            "path": "packages/persistence/src/config.ts",
+            "symbol": "resolveSurebetPersistenceConfig"
+          }
+        ],
+        "title": "Persistence configuration rejects missing and mixed explicit host/socket targets"
+      },
+      "id": "BWS116-R03-SAFE-001",
+      "primary_owner": "R03",
+      "severity": "NOT_ASSIGNED",
+      "source_area": "R03",
+      "title": "Persistence configuration rejects missing and mixed explicit host/socket targets"
+    },
+    {
+      "canonical_id": "BWS116-R03-SAFE-002",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "confidence": "HIGH",
+      "consolidation_status": "OUT_OF_SCOPE",
+      "details": {
+        "classification": "INTENTIONAL_SAFEGUARD",
+        "confidence": "HIGH",
+        "details": "The 12 frozen SQL files are lexically ordered 001 through 012, contain no explicit transaction control, and the static inventory found no current object target outside surebet.*.",
+        "id": "BWS116-R03-SAFE-002",
+        "primary_owner": "R03",
+        "severity": null,
+        "source_evidence": [],
+        "title": "Current archive migrations are ordered, transaction-controlled externally, and presently surebet-qualified"
+      },
+      "id": "BWS116-R03-SAFE-002",
+      "primary_owner": "R03",
+      "severity": "NOT_ASSIGNED",
+      "source_area": "R03",
+      "title": "Current archive migrations are ordered, transaction-controlled externally, and presently surebet-qualified"
+    },
+    {
+      "canonical_id": "BWS116-R03-SAFE-003",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "confidence": "HIGH",
+      "consolidation_status": "OUT_OF_SCOPE",
+      "details": {
+        "classification": "INTENTIONAL_SAFEGUARD",
+        "confidence": "HIGH",
+        "details": "claimNext selects and updates one eligible job in a single CTE with FOR UPDATE SKIP LOCKED and deterministic ordering.",
+        "id": "BWS116-R03-SAFE-003",
+        "primary_owner": "R03",
+        "severity": null,
+        "source_evidence": [
+          {
+            "full_file_sha256": "263481bca4ae76ceda0e134e7b1d707f17b9de89679c5e0a51f0f5e10431b57e",
+            "line_range": "355-435",
+            "note": "Atomic claim path.",
+            "path": "packages/persistence/src/repositories/worker-job-repository.ts",
+            "symbol": "claimNext"
+          }
+        ],
+        "title": "Worker claim uses one atomic SKIP LOCKED update"
+      },
+      "id": "BWS116-R03-SAFE-003",
+      "primary_owner": "R03",
+      "severity": "NOT_ASSIGNED",
+      "source_area": "R03",
+      "title": "Worker claim uses one atomic SKIP LOCKED update"
+    },
+    {
+      "canonical_id": "BWS116-R03-SAFE-004",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "confidence": "HIGH",
+      "consolidation_status": "OUT_OF_SCOPE",
+      "details": {
+        "classification": "INTENTIONAL_SAFEGUARD",
+        "confidence": "HIGH",
+        "details": "deadLetterOwnedJob and deadLetterExpiredLease condition the update on current status and lease identity and use RETURNING before inserting dead-letter evidence.",
+        "id": "BWS116-R03-SAFE-004",
+        "primary_owner": "R03",
+        "severity": null,
+        "source_evidence": [
+          {
+            "full_file_sha256": "263481bca4ae76ceda0e134e7b1d707f17b9de89679c5e0a51f0f5e10431b57e",
+            "line_range": "882-1037",
+            "note": "Fenced terminal path.",
+            "path": "packages/persistence/src/repositories/worker-job-repository.ts",
+            "symbol": "deadLetterOwnedJob / deadLetterExpiredLease"
+          }
+        ],
+        "title": "Owned and expired dead-letter transitions use current owner/token predicates"
+      },
+      "id": "BWS116-R03-SAFE-004",
+      "primary_owner": "R03",
+      "severity": "NOT_ASSIGNED",
+      "source_area": "R03",
+      "title": "Owned and expired dead-letter transitions use current owner/token predicates"
+    },
+    {
+      "canonical_id": "BWS116-R03-SAFE-005",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "confidence": "HIGH",
+      "consolidation_status": "OUT_OF_SCOPE",
+      "details": {
+        "classification": "INTENTIONAL_SAFEGUARD",
+        "confidence": "HIGH",
+        "details": "B1 convergence, backtest, and observation migrations constrain runtime_evidence=false and executable=false, preserving the BWS-710/BWS-900 holds.",
+        "id": "BWS116-R03-SAFE-005",
+        "primary_owner": "R03",
+        "severity": null,
+        "source_evidence": [],
+        "title": "Schema prevents runtime or execution promotion in B1 durable records"
+      },
+      "id": "BWS116-R03-SAFE-005",
+      "primary_owner": "R03",
+      "severity": "NOT_ASSIGNED",
+      "source_area": "R03",
+      "title": "Schema prevents runtime or execution promotion in B1 durable records"
+    },
+    {
+      "canonical_id": "BWS116-R03-SAFE-006",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "confidence": "HIGH",
+      "consolidation_status": "OUT_OF_SCOPE",
+      "details": {
+        "classification": "INTENTIONAL_SAFEGUARD",
+        "confidence": "HIGH",
+        "details": "The scheduler derives job IDs from scheduler checkpoint and cycle number and calls create before advancing, so a single-instance crash after create can re-observe the same job on restart.",
+        "id": "BWS116-R03-SAFE-006",
+        "primary_owner": "R03",
+        "severity": null,
+        "source_evidence": [
+          {
+            "full_file_sha256": "46311916b8d4df07c09183f7e8563bd69fae1d5330927e325a45e21e5f48be58",
+            "line_range": "717-765",
+            "note": "Deterministic sequential recovery; concurrency still affected by findings 006/007.",
+            "path": "packages/bootstrap/src/operations/private-paper-runtime-scheduler.ts",
+            "symbol": "scheduleRuntimeJob"
+          }
+        ],
+        "title": "Scheduler identities are deterministic and sequential replay suppresses a previously created job"
+      },
+      "id": "BWS116-R03-SAFE-006",
+      "primary_owner": "R03",
+      "severity": "NOT_ASSIGNED",
+      "source_area": "R03",
+      "title": "Scheduler identities are deterministic and sequential replay suppresses a previously created job"
+    },
+    {
+      "canonical_id": "BWS116-R03-REJ-001",
+      "classification": "REJECTED_SUSPICION",
+      "confidence": "HIGH",
+      "consolidation_status": "NOT_REPRODUCED",
+      "details": {
+        "classification": "REJECTED_SUSPICION",
+        "confidence": "HIGH",
+        "details": "Rejected. Static inventory of all 12 SQL files found only surebet.* object targets. Finding 001 concerns the general loader/security boundary and future or caller-selected bytes, not a claim that current migrations escape.",
+        "id": "BWS116-R03-REJ-001",
+        "primary_owner": "R03",
+        "severity": null,
+        "source_evidence": [],
+        "title": "Current frozen migration files already write outside surebet.*"
+      },
+      "id": "BWS116-R03-REJ-001",
+      "primary_owner": "R03",
+      "severity": "NOT_ASSIGNED",
+      "source_area": "R03",
+      "title": "Current frozen migration files already write outside surebet.*"
+    },
+    {
+      "canonical_id": "BWS116-R03-REJ-002",
+      "classification": "REJECTED_SUSPICION",
+      "confidence": "HIGH",
+      "consolidation_status": "NOT_REPRODUCED",
+      "details": {
+        "classification": "REJECTED_SUSPICION",
+        "confidence": "HIGH",
+        "details": "Rejected. Independent ZIP inspection found 618 regular files, no duplicate paths, no unsafe paths, no symlinks, and no special entries.",
+        "id": "BWS116-R03-REJ-002",
+        "primary_owner": "R03",
+        "severity": null,
+        "source_evidence": [],
+        "title": "Archive has duplicate, unsafe, symlink, or special members"
+      },
+      "id": "BWS116-R03-REJ-002",
+      "primary_owner": "R03",
+      "severity": "NOT_ASSIGNED",
+      "source_area": "R03",
+      "title": "Archive has duplicate, unsafe, symlink, or special members"
+    },
+    {
+      "canonical_id": "BWS116-R03-REJ-003",
+      "classification": "REJECTED_SUSPICION",
+      "confidence": "HIGH",
+      "consolidation_status": "NOT_REPRODUCED",
+      "details": {
+        "classification": "REJECTED_SUSPICION",
+        "confidence": "HIGH",
+        "details": "Rejected. execFileSync receives an argument array, and repository values use SQL literal escaping. SQL authority and timeout defects remain separate.",
+        "id": "BWS116-R03-REJ-003",
+        "primary_owner": "R03",
+        "severity": null,
+        "source_evidence": [],
+        "title": "psql command construction uses a shell and directly interpolates command arguments"
+      },
+      "id": "BWS116-R03-REJ-003",
+      "primary_owner": "R03",
+      "severity": "NOT_ASSIGNED",
+      "source_area": "R03",
+      "title": "psql command construction uses a shell and directly interpolates command arguments"
+    },
+    {
+      "canonical_id": "BWS116-R03-REJ-004",
+      "classification": "REJECTED_SUSPICION",
+      "confidence": "HIGH",
+      "consolidation_status": "NOT_REPRODUCED",
+      "details": {
+        "classification": "REJECTED_SUSPICION",
+        "confidence": "HIGH",
+        "details": "Rejected for the reviewed repository projections. bigint columns are generally cast to text before JSON decoding; mathematical interpretation remains R02/R04-owned.",
+        "id": "BWS116-R03-REJ-004",
+        "primary_owner": "R03",
+        "severity": null,
+        "source_evidence": [],
+        "title": "B1 bigint values are necessarily truncated by JavaScript reads"
+      },
+      "id": "BWS116-R03-REJ-004",
+      "primary_owner": "R03",
+      "severity": "NOT_ASSIGNED",
+      "source_area": "R03",
+      "title": "B1 bigint values are necessarily truncated by JavaScript reads"
+    },
+    {
+      "canonical_id": "BWS116-R03-REJ-005",
+      "classification": "REJECTED_SUSPICION",
+      "confidence": "HIGH",
+      "consolidation_status": "NOT_REPRODUCED",
+      "details": {
+        "classification": "REJECTED_SUSPICION",
+        "confidence": "HIGH",
+        "details": "Rejected for a single scheduler instance with the same immutable payload. Deterministic job ID plus create/get can suppress it. Concurrent creation and checkpoint races remain findings 006 and 007.",
+        "id": "BWS116-R03-REJ-005",
+        "primary_owner": "R03",
+        "severity": null,
+        "source_evidence": [],
+        "title": "Sequential scheduler restart necessarily creates a second job"
+      },
+      "id": "BWS116-R03-REJ-005",
+      "primary_owner": "R03",
+      "severity": "NOT_ASSIGNED",
+      "source_area": "R03",
+      "title": "Sequential scheduler restart necessarily creates a second job"
+    },
+    {
+      "canonical_id": "KNOWN_BASELINE_MANIFEST_DRIFT",
+      "classification": "CROSS_AREA_HANDOFF",
+      "confidence": "HIGH",
+      "consolidation_status": "CONFIRMED_DUPLICATE",
+      "details": {
+        "classification": "CROSS_AREA_HANDOFF",
+        "confidence": "HIGH",
+        "details": "The correct 617 non-self path set has seven stale Graphify/update-tooling hashes or sizes. Per frozen authority, this is not an R03 finding and is handed to R11.",
+        "id": "KNOWN_BASELINE_MANIFEST_DRIFT",
+        "primary_owner": "R11",
+        "severity": null,
+        "source_evidence": [
+          {
+            "full_file_sha256": "d9ea618c19fac733cf070c7e9b811ace8a1a0d637680b0b9f8233be5879aba6a",
+            "line_range": "1-1",
+            "note": "Known qualified baseline drift.",
+            "path": "SOURCE_MANIFEST.json",
+            "symbol": "source manifest"
+          }
+        ],
+        "title": "Known SOURCE_MANIFEST.json drift"
+      },
+      "id": "KNOWN_BASELINE_MANIFEST_DRIFT",
+      "primary_owner": "R11",
+      "severity": "NOT_ASSIGNED",
+      "source_area": "R03",
+      "title": "Known SOURCE_MANIFEST.json drift"
+    },
+    {
+      "canonical_id": "BWS116-R03-HO-001",
+      "classification": "CROSS_AREA_HANDOFF",
+      "confidence": "HIGH",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "details": {
+        "classification": "CROSS_AREA_HANDOFF",
+        "confidence": "HIGH",
+        "details": "R11 should incorporate TG-001 through TG-006 and verify that aggregate gates detect the confirmed persistence defects.",
+        "id": "BWS116-R03-HO-001",
+        "primary_owner": "R11",
+        "severity": null,
+        "source_evidence": [],
+        "title": "Aggregate false-green test and validator ownership"
+      },
+      "id": "BWS116-R03-HO-001",
+      "primary_owner": "R11",
+      "severity": "NOT_ASSIGNED",
+      "source_area": "R03",
+      "title": "Aggregate false-green test and validator ownership"
+    },
+    {
+      "canonical_id": "BWS116-R03-HO-002",
+      "classification": "CROSS_AREA_HANDOFF",
+      "confidence": "HIGH",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "details": {
+        "classification": "CROSS_AREA_HANDOFF",
+        "confidence": "HIGH",
+        "details": "R08 owns command-level operational lifecycle. R03 retains ownership of schema/repository transaction correctness and finding 013 reference integrity.",
+        "id": "BWS116-R03-HO-002",
+        "primary_owner": "R08",
+        "severity": null,
+        "source_evidence": [],
+        "title": "Operational backup, restore, retention, and migration command lifecycle"
+      },
+      "id": "BWS116-R03-HO-002",
+      "primary_owner": "R08",
+      "severity": "NOT_ASSIGNED",
+      "source_area": "R03",
+      "title": "Operational backup, restore, retention, and migration command lifecycle"
+    },
+    {
+      "canonical_id": "BWS116-R03-HO-003",
+      "classification": "CROSS_AREA_HANDOFF",
+      "confidence": "HIGH",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "details": {
+        "classification": "CROSS_AREA_HANDOFF",
+        "confidence": "HIGH",
+        "details": "R06 owns child process topology, start/status/stop, and generic signal/listener lifecycle. R03 finding 011 covers the durable-state cancellation boundary.",
+        "id": "BWS116-R03-HO-003",
+        "primary_owner": "R06",
+        "severity": null,
+        "source_evidence": [],
+        "title": "Generic process topology and shutdown ownership"
+      },
+      "id": "BWS116-R03-HO-003",
+      "primary_owner": "R06",
+      "severity": "NOT_ASSIGNED",
+      "source_area": "R03",
+      "title": "Generic process topology and shutdown ownership"
+    },
+    {
+      "canonical_id": "BWS116-R03-HO-004",
+      "classification": "CROSS_AREA_HANDOFF",
+      "confidence": "HIGH",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "details": {
+        "classification": "CROSS_AREA_HANDOFF",
+        "confidence": "HIGH",
+        "details": "R10 should decide whether ambient libpq variables are permitted and ensure selected tuple/redaction rules are exact.",
+        "id": "BWS116-R03-HO-004",
+        "primary_owner": "R10",
+        "severity": null,
+        "source_evidence": [],
+        "title": "Environment and CLI precedence for PostgreSQL/libpq variables"
+      },
+      "id": "BWS116-R03-HO-004",
+      "primary_owner": "R10",
+      "severity": "NOT_ASSIGNED",
+      "source_area": "R03",
+      "title": "Environment and CLI precedence for PostgreSQL/libpq variables"
+    },
+    {
+      "canonical_id": "BWS116-R03-HO-005",
+      "classification": "CROSS_AREA_HANDOFF",
+      "confidence": "HIGH",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "details": {
+        "classification": "CROSS_AREA_HANDOFF",
+        "confidence": "HIGH",
+        "details": "R04 owns whether B1 candidate/simulation contents are correct. R03 finding 015 concerns only atomic durable graph completeness.",
+        "id": "BWS116-R03-HO-005",
+        "primary_owner": "R04",
+        "severity": null,
+        "source_evidence": [],
+        "title": "B1 simulation and settlement semantics"
+      },
+      "id": "BWS116-R03-HO-005",
+      "primary_owner": "R04",
+      "severity": "NOT_ASSIGNED",
+      "source_area": "R03",
+      "title": "B1 simulation and settlement semantics"
+    },
+    {
+      "canonical_id": "BWS116-R03-HO-006",
+      "classification": "CROSS_AREA_HANDOFF",
+      "confidence": "HIGH",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "details": {
+        "classification": "CROSS_AREA_HANDOFF",
+        "confidence": "HIGH",
+        "details": "R01 owns source contract/provenance/currentness semantics. R03 covers transactional storage, CAS, and replay after accepted input.",
+        "id": "BWS116-R03-HO-006",
+        "primary_owner": "R01",
+        "severity": null,
+        "source_evidence": [],
+        "title": "Upstream semantic validity before persistence"
+      },
+      "id": "BWS116-R03-HO-006",
+      "primary_owner": "R01",
+      "severity": "NOT_ASSIGNED",
+      "source_area": "R03",
+      "title": "Upstream semantic validity before persistence"
+    },
+    {
+      "canonical_id": "BWS116-R03-HO-007",
+      "classification": "CROSS_AREA_HANDOFF",
+      "confidence": "HIGH",
+      "consolidation_status": "DEPENDENT_ON_OTHER_FINDING",
+      "details": {
+        "classification": "CROSS_AREA_HANDOFF",
+        "confidence": "HIGH",
+        "details": "R02 owns mathematical/identity correctness. No R03 finding is assigned solely because a value might be mathematically wrong before storage.",
+        "id": "BWS116-R03-HO-007",
+        "primary_owner": "R02",
+        "severity": null,
+        "source_evidence": [],
+        "title": "Strategy mathematics and identity before persistence"
+      },
+      "id": "BWS116-R03-HO-007",
+      "primary_owner": "R02",
+      "severity": "NOT_ASSIGNED",
+      "source_area": "R03",
+      "title": "Strategy mathematics and identity before persistence"
+    }
+  ],
+  "schema": "betting-win-surebet-wave01-non-defect-and-open-record-register-v1"
+}

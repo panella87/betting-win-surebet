@@ -1,0 +1,14 @@
+{
+  "archive_container_sha256_equal": false,
+  "current_archive_sha256": "0d234e00d015dcab0989b47372ded516bddee9705d9021a0694916dc91a9d494",
+  "member_path_size_sha256_mode_equal": true,
+  "path_sets_equal": true,
+  "report_classification": "COMPATIBLE_AND_UNAFFECTED_BY_DELTA",
+  "reports": [
+    "BWS116-R01",
+    "BWS116-R02",
+    "BWS116-R03"
+  ],
+  "review_archive_sha256": "6cc5be4e7f3a637d7c0ed9485f246ade4975b5a8e60d3895943e0471afc29376",
+  "schema": "betting-win-surebet-wave01-baseline-compatibility-v1"
+}

@@ -1,0 +1,109 @@
+{
+  "decisions": [
+    {
+      "blocks_next_wave": false,
+      "blocks_overlay": false,
+      "blocks_release": false,
+      "decision": "Use betting-win-surebet117.zip as the exact documentation preimage while classifying all three BWS116 reviews as COMPATIBLE_AND_UNAFFECTED_BY_DELTA because every member path, byte, size, and mode is identical.",
+      "id": "BWS117-W1-DEC-001",
+      "owner": "Wave 01 consolidation"
+    },
+    {
+      "blocks_next_wave": false,
+      "blocks_overlay": false,
+      "blocks_release": false,
+      "decision": "Retain all 41 confirmed finding IDs unchanged. No confirmed findings are merged because no pair shares the same trigger, root cause, and minimal correction boundary.",
+      "id": "BWS117-W1-DEC-002",
+      "owner": "Wave 01 consolidation"
+    },
+    {
+      "blocks_next_wave": false,
+      "blocks_overlay": false,
+      "blocks_release": true,
+      "decision": "Consolidate BWS116-R01-HO-002 and both KNOWN_BASELINE_MANIFEST_DRIFT records under canonical non-defect handoff ID KNOWN_BASELINE_MANIFEST_DRIFT with R11 ownership.",
+      "id": "BWS117-W1-DEC-003",
+      "owner": "R11"
+    },
+    {
+      "blocks_next_wave": false,
+      "blocks_overlay": false,
+      "blocks_release": true,
+      "decision": "R01 owns immutable upstream cycle identity, provenance, and exact consumed-record semantics. R03 owns the atomic persistence and checkpoint mechanics required to store that cycle.",
+      "id": "BWS117-W1-DEC-004",
+      "owner": "R01/R03"
+    },
+    {
+      "blocks_next_wave": false,
+      "blocks_overlay": false,
+      "blocks_release": true,
+      "decision": "R02 owns complete-set, provider/generation, quote, fee, capacity, and solver semantics after intake. R01 remains owner of upstream authority and currentness before records cross into the strategy layer.",
+      "id": "BWS117-W1-DEC-005",
+      "owner": "R01/R02"
+    },
+    {
+      "blocks_next_wave": false,
+      "blocks_overlay": false,
+      "blocks_release": true,
+      "decision": "R01 pagination/HTTP deadlines, R03 psql command deadlines, and R03 service cancellation are related dependencies but distinct root causes and must not be merged.",
+      "id": "BWS117-W1-DEC-006",
+      "owner": "R01/R03"
+    },
+    {
+      "blocks_next_wave": false,
+      "blocks_overlay": false,
+      "blocks_release": true,
+      "decision": "Retain BWS116-R03-001 as P0. Current supplied migrations are presently surebet-qualified; the defect is the callable migration source/scope authority that accepts external and cross-schema executable SQL.",
+      "id": "BWS117-W1-DEC-007",
+      "owner": "R03"
+    },
+    {
+      "blocks_next_wave": false,
+      "blocks_overlay": false,
+      "blocks_release": false,
+      "decision": "Current task/status and BWS-600/BWS-710/BWS-900 routing documents remain untouched. Review documentation is subordinate and cannot promote readiness.",
+      "id": "BWS117-W1-DEC-008",
+      "owner": "Current task authority"
+    },
+    {
+      "blocks_next_wave": false,
+      "blocks_overlay": false,
+      "blocks_release": true,
+      "decision": "Node 22 observations remain supplementary. Any implementation acceptance must rerun the relevant suite under exact Node 20.20.2.",
+      "id": "BWS117-W1-DEC-009",
+      "owner": "R11 and implementation validation"
+    },
+    {
+      "blocks_next_wave": false,
+      "blocks_overlay": false,
+      "blocks_release": true,
+      "decision": "R03 PostgreSQL findings supported only statically remain confirmed source defects where the code path is direct, but PostgreSQL isolation, crash, and role enforcement acceptance remains unproven until a disposable database run.",
+      "id": "BWS117-W1-DEC-010",
+      "owner": "R03/R08/R11"
+    },
+    {
+      "blocks_next_wave": false,
+      "blocks_overlay": false,
+      "blocks_release": false,
+      "decision": "Do not integrate or modify betting-win. Prior BW R13/R17/R18 material and its failed documentation overlay remain out of scope and process-only evidence.",
+      "id": "BWS117-W1-DEC-011",
+      "owner": "Repository boundary"
+    },
+    {
+      "blocks_next_wave": false,
+      "blocks_overlay": false,
+      "blocks_release": true,
+      "decision": "The exact archive and validate_source_manifest.py result override the stale PROJECT_STATUS prose claiming the previous manifest diagnostic was resolved. The review overlay records the contradiction but does not rewrite protected status; R11 owns correction.",
+      "id": "BWS117-W1-DEC-012",
+      "owner": "R11"
+    },
+    {
+      "blocks_next_wave": false,
+      "blocks_overlay": false,
+      "blocks_release": false,
+      "decision": "Wave 02 R04-R06 may proceed in parallel as read-only research. No source implementation starts before all review outputs are consolidated and dependency-ready fix tranches are approved.",
+      "id": "BWS117-W1-DEC-013",
+      "owner": "Review program"
+    }
+  ],
+  "schema": "betting-win-surebet-wave01-decisions-v1"
+}

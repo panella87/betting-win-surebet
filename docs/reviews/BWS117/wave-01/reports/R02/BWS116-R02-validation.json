@@ -1,0 +1,593 @@
+{
+  "schema": "betting-win-surebet-r02-validation-v1",
+  "review_id": "BWS116-R02",
+  "generated_at_utc": "2026-09-11T04:54:37.232110Z",
+  "archive": {
+    "required_name": "betting-win-surebet116.zip",
+    "reviewed_uploaded_path": "/mnt/data/betting-win-surebet116(3).zip",
+    "expected_sha256": "6cc5be4e7f3a637d7c0ed9485f246ade4975b5a8e60d3895943e0471afc29376",
+    "actual_sha256": "6cc5be4e7f3a637d7c0ed9485f246ade4975b5a8e60d3895943e0471afc29376",
+    "hash_matches": true,
+    "matching_uploaded_copy": "/mnt/data/betting-win-surebet116(4).zip",
+    "matching_copy_sha256": "6cc5be4e7f3a637d7c0ed9485f246ade4975b5a8e60d3895943e0471afc29376",
+    "newer_archive_not_substituted": "/mnt/data/betting-win-surebet117(2).zip",
+    "newer_archive_sha256": "0d234e00d015dcab0989b47372ded516bddee9705d9021a0694916dc91a9d494",
+    "zip_entries": 618,
+    "regular_files": 618,
+    "expected_regular_files": 618,
+    "entry_count_matches": true,
+    "path_safety": {
+      "duplicate_paths": 0,
+      "unsafe_paths": 0,
+      "symlinks": 0,
+      "special_entries": 0,
+      "directories": 0,
+      "extraction_integrity": true
+    }
+  },
+  "package_identity": {
+    "name": "betting-win-surebet",
+    "version": "0.1.0-bws-full-platform",
+    "engine": ">=20 <21",
+    "matches_required_identity": true
+  },
+  "runtime_and_tools": {
+    "canonical_runtime": "Node 20.20.2",
+    "canonical_runtime_available": false,
+    "actual_node": "v22.16.0",
+    "actual_node_classification": "supplementary_only",
+    "npm": "10.9.2",
+    "typescript_cli": "5.8.3",
+    "python": "3.13.5",
+    "ts_node_loader": "/opt/nvm/versions/node/v22.16.0/lib/node_modules/ts-node/esm.mjs",
+    "node_modules_present": false,
+    "dist_present": false
+  },
+  "commands_executed": [
+    {
+      "name": "validate_repo",
+      "command": [
+        "python3",
+        "scripts/validate_repo.py"
+      ],
+      "cwd": "/tmp/bws116-r02-review/extracted",
+      "duration_seconds": 0.83371,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout_path": "/tmp/bws116-r02-review/harness/checks/validate_repo.stdout",
+      "stderr_path": "/tmp/bws116-r02-review/harness/checks/validate_repo.stderr",
+      "classification": "passed"
+    },
+    {
+      "name": "validate_contract_boundary",
+      "command": [
+        "python3",
+        "scripts/validate_contract_boundary.py"
+      ],
+      "cwd": "/tmp/bws116-r02-review/extracted",
+      "duration_seconds": 0.76632,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout_path": "/tmp/bws116-r02-review/harness/checks/validate_contract_boundary.stdout",
+      "stderr_path": "/tmp/bws116-r02-review/harness/checks/validate_contract_boundary.stderr",
+      "classification": "passed"
+    },
+    {
+      "name": "validate_no_provider_connections",
+      "command": [
+        "python3",
+        "scripts/validate_no_provider_connections.py"
+      ],
+      "cwd": "/tmp/bws116-r02-review/extracted",
+      "duration_seconds": 0.817335,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout_path": "/tmp/bws116-r02-review/harness/checks/validate_no_provider_connections.stdout",
+      "stderr_path": "/tmp/bws116-r02-review/harness/checks/validate_no_provider_connections.stderr",
+      "classification": "passed"
+    },
+    {
+      "name": "validate_no_execution_paths",
+      "command": [
+        "python3",
+        "scripts/validate_no_execution_paths.py"
+      ],
+      "cwd": "/tmp/bws116-r02-review/extracted",
+      "duration_seconds": 0.865728,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout_path": "/tmp/bws116-r02-review/harness/checks/validate_no_execution_paths.stdout",
+      "stderr_path": "/tmp/bws116-r02-review/harness/checks/validate_no_execution_paths.stderr",
+      "classification": "passed"
+    },
+    {
+      "name": "validate_fixture_integrity",
+      "command": [
+        "python3",
+        "scripts/validate_fixture_integrity.py"
+      ],
+      "cwd": "/tmp/bws116-r02-review/extracted",
+      "duration_seconds": 0.613931,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout_path": "/tmp/bws116-r02-review/harness/checks/validate_fixture_integrity.stdout",
+      "stderr_path": "/tmp/bws116-r02-review/harness/checks/validate_fixture_integrity.stderr",
+      "classification": "passed"
+    },
+    {
+      "name": "validate_bws_b1_authority",
+      "command": [
+        "python3",
+        "scripts/validate_bws_b1_authority.py"
+      ],
+      "cwd": "/tmp/bws116-r02-review/extracted",
+      "duration_seconds": 0.584131,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout_path": "/tmp/bws116-r02-review/harness/checks/validate_bws_b1_authority.stdout",
+      "stderr_path": "/tmp/bws116-r02-review/harness/checks/validate_bws_b1_authority.stderr",
+      "classification": "passed"
+    },
+    {
+      "name": "validate_bws_b1_boundary",
+      "command": [
+        "python3",
+        "scripts/validate_bws_b1_boundary.py"
+      ],
+      "cwd": "/tmp/bws116-r02-review/extracted",
+      "duration_seconds": 0.596872,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout_path": "/tmp/bws116-r02-review/harness/checks/validate_bws_b1_boundary.stdout",
+      "stderr_path": "/tmp/bws116-r02-review/harness/checks/validate_bws_b1_boundary.stderr",
+      "classification": "passed"
+    },
+    {
+      "name": "validate_bws_b1_acceptance",
+      "command": [
+        "python3",
+        "scripts/validate_bws_b1_acceptance.py"
+      ],
+      "cwd": "/tmp/bws116-r02-review/extracted",
+      "duration_seconds": 0.58893,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout_path": "/tmp/bws116-r02-review/harness/checks/validate_bws_b1_acceptance.stdout",
+      "stderr_path": "/tmp/bws116-r02-review/harness/checks/validate_bws_b1_acceptance.stderr",
+      "classification": "passed"
+    },
+    {
+      "name": "validate_source_manifest",
+      "command": [
+        "python3",
+        "scripts/validate_source_manifest.py"
+      ],
+      "cwd": "/tmp/bws116-r02-review/extracted",
+      "duration_seconds": 0.634224,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 1,
+      "stdout_path": "/tmp/bws116-r02-review/harness/checks/validate_source_manifest.stdout",
+      "stderr_path": "/tmp/bws116-r02-review/harness/checks/validate_source_manifest.stderr",
+      "classification": "known_baseline_failure"
+    },
+    {
+      "name": "typecheck",
+      "command": [
+        "tsc",
+        "-p",
+        "tsconfig.json",
+        "--noEmit"
+      ],
+      "cwd": "/tmp/bws116-r02-review/extracted",
+      "duration_seconds": 1.165005,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 2,
+      "stdout_path": "/tmp/bws116-r02-review/harness/checks/typecheck.stdout",
+      "stderr_path": "/tmp/bws116-r02-review/harness/checks/typecheck.stderr",
+      "classification": "unavailable_missing_installed_dev_dependency"
+    },
+    {
+      "name": "focused_r02_tests_node22_supplementary",
+      "command": [
+        "node",
+        "--test",
+        "--test-concurrency=1",
+        "--loader",
+        "/opt/nvm/versions/node/v22.16.0/lib/node_modules/ts-node/esm.mjs",
+        "tests/market-group-key.test.ts",
+        "tests/equivalence-precheck.test.ts",
+        "tests/complete-set.test.ts",
+        "tests/quote-capacity.test.ts",
+        "tests/fee-cost-model.test.ts",
+        "tests/stake-vector.test.ts",
+        "tests/rounding.test.ts",
+        "tests/scenario-cashflow.test.ts",
+        "tests/standard-binary-stake-solver.test.ts",
+        "tests/opportunity-derivation.test.ts",
+        "tests/b1-market-equivalence.test.ts",
+        "tests/b1-quote-synchronization.test.ts",
+        "tests/b1-capital-lock.test.ts",
+        "tests/b1-gross-spread.test.ts",
+        "tests/b1-net-spread.test.ts",
+        "tests/b1-cross-venue-derivation.test.ts",
+        "tests/b1-generalized-stake-vector.test.ts",
+        "tests/b1-scenario-cashflow.test.ts"
+      ],
+      "cwd": "/tmp/bws116-r02-review/extracted",
+      "duration_seconds": 6.560811,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "runtime": "Node 22.16.0 supplementary",
+      "tests": [
+        "tests/market-group-key.test.ts",
+        "tests/equivalence-precheck.test.ts",
+        "tests/complete-set.test.ts",
+        "tests/quote-capacity.test.ts",
+        "tests/fee-cost-model.test.ts",
+        "tests/stake-vector.test.ts",
+        "tests/rounding.test.ts",
+        "tests/scenario-cashflow.test.ts",
+        "tests/standard-binary-stake-solver.test.ts",
+        "tests/opportunity-derivation.test.ts",
+        "tests/b1-market-equivalence.test.ts",
+        "tests/b1-quote-synchronization.test.ts",
+        "tests/b1-capital-lock.test.ts",
+        "tests/b1-gross-spread.test.ts",
+        "tests/b1-net-spread.test.ts",
+        "tests/b1-cross-venue-derivation.test.ts",
+        "tests/b1-generalized-stake-vector.test.ts",
+        "tests/b1-scenario-cashflow.test.ts"
+      ],
+      "stdout_path": "/tmp/bws116-r02-review/harness/checks/focused_r02_tests.stdout",
+      "stderr_path": "/tmp/bws116-r02-review/harness/checks/focused_r02_tests.stderr",
+      "classification": "passed_supplementary_runtime"
+    },
+    {
+      "name": "r02_adversarial",
+      "command": [
+        "node",
+        "--loader",
+        "/opt/nvm/versions/node/v22.16.0/lib/node_modules/ts-node/esm.mjs",
+        "/tmp/bws116-r02-review/harness/r02-adversarial.mts"
+      ],
+      "cwd": "/tmp/bws116-r02-review/harness",
+      "duration_seconds": 0.56805,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout_path": "/tmp/bws116-r02-review/harness/r02_adversarial.rerun.stdout",
+      "stderr_path": "/tmp/bws116-r02-review/harness/r02_adversarial.rerun.stderr",
+      "runtime": "Node 22.16.0 supplementary",
+      "classification": "passed_bounded_offline_harness"
+    },
+    {
+      "name": "r02_extended",
+      "command": [
+        "node",
+        "--loader",
+        "/opt/nvm/versions/node/v22.16.0/lib/node_modules/ts-node/esm.mjs",
+        "/tmp/bws116-r02-review/harness/r02-extended.mts"
+      ],
+      "cwd": "/tmp/bws116-r02-review/harness",
+      "duration_seconds": 0.471721,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout_path": "/tmp/bws116-r02-review/harness/r02_extended.rerun.stdout",
+      "stderr_path": "/tmp/bws116-r02-review/harness/r02_extended.rerun.stderr",
+      "runtime": "Node 22.16.0 supplementary",
+      "classification": "passed_bounded_offline_harness"
+    },
+    {
+      "name": "solver_two_way_small_domain_oracle",
+      "command": [
+        "python3",
+        "/tmp/bws116-r02-review/harness/search_solver_counterexamples.py"
+      ],
+      "cwd": "/tmp/bws116-r02-review/harness",
+      "duration_seconds": 0.58964,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout_path": "/tmp/bws116-r02-review/harness/solver_two_way_small_domain_oracle.rerun.stdout",
+      "stderr_path": "/tmp/bws116-r02-review/harness/solver_two_way_small_domain_oracle.rerun.stderr",
+      "runtime": "Python 3.13.5",
+      "classification": "passed_bounded_offline_harness"
+    },
+    {
+      "name": "additional_en_US",
+      "command": [
+        "node",
+        "--loader",
+        "/opt/nvm/versions/node/v22.16.0/lib/node_modules/ts-node/esm.mjs",
+        "/tmp/bws116-r02-review/harness/r02-additional.mts"
+      ],
+      "cwd": "/tmp/bws116-r02-review/harness",
+      "environment": {
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US.UTF-8",
+        "TS_NODE_TRANSPILE_ONLY": "true",
+        "TS_NODE_COMPILER_OPTIONS": "NodeNext/NodeNext"
+      },
+      "duration_seconds": 0.48381,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout_path": "/tmp/bws116-r02-review/harness/additional_en_US.stdout",
+      "stderr_path": "/tmp/bws116-r02-review/harness/additional_en_US.stderr",
+      "classification": "passed_bounded_offline_harness",
+      "runtime": "Node 22.16.0 supplementary"
+    },
+    {
+      "name": "additional_sv_SE",
+      "command": [
+        "node",
+        "--loader",
+        "/opt/nvm/versions/node/v22.16.0/lib/node_modules/ts-node/esm.mjs",
+        "/tmp/bws116-r02-review/harness/r02-additional.mts"
+      ],
+      "cwd": "/tmp/bws116-r02-review/harness",
+      "environment": {
+        "LANG": "sv_SE.UTF-8",
+        "LC_ALL": "sv_SE.UTF-8",
+        "TS_NODE_TRANSPILE_ONLY": "true",
+        "TS_NODE_COMPILER_OPTIONS": "NodeNext/NodeNext"
+      },
+      "duration_seconds": 0.471333,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout_path": "/tmp/bws116-r02-review/harness/additional_sv_SE.stdout",
+      "stderr_path": "/tmp/bws116-r02-review/harness/additional_sv_SE.stderr",
+      "classification": "passed_bounded_offline_harness",
+      "runtime": "Node 22.16.0 supplementary"
+    },
+    {
+      "name": "solver_three_way_small_domain_oracle",
+      "command": [
+        "python3",
+        "/tmp/bws116-r02-review/harness/search_solver_three_way.py"
+      ],
+      "duration_seconds": 0.663587,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout_path": "/tmp/bws116-r02-review/harness/solver-three-way.stdout",
+      "stderr_path": "/tmp/bws116-r02-review/harness/solver-three-way.stderr",
+      "classification": "passed_independent_oracle",
+      "runtime": "Python 3.13.5"
+    },
+    {
+      "name": "three_way_production_counterexample",
+      "command": [
+        "node",
+        "--loader",
+        "/opt/nvm/versions/node/v22.16.0/lib/node_modules/ts-node/esm.mjs",
+        "/tmp/bws116-r02-review/harness/r02-three-way-production.mts"
+      ],
+      "cwd": "/tmp/bws116-r02-review/harness",
+      "duration_seconds": 0.34161,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout_path": "/tmp/bws116-r02-review/harness/r02-three-way-production.stdout",
+      "stderr_path": "/tmp/bws116-r02-review/harness/r02-three-way-production.stderr",
+      "classification": "passed_production_counterexample",
+      "runtime": "Node 22.16.0 supplementary"
+    }
+  ],
+  "checks": {
+    "passed": [
+      "validate_repo",
+      "validate_contract_boundary",
+      "validate_no_provider_connections",
+      "validate_no_execution_paths",
+      "validate_fixture_integrity",
+      "validate_bws_b1_authority",
+      "validate_bws_b1_boundary",
+      "validate_bws_b1_acceptance",
+      "focused_r02_tests_node22_supplementary",
+      "r02_adversarial",
+      "r02_extended",
+      "solver_two_way_small_domain_oracle",
+      "additional_en_US",
+      "additional_sv_SE",
+      "solver_three_way_small_domain_oracle",
+      "three_way_production_counterexample"
+    ],
+    "failed_expected_known_baseline": [
+      "validate_source_manifest"
+    ],
+    "failed_unexpected": [],
+    "skipped": [
+      "full npm build/test because dependencies were not installed and installation was prohibited",
+      "provider/API/database/runtime controllers"
+    ],
+    "unavailable": [
+      "canonical Node 20.20.2 execution",
+      "tsc --noEmit because @types/node was not installed in the extracted archive environment"
+    ],
+    "focused_test_summary": {
+      "files": 18,
+      "tests_passed": 147,
+      "tests_failed": 0,
+      "runtime": "Node 22.16.0 supplementary"
+    }
+  },
+  "bounded_harnesses": {
+    "adversarial_contract_harness": "/tmp/bws116-r02-review/harness/r02-adversarial.mts",
+    "extended_solver_and_venue_harness": "/tmp/bws116-r02-review/harness/r02-extended.mts",
+    "global_sync_and_locale_harness": "/tmp/bws116-r02-review/harness/r02-additional.mts",
+    "two_way_oracle": "/tmp/bws116-r02-review/harness/search_solver_counterexamples.py",
+    "three_way_oracle": "/tmp/bws116-r02-review/harness/search_solver_three_way.py",
+    "three_way_production_reproduction": "/tmp/bws116-r02-review/harness/r02-three-way-production.mts",
+    "all_inputs": "inert, local, deterministic; no network/provider/database access"
+  },
+  "independent_vector_generation_method": {
+    "description": "Exhaustive Cartesian enumeration of every stake satisfying each min/max/step constraint in bounded small domains. For each vector, integer payout=floor(stake*decimalOddsMicro/1e6), total stake is conserved, and worst-case net is min(payout_i-totalStake). Feasibility is compared with a separately reimplemented model and then reproduced against the production TypeScript function.",
+    "two_way_cases_examined_before_retained_counterexamples": 1317,
+    "two_way_example": {
+      "n": 2,
+      "odds": [
+        1500000,
+        4000000
+      ],
+      "constraints": [
+        [
+          1,
+          2,
+          1
+        ],
+        [
+          1,
+          1,
+          1
+        ]
+      ],
+      "target": 0,
+      "brute": [
+        [
+          2,
+          1
+        ],
+        0
+      ],
+      "impl": null,
+      "status": "capacity"
+    },
+    "three_way_cases_examined": 12163,
+    "three_way_false_feasible_count": 0,
+    "three_way_example": {
+      "odds": [
+        2500000,
+        2500000,
+        6000000
+      ],
+      "constraints": [
+        [
+          1,
+          2,
+          1
+        ],
+        [
+          1,
+          2,
+          1
+        ],
+        [
+          1,
+          1,
+          1
+        ]
+      ],
+      "target": 0,
+      "brute": {
+        "stakes": [
+          2,
+          2,
+          1
+        ],
+        "nets": [
+          0,
+          0,
+          1
+        ]
+      },
+      "impl_status": "capacity"
+    },
+    "production_three_way_result": {
+      "production_ok": false,
+      "production_blocker": "B1_STAKE_VECTOR_CAPACITY_EXHAUSTED",
+      "feasible_stakes": [
+        "2",
+        "2",
+        "1"
+      ],
+      "feasible_payouts": [
+        "5",
+        "5",
+        "6"
+      ],
+      "feasible_nets": [
+        "0",
+        "0",
+        "1"
+      ],
+      "feasible_worst_case_net": "0"
+    }
+  },
+  "coverage_reconciliation": {
+    "archive_regular_files": 618,
+    "tsv_rows_excluding_header": 618,
+    "unique_paths": 618,
+    "missing_paths": [],
+    "duplicate_rows": 0,
+    "all_member_sizes_and_hashes_recorded": true,
+    "primary_sources": 32,
+    "focused_tests": 18,
+    "authority_documents_and_backlogs": 14,
+    "secondary_traces": 9
+  },
+  "finding_counts": {
+    "confirmed_by_severity": {
+      "P1": 14
+    },
+    "all_records_by_classification": {
+      "CONFIRMED_FINDING": 14,
+      "CROSS_AREA_HANDOFF": 3,
+      "EXTERNAL_INPUT_BLOCKER": 1,
+      "HYPOTHESIS": 4,
+      "INTENTIONAL_SAFEGUARD": 6,
+      "PROBABLE_FINDING": 1,
+      "REJECTED_SUSPICION": 5,
+      "TEST_GAP": 9
+    },
+    "all_records_by_severity": {
+      "P1": 21,
+      "P2": 10,
+      "P3": 12
+    },
+    "confirmed_release_blocking": 14,
+    "confirmed_bws600_blocking": 12,
+    "confirmed_b1_acceptance_blocking": 10
+  },
+  "known_validation_limitations": [
+    "Canonical Node 20.20.2 was unavailable; Node 22 observations are supplementary and not release acceptance.",
+    "Dependencies were not installed. Full npm build/test and declaration checks were not run.",
+    "No real betting-win B1 runtime resource exists in the supplied baseline; fee, capacity, and provider-generation truth cannot be externally accepted from fixtures.",
+    "The independent brute-force domains are bounded counterexample searches, not formal proofs over unbounded bigint domains.",
+    "R04 lifecycle/backtest orchestration and R03 persistence behavior were traced only to the R02 boundary.",
+    "Known SOURCE_MANIFEST drift is handed to R11 and is not an R02 finding."
+  ],
+  "repository_mutation_attestation": {
+    "source_tree_path": "/tmp/bws116-r02-review/extracted",
+    "expected_files": 618,
+    "actual_files": 618,
+    "missing": [],
+    "extra": [],
+    "changed": [],
+    "repository_state_modified": false,
+    "temporary_outputs_location": "/tmp/bws116-r02-review"
+  },
+  "network_provider_database_access_attestation": {
+    "network_access": "none",
+    "provider_access": "none",
+    "external_api_access": "none",
+    "account_or_credential_access": "none",
+    "persistent_database_access": "none",
+    "provider_writes_or_execution": "none",
+    "controllers_or_services_started": "none"
+  },
+  "verdict": "BLOCKED_CORRECTNESS_REMEDIATION_REQUIRED"
+}

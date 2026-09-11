@@ -1,0 +1,1466 @@
+{
+  "schema": "betting-win-surebet-r02-findings-v1",
+  "review_id": "BWS116-R02",
+  "repository": "betting-win-surebet",
+  "archive": "betting-win-surebet116.zip",
+  "reviewed_uploaded_copy": "betting-win-surebet116(3).zip",
+  "archive_sha256": "6cc5be4e7f3a637d7c0ed9485f246ade4975b5a8e60d3895943e0471afc29376",
+  "regular_file_count": 618,
+  "package": {
+    "name": "betting-win-surebet",
+    "version": "0.1.0-bws-full-platform"
+  },
+  "canonical_runtime": "Node 20.20.2",
+  "verdict": "BLOCKED_CORRECTNESS_REMEDIATION_REQUIRED",
+  "confirmed_finding_count": 14,
+  "confirmed_severity_counts": {
+    "P1": 14
+  },
+  "record_classification_counts": {
+    "CONFIRMED_FINDING": 14,
+    "CROSS_AREA_HANDOFF": 3,
+    "EXTERNAL_INPUT_BLOCKER": 1,
+    "HYPOTHESIS": 4,
+    "INTENTIONAL_SAFEGUARD": 6,
+    "PROBABLE_FINDING": 1,
+    "REJECTED_SUSPICION": 5,
+    "TEST_GAP": 9
+  },
+  "records": [
+    {
+      "id": "BWS116-R02-001",
+      "title": "B1 complete-set acceptance proves only key cardinality, not mutually exclusive and exhaustive outcome semantics",
+      "severity": "P1",
+      "confidence": 0.99,
+      "classification": "CONFIRMED_FINDING",
+      "current_files_symbols_line_ranges_hashes": [
+        {
+          "path": "packages/bootstrap/src/identity/b1-market-equivalence.ts",
+          "symbol": "compareB1MarketOutcomeSetEquivalence / indexBySelectionEquivalence",
+          "line_range": "141-235",
+          "full_file_sha256": "b7bd85ede3224740021fdc676db69c690820e2634c13c32a6719190feedb6f75"
+        },
+        {
+          "path": "packages/bootstrap/src/identity/b1-market-equivalence.ts",
+          "symbol": "indexBySelectionEquivalence",
+          "line_range": "305-326",
+          "full_file_sha256": "b7bd85ede3224740021fdc676db69c690820e2634c13c32a6719190feedb6f75"
+        },
+        {
+          "path": "packages/bootstrap/src/identity/b1-selection-equivalence.ts",
+          "symbol": "compareB1SelectionEquivalence",
+          "line_range": "15-51",
+          "full_file_sha256": "ac7dcc2ddf2d9bf660931b639e10b6659ffe90ec8115ab80b765884784bc0ae2"
+        },
+        {
+          "path": "packages/bootstrap/src/scenarios/b1-terminal-scenario.ts",
+          "symbol": "buildB1TerminalScenarios",
+          "line_range": "15-52",
+          "full_file_sha256": "4f3ee12a400f4a034a177043213f785df2c6a60f33f8cdd85a84be652401b47c"
+        }
+      ],
+      "preconditions": [
+        "Two or three distinct selection-equivalence keys exist on each venue.",
+        "The rows share market, rule, currency, and venue-pair fields accepted by the existing comparator."
+      ],
+      "trigger": "Supply two distinct selection keys whose outcomeSide values are both \"home\" on both venues, then derive the B1 candidate.",
+      "expected_behavior": "A supported complete set must prove that its terminal outcomes are mutually exclusive, exhaustive, and mapped to the declared market shape, not merely count two or three distinct keys.",
+      "current_behavior": "The comparator checks 2/3 cardinality, unique selection keys, and pairwise equality of each key/side across venues. It never checks within-set semantic complementarity or exhaustiveness. Terminal scenarios are then generated one per key.",
+      "impact": "A duplicated or overlapping semantic outcome set can be treated as complete, allowing gross and net calculations over a portfolio that does not cover every terminal result.",
+      "independent_mathematical_evidence": "The inert harness passed two unique selections with sides [home, home]; outcome-set equivalence returned ok=true and gross derivation emitted one accepted candidate.",
+      "reproduction_status": "REPRODUCED_OFFLINE_NODE22_SUPPLEMENTARY",
+      "root_cause": "Outcome-set validity is represented as cardinality plus key uniqueness; canonical market-shape semantics are absent from the B1 complete-set gate.",
+      "minimal_fix_boundary": "Add an R02-owned market-shape outcome-set validator at the equivalence/terminal-scenario boundary. It must consume authoritative canonical outcome semantics and fail closed before quote selection. Do not change upstream canonical identity production.",
+      "required_tests": [
+        "Two-way home/home, away/away, yes/yes, no/no, over/over, under/under rejection tests.",
+        "Three-way duplicate-side and missing-draw tests.",
+        "Permutation/property tests proving exactly one terminal winner per valid market shape."
+      ],
+      "regression_risks": [
+        "Overly label-based fixes could reject legitimate provider aliases.",
+        "Changes must preserve canonical selection-equivalence authority and not invent local identity."
+      ],
+      "primary_owner": "R02",
+      "secondary_sectors": [
+        "R01 upstream canonical outcome authority",
+        "R04 residual/settlement simulation consumers",
+        "R11 aggregate false-green tests"
+      ],
+      "aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "Upstream event/market identity generation",
+        "Persistence and worker lifecycle",
+        "Fill/rejection/settlement replay implementation"
+      ],
+      "blocks": {
+        "release": true,
+        "bws_600_evidence": true,
+        "b1_acceptance": true,
+        "later_execution": true
+      }
+    },
+    {
+      "id": "BWS116-R02-002",
+      "title": "B1 market grouping and venue-pair identity omit provider and provider-generation authority",
+      "severity": "P1",
+      "confidence": 0.99,
+      "classification": "CONFIRMED_FINDING",
+      "current_files_symbols_line_ranges_hashes": [
+        {
+          "path": "packages/bootstrap/src/contracts/b1-local-types.ts",
+          "symbol": "B1MultiVenueMarketRow provider identity fields",
+          "line_range": "30-70",
+          "full_file_sha256": "22a43ced9a713e4144e343529a8940edfa00676659aa01f48f739e3f28ca03e1"
+        },
+        {
+          "path": "packages/bootstrap/src/identity/b1-market-equivalence.ts",
+          "symbol": "compareB1MarketEquivalence",
+          "line_range": "43-139",
+          "full_file_sha256": "b7bd85ede3224740021fdc676db69c690820e2634c13c32a6719190feedb6f75"
+        },
+        {
+          "path": "packages/bootstrap/src/identity/b1-market-equivalence.ts",
+          "symbol": "compareB1MarketOutcomeSetEquivalence",
+          "line_range": "141-235",
+          "full_file_sha256": "b7bd85ede3224740021fdc676db69c690820e2634c13c32a6719190feedb6f75"
+        },
+        {
+          "path": "packages/bootstrap/src/identity/b1-venue-pair-key.ts",
+          "symbol": "createB1VenuePairKey",
+          "line_range": "14-50",
+          "full_file_sha256": "3c1f4864a055c479d758ec070804a285aa1441ad7b14418061039d45d44517fa"
+        },
+        {
+          "path": "packages/bootstrap/src/opportunity/b1-cross-venue-derivation.ts",
+          "symbol": "groupRowsByMarketEquivalence / groupRowsByVenue",
+          "line_range": "318-359",
+          "full_file_sha256": "29866c6839497502a2f9371166dd3865026bc8bca7a8cc57dad12c5717ba2543"
+        },
+        {
+          "path": "packages/bootstrap/src/opportunity/b1-gross-spread.ts",
+          "symbol": "B1GrossQuoteInput / B1GrossQuoteContribution",
+          "line_range": "10-26",
+          "full_file_sha256": "48ecd0e6402a23610f9582222e86e31c943948f31b6edf0896a66751edfddafb"
+        }
+      ],
+      "preconditions": [
+        "Rows reuse the same market-equivalence key and venue ID strings.",
+        "Provider or provider-generation IDs differ across the compared rows or terminal outcomes."
+      ],
+      "trigger": "Combine rows from generation-001 and generation-002 while holding market key, venue IDs, rules, and selection keys constant.",
+      "expected_behavior": "Every compared quote set must preserve and verify compatible provider ID and provider-generation identity, and the selected quote evidence must retain that authority.",
+      "current_behavior": "ProviderId and providerGenerationId are present on input rows but are not compared by the market/outcome-set equivalence functions, are not part of the venue-pair key or grouping keys, and are dropped from selected quote contributions.",
+      "impact": "Historical/current generations or same-named venues from different providers can be merged into one candidate, while downstream economic records cannot identify the selected generation.",
+      "independent_mathematical_evidence": "The inert harness accepted an outcome set containing generation-001 and generation-002. The selected quote objects contained no providerId, providerGenerationId, lineage ID, evidence ID, or raw-payload hash.",
+      "reproduction_status": "REPRODUCED_OFFLINE_NODE22_SUPPLEMENTARY",
+      "root_cause": "The B1 local row contract carries provider authority, but the R02 identity composition narrows to market key plus venue string and strips generation evidence at quote selection.",
+      "minimal_fix_boundary": "Extend R02 equivalence, grouping, venue identity, and selected-quote contracts to bind provider and generation. Any definition of compatible cross-generation equivalence is an explicit R01 handoff and must not default to compatibility.",
+      "required_tests": [
+        "Mixed-provider and mixed-generation rejection tests.",
+        "Same venue ID under different providers collision tests.",
+        "Selected quote evidence retention tests.",
+        "Permutation tests across generation partitions."
+      ],
+      "regression_risks": [
+        "Changing candidate identity may affect persisted keys and report joins owned by R03/R05.",
+        "Do not rewrite upstream provider-generation semantics locally."
+      ],
+      "primary_owner": "R02",
+      "secondary_sectors": [
+        "R01 upstream contract/provenance",
+        "R03 persisted candidate identity",
+        "R05 API/report projections",
+        "R11 validators"
+      ],
+      "aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "Upstream provider-generation production",
+        "External API currentness gate",
+        "Execution remains prohibited"
+      ],
+      "blocks": {
+        "release": true,
+        "bws_600_evidence": true,
+        "b1_acceptance": true,
+        "later_execution": true
+      }
+    },
+    {
+      "id": "BWS116-R02-003",
+      "title": "B1 synchronization is pair-local and can combine terminal outcomes outside the configured global quote window",
+      "severity": "P1",
+      "confidence": 0.99,
+      "classification": "CONFIRMED_FINDING",
+      "current_files_symbols_line_ranges_hashes": [
+        {
+          "path": "packages/bootstrap/src/quotes/b1-quote-synchronization.ts",
+          "symbol": "synchronizeB1VenueQuotePair",
+          "line_range": "41-86",
+          "full_file_sha256": "4746d1bd364a7389a95b4aa912e66f66041c44fc51083dcd02a12e9ad1fa9bde"
+        },
+        {
+          "path": "packages/bootstrap/src/opportunity/b1-cross-venue-derivation.ts",
+          "symbol": "deriveVenuePairGrossCandidate",
+          "line_range": "166-216",
+          "full_file_sha256": "29866c6839497502a2f9371166dd3865026bc8bca7a8cc57dad12c5717ba2543"
+        },
+        {
+          "path": "packages/bootstrap/src/opportunity/b1-cross-venue-derivation.ts",
+          "symbol": "acceptedCandidate",
+          "line_range": "238-273",
+          "full_file_sha256": "29866c6839497502a2f9371166dd3865026bc8bca7a8cc57dad12c5717ba2543"
+        },
+        {
+          "path": "packages/bootstrap/src/opportunity/b1-cross-venue-derivation.ts",
+          "symbol": "maxComparisonWindow",
+          "line_range": "437-445",
+          "full_file_sha256": "29866c6839497502a2f9371166dd3865026bc8bca7a8cc57dad12c5717ba2543"
+        }
+      ],
+      "preconditions": [
+        "Each selection has one quote per venue and each pair is internally synchronized.",
+        "Different terminal selections come from materially different snapshot times."
+      ],
+      "trigger": "Use two outcome pairs with zero intra-pair skew but a 10,000 ms skew between the selected outcomes under maxComparisonWindowMs=100.",
+      "expected_behavior": "The complete selected terminal-outcome portfolio must be inside one explicit synchronization window, and the reported window must represent the actual selected-quote span.",
+      "current_behavior": "The code validates each selection pair separately, then reports the maximum intra-pair delta. It never compares selected quote timestamps across terminal outcomes and takes comparisonTimeUtc from the first pair.",
+      "impact": "A candidate can combine asynchronous terminal prices and report maxComparisonWindowMs=0 even though the selected portfolio spans seconds, creating stale-combination false positives.",
+      "independent_mathematical_evidence": "Harness result: configured window 100 ms; pair windows [0,0]; selected-outcome snapshot span 10,000 ms; candidate accepted and reported window 0 ms.",
+      "reproduction_status": "REPRODUCED_OFFLINE_NODE22_SUPPLEMENTARY",
+      "root_cause": "Synchronization scope is selection-pair local rather than candidate-global.",
+      "minimal_fix_boundary": "After best-quote selection, compute and enforce one candidate-global min/max snapshot span and bind comparison time/age evidence to every selected quote.",
+      "required_tests": [
+        "Two- and three-way cross-outcome skew tests.",
+        "Boundary tests at window-1, window, and window+1.",
+        "Permutation tests proving identical global span and decision."
+      ],
+      "regression_risks": [
+        "A global gate can reduce candidate counts; metrics and fixtures must be updated truthfully.",
+        "Do not replace source time with retrieval time."
+      ],
+      "primary_owner": "R02",
+      "secondary_sectors": [
+        "R01 source-time authority",
+        "R04 backtest currentness interpretation",
+        "R07 evidence reporting",
+        "R11 false-green tests"
+      ],
+      "aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "Per-row future and age validation",
+        "Provider intake timing semantics",
+        "Runtime scheduler behavior"
+      ],
+      "blocks": {
+        "release": true,
+        "bws_600_evidence": true,
+        "b1_acceptance": true,
+        "later_execution": true
+      }
+    },
+    {
+      "id": "BWS116-R02-004",
+      "title": "B1 net economics accepts selected odds that are not value-bound to synchronized quote evidence",
+      "severity": "P1",
+      "confidence": 0.99,
+      "classification": "CONFIRMED_FINDING",
+      "current_files_symbols_line_ranges_hashes": [
+        {
+          "path": "packages/bootstrap/src/opportunity/b1-gross-spread.ts",
+          "symbol": "B1GrossQuoteContribution",
+          "line_range": "18-26",
+          "full_file_sha256": "48ecd0e6402a23610f9582222e86e31c943948f31b6edf0896a66751edfddafb"
+        },
+        {
+          "path": "packages/bootstrap/src/opportunity/b1-cross-venue-derivation.ts",
+          "symbol": "selected quote projection",
+          "line_range": "210-216",
+          "full_file_sha256": "29866c6839497502a2f9371166dd3865026bc8bca7a8cc57dad12c5717ba2543"
+        },
+        {
+          "path": "packages/bootstrap/src/opportunity/b1-cross-venue-derivation.ts",
+          "symbol": "acceptedCandidate selectedQuotes/synchronizedQuotePairs",
+          "line_range": "252-272",
+          "full_file_sha256": "29866c6839497502a2f9371166dd3865026bc8bca7a8cc57dad12c5717ba2543"
+        },
+        {
+          "path": "packages/bootstrap/src/economics/b1-net-spread.ts",
+          "symbol": "evaluateB1NetEconomics",
+          "line_range": "119-167",
+          "full_file_sha256": "0f4bbd52d105d75aef34baa43bea49b09b5c6fde8e3afc8ef7f51383cda0947b"
+        },
+        {
+          "path": "packages/bootstrap/src/economics/b1-net-spread.ts",
+          "symbol": "validateAcceptedB1GrossCandidateShape / findSelectedSynchronizedQuote",
+          "line_range": "275-369",
+          "full_file_sha256": "0f4bbd52d105d75aef34baa43bea49b09b5c6fde8e3afc8ef7f51383cda0947b"
+        }
+      ],
+      "preconditions": [
+        "A structurally accepted gross candidate is supplied to the public net-economics function.",
+        "selectedQuotes contains the same selection and venue keys as a synchronized row but different odds or outcome values."
+      ],
+      "trigger": "Replace selectedQuotes decimalOddsMicro values 2,200,000 with 3,000,000 while leaving synchronized source rows at 2.18/2.20.",
+      "expected_behavior": "Net payout values must be derived from, or exactly value-bound to, the synchronized source row selected during gross derivation.",
+      "current_behavior": "Shape validation checks selected quote field types. findSelectedSynchronizedQuote matches only selectionEquivalenceKey and venueOrBookmakerId. Net payout then uses the detached selected quote decimalOddsMicro without comparing it to synchronized row odds or source evidence.",
+      "impact": "A forged, stale, or accidentally recomputed selected quote can inflate payout and pass positive worst-case net while the retained synchronization evidence proves different prices.",
+      "independent_mathematical_evidence": "The harness changed only detached selectedQuotes odds to 3.0; synchronized rows stayed 2.18/2.20; evaluateB1NetEconomics returned ok=true with worstCaseNetMinor=100.",
+      "reproduction_status": "REPRODUCED_OFFLINE_NODE22_SUPPLEMENTARY",
+      "root_cause": "The accepted-gross contract duplicates economic values without an immutable value/evidence binding, and the net gate verifies identity keys only.",
+      "minimal_fix_boundary": "Derive net odds directly from the matched synchronized row or bind selected quote values to an immutable row/evidence digest and verify all value, provider-generation, time, side, and outcome fields.",
+      "required_tests": [
+        "Detached-odds mutation rejection.",
+        "OutcomeName/outcomeSide mutation rejection.",
+        "Provider-generation/evidence/time mutation rejection.",
+        "Exact derivation-to-net round-trip tests."
+      ],
+      "regression_risks": [
+        "Contract changes affect test builders and downstream report serializers.",
+        "Avoid trusting caller-provided digests without recomputation."
+      ],
+      "primary_owner": "R02",
+      "secondary_sectors": [
+        "R01 provenance binding",
+        "R03 stored gross candidate immutability",
+        "R11 contract mutation tests"
+      ],
+      "aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "Gross reciprocal formula",
+        "Fee and capital-lock arithmetic",
+        "Runtime execution path"
+      ],
+      "blocks": {
+        "release": true,
+        "bws_600_evidence": true,
+        "b1_acceptance": true,
+        "later_execution": true
+      }
+    },
+    {
+      "id": "BWS116-R02-005",
+      "title": "B1 integrated solver and net path is not bound to quote capacity or venue-limit decisions",
+      "severity": "P1",
+      "confidence": 0.99,
+      "classification": "CONFIRMED_FINDING",
+      "current_files_symbols_line_ranges_hashes": [
+        {
+          "path": "packages/bootstrap/src/quotes/b1-capacity-model.ts",
+          "symbol": "B1CapacityPolicy / B1CapacityDecision / evaluateB1QuoteCapacity",
+          "line_range": "11-31",
+          "full_file_sha256": "6a98bd374fff19cd414d04fc3410ad944b234043733d8f258a383537e0a28617"
+        },
+        {
+          "path": "packages/bootstrap/src/quotes/b1-capacity-model.ts",
+          "symbol": "capacity enforcement",
+          "line_range": "70-118",
+          "full_file_sha256": "6a98bd374fff19cd414d04fc3410ad944b234043733d8f258a383537e0a28617"
+        },
+        {
+          "path": "packages/bootstrap/src/solver/b1-generalized-stake-vector.ts",
+          "symbol": "B1GeneralizedStakeVectorPolicy",
+          "line_range": "28-41",
+          "full_file_sha256": "822a6ca6802ffb6fbfd52145679b2575536701d4c936a16ab06ab7d70123d1a0"
+        },
+        {
+          "path": "packages/bootstrap/src/economics/b1-net-spread.ts",
+          "symbol": "B1NetEconomicsPolicy / evaluateB1NetEconomics",
+          "line_range": "31-41",
+          "full_file_sha256": "0f4bbd52d105d75aef34baa43bea49b09b5c6fde8e3afc8ef7f51383cda0947b"
+        },
+        {
+          "path": "packages/bootstrap/src/backtest/b1-cross-venue-backtest.ts",
+          "symbol": "B1CrossVenueBacktestPlan",
+          "line_range": "20-29",
+          "full_file_sha256": "b367b8880c8461a50912e13b3cb1489a1f5c8e2c235dfd556d2ef615b6a575d4"
+        },
+        {
+          "path": "packages/bootstrap/src/backtest/b1-cross-venue-backtest.ts",
+          "symbol": "runCandidateBacktest",
+          "line_range": "387-400",
+          "full_file_sha256": "b367b8880c8461a50912e13b3cb1489a1f5c8e2c235dfd556d2ef615b6a575d4"
+        }
+      ],
+      "preconditions": [
+        "Input rows contain availableSizeMinor and venue-limit models exist.",
+        "A caller supplies legConstraints whose maxStakeMinor exceeds the authoritative quote/venue capacity."
+      ],
+      "trigger": "Solve/evaluate stakes of 100 minor units for a selected quote whose availableSizeMinor is 1, without invoking the separate capacity primitive.",
+      "expected_behavior": "Every accepted stake and net candidate must be derived from explicit capacity and venue-limit decisions bound to the selected source rows.",
+      "current_behavior": "The backtest plan accepts caller-authored solver constraints and no capacity/venue-limit evidence. The solver and net evaluator never invoke evaluateB1QuoteCapacity. The standalone capacity primitive is used only in focused unit tests.",
+      "impact": "A candidate can be labeled net-positive despite being unfillable at the quote depth or violating the venue cap; capacity and limit blocker counts can be false.",
+      "independent_mathematical_evidence": "Harness result: net evaluation accepted stake 100 with worstCaseNetMinor=20 against selected availableSizeMinor=1. Calling evaluateB1QuoteCapacity on the same row correctly returned B1_CAPACITY_OR_LIMIT_INSUFFICIENT.",
+      "reproduction_status": "REPRODUCED_OFFLINE_NODE22_SUPPLEMENTARY",
+      "root_cause": "Capacity and venue-limit validation are disconnected primitives rather than authoritative inputs to stake-policy construction and net acceptance.",
+      "minimal_fix_boundary": "Introduce one R02 integration boundary that derives each leg max/min/step from selected quote capacity plus normalized venue limits and carries the resulting decisions through solver and net acceptance. Persistence changes belong to R03.",
+      "required_tests": [
+        "End-to-end quote-depth-to-solver constraint tests.",
+        "Stake above quote, venue, market, and portfolio cap rejection tests.",
+        "Missing capacity/proxy and missing venue-limit tests.",
+        "Capacity changes after selection must invalidate the candidate."
+      ],
+      "regression_risks": [
+        "Existing backtest plans and fixtures contain synthetic max values and will need explicit evidence.",
+        "Do not allow an operator cap to exceed observed depth."
+      ],
+      "primary_owner": "R02",
+      "secondary_sectors": [
+        "R03 capacity evidence persistence",
+        "R04 fillability simulation",
+        "R07 acceptance metrics",
+        "R11 integration validators"
+      ],
+      "aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "Standalone capacity arithmetic",
+        "Venue-limit normalization",
+        "Fill/rejection lifecycle after stake acceptance"
+      ],
+      "blocks": {
+        "release": true,
+        "bws_600_evidence": true,
+        "b1_acceptance": true,
+        "later_execution": true
+      }
+    },
+    {
+      "id": "BWS116-R02-006",
+      "title": "B1 generalized solver can reject feasible two-way and three-way integer stake vectors",
+      "severity": "P1",
+      "confidence": 0.99,
+      "classification": "CONFIRMED_FINDING",
+      "current_files_symbols_line_ranges_hashes": [
+        {
+          "path": "packages/bootstrap/src/solver/b1-generalized-stake-vector.ts",
+          "symbol": "solveB1GeneralizedStakeVector target search",
+          "line_range": "147-225",
+          "full_file_sha256": "822a6ca6802ffb6fbfd52145679b2575536701d4c936a16ab06ab7d70123d1a0"
+        },
+        {
+          "path": "packages/bootstrap/src/solver/b1-generalized-stake-vector.ts",
+          "symbol": "initialTargetPayout / maxTargetPayout",
+          "line_range": "349-380",
+          "full_file_sha256": "822a6ca6802ffb6fbfd52145679b2575536701d4c936a16ab06ab7d70123d1a0"
+        },
+        {
+          "path": "packages/bootstrap/src/solver/b1-generalized-stake-vector.ts",
+          "symbol": "buildStakesForTargetPayout",
+          "line_range": "382-445",
+          "full_file_sha256": "822a6ca6802ffb6fbfd52145679b2575536701d4c936a16ab06ab7d70123d1a0"
+        },
+        {
+          "path": "packages/bootstrap/src/solver/b1-generalized-stake-vector.ts",
+          "symbol": "calculateScenarioNets",
+          "line_range": "447-469",
+          "full_file_sha256": "822a6ca6802ffb6fbfd52145679b2575536701d4c936a16ab06ab7d70123d1a0"
+        }
+      ],
+      "preconditions": [
+        "A feasible vector exists under per-leg min, max, and step constraints.",
+        "Feasibility requires unequal terminal payouts after integer rounding."
+      ],
+      "trigger": "Two-way: odds [1.5,4.0], caps [(1,2,1),(1,1,1)], target worst-case 0. Three-way: odds [2.5,2.5,6.0], caps [(1,2,1),(1,2,1),(1,1,1)], target 0.",
+      "expected_behavior": "The solver must return any deterministic feasible integer vector satisfying min/max/step and target worst-case net, even when terminal payouts are unequal.",
+      "current_behavior": "The algorithm searches a single common target payout and rounds every leg up to reach it. If one leg cannot reach that common target it returns CAPACITY_EXHAUSTED without exploring feasible unequal-payout vectors.",
+      "impact": "Valid candidates can be falsely classified infeasible, suppressing B1 observations and distorting falsification, capacity, and conversion metrics.",
+      "independent_mathematical_evidence": "Independent exhaustive enumeration found [2,1] with payouts [3,4], nets [0,1], and [2,2,1] with payouts [5,5,6], nets [0,0,1]. The production function returned B1_STAKE_VECTOR_CAPACITY_EXHAUSTED for both. The two-way oracle examined 1,317 cases before the retained sample; the three-way oracle examined 12,163 cases and found no false-feasible result in its domain.",
+      "reproduction_status": "REPRODUCED_BY_INDEPENDENT_PYTHON_ORACLE_AND_PRODUCTION_NODE22_SUPPLEMENTARY",
+      "root_cause": "Common-target-payout construction is used as if it were a complete feasibility search, but it is only one sufficient family of vectors.",
+      "minimal_fix_boundary": "Replace or augment the R02 search with a complete bounded integer feasibility/optimization method for the declared two- and three-leg domains. Preserve deterministic objective and explicit search bounds.",
+      "required_tests": [
+        "Brute-force oracle comparison over small domains for 2-way and 3-way cases.",
+        "Unequal payout feasibility cases.",
+        "Positive target-net, one-unit residual, tight cap, and non-unit step cases.",
+        "Metamorphic scaling and permutation tests.",
+        "Proof that returned vectors satisfy all constraints."
+      ],
+      "regression_risks": [
+        "A complete search may cost more; bounds and failure typing must remain explicit.",
+        "Changing objective/tie-breaking can alter historical fixtures and reports."
+      ],
+      "primary_owner": "R02",
+      "secondary_sectors": [
+        "R04 backtest classification",
+        "R07 falsification metrics",
+        "R11 property-test coverage"
+      ],
+      "aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "Scenario payout formula",
+        "Capacity evidence integration finding BWS116-R02-005",
+        "Live execution remains parked"
+      ],
+      "blocks": {
+        "release": true,
+        "bws_600_evidence": true,
+        "b1_acceptance": true,
+        "later_execution": true
+      }
+    },
+    {
+      "id": "BWS116-R02-007",
+      "title": "Unescaped delimiter-based composite keys collide for distinct B1 identities and constraints",
+      "severity": "P1",
+      "confidence": 0.99,
+      "classification": "CONFIRMED_FINDING",
+      "current_files_symbols_line_ranges_hashes": [
+        {
+          "path": "packages/bootstrap/src/identity/b1-venue-pair-key.ts",
+          "symbol": "createB1VenuePairKey",
+          "line_range": "35-50",
+          "full_file_sha256": "3c1f4864a055c479d758ec070804a285aa1441ad7b14418061039d45d44517fa"
+        },
+        {
+          "path": "packages/bootstrap/src/opportunity/b1-cross-venue-derivation.ts",
+          "symbol": "buildCandidateId / buildVenuePairKeyForRows",
+          "line_range": "376-405",
+          "full_file_sha256": "29866c6839497502a2f9371166dd3865026bc8bca7a8cc57dad12c5717ba2543"
+        },
+        {
+          "path": "packages/bootstrap/src/economics/b1-fee-matrix.ts",
+          "symbol": "normalizeB1FeeMatrix duplicate key",
+          "line_range": "102-117",
+          "full_file_sha256": "081e148be8c1e3ffce089cca44c14cb16fa94ee25ae06a320d422b23e9e37175"
+        },
+        {
+          "path": "packages/bootstrap/src/solver/b1-generalized-stake-vector.ts",
+          "symbol": "constraint-key construction and duplicate detection",
+          "line_range": "292-326",
+          "full_file_sha256": "822a6ca6802ffb6fbfd52145679b2575536701d4c936a16ab06ab7d70123d1a0"
+        },
+        {
+          "path": "packages/bootstrap/src/solver/b1-generalized-stake-vector.ts",
+          "symbol": "buildConstraintKey",
+          "line_range": "512-514",
+          "full_file_sha256": "822a6ca6802ffb6fbfd52145679b2575536701d4c936a16ab06ab7d70123d1a0"
+        },
+        {
+          "path": "packages/bootstrap/src/scenarios/b1-scenario-cashflow.ts",
+          "symbol": "buildB1ScenarioLegKey",
+          "line_range": "400-402",
+          "full_file_sha256": "f48a4d0f697fcc2d9d48328ef665689807f3f97d6c74fbcba67b01520293a580"
+        }
+      ],
+      "preconditions": [
+        "Provider-controlled or canonical string components may contain the chosen delimiter.",
+        "No reserved-character validation or length-prefix encoding is applied."
+      ],
+      "trigger": "Construct venue tuples (\"a\", \"b::c\") and (\"a::b\", \"c\"), or fee tuples split around a NUL character.",
+      "expected_behavior": "Distinct typed tuples must have distinct deterministic encodings for keys, duplicate checks, candidate IDs, and scenario legs.",
+      "current_behavior": "Keys are built by raw concatenation with ::, |, or NUL. Input validation requires non-empty strings but permits these delimiter characters.",
+      "impact": "Distinct venues/selections can alias, causing candidate identity collisions, false duplicate rejection, incorrect joins, or scenario-leg overwrites.",
+      "independent_mathematical_evidence": "Harness result: both venue tuples produced a::b::c. Two distinct fee tuples collapsed to one NUL-delimited key and were rejected as B1_FEE_MATRIX_DUPLICATE_ENTRY.",
+      "reproduction_status": "REPRODUCED_OFFLINE_NODE22_SUPPLEMENTARY",
+      "root_cause": "Composite identity uses ambiguous delimiter serialization instead of a canonical injective tuple encoding.",
+      "minimal_fix_boundary": "Use one canonical structured/length-prefixed tuple encoder for all R02 keys or reject reserved characters at the authoritative parser. Coordinate persisted-key migrations with R03 rather than changing storage silently.",
+      "required_tests": [
+        "Delimiter injection for every key constructor.",
+        "Round-trip/injectivity property tests over Unicode and control characters.",
+        "Cross-module consistency tests for candidate, constraint, fee, and scenario keys."
+      ],
+      "regression_risks": [
+        "Changing key encoding affects persisted records, fixtures, and APIs.",
+        "Unicode normalization policy must be explicit rather than incidental."
+      ],
+      "primary_owner": "R02",
+      "secondary_sectors": [
+        "R01 input character contract",
+        "R03 persisted key migration",
+        "R05 API identifiers",
+        "R11 property tests"
+      ],
+      "aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "Canonical upstream IDs themselves",
+        "Provider connectivity",
+        "Economic formulas"
+      ],
+      "blocks": {
+        "release": true,
+        "bws_600_evidence": true,
+        "b1_acceptance": true,
+        "later_execution": true
+      }
+    },
+    {
+      "id": "BWS116-R02-008",
+      "title": "B1 line equivalence compares raw decimal text and rejects numerically identical markets",
+      "severity": "P1",
+      "confidence": 0.99,
+      "classification": "CONFIRMED_FINDING",
+      "current_files_symbols_line_ranges_hashes": [
+        {
+          "path": "packages/bootstrap/src/contracts/betting-win-b1-resource-records.ts",
+          "symbol": "line_value parse",
+          "line_range": "386-397",
+          "full_file_sha256": "2068f5dea3a115cbbc4e7b7fde16774b9a0fc9c964be1550215cc2c7508604e8"
+        },
+        {
+          "path": "packages/bootstrap/src/contracts/betting-win-b1-resource-records.ts",
+          "symbol": "requireSignedDecimalString",
+          "line_range": "611-620",
+          "full_file_sha256": "2068f5dea3a115cbbc4e7b7fde16774b9a0fc9c964be1550215cc2c7508604e8"
+        },
+        {
+          "path": "packages/bootstrap/src/identity/b1-market-equivalence.ts",
+          "symbol": "compareB1MarketEquivalence line comparison",
+          "line_range": "82-87",
+          "full_file_sha256": "b7bd85ede3224740021fdc676db69c690820e2634c13c32a6719190feedb6f75"
+        },
+        {
+          "path": "packages/bootstrap/src/identity/b1-market-equivalence.ts",
+          "symbol": "compareOutcomeSetMarketContext line comparison",
+          "line_range": "274-279",
+          "full_file_sha256": "b7bd85ede3224740021fdc676db69c690820e2634c13c32a6719190feedb6f75"
+        }
+      ],
+      "preconditions": [
+        "Equivalent upstream rows encode the same numeric line with different valid decimal text, such as \"1\" and \"1.0\" or \"-0\" and \"0\"."
+      ],
+      "trigger": "Compare otherwise identical spread/total rows using lineValue \"1\" and \"1.0\".",
+      "expected_behavior": "Line equality must use one canonical fixed-point numeric representation with explicit scale and sign normalization.",
+      "current_behavior": "The parser validates syntax but preserves raw text; equivalence uses strict string equality.",
+      "impact": "Equivalent markets are falsely blocked, reducing coverage and making results dependent on upstream formatting rather than value.",
+      "independent_mathematical_evidence": "The inert harness returned B1_LINE_VALUE_MISMATCH for \"1\" versus \"1.0\".",
+      "reproduction_status": "REPRODUCED_OFFLINE_NODE22_SUPPLEMENTARY",
+      "root_cause": "No canonical numeric line representation is established before identity comparison.",
+      "minimal_fix_boundary": "Normalize line values to a bounded signed fixed-point tuple at intake or R02 comparison. R01 owns any upstream contract change; R02 owns numeric equality and key consumption.",
+      "required_tests": [
+        "Equivalent textual forms tests.",
+        "Negative-zero normalization.",
+        "Scale/precision overflow and unsupported precision tests.",
+        "Spread sign/viewpoint inversion tests."
+      ],
+      "regression_risks": [
+        "Incorrect sign normalization can merge opposite spread viewpoints.",
+        "Canonical scale changes can affect persisted keys."
+      ],
+      "primary_owner": "R02",
+      "secondary_sectors": [
+        "R01 upstream line contract",
+        "R09-equivalent numeric semantics within BWS scope",
+        "R03 key persistence"
+      ],
+      "aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "Market type/period/rule checks",
+        "Raw upstream archival bytes",
+        "Settlement replay"
+      ],
+      "blocks": {
+        "release": true,
+        "bws_600_evidence": false,
+        "b1_acceptance": true,
+        "later_execution": true
+      }
+    },
+    {
+      "id": "BWS116-R02-009",
+      "title": "Standard-binary complete-set assembly can mix YES and NO quotes from different source manifests",
+      "severity": "P1",
+      "confidence": 0.99,
+      "classification": "CONFIRMED_FINDING",
+      "current_files_symbols_line_ranges_hashes": [
+        {
+          "path": "packages/bootstrap/src/contracts/betting-win-resource-records.ts",
+          "symbol": "BettingWinQuoteRecord",
+          "line_range": "31-40",
+          "full_file_sha256": "8ca3a040b691242eb1025ab74f545157c1072b85332fdc1313924e57396c6903"
+        },
+        {
+          "path": "packages/bootstrap/src/scenarios/complete-set.ts",
+          "symbol": "quote assembly and acceptance",
+          "line_range": "112-184",
+          "full_file_sha256": "bdea2ee4db048e553d69f379ab4599c28bae68e372b2821bacb2a64611c98bac"
+        }
+      ],
+      "preconditions": [
+        "One identity/rule record exists for a standard-binary market.",
+        "YES and NO quote records share canonicalMarketId and currency but have different quoteSourceManifestHash values."
+      ],
+      "trigger": "Assemble a complete set with manifest hash a...a for YES and b...b for NO.",
+      "expected_behavior": "All legs in one complete-set snapshot must be bound to one compatible source manifest or an explicit multi-source synchronization/provenance receipt.",
+      "current_behavior": "The quote contract carries quoteSourceManifestHash, but assembly checks only market ID, outcome uniqueness, and currency. The accepted complete set does not expose a quote-manifest identity.",
+      "impact": "Quotes from different snapshots or source lineages can be combined into a false complete set while the output advertises only the identity-record provider generation.",
+      "independent_mathematical_evidence": "Harness result: mixed 64-byte manifest hashes were accepted; output providerGeneration remained generation-s and did not disclose the mixed quote sources.",
+      "reproduction_status": "REPRODUCED_OFFLINE_NODE22_SUPPLEMENTARY",
+      "root_cause": "Quote provenance is available but omitted from complete-set coherence and output identity.",
+      "minimal_fix_boundary": "Require exact compatible quote-manifest binding during standard complete-set assembly and retain the accepted source identity in the complete-set contract.",
+      "required_tests": [
+        "Mixed-manifest rejection.",
+        "Missing/unknown manifest rejection.",
+        "Single-manifest round trip.",
+        "Explicit synchronization receipt path only if separately authorized."
+      ],
+      "regression_risks": [
+        "Historical fixture bundles may intentionally contain multiple manifests and will need explicit partitioning.",
+        "Do not infer compatibility from provider generation alone."
+      ],
+      "primary_owner": "R02",
+      "secondary_sectors": [
+        "R01 upstream provenance",
+        "R03 stored standard candidate identity",
+        "R11 fixture integrity"
+      ],
+      "aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "Rule and settlement identity checks",
+        "B1 generation finding BWS116-R02-002",
+        "Runtime API access"
+      ],
+      "blocks": {
+        "release": true,
+        "bws_600_evidence": true,
+        "b1_acceptance": false,
+        "later_execution": true
+      }
+    },
+    {
+      "id": "BWS116-R02-010",
+      "title": "Standard-binary quote freshness is per leg and permits an asynchronous YES/NO snapshot",
+      "severity": "P1",
+      "confidence": 0.99,
+      "classification": "CONFIRMED_FINDING",
+      "current_files_symbols_line_ranges_hashes": [
+        {
+          "path": "packages/bootstrap/src/opportunity/standard-binary-stake-solver.ts",
+          "symbol": "StandardBinaryStakeVectorSolveOptions / freshness default",
+          "line_range": "13-45",
+          "full_file_sha256": "a68d4ea89b2ec4a7d83d8e2ced929732522e0e4af5a36efaac4712e88255dc92"
+        },
+        {
+          "path": "packages/bootstrap/src/opportunity/standard-binary-stake-solver.ts",
+          "symbol": "validateCompleteSetQuoteFreshness",
+          "line_range": "110-124",
+          "full_file_sha256": "a68d4ea89b2ec4a7d83d8e2ced929732522e0e4af5a36efaac4712e88255dc92"
+        },
+        {
+          "path": "packages/bootstrap/src/quotes/quote-freshness.ts",
+          "symbol": "checkQuoteFreshness",
+          "line_range": "10-33",
+          "full_file_sha256": "38a0042d488084145e2438fe30d9e5b0ed665733af97b561587ca78d5bb9718f"
+        }
+      ],
+      "preconditions": [
+        "Both quote timestamps are individually inside maxQuoteAgeMs.",
+        "Their mutual snapshot distance is large enough to invalidate simultaneous arbitrage."
+      ],
+      "trigger": "Evaluate one quote aged 59,999 ms and one current quote under a 60,000 ms age threshold.",
+      "expected_behavior": "The two terminal quotes must satisfy an explicit same-snapshot or bounded pairwise synchronization rule in addition to individual freshness.",
+      "current_behavior": "The standard solver checks each quote independently against observedNowMs and never compares the two observedAt timestamps.",
+      "impact": "Non-simultaneous YES/NO prices can be combined, creating false gross/stake feasibility and misleading paper results.",
+      "independent_mathematical_evidence": "Harness result: the pair spanning 59,999 ms was accepted; no pairwise synchronization policy exists in the standard input.",
+      "reproduction_status": "REPRODUCED_OFFLINE_NODE22_SUPPLEMENTARY",
+      "root_cause": "Freshness and synchronization are conflated; only age-to-now is modeled.",
+      "minimal_fix_boundary": "Add an explicit standard-binary pair synchronization bound and report actual snapshot span. Preserve individual freshness as a separate check.",
+      "required_tests": [
+        "Pair-skew boundary tests.",
+        "Individually fresh but mutually stale rejection.",
+        "Same manifest with divergent timestamps.",
+        "Permutation invariance."
+      ],
+      "regression_risks": [
+        "Candidate counts will decline when asynchronous snapshots are rejected.",
+        "Do not reuse the B1 pair primitive without reconciling standard source semantics."
+      ],
+      "primary_owner": "R02",
+      "secondary_sectors": [
+        "R01 source-time authority",
+        "R04 standard backtest timing",
+        "R11 test coverage"
+      ],
+      "aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "Canonical timestamp parsing",
+        "Individual future/stale rejection",
+        "B1 global synchronization finding BWS116-R02-003"
+      ],
+      "blocks": {
+        "release": true,
+        "bws_600_evidence": true,
+        "b1_acceptance": false,
+        "later_execution": true
+      }
+    },
+    {
+      "id": "BWS116-R02-011",
+      "title": "Standard-binary quote contract omits stake increment and silently substitutes minimum stake as the rounding step",
+      "severity": "P1",
+      "confidence": 0.99,
+      "classification": "CONFIRMED_FINDING",
+      "current_files_symbols_line_ranges_hashes": [
+        {
+          "path": "packages/bootstrap/src/contracts/betting-win-resource-records.ts",
+          "symbol": "BettingWinQuoteRecord",
+          "line_range": "31-40",
+          "full_file_sha256": "8ca3a040b691242eb1025ab74f545157c1072b85332fdc1313924e57396c6903"
+        },
+        {
+          "path": "packages/bootstrap/src/opportunity/standard-binary-stake-solver.ts",
+          "symbol": "deriveRoundingConstraints",
+          "line_range": "209-238",
+          "full_file_sha256": "a68d4ea89b2ec4a7d83d8e2ced929732522e0e4af5a36efaac4712e88255dc92"
+        },
+        {
+          "path": "packages/bootstrap/src/solver/stake-vector.ts",
+          "symbol": "StakeVectorRoundingConstraint",
+          "line_range": "5-14",
+          "full_file_sha256": "d5022b515bbac8672ed337933887276d590424c89b75c3e5acd290f3a5561029"
+        }
+      ],
+      "preconditions": [
+        "Venue minimum stake and increment differ, which is common for executable constraints.",
+        "The quote record supplies minStakeMinor but no increment field."
+      ],
+      "trigger": "Build the standard stake-vector input for quotes with minStakeMinor=10; the derived step is automatically 10 regardless of the actual venue increment.",
+      "expected_behavior": "Minimum stake, maximum/depth, and increment must be independent explicit values bound to quote/venue authority.",
+      "current_behavior": "The standard quote type has no increment. deriveRoundingConstraints sets stepMinor equal to minStakeMinor and describes the minimum as a rounding step.",
+      "impact": "The solver can reject feasible stakes, accept invalid increments, or compute the wrong vector whenever min and step differ.",
+      "independent_mathematical_evidence": "Harness result: both derived steps were 10 solely because minStakeMinor was 10; the quote object had no explicit step field.",
+      "reproduction_status": "REPRODUCED_OFFLINE_NODE22_SUPPLEMENTARY",
+      "root_cause": "The standard data contract collapses two independent venue constraints into one field.",
+      "minimal_fix_boundary": "Extend the standard quote/depth contract with an explicit bounded increment and derive rounding constraints from it. Upstream schema ownership is an R01 handoff; solver consumption is R02.",
+      "required_tests": [
+        "min != step cases.",
+        "min not divisible by step cases.",
+        "step greater/less than min.",
+        "Capacity boundary after rounding.",
+        "Missing increment fail-closed test."
+      ],
+      "regression_risks": [
+        "Schema and fixture changes cross the upstream contract boundary.",
+        "The increment origin convention must be explicit."
+      ],
+      "primary_owner": "R02",
+      "secondary_sectors": [
+        "R01 upstream quote contract",
+        "R03 persisted quote schema",
+        "R11 fixture/test updates"
+      ],
+      "aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "Available-size capacity calculation",
+        "B1 explicit stakeStepMinor contract",
+        "No-live-operation boundary"
+      ],
+      "blocks": {
+        "release": true,
+        "bws_600_evidence": true,
+        "b1_acceptance": false,
+        "later_execution": true
+      }
+    },
+    {
+      "id": "BWS116-R02-012",
+      "title": "Standard scenario cash-flow validator accepts incomplete and non-rectangular matrices",
+      "severity": "P1",
+      "confidence": 0.99,
+      "classification": "CONFIRMED_FINDING",
+      "current_files_symbols_line_ranges_hashes": [
+        {
+          "path": "packages/bootstrap/src/scenarios/scenario-cashflow.ts",
+          "symbol": "validateScenarioCashflowMatrix",
+          "line_range": "15-62",
+          "full_file_sha256": "11c1608a8d1cb5341f6125b9a30af4afd7c22aac64e228545636446b38476228"
+        },
+        {
+          "path": "packages/bootstrap/src/scenarios/scenario-cashflow.ts",
+          "symbol": "validateScenarioCoverage",
+          "line_range": "218-240",
+          "full_file_sha256": "11c1608a8d1cb5341f6125b9a30af4afd7c22aac64e228545636446b38476228"
+        },
+        {
+          "path": "packages/bootstrap/src/solver/stake-vector.ts",
+          "symbol": "solver post-validation shape checks",
+          "line_range": "73-88",
+          "full_file_sha256": "d5022b515bbac8672ed337933887276d590424c89b75c3e5acd290f3a5561029"
+        }
+      ],
+      "preconditions": [
+        "Rows include the two expected scenario IDs.",
+        "One or more legs are absent, duplicated, or not represented in every scenario."
+      ],
+      "trigger": "Pass two rows, one for each scenario, both using the same leg ID.",
+      "expected_behavior": "A matrix validator must prove the full scenario-by-leg rectangle, stable stake/cost terms, unique cells, and complete terminal winner coverage.",
+      "current_behavior": "The exported validator checks row shape and distinct scenario IDs only. It does not check leg cardinality, unique scenario-leg cells, or every leg in every scenario. The solver adds one later leg-count check, but the validator itself returns accepted.",
+      "impact": "Other callers can trust an invalid matrix, and tests/validators can falsely certify complete terminal cash-flow coverage.",
+      "independent_mathematical_evidence": "The adversarial harness supplied two rows covering YES-wins and NO-wins but only one distinct leg; validateScenarioCashflowMatrix returned ok=true.",
+      "reproduction_status": "REPRODUCED_OFFLINE_NODE22_SUPPLEMENTARY",
+      "root_cause": "Scenario coverage is validated independently of leg coverage and matrix rectangularity.",
+      "minimal_fix_boundary": "Strengthen the R02 matrix validator to require unique scenario-leg cells, the complete leg set in every scenario, stable leg terms, and one coherent winner. Keep lifecycle simulation semantics in R04.",
+      "required_tests": [
+        "One-leg/two-scenario rejection.",
+        "Duplicate cell and missing cell tests.",
+        "Extra leg/scenario rejection.",
+        "Permutation and rectangularity property tests."
+      ],
+      "regression_risks": [
+        "Stricter validation may expose malformed retained fixtures.",
+        "Do not duplicate B1-specific matrix logic inconsistently."
+      ],
+      "primary_owner": "R02",
+      "secondary_sectors": [
+        "R04 simulation consumers",
+        "R11 validator false-green coverage"
+      ],
+      "aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "Standard complete-set assembly",
+        "B1 matrix validator, which already checks rectangularity more strongly",
+        "Persistence"
+      ],
+      "blocks": {
+        "release": true,
+        "bws_600_evidence": false,
+        "b1_acceptance": false,
+        "later_execution": true
+      }
+    },
+    {
+      "id": "BWS116-R02-013",
+      "title": "Locale-sensitive localeCompare calls make candidate, scenario, and solver ordering environment-dependent",
+      "severity": "P1",
+      "confidence": 0.99,
+      "classification": "CONFIRMED_FINDING",
+      "current_files_symbols_line_ranges_hashes": [
+        {
+          "path": "packages/bootstrap/src/opportunity/standard-binary-derivation.ts",
+          "symbol": "deriveStandardBinaryOpportunityCandidates ordering",
+          "line_range": "27-41",
+          "full_file_sha256": "04059b7cd11e946fd8f997d215732e514b5d03cf9faaf9ba86bb42910f25d653"
+        },
+        {
+          "path": "packages/bootstrap/src/opportunity/b1-cross-venue-derivation.ts",
+          "symbol": "sortRowsBySelection / sortedEntries",
+          "line_range": "362-374",
+          "full_file_sha256": "29866c6839497502a2f9371166dd3865026bc8bca7a8cc57dad12c5717ba2543"
+        },
+        {
+          "path": "packages/bootstrap/src/scenarios/b1-terminal-scenario.ts",
+          "symbol": "compareSelectedQuotes",
+          "line_range": "55-60",
+          "full_file_sha256": "4f3ee12a400f4a034a177043213f785df2c6a60f33f8cdd85a84be652401b47c"
+        },
+        {
+          "path": "packages/bootstrap/src/solver/b1-generalized-stake-vector.ts",
+          "symbol": "compareCandidateQuotes",
+          "line_range": "526-535",
+          "full_file_sha256": "822a6ca6802ffb6fbfd52145679b2575536701d4c936a16ab06ab7d70123d1a0"
+        },
+        {
+          "path": "packages/bootstrap/src/scenarios/b1-scenario-cashflow.ts",
+          "symbol": "compareCashflowRows / compareLegTerms",
+          "line_range": "380-397",
+          "full_file_sha256": "f48a4d0f697fcc2d9d48328ef665689807f3f97d6c74fbcba67b01520293a580"
+        }
+      ],
+      "preconditions": [
+        "Canonical keys contain non-ASCII characters or collation-sensitive sequences.",
+        "The process locale differs between machines or containers."
+      ],
+      "trigger": "Sort selection keys [\"a\", \"ä\", \"z\"] under en_US.UTF-8 and sv_SE.UTF-8.",
+      "expected_behavior": "Deterministic strategy output must use one locale-independent byte/code-point ordering contract.",
+      "current_behavior": "Multiple R02 paths use String.localeCompare without an explicit locale/options. The host locale controls order.",
+      "impact": "Candidate order, stake order, scenario order, serialized hashes, and tie outcomes can differ across environments despite identical inputs.",
+      "independent_mathematical_evidence": "The same harness produced [a, ä, z] under en-US and [a, z, ä] under sv-SE.",
+      "reproduction_status": "REPRODUCED_OFFLINE_NODE22_SUPPLEMENTARY_TWO_LOCALES",
+      "root_cause": "Determinism depends on ambient ICU collation rather than a repository-defined comparator.",
+      "minimal_fix_boundary": "Replace localeCompare with one canonical locale-independent comparator and apply it consistently to keys, tuples, scenarios, and tie-breaks.",
+      "required_tests": [
+        "Cross-locale golden tests.",
+        "Unicode normalization and code-unit ordering property tests.",
+        "Input permutation determinism tests.",
+        "Stable serialized artifact hash tests."
+      ],
+      "regression_risks": [
+        "Ordering changes can alter retained artifacts and snapshots.",
+        "Do not silently normalize Unicode unless the identity contract authorizes it."
+      ],
+      "primary_owner": "R02",
+      "secondary_sectors": [
+        "R03 persisted ordering assumptions",
+        "R05 API ordering",
+        "R11 deterministic validation"
+      ],
+      "aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "Economic values",
+        "Canonical key contents",
+        "Runtime execution hold"
+      ],
+      "blocks": {
+        "release": true,
+        "bws_600_evidence": true,
+        "b1_acceptance": true,
+        "later_execution": true
+      }
+    },
+    {
+      "id": "BWS116-R02-014",
+      "title": "B1 fee matrix cannot represent scenario-conditional or non-stake fee bases accepted by its venue-type domain",
+      "severity": "P1",
+      "confidence": 0.97,
+      "classification": "CONFIRMED_FINDING",
+      "current_files_symbols_line_ranges_hashes": [
+        {
+          "path": "packages/bootstrap/src/contracts/b1-local-types.ts",
+          "symbol": "B1VenueType / B1MultiVenueMarketRow",
+          "line_range": "10-12",
+          "full_file_sha256": "22a43ced9a713e4144e343529a8940edfa00676659aa01f48f739e3f28ca03e1"
+        },
+        {
+          "path": "packages/bootstrap/src/economics/b1-fee-matrix.ts",
+          "symbol": "B1FeeMatrixEntry / B1FeeCharge",
+          "line_range": "7-25",
+          "full_file_sha256": "081e148be8c1e3ffce089cca44c14cb16fa94ee25ae06a320d422b23e9e37175"
+        },
+        {
+          "path": "packages/bootstrap/src/economics/b1-fee-matrix.ts",
+          "symbol": "calculateB1FeeCharge",
+          "line_range": "27-83",
+          "full_file_sha256": "081e148be8c1e3ffce089cca44c14cb16fa94ee25ae06a320d422b23e9e37175"
+        },
+        {
+          "path": "packages/bootstrap/src/economics/b1-net-spread.ts",
+          "symbol": "fee application and scenario totals",
+          "line_range": "119-188",
+          "full_file_sha256": "0f4bbd52d105d75aef34baa43bea49b09b5c6fde8e3afc8ef7f51383cda0947b"
+        }
+      ],
+      "preconditions": [
+        "A supported sportsbook, exchange, or prediction-market venue charges on winnings/profit, liability, maker/taker role, market, or only the winning scenario.",
+        "The caller must encode that venue in the current fee matrix."
+      ],
+      "trigger": "Model a 2% commission on positive winnings at odds 3.0 and stake 100.",
+      "expected_behavior": "Fee authority must declare basis, side/role, condition, rounding, minimum/maximum, and version so each terminal scenario is charged correctly.",
+      "current_behavior": "The only model is feeBps on stake plus fixedFeeMinor, keyed by venue and selection. The charge is computed before scenarios and subtracted from every scenario. Venue type is not consulted and no alternative basis can be represented.",
+      "impact": "Net spread can be over- or understated, particularly for exchange commission and conditional fees; an unknown fee shape can still be encoded as if it were stake-based and accepted.",
+      "independent_mathematical_evidence": "For 2% commission on positive winnings, correct fee at stake 100 and odds 3.0 is 4 only in the winning scenario. Current code can only charge ceil(100*200/10000)=2 plus fixed, unconditionally. No parameterization can express the correct function.",
+      "reproduction_status": "CONFIRMED_BY_STATIC_TYPE_AND_INDEPENDENT_CASHFLOW_ANALYSIS",
+      "root_cause": "Fee semantics are collapsed to one unconditional stake-percentage formula despite a heterogeneous venue domain.",
+      "minimal_fix_boundary": "Define versioned fee-basis unions and scenario-dependent fee cash flows in R02. Current provider-specific fee authority remains an R01 external-input requirement; do not guess venue schedules.",
+      "required_tests": [
+        "Stake, payout, profit, liability, maker/taker, fixed, minimum, maximum, and conditional fee cases.",
+        "Scenario-only charge tests.",
+        "Unknown fee basis must block.",
+        "Independent cash-flow oracle tests."
+      ],
+      "regression_risks": [
+        "Incorrect generalization can double-charge or omit fees.",
+        "Provider fee schedules are external authority and may change."
+      ],
+      "primary_owner": "R02",
+      "secondary_sectors": [
+        "R01 provider fee contract/currentness",
+        "R04 terminal simulation",
+        "R07 net-metric evidence",
+        "R11 independent oracle tests"
+      ],
+      "aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "Current simple stake-bps arithmetic for explicitly compatible venues",
+        "Capital-lock formula",
+        "Provider access remains prohibited"
+      ],
+      "blocks": {
+        "release": true,
+        "bws_600_evidence": true,
+        "b1_acceptance": true,
+        "later_execution": true
+      }
+    },
+    {
+      "id": "BWS116-R02-PF-001",
+      "title": "B1 venue-pair candidate may select every leg from one venue",
+      "severity": "P2",
+      "confidence": 0.86,
+      "classification": "PROBABLE_FINDING",
+      "current_files_symbols_line_ranges_hashes": [
+        {
+          "path": "packages/bootstrap/src/opportunity/b1-cross-venue-derivation.ts",
+          "symbol": "selectBestGrossQuote / acceptedCandidate",
+          "line_range": "238-315",
+          "full_file_sha256": "29866c6839497502a2f9371166dd3865026bc8bca7a8cc57dad12c5717ba2543"
+        }
+      ],
+      "evidence": "Harness emitted venuePair=[venue-a,venue-b] while selected_venues=[venue-a,venue-a]. This can duplicate a same-venue opportunity across multiple pair IDs and misstate cross-venue counts. Current authority calls the program cross-venue but does not explicitly state that selected legs must span both venues, so final classification requires product-authority confirmation.",
+      "proof_required": "Confirm whether B1 candidate semantics require at least one selected leg from each venue; then test duplicate metrics across three venues.",
+      "primary_owner": "R02",
+      "secondary_sectors": [
+        "R07 metrics",
+        "R05 projection"
+      ]
+    },
+    {
+      "id": "BWS116-R02-HYP-001",
+      "title": "Stake increment origin is unspecified",
+      "severity": "P2",
+      "confidence": 0.72,
+      "classification": "HYPOTHESIS",
+      "current_files_symbols_line_ranges_hashes": [
+        {
+          "path": "packages/bootstrap/src/solver/b1-rounding.ts",
+          "symbol": "roundUpB1StakeMinor",
+          "line_range": "1-48",
+          "full_file_sha256": "32275d20e5de782278e33df95e94e207bee5b662a3fd23fb695ab98bed0ac281"
+        }
+      ],
+      "evidence": "Rounding is to multiples of step from zero. Some venues define valid stakes as min + k*step. The supplied current authority does not specify the origin convention.",
+      "proof_required": "Accepted upstream venue-limit contract defining increment origin.",
+      "primary_owner": "R02",
+      "secondary_sectors": [
+        "R01"
+      ]
+    },
+    {
+      "id": "BWS116-R02-HYP-002",
+      "title": "No explicit total portfolio budget or residual-budget objective exists in the B1 solver policy",
+      "severity": "P2",
+      "confidence": 0.7,
+      "classification": "HYPOTHESIS",
+      "current_files_symbols_line_ranges_hashes": [
+        {
+          "path": "packages/bootstrap/src/solver/b1-generalized-stake-vector.ts",
+          "symbol": "B1GeneralizedStakeVectorPolicy",
+          "line_range": "28-41",
+          "full_file_sha256": "822a6ca6802ffb6fbfd52145679b2575536701d4c936a16ab06ab7d70123d1a0"
+        }
+      ],
+      "evidence": "The policy supplies per-leg caps and a target worst-case net, but no total bankroll/budget or residual allocation rule. This may be intentional because BWS is no-bankroll/offline, but the requested residual-budget semantics cannot be proven.",
+      "proof_required": "Product authority deciding whether the solver is feasibility-only or budget-allocation.",
+      "primary_owner": "R02",
+      "secondary_sectors": [
+        "R04"
+      ]
+    },
+    {
+      "id": "BWS116-R02-HYP-003",
+      "title": "Selection-equivalence key is trusted over outcomeName consistency",
+      "severity": "P2",
+      "confidence": 0.76,
+      "classification": "HYPOTHESIS",
+      "current_files_symbols_line_ranges_hashes": [
+        {
+          "path": "packages/bootstrap/src/identity/b1-selection-equivalence.ts",
+          "symbol": "compareB1SelectionEquivalence",
+          "line_range": "15-51",
+          "full_file_sha256": "ac7dcc2ddf2d9bf660931b639e10b6659ffe90ec8115ab80b765884784bc0ae2"
+        }
+      ],
+      "evidence": "The comparator checks key and outcomeSide but returns outcomeName only from the first row. Whether differing names are aliases or contradictions requires upstream canonical-selection authority.",
+      "proof_required": "R01 definition of selection key and display-label equivalence.",
+      "primary_owner": "R02",
+      "secondary_sectors": [
+        "R01"
+      ]
+    },
+    {
+      "id": "BWS116-R02-HYP-004",
+      "title": "Standard 60-second quote-age default lacks explicit policy binding at the pure solver API",
+      "severity": "P2",
+      "confidence": 0.78,
+      "classification": "HYPOTHESIS",
+      "current_files_symbols_line_ranges_hashes": [
+        {
+          "path": "packages/bootstrap/src/opportunity/standard-binary-stake-solver.ts",
+          "symbol": "DEFAULT_STANDARD_BINARY_MAX_QUOTE_AGE_MS / options default",
+          "line_range": "13-45",
+          "full_file_sha256": "a68d4ea89b2ec4a7d83d8e2ced929732522e0e4af5a36efaac4712e88255dc92"
+        }
+      ],
+      "evidence": "maxQuoteAgeMs is optional and defaults to 60,000 ms. Runtime plans usually supply explicit values, but direct callers can omit it. Current docs require explicit freshness but do not establish 60 seconds as universal authority.",
+      "proof_required": "Current lane-specific freshness authority or make the pure API require an explicit bound.",
+      "primary_owner": "R02",
+      "secondary_sectors": [
+        "R10"
+      ]
+    },
+    {
+      "id": "BWS116-R02-EXT-001",
+      "title": "Accepted betting-win B1 runtime resource and fee/capacity authority remain unavailable",
+      "severity": "P1",
+      "confidence": 1.0,
+      "classification": "EXTERNAL_INPUT_BLOCKER",
+      "evidence": "BWS-710 remains BLOCKED_ACCEPTED_BETTING_WIN_B1_MULTI_VENUE_API_REQUIRED. Local fixtures cannot establish real provider generation, fee, capacity, or settlement truth.",
+      "blocks": {
+        "release": true,
+        "bws_600_evidence": true,
+        "b1_acceptance": true,
+        "later_execution": true
+      },
+      "primary_owner": "R01/external betting-win handoff",
+      "secondary_sectors": [
+        "R02",
+        "R07"
+      ]
+    },
+    {
+      "id": "KNOWN_BASELINE_MANIFEST_DRIFT",
+      "title": "Known seven-path SOURCE_MANIFEST drift",
+      "severity": "P3",
+      "confidence": 1.0,
+      "classification": "CROSS_AREA_HANDOFF",
+      "evidence": "The 617-path non-self inventory is correct, but seven Graphify/update-tooling sizes or hashes are stale. This is explicitly excluded from R02 finding ownership.",
+      "primary_owner": "R11",
+      "secondary_sectors": [
+        "R02 validation only"
+      ]
+    },
+    {
+      "id": "BWS116-R02-HO-001",
+      "title": "Define consistency rules between decimalOdds and priceMinorOrProbabilityMinor",
+      "severity": "P1",
+      "confidence": 0.94,
+      "classification": "CROSS_AREA_HANDOFF",
+      "current_files_symbols_line_ranges_hashes": [
+        {
+          "path": "packages/bootstrap/src/contracts/b1-local-types.ts",
+          "symbol": "B1MultiVenueMarketRow price fields",
+          "line_range": "56-62",
+          "full_file_sha256": "22a43ced9a713e4144e343529a8940edfa00676659aa01f48f739e3f28ca03e1"
+        },
+        {
+          "path": "packages/bootstrap/src/contracts/betting-win-b1-resource-records.ts",
+          "symbol": "B1 row price parsing",
+          "line_range": "430-440",
+          "full_file_sha256": "2068f5dea3a115cbbc4e7b7fde16774b9a0fc9c964be1550215cc2c7508604e8"
+        },
+        {
+          "path": "packages/bootstrap/src/opportunity/b1-gross-spread.ts",
+          "symbol": "gross quote input",
+          "line_range": "10-16",
+          "full_file_sha256": "48ecd0e6402a23610f9582222e86e31c943948f31b6edf0896a66751edfddafb"
+        }
+      ],
+      "evidence": "Harness used decimalOdds=2.20 with priceMinorOrProbabilityMinor=999999; gross derivation used only decimalOdds and accepted. The archive does not define whether the second field must be mathematically consistent, provider-specific, or informational.",
+      "primary_owner": "R01",
+      "secondary_sectors": [
+        "R02"
+      ]
+    },
+    {
+      "id": "BWS116-R02-HO-002",
+      "title": "Persisted capacity receipts and candidate-key migration belong outside R02",
+      "severity": "P1",
+      "confidence": 1.0,
+      "classification": "CROSS_AREA_HANDOFF",
+      "evidence": "Fixes for BWS116-R02-002, -005, and -007 will change source identity, capacity evidence, or key encoding. Atomic storage, migration, and replay compatibility are R03-owned.",
+      "primary_owner": "R03",
+      "secondary_sectors": [
+        "R02"
+      ]
+    },
+    {
+      "id": "BWS116-R02-TG-001",
+      "title": "No outcome-semantic exclusivity/exhaustiveness property tests",
+      "severity": "P2",
+      "confidence": 1.0,
+      "classification": "TEST_GAP",
+      "related_findings": [
+        "BWS116-R02-001"
+      ],
+      "primary_owner": "R11",
+      "evidence": "Focused equivalence tests cover cardinality and duplicate keys but not distinct keys carrying the same semantic side or incomplete three-way market shapes."
+    },
+    {
+      "id": "BWS116-R02-TG-002",
+      "title": "No provider/generation partition tests for B1 equivalence and quote selection",
+      "severity": "P2",
+      "confidence": 1.0,
+      "classification": "TEST_GAP",
+      "related_findings": [
+        "BWS116-R02-002"
+      ],
+      "primary_owner": "R11",
+      "evidence": "The 147 focused tests passed while the mixed-generation harness was accepted."
+    },
+    {
+      "id": "BWS116-R02-TG-003",
+      "title": "No candidate-global quote synchronization tests",
+      "severity": "P2",
+      "confidence": 1.0,
+      "classification": "TEST_GAP",
+      "related_findings": [
+        "BWS116-R02-003",
+        "BWS116-R02-010"
+      ],
+      "primary_owner": "R11",
+      "evidence": "Existing tests validate pair-local or per-leg freshness only; they do not vary timestamp spans across selected terminal outcomes."
+    },
+    {
+      "id": "BWS116-R02-TG-004",
+      "title": "No adversarial mutation test binds selected quote values to synchronized evidence",
+      "severity": "P2",
+      "confidence": 1.0,
+      "classification": "TEST_GAP",
+      "related_findings": [
+        "BWS116-R02-004"
+      ],
+      "primary_owner": "R11",
+      "evidence": "Net tests mutate malformed shapes but not a valid same-key selected quote with altered odds, side, generation, or timestamp."
+    },
+    {
+      "id": "BWS116-R02-TG-005",
+      "title": "Capacity primitives are unit-tested but not composed into the solver/net/backtest path",
+      "severity": "P1",
+      "confidence": 1.0,
+      "classification": "TEST_GAP",
+      "related_findings": [
+        "BWS116-R02-005"
+      ],
+      "primary_owner": "R11",
+      "evidence": "evaluateB1QuoteCapacity appears only in its module and quote-synchronization tests, not production solver/backtest code."
+    },
+    {
+      "id": "BWS116-R02-TG-006",
+      "title": "No independent brute-force oracle for generalized solver completeness",
+      "severity": "P1",
+      "confidence": 1.0,
+      "classification": "TEST_GAP",
+      "related_findings": [
+        "BWS116-R02-006"
+      ],
+      "primary_owner": "R11",
+      "evidence": "Existing examples pass, but independent enumeration exposed feasible vectors the common-target search rejects."
+    },
+    {
+      "id": "BWS116-R02-TG-007",
+      "title": "No delimiter injectivity, Unicode, or cross-locale determinism tests",
+      "severity": "P2",
+      "confidence": 1.0,
+      "classification": "TEST_GAP",
+      "related_findings": [
+        "BWS116-R02-007",
+        "BWS116-R02-013"
+      ],
+      "primary_owner": "R11",
+      "evidence": "Focused tests use simple ASCII identifiers and one ambient locale."
+    },
+    {
+      "id": "BWS116-R02-TG-008",
+      "title": "Standard lane lacks mixed-manifest, pair-skew, independent-increment, and malformed-matrix tests",
+      "severity": "P1",
+      "confidence": 1.0,
+      "classification": "TEST_GAP",
+      "related_findings": [
+        "BWS116-R02-009",
+        "BWS116-R02-010",
+        "BWS116-R02-011",
+        "BWS116-R02-012"
+      ],
+      "primary_owner": "R11",
+      "evidence": "All focused standard tests passed while the adversarial harness reproduced each defect."
+    },
+    {
+      "id": "BWS116-R02-TG-009",
+      "title": "Fee tests mirror the only implemented stake-bps formula rather than independently covering fee-basis unions",
+      "severity": "P1",
+      "confidence": 0.98,
+      "classification": "TEST_GAP",
+      "related_findings": [
+        "BWS116-R02-014"
+      ],
+      "primary_owner": "R11",
+      "evidence": "Tests cover missing entries and arithmetic for feeBps+fixedFeeMinor but cannot test unsupported winnings/liability/maker/taker bases because the contract has no representation."
+    },
+    {
+      "id": "BWS116-R02-SG-001",
+      "title": "B1 gross implied probability uses conservative ceiling division",
+      "severity": "P3",
+      "confidence": 1.0,
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "evidence": "ceil(1e12/decimalOddsMicro) overstates implied probability rather than overstating gross edge.",
+      "primary_owner": "R02"
+    },
+    {
+      "id": "BWS116-R02-SG-002",
+      "title": "B1 timestamp, future-skew, quote-age, retrieval-lag, and market-status checks fail closed pairwise",
+      "severity": "P3",
+      "confidence": 1.0,
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "evidence": "synchronizeB1VenueQuotePair validates canonical timestamps and explicit non-negative policy limits before acceptance.",
+      "primary_owner": "R02"
+    },
+    {
+      "id": "BWS116-R02-SG-003",
+      "title": "Missing B1 fee entry does not default to zero",
+      "severity": "P3",
+      "confidence": 1.0,
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "evidence": "calculateB1FeeCharge requires exactly one explicit matrix entry.",
+      "primary_owner": "R02"
+    },
+    {
+      "id": "BWS116-R02-SG-004",
+      "title": "B1 core money, stake, payout, fee, penalty, capacity, and time arithmetic uses bigint",
+      "severity": "P3",
+      "confidence": 1.0,
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "evidence": "No Number conversion was found in the reviewed B1 economic arithmetic; maxSearchIterations is the bounded control counter.",
+      "primary_owner": "R02"
+    },
+    {
+      "id": "BWS116-R02-SG-005",
+      "title": "Gross, net, executable, and live-readiness labels remain distinct in accepted B1 contracts",
+      "severity": "P3",
+      "confidence": 1.0,
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "evidence": "Gross candidates are typed gross-only; net candidates remain executable=false and liveReadiness=not_authorized_bws_900_parked.",
+      "primary_owner": "R02"
+    },
+    {
+      "id": "BWS116-R02-SG-006",
+      "title": "Generalized solver search is explicitly bounded",
+      "severity": "P3",
+      "confidence": 1.0,
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "evidence": "maxSearchIterations must be 1..1000, preventing unbounded pure search.",
+      "primary_owner": "R02"
+    },
+    {
+      "id": "BWS116-R02-RS-001",
+      "title": "Candidate ID reuse across snapshots is not independently an R02 defect",
+      "severity": "P3",
+      "confidence": 0.94,
+      "classification": "REJECTED_SUSPICION",
+      "evidence": "Harness showed the same market+venue-pair candidate ID across snapshots, but docs/049 defines B1MarketPair as market-equivalence key plus venue pair; persistence scopes snapshots by run. Generation omission remains separately confirmed in BWS116-R02-002.",
+      "primary_owner": "R02"
+    },
+    {
+      "id": "BWS116-R02-RS-002",
+      "title": "Capital-lock annualization arithmetic matched the encoded model",
+      "severity": "P3",
+      "confidence": 1.0,
+      "classification": "REJECTED_SUSPICION",
+      "evidence": "Independent recomputation matched ceil(capitalLocked * durationMs * annualizedBps / (365d_ms*10000)), including buffer and explicit ms units.",
+      "primary_owner": "R02"
+    },
+    {
+      "id": "BWS116-R02-RS-003",
+      "title": "Quote-age penalty arithmetic matched the encoded model",
+      "severity": "P3",
+      "confidence": 1.0,
+      "classification": "REJECTED_SUSPICION",
+      "evidence": "Independent recomputation matched ceil(stake*ageMs*bpsPerSecond/(1000*10000))+fixed.",
+      "primary_owner": "R02"
+    },
+    {
+      "id": "BWS116-R02-RS-004",
+      "title": "Malformed zero odds did not create an accepted opportunity in the tested path",
+      "severity": "P3",
+      "confidence": 0.97,
+      "classification": "REJECTED_SUSPICION",
+      "evidence": "A structurally forged zero-odds candidate did not throw, and downstream validation blocked it; no false acceptance was reproduced.",
+      "primary_owner": "R02"
+    },
+    {
+      "id": "BWS116-R02-RS-005",
+      "title": "No false-feasible generalized solver result was found in the bounded three-way oracle domain",
+      "severity": "P3",
+      "confidence": 0.95,
+      "classification": "REJECTED_SUSPICION",
+      "evidence": "The 12,163-case independent domain found false-infeasible cases but zero false-feasible cases. This is not a general proof.",
+      "primary_owner": "R02"
+    }
+  ]
+}

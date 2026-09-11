@@ -1,0 +1,1750 @@
+{
+  "schema": "bws116-r03-findings-v1",
+  "review_id": "BWS116-R03",
+  "repository": "betting-win-surebet",
+  "source_authority": {
+    "archive_requested_name": "betting-win-surebet116.zip",
+    "archive_reviewed_path": "/mnt/data/betting-win-surebet116(2).zip",
+    "actual_sha256": "6cc5be4e7f3a637d7c0ed9485f246ade4975b5a8e60d3895943e0471afc29376",
+    "expected_sha256": "6cc5be4e7f3a637d7c0ed9485f246ade4975b5a8e60d3895943e0471afc29376",
+    "regular_file_count": 618,
+    "package_name": "betting-win-surebet",
+    "package_version": "0.1.0-bws-full-platform",
+    "canonical_runtime": "Node 20.20.2"
+  },
+  "summary": {
+    "confirmed_findings": 17,
+    "severity_counts": {
+      "P0": 1,
+      "P1": 13,
+      "P2": 3
+    },
+    "classification_counts": {
+      "CONFIRMED_FINDING": 17,
+      "CROSS_AREA_HANDOFF": 8,
+      "ENVIRONMENT_BLOCKER": 2,
+      "HYPOTHESIS": 1,
+      "INTENTIONAL_SAFEGUARD": 6,
+      "REJECTED_SUSPICION": 5,
+      "TEST_GAP": 6
+    },
+    "blocking_counts": {
+      "release": 17,
+      "BWS-600": 15,
+      "B1": 15,
+      "deployment": 17
+    },
+    "overall_verdict": "BLOCKED_SOURCE_CORRECTNESS_REMEDIATION_REQUIRED"
+  },
+  "records": [
+    {
+      "id": "BWS116-R03-001",
+      "title": "Migration discovery can escape the repository and the SQL scope scanner admits cross-schema executable DDL",
+      "severity": "P0",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "packages/persistence/src/psql.ts::loadSurebetMigrationFiles",
+      "exact_line_range": "94-153",
+      "full_file_sha256": "86053cd5690b15a2ba6ea210e3073c3324017d12fb36ec1fe815c84edab50343",
+      "relevant_sql_object_or_migration": "Migration source authority and every SQL object reachable through applySurebetMigrations",
+      "source_evidence": [
+        {
+          "path": "packages/persistence/src/psql.ts",
+          "symbol": "loadSurebetMigrationFiles",
+          "line_range": "94-153",
+          "full_file_sha256": "86053cd5690b15a2ba6ea210e3073c3324017d12fb36ec1fe815c84edab50343",
+          "note": "Resolves caller-provided directories without realpath containment or a fixed repository-owned path."
+        },
+        {
+          "path": "packages/persistence/src/psql.ts",
+          "symbol": "SUREBET_MIGRATION_TARGET_PATTERNS / assertSurebetOnlyMigrationSql",
+          "line_range": "14-43; 219-265",
+          "full_file_sha256": "86053cd5690b15a2ba6ea210e3073c3324017d12fb36ec1fe815c84edab50343",
+          "note": "Regex allowlist covers only selected statement families and does not inspect functions, procedures, triggers, types, extensions, grants, DO blocks, or dynamic SQL."
+        },
+        {
+          "path": "packages/persistence/src/migrations.ts",
+          "symbol": "applySurebetMigrations",
+          "line_range": "41-90",
+          "full_file_sha256": "2ae8d8e9d9cdb6c08003371083c2065dd803ad5d82258f5be3166a17da01f57b",
+          "note": "Executes every migration returned by the permissive loader against the selected database."
+        }
+      ],
+      "preconditions": "A caller, wrapper, compromised workspace, or future code path can influence repositoryRoot or migrationsDirectory, or a migration contains an executable statement family not covered by the regex scanner.",
+      "trigger": "Load an absolute or traversal-resolved migration directory containing CREATE FUNCTION public.*, or a DO block that dynamically creates a public object, then pass the returned migrations to the normal application path.",
+      "expected_behavior": "Migration bytes must come only from the realpath-confined repository database/migrations/surebet directory, and database-level authority must make writes outside surebet.* impossible.",
+      "current_behavior": "Absolute and ../ migration directories are accepted. Cross-schema CREATE FUNCTION and dynamic DO SQL are accepted by the scanner. applySurebetMigrations would submit those bytes to psql.",
+      "impact": "A migration invocation can execute cross-schema DDL or other unreviewed SQL. This is a direct schema-ownership escape and meets the P0 taxonomy even though the 12 supplied migrations are currently confined.",
+      "evidence": "An inert external Node harness called only loadSurebetMigrationFiles. It accepted an absolute directory, a traversal directory, CREATE FUNCTION public.r03_escape(), and a dynamic DO block. No SQL or database command was executed.",
+      "reproduction_status": {
+        "status": "REPRODUCED_INERT",
+        "runtime": "Node v22.16.0 supplementary",
+        "database_used": false,
+        "harness": "/tmp/bws116-r03-review/harness/migration-scope-harness.mjs",
+        "result": "all three escape cases accepted"
+      },
+      "transaction_or_state_machine_analysis": "The loader establishes source authority before the migration transaction begins. Because containment and complete statement authority are absent at that boundary, the later per-migration transaction cannot constrain where the SQL writes.",
+      "root_cause": "Migration authority is enforced by incomplete lexical matching and caller-selected filesystem paths rather than a fixed, realpath-confined source plus a database role restricted to surebet.*.",
+      "minimal_fix_boundary": "Confine the migration directory by realpath against the repository root, reject symlink and traversal escapes, remove ordinary caller override from production entrypoints, replace the incomplete regex as the security boundary, and require a database role whose privileges cannot create or mutate objects outside surebet.*.",
+      "required_tests": [
+        "Absolute-path and ../ traversal rejection",
+        "Symlink escape rejection",
+        "CREATE FUNCTION/PROCEDURE/TRIGGER/TYPE/EXTENSION and GRANT/REVOKE rejection",
+        "DO and dynamic SQL rejection",
+        "Disposable PostgreSQL proof that the migration role cannot write outside surebet.*"
+      ],
+      "regression_risks": [
+        "Legitimate future migration syntax may require an explicit reviewed allowlist update",
+        "Tightening the database role can expose undocumented cross-schema assumptions"
+      ],
+      "primary_owner": "R03",
+      "secondary_sectors": [
+        "R08",
+        "R10",
+        "R11"
+      ],
+      "aliases_or_dependencies": [
+        "KNOWN_BASELINE_MANIFEST_DRIFT is unrelated"
+      ],
+      "explicitly_unchanged_areas": [
+        "The 12 migration files in the frozen archive remain byte-unchanged and presently reference surebet.* objects only",
+        "No migration was applied"
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS116-R03-002",
+      "title": "The migration-status read path creates schema objects before reporting status",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "packages/persistence/src/migrations.ts::listAppliedSurebetMigrations",
+      "exact_line_range": "92-110",
+      "full_file_sha256": "2ae8d8e9d9cdb6c08003371083c2065dd803ad5d82258f5be3166a17da01f57b",
+      "relevant_sql_object_or_migration": "surebet schema and surebet.schema_migrations",
+      "source_evidence": [
+        {
+          "path": "packages/persistence/src/migrations.ts",
+          "symbol": "listAppliedSurebetMigrations",
+          "line_range": "92-110",
+          "full_file_sha256": "2ae8d8e9d9cdb6c08003371083c2065dd803ad5d82258f5be3166a17da01f57b",
+          "note": "Always executes CREATE SCHEMA IF NOT EXISTS and CREATE TABLE IF NOT EXISTS before reading the ledger."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/database-lifecycle.ts",
+          "symbol": "getBwsDatabaseMigrationStatus",
+          "line_range": "262-308",
+          "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+          "note": "Calls the mutating listAppliedSurebetMigrations method from the status operation."
+        },
+        {
+          "path": "docs/037_database_backup_retention_and_recovery.md",
+          "symbol": "Migration status contract",
+          "line_range": "9-19",
+          "full_file_sha256": "6d65630b7d351c1e59318f4761cbb05de099d1661c37fea18d5bf603fd560d10",
+          "note": "States that no migration may run implicitly for status or dry-run."
+        }
+      ],
+      "preconditions": "The target database does not yet contain the surebet schema or migration ledger, or the caller expects a strictly read-only status probe.",
+      "trigger": "Run the migration-status operation.",
+      "expected_behavior": "Status must report schema and ledger absence without creating either object.",
+      "current_behavior": "The status path runs bootstrap DDL first, so an empty database is changed before status is calculated.",
+      "impact": "A read-only diagnostic can alter a database, manufacture the ownership state it is supposed to observe, require write privileges, and mask the distinction between never-initialized and initialized-with-no-migrations.",
+      "evidence": "The call graph is direct: getBwsDatabaseMigrationStatus -> listAppliedSurebetMigrations -> executePsqlCommand(MIGRATION_BOOTSTRAP_SQL). The documented contract explicitly forbids implicit migration during status.",
+      "reproduction_status": {
+        "status": "STATICALLY_CONFIRMED",
+        "runtime": "not required",
+        "database_used": false,
+        "limitation": "PostgreSQL unavailable, so object creation was not executed"
+      },
+      "transaction_or_state_machine_analysis": "The operation performs a write transition (schema/table absent -> present) before constructing its supposedly observational state. No transaction rollback restores the original database.",
+      "root_cause": "Bootstrap creation was shared between apply and inspect paths instead of separating read-only catalog inspection from migration initialization.",
+      "minimal_fix_boundary": "Make status query pg_catalog/information_schema first and report absent objects. Keep MIGRATION_BOOTSTRAP_SQL exclusively in the explicit apply path.",
+      "required_tests": [
+        "Status against an empty disposable database leaves schema/table counts unchanged",
+        "Status under a read-only role reports absence rather than failing or mutating",
+        "Repeated status is observationally idempotent"
+      ],
+      "regression_risks": [
+        "Existing automation that accidentally relies on status to initialize the ledger will fail and must call the explicit migration command"
+      ],
+      "primary_owner": "R03",
+      "secondary_sectors": [
+        "R08",
+        "R11"
+      ],
+      "aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "Explicit migration application remains allowed",
+        "Backup and restore command semantics are not changed by this finding"
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS116-R03-003",
+      "title": "Unknown applied migration rows are ignored and can be reported as compatible",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "packages/bootstrap/src/operations/database-lifecycle.ts::buildMigrationChecksumMismatches",
+      "exact_line_range": "1054-1075",
+      "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+      "relevant_sql_object_or_migration": "surebet.schema_migrations lineage",
+      "source_evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/database-lifecycle.ts",
+          "symbol": "buildMigrationChecksumMismatches",
+          "line_range": "1054-1075",
+          "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+          "note": "Applied migration names absent from the archive are skipped rather than classified as incompatible."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/database-lifecycle.ts",
+          "symbol": "getBwsDatabaseMigrationStatus",
+          "line_range": "278-305",
+          "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+          "note": "Compatibility depends only on checksum mismatches for known files and schema existence."
+        },
+        {
+          "path": "packages/persistence/src/migrations.ts",
+          "symbol": "applySurebetMigrations",
+          "line_range": "45-84",
+          "full_file_sha256": "2ae8d8e9d9cdb6c08003371083c2065dd803ad5d82258f5be3166a17da01f57b",
+          "note": "The application snapshot verifies known names but does not reject extra ledger rows."
+        }
+      ],
+      "preconditions": "The selected database contains an applied migration name not present in the frozen archive, such as a newer, renamed, foreign, or manually inserted migration row.",
+      "trigger": "Run migration status or apply from this archive.",
+      "expected_behavior": "A frozen binary must classify a divergent or newer migration lineage explicitly and fail closed unless a reviewed forward-compatibility rule proves it safe.",
+      "current_behavior": "The unknown row is ignored. If all known checksums match and the schema exists, status is compatible and apply proceeds with the current file set.",
+      "impact": "An older or divergent application can be allowed to operate against a schema it does not understand, producing false migration compatibility and unsafe rollback/upgrade decisions.",
+      "evidence": "The mismatch builder executes continue when expectedSha256 is undefined; compatibility has no unknown-applied-migration reason.",
+      "reproduction_status": {
+        "status": "STATICALLY_CONFIRMED",
+        "database_used": false,
+        "limitation": "No disposable PostgreSQL ledger was available"
+      },
+      "transaction_or_state_machine_analysis": "Migration compatibility is a set-and-digest comparison. The implementation checks only archive -> ledger presence/pending and known-name digest mismatch, not ledger -> archive surplus, so the relation is not exact.",
+      "root_cause": "The migration ledger is treated as a cache of known rows rather than authoritative schema lineage requiring explicit forward/backward compatibility.",
+      "minimal_fix_boundary": "Add unknownApplied entries to the status contract, make compatibility fail closed by default, and permit forward compatibility only through an explicit reviewed compatibility range or schema capability proof.",
+      "required_tests": [
+        "Ledger with one unknown applied migration is incompatible",
+        "Renamed migration and same-SQL/different-name cases",
+        "Older binary against newer schema",
+        "Exact known set remains compatible"
+      ],
+      "regression_risks": [
+        "A strict set check can block intentional rolling upgrades unless compatibility policy is made explicit"
+      ],
+      "primary_owner": "R03",
+      "secondary_sectors": [
+        "R08",
+        "R09",
+        "R11"
+      ],
+      "aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "Known migration checksum checking remains valid",
+        "No claim is made that the current target database contains an unknown row"
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS116-R03-004",
+      "title": "Concurrent migration applications are not serialized around ledger observation and insertion",
+      "severity": "P2",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "packages/persistence/src/migrations.ts::applySurebetMigrations",
+      "exact_line_range": "41-84",
+      "full_file_sha256": "2ae8d8e9d9cdb6c08003371083c2065dd803ad5d82258f5be3166a17da01f57b",
+      "relevant_sql_object_or_migration": "surebet.schema_migrations and all migration DDL",
+      "source_evidence": [
+        {
+          "path": "packages/persistence/src/migrations.ts",
+          "symbol": "applySurebetMigrations",
+          "line_range": "41-84",
+          "full_file_sha256": "2ae8d8e9d9cdb6c08003371083c2065dd803ad5d82258f5be3166a17da01f57b",
+          "note": "Reads the complete applied ledger once, then applies each absent migration without an advisory lock or in-database compare-and-apply protocol."
+        }
+      ],
+      "preconditions": "Two application or lifecycle processes invoke migration application against the same database at the same time.",
+      "trigger": "Both processes read the same pre-application ledger and attempt the same migration transaction.",
+      "expected_behavior": "Exactly one migrator should own the schema transition; peers should wait and then observe the committed ledger.",
+      "current_behavior": "Both callers can classify the migration as absent. One commits; the other can fail on the ledger primary key or on future non-idempotent DDL even though the database reached the desired state.",
+      "impact": "Concurrent startup can create false deployment failure, partial rollout behavior across processes, and nondeterministic operator results.",
+      "evidence": "No pg_advisory_xact_lock, locked ledger row, serializable retry protocol, or re-read inside a migration-owner transaction exists.",
+      "reproduction_status": {
+        "status": "STATICALLY_CONFIRMED",
+        "database_used": false,
+        "limitation": "Concurrent PostgreSQL execution unavailable"
+      },
+      "transaction_or_state_machine_analysis": "The observation of absence and the insertion of the migration row are not protected by one ownership fence spanning competing migrators.",
+      "root_cause": "Migration application assumes a single caller but the service/lifecycle architecture does not encode that assumption in PostgreSQL.",
+      "minimal_fix_boundary": "Acquire a repository-specific PostgreSQL advisory lock before bootstrap/ledger inspection, re-read under the lock, apply in deterministic order, and release only after the ledger row is durable.",
+      "required_tests": [
+        "Two concurrent migrators against a disposable database",
+        "Second migrator waits and returns skipped rather than failing",
+        "Crash while holding the lock and subsequent recovery"
+      ],
+      "regression_risks": [
+        "Lock-key collisions must be avoided",
+        "Long migrations need an explicit bounded lock-wait policy"
+      ],
+      "primary_owner": "R03",
+      "secondary_sectors": [
+        "R08",
+        "R06",
+        "R11"
+      ],
+      "aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "Each individual supplied migration remains wrapped in BEGIN/COMMIT",
+        "Current migrations use CREATE TABLE/INDEX IF NOT EXISTS"
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS116-R03-005",
+      "title": "psql subprocesses have no explicit timeout or cancellation boundary",
+      "severity": "P2",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "packages/persistence/src/psql.ts::runPsql",
+      "exact_line_range": "191-217",
+      "full_file_sha256": "86053cd5690b15a2ba6ea210e3073c3324017d12fb36ec1fe815c84edab50343",
+      "relevant_sql_object_or_migration": "All repository queries and mutations executed through psql",
+      "source_evidence": [
+        {
+          "path": "packages/persistence/src/psql.ts",
+          "symbol": "runPsql",
+          "line_range": "191-217",
+          "full_file_sha256": "86053cd5690b15a2ba6ea210e3073c3324017d12fb36ec1fe815c84edab50343",
+          "note": "Uses synchronous execFileSync with no timeout, killSignal, or caller cancellation channel."
+        }
+      ],
+      "preconditions": "psql, DNS/socket connection, authentication, a database lock, query execution, or output delivery stalls.",
+      "trigger": "Invoke any repository, migration, status, scheduler, or worker persistence operation.",
+      "expected_behavior": "Every database subprocess must have a bounded command budget, classified timeout, deterministic cleanup, and cancellation propagation from service shutdown.",
+      "current_behavior": "The Node process blocks synchronously until psql exits. Service pass timeouts cannot interrupt this child.",
+      "impact": "A single blocked database command can freeze the event loop, prevent lease handling and graceful drain, and make configured service timeout values non-binding.",
+      "evidence": "The execFileSync options set encoding/env/stdio only. No timeout is supplied and no child handle exists for cancellation.",
+      "reproduction_status": {
+        "status": "STATICALLY_CONFIRMED",
+        "database_used": false
+      },
+      "transaction_or_state_machine_analysis": "All persistence calls are synchronous process ownership boundaries. Without a subprocess deadline, higher-level Promise races cannot regain control while Node is inside execFileSync.",
+      "root_cause": "The persistence abstraction omits command-budget and abort ownership from its public configuration.",
+      "minimal_fix_boundary": "Add a required bounded psql timeout and maximum output size, map timeout/termination distinctly, redact errors, and thread an abort/deadline policy through long-running service calls. Consider a pooled PostgreSQL driver for transactional and cancellation semantics.",
+      "required_tests": [
+        "Sleeping fake psql is terminated at the configured budget",
+        "Blocked database query does not prevent service shutdown indefinitely",
+        "Timeout is distinct from SQL failure and authentication failure"
+      ],
+      "regression_risks": [
+        "Too-short defaults can abort legitimate migrations or backups",
+        "Switching drivers changes error and transaction semantics"
+      ],
+      "primary_owner": "R03",
+      "secondary_sectors": [
+        "R06",
+        "R08",
+        "R10",
+        "R11"
+      ],
+      "aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "execFileSync argument arrays avoid shell interpolation",
+        "No credentials were printed during review"
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS116-R03-006",
+      "title": "Repository idempotency claims use read-then-insert races instead of atomic create-or-compare operations",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "packages/persistence/src/repositories/upstream-lock-repository.ts::SurebetUpstreamLockRepository.put",
+      "exact_line_range": "32-88",
+      "full_file_sha256": "c77663c55b41255a4c1f455012d5427b55f8a5cf1c733e7b800cc334f407a8bc",
+      "relevant_sql_object_or_migration": "upstream_locks, import_runs, pinned_strategy_exports, strategy_ledger_entries, worker_jobs, scheduler checkpoints, convergence checkpoints, B1 records",
+      "source_evidence": [
+        {
+          "path": "packages/persistence/src/repositories/upstream-lock-repository.ts",
+          "symbol": "SurebetUpstreamLockRepository.put",
+          "line_range": "32-88",
+          "full_file_sha256": "c77663c55b41255a4c1f455012d5427b55f8a5cf1c733e7b800cc334f407a8bc",
+          "note": "Checks by ID and fingerprint in separate psql sessions before INSERT."
+        },
+        {
+          "path": "packages/persistence/src/repositories/import-run-repository.ts",
+          "symbol": "SurebetImportRunRepository.create",
+          "line_range": "60-115",
+          "full_file_sha256": "9bb1a79b2b27ea6cd3eaaf38cb22bb20148615a2400ff929b834ad2dbd08e00b",
+          "note": "Checks existence, then inserts unconditionally."
+        },
+        {
+          "path": "packages/persistence/src/repositories/strategy-ledger-repository.ts",
+          "symbol": "SurebetStrategyLedgerRepository.create",
+          "line_range": "56-143",
+          "full_file_sha256": "a3874447d9cf6334eafd4eaf1e7a45c3cd95b48fe865fcc68ba1f5583ca32528",
+          "note": "Checks ID, run fingerprint, and report hash before unconditional INSERT."
+        },
+        {
+          "path": "packages/persistence/src/repositories/worker-job-repository.ts",
+          "symbol": "SurebetWorkerJobRepository.create",
+          "line_range": "220-270",
+          "full_file_sha256": "263481bca4ae76ceda0e134e7b1d707f17b9de89679c5e0a51f0f5e10431b57e",
+          "note": "Checks job ID then inserts unconditionally."
+        },
+        {
+          "path": "packages/persistence/src/repositories/private-paper-runtime-scheduler-checkpoint-repository.ts",
+          "symbol": "SurebetPrivatePaperRuntimeSchedulerCheckpointRepository.create",
+          "line_range": "74-121",
+          "full_file_sha256": "fd997e6c563e93a0055066ae7ffc64173402495429983e0574b6e929aa743489",
+          "note": "Checks checkpoint ID then inserts unconditionally."
+        },
+        {
+          "path": "packages/persistence/src/repositories/b1-upstream-convergence-repository.ts",
+          "symbol": "SurebetB1UpstreamConvergenceRepository.create",
+          "line_range": "59-110",
+          "full_file_sha256": "468cde29f264349925fe65e33d5b7e05fb34390877bb0f2503345154160d6884",
+          "note": "Uses the same read-then-insert pattern."
+        }
+      ],
+      "preconditions": "Two callers create the same logical identity concurrently, with either equal or conflicting payloads.",
+      "trigger": "Both existence checks complete before either INSERT commits.",
+      "expected_behavior": "Equal requests should converge to one retained record; conflicting payloads should return the repository-specific deterministic conflict code.",
+      "current_behavior": "One INSERT wins and another surfaces a raw wrapped psql uniqueness failure. The loser does not re-read and compare the committed row.",
+      "impact": "Scheduler, convergence, import, and worker retries can be reported as failures even when the desired record is durable. Conflicting payloads lose their typed conflict semantics, weakening recovery decisions.",
+      "evidence": "The pattern recurs across all creation repositories. Database uniqueness prevents many physical duplicates, but it does not provide application-level atomic idempotency or deterministic conflict classification.",
+      "reproduction_status": {
+        "status": "STATICALLY_CONFIRMED",
+        "database_used": false,
+        "limitation": "Real concurrent connections unavailable"
+      },
+      "transaction_or_state_machine_analysis": "IDLE/absent -> inserted is claimed in application memory. There is no INSERT ... ON CONFLICT ... RETURNING protocol or transaction that binds claim and comparison.",
+      "root_cause": "Idempotency is implemented as optimistic preflight reads rather than a database atomic claim keyed by identity and immutable payload digest.",
+      "minimal_fix_boundary": "Use one database round trip per create: INSERT ... ON CONFLICT DO NOTHING RETURNING, then fetch and compare in the same transaction; or encode identity plus immutable digest in a conflict-aware UPSERT that never overwrites.",
+      "required_tests": [
+        "Concurrent equal creates converge to one success result",
+        "Concurrent different creates return the typed conflict",
+        "Unique secondary identities such as fingerprint/report hash are classified deterministically",
+        "Scheduler/job restart uses the production repository, not an in-memory fake"
+      ],
+      "regression_risks": [
+        "Incorrect ON CONFLICT targets could mask secondary-identity conflicts",
+        "Automatic overwrite must remain prohibited"
+      ],
+      "primary_owner": "R03",
+      "secondary_sectors": [
+        "R01",
+        "R07",
+        "R11"
+      ],
+      "aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "Existing primary and unique constraints remain useful and must not be removed",
+        "Pure strategy identity composition remains R02-owned"
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS116-R03-007",
+      "title": "Finalization and checkpoint advances validate expected state in one session but update by ID in another",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "packages/persistence/src/repositories/import-run-repository.ts::SurebetImportRunRepository.finalize",
+      "exact_line_range": "117-157",
+      "full_file_sha256": "9bb1a79b2b27ea6cd3eaaf38cb22bb20148615a2400ff929b834ad2dbd08e00b",
+      "relevant_sql_object_or_migration": "import_runs and all mutable convergence/scheduler/observation checkpoint rows",
+      "source_evidence": [
+        {
+          "path": "packages/persistence/src/repositories/import-run-repository.ts",
+          "symbol": "SurebetImportRunRepository.finalize",
+          "line_range": "117-157",
+          "full_file_sha256": "9bb1a79b2b27ea6cd3eaaf38cb22bb20148615a2400ff929b834ad2dbd08e00b",
+          "note": "Reads running state, then UPDATE filters only by import_run_id."
+        },
+        {
+          "path": "packages/persistence/src/repositories/upstream-api-convergence-repository.ts",
+          "symbol": "SurebetUpstreamApiConvergenceRepository.advance",
+          "line_range": "149-198",
+          "full_file_sha256": "298c9e2b2d874f5e11e7278893f00acaaaf16b48a47fde0cab41c33e59017ba0",
+          "note": "Checks expected cursor/resource state before an ID-only UPDATE."
+        },
+        {
+          "path": "packages/persistence/src/repositories/upstream-export-convergence-repository.ts",
+          "symbol": "SurebetUpstreamExportConvergenceRepository.advance",
+          "line_range": "115-164",
+          "full_file_sha256": "dbfac37a5aac9e6139532312a0635f25f655c8739782e186f72bc6717bd79600",
+          "note": "Checks expected selection index before an ID-only UPDATE."
+        },
+        {
+          "path": "packages/persistence/src/repositories/private-paper-runtime-scheduler-checkpoint-repository.ts",
+          "symbol": "SurebetPrivatePaperRuntimeSchedulerCheckpointRepository.advance",
+          "line_range": "201-236",
+          "full_file_sha256": "fd997e6c563e93a0055066ae7ffc64173402495429983e0574b6e929aa743489",
+          "note": "Checks expected cycle number before an ID-only UPDATE."
+        },
+        {
+          "path": "packages/persistence/src/repositories/b1-private-observation-repository.ts",
+          "symbol": "complete / block",
+          "line_range": "119-167",
+          "full_file_sha256": "a057be720b8d7794b5d3a29cac35879ea555a65f2238e085b98fb7ea730f9941",
+          "note": "Checks started state before an ID-only terminal UPDATE."
+        }
+      ],
+      "preconditions": "Two finalizers or checkpoint advancers operate concurrently on the same record.",
+      "trigger": "Both precondition reads observe the same current state, after which the updates execute in a different order.",
+      "expected_behavior": "Expected state must be part of the UPDATE predicate and exactly one transition may succeed; retries must compare the retained terminal payload.",
+      "current_behavior": "The UPDATE predicates contain only the primary ID. Both callers can pass preflight validation and the later writer can replace the earlier terminal outcome or advance from stale state.",
+      "impact": "Import outcomes, convergence cursors, scheduled cycle identities, and B1 terminal evidence can become last-writer-wins rather than monotonic and conflict-detecting. This permits skipped/reordered work and false terminality.",
+      "evidence": "Every listed method opens separate psql processes for read and write and does not inspect an affected-row RETURNING result tied to expected state.",
+      "reproduction_status": {
+        "status": "STATICALLY_CONFIRMED",
+        "database_used": false
+      },
+      "transaction_or_state_machine_analysis": "The intended transition is state S(expected) -> S(next), but implementation performs read(S), gap, update(ID). The gap admits an intervening transition and the write does not prove it consumed the state read.",
+      "root_cause": "Optimistic concurrency is enforced only in TypeScript, outside the database transaction that owns the state.",
+      "minimal_fix_boundary": "Move each transition into one SQL statement or transaction with current status/cursor/version in WHERE, use RETURNING, distinguish zero-row stale from missing, and compare retained terminal payloads for idempotent replay.",
+      "required_tests": [
+        "Two concurrent import finalizers with equal and conflicting outcomes",
+        "Two API/export cursor advances from one expected cursor",
+        "Two scheduler instances advancing one checkpoint",
+        "Concurrent B1 complete versus block"
+      ],
+      "regression_risks": [
+        "Adding strict CAS can expose callers that currently depend on silent last-writer-wins behavior"
+      ],
+      "primary_owner": "R03",
+      "secondary_sectors": [
+        "R01",
+        "R04",
+        "R06",
+        "R11"
+      ],
+      "aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "Read model ordering is unchanged",
+        "Upstream semantic validity remains R01-owned"
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS116-R03-008",
+      "title": "Worker heartbeat, checkpoint, completion, and retry transitions omit the lease fence from their mutation predicates",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "packages/persistence/src/repositories/worker-job-repository.ts::heartbeatLease / recordCheckpoint",
+      "exact_line_range": "438-546",
+      "full_file_sha256": "263481bca4ae76ceda0e134e7b1d707f17b9de89679c5e0a51f0f5e10431b57e",
+      "relevant_sql_object_or_migration": "surebet.worker_jobs and surebet.worker_job_checkpoints",
+      "source_evidence": [
+        {
+          "path": "packages/persistence/src/repositories/worker-job-repository.ts",
+          "symbol": "heartbeatLease / recordCheckpoint",
+          "line_range": "438-546",
+          "full_file_sha256": "263481bca4ae76ceda0e134e7b1d707f17b9de89679c5e0a51f0f5e10431b57e",
+          "note": "Ownership is checked by a prior read; heartbeat and job checkpoint update filter only by job_id."
+        },
+        {
+          "path": "packages/persistence/src/repositories/worker-job-repository.ts",
+          "symbol": "complete / fail",
+          "line_range": "609-692",
+          "full_file_sha256": "263481bca4ae76ceda0e134e7b1d707f17b9de89679c5e0a51f0f5e10431b57e",
+          "note": "Completion and retry UPDATEs filter only by job_id after a prior lease read."
+        },
+        {
+          "path": "packages/persistence/src/repositories/worker-job-repository.ts",
+          "symbol": "requireOwnedActiveLease",
+          "line_range": "844-879",
+          "full_file_sha256": "263481bca4ae76ceda0e134e7b1d707f17b9de89679c5e0a51f0f5e10431b57e",
+          "note": "Lease validation is performed outside the subsequent mutation."
+        },
+        {
+          "path": "packages/persistence/src/repositories/worker-job-repository.ts",
+          "symbol": "deadLetterOwnedJob",
+          "line_range": "882-962",
+          "full_file_sha256": "263481bca4ae76ceda0e134e7b1d707f17b9de89679c5e0a51f0f5e10431b57e",
+          "note": "Provides the correct contrasting pattern: status, owner, and token are included in one UPDATE and checked through RETURNING."
+        }
+      ],
+      "preconditions": "A lease-owning worker overlaps with failure/retry, reaping, another claim, another same-lease mutation, or service shutdown.",
+      "trigger": "The worker passes requireOwnedActiveLease, then another transaction changes the row before the worker mutation executes.",
+      "expected_behavior": "Every lease-authorized mutation must atomically require status=leased, exact owner, exact token or epoch, and active lease in the same SQL statement.",
+      "current_behavior": "Heartbeat, checkpoint job update, completion, and retry use WHERE job_id only. A stale operation can alter a later lease or race a conflicting transition; checkpoint insertion can publish after the job became terminal.",
+      "impact": "A stale worker can extend a replacement lease, complete work after a retry/reclaim sequence, publish late checkpoints, or produce success/error ordering that does not correspond to a single owner. Duplicate economic/evidence effects become possible.",
+      "evidence": "The source itself demonstrates the missing predicates. deadLetterOwnedJob already uses an atomic fenced UPDATE, showing the intended mechanism exists but is not applied consistently.",
+      "reproduction_status": {
+        "status": "STATICALLY_CONFIRMED",
+        "database_used": false,
+        "limitation": "Race was not executed against PostgreSQL"
+      },
+      "transaction_or_state_machine_analysis": "Lease token is a valid fence only when every mutation consumes it atomically. The current two-phase read then ID-only update makes the token advisory.",
+      "root_cause": "Lease ownership and state mutation are split across psql sessions instead of encoded in one conditional database transition.",
+      "minimal_fix_boundary": "Use conditional UPDATE/CTE statements with job_id, status, lease_owner, lease_token, lease expiry, and optionally monotonic lease_epoch; use RETURNING and zero-row stale-owner classification. Keep checkpoint insert plus job metadata update atomic and fenced.",
+      "required_tests": [
+        "Old worker completion after new claim",
+        "Heartbeat racing retry and replacement claim",
+        "Checkpoint racing success/dead-letter",
+        "Completion versus retry race",
+        "Exactly-once release of lease fields"
+      ],
+      "regression_risks": [
+        "Stricter fencing can surface latent late callbacks as errors; callers must treat them as stale completion, not retryable work"
+      ],
+      "primary_owner": "R03",
+      "secondary_sectors": [
+        "R06",
+        "R07",
+        "R11"
+      ],
+      "aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "Atomic FOR UPDATE SKIP LOCKED claim remains a safeguard",
+        "Dead-letter owner/token CAS remains a safeguard"
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS116-R03-009",
+      "title": "Worker availability and lease validity are controlled by caller timestamps with inconsistent expiry boundaries",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "packages/persistence/src/repositories/worker-job-repository.ts::claimNext",
+      "exact_line_range": "355-435",
+      "full_file_sha256": "263481bca4ae76ceda0e134e7b1d707f17b9de89679c5e0a51f0f5e10431b57e",
+      "relevant_sql_object_or_migration": "worker_jobs.available_at, claimed_at, lease_expires_at, last_heartbeat_at and terminal timestamps",
+      "source_evidence": [
+        {
+          "path": "packages/persistence/src/repositories/worker-job-repository.ts",
+          "symbol": "claimNext",
+          "line_range": "355-435",
+          "full_file_sha256": "263481bca4ae76ceda0e134e7b1d707f17b9de89679c5e0a51f0f5e10431b57e",
+          "note": "Uses caller claimedAt for eligibility, claimed_at, heartbeat, and lease expiry."
+        },
+        {
+          "path": "packages/persistence/src/repositories/worker-job-repository.ts",
+          "symbol": "validateClaimRequest / validateHeartbeatRequest",
+          "line_range": "1166-1200",
+          "full_file_sha256": "263481bca4ae76ceda0e134e7b1d707f17b9de89679c5e0a51f0f5e10431b57e",
+          "note": "Computes lease expiry from caller-provided timestamps."
+        },
+        {
+          "path": "packages/persistence/src/repositories/worker-job-repository.ts",
+          "symbol": "requireOwnedActiveLease / reapExpiredLeases",
+          "line_range": "751-879",
+          "full_file_sha256": "263481bca4ae76ceda0e134e7b1d707f17b9de89679c5e0a51f0f5e10431b57e",
+          "note": "Active check rejects only expiry < observedAt, while reaping treats expiry <= reapedAt as expired."
+        }
+      ],
+      "preconditions": "Worker clocks are skewed, injected incorrectly, move backward, or two operations observe the exact expiry instant.",
+      "trigger": "Claim, heartbeat, completion, failure, or reap uses the supplied timestamp.",
+      "expected_behavior": "PostgreSQL should own lease-now and monotonic lease epochs, with one consistent half-open validity rule; business timestamps should be validated for chronology.",
+      "current_behavior": "A future caller clock can claim retry work early and create long leases; a past clock can authorize late completion against real time or regress heartbeat fields. At equality, requireOwnedActiveLease accepts while reaper expires.",
+      "impact": "Clock skew can create premature claims, effectively unbounded leases, stale-worker publication, and contradictory active/expired decisions.",
+      "evidence": "All relevant SQL literals are derived from injected strings; no CURRENT_TIMESTAMP predicate or monotonic version is used for lease authority.",
+      "reproduction_status": {
+        "status": "STATICALLY_CONFIRMED",
+        "database_used": false
+      },
+      "transaction_or_state_machine_analysis": "The lease state machine uses wall-clock values supplied by each actor as authority. Since actors need not share one clock and there is no version fence, time does not establish a total order.",
+      "root_cause": "Deterministic test clocks were elevated into production concurrency authority instead of separating observable event time from database lease time.",
+      "minimal_fix_boundary": "Use database-generated lease timestamps and a monotonic lease epoch/fencing token; define validity as now < expires_at consistently; reject timestamp regression and preserve injected clocks only for non-authoritative evidence fields.",
+      "required_tests": [
+        "Future-skew claim cannot claim not-yet-available work",
+        "Past-skew completion after real expiry is rejected",
+        "Exact expiry instant has one result",
+        "Heartbeat cannot regress last_heartbeat_at or lease_expires_at"
+      ],
+      "regression_risks": [
+        "Changing time authority can affect deterministic test fixtures and requires explicit database clock control in tests"
+      ],
+      "primary_owner": "R03",
+      "secondary_sectors": [
+        "R06",
+        "R10",
+        "R11"
+      ],
+      "aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "ISO-8601 syntax validation remains useful",
+        "Pure quote/source currentness remains R01/R02-owned"
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS116-R03-010",
+      "title": "Expired leases are always dead-lettered even when retry budget remains",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "packages/persistence/src/repositories/worker-job-repository.ts::reapExpiredLeases / deadLetterExpiredLease",
+      "exact_line_range": "751-830; 965-1037",
+      "full_file_sha256": "263481bca4ae76ceda0e134e7b1d707f17b9de89679c5e0a51f0f5e10431b57e",
+      "relevant_sql_object_or_migration": "surebet.worker_jobs stale-lease transition and surebet.worker_job_dead_letters",
+      "source_evidence": [
+        {
+          "path": "packages/persistence/src/repositories/worker-job-repository.ts",
+          "symbol": "reapExpiredLeases / deadLetterExpiredLease",
+          "line_range": "751-830; 965-1037",
+          "full_file_sha256": "263481bca4ae76ceda0e134e7b1d707f17b9de89679c5e0a51f0f5e10431b57e",
+          "note": "Every expired leased row is transitioned directly to dead_lettered; retryDelaysMs is not consulted."
+        },
+        {
+          "path": "docs/035_continuous_service_supervisor_contract.md",
+          "symbol": "Required worker behavior",
+          "line_range": "65-72",
+          "full_file_sha256": "cae4ce541c65848974de8c4568e72b6d2d3d151d9f2c3eaf52cb50e6777c8505",
+          "note": "Requires stale-lease recovery without double finalization and bounded retry schedules."
+        },
+        {
+          "path": "database/migrations/surebet/004_create_worker_jobs.sql",
+          "symbol": "surebet.worker_jobs",
+          "line_range": "1-111",
+          "full_file_sha256": "9756445dbfbdac6226413098d1253527578d9420543287842c30d034df162b9c",
+          "note": "Stores retry schedule and attempt count but has no abandoned/unknown state or expiry policy field."
+        }
+      ],
+      "preconditions": "A worker dies or loses connectivity while holding a lease and the job still has configured retry delays remaining.",
+      "trigger": "The next worker pass invokes reapExpiredLeases.",
+      "expected_behavior": "The durable policy must distinguish abandoned/unknown work, apply the configured retry budget when replay is safe, and dead-letter only on exhaustion or an explicit non-replayable policy.",
+      "current_behavior": "The reaper unconditionally writes dead_lettered with SUREBET_WORKER_JOB_LEASE_EXPIRED. No remaining retry calculation is performed.",
+      "impact": "Transient worker failure becomes permanent work loss. Standard and B1 private-paper cycles can be stranded even though their queue record was explicitly configured with retries.",
+      "evidence": "The normal fail path reads retryDelaysMs[attemptCount-1], but the expired-lease path bypasses it entirely.",
+      "reproduction_status": {
+        "status": "STATICALLY_CONFIRMED",
+        "database_used": false
+      },
+      "transaction_or_state_machine_analysis": "leased -> expired has only one terminal edge. The configured retry_wait edge is available for handler-reported failure but not for process crash, the exact case durable queues must recover.",
+      "root_cause": "Lease expiration policy is hard-coded as terminal rather than derived from retry budget and idempotency/replay safety.",
+      "minimal_fix_boundary": "Add an explicit atomic expired-lease transition: retry_wait with next availability while budget remains and replay is authorized; dead_lettered only when exhausted or policy says outcome is unknown/non-replayable. Preserve prior lease evidence.",
+      "required_tests": [
+        "Expired first attempt with remaining retries moves to retry_wait",
+        "Expired final attempt dead-letters",
+        "Concurrent reapers transition once",
+        "Unknown-side-effect policy remains fail-closed",
+        "Recovered job cannot be finalized by stale worker"
+      ],
+      "regression_risks": [
+        "Automatic replay is unsafe until the idempotency and fencing findings are fixed; implementation order must place those first"
+      ],
+      "primary_owner": "R03",
+      "secondary_sectors": [
+        "R06",
+        "R07",
+        "R11"
+      ],
+      "aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "Dead-letter evidence table remains required",
+        "No live execution path is authorized"
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS116-R03-011",
+      "title": "Configured service timeouts and shutdown signals do not cancel in-flight scheduler or worker work",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "packages/bootstrap/src/workers/bounded-job-worker.ts::RunBoundedWorkerPassRequest / runHandlerWithLeaseRenewal",
+      "exact_line_range": "59-77; 313-347",
+      "full_file_sha256": "3f319fc5ad09636121698b36817f1762c4431dffb775535a2d62e3289b111dd7",
+      "relevant_sql_object_or_migration": "Worker/scheduler durable effects after timeout, cancellation, or service drain",
+      "source_evidence": [
+        {
+          "path": "packages/bootstrap/src/workers/bounded-job-worker.ts",
+          "symbol": "RunBoundedWorkerPassRequest / runHandlerWithLeaseRenewal",
+          "line_range": "59-77; 313-347",
+          "full_file_sha256": "3f319fc5ad09636121698b36817f1762c4431dffb775535a2d62e3289b111dd7",
+          "note": "No AbortSignal or handler deadline exists; the renewal loop can continue forever until the handler settles."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/private-paper-worker-service.ts",
+          "symbol": "worker pass execution / raceWithTimeout",
+          "line_range": "379-395; 552-574",
+          "full_file_sha256": "1527b3a36e20f2221793a612011b65edf34d0d190534b95f43136ab9ebe58d36",
+          "note": "After timeout it awaits the same raw pass promise; helper itself awaits passPromise before returning timedOut=true."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/private-paper-scheduler-service.ts",
+          "symbol": "executePass / raceWithTimeout",
+          "line_range": "505-514; 531-553",
+          "full_file_sha256": "876cd3d1b142d369b999f10a49e7a01e9b8469af14d84bbef64efdc6ae3bc967",
+          "note": "Uses the same wait-after-timeout pattern."
+        }
+      ],
+      "preconditions": "A handler, convergence call, psql command, or injected pass promise never settles or settles after passTimeoutMs/SIGTERM.",
+      "trigger": "The timeout fires or shutdownSignal is set while work is in flight.",
+      "expected_behavior": "The service must stop awaiting at the deadline, propagate cancellation to underlying work, stop renewing leases, fence late mutations, and report a distinct timeout/cancel state.",
+      "current_behavior": "Timeout only changes later classification. Both helpers await the original promise after the sentinel. Worker shutdown is checked only before new claims; the in-flight handler receives no cancellation and continues lease renewal.",
+      "impact": "Graceful shutdown can hang indefinitely, configured timeout budgets are false, late work can publish checkpoints/ledger/terminal results, and resource ownership is not released at the claimed deadline.",
+      "evidence": "The source has two explicit await rawPassPromise paths after timeout and an infinite renewal loop without drain/abort observation.",
+      "reproduction_status": {
+        "status": "STATICALLY_CONFIRMED",
+        "database_used": false,
+        "harness_note": "Focused tests passed only with resolving fakes; no unresolved-promise test exists"
+      },
+      "transaction_or_state_machine_analysis": "RUNNING has no cancellation transition. TIMEOUT is recorded only after RUNNING eventually terminates, so it is not a state boundary and cannot prevent late durable effects.",
+      "root_cause": "Timeout and signal handling are observational wrappers rather than ownership/cancellation mechanisms threaded through worker handlers and repositories.",
+      "minimal_fix_boundary": "Introduce AbortSignal and absolute deadlines at service, pass, handler, adapter, and persistence boundaries; stop renewal on abort; return at timeout; fence late result publication by lease epoch/status; add cancelled/timed_out/unknown durable states as required.",
+      "required_tests": [
+        "Never-settling worker handler exits service within timeout",
+        "SIGTERM during handler stops lease renewal and prevents new durable writes",
+        "Late handler resolution cannot complete the job",
+        "Scheduler pass timeout returns without awaiting the pass",
+        "Timer/listener cleanup occurs exactly once"
+      ],
+      "regression_risks": [
+        "Cancellation can expose non-cancellable psql calls until finding 005 is fixed",
+        "New durable states require migration and API/read-model updates"
+      ],
+      "primary_owner": "R03",
+      "secondary_sectors": [
+        "R06",
+        "R10",
+        "R11"
+      ],
+      "aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "Existing drain behavior before new claims remains valid",
+        "Generic child-process supervision details remain R06-owned"
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS116-R03-012",
+      "title": "Checkpoint, dead-letter, B1 child-row, and expired-lease reads are unbounded",
+      "severity": "P2",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "packages/persistence/src/repositories/worker-job-repository.ts::listCheckpoints / listDeadLetters / reapExpiredLeases",
+      "exact_line_range": "573-607; 720-830",
+      "full_file_sha256": "263481bca4ae76ceda0e134e7b1d707f17b9de89679c5e0a51f0f5e10431b57e",
+      "relevant_sql_object_or_migration": "worker_job_checkpoints, worker_job_dead_letters, worker_jobs, b1_candidate_snapshots, b1_simulation_results",
+      "source_evidence": [
+        {
+          "path": "packages/persistence/src/repositories/worker-job-repository.ts",
+          "symbol": "listCheckpoints / listDeadLetters / reapExpiredLeases",
+          "line_range": "573-607; 720-830",
+          "full_file_sha256": "263481bca4ae76ceda0e134e7b1d707f17b9de89679c5e0a51f0f5e10431b57e",
+          "note": "Limits are optional or absent; reaper materializes every expired lease and performs one follow-up psql operation per row."
+        },
+        {
+          "path": "packages/persistence/src/repositories/b1-backtest-run-repository.ts",
+          "symbol": "listCandidates / listSimulationResults",
+          "line_range": "285-341",
+          "full_file_sha256": "fca39b72d06d2685cf82445e95d033830af1eea4b60d9896b8bce69d1d53ec04",
+          "note": "Returns every child row for a run without a limit or cursor."
+        }
+      ],
+      "preconditions": "Long-running runtime evidence accumulates many checkpoints, dead letters, expired leases, candidates, or simulation results.",
+      "trigger": "A list/read/reaper call runs with default options or on a large B1 run.",
+      "expected_behavior": "Persistence APIs must require bounded page sizes and stable cursors; maintenance transitions must process bounded batches atomically.",
+      "current_behavior": "Several methods issue no LIMIT. The reaper loads all expired jobs and then creates N additional psql sessions.",
+      "impact": "Memory, output-buffer, process-count, and database-load spikes can block workers and lifecycle diagnostics. Backpressure is undermined precisely during failure accumulation.",
+      "evidence": "The SQL shown contains no LIMIT for dead letters, reaping, or B1 child rows; checkpoint limit is optional and defaults to empty.",
+      "reproduction_status": {
+        "status": "STATICALLY_CONFIRMED",
+        "database_used": false
+      },
+      "transaction_or_state_machine_analysis": "The state machine has bounded claim maxJobs but an unbounded pre-pass recovery scan. Read-side cardinality is not coupled to configured worker/service limits.",
+      "root_cause": "Boundedness is enforced at selected service loops but omitted from repository contracts and maintenance queries.",
+      "minimal_fix_boundary": "Require explicit positive limits and stable keyset cursors; add a bounded bulk expired-lease CTE with SKIP LOCKED/RETURNING; page B1 children and dead letters.",
+      "required_tests": [
+        "Large-cardinality query plans use indexes and fixed limits",
+        "Reaper handles at most batchSize and is repeatable",
+        "Stable keyset ordering under concurrent inserts",
+        "psql output remains below configured maximum"
+      ],
+      "regression_risks": [
+        "Pagination changes API consumers and evidence aggregation",
+        "Bulk reaping must preserve per-job dead-letter evidence"
+      ],
+      "primary_owner": "R03",
+      "secondary_sectors": [
+        "R05",
+        "R06",
+        "R07",
+        "R11"
+      ],
+      "aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "Individual query ordering is deterministic where ORDER BY is present",
+        "Worker claim maxJobs remains bounded"
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS116-R03-013",
+      "title": "Import-run retention ignores convergence references, causing either deletion failure or dangling durable identity",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "packages/bootstrap/src/operations/database-lifecycle.ts::buildRetentionPlanQuery / buildRetentionDeleteSql",
+      "exact_line_range": "568-598; 854-875",
+      "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+      "relevant_sql_object_or_migration": "surebet.import_runs and convergence last_import_run_id references",
+      "source_evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/database-lifecycle.ts",
+          "symbol": "buildRetentionPlanQuery / buildRetentionDeleteSql",
+          "line_range": "568-598; 854-875",
+          "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+          "note": "Import-run candidates exclude pinned exports only, then are deleted without rechecking convergence references."
+        },
+        {
+          "path": "database/migrations/surebet/005_create_upstream_export_convergence_checkpoints.sql",
+          "symbol": "surebet.upstream_export_convergence_checkpoints.last_import_run_id",
+          "line_range": "1-39",
+          "full_file_sha256": "8d3c09c06b61e4fb1774879c51467381b70bbe6f46c86c660345c63667089e3c",
+          "note": "Stores last_import_run_id as plain text without a foreign key."
+        },
+        {
+          "path": "database/migrations/surebet/006_create_upstream_api_convergence_checkpoints.sql",
+          "symbol": "surebet.upstream_api_convergence_checkpoints.last_import_run_id",
+          "line_range": "1-28",
+          "full_file_sha256": "3d5ac1c0f2d89aac08acb057668b87b2e9116f274ff78020568dc82522f270f7",
+          "note": "Stores the analogous API reference with a restrictive foreign key."
+        },
+        {
+          "path": "docs/037_database_backup_retention_and_recovery.md",
+          "symbol": "Retention contract",
+          "line_range": "44-54",
+          "full_file_sha256": "6d65630b7d351c1e59318f4761cbb05de099d1661c37fea18d5bf603fd560d10",
+          "note": "Requires preservation of references needed by accepted runtime cycles and strategy state."
+        }
+      ],
+      "preconditions": "A completed old import run is not referenced by pinned_strategy_exports but is referenced by an API or export convergence checkpoint.",
+      "trigger": "Generate and apply an import_runs retention plan containing that run.",
+      "expected_behavior": "The plan must exclude every retained reference and revalidate atomically before deletion; equivalent references must have consistent foreign-key semantics.",
+      "current_behavior": "The candidate query does not inspect convergence tables. API checkpoint references make DELETE fail through the FK; export checkpoint references allow DELETE and leave last_import_run_id dangling.",
+      "impact": "Retention can produce a plan that cannot be applied or can destroy provenance required to reconstruct convergence state. Partial prune/recovery evidence becomes unreliable.",
+      "evidence": "The two convergence schemas encode the same logical reference differently, while the retention anti-join covers neither.",
+      "reproduction_status": {
+        "status": "STATICALLY_CONFIRMED",
+        "database_used": false
+      },
+      "transaction_or_state_machine_analysis": "PLANNED -> APPLY is not closed over the actual referential graph. One edge is enforced late by PostgreSQL, another is unenforced, so identical business preconditions produce divergent outcomes.",
+      "root_cause": "Retention ownership and schema reference ownership were designed independently without one authoritative dependency graph.",
+      "minimal_fix_boundary": "Add consistent FKs or explicit immutable-reference tables, anti-join all retained references during planning, recheck in the delete transaction, and classify protected/skipped rows instead of failing the whole plan.",
+      "required_tests": [
+        "API-referenced import is excluded",
+        "Export-referenced import is excluded",
+        "Concurrent new reference between plan and apply is preserved",
+        "Plan/apply deletedCount and protectedCount reconcile"
+      ],
+      "regression_risks": [
+        "Adding a foreign key requires cleanup of any existing dangling values",
+        "Retention throughput may fall without supporting indexes"
+      ],
+      "primary_owner": "R03",
+      "secondary_sectors": [
+        "R08",
+        "R01",
+        "R11"
+      ],
+      "aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "Pinned export protection remains valid",
+        "Operational backup/restore command ownership remains R08"
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": false,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS116-R03-014",
+      "title": "Standard private-paper retries do not reconstruct durable previous cycle state",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "packages/bootstrap/src/workers/private-paper-runtime-jobs.ts::PersistedPrivatePaperRuntimeJobPayload / toRuntimeRequest / handler",
+      "exact_line_range": "47-56; 90-217; 586-613",
+      "full_file_sha256": "cbf9794410c3c374c7cd22844c5fd1c5fc4e51c7322856b921753479f4b0ca5c",
+      "relevant_sql_object_or_migration": "strategy_ledger_entries for private_paper_runtime_cycle and worker_jobs payload/checkpoints",
+      "source_evidence": [
+        {
+          "path": "packages/bootstrap/src/workers/private-paper-runtime-jobs.ts",
+          "symbol": "PersistedPrivatePaperRuntimeJobPayload / toRuntimeRequest / handler",
+          "line_range": "47-56; 90-217; 586-613",
+          "full_file_sha256": "cbf9794410c3c374c7cd22844c5fd1c5fc4e51c7322856b921753479f4b0ca5c",
+          "note": "Payload and reconstructed runtime request omit previousState; ledger is persisted before worker completion."
+        },
+        {
+          "path": "packages/bootstrap/src/runtime/private-paper-runtime.ts",
+          "symbol": "PrivatePaperRuntimeRequest / validateRestartState / buildNextState",
+          "line_range": "96-104; 981-1060",
+          "full_file_sha256": "252e38a52693f3fa598c9ea92a83b184de0c4b29c4ab0bd5c952b750d009c6f5",
+          "note": "Idempotency mismatch protection is bypassed when previousState is absent."
+        },
+        {
+          "path": "packages/bootstrap/src/strategy/strategy-ledger.ts",
+          "symbol": "createPrivatePaperStrategyLedgerEntry",
+          "line_range": "237-267",
+          "full_file_sha256": "d05e339a5692a9218f2146c153570ee7d9c8d79ae88282e162b7ece0c0cb5dbc",
+          "note": "Uses runtimeId:cycleId as runReferenceId but cycleFingerprint as the unique entry/report identity."
+        },
+        {
+          "path": "database/migrations/surebet/003_create_strategy_ledger_entries.sql",
+          "symbol": "surebet.strategy_ledger_entries",
+          "line_range": "1-60",
+          "full_file_sha256": "b3a7695bfba8fedaa0bb3fccefdde9ae11d893e63a67b493647f0818ce507071",
+          "note": "Has no uniqueness constraint on run_kind plus run_reference_id."
+        }
+      ],
+      "preconditions": "An API-backed private-paper job persists its strategy ledger entry, then crashes before worker completion; upstream query results differ when the job is retried.",
+      "trigger": "The retry reconstructs the runtime request from the job payload and fetches current source pages.",
+      "expected_behavior": "The same runtimeId/cycleId must be bound to one immutable input digest and prior state; equal replay returns the retained outcome and changed replay is rejected.",
+      "current_behavior": "No prior runtime state is persisted or supplied. validateRestartState immediately accepts absence. A changed source produces a different cycle fingerprint and a second ledger identity with the same logical runReferenceId.",
+      "impact": "One logical private-paper cycle can produce divergent accepted/blocked evidence across retries, duplicate ledger effects, and a worker result that does not identify which cycle incarnation is authoritative.",
+      "evidence": "The runtime contains correct restart validation, but the production job adapter never supplies the required previousState and the schema does not enforce unique logical run identity.",
+      "reproduction_status": {
+        "status": "STATICALLY_CONFIRMED",
+        "database_used": false
+      },
+      "transaction_or_state_machine_analysis": "Logical cycle state spans source fetch, runtime result, ledger insert, checkpoint insert, and worker terminal update. There is no durable aggregate row or transaction binding those phases, and replay begins from an empty prior-state view.",
+      "root_cause": "Restart state exists only as an optional in-memory API parameter, not as durable job/cycle authority.",
+      "minimal_fix_boundary": "Persist a private-paper cycle aggregate keyed by runtimeId/cycleId with immutable input/cycle digest, reconstruct previousState from durable rows, enforce unique logical run reference, and atomically link ledger outcome to worker terminal publication or make replay return the retained result.",
+      "required_tests": [
+        "Crash after runtime result, after ledger insert, and after final checkpoint",
+        "Equal retry returns the same ledger/result",
+        "Changed upstream bytes for same cycle are rejected",
+        "Fresh process reconstructs previousState from PostgreSQL"
+      ],
+      "regression_risks": [
+        "Adding run-reference uniqueness requires resolving any pre-existing duplicates",
+        "Source-currentness semantics remain R01-owned and must not be weakened"
+      ],
+      "primary_owner": "R03",
+      "secondary_sectors": [
+        "R01",
+        "R04",
+        "R06",
+        "R11"
+      ],
+      "aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "Cycle fingerprint computation remains unchanged",
+        "No claim is made that pinned-record retries diverge"
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": false,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS116-R03-015",
+      "title": "B1 backtest persistence commits the parent before children and suppresses repair on replay",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "packages/persistence/src/repositories/b1-backtest-run-repository.ts::SurebetB1BacktestRunRepository.create",
+      "exact_line_range": "127-186",
+      "full_file_sha256": "fca39b72d06d2685cf82445e95d033830af1eea4b60d9896b8bce69d1d53ec04",
+      "relevant_sql_object_or_migration": "b1_backtest_runs, b1_candidate_snapshots, b1_simulation_results",
+      "source_evidence": [
+        {
+          "path": "packages/persistence/src/repositories/b1-backtest-run-repository.ts",
+          "symbol": "SurebetB1BacktestRunRepository.create",
+          "line_range": "127-186",
+          "full_file_sha256": "fca39b72d06d2685cf82445e95d033830af1eea4b60d9896b8bce69d1d53ec04",
+          "note": "Inserts parent, then loops through candidate/simulation inserts in separate psql calls; existing parent with matching runHash returns immediately."
+        },
+        {
+          "path": "packages/persistence/src/repositories/b1-backtest-run-repository.ts",
+          "symbol": "createCandidateSnapshot / createSimulationResults / insertSimulationResult",
+          "line_range": "354-448",
+          "full_file_sha256": "fca39b72d06d2685cf82445e95d033830af1eea4b60d9896b8bce69d1d53ec04",
+          "note": "Each child is inserted separately without a parent completion marker or expected child-count verification."
+        },
+        {
+          "path": "database/migrations/surebet/009_create_b1_backtest_runs.sql",
+          "symbol": "surebet.b1_backtest_runs",
+          "line_range": "1-32",
+          "full_file_sha256": "c5b9b66325ca16346c48176236b73dea7fd79f51b5b18aba8ae73d33d7ad12ea",
+          "note": "Parent has no persistence-complete state or expected child counts."
+        },
+        {
+          "path": "database/migrations/surebet/010_create_b1_candidate_snapshots.sql",
+          "symbol": "surebet.b1_candidate_snapshots",
+          "line_range": "1-21",
+          "full_file_sha256": "83da55cee8bc46ca6f47b8584aaa81c08794a268f5147fc9bef320201a79b78a",
+          "note": "Children are unique per run/candidate but completeness is not constrained."
+        },
+        {
+          "path": "database/migrations/surebet/011_create_b1_simulation_results.sql",
+          "symbol": "surebet.b1_simulation_results",
+          "line_range": "1-20",
+          "full_file_sha256": "3e748cb212558268e675df42f809ce9e3cd29b8527a83fd9c00c5897341d15fa",
+          "note": "Simulation children are unique but completeness is not constrained."
+        }
+      ],
+      "preconditions": "A psql call fails or the process crashes after the parent row or some child rows commit.",
+      "trigger": "Retry create with the same runId/runHash.",
+      "expected_behavior": "Parent and all expected children must commit atomically, or replay must verify and deterministically repair/reject an incomplete graph before presenting the run.",
+      "current_behavior": "The parent persists first. On replay, matching parent causes an immediate return and no child completeness check or repair.",
+      "impact": "A B1 run can appear durable and terminal while candidate or simulation evidence is missing. Reports and private observations can reference an incomplete backtest graph indefinitely.",
+      "evidence": "The create method has one psql call for the parent and one or more per candidate/result. The early-return branch checks only runHash.",
+      "reproduction_status": {
+        "status": "STATICALLY_CONFIRMED",
+        "database_used": false
+      },
+      "transaction_or_state_machine_analysis": "ABSENT -> PARENT_ONLY -> PARTIAL_CHILDREN -> COMPLETE has no stored phase. The public create method treats every state after PARENT_ONLY as COMPLETE on replay.",
+      "root_cause": "Aggregate persistence was decomposed into independent repository writes without an aggregate transaction or durable completion invariant.",
+      "minimal_fix_boundary": "Persist the entire run graph in one PostgreSQL transaction, or add expected child counts/digests and a completion state with locked deterministic repair. Readers must reject non-complete aggregates.",
+      "required_tests": [
+        "Fault after parent insert",
+        "Fault after each candidate and simulation insert boundary",
+        "Replay repairs or rejects partial graph",
+        "Readers never expose incomplete run as complete",
+        "Concurrent equal creates converge"
+      ],
+      "regression_risks": [
+        "One large transaction can increase lock duration; batching must still preserve an atomic completion marker"
+      ],
+      "primary_owner": "R03",
+      "secondary_sectors": [
+        "R04",
+        "R07",
+        "R11"
+      ],
+      "aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "B1 mathematical contents remain R02/R04-owned",
+        "Current parent and child identifiers remain deterministic"
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": false,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS116-R03-016",
+      "title": "B1 observation terminality and worker-job terminality can diverge after a crash",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "packages/bootstrap/src/workers/b1-private-observation-jobs.ts::createB1PrivateObservationJobHandler.run",
+      "exact_line_range": "59-137",
+      "full_file_sha256": "ee293ef0e7a3edeef6ef6729c987f477f049523ccd3d0b150b874796e032a5cc",
+      "relevant_sql_object_or_migration": "b1_private_observation_cycles, b1_backtest_runs and worker_jobs",
+      "source_evidence": [
+        {
+          "path": "packages/bootstrap/src/workers/b1-private-observation-jobs.ts",
+          "symbol": "createB1PrivateObservationJobHandler.run",
+          "line_range": "59-137",
+          "full_file_sha256": "ee293ef0e7a3edeef6ef6729c987f477f049523ccd3d0b150b874796e032a5cc",
+          "note": "Completes/blocks the observation inside the handler, then returns a result; worker-job terminal update occurs later in the bounded worker."
+        },
+        {
+          "path": "packages/persistence/src/repositories/b1-private-observation-repository.ts",
+          "symbol": "create / complete / block",
+          "line_range": "73-167; 268-293",
+          "full_file_sha256": "a057be720b8d7794b5d3a29cac35879ea555a65f2238e085b98fb7ea730f9941",
+          "note": "create accepts an existing terminal row by comparing only original started fields, but complete/block reject any non-started status."
+        },
+        {
+          "path": "packages/bootstrap/src/workers/bounded-job-worker.ts",
+          "symbol": "runBoundedWorkerPass terminal dispatch",
+          "line_range": "180-218",
+          "full_file_sha256": "3f319fc5ad09636121698b36817f1762c4431dffb775535a2d62e3289b111dd7",
+          "note": "Calls jobs.complete or deadLetterOwnedJob only after the handler returns."
+        },
+        {
+          "path": "database/migrations/surebet/012_create_b1_private_observation_cycles.sql",
+          "symbol": "surebet.b1_private_observation_cycles",
+          "line_range": "1-37",
+          "full_file_sha256": "5c4858bb130178460e45226677c6cc74610628badeca3632425c0a0838a474a6",
+          "note": "worker_job_id is not a foreign key and no cross-row terminal consistency constraint exists."
+        }
+      ],
+      "preconditions": "The process crashes after observations.complete or observations.block commits but before the worker job is completed/dead-lettered.",
+      "trigger": "The same worker job is retried.",
+      "expected_behavior": "Replay should detect the retained terminal observation and converge the worker job to the matching retained result without rerunning or contradicting terminal state.",
+      "current_behavior": "create returns the existing terminal observation, the backtest parent returns existing, then complete/block throws NOT_STARTED. The bounded worker converts the throw into a dead-letter result, so completed observation and dead-lettered job can coexist.",
+      "impact": "Operational status, queue evidence, and B1 observation evidence disagree. A successful B1 result can be presented as a failed job, or blocked evidence can lose its original reason.",
+      "evidence": "The handler and queue terminal writes are separate. The observation repository is partially idempotent at create but not idempotent at terminal replay.",
+      "reproduction_status": {
+        "status": "STATICALLY_CONFIRMED",
+        "database_used": false
+      },
+      "transaction_or_state_machine_analysis": "The aggregate has two terminal authorities with a crash gap: observation STARTED -> COMPLETED/BLOCKED, then job LEASED -> SUCCEEDED/DEAD_LETTERED. No transaction or recovery mapping binds them.",
+      "root_cause": "Observation terminal persistence and worker terminal persistence were implemented as independent state machines without replay convergence.",
+      "minimal_fix_boundary": "Make terminal observation methods idempotent-by-payload, persist an authoritative handler outcome, and atomically or recoverably project it to the worker job. Add FK/unique binding between job and observation where appropriate.",
+      "required_tests": [
+        "Crash after observation complete before job complete",
+        "Crash after observation block before job dead-letter",
+        "Retry converges without rerunning backtest",
+        "Conflicting retained terminal payload is rejected"
+      ],
+      "regression_risks": [
+        "Changing blocked handling may affect dead-letter reason semantics and read models"
+      ],
+      "primary_owner": "R03",
+      "secondary_sectors": [
+        "R04",
+        "R06",
+        "R07",
+        "R11"
+      ],
+      "aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "runtimeEvidence=false and executable=false safeguards remain",
+        "B1 strategy calculations remain unchanged"
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": false,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS116-R03-017",
+      "title": "Durable lifecycle tables accept impossible timestamp orderings",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "database/migrations/surebet/001_create_upstream_locks_and_import_runs.sql::surebet.import_runs",
+      "exact_line_range": "16-36",
+      "full_file_sha256": "9e42a36b06adc858c25e72c4fd6ab41500cdfdcbbb3e0a7ae556efd2ec771584",
+      "relevant_sql_object_or_migration": "import_runs, worker_jobs, worker_job_checkpoints, b1_private_observation_cycles and related evidence timestamps",
+      "source_evidence": [
+        {
+          "path": "database/migrations/surebet/001_create_upstream_locks_and_import_runs.sql",
+          "symbol": "surebet.import_runs",
+          "line_range": "16-36",
+          "full_file_sha256": "9e42a36b06adc858c25e72c4fd6ab41500cdfdcbbb3e0a7ae556efd2ec771584",
+          "note": "Constrains nullability by outcome but not requested_at <= started_at <= completed_at."
+        },
+        {
+          "path": "packages/persistence/src/repositories/import-run-repository.ts",
+          "symbol": "validatePendingRecord / validateFinalizeRecord",
+          "line_range": "194-230",
+          "full_file_sha256": "9bb1a79b2b27ea6cd3eaaf38cb22bb20148615a2400ff929b834ad2dbd08e00b",
+          "note": "Validates timestamp syntax but not chronology."
+        },
+        {
+          "path": "database/migrations/surebet/004_create_worker_jobs.sql",
+          "symbol": "surebet.worker_jobs and checkpoints",
+          "line_range": "1-153",
+          "full_file_sha256": "9756445dbfbdac6226413098d1253527578d9420543287842c30d034df162b9c",
+          "note": "Does not enforce available/claim/heartbeat/checkpoint/completion/dead-letter chronology."
+        },
+        {
+          "path": "database/migrations/surebet/012_create_b1_private_observation_cycles.sql",
+          "symbol": "surebet.b1_private_observation_cycles",
+          "line_range": "1-34",
+          "full_file_sha256": "5c4858bb130178460e45226677c6cc74610628badeca3632425c0a0838a474a6",
+          "note": "Does not enforce cycle_completed_at >= cycle_started_at."
+        },
+        {
+          "path": "packages/persistence/src/repositories/b1-private-observation-repository.ts",
+          "symbol": "validateCreateRecord / validateCompleteRecord / validateBlockRecord",
+          "line_range": "220-249; 303-322",
+          "full_file_sha256": "a057be720b8d7794b5d3a29cac35879ea555a65f2238e085b98fb7ea730f9941",
+          "note": "Checks UTC syntax only."
+        }
+      ],
+      "preconditions": "A caller clock regresses, inputs are reordered, or a malformed caller supplies syntactically valid timestamps in impossible order.",
+      "trigger": "Create/finalize/heartbeat/checkpoint/complete with a terminal timestamp before the start or prior durable event.",
+      "expected_behavior": "Application validation and PostgreSQL CHECK constraints must preserve causal ordering, while retaining explicit source/event timestamps separately when out-of-order arrival is legitimate.",
+      "current_behavior": "Rows can satisfy all current constraints while completed_at precedes started_at, B1 completion precedes cycle start, or checkpoints/heartbeats regress.",
+      "impact": "Sorting, retention cutoffs, recovery decisions, duration metrics, and evidence truth can be wrong while rows appear terminal and schema-valid.",
+      "evidence": "All validators shown use regex/Date.parse shape checks. The migrations constrain state/null combinations but have no chronology predicates.",
+      "reproduction_status": {
+        "status": "STATICALLY_CONFIRMED",
+        "database_used": false
+      },
+      "transaction_or_state_machine_analysis": "Lifecycle transitions have terminal labels but no database causal-order invariant. Therefore terminality is syntactically complete but not temporally coherent.",
+      "root_cause": "Timestamp syntax validation was not paired with semantic chronology constraints at repository or schema boundaries.",
+      "minimal_fix_boundary": "Add explicit chronology validation and CHECK constraints for each state machine; use database authoritative transition time where appropriate; preserve source occurrence time separately from receive/persist time.",
+      "required_tests": [
+        "Import requested/start/complete permutations",
+        "Worker claim/heartbeat/checkpoint/complete regression",
+        "B1 cycle completion before start",
+        "Boundary equality cases",
+        "Migration of any existing invalid rows is fail-closed and reported"
+      ],
+      "regression_risks": [
+        "Existing test fixtures with equal or synthetic timestamps may need clarification",
+        "Source event timestamps must not be conflated with database transition timestamps"
+      ],
+      "primary_owner": "R03",
+      "secondary_sectors": [
+        "R01",
+        "R06",
+        "R09",
+        "R11"
+      ],
+      "aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "Timestamp storage remains timestamptz",
+        "Fixed-point numeric persistence is unchanged"
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS116-R03-ENV-001",
+      "classification": "ENVIRONMENT_BLOCKER",
+      "title": "Canonical Node 20.20.2 runtime unavailable",
+      "severity": null,
+      "confidence": "HIGH",
+      "details": "The review environment exposed Node v22.16.0. TypeScript emit and focused tests under Node 22 are supplementary only and are not canonical acceptance.",
+      "source_evidence": [],
+      "primary_owner": "R03"
+    },
+    {
+      "id": "BWS116-R03-ENV-002",
+      "classification": "ENVIRONMENT_BLOCKER",
+      "title": "Disposable PostgreSQL execution unavailable",
+      "severity": null,
+      "confidence": "HIGH",
+      "details": "psql and pg_isready were not installed and no local credentials/server were supplied. No database was created or contacted. PostgreSQL isolation, constraint, concurrency, and query-plan behavior therefore remain unexecuted.",
+      "source_evidence": [],
+      "primary_owner": "R03"
+    },
+    {
+      "id": "BWS116-R03-HYP-001",
+      "classification": "HYPOTHESIS",
+      "title": "Ambient libpq environment may alter authentication or session behavior",
+      "severity": null,
+      "confidence": "HIGH",
+      "details": "runPsql inherits process.env and only overrides PGPASSWORD when an explicit password is supplied. PGPASSFILE, PGSERVICE, PGOPTIONS, SSL variables, and ambient PGPASSWORD require R10 policy review. Explicit -d/-U/-p/-h arguments prevent the main target tuple from silently falling back.",
+      "source_evidence": [
+        {
+          "path": "packages/persistence/src/psql.ts",
+          "symbol": "runPsql",
+          "line_range": "191-217",
+          "full_file_sha256": "86053cd5690b15a2ba6ea210e3073c3324017d12fb36ec1fe815c84edab50343",
+          "note": "Inherits process.env."
+        }
+      ],
+      "primary_owner": "R10"
+    },
+    {
+      "id": "BWS116-R03-TG-001",
+      "classification": "TEST_GAP",
+      "title": "Migration tests do not exercise repository escape or unrecognized executable SQL",
+      "severity": null,
+      "confidence": "HIGH",
+      "details": "The focused migration tests cover empty files, transaction keywords, deterministic order, and selected direct targets, but not absolute/traversal/symlink directories, functions, DO blocks, dynamic SQL, grants, or database privilege confinement.",
+      "source_evidence": [
+        {
+          "path": "tests/surebet-persistence.test.ts",
+          "symbol": "migration loader tests",
+          "line_range": "114-172",
+          "full_file_sha256": "76ad61f52a0cefd1885dc8413197378cc85e2c041540b3568b9afaed03b11310",
+          "note": "Non-adversarial migration-scope coverage."
+        }
+      ],
+      "primary_owner": "R11"
+    },
+    {
+      "id": "BWS116-R03-TG-002",
+      "classification": "TEST_GAP",
+      "title": "PostgreSQL idempotency proof is sequential and skipped without explicit disposable configuration",
+      "severity": null,
+      "confidence": "HIGH",
+      "details": "The focused suite reported six skipped tests, including the disposable PostgreSQL persistence proof. No two-connection race, injected commit failure, or isolation-level test ran.",
+      "source_evidence": [
+        {
+          "path": "tests/surebet-persistence.test.ts",
+          "symbol": "disposable PostgreSQL proof",
+          "line_range": "173-374",
+          "full_file_sha256": "76ad61f52a0cefd1885dc8413197378cc85e2c041540b3568b9afaed03b11310",
+          "note": "Environment-gated and primarily sequential."
+        }
+      ],
+      "primary_owner": "R11"
+    },
+    {
+      "id": "BWS116-R03-TG-003",
+      "classification": "TEST_GAP",
+      "title": "Worker tests do not model stale completion after lease transition or takeover",
+      "severity": null,
+      "confidence": "HIGH",
+      "details": "Worker tests exercise normal claim/heartbeat/retry/dead-letter paths, but do not interleave the production repository methods across two PostgreSQL sessions to prove fencing.",
+      "source_evidence": [
+        {
+          "path": "tests/bounded-worker-jobs.test.ts",
+          "symbol": "bounded worker persistence tests",
+          "line_range": "31-306",
+          "full_file_sha256": "59aa7be3ad2725cdbb8aad00e205dd3ab758b9ace08dd605d337943b0a079e2d",
+          "note": "Sequential clock-driven paths."
+        }
+      ],
+      "primary_owner": "R11"
+    },
+    {
+      "id": "BWS116-R03-TG-004",
+      "classification": "TEST_GAP",
+      "title": "Standard private-paper restart tests reuse in-memory previousState rather than reconstructing production durable state",
+      "severity": null,
+      "confidence": "HIGH",
+      "details": "The runtime unit tests demonstrate the optional previousState contract, while the production job payload omits it. There is no fresh-process PostgreSQL crash-window test spanning ledger persistence and worker completion.",
+      "source_evidence": [
+        {
+          "path": "tests/private-paper-runtime.test.ts",
+          "symbol": "restart/idempotency tests",
+          "line_range": "1-520",
+          "full_file_sha256": "93edf430d20eb63a5e60cd743f5a7fcc4964b31940a4164b3810849b9be5662d",
+          "note": "Pure runtime state, not production durable recovery."
+        }
+      ],
+      "primary_owner": "R11"
+    },
+    {
+      "id": "BWS116-R03-TG-005",
+      "classification": "TEST_GAP",
+      "title": "B1 persistence tests do not inject failure between parent and child commits",
+      "severity": null,
+      "confidence": "HIGH",
+      "details": "No disposable PostgreSQL test crashes after b1_backtest_runs insertion or between candidate/simulation inserts, and no replay-completeness assertion exists.",
+      "source_evidence": [
+        {
+          "path": "tests/b1-persistence.test.ts",
+          "symbol": "B1 persistence tests",
+          "line_range": "1-520",
+          "full_file_sha256": "c51b6a753d32397ac0b20e0e4040bf035bf759dda505175a6155d848fcf8caf9",
+          "note": "Static/fake and happy-path coverage."
+        }
+      ],
+      "primary_owner": "R11"
+    },
+    {
+      "id": "BWS116-R03-TG-006",
+      "classification": "TEST_GAP",
+      "title": "Service timeout and shutdown tests use promises that are eventually released",
+      "severity": null,
+      "confidence": "HIGH",
+      "details": "The tests can classify timeout/drain only after fakes settle; they do not prove a never-settling pass is cancelled, lease renewal stops, or late durable calls are fenced.",
+      "source_evidence": [
+        {
+          "path": "tests/bws-private-paper-worker-service.test.ts",
+          "symbol": "worker service lifecycle tests",
+          "line_range": "1-470",
+          "full_file_sha256": "1a25191b979481a30d998bda9d5f2b3f8579114d72d80ee26464f09a65284175",
+          "note": "Controlled resolving fakes."
+        },
+        {
+          "path": "tests/bws-private-paper-scheduler-service.test.ts",
+          "symbol": "scheduler service lifecycle tests",
+          "line_range": "1-520",
+          "full_file_sha256": "63c1067cb56985ebc2eb41392dae471d3885e4c58d4e91a3ad643991f348d96a",
+          "note": "Controlled resolving fakes."
+        }
+      ],
+      "primary_owner": "R11"
+    },
+    {
+      "id": "BWS116-R03-SAFE-001",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "Persistence configuration rejects missing and mixed explicit host/socket targets",
+      "severity": null,
+      "confidence": "HIGH",
+      "details": "resolveSurebetPersistenceConfig requires database, user, port, and exactly one of host or socketDirectory.",
+      "source_evidence": [
+        {
+          "path": "packages/persistence/src/config.ts",
+          "symbol": "resolveSurebetPersistenceConfig",
+          "line_range": "7-42",
+          "full_file_sha256": "03cc5a97ec98091f4a47b9f2ac65682ad298b03617185884e75fea0999ecd4cb",
+          "note": "Fail-fast tuple validation."
+        }
+      ],
+      "primary_owner": "R03"
+    },
+    {
+      "id": "BWS116-R03-SAFE-002",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "Current archive migrations are ordered, transaction-controlled externally, and presently surebet-qualified",
+      "severity": null,
+      "confidence": "HIGH",
+      "details": "The 12 frozen SQL files are lexically ordered 001 through 012, contain no explicit transaction control, and the static inventory found no current object target outside surebet.*.",
+      "source_evidence": [],
+      "primary_owner": "R03"
+    },
+    {
+      "id": "BWS116-R03-SAFE-003",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "Worker claim uses one atomic SKIP LOCKED update",
+      "severity": null,
+      "confidence": "HIGH",
+      "details": "claimNext selects and updates one eligible job in a single CTE with FOR UPDATE SKIP LOCKED and deterministic ordering.",
+      "source_evidence": [
+        {
+          "path": "packages/persistence/src/repositories/worker-job-repository.ts",
+          "symbol": "claimNext",
+          "line_range": "355-435",
+          "full_file_sha256": "263481bca4ae76ceda0e134e7b1d707f17b9de89679c5e0a51f0f5e10431b57e",
+          "note": "Atomic claim path."
+        }
+      ],
+      "primary_owner": "R03"
+    },
+    {
+      "id": "BWS116-R03-SAFE-004",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "Owned and expired dead-letter transitions use current owner/token predicates",
+      "severity": null,
+      "confidence": "HIGH",
+      "details": "deadLetterOwnedJob and deadLetterExpiredLease condition the update on current status and lease identity and use RETURNING before inserting dead-letter evidence.",
+      "source_evidence": [
+        {
+          "path": "packages/persistence/src/repositories/worker-job-repository.ts",
+          "symbol": "deadLetterOwnedJob / deadLetterExpiredLease",
+          "line_range": "882-1037",
+          "full_file_sha256": "263481bca4ae76ceda0e134e7b1d707f17b9de89679c5e0a51f0f5e10431b57e",
+          "note": "Fenced terminal path."
+        }
+      ],
+      "primary_owner": "R03"
+    },
+    {
+      "id": "BWS116-R03-SAFE-005",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "Schema prevents runtime or execution promotion in B1 durable records",
+      "severity": null,
+      "confidence": "HIGH",
+      "details": "B1 convergence, backtest, and observation migrations constrain runtime_evidence=false and executable=false, preserving the BWS-710/BWS-900 holds.",
+      "source_evidence": [],
+      "primary_owner": "R03"
+    },
+    {
+      "id": "BWS116-R03-SAFE-006",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "Scheduler identities are deterministic and sequential replay suppresses a previously created job",
+      "severity": null,
+      "confidence": "HIGH",
+      "details": "The scheduler derives job IDs from scheduler checkpoint and cycle number and calls create before advancing, so a single-instance crash after create can re-observe the same job on restart.",
+      "source_evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/private-paper-runtime-scheduler.ts",
+          "symbol": "scheduleRuntimeJob",
+          "line_range": "717-765",
+          "full_file_sha256": "46311916b8d4df07c09183f7e8563bd69fae1d5330927e325a45e21e5f48be58",
+          "note": "Deterministic sequential recovery; concurrency still affected by findings 006/007."
+        }
+      ],
+      "primary_owner": "R03"
+    },
+    {
+      "id": "BWS116-R03-REJ-001",
+      "classification": "REJECTED_SUSPICION",
+      "title": "Current frozen migration files already write outside surebet.*",
+      "severity": null,
+      "confidence": "HIGH",
+      "details": "Rejected. Static inventory of all 12 SQL files found only surebet.* object targets. Finding 001 concerns the general loader/security boundary and future or caller-selected bytes, not a claim that current migrations escape.",
+      "source_evidence": [],
+      "primary_owner": "R03"
+    },
+    {
+      "id": "BWS116-R03-REJ-002",
+      "classification": "REJECTED_SUSPICION",
+      "title": "Archive has duplicate, unsafe, symlink, or special members",
+      "severity": null,
+      "confidence": "HIGH",
+      "details": "Rejected. Independent ZIP inspection found 618 regular files, no duplicate paths, no unsafe paths, no symlinks, and no special entries.",
+      "source_evidence": [],
+      "primary_owner": "R03"
+    },
+    {
+      "id": "BWS116-R03-REJ-003",
+      "classification": "REJECTED_SUSPICION",
+      "title": "psql command construction uses a shell and directly interpolates command arguments",
+      "severity": null,
+      "confidence": "HIGH",
+      "details": "Rejected. execFileSync receives an argument array, and repository values use SQL literal escaping. SQL authority and timeout defects remain separate.",
+      "source_evidence": [],
+      "primary_owner": "R03"
+    },
+    {
+      "id": "BWS116-R03-REJ-004",
+      "classification": "REJECTED_SUSPICION",
+      "title": "B1 bigint values are necessarily truncated by JavaScript reads",
+      "severity": null,
+      "confidence": "HIGH",
+      "details": "Rejected for the reviewed repository projections. bigint columns are generally cast to text before JSON decoding; mathematical interpretation remains R02/R04-owned.",
+      "source_evidence": [],
+      "primary_owner": "R03"
+    },
+    {
+      "id": "BWS116-R03-REJ-005",
+      "classification": "REJECTED_SUSPICION",
+      "title": "Sequential scheduler restart necessarily creates a second job",
+      "severity": null,
+      "confidence": "HIGH",
+      "details": "Rejected for a single scheduler instance with the same immutable payload. Deterministic job ID plus create/get can suppress it. Concurrent creation and checkpoint races remain findings 006 and 007.",
+      "source_evidence": [],
+      "primary_owner": "R03"
+    },
+    {
+      "id": "KNOWN_BASELINE_MANIFEST_DRIFT",
+      "classification": "CROSS_AREA_HANDOFF",
+      "title": "Known SOURCE_MANIFEST.json drift",
+      "severity": null,
+      "confidence": "HIGH",
+      "details": "The correct 617 non-self path set has seven stale Graphify/update-tooling hashes or sizes. Per frozen authority, this is not an R03 finding and is handed to R11.",
+      "source_evidence": [
+        {
+          "path": "SOURCE_MANIFEST.json",
+          "symbol": "source manifest",
+          "line_range": "1-1",
+          "full_file_sha256": "d9ea618c19fac733cf070c7e9b811ace8a1a0d637680b0b9f8233be5879aba6a",
+          "note": "Known qualified baseline drift."
+        }
+      ],
+      "primary_owner": "R11"
+    },
+    {
+      "id": "BWS116-R03-HO-001",
+      "classification": "CROSS_AREA_HANDOFF",
+      "title": "Aggregate false-green test and validator ownership",
+      "severity": null,
+      "confidence": "HIGH",
+      "details": "R11 should incorporate TG-001 through TG-006 and verify that aggregate gates detect the confirmed persistence defects.",
+      "source_evidence": [],
+      "primary_owner": "R11"
+    },
+    {
+      "id": "BWS116-R03-HO-002",
+      "classification": "CROSS_AREA_HANDOFF",
+      "title": "Operational backup, restore, retention, and migration command lifecycle",
+      "severity": null,
+      "confidence": "HIGH",
+      "details": "R08 owns command-level operational lifecycle. R03 retains ownership of schema/repository transaction correctness and finding 013 reference integrity.",
+      "source_evidence": [],
+      "primary_owner": "R08"
+    },
+    {
+      "id": "BWS116-R03-HO-003",
+      "classification": "CROSS_AREA_HANDOFF",
+      "title": "Generic process topology and shutdown ownership",
+      "severity": null,
+      "confidence": "HIGH",
+      "details": "R06 owns child process topology, start/status/stop, and generic signal/listener lifecycle. R03 finding 011 covers the durable-state cancellation boundary.",
+      "source_evidence": [],
+      "primary_owner": "R06"
+    },
+    {
+      "id": "BWS116-R03-HO-004",
+      "classification": "CROSS_AREA_HANDOFF",
+      "title": "Environment and CLI precedence for PostgreSQL/libpq variables",
+      "severity": null,
+      "confidence": "HIGH",
+      "details": "R10 should decide whether ambient libpq variables are permitted and ensure selected tuple/redaction rules are exact.",
+      "source_evidence": [],
+      "primary_owner": "R10"
+    },
+    {
+      "id": "BWS116-R03-HO-005",
+      "classification": "CROSS_AREA_HANDOFF",
+      "title": "B1 simulation and settlement semantics",
+      "severity": null,
+      "confidence": "HIGH",
+      "details": "R04 owns whether B1 candidate/simulation contents are correct. R03 finding 015 concerns only atomic durable graph completeness.",
+      "source_evidence": [],
+      "primary_owner": "R04"
+    },
+    {
+      "id": "BWS116-R03-HO-006",
+      "classification": "CROSS_AREA_HANDOFF",
+      "title": "Upstream semantic validity before persistence",
+      "severity": null,
+      "confidence": "HIGH",
+      "details": "R01 owns source contract/provenance/currentness semantics. R03 covers transactional storage, CAS, and replay after accepted input.",
+      "source_evidence": [],
+      "primary_owner": "R01"
+    },
+    {
+      "id": "BWS116-R03-HO-007",
+      "classification": "CROSS_AREA_HANDOFF",
+      "title": "Strategy mathematics and identity before persistence",
+      "severity": null,
+      "confidence": "HIGH",
+      "details": "R02 owns mathematical/identity correctness. No R03 finding is assigned solely because a value might be mathematically wrong before storage.",
+      "source_evidence": [],
+      "primary_owner": "R02"
+    }
+  ]
+}
