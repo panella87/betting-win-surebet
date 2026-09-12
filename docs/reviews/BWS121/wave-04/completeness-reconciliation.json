@@ -1,0 +1,16 @@
+{
+  "application_implementation_performed": false,
+  "confirmed_findings": 173,
+  "confirmed_ids_unique": true,
+  "current_mutable_authority_overwritten": false,
+  "duplicate_raw_ids": "documented historical repeated aliases only",
+  "input_records_accounted_for": 555,
+  "input_reports_accounted_for": 12,
+  "intentional_duplicate_canonical_record": "BWS121-R11-001 aliases provisional manifest handoffs",
+  "mapping_records": 555,
+  "new_wave_reports_accounted_for": 3,
+  "review_program_complete": true,
+  "schema": "betting-win-surebet-wave04-completeness-v1",
+  "silent_renumbering": false,
+  "unmapped_records": 0
+}

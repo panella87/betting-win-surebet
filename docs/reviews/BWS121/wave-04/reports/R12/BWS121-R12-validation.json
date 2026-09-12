@@ -1,0 +1,426 @@
+{
+  "schema": "betting-win-surebet-r12-validation-v1",
+  "review_id": "BWS121-R12",
+  "repository": "betting-win-surebet",
+  "archive": {
+    "uploaded_path": "/mnt/data/betting-win-surebet121(3).zip",
+    "logical_name": "betting-win-surebet121.zip",
+    "actual_sha256": "025936d21db89ac5cf4881863f05ec9ed5ddaaa2b4adfe60e766207fc4c9b9f7",
+    "regular_file_count": 733,
+    "zip_entry_count": 733,
+    "directory_entries": 0,
+    "duplicate_paths": 0,
+    "unsafe_paths": 0,
+    "symlinks": 0,
+    "special_entries": 0,
+    "extraction_integrity": "PASS_EXACT_PATH_SIZE_SHA256_MATCH"
+  },
+  "baseline_and_executable_compatibility": {
+    "baseline_archive": "betting-win-surebet120(3).zip",
+    "baseline_sha256": "d4565c05ecfe63f5d5511f224a20ff20fb82bfc75b23203c94d7d3e98a8c21bb",
+    "baseline_regular_files": 695,
+    "current_regular_files": 733,
+    "added_files": 38,
+    "changed_files": 2,
+    "removed_files": 0,
+    "added_non_documentation": 0,
+    "changed_non_documentation": 0,
+    "removed_non_documentation": 0,
+    "result": "EXACT_NON_DOCUMENTATION_BYTE_EQUIVALENCE_WITH_BWS120"
+  },
+  "package_identity": {
+    "name": "betting-win-surebet",
+    "version": "0.1.0-bws-full-platform",
+    "engines_node": ">=20 <21",
+    "nvmrc": "20.20.2"
+  },
+  "runtime_and_tools": {
+    "canonical_node": "20.20.2",
+    "actual_node": "22.16.0",
+    "actual_node_classification": "SUPPLEMENTARY_ONLY",
+    "npm": "10.9.2",
+    "python": "3.13.5",
+    "bash": "5.2.37",
+    "git": "2.47.3",
+    "coreutils_timeout": "9.7",
+    "zip": "Info-ZIP 3.0",
+    "unzip": "6.00",
+    "shellcheck": "UNAVAILABLE",
+    "psql": "UNAVAILABLE_NOT_USED"
+  },
+  "commands_executed": [
+    {
+      "name": "archive_inventory_and_safe_extraction",
+      "command": "python3 bounded ZIP inventory, path/type safety validation, extraction, and member hash reconciliation",
+      "duration_seconds": 0.208109,
+      "exit_code": 0,
+      "timed_out": false,
+      "status": "PASS"
+    },
+    {
+      "name": "baseline_executable_compatibility",
+      "command": "python3 exact member comparison: betting-win-surebet120(3).zip -> betting-win-surebet121(3).zip",
+      "duration_seconds": null,
+      "exit_code": 0,
+      "timed_out": false,
+      "status": "PASS"
+    },
+    {
+      "name": "bash_syntax_all",
+      "command": "bash -n ./.automation/lib/controller_hardening_v2.sh ./.automation/lib/run_common.sh ./.automation/lib/telegram_notify.sh ./.automation/lib/temp_inode_guard.sh ./automation.config.sh ./check_progress.sh ./cleanup_automation_artifact_residue.sh ./cleanup_automation_temp_inode_residue.sh ./commands/run-pinned-interface-smoke.sh ./commands/run-sure-001-autonomous.sh ./commands/run-sure-local-engine-autonomous.sh ./commands/run-sure-paper-mode-autonomous.sh ./graphify_repo_install.sh ./graphify_repo_refresh.sh ./open_log.sh ./pull_artifacts_and_zip_codebase.sh ./run-autonomous-bugfix.sh ./run-autonomous-implementation.sh ./run-bugfix-autopilot.sh ./run-paper-autopilot.sh ./run-paper-evaluation.sh ./scripts/create-source-handoff-archive.sh ./scripts/load-node-runtime.sh ./start.sh ./stop.sh ./update_git.sh ./watch_progress.sh ./zip_codebase.sh",
+      "duration_seconds": 0.572274,
+      "exit_code": 0,
+      "timed_out": false,
+      "status": "PASS"
+    },
+    {
+      "name": "validate_autonomous_controller_contract",
+      "command": "env PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_autonomous_controller_contract.py",
+      "duration_seconds": 1.33891,
+      "exit_code": 0,
+      "timed_out": false,
+      "status": "PASS"
+    },
+    {
+      "name": "validate_temp_inode_safety",
+      "command": "env PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_temp_inode_safety.py",
+      "duration_seconds": 1.163519,
+      "exit_code": 0,
+      "timed_out": false,
+      "status": "PASS"
+    },
+    {
+      "name": "validate_artifact_hygiene",
+      "command": "env PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_artifact_hygiene.py",
+      "duration_seconds": 1.165103,
+      "exit_code": 0,
+      "timed_out": false,
+      "status": "PASS"
+    },
+    {
+      "name": "validate_private_paper_mode_backlog",
+      "command": "env PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_private_paper_mode_backlog_contract.py",
+      "duration_seconds": 1.436907,
+      "exit_code": 0,
+      "timed_out": false,
+      "status": "PASS"
+    },
+    {
+      "name": "focused_r12_node_tests",
+      "command": "node --loader <global ts-node esm loader> --test --test-concurrency=1 <10 focused R12 test files>",
+      "duration_seconds": 79.751869,
+      "exit_code": 0,
+      "timed_out": false,
+      "status": "PASS_SUPPLEMENTARY_NODE_22",
+      "result": {
+        "tests": 74,
+        "passed": 74,
+        "failed": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "name": "h01_heartbeat_overwrites_child_metadata",
+      "script": "/tmp/bws121-r12-review/harness/h01_heartbeat_overwrites_child_metadata.sh",
+      "command": "timeout --signal=TERM --kill-after=2s 30 /tmp/bws121-r12-review/harness/h01_heartbeat_overwrites_child_metadata.sh",
+      "exit_code": 0,
+      "duration_seconds": 1.032215,
+      "timed_out": false,
+      "status": "PASS",
+      "stdout_path": "/tmp/bws121-r12-review/harness/h01_heartbeat_overwrites_child_metadata.stdout",
+      "stderr_path": "/tmp/bws121-r12-review/harness/h01_heartbeat_overwrites_child_metadata.stderr"
+    },
+    {
+      "name": "h02_stale_takeover_leaves_recorded_child",
+      "script": "/tmp/bws121-r12-review/harness/h02_stale_takeover_leaves_recorded_child.sh",
+      "command": "timeout --signal=TERM --kill-after=2s 20 /tmp/bws121-r12-review/harness/h02_stale_takeover_leaves_recorded_child.sh",
+      "exit_code": 0,
+      "duration_seconds": 1.306521,
+      "timed_out": false,
+      "status": "PASS",
+      "stdout_path": "/tmp/bws121-r12-review/harness/h02_stale_takeover_leaves_recorded_child.stdout",
+      "stderr_path": "/tmp/bws121-r12-review/harness/h02_stale_takeover_leaves_recorded_child.stderr"
+    },
+    {
+      "name": "h03_child_budget_is_advisory",
+      "script": "/tmp/bws121-r12-review/harness/h03_child_budget_is_advisory.sh",
+      "command": "timeout --signal=TERM --kill-after=2s 10 /tmp/bws121-r12-review/harness/h03_child_budget_is_advisory.sh",
+      "exit_code": 0,
+      "duration_seconds": 2.012562,
+      "timed_out": false,
+      "status": "PASS",
+      "stdout_path": "/tmp/bws121-r12-review/harness/h03_child_budget_is_advisory.stdout",
+      "stderr_path": "/tmp/bws121-r12-review/harness/h03_child_budget_is_advisory.stderr"
+    },
+    {
+      "name": "h04_leader_exit_leaves_process_group",
+      "script": "/tmp/bws121-r12-review/harness/h04_leader_exit_leaves_process_group.sh",
+      "command": "timeout --signal=TERM --kill-after=2s 30 /tmp/bws121-r12-review/harness/h04_leader_exit_leaves_process_group.sh",
+      "exit_code": 0,
+      "duration_seconds": 0.009061,
+      "timed_out": false,
+      "status": "PASS",
+      "stdout_path": "/tmp/bws121-r12-review/harness/h04_leader_exit_leaves_process_group.stdout",
+      "stderr_path": "/tmp/bws121-r12-review/harness/h04_leader_exit_leaves_process_group.stderr"
+    },
+    {
+      "name": "h05_run_directory_collision",
+      "script": "/tmp/bws121-r12-review/harness/h05_run_directory_collision.sh",
+      "command": "timeout --signal=TERM --kill-after=2s 30 /tmp/bws121-r12-review/harness/h05_run_directory_collision.sh",
+      "exit_code": 0,
+      "duration_seconds": 0.024764,
+      "timed_out": false,
+      "status": "PASS",
+      "stdout_path": "/tmp/bws121-r12-review/harness/h05_run_directory_collision.stdout",
+      "stderr_path": "/tmp/bws121-r12-review/harness/h05_run_directory_collision.stderr"
+    },
+    {
+      "name": "h06_cleanup_deletes_live_named_directory",
+      "script": "/tmp/bws121-r12-review/harness/h06_cleanup_deletes_live_named_directory.sh",
+      "command": "timeout --signal=TERM --kill-after=2s 30 /tmp/bws121-r12-review/harness/h06_cleanup_deletes_live_named_directory.sh",
+      "exit_code": 0,
+      "duration_seconds": 0.213583,
+      "timed_out": false,
+      "status": "PASS",
+      "stdout_path": "/tmp/bws121-r12-review/harness/h06_cleanup_deletes_live_named_directory.stdout",
+      "stderr_path": "/tmp/bws121-r12-review/harness/h06_cleanup_deletes_live_named_directory.stderr"
+    },
+    {
+      "name": "h07_shared_artifacts_publication_last_writer_wins",
+      "script": "/tmp/bws121-r12-review/harness/h07_shared_artifacts_publication_last_writer_wins.sh",
+      "command": "timeout --signal=TERM --kill-after=2s 30 /tmp/bws121-r12-review/harness/h07_shared_artifacts_publication_last_writer_wins.sh",
+      "exit_code": 0,
+      "duration_seconds": 0.593006,
+      "timed_out": false,
+      "status": "PASS",
+      "stdout_path": "/tmp/bws121-r12-review/harness/h07_shared_artifacts_publication_last_writer_wins.stdout",
+      "stderr_path": "/tmp/bws121-r12-review/harness/h07_shared_artifacts_publication_last_writer_wins.stderr"
+    },
+    {
+      "name": "h08_telegram_result_created_after_archive",
+      "script": "/tmp/bws121-r12-review/harness/h08_telegram_result_created_after_archive.sh",
+      "command": "timeout --signal=TERM --kill-after=2s 30 /tmp/bws121-r12-review/harness/h08_telegram_result_created_after_archive.sh",
+      "exit_code": 0,
+      "duration_seconds": 0.030972,
+      "timed_out": false,
+      "status": "PASS",
+      "stdout_path": "/tmp/bws121-r12-review/harness/h08_telegram_result_created_after_archive.stdout",
+      "stderr_path": "/tmp/bws121-r12-review/harness/h08_telegram_result_created_after_archive.stderr"
+    },
+    {
+      "name": "h09_stale_shared_archive_preempts_newer_run",
+      "script": "/tmp/bws121-r12-review/harness/h09_stale_shared_archive_preempts_newer_run.sh",
+      "command": "timeout --signal=TERM --kill-after=2s 30 /tmp/bws121-r12-review/harness/h09_stale_shared_archive_preempts_newer_run.sh",
+      "exit_code": 0,
+      "duration_seconds": 0.595715,
+      "timed_out": false,
+      "status": "PASS",
+      "stdout_path": "/tmp/bws121-r12-review/harness/h09_stale_shared_archive_preempts_newer_run.stdout",
+      "stderr_path": "/tmp/bws121-r12-review/harness/h09_stale_shared_archive_preempts_newer_run.stderr"
+    },
+    {
+      "name": "post_review_repository_mutation_reconciliation",
+      "command": "python3 compare extracted regular-file path/size/SHA-256 set to original ZIP inventory",
+      "duration_seconds": null,
+      "exit_code": 0,
+      "timed_out": false,
+      "status": "PASS"
+    }
+  ],
+  "checks": {
+    "passed": [
+      "Archive hash computed independently",
+      "733-member path/type safety and extraction reconciliation",
+      "Exact non-documentation equivalence with BWS120",
+      "All shell sources passed bash -n",
+      "Four focused Python validators passed",
+      "Focused R12 test set passed 74/74 under supplementary Node 22",
+      "Nine inert adversarial harnesses reproduced the targeted behavior",
+      "Coverage has exactly 733 unique archive-member rows",
+      "Post-review extracted tree matches original archive bytes exactly",
+      "All 137 inherited findings indexed and screened for duplicate root cause"
+    ],
+    "failed": [],
+    "skipped": [
+      "Full repository Node test suite",
+      "Canonical Node 20.20.2 rerun",
+      "Controller or Codex execution",
+      "Service start/stop/restart",
+      "Live provider/API/account/credential/database access",
+      "Telegram network delivery",
+      "Power-loss and real filesystem crash injection"
+    ],
+    "unavailable": [
+      "Node 20.20.2 runtime",
+      "shellcheck",
+      "psql/local PostgreSQL"
+    ]
+  },
+  "adversarial_harnesses": [
+    {
+      "name": "h01_heartbeat_overwrites_child_metadata",
+      "script": "/tmp/bws121-r12-review/harness/h01_heartbeat_overwrites_child_metadata.sh",
+      "command": "timeout --signal=TERM --kill-after=2s 30 /tmp/bws121-r12-review/harness/h01_heartbeat_overwrites_child_metadata.sh",
+      "exit_code": 0,
+      "duration_seconds": 1.032215,
+      "timed_out": false,
+      "status": "PASS",
+      "stdout_path": "/tmp/bws121-r12-review/harness/h01_heartbeat_overwrites_child_metadata.stdout",
+      "stderr_path": "/tmp/bws121-r12-review/harness/h01_heartbeat_overwrites_child_metadata.stderr"
+    },
+    {
+      "name": "h02_stale_takeover_leaves_recorded_child",
+      "script": "/tmp/bws121-r12-review/harness/h02_stale_takeover_leaves_recorded_child.sh",
+      "command": "timeout --signal=TERM --kill-after=2s 20 /tmp/bws121-r12-review/harness/h02_stale_takeover_leaves_recorded_child.sh",
+      "exit_code": 0,
+      "duration_seconds": 1.306521,
+      "timed_out": false,
+      "status": "PASS",
+      "stdout_path": "/tmp/bws121-r12-review/harness/h02_stale_takeover_leaves_recorded_child.stdout",
+      "stderr_path": "/tmp/bws121-r12-review/harness/h02_stale_takeover_leaves_recorded_child.stderr"
+    },
+    {
+      "name": "h03_child_budget_is_advisory",
+      "script": "/tmp/bws121-r12-review/harness/h03_child_budget_is_advisory.sh",
+      "command": "timeout --signal=TERM --kill-after=2s 10 /tmp/bws121-r12-review/harness/h03_child_budget_is_advisory.sh",
+      "exit_code": 0,
+      "duration_seconds": 2.012562,
+      "timed_out": false,
+      "status": "PASS",
+      "stdout_path": "/tmp/bws121-r12-review/harness/h03_child_budget_is_advisory.stdout",
+      "stderr_path": "/tmp/bws121-r12-review/harness/h03_child_budget_is_advisory.stderr"
+    },
+    {
+      "name": "h04_leader_exit_leaves_process_group",
+      "script": "/tmp/bws121-r12-review/harness/h04_leader_exit_leaves_process_group.sh",
+      "command": "timeout --signal=TERM --kill-after=2s 30 /tmp/bws121-r12-review/harness/h04_leader_exit_leaves_process_group.sh",
+      "exit_code": 0,
+      "duration_seconds": 0.009061,
+      "timed_out": false,
+      "status": "PASS",
+      "stdout_path": "/tmp/bws121-r12-review/harness/h04_leader_exit_leaves_process_group.stdout",
+      "stderr_path": "/tmp/bws121-r12-review/harness/h04_leader_exit_leaves_process_group.stderr"
+    },
+    {
+      "name": "h05_run_directory_collision",
+      "script": "/tmp/bws121-r12-review/harness/h05_run_directory_collision.sh",
+      "command": "timeout --signal=TERM --kill-after=2s 30 /tmp/bws121-r12-review/harness/h05_run_directory_collision.sh",
+      "exit_code": 0,
+      "duration_seconds": 0.024764,
+      "timed_out": false,
+      "status": "PASS",
+      "stdout_path": "/tmp/bws121-r12-review/harness/h05_run_directory_collision.stdout",
+      "stderr_path": "/tmp/bws121-r12-review/harness/h05_run_directory_collision.stderr"
+    },
+    {
+      "name": "h06_cleanup_deletes_live_named_directory",
+      "script": "/tmp/bws121-r12-review/harness/h06_cleanup_deletes_live_named_directory.sh",
+      "command": "timeout --signal=TERM --kill-after=2s 30 /tmp/bws121-r12-review/harness/h06_cleanup_deletes_live_named_directory.sh",
+      "exit_code": 0,
+      "duration_seconds": 0.213583,
+      "timed_out": false,
+      "status": "PASS",
+      "stdout_path": "/tmp/bws121-r12-review/harness/h06_cleanup_deletes_live_named_directory.stdout",
+      "stderr_path": "/tmp/bws121-r12-review/harness/h06_cleanup_deletes_live_named_directory.stderr"
+    },
+    {
+      "name": "h07_shared_artifacts_publication_last_writer_wins",
+      "script": "/tmp/bws121-r12-review/harness/h07_shared_artifacts_publication_last_writer_wins.sh",
+      "command": "timeout --signal=TERM --kill-after=2s 30 /tmp/bws121-r12-review/harness/h07_shared_artifacts_publication_last_writer_wins.sh",
+      "exit_code": 0,
+      "duration_seconds": 0.593006,
+      "timed_out": false,
+      "status": "PASS",
+      "stdout_path": "/tmp/bws121-r12-review/harness/h07_shared_artifacts_publication_last_writer_wins.stdout",
+      "stderr_path": "/tmp/bws121-r12-review/harness/h07_shared_artifacts_publication_last_writer_wins.stderr"
+    },
+    {
+      "name": "h08_telegram_result_created_after_archive",
+      "script": "/tmp/bws121-r12-review/harness/h08_telegram_result_created_after_archive.sh",
+      "command": "timeout --signal=TERM --kill-after=2s 30 /tmp/bws121-r12-review/harness/h08_telegram_result_created_after_archive.sh",
+      "exit_code": 0,
+      "duration_seconds": 0.030972,
+      "timed_out": false,
+      "status": "PASS",
+      "stdout_path": "/tmp/bws121-r12-review/harness/h08_telegram_result_created_after_archive.stdout",
+      "stderr_path": "/tmp/bws121-r12-review/harness/h08_telegram_result_created_after_archive.stderr"
+    },
+    {
+      "name": "h09_stale_shared_archive_preempts_newer_run",
+      "script": "/tmp/bws121-r12-review/harness/h09_stale_shared_archive_preempts_newer_run.sh",
+      "command": "timeout --signal=TERM --kill-after=2s 30 /tmp/bws121-r12-review/harness/h09_stale_shared_archive_preempts_newer_run.sh",
+      "exit_code": 0,
+      "duration_seconds": 0.595715,
+      "timed_out": false,
+      "status": "PASS",
+      "stdout_path": "/tmp/bws121-r12-review/harness/h09_stale_shared_archive_preempts_newer_run.stdout",
+      "stderr_path": "/tmp/bws121-r12-review/harness/h09_stale_shared_archive_preempts_newer_run.stderr"
+    }
+  ],
+  "coverage_reconciliation": {
+    "expected_rows": 733,
+    "actual_rows": 733,
+    "unique_paths": 733,
+    "missing_paths": [],
+    "extra_paths": [],
+    "ownership_counts": {
+      "INHERITED_AUTHORITY": 115,
+      "OUT_OF_SCOPE_INVENTORIED": 533,
+      "PRIMARY_OWNED": 48,
+      "SHARED_CONTEXT": 37
+    },
+    "review_status_counts": {
+      "AUTHORITY_OVERLAP_CHECKED": 115,
+      "CONTEXT_TRACED": 37,
+      "DEEP_STATIC": 26,
+      "DEEP_STATIC_AND_ADVERSARIAL": 8,
+      "FOCUSED_TEST_OR_VALIDATOR_REVIEW": 14,
+      "INVENTORIED_NOT_TRACED": 533
+    },
+    "status": "PASS"
+  },
+  "finding_counts": {
+    "confirmed": 13,
+    "by_severity": {
+      "P1": 12,
+      "P2": 1
+    },
+    "release_blocking": 12,
+    "deployment_blocking": 12,
+    "hypotheses": 1,
+    "handoffs": 5,
+    "safeguards": 5,
+    "rejected_suspicions": 4,
+    "test_gaps": 12,
+    "environment_blockers": 3
+  },
+  "known_limitations": [
+    "Canonical Node 20.20.2 was unavailable, so Node 22 test results cannot be treated as release acceptance.",
+    "No actual repository controller or implementation agent was invoked; controller findings rest on static control-flow tracing plus inert external harnesses.",
+    "No power-loss, kernel cgroup, PID namespace, or real multi-host filesystem behavior was exercised.",
+    "Telegram outcome ordering was tested only with inert local files/dry-run semantics; no network request was made.",
+    "The narrow parent-lock unlink TOCTOU remains a hypothesis pending an instrumented barrier test."
+  ],
+  "repository_mutation_attestation": {
+    "source_modified": false,
+    "tests_modified": false,
+    "documentation_modified": false,
+    "configuration_modified": false,
+    "archive_modified": false,
+    "post_review_path_count": 733,
+    "post_review_changed_paths": 0,
+    "temporary_files_location": "/tmp/bws121-r12-review outside extracted repository, plus final outputs in /mnt/data"
+  },
+  "access_attestation": {
+    "network_access": false,
+    "provider_access": false,
+    "external_api_access": false,
+    "account_or_credential_access": false,
+    "persistent_database_access": false,
+    "betting_win_checkout_access": false,
+    "controller_execution": false,
+    "codex_or_implementation_agent_invocation": false,
+    "live_operation": false
+  },
+  "overall_verdict": "BLOCKED_SOURCE_CORRECTNESS_REMEDIATION_REQUIRED"
+}

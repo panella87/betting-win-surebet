@@ -8,3 +8,5 @@ Independent review material is stored by exact current documentation baseline. I
 - [BWS120 Wave 03](BWS120/wave-03/README.md): R07 evidence/campaign truth, R08 database lifecycle/recovery, and R09 release/upgrade/soak/promotion.
 
 Current task and controller routing remain in `../automation/current-implementation-task.md` and `../repo_status_current.md`.
+
+- [BWS121 Wave 04](BWS121/wave-04/README.md): final R10 configuration/repository boundary, R11 assurance, and R12 controller/artifact review; R01-R12 review program complete.

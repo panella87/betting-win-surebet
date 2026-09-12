@@ -1,0 +1,556 @@
+{
+  "entries": [
+    {
+      "action": "REPLACE",
+      "mode": "0744",
+      "path": "docs/000_documentation_index.md",
+      "postimage_sha256": "e5cf97e189fa4e9bd7e9c6dd5bbad23d29ef785276fb742e400c5217e6e6cd6b",
+      "preimage_sha256": "732b6e6ef7136af4e9fb7074c9606c10c68f1f48546f35feb78f88ec2b3ce40f",
+      "protected_content_preserved": true,
+      "reason": "Wave 04 final review consolidation and navigation",
+      "size": 18487,
+      "source_reports_represented": [
+        "R01-R12 cumulative"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS121/wave-04/README.md",
+      "postimage_sha256": "4b58ea57c1950239e273123c34c8a1006574d9a06972ad00b57de71e213081c7",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 04 final review consolidation and navigation",
+      "size": 1504,
+      "source_reports_represented": [
+        "R01-R12 cumulative"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS121/wave-04/area-coverage.md",
+      "postimage_sha256": "9770b5669368dedd648f3c4d77408ccaa368bd8283dbf5093b6a50b56be2872b",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 04 final review consolidation and navigation",
+      "size": 1119,
+      "source_reports_represented": [
+        "R01-R12 cumulative"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS121/wave-04/authority-map.md",
+      "postimage_sha256": "919db0a10faf8facade374f655fcf1809cec50590dfea42c8be50b05ab4456b8",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 04 final review consolidation and navigation",
+      "size": 1829,
+      "source_reports_represented": [
+        "R01-R12 cumulative"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS121/wave-04/baseline-compatibility.json",
+      "postimage_sha256": "c9f17aabf9081abbf31bcc46ba38e08724ec665eab95418c591eb09b3da9b201",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 04 final review consolidation and navigation",
+      "size": 1470,
+      "source_reports_represented": [
+        "R01-R12 cumulative"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS121/wave-04/baseline-compatibility.md",
+      "postimage_sha256": "f4166747bd69633f46ad9e66002ced37ee0d84a23fb9289aeb1d18ce900e9ede",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 04 final review consolidation and navigation",
+      "size": 543,
+      "source_reports_represented": [
+        "R01-R12 cumulative"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS121/wave-04/baseline-file-manifest.tsv",
+      "postimage_sha256": "ebf085c039fca042b5e600d629fb470749e008db62bc2b6bf641ecd0dc76d101",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 04 final review consolidation and navigation",
+      "size": 111554,
+      "source_reports_represented": [
+        "R01-R12 cumulative"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS121/wave-04/completeness-reconciliation.json",
+      "postimage_sha256": "b94e9f986ae80caa37558499bc14e76b69e73e6815b0a604f7a7f6c43ac6a76c",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 04 final review consolidation and navigation",
+      "size": 622,
+      "source_reports_represented": [
+        "R01-R12 cumulative"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS121/wave-04/cumulative-consolidated-ledger.json",
+      "postimage_sha256": "b7253f4543257c7c50f9ba58ae913601d74b71ec982209b572f8c5ece54c7034",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 04 final review consolidation and navigation",
+      "size": 909177,
+      "source_reports_represented": [
+        "R01-R12 cumulative"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS121/wave-04/cumulative-consolidated-ledger.md",
+      "postimage_sha256": "d7820e63ff0585cd414cf96e2244bde54ad1ce6abc0107b5531dc4fd7fa9caac",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 04 final review consolidation and navigation",
+      "size": 424821,
+      "source_reports_represented": [
+        "R01-R12 cumulative"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS121/wave-04/decisions.json",
+      "postimage_sha256": "e0d25bdb976d419c57aaf8764f684e252ce54ae5ae413e2ff32ef18864a5d157",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 04 final review consolidation and navigation",
+      "size": 22732,
+      "source_reports_represented": [
+        "R01-R12 cumulative"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS121/wave-04/decisions.md",
+      "postimage_sha256": "57c218c49278a15f02e710f43adb81be6dbb197c9a5126e966e12cd4a8461a9c",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 04 final review consolidation and navigation",
+      "size": 17266,
+      "source_reports_represented": [
+        "R01-R12 cumulative"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS121/wave-04/dependency-and-tranches.md",
+      "postimage_sha256": "6a7331296ad92b1f254c67565d5db27b5f5a2dce1d29f9fb2a725233efe14fb0",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 04 final review consolidation and navigation",
+      "size": 14897,
+      "source_reports_represented": [
+        "R01-R12 cumulative"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS121/wave-04/incremental-consolidation.md",
+      "postimage_sha256": "913634d0d06e4453f508694b5731b5db5ecd4e2102b1a8da547c6b4175a2ce9f",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 04 final review consolidation and navigation",
+      "size": 544,
+      "source_reports_represented": [
+        "R10",
+        "R11",
+        "R12"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS121/wave-04/input-inventory.json",
+      "postimage_sha256": "fc79c3ebcf41462974ba0b80460ef68c4d770c5cd0c50c7c5d0795cbf8ab26ce",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 04 final review consolidation and navigation",
+      "size": 7374,
+      "source_reports_represented": [
+        "R01-R12 cumulative"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS121/wave-04/next-wave-handoff.md",
+      "postimage_sha256": "473882dc21fb6f63622ffcfd125ce2127cf4c7b1317ab92d5b183b3ece18d19d",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 04 final review consolidation and navigation",
+      "size": 1849,
+      "source_reports_represented": [
+        "R01-R12 cumulative"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS121/wave-04/non-defect-register.json",
+      "postimage_sha256": "adba674e00115e25aec98a8df8f64a51d47fd2e6bb783d1787ae8ce6e099c915",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 04 final review consolidation and navigation",
+      "size": 359820,
+      "source_reports_represented": [
+        "R01-R12 cumulative"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS121/wave-04/original-to-consolidated.json",
+      "postimage_sha256": "f5d3c16fdc430e0943de37d00336ceed1034b82546b0de9106bda20d06545b02",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 04 final review consolidation and navigation",
+      "size": 177778,
+      "source_reports_represented": [
+        "R01-R12 cumulative"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS121/wave-04/prior-overlay-lineage.json",
+      "postimage_sha256": "e69fdd06e9f6dc633e760f54b041eb14cb2ee797c3195ea4c5e5659486636797",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 04 final review consolidation and navigation",
+      "size": 7751,
+      "source_reports_represented": [
+        "R01-R12 cumulative"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS121/wave-04/prior-overlay-lineage.md",
+      "postimage_sha256": "2d5f13b97ded5f0508c3162298b3d553d4c65dc05036e51a97724b6125e00d62",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 04 final review consolidation and navigation",
+      "size": 3501,
+      "source_reports_represented": [
+        "R01-R12 cumulative"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS121/wave-04/protected-mutable-documents.json",
+      "postimage_sha256": "cd528717be997399de4bfd81030748b8a47cac6d8068f7bee66fef8c360e56ba",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 04 final review consolidation and navigation",
+      "size": 5290,
+      "source_reports_represented": [
+        "R01-R12 cumulative"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS121/wave-04/report-index.json",
+      "postimage_sha256": "6ca3e579e4aad689eb86f3fca6aa69f7ee257de5224ffb049bc8d8e43279e74a",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 04 final review consolidation and navigation",
+      "size": 25881,
+      "source_reports_represented": [
+        "R01-R12 cumulative"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS121/wave-04/reports/R10/BWS121-R10-coverage.tsv",
+      "postimage_sha256": "b690fcc30430d7550c6520e9efde6ca0e994827ff2bada340b88759efcaab9b8",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 04 final review consolidation and navigation",
+      "size": 201061,
+      "source_reports_represented": [
+        "R10",
+        "R11",
+        "R12"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS121/wave-04/reports/R10/BWS121-R10-findings.json",
+      "postimage_sha256": "be9456f91a6f8442afd1c83486c11c4e79250cece2a2fb288673423e963e9564",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 04 final review consolidation and navigation",
+      "size": 74036,
+      "source_reports_represented": [
+        "R10",
+        "R11",
+        "R12"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS121/wave-04/reports/R10/BWS121-R10-report.md",
+      "postimage_sha256": "d5085785dc889a5d021fd0b23593fbd505cf0c6ee13efae8726828807fc8029e",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 04 final review consolidation and navigation",
+      "size": 67657,
+      "source_reports_represented": [
+        "R10",
+        "R11",
+        "R12"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS121/wave-04/reports/R10/BWS121-R10-validation.json",
+      "postimage_sha256": "275ea11cdc590c1fe8433a7dee406159f9e1ae2986095014cb489dcd46e0e5f4",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 04 final review consolidation and navigation",
+      "size": 19449,
+      "source_reports_represented": [
+        "R10",
+        "R11",
+        "R12"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS121/wave-04/reports/R11/BWS121-R11-coverage.tsv",
+      "postimage_sha256": "e372c9c7ac5d9cd551d036db23f7cb5bf166b238b26d9d52d4ba37924a5e113f",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 04 final review consolidation and navigation",
+      "size": 186684,
+      "source_reports_represented": [
+        "R10",
+        "R11",
+        "R12"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS121/wave-04/reports/R11/BWS121-R11-findings.json",
+      "postimage_sha256": "c8bca5dd44577024b51b0bb6c23019780e53dfd1e630c76e18df57472d97803d",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 04 final review consolidation and navigation",
+      "size": 72542,
+      "source_reports_represented": [
+        "R10",
+        "R11",
+        "R12"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS121/wave-04/reports/R11/BWS121-R11-report.md",
+      "postimage_sha256": "9eda01ed81884af0642aa98b8bbfcecae2b9cc02bc0bf37f5726bb9f4d469fe7",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 04 final review consolidation and navigation",
+      "size": 47560,
+      "source_reports_represented": [
+        "R10",
+        "R11",
+        "R12"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS121/wave-04/reports/R11/BWS121-R11-validation.json",
+      "postimage_sha256": "b02725e540d758bfff790d13a214b771b1744140d797416a69c6e2ba67bdeaa8",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 04 final review consolidation and navigation",
+      "size": 24411,
+      "source_reports_represented": [
+        "R10",
+        "R11",
+        "R12"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS121/wave-04/reports/R12/BWS121-R12-coverage.tsv",
+      "postimage_sha256": "938cdeebed8d4743864b64e8730a9eaeaf93af07b5dd442e8fb8a481595cd8c1",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 04 final review consolidation and navigation",
+      "size": 192741,
+      "source_reports_represented": [
+        "R10",
+        "R11",
+        "R12"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS121/wave-04/reports/R12/BWS121-R12-findings.json",
+      "postimage_sha256": "8c30f9429900aa5a44d0061602e99504d645d63196b492880b25542a7eb8120d",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 04 final review consolidation and navigation",
+      "size": 76094,
+      "source_reports_represented": [
+        "R10",
+        "R11",
+        "R12"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS121/wave-04/reports/R12/BWS121-R12-report.md",
+      "postimage_sha256": "fe4524cffe14940d8b3bc42bf048f5a1bb6420a63fb2fa699b17e2d21bcb6904",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 04 final review consolidation and navigation",
+      "size": 68647,
+      "source_reports_represented": [
+        "R10",
+        "R11",
+        "R12"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS121/wave-04/reports/R12/BWS121-R12-validation.json",
+      "postimage_sha256": "dab4607e2fc1e4b54b8877c6e44873bf21e852474b39fa0c7854a44b43059a9d",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 04 final review consolidation and navigation",
+      "size": 19478,
+      "source_reports_represented": [
+        "R10",
+        "R11",
+        "R12"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS121/wave-04/repository-profile.md",
+      "postimage_sha256": "de02581517a9e0c06a0b99c7e2c7964059fd401f2b73870b779946d0dbda5bcb",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 04 final review consolidation and navigation",
+      "size": 2775,
+      "source_reports_represented": [
+        "R01-R12 cumulative"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS121/wave-04/source-verification.json",
+      "postimage_sha256": "0f5dda34541376f609f8181bf2eb40309d213807c7484d8d768e3406a2a8e5d8",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 04 final review consolidation and navigation",
+      "size": 100538,
+      "source_reports_represented": [
+        "R01-R12 cumulative"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS121/wave-04/test-evidence-matrix.json",
+      "postimage_sha256": "2ba0b5d98f5f56ffd427213b04bbe271804a20fcb5bd7b2d3fd8d28835daeaaa",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 04 final review consolidation and navigation",
+      "size": 381837,
+      "source_reports_represented": [
+        "R01-R12 cumulative"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS121/wave-04/test-evidence-matrix.md",
+      "postimage_sha256": "d043d3f2c1cb54895a60fb9691314f3cb92593e87f713fecb7c032b11ecc7a09",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 04 final review consolidation and navigation",
+      "size": 1188,
+      "source_reports_represented": [
+        "R01-R12 cumulative"
+      ]
+    },
+    {
+      "action": "REPLACE",
+      "mode": "0644",
+      "path": "docs/reviews/README.md",
+      "postimage_sha256": "7ead76c8005cf2b9a12421f251eaf0ba6aa6b9d7a6c4a6be2a7a8e8d907c00aa",
+      "preimage_sha256": "e49fa4209c5598c31962ad0815886bbbb58a93f9e26190f57be839886173e5bb",
+      "protected_content_preserved": true,
+      "reason": "Wave 04 final review consolidation and navigation",
+      "size": 931,
+      "source_reports_represented": [
+        "R01-R12 cumulative"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS121/wave-04/documentation-integration-plan.json",
+      "postimage_sha256": "SELF_BOUND_BY_OVERLAY_INSTALLER_AND_EXTERNAL_CHECKSUM",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 04 final review consolidation and navigation",
+      "size": "SELF_BOUND",
+      "source_reports_represented": [
+        "R01-R12 cumulative"
+      ]
+    }
+  ],
+  "repository_preimage": {
+    "filename": "betting-win-surebet121.zip",
+    "sha256": "025936d21db89ac5cf4881863f05ec9ed5ddaaa2b4adfe60e766207fc4c9b9f7"
+  },
+  "schema": "betting-win-surebet-wave04-documentation-integration-plan-v1",
+  "self_hash_note": "The plan cannot recursively contain its own final digest. Its exact postimage is bound by the overlay manifest, transactional installer, checksum record, validation record, and delivery response."
+}

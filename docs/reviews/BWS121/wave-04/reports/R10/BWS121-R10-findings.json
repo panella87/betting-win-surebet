@@ -1,0 +1,1215 @@
+{
+  "schema": "betting-win-surebet-deep-review-findings-v1",
+  "review_id": "BWS121-R10",
+  "repository": "betting-win-surebet",
+  "generated_at_utc": "2026-09-12T11:13:10Z",
+  "source_authority": {
+    "archive": "betting-win-surebet121(1).zip",
+    "archive_sha256": "025936d21db89ac5cf4881863f05ec9ed5ddaaa2b4adfe60e766207fc4c9b9f7",
+    "regular_files": 733,
+    "package": "betting-win-surebet@0.1.0-bws-full-platform",
+    "canonical_runtime": "Node 20.20.2",
+    "actual_runtime": "Node 22.16.0 (supplementary only)"
+  },
+  "inherited_authority": {
+    "baseline": "betting-win-surebet120.zip",
+    "baseline_sha256": "d4565c05ecfe63f5d5511f224a20ff20fb82bfc75b23203c94d7d3e98a8c21bb",
+    "confirmed_findings_preserved": 137,
+    "severity_counts": {
+      "P0": 5,
+      "P1": 115,
+      "P2": 17,
+      "P3": 0
+    },
+    "overlap_result": "NO_INHERITED_ROOT_CAUSE_REISSUED",
+    "required_consumed_ids": [
+      "BWS116-R01-001",
+      "BWS116-R01-009",
+      "BWS116-R03-001",
+      "BWS120-R07-001",
+      "BWS120-R07-002",
+      "BWS120-R08-001",
+      "BWS120-R08-002",
+      "BWS120-R09-005",
+      "BWS120-R09-006",
+      "BWS120-R09-019",
+      "BWS116-R03-HYP-001",
+      "BWS116-R03-HO-004"
+    ]
+  },
+  "summary": {
+    "confirmed_findings": 13,
+    "severity_counts": {
+      "P0": 5,
+      "P1": 7,
+      "P2": 1
+    },
+    "release_blocking": 12,
+    "deployment_blocking": 13,
+    "bws_600_blocking": 8,
+    "bws_710_blocking": 4,
+    "inherited_findings_checked": 137,
+    "inherited_duplicate_root_causes_created": 0,
+    "probable_or_hypotheses": 2,
+    "external_upstream_blockers": 0,
+    "environment_blockers": 3,
+    "intentional_safeguards": 7,
+    "rejected_suspicions": 4,
+    "cross_area_handoffs": 8,
+    "test_gaps": 14
+  },
+  "records": [
+    {
+      "id": "BWS121-R10-001",
+      "title": "Managed runtime children inherit the entire ambient process environment instead of a bounded effective configuration",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "scripts/bws-root-wrapper-runtime.mjs",
+      "current_symbol": "resolveRuntimeEnvironment / runCommand",
+      "exact_line_range": "L227-L259; L670-L675",
+      "full_file_sha256": "1d1d5fe74a399da77aeaffecf784c6d7f47176c5101e85ae9987cac87cc2bcb8",
+      "source_locations": [
+        {
+          "path": "scripts/bws-root-wrapper-runtime.mjs",
+          "symbol": "resolveRuntimeEnvironment / runCommand",
+          "line_range": "L227-L259; L670-L675",
+          "sha256": "1d1d5fe74a399da77aeaffecf784c6d7f47176c5101e85ae9987cac87cc2bcb8"
+        },
+        {
+          "path": "packages/bootstrap/src/operations/operator-lifecycle.ts",
+          "symbol": "createLifecycleContext",
+          "line_range": "L351-L369",
+          "sha256": "704457608967fcb4bd736d372f1e65d252bc1d762f5efd63e52de5c9348e0f31"
+        },
+        {
+          "path": "scripts/validate_bws_loopback_acceptance.mjs",
+          "symbol": "resolveEnvironment",
+          "line_range": "L87-L97",
+          "sha256": "1624933a115da5e14c687b95913d7de272bfddf528039fb90acdb502087d1c50"
+        }
+      ],
+      "preconditions": "The root wrapper, lifecycle entrypoint, or loopback-acceptance command is launched from a shell containing unrelated secrets or behavior-changing variables such as GITHUB_TOKEN, NODE_OPTIONS, proxy variables, Git variables, or libpq variables.",
+      "trigger": "Start, stop, build, observe, or validate the managed runtime while those variables are present in the parent process environment.",
+      "expected_behavior": "A safety-critical wrapper must construct an explicit child environment from approved keys plus a minimal documented operating-system runtime set, reject or scrub behavior-changing ambient variables, and bind the resulting effective configuration to evidence.",
+      "current_behavior": "The root wrapper begins with `{ ...process.env }`, the lifecycle context spreads `process.env` again, and loopback acceptance does the same. Selective `.env` loading therefore does not make child configuration selective: every ambient variable remains available to npm builds and managed children.",
+      "impact": "Managed behavior and secret exposure depend on the invoking shell rather than the reviewed configuration. Ambient Node, proxy, Git, or database controls can alter execution or network behavior without appearing in the configuration receipt, and unrelated credentials are propagated to child processes.",
+      "evidence": [
+        "Static dataflow shows the full process environment is copied and passed to npm/node children.",
+        "A bounded disposable wrapper probe supplied `GITHUB_TOKEN=ambient-secret-sentinel`; the inert child received that value together with the approved runtime tuple.",
+        "The existing focused test proves that an unrelated `.env` value is not loaded, but it does not test or scrub the same value when inherited from the parent shell."
+      ],
+      "reproduction_status": "STATIC_SOURCE_CONFIRMED; BOUNDED_OFFLINE_CHILD_ENVIRONMENT_PROBE_CONFIRMED under Node 22.16.0 supplementary runtime",
+      "root_cause": "The implementation applies an allowlist only to values read from `.env`, while treating the complete parent process environment as trusted configuration and secret context.",
+      "minimal_fix_boundary": "Introduce one repository-owned effective-environment builder per child class. Start from a documented allowlist, add only required platform variables, explicitly reject or remove Node/proxy/Git/libpq control variables unless owned by that child, and emit a secret-safe digest of the exact effective configuration. Keep the fixed paper/provider/execution invariants unchanged.",
+      "required_tests": [
+        "Ambient unrelated token and credential variables are absent from build and managed child environments.",
+        "NODE_OPTIONS/NODE_PATH and proxy variables are rejected or stripped according to an explicit policy.",
+        "Required PATH, HOME, locale, and approved BWS variables remain available.",
+        "The configuration receipt changes when any approved effective value or source changes and never contains plaintext secrets."
+      ],
+      "regression_risks": [
+        "Over-scrubbing PATH, HOME, locale, temporary-directory, or certificate variables required by Node/npm/PostgreSQL.",
+        "Divergence between start, stop, status, acceptance, and test environment builders."
+      ],
+      "primary_owner": "R10",
+      "secondary_sectors": [
+        "R03",
+        "R06",
+        "R07",
+        "R09",
+        "R11"
+      ],
+      "existing_aliases_or_dependencies": [
+        "BWS120-R07-002 owns output redaction, not child-environment propagation.",
+        "BWS120-R09-019 owns campaign identity omission; R10 owns effective environment precedence and filtering."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "No provider, external API, deployed service, account, credential, wallet, signer, or persistent database was contacted.",
+        "No controller, scheduler, worker, API, lifecycle service, release apply, database command, Git pull, Git push, or live operation was started.",
+        "BWS-600 remains BLOCKED_EXTERNAL_RUNTIME_EVIDENCE, BWS-710 remains blocked on an accepted upstream runtime resource, and BWS-900 remains parked."
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "bws_600": true,
+        "bws_710": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS121-R10-002",
+      "title": "The root runtime wrapper assembles one PostgreSQL tuple from mixed process and .env sources",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "scripts/bws-root-wrapper-runtime.mjs",
+      "current_symbol": "resolveCanonicalPostgresEnvironment",
+      "exact_line_range": "L270-L299",
+      "full_file_sha256": "1d1d5fe74a399da77aeaffecf784c6d7f47176c5101e85ae9987cac87cc2bcb8",
+      "source_locations": [
+        {
+          "path": "scripts/bws-root-wrapper-runtime.mjs",
+          "symbol": "resolveCanonicalPostgresEnvironment",
+          "line_range": "L270-L299",
+          "sha256": "1d1d5fe74a399da77aeaffecf784c6d7f47176c5101e85ae9987cac87cc2bcb8"
+        },
+        {
+          "path": "scripts/validate_bws_loopback_acceptance.mjs",
+          "symbol": "readPostgresEnvironment",
+          "line_range": "L145-L169",
+          "sha256": "1624933a115da5e14c687b95913d7de272bfddf528039fb90acdb502087d1c50"
+        }
+      ],
+      "preconditions": "At least one canonical POSTGRES_* field is set in the process environment and the remaining fields exist in the repository `.env` file.",
+      "trigger": "Run the root lifecycle or paper-evidence wrapper with a partial process tuple.",
+      "expected_behavior": "The PostgreSQL connection tuple must be atomic: exactly one complete source must win, partial process tuples must fail closed, and validation and runtime startup must resolve the same values.",
+      "current_behavior": "The root wrapper resolves each POSTGRES_* key independently using `process ?? file`, creating a hybrid tuple. The loopback-acceptance validator instead chooses the process source atomically whenever any process field exists and rejects a partial tuple.",
+      "impact": "The same operator configuration can pass one entrypoint and fail another, or start against a host supplied by the shell while using user, password, and database values from `.env`. Database target and credential provenance are ambiguous and cannot be represented by one truthful source receipt.",
+      "evidence": [
+        "The production wrapper loops across four keys and selects the process or file value per key.",
+        "The validator uses `processValues.size > 0 ? processValues : fileValues`, proving a contradictory atomic-source policy.",
+        "A bounded inert probe supplied only POSTGRES_ADDRESS in the process and supplied the other three values in `.env`; startup accepted the hybrid and derived the internal SUREBET_PG_* tuple."
+      ],
+      "reproduction_status": "STATIC_SOURCE_CONFIRMED; BOUNDED_OFFLINE_MIXED_SOURCE_PROBE_CONFIRMED under Node 22.16.0 supplementary runtime",
+      "root_cause": "No single typed effective-configuration resolver owns PostgreSQL source selection across wrappers and validators.",
+      "minimal_fix_boundary": "Centralize canonical POSTGRES_* resolution. Reject partial tuples in every source, select one complete source using one documented precedence rule, preserve source metadata in a protected receipt, and reuse the resolver in lifecycle, acceptance, release, and validation entrypoints.",
+      "required_tests": [
+        "Complete process tuple wins as one unit.",
+        "Complete `.env` tuple is accepted only when no process tuple key is present.",
+        "Every partial process and partial file tuple fails before build, database, or lifecycle work.",
+        "Root wrapper and loopback-acceptance validator produce byte-equivalent effective tuples for the same inputs."
+      ],
+      "regression_risks": [
+        "Breaking operators that currently rely on mixed-source tuples.",
+        "Accidentally exposing the password in the source receipt."
+      ],
+      "primary_owner": "R10",
+      "secondary_sectors": [
+        "R03",
+        "R06",
+        "R08",
+        "R09",
+        "R11"
+      ],
+      "existing_aliases_or_dependencies": [
+        "BWS116-R03-HO-004 requested one shared environment/connection resolver.",
+        "BWS120-R08-002 owns wrong-target upgrade apply mechanics, not tuple precedence."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "No provider, external API, deployed service, account, credential, wallet, signer, or persistent database was contacted.",
+        "No controller, scheduler, worker, API, lifecycle service, release apply, database command, Git pull, Git push, or live operation was started.",
+        "BWS-600 remains BLOCKED_EXTERNAL_RUNTIME_EVIDENCE, BWS-710 remains blocked on an accepted upstream runtime resource, and BWS-900 remains parked."
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "bws_600": true,
+        "bws_710": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS121-R10-003",
+      "title": "Explicit blank runtime values are converted to absence and silently replaced by file values or defaults",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "scripts/bws-root-wrapper-runtime.mjs",
+      "current_symbol": "resolveRuntimeEnvironment / readSelectedEnvFile / readProcessValue",
+      "exact_line_range": "L227-L245; L683-L734",
+      "full_file_sha256": "1d1d5fe74a399da77aeaffecf784c6d7f47176c5101e85ae9987cac87cc2bcb8",
+      "source_locations": [
+        {
+          "path": "scripts/bws-root-wrapper-runtime.mjs",
+          "symbol": "resolveRuntimeEnvironment / readSelectedEnvFile / readProcessValue",
+          "line_range": "L227-L245; L683-L734",
+          "sha256": "1d1d5fe74a399da77aeaffecf784c6d7f47176c5101e85ae9987cac87cc2bcb8"
+        }
+      ],
+      "preconditions": "An approved runtime variable is explicitly present but empty or whitespace-only in the process environment, or quoted empty in `.env`.",
+      "trigger": "Resolve the root runtime environment.",
+      "expected_behavior": "Missing and explicit blank must remain distinct. A present blank value for a typed runtime field must fail validation rather than silently activate another source or a built-in default.",
+      "current_behavior": "`readProcessValue` trims and returns undefined for blank values. The resolver then fills from `.env` or a repository default. A quoted empty file value is accepted by the parser and then also appears absent to the defaulting pass.",
+      "impact": "An attempted explicit override, disablement, or secret/configuration clearing can silently reactivate stale file configuration or defaults. Evidence does not reveal that a higher-precedence source was present but invalid.",
+      "evidence": [
+        "The blank-to-undefined conversion occurs before both `.env` fill and repository defaulting.",
+        "A bounded probe supplied a whitespace-only process BWS_API_PORT and `.env` BWS_API_PORT=5555; the child received 5555 instead of a configuration error."
+      ],
+      "reproduction_status": "STATIC_SOURCE_CONFIRMED; BOUNDED_OFFLINE_BLANK_PRECEDENCE_PROBE_CONFIRMED under Node 22.16.0 supplementary runtime",
+      "root_cause": "The resolver uses absence as both “not supplied” and “supplied but invalid,” erasing source and validity state before typed validation.",
+      "minimal_fix_boundary": "Parse each source into explicit states (`missing`, `present_valid`, `present_blank`, `present_invalid`). Fail on blank/invalid values in the highest-precedence source and apply defaults only to genuinely missing fields.",
+      "required_tests": [
+        "Whitespace-only process value rejects.",
+        "Quoted empty `.env` value rejects.",
+        "Zero and false-like strings remain valid or invalid according to each field type rather than generic truthiness.",
+        "Source-state metadata is present in the effective configuration receipt."
+      ],
+      "regression_risks": [
+        "Some existing shell profiles may contain blank optional variables and begin failing.",
+        "Optional fields need a deliberate unset mechanism distinct from an empty string."
+      ],
+      "primary_owner": "R10",
+      "secondary_sectors": [
+        "R06",
+        "R09",
+        "R11"
+      ],
+      "existing_aliases_or_dependencies": [
+        "BWS120-R09-019 requires an exact effective-configuration receipt and should consume the corrected source-state model."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "No provider, external API, deployed service, account, credential, wallet, signer, or persistent database was contacted.",
+        "No controller, scheduler, worker, API, lifecycle service, release apply, database command, Git pull, Git push, or live operation was started.",
+        "BWS-600 remains BLOCKED_EXTERNAL_RUNTIME_EVIDENCE, BWS-710 remains blocked on an accepted upstream runtime resource, and BWS-900 remains parked."
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "bws_600": true,
+        "bws_710": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS121-R10-004",
+      "title": "Runtime status probes trust a mutable state-selected base URL without destination confinement",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "scripts/bws-root-wrapper-runtime.mjs",
+      "current_symbol": "createRuntimeSummary / fetchJson",
+      "exact_line_range": "L331-L356; L624-L667",
+      "full_file_sha256": "1d1d5fe74a399da77aeaffecf784c6d7f47176c5101e85ae9987cac87cc2bcb8",
+      "source_locations": [
+        {
+          "path": "scripts/bws-root-wrapper-runtime.mjs",
+          "symbol": "createRuntimeSummary / fetchJson",
+          "line_range": "L331-L356; L624-L667",
+          "sha256": "1d1d5fe74a399da77aeaffecf784c6d7f47176c5101e85ae9987cac87cc2bcb8"
+        }
+      ],
+      "preconditions": "The repository runtime state file exists and its `runtimeBaseUrl` field can be replaced, corrupted, or written by a stale/other process.",
+      "trigger": "Run `runtime-summary`, `check_progress.sh`, or `watch_progress.sh`.",
+      "expected_behavior": "Status probes must derive or verify a loopback-only URL from current validated configuration and bound lifecycle identity, reject credentials and unsupported schemes, and never follow an untrusted state-selected destination.",
+      "current_behavior": "The helper parses `state.runtimeBaseUrl`, constructs `/metrics`, `/health`, and `/readiness`, then issues HTTP(S) requests without validating host class, port ownership, userinfo, state provenance, or equality with the current effective configuration before the requests.",
+      "impact": "A mutable local state record can redirect operator status requests to another local, private, or external HTTP service and can make unrelated responses influence runtime condition. This is a status-path SSRF and false-evidence boundary even though no provider credentials are attached.",
+      "evidence": [
+        "All three destinations are derived directly from the state field before configuration comparison.",
+        "A bounded local-only probe wrote a state-selected loopback port and observed exactly `/metrics`, `/health`, and `/readiness` requests at that server.",
+        "No provider or external network was contacted."
+      ],
+      "reproduction_status": "STATIC_SOURCE_CONFIRMED; BOUNDED_LOCAL_HTTP_DESTINATION_PROBE_CONFIRMED under Node 22.16.0 supplementary runtime",
+      "root_cause": "Runtime state is treated as trusted destination authority rather than evidence that must be authenticated against current lifecycle/configuration authority.",
+      "minimal_fix_boundary": "Derive the expected loopback URL from validated effective configuration; require the state URL to match it and the active lifecycle generation before any request; reject userinfo, non-http, non-loopback, mapped-loopback ambiguity, redirects, and unexpected ports.",
+      "required_tests": [
+        "State URL to external/private/non-loopback destination rejects before socket creation.",
+        "Wrong loopback port and userinfo reject.",
+        "Redirect away from the exact loopback endpoint rejects.",
+        "Stale lifecycle generation cannot select a destination.",
+        "Valid current loopback state still reports status."
+      ],
+      "regression_risks": [
+        "Status of legacy state files without generation/configuration receipts will become unavailable.",
+        "IPv6 loopback support requires one explicit policy."
+      ],
+      "primary_owner": "R10",
+      "secondary_sectors": [
+        "R01",
+        "R06",
+        "R07",
+        "R11"
+      ],
+      "existing_aliases_or_dependencies": [
+        "BWS116-R01-009 owns external upstream API destination proof. This finding is the distinct local operator-status destination path."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "No provider, external API, deployed service, account, credential, wallet, signer, or persistent database was contacted.",
+        "No controller, scheduler, worker, API, lifecycle service, release apply, database command, Git pull, Git push, or live operation was started.",
+        "BWS-600 remains BLOCKED_EXTERNAL_RUNTIME_EVIDENCE, BWS-710 remains blocked on an accepted upstream runtime resource, and BWS-900 remains parked."
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "bws_600": true,
+        "bws_710": false,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS121-R10-005",
+      "title": "The exported package CLI treats the caller current directory as repository authority and executes its build",
+      "severity": "P0",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "cli.js",
+      "current_symbol": "root command dispatch / runBuiltEntry",
+      "exact_line_range": "L1-L16; L29-L36; L92-L108",
+      "full_file_sha256": "acd4aa4ba64dbcacbc891ffe1af22699d9a240f16d3411ac3ea6998048d63349",
+      "source_locations": [
+        {
+          "path": "cli.js",
+          "symbol": "root command dispatch / runBuiltEntry",
+          "line_range": "L1-L16; L29-L36; L92-L108",
+          "sha256": "acd4aa4ba64dbcacbc891ffe1af22699d9a240f16d3411ac3ea6998048d63349"
+        },
+        {
+          "path": "package.json",
+          "symbol": "bin.betting-win-surebet",
+          "line_range": "L76-L78",
+          "sha256": "b1b69ffa6d0b974c3b3ba55f3ec1acffb21e512c3a862e2a7b2d6b5139e5eac0"
+        }
+      ],
+      "preconditions": "The package bin is invoked from a directory other than the intended betting-win-surebet repository root.",
+      "trigger": "Run `betting-win-surebet status`, `validate`, or any command routed through `runBuiltEntry`.",
+      "expected_behavior": "The public bin must bind to an authenticated repository/package root derived from its own installation or require an explicit validated repository root. It must never execute package scripts or relative dist files from an arbitrary caller directory.",
+      "current_behavior": "All paths are relative and spawn calls omit `cwd`. `status` reads the caller `PROJECT_STATUS.md`; `validate` and runtime commands run the caller `npm run ...`; built entrypoints are also resolved relative to the caller.",
+      "impact": "An operator can receive status from the wrong tree or cause the trusted BWS binary to execute caller-directory npm scripts and dist content. This is a repository-boundary and unauthorized-execution defect in the exported CLI.",
+      "evidence": [
+        "The package explicitly exports `./cli.js` as the binary.",
+        "A bounded probe invoked the real CLI by absolute path from a disposable caller directory; `status` printed that directory’s sentinel PROJECT_STATUS.md.",
+        "Static tracing shows the same unbound current directory governs npm build/validate and node entrypoint execution."
+      ],
+      "reproduction_status": "STATIC_SOURCE_CONFIRMED; BOUNDED_OFFLINE_CALLER_CWD_PROBE_CONFIRMED under Node 22.16.0 supplementary runtime",
+      "root_cause": "The bin conflates invocation working directory with package/repository identity and performs no root marker, realpath, or package identity verification.",
+      "minimal_fix_boundary": "Resolve the installed package root from `import.meta.url`, or require and validate an explicit repository root with package name/version and canonical realpath checks. Pass that root as `cwd` to every child and use absolute entrypoint paths. Fail before npm/node execution on mismatch.",
+      "required_tests": [
+        "Invoke every public command from an unrelated directory and prove it cannot read or execute caller files.",
+        "Symlinked package/root and lookalike package.json rejection.",
+        "Normal invocation from the authentic repository remains functional.",
+        "Status, validate, build, and dist execution all use the same bound root."
+      ],
+      "regression_risks": [
+        "Global installs, workspace links, and packed consumers may have different package-root layouts.",
+        "Repository-development mode may need an explicit and tested root override."
+      ],
+      "primary_owner": "R10",
+      "secondary_sectors": [
+        "R06",
+        "R09",
+        "R11",
+        "R12"
+      ],
+      "existing_aliases_or_dependencies": [
+        "BWS116-R03-001 owns migration-directory escape, not public CLI repository identity."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "No provider, external API, deployed service, account, credential, wallet, signer, or persistent database was contacted.",
+        "No controller, scheduler, worker, API, lifecycle service, release apply, database command, Git pull, Git push, or live operation was started.",
+        "BWS-600 remains BLOCKED_EXTERNAL_RUNTIME_EVIDENCE, BWS-710 remains blocked on an accepted upstream runtime resource, and BWS-900 remains parked."
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "bws_600": false,
+        "bws_710": false,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS121-R10-006",
+      "title": "Safety-critical CLIs silently accept unknown flags and overwrite duplicate flags",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "packages/bootstrap/src/cli/bws-final-local-acceptance.ts",
+      "current_symbol": "parseFlags",
+      "exact_line_range": "L124-L142",
+      "full_file_sha256": "218d99afdbef03328786d155dd23766bf87e19a75eb03c5ba1e835922c251d43",
+      "source_locations": [
+        {
+          "path": "packages/bootstrap/src/cli/bws-final-local-acceptance.ts",
+          "symbol": "parseFlags",
+          "line_range": "L124-L142",
+          "sha256": "218d99afdbef03328786d155dd23766bf87e19a75eb03c5ba1e835922c251d43"
+        },
+        {
+          "path": "packages/bootstrap/src/cli/bws-release-packaging.ts",
+          "symbol": "parseFlags",
+          "line_range": "L75-L93",
+          "sha256": "a3f0d96bd9d3e3c45df37538dd99f4c07eb27934fd77eb4d80cc3143edef4ec7"
+        },
+        {
+          "path": "packages/bootstrap/src/cli/bws-release-upgrade.ts",
+          "symbol": "parseFlags",
+          "line_range": "L91-L109",
+          "sha256": "362783fada2194c4c62c5bd1b545270c4f94ea358a816f45051c0b95a870daa7"
+        },
+        {
+          "path": "packages/bootstrap/src/cli/bws-database-lifecycle.ts",
+          "symbol": "parseFlags",
+          "line_range": "L95-L113",
+          "sha256": "4e6da6bfca8e7c622ccd04e66d3789b4f4eaf490f93fd8265bfa458d3c22b06a"
+        },
+        {
+          "path": "packages/bootstrap/src/cli/bws-soak-campaign.ts",
+          "symbol": "parseFlags",
+          "line_range": "L156-L174",
+          "sha256": "55a3b486f879b367fb30e3d67b465e457f1f258c209d131603ce3916e51e534a"
+        },
+        {
+          "path": "packages/bootstrap/src/cli/bws-external-runtime-preflight.ts",
+          "symbol": "parseFlags (strict comparator)",
+          "line_range": "L101-L125",
+          "sha256": "b02200f62578bd2b273c0e9df020132b8dd49e613fc5a788555efda2dc0d8c5f"
+        }
+      ],
+      "preconditions": "An operator, wrapper, or automation passes an unknown option or repeats a path, fingerprint, target, or safety option.",
+      "trigger": "Invoke release packaging, release upgrade, database lifecycle, soak, or final-local-acceptance commands.",
+      "expected_behavior": "Each command must define an exact option allowlist, reject unknown options, reject duplicate options before file or side-effect work, and preserve the distinction between a missing value and a boolean switch.",
+      "current_behavior": "Five production CLIs accept every `--...` key into a Map and silently overwrite earlier occurrences. Unknown keys remain ignored by command logic. The external-runtime-preflight CLI already implements the required allowlist and duplicate rejection, proving the repository has two incompatible parser policies.",
+      "impact": "Typos do not fail closed, and a repeated high-impact argument can make the last unseen value control plan files, fingerprints, release directories, database retention parameters, or acceptance evidence. Command provenance cannot unambiguously describe the effective invocation.",
+      "evidence": [
+        "Exact parser copies use `parsed.set` without `parsed.has` or command-specific allowlist checks.",
+        "Focused tests cover strict preflight rejection but no equivalent tests exist for the other safety-critical CLIs."
+      ],
+      "reproduction_status": "STATIC_SOURCE_CONFIRMED; PRODUCTION_ARGUMENT_DATAFLOW_TRACED; canonical Node execution unavailable",
+      "root_cause": "Flag parsing is duplicated across CLIs without one strict command schema or shared parser contract.",
+      "minimal_fix_boundary": "Adopt one shared parser with per-command allowed flags, arity/type metadata, duplicate rejection, and deterministic normalized invocation receipts. Preserve valid documented commands and the existing strict external-preflight behavior.",
+      "required_tests": [
+        "Unknown flag rejection for every command.",
+        "Duplicate value and duplicate boolean flag rejection before I/O.",
+        "Repeated plan-file/fingerprint/output/database flags cannot select the last value.",
+        "Help text and parser schema stay synchronized."
+      ],
+      "regression_risks": [
+        "Existing wrappers may accidentally pass ignored flags and begin failing.",
+        "Subcommands with shared flags require command-specific allowlists rather than one global set."
+      ],
+      "primary_owner": "R10",
+      "secondary_sectors": [
+        "R08",
+        "R09",
+        "R11",
+        "R12"
+      ],
+      "existing_aliases_or_dependencies": [
+        "BWS120-R09-005 and BWS120-R09-006 own plan and apply byte authority; R10 owns CLI argument authority."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "No provider, external API, deployed service, account, credential, wallet, signer, or persistent database was contacted.",
+        "No controller, scheduler, worker, API, lifecycle service, release apply, database command, Git pull, Git push, or live operation was started.",
+        "BWS-600 remains BLOCKED_EXTERNAL_RUNTIME_EVIDENCE, BWS-710 remains blocked on an accepted upstream runtime resource, and BWS-900 remains parked."
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "bws_600": true,
+        "bws_710": false,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS121-R10-007",
+      "title": "Final local acceptance requires the PostgreSQL password in process arguments",
+      "severity": "P0",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "packages/bootstrap/src/cli/bws-final-local-acceptance.ts",
+      "current_symbol": "runBwsFinalLocalAcceptanceCli / help",
+      "exact_line_range": "L23-L38; L109-L120",
+      "full_file_sha256": "218d99afdbef03328786d155dd23766bf87e19a75eb03c5ba1e835922c251d43",
+      "source_locations": [
+        {
+          "path": "packages/bootstrap/src/cli/bws-final-local-acceptance.ts",
+          "symbol": "runBwsFinalLocalAcceptanceCli / help",
+          "line_range": "L23-L38; L109-L120",
+          "sha256": "218d99afdbef03328786d155dd23766bf87e19a75eb03c5ba1e835922c251d43"
+        }
+      ],
+      "preconditions": "BWS-599 stage1 is invoked with a real PostgreSQL password.",
+      "trigger": "Supply the documented mandatory `--pg-password <password>` argument.",
+      "expected_behavior": "Secrets must enter through a protected file descriptor, restricted environment/secret file, or injected secret provider and must never appear in argv, help examples containing real values, process listings, shell history, or command evidence.",
+      "current_behavior": "The CLI requires and documents a plaintext `--pg-password` value and directly places it into the persistence configuration.",
+      "impact": "Database credentials can be exposed through shell history, process inspection, audit telemetry, controller command captures, and error/support transcripts. This is direct secret-exposure risk at a release gate.",
+      "evidence": [
+        "The production stage1 branch calls `requireFlagValue(options, \"--pg-password\")`.",
+        "The help contract declares the plaintext argument mandatory.",
+        "No credential was supplied or used during this review."
+      ],
+      "reproduction_status": "STATIC_SOURCE_CONFIRMED; NO_SECRET_RUNTIME_PROBE_PERFORMED",
+      "root_cause": "The acceptance CLI models a secret as an ordinary command-line scalar rather than a protected secret input.",
+      "minimal_fix_boundary": "Remove the password option; consume the same approved atomic configuration resolver/secret source used by the runtime, or accept a restrictive secret-file descriptor. Ensure command/evidence serialization records only source identity and a protected digest, never secret bytes.",
+      "required_tests": [
+        "Process argv contains no database password.",
+        "Help and error output contain no secret.",
+        "Secret file permissions/symlink/path confinement fail closed.",
+        "Final acceptance and runtime resolve the same atomic database tuple."
+      ],
+      "regression_risks": [
+        "Automation that currently supplies the flag must migrate atomically.",
+        "Secret digest artifacts must not enable low-entropy offline guessing."
+      ],
+      "primary_owner": "R10",
+      "secondary_sectors": [
+        "R03",
+        "R07",
+        "R09",
+        "R11",
+        "R12"
+      ],
+      "existing_aliases_or_dependencies": [
+        "BWS120-R07-002 owns output redaction but cannot make argv secret transport safe."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "No provider, external API, deployed service, account, credential, wallet, signer, or persistent database was contacted.",
+        "No controller, scheduler, worker, API, lifecycle service, release apply, database command, Git pull, Git push, or live operation was started.",
+        "BWS-600 remains BLOCKED_EXTERNAL_RUNTIME_EVIDENCE, BWS-710 remains blocked on an accepted upstream runtime resource, and BWS-900 remains parked."
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "bws_600": true,
+        "bws_710": false,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS121-R10-008",
+      "title": "PostgreSQL subprocesses inherit ambient libpq control variables",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "packages/persistence/src/psql.ts",
+      "current_symbol": "runPsql",
+      "exact_line_range": "L191-L217",
+      "full_file_sha256": "86053cd5690b15a2ba6ea210e3073c3324017d12fb36ec1fe815c84edab50343",
+      "source_locations": [
+        {
+          "path": "packages/persistence/src/psql.ts",
+          "symbol": "runPsql",
+          "line_range": "L191-L217",
+          "sha256": "86053cd5690b15a2ba6ea210e3073c3324017d12fb36ec1fe815c84edab50343"
+        },
+        {
+          "path": "packages/bootstrap/src/operations/database-lifecycle.ts",
+          "symbol": "runUtilityCommand",
+          "line_range": "L1412-L1435",
+          "sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377"
+        }
+      ],
+      "preconditions": "The invoking process contains ambient libpq variables not represented by `SurebetPersistenceConfig`, such as PGOPTIONS, PGSERVICE, PGSERVICEFILE, PGPASSFILE, PGSSLMODE, PGSSLROOTCERT, or related controls.",
+      "trigger": "Run migrations, repository SQL, backup, restore, or database lifecycle utilities.",
+      "expected_behavior": "Database subprocesses must receive a minimal explicit environment consistent with the validated persistence tuple and security policy; unsupported ambient libpq controls must be removed or explicitly validated and receipt-bound.",
+      "current_behavior": "Both helpers pass `process.env` wholesale and only optionally overwrite PGPASSWORD. Explicit `-d/-U/-p/-h` arguments bind the main target tuple, but other authentication, TLS, service, and session controls remain ambient.",
+      "impact": "Database security/session behavior can differ from the reviewed tuple, and release or migration evidence cannot prove the exact libpq configuration used. Ambient variables can weaken TLS, inject session options, or alter credential resolution where an explicit password is absent.",
+      "evidence": [
+        "Static process-spawn dataflow proves the complete ambient environment reaches psql/pg_dump.",
+        "The Wave 01 ledger recorded this exact issue as `BWS116-R03-HYP-001` for R10 policy resolution; R10 source review supplies the missing configuration-policy proof."
+      ],
+      "reproduction_status": "STATIC_SOURCE_CONFIRMED; DYNAMIC_POSTGRESQL_PROBE_UNAVAILABLE because psql/PostgreSQL were absent and persistent database access was prohibited",
+      "root_cause": "Persistence configuration validates explicit fields but subprocess construction does not make those fields the complete authority for libpq behavior.",
+      "minimal_fix_boundary": "Construct a minimal subprocess environment; set only deliberate locale/PATH/temp variables plus the approved password transport; reject or explicitly map each supported PG* variable; bind the resulting policy to database and release evidence.",
+      "required_tests": [
+        "Ambient PGOPTIONS, PGSERVICE, PGPASSFILE, PGSSLMODE, and PGSSLROOTCERT are rejected or absent in a fake psql child.",
+        "Explicit approved password transport remains available without argv leakage.",
+        "Backup, restore, migration, and repository paths share one environment builder.",
+        "Disposable PostgreSQL test verifies intended TLS/session/target behavior under canonical Node 20."
+      ],
+      "regression_risks": [
+        "Removing certificate or Kerberos variables may break legitimate deployments unless explicitly modeled.",
+        "PATH/locale/temp variables still need a constrained cross-platform policy."
+      ],
+      "primary_owner": "R10",
+      "secondary_sectors": [
+        "R03",
+        "R08",
+        "R09",
+        "R11"
+      ],
+      "existing_aliases_or_dependencies": [
+        "Promotes and supersedes the unresolved classification of BWS116-R03-HYP-001; the original hypothesis ID remains preserved as an alias/dependency."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "No provider, external API, deployed service, account, credential, wallet, signer, or persistent database was contacted.",
+        "No controller, scheduler, worker, API, lifecycle service, release apply, database command, Git pull, Git push, or live operation was started.",
+        "BWS-600 remains BLOCKED_EXTERNAL_RUNTIME_EVIDENCE, BWS-710 remains blocked on an accepted upstream runtime resource, and BWS-900 remains parked."
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "bws_600": true,
+        "bws_710": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS121-R10-009",
+      "title": "open_log.sh accepts arbitrary out-of-repository run directories and follows selected files",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "open_log.sh",
+      "current_symbol": "argument parser / run directory selection / tail",
+      "exact_line_range": "L16-L45; L74-L84",
+      "full_file_sha256": "3a9886b0439c468483142d77e22bcab874c14fb2dd50c5293d014727f0c7a7b1",
+      "source_locations": [
+        {
+          "path": "open_log.sh",
+          "symbol": "argument parser / run directory selection / tail",
+          "line_range": "L16-L45; L74-L84",
+          "sha256": "3a9886b0439c468483142d77e22bcab874c14fb2dd50c5293d014727f0c7a7b1"
+        },
+        {
+          "path": "scripts/bws-root-wrapper-runtime.mjs",
+          "symbol": "printRuntimeLogPath",
+          "line_range": "L215-L224",
+          "sha256": "1d1d5fe74a399da77aeaffecf784c6d7f47176c5101e85ae9987cac87cc2bcb8"
+        }
+      ],
+      "preconditions": "An operator, wrapper, or copied command supplies `--run-dir` or a managed log path is replaced by a symlink.",
+      "trigger": "Run `open_log.sh` in controller/codex/paper/bugfix/implementation mode, or runtime mode against a replaced log path.",
+      "expected_behavior": "Log readers must resolve one canonical non-symlink file beneath the approved repository artifact/runtime roots and must reject absolute paths, traversal, alternate roots, and symlink components.",
+      "current_behavior": "The explicit run directory is accepted whenever `-d` succeeds, with no canonical containment check. The selected log is only tested with `-f`, which follows symlinks. Runtime log lookup also checks existence but not symlink/realpath confinement.",
+      "impact": "Operator tooling can display unrelated files as BWS evidence and can copy secrets or misleading content into terminals, support logs, or retained transcripts. It also defeats the repository-boundary guarantee expected from standardized helpers.",
+      "evidence": [
+        "A bounded probe supplied an absolute external run directory containing controller.log; the real helper exited zero and printed the outside sentinel.",
+        "No privilege escalation is required or claimed; the defect is evidence/repository confinement."
+      ],
+      "reproduction_status": "STATIC_SOURCE_CONFIRMED; BOUNDED_OFFLINE_OUTSIDE_RUN_DIRECTORY_PROBE_CONFIRMED",
+      "root_cause": "The helper treats caller-selected filesystem existence as sufficient authority and never binds the path to an approved artifact generation/root.",
+      "minimal_fix_boundary": "Accept only a run identity or repo-relative path under canonical artifacts roots; reject absolute/traversal paths and every symlink segment; open the final file with no-follow semantics where supported; preserve runtime-role allowlisting.",
+      "required_tests": [
+        "Absolute and traversal run directories reject.",
+        "Outside and intermediate symlink paths reject.",
+        "Symlinked controller.log rejects.",
+        "Valid artifact generations and runtime role logs remain readable.",
+        "Displayed file identity is bound to the selected run/evidence generation."
+      ],
+      "regression_risks": [
+        "Historical artifact layouts need an explicit allowlisted compatibility map.",
+        "Portable no-follow behavior differs across platforms."
+      ],
+      "primary_owner": "R10",
+      "secondary_sectors": [
+        "R07",
+        "R11",
+        "R12"
+      ],
+      "existing_aliases_or_dependencies": [
+        "BWS120-R07-001 owns writable observability log-directory escape. R10-009 is the distinct standardized reader/confinement defect."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "No provider, external API, deployed service, account, credential, wallet, signer, or persistent database was contacted.",
+        "No controller, scheduler, worker, API, lifecycle service, release apply, database command, Git pull, Git push, or live operation was started.",
+        "BWS-600 remains BLOCKED_EXTERNAL_RUNTIME_EVIDENCE, BWS-710 remains blocked on an accepted upstream runtime resource, and BWS-900 remains parked."
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "bws_600": true,
+        "bws_710": false,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS121-R10-010",
+      "title": "The source-handoff archive includes nested environment, secret, key, and runtime-state files",
+      "severity": "P0",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "scripts/create-source-handoff-archive.sh",
+      "current_symbol": "source handoff exclusions",
+      "exact_line_range": "L6-L10; L83-L125",
+      "full_file_sha256": "3636462392c76a66fae28b84eafd04a7a7db689e63d815bc82855b58f86e2f49",
+      "source_locations": [
+        {
+          "path": "scripts/create-source-handoff-archive.sh",
+          "symbol": "source handoff exclusions",
+          "line_range": "L6-L10; L83-L125",
+          "sha256": "3636462392c76a66fae28b84eafd04a7a7db689e63d815bc82855b58f86e2f49"
+        },
+        {
+          "path": "zip_codebase.sh",
+          "symbol": "zc_is_excluded_path (safe comparator)",
+          "line_range": "L27-L55",
+          "sha256": "7c9090876b6c558709f6e03a979144f07f501306109ffcc7e6cf95fafc5100a9"
+        }
+      ],
+      "preconditions": "Sensitive files exist below nested directories using names such as `.env`, `secrets/`, `credentials/`, `*.key`, database files, or runtime-state paths.",
+      "trigger": "Create the advertised source handoff archive and transmit or retain it as source-only material.",
+      "expected_behavior": "Every source archive helper must share one path-aware exclusion policy that rejects nested secret/env/key/database/runtime material and must verify the produced member list before publication.",
+      "current_behavior": "The tar helper excludes only the repository-root `.env` and broad top-level build/artifact directories. It has no nested basename or directory rules for `.env`, secrets, credentials, keys, databases, or runtime state, despite claiming those categories are excluded. `zip_codebase.sh` implements materially stronger nested rules, so two official archive paths disagree.",
+      "impact": "A source handoff can disclose credentials, private keys, local databases, and retained runtime evidence. The archive label falsely implies a source-only, secret-free artifact.",
+      "evidence": [
+        "A bounded disposable source tree containing `config/.env`, `nested/secrets/token.txt`, `nested/private.key`, and `runtime/state.json` produced a successful handoff archive containing all four members.",
+        "The production tar exclusion list contains no equivalent of the nested path policy in `zip_codebase.sh`."
+      ],
+      "reproduction_status": "STATIC_SOURCE_CONFIRMED; BOUNDED_OFFLINE_ARCHIVE_MEMBER_PROBE_CONFIRMED",
+      "root_cause": "Archive exclusion policy is duplicated and implemented as a narrow tar argument list rather than one canonical member-selection and post-build verification contract.",
+      "minimal_fix_boundary": "Reuse one canonical archive member policy for both helpers; construct an explicit member list; reject all secret/runtime/database/key/certificate patterns at any depth; fail on symlinks; verify the finished archive against the policy before publication.",
+      "required_tests": [
+        "Nested `.env` and `.env.*` exclusion while retaining templates.",
+        "Nested secrets/.secrets/credentials exclusion.",
+        "Key/certificate/database/runtime-state exclusion at any depth.",
+        "Archive-member postcondition validation and adversarial basename/case tests.",
+        "Parity test proving tar and zip helpers select the same source members."
+      ],
+      "regression_risks": [
+        "Overbroad patterns may exclude legitimate documentation fixtures; exceptions must be explicit and non-secret.",
+        "Existing downstream tooling may expect current tar member layout."
+      ],
+      "primary_owner": "R10",
+      "secondary_sectors": [
+        "R07",
+        "R09",
+        "R11",
+        "R12"
+      ],
+      "existing_aliases_or_dependencies": [
+        "R09 owns release package authority; R10 owns repository helper path/secret policy.",
+        "KNOWN_BASELINE_MANIFEST_DRIFT remains R11-owned and is unrelated."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "No provider, external API, deployed service, account, credential, wallet, signer, or persistent database was contacted.",
+        "No controller, scheduler, worker, API, lifecycle service, release apply, database command, Git pull, Git push, or live operation was started.",
+        "BWS-600 remains BLOCKED_EXTERNAL_RUNTIME_EVIDENCE, BWS-710 remains blocked on an accepted upstream runtime resource, and BWS-900 remains parked."
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "bws_600": false,
+        "bws_710": false,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS121-R10-011",
+      "title": "update_git.sh secret-path guard misses nested environment and credential directories before push",
+      "severity": "P0",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "update_git.sh",
+      "current_symbol": "secret_like_path / refuse_secret_commit / ACP flow",
+      "exact_line_range": "L209-L232; L398-L414",
+      "full_file_sha256": "afdd43955e7513016f5e53770faf9523df7ae9827608931ed81d168519dce3fe",
+      "source_locations": [
+        {
+          "path": "update_git.sh",
+          "symbol": "secret_like_path / refuse_secret_commit / ACP flow",
+          "line_range": "L209-L232; L398-L414",
+          "sha256": "afdd43955e7513016f5e53770faf9523df7ae9827608931ed81d168519dce3fe"
+        }
+      ],
+      "preconditions": "A nested secret-like file is tracked or newly staged, and an operator runs `update_git.sh --acp` or another path that commits and pushes.",
+      "trigger": "Stage paths such as `config/.env`, `nested/secrets/token.txt`, or `nested/credentials/token.txt`.",
+      "expected_behavior": "The pre-commit/push guard must evaluate basenames and directory segments at every depth, use the same canonical secret policy as archive helpers, and fail before commit when any protected path is staged.",
+      "current_behavior": "The case patterns match `.env` only at repository root and secrets/.secrets/credentials only as the first path segment. `git add -A` stages everything before the guard, and a passing guard permits commit and push.",
+      "impact": "Nested credentials or environment files can be committed and pushed by the repository’s standard synchronization helper, causing durable secret exposure and repository contamination.",
+      "evidence": [
+        "A bounded function probe returned “not secret” for `config/.env`, `nested/secrets/token.txt`, and `nested/credentials/token.txt`, while correctly blocking only root forms.",
+        "The ACP flow performs `git add -A`, then the incomplete guard, then commit and push.",
+        "No commit or remote push was performed during review."
+      ],
+      "reproduction_status": "STATIC_SOURCE_CONFIRMED; BOUNDED_OFFLINE_PATH_MATCH_PROBE_CONFIRMED; NO_REMOTE_OPERATION",
+      "root_cause": "The secret guard uses root-anchored shell patterns instead of normalized basename and path-segment policy shared with packaging.",
+      "minimal_fix_boundary": "Normalize staged paths, reject unsafe/control-character forms, evaluate protected basenames and directory segments at every depth, optionally add content scanning for high-confidence credentials, and reuse the archive secret policy. Unstage or abort cleanly on failure.",
+      "required_tests": [
+        "Nested `.env`/`.env.*`, secrets, .secrets, and credentials reject.",
+        "Template env files remain allowed only under explicit rules.",
+        "Renames/deletions, spaces, Unicode, and newline-hostile Git paths are handled safely using NUL-delimited output.",
+        "No commit or push occurs when any path is blocked."
+      ],
+      "regression_risks": [
+        "Legitimate credential-named test fixtures may require explicit non-secret allowlisting.",
+        "Path parsing must use `-z` to avoid introducing filename parsing defects."
+      ],
+      "primary_owner": "R10",
+      "secondary_sectors": [
+        "R11",
+        "R12"
+      ],
+      "existing_aliases_or_dependencies": [
+        "BWS121-R10-010 shares the canonical secret-path policy but has a distinct archive correction boundary."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "No provider, external API, deployed service, account, credential, wallet, signer, or persistent database was contacted.",
+        "No controller, scheduler, worker, API, lifecycle service, release apply, database command, Git pull, Git push, or live operation was started.",
+        "BWS-600 remains BLOCKED_EXTERNAL_RUNTIME_EVIDENCE, BWS-710 remains blocked on an accepted upstream runtime resource, and BWS-900 remains parked."
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "bws_600": false,
+        "bws_710": false,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS121-R10-012",
+      "title": "update_git.sh permanently removes all repository-local HTTP extraheader configuration",
+      "severity": "P2",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "update_git.sh",
+      "current_symbol": "clear_local_extraheaders_quietly / git_with_token_if_needed",
+      "exact_line_range": "L122-L178",
+      "full_file_sha256": "afdd43955e7513016f5e53770faf9523df7ae9827608931ed81d168519dce3fe",
+      "source_locations": [
+        {
+          "path": "update_git.sh",
+          "symbol": "clear_local_extraheaders_quietly / git_with_token_if_needed",
+          "line_range": "L122-L178",
+          "sha256": "afdd43955e7513016f5e53770faf9523df7ae9827608931ed81d168519dce3fe"
+        }
+      ],
+      "preconditions": "The repository has one or more local `http.extraheader` or URL-scoped extraheader values and uses a GitHub HTTPS origin.",
+      "trigger": "Run a token-backed pull or push through `update_git.sh`.",
+      "expected_behavior": "The helper must use command-scoped `git -c` overrides without mutating unrelated persistent repository configuration, or it must snapshot and restore any narrowly justified change transactionally.",
+      "current_behavior": "Before the command, the helper unsets every matching local extraheader and never restores it. The same command already supplies empty command-scoped `-c ...extraheader=` values, so permanent mutation is not required for that invocation.",
+      "impact": "Unrelated authentication/proxy/tooling configuration is silently destroyed, causing later Git operations or integrations to fail and making wrapper execution non-idempotent.",
+      "evidence": [
+        "A bounded disposable Git repository was configured with generic and URL-scoped extraheaders. Calling the production function removed both, and the post-state was empty.",
+        "No network or remote Git operation was performed."
+      ],
+      "reproduction_status": "STATIC_SOURCE_CONFIRMED; BOUNDED_LOCAL_GIT_CONFIG_MUTATION_PROBE_CONFIRMED",
+      "root_cause": "A transient credential-isolation requirement is implemented as permanent broad repository configuration deletion.",
+      "minimal_fix_boundary": "Remove persistent unsets and rely on command-scoped configuration, or snapshot/restore only exact keys around the command with failure-safe cleanup. Preserve unrelated local Git config byte-for-byte.",
+      "required_tests": [
+        "Generic and multiple URL-scoped extraheaders are unchanged after success and failure.",
+        "Token-backed command still suppresses inherited headers for that process.",
+        "Interrupted/failed command restores any temporary state.",
+        "Non-GitHub remotes remain untouched."
+      ],
+      "regression_risks": [
+        "Previously hidden credential conflicts may reappear if command-scoped suppression is incomplete.",
+        "Restoration logic must handle multiple values and exact ordering."
+      ],
+      "primary_owner": "R10",
+      "secondary_sectors": [
+        "R11",
+        "R12"
+      ],
+      "existing_aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "No source, test, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "No provider, external API, deployed service, account, credential, wallet, signer, or persistent database was contacted.",
+        "No controller, scheduler, worker, API, lifecycle service, release apply, database command, Git pull, Git push, or live operation was started.",
+        "BWS-600 remains BLOCKED_EXTERNAL_RUNTIME_EVIDENCE, BWS-710 remains blocked on an accepted upstream runtime resource, and BWS-900 remains parked."
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": false,
+        "bws_600": false,
+        "bws_710": false,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS121-R10-013",
+      "title": "Artifact download accepts first-seen SSH host keys while sending a reusable password",
+      "severity": "P0",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "pull_artifacts_and_zip_codebase.sh",
+      "current_symbol": "pa_get_config / pa_ssh / pa_scp / pa_stream_remote_file",
+      "exact_line_range": "L33-L53; L104-L119; L121-L143; L182-L185",
+      "full_file_sha256": "9e7199e2e7efa85963f26374510e7cde6a74eb4cd3f00aca7893de2efe0f6cc7",
+      "source_locations": [
+        {
+          "path": "pull_artifacts_and_zip_codebase.sh",
+          "symbol": "pa_get_config / pa_ssh / pa_scp / pa_stream_remote_file",
+          "line_range": "L33-L53; L104-L119; L121-L143; L182-L185",
+          "sha256": "9e7199e2e7efa85963f26374510e7cde6a74eb4cd3f00aca7893de2efe0f6cc7"
+        }
+      ],
+      "preconditions": "The target host key is not already trusted, the operator supplies SSH_PASSWORD, and the network or destination authority is compromised or misdirected on first contact.",
+      "trigger": "Run the standard artifact pull helper.",
+      "expected_behavior": "A noninteractive password-bearing transfer must require a pre-provisioned known-hosts entry or explicit pinned host-key fingerprint and use `StrictHostKeyChecking=yes`; it must not trust an unverified first-seen host.",
+      "current_behavior": "Every ssh/scp path uses `StrictHostKeyChecking=accept-new` while `sshpass` supplies the reusable password. A first-seen key is accepted and persisted without an out-of-band identity check.",
+      "impact": "A wrong or intercepted first destination can receive the SSH password and supply arbitrary artifact bytes that are then numbered and processed locally. This is both secret exposure and artifact-origin failure.",
+      "evidence": [
+        "Static tracing shows the password is sourced from environment/`.env` and attached to all three accept-new transfer paths.",
+        "The script requires SSH_HOST and does not use a hard-coded host, which is a safeguard, but it does not bind that host to a trusted key.",
+        "No SSH connection, host, password, or remote artifact was accessed during review."
+      ],
+      "reproduction_status": "STATIC_SOURCE_CONFIRMED; LIVE_NETWORK_REPRODUCTION_PROHIBITED",
+      "root_cause": "Destination hostname configuration is treated as server identity; first-use host-key trust is delegated to an automatic SSH policy while password authentication is active.",
+      "minimal_fix_boundary": "Require a restrictive known-hosts file or explicit fingerprint supplied through protected configuration; use `StrictHostKeyChecking=yes`, a dedicated `UserKnownHostsFile`, and fail before authentication if identity is absent or mismatched. Preserve remote repo basename and archive-integrity checks.",
+      "required_tests": [
+        "Unknown host key fails before password authentication using a fake ssh executable.",
+        "Pinned matching key succeeds; changed key fails.",
+        "All ssh/scp/pv branches use the same strict options and known-hosts file.",
+        "Command/evidence output never exposes password or known-hosts contents."
+      ],
+      "regression_risks": [
+        "Operators must provision/rotate host keys deliberately.",
+        "Host clusters with multiple legitimate keys require an explicit pin set rather than accept-new."
+      ],
+      "primary_owner": "R10",
+      "secondary_sectors": [
+        "R07",
+        "R09",
+        "R11",
+        "R12"
+      ],
+      "existing_aliases_or_dependencies": [
+        "R01 external API destination proof is separate; this finding concerns the repository artifact-transfer helper."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "No provider, external API, deployed service, account, credential, wallet, signer, or persistent database was contacted.",
+        "No controller, scheduler, worker, API, lifecycle service, release apply, database command, Git pull, Git push, or live operation was started.",
+        "BWS-600 remains BLOCKED_EXTERNAL_RUNTIME_EVIDENCE, BWS-710 remains blocked on an accepted upstream runtime resource, and BWS-900 remains parked."
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "bws_600": false,
+        "bws_710": false,
+        "deployment": true
+      }
+    }
+  ],
+  "hypotheses": [
+    {
+      "id": "BWS121-R10-PROB-001",
+      "classification": "PROBABLE_FINDING",
+      "title": "Repository-relative path validation is vulnerable to validation-to-use replacement races",
+      "status": "PROBABLE_STATIC_TOCTOU",
+      "source_locations": [
+        {
+          "path": "packages/bootstrap/src/operations/repository-paths.ts",
+          "symbol": "resolveRepositoryRelativePath / assertRepositoryRealpathContainment",
+          "line_range": "L22-L37; L68-L111",
+          "sha256": "c1c9f29f472abc2b5f6a571973ca3974fcc3c7206737b29465276aad189f7e57"
+        }
+      ],
+      "reason_not_confirmed": "The validator returns a pathname after lstat/realpath checks; callers later reopen or create through that name. A concurrent rename/symlink replacement appears possible, but a production caller race was not executed under the read-only/no-controller constraints.",
+      "required_proof": "A bounded disposable race harness against an actual production caller, followed by descriptor-relative/no-follow remediation tests."
+    },
+    {
+      "id": "BWS121-R10-HYP-001",
+      "classification": "HYPOTHESIS",
+      "title": "Latest runtime JSON and log reads may accept symlink replacement after existence checks",
+      "status": "UNPROVEN_SEPARATE_ROOT",
+      "source_locations": [
+        {
+          "path": "scripts/bws-root-wrapper-runtime.mjs",
+          "symbol": "readOptionalJsonFile / printRuntimeLogPath",
+          "line_range": "L215-L224; L617-L622",
+          "sha256": "1d1d5fe74a399da77aeaffecf784c6d7f47176c5101e85ae9987cac87cc2bcb8"
+        }
+      ],
+      "reason_not_confirmed": "The reads follow normal filesystem semantics, but the practical root may be inherited writable-path authority from R07/R06 rather than a distinct R10 root cause.",
+      "required_proof": "Caller-specific symlink/replacement harness and overlap reconciliation with BWS120-R07-001 and lifecycle state ownership."
+    }
+  ],
+  "external_upstream_blockers": [],
+  "environment_blockers": [
+    {
+      "id": "BWS121-R10-ENV-001",
+      "classification": "ENVIRONMENT_BLOCKER",
+      "title": "Canonical Node 20.20.2 was unavailable",
+      "impact": "Node 22.16.0 syntax/probe results are supplementary; no canonical Node acceptance is claimed."
+    },
+    {
+      "id": "BWS121-R10-ENV-002",
+      "classification": "ENVIRONMENT_BLOCKER",
+      "title": "Repository dependencies were absent and were not installed",
+      "impact": "TypeScript build and focused compiled test suites were unavailable. Static tracing, validators, shell/JS syntax checks, and external inert probes were used instead."
+    },
+    {
+      "id": "BWS121-R10-ENV-003",
+      "classification": "ENVIRONMENT_BLOCKER",
+      "title": "psql/PostgreSQL were unavailable and database access was prohibited",
+      "impact": "Ambient libpq behavior was confirmed at subprocess-construction level but not against a live/disposable PostgreSQL server."
+    }
+  ],
+  "intentional_safeguards": [
+    {
+      "id": "BWS121-R10-S01",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "Root runtime wrappers forcibly set API-only, paper-mode, provider-disabled, and execution-disabled invariants."
+    },
+    {
+      "id": "BWS121-R10-S02",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "Persistence configuration rejects blank required fields and requires exactly one host or socket target."
+    },
+    {
+      "id": "BWS121-R10-S03",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "External-runtime-preflight CLI already rejects unknown and duplicate flags before file checks."
+    },
+    {
+      "id": "BWS121-R10-S04",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "zip_codebase.sh applies path-aware nested secret/runtime/database exclusions and rejects symlink source paths."
+    },
+    {
+      "id": "BWS121-R10-S05",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "Managed cockpit build forces API mode and an exact loopback API base URL."
+    },
+    {
+      "id": "BWS121-R10-S06",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "Artifact pull requires explicit SSH_HOST and verifies the local archive structurally after transfer."
+    },
+    {
+      "id": "BWS121-R10-S07",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "Repository path utility rejects absolute/traversal paths and existing symlink components in non-racing cases."
+    }
+  ],
+  "rejected_suspicions": [
+    {
+      "id": "BWS121-R10-RS01",
+      "classification": "REJECTED_SUSPICION",
+      "title": "The `.env.example` mock cockpit default makes managed runtime use mock data",
+      "reason": "The managed build script explicitly overrides VITE_BWS_COCKPIT_DATA_MODE=api and binds the exact loopback URL. The template value remains an operator/development hint, not managed-runtime authority."
+    },
+    {
+      "id": "BWS121-R10-RS02",
+      "classification": "REJECTED_SUSPICION",
+      "title": "Selective `.env` loading imports unrelated file secrets",
+      "reason": "The parser loads only the named runtime/POSTGRES/retired-key set. The confirmed R10-001 issue is full ambient process inheritance, not unrelated `.env` import."
+    },
+    {
+      "id": "BWS121-R10-RS03",
+      "classification": "REJECTED_SUSPICION",
+      "title": "`watch_progress.sh --base-url` contacts the supplied URL",
+      "reason": "The option is explicitly compatibility-only and is merely echoed; progress remains local. Runtime-summary destination authority is separately covered by R10-004."
+    },
+    {
+      "id": "BWS121-R10-RS04",
+      "classification": "REJECTED_SUSPICION",
+      "title": "update_git executable-manifest import establishes a separate trusted-code boundary",
+      "reason": "The helper and imported working-tree manifest are both mutable repository code executed by the operator. This does not create a distinct boundary beyond the inherent decision to execute an untrusted working tree; no separate finding was assigned."
+    }
+  ],
+  "cross_area_handoffs": [
+    {
+      "id": "BWS121-R10-X01",
+      "classification": "CROSS_AREA_HANDOFF",
+      "target": "R01",
+      "subject": "Keep BWS116-R01-009 as owner of external upstream API destination proof. R10-004 covers the separate runtime-status state-selected destination."
+    },
+    {
+      "id": "BWS121-R10-X02",
+      "classification": "CROSS_AREA_HANDOFF",
+      "target": "R03",
+      "subject": "Consume R10-002 and R10-008 for atomic database configuration and subprocess environment; R03 retains transaction, schema, and durable-state mechanics."
+    },
+    {
+      "id": "BWS121-R10-X03",
+      "classification": "CROSS_AREA_HANDOFF",
+      "target": "R06",
+      "subject": "Managed child lifecycle must consume the bounded environment from R10-001; R06 retains child ownership, cancellation, and shutdown mechanics."
+    },
+    {
+      "id": "BWS121-R10-X04",
+      "classification": "CROSS_AREA_HANDOFF",
+      "target": "R07",
+      "subject": "R07-001/R07-002 remain owners of writable log-path and output-redaction roots. R10 owns standardized reader confinement and secret transport/path policy."
+    },
+    {
+      "id": "BWS121-R10-X05",
+      "classification": "CROSS_AREA_HANDOFF",
+      "target": "R08",
+      "subject": "Backup/restore/retention must consume the atomic database tuple and bounded libpq environment without duplicating R08 target and deletion findings."
+    },
+    {
+      "id": "BWS121-R10-X06",
+      "classification": "CROSS_AREA_HANDOFF",
+      "target": "R09",
+      "subject": "Release/upgrade/soak/final acceptance must consume strict argument parsing and the effective configuration receipt; R09-005/R09-006/R09-019 remain stable."
+    },
+    {
+      "id": "BWS121-R10-X07",
+      "classification": "CROSS_AREA_HANDOFF",
+      "target": "R11",
+      "subject": "Add production-entrypoint tests for every R10 finding, explain false-green validators, and retain ownership of KNOWN_BASELINE_MANIFEST_DRIFT/runtime enforcement."
+    },
+    {
+      "id": "BWS121-R10-X08",
+      "classification": "CROSS_AREA_HANDOFF",
+      "target": "R12",
+      "subject": "Automation/controller consumers must use confined log/artifact paths, strict secret guards, pinned transfer identity, and normalized command receipts."
+    }
+  ],
+  "test_gaps": [
+    {
+      "id": "BWS121-R10-TG-01",
+      "classification": "TEST_GAP",
+      "title": "No test proves unrelated ambient process secrets and control variables are absent from managed children."
+    },
+    {
+      "id": "BWS121-R10-TG-02",
+      "classification": "TEST_GAP",
+      "title": "No cross-entrypoint test enforces one atomic PostgreSQL source/precedence policy."
+    },
+    {
+      "id": "BWS121-R10-TG-03",
+      "classification": "TEST_GAP",
+      "title": "No blank-versus-missing precedence matrix covers process, `.env`, defaults, zero, and false-like values."
+    },
+    {
+      "id": "BWS121-R10-TG-04",
+      "classification": "TEST_GAP",
+      "title": "No runtime-summary test rejects state-selected external/private/wrong-port/redirect destinations."
+    },
+    {
+      "id": "BWS121-R10-TG-05",
+      "classification": "TEST_GAP",
+      "title": "Root CLI tests inspect source markers but never execute the exported bin from an unrelated current directory."
+    },
+    {
+      "id": "BWS121-R10-TG-06",
+      "classification": "TEST_GAP",
+      "title": "Release, database, soak, and final-acceptance CLIs lack unknown/duplicate flag tests equivalent to external preflight."
+    },
+    {
+      "id": "BWS121-R10-TG-07",
+      "classification": "TEST_GAP",
+      "title": "No test asserts that database passwords are absent from argv, process listings, help-derived commands, and controller captures."
+    },
+    {
+      "id": "BWS121-R10-TG-08",
+      "classification": "TEST_GAP",
+      "title": "No fake-psql test records and rejects ambient libpq control variables."
+    },
+    {
+      "id": "BWS121-R10-TG-09",
+      "classification": "TEST_GAP",
+      "title": "open_log tests cover valid runtime logs only; outside, traversal, and symlink paths are untested."
+    },
+    {
+      "id": "BWS121-R10-TG-10",
+      "classification": "TEST_GAP",
+      "title": "Source-handoff tests cover only root `.env` and broad build directories, not nested secrets, keys, databases, or runtime state."
+    },
+    {
+      "id": "BWS121-R10-TG-11",
+      "classification": "TEST_GAP",
+      "title": "update_git tests cover executable modes but not nested secret paths or no-push-on-block behavior."
+    },
+    {
+      "id": "BWS121-R10-TG-12",
+      "classification": "TEST_GAP",
+      "title": "No test proves update_git preserves local extraheader values across success and failure."
+    },
+    {
+      "id": "BWS121-R10-TG-13",
+      "classification": "TEST_GAP",
+      "title": "No fake-SSH test requires a pinned host key before password authentication across every transfer branch."
+    },
+    {
+      "id": "BWS121-R10-TG-14",
+      "classification": "TEST_GAP",
+      "title": "No descriptor-relative/no-follow race test exercises repository path validation through a production caller."
+    }
+  ]
+}

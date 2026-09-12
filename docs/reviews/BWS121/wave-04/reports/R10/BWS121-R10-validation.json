@@ -1,0 +1,480 @@
+{
+  "schema": "betting-win-surebet-deep-review-validation-v1",
+  "review_id": "BWS121-R10",
+  "repository": "betting-win-surebet",
+  "generated_at_utc": "2026-09-12T11:13:10Z",
+  "archive": {
+    "path": "/mnt/data/betting-win-surebet121(1).zip",
+    "expected_sha256": null,
+    "actual_sha256": "025936d21db89ac5cf4881863f05ec9ed5ddaaa2b4adfe60e766207fc4c9b9f7",
+    "expected_regular_file_count": null,
+    "actual_regular_file_count": 733,
+    "total_uncompressed_bytes": 14117279,
+    "archive_bytes": 3954499,
+    "safety": {
+      "duplicate_paths": 0,
+      "unsafe_paths": 0,
+      "unsafe_path_list": [],
+      "symlinks": 0,
+      "symlink_list": [],
+      "special_entries": 0,
+      "special_entry_list": [],
+      "verdict": "PASS"
+    }
+  },
+  "baseline_compatibility": {
+    "prior_baseline": "betting-win-surebet120(1).zip",
+    "prior_baseline_sha256_expected": "d4565c05ecfe63f5d5511f224a20ff20fb82bfc75b23203c94d7d3e98a8c21bb",
+    "prior_baseline_sha256_actual": "d4565c05ecfe63f5d5511f224a20ff20fb82bfc75b23203c94d7d3e98a8c21bb",
+    "added_paths": 38,
+    "changed_paths": 2,
+    "removed_paths": 0,
+    "added_path_list": [
+      "docs/reviews/BWS120/wave-03/README.md",
+      "docs/reviews/BWS120/wave-03/area-coverage.md",
+      "docs/reviews/BWS120/wave-03/authority-map.md",
+      "docs/reviews/BWS120/wave-03/baseline-compatibility.json",
+      "docs/reviews/BWS120/wave-03/baseline-compatibility.md",
+      "docs/reviews/BWS120/wave-03/baseline-file-manifest.tsv",
+      "docs/reviews/BWS120/wave-03/completeness-reconciliation.json",
+      "docs/reviews/BWS120/wave-03/cumulative-consolidated-ledger.json",
+      "docs/reviews/BWS120/wave-03/cumulative-consolidated-ledger.md",
+      "docs/reviews/BWS120/wave-03/decisions.json",
+      "docs/reviews/BWS120/wave-03/decisions.md",
+      "docs/reviews/BWS120/wave-03/dependency-and-tranches.md",
+      "docs/reviews/BWS120/wave-03/documentation-integration-plan.json",
+      "docs/reviews/BWS120/wave-03/incremental-consolidation.md",
+      "docs/reviews/BWS120/wave-03/input-inventory.json",
+      "docs/reviews/BWS120/wave-03/next-wave-handoff.md",
+      "docs/reviews/BWS120/wave-03/non-defect-register.json",
+      "docs/reviews/BWS120/wave-03/original-to-consolidated.json",
+      "docs/reviews/BWS120/wave-03/prior-overlay-lineage.json",
+      "docs/reviews/BWS120/wave-03/prior-overlay-lineage.md",
+      "docs/reviews/BWS120/wave-03/protected-mutable-documents.json",
+      "docs/reviews/BWS120/wave-03/report-index.json",
+      "docs/reviews/BWS120/wave-03/reports/R07/BWS120-R07-coverage.tsv",
+      "docs/reviews/BWS120/wave-03/reports/R07/BWS120-R07-findings.json",
+      "docs/reviews/BWS120/wave-03/reports/R07/BWS120-R07-report.md",
+      "docs/reviews/BWS120/wave-03/reports/R07/BWS120-R07-validation.json",
+      "docs/reviews/BWS120/wave-03/reports/R08/BWS120-R08-coverage.tsv",
+      "docs/reviews/BWS120/wave-03/reports/R08/BWS120-R08-findings.json",
+      "docs/reviews/BWS120/wave-03/reports/R08/BWS120-R08-report.md",
+      "docs/reviews/BWS120/wave-03/reports/R08/BWS120-R08-validation.json",
+      "docs/reviews/BWS120/wave-03/reports/R09/BWS120-R09-coverage.tsv",
+      "docs/reviews/BWS120/wave-03/reports/R09/BWS120-R09-findings.json",
+      "docs/reviews/BWS120/wave-03/reports/R09/BWS120-R09-report.md",
+      "docs/reviews/BWS120/wave-03/reports/R09/BWS120-R09-validation.json",
+      "docs/reviews/BWS120/wave-03/repository-profile.md",
+      "docs/reviews/BWS120/wave-03/source-verification.json",
+      "docs/reviews/BWS120/wave-03/test-evidence-matrix.json",
+      "docs/reviews/BWS120/wave-03/test-evidence-matrix.md"
+    ],
+    "changed_path_list": [
+      "docs/000_documentation_index.md",
+      "docs/reviews/README.md"
+    ],
+    "removed_path_list": [],
+    "non_documentation_differences": [],
+    "executable_compatibility_result": "PASS_EXACT_NON_DOCUMENTATION_BYTE_EQUIVALENCE"
+  },
+  "package_identity": {
+    "name": "betting-win-surebet",
+    "version": "0.1.0-bws-full-platform",
+    "nvmrc": "20.20.2",
+    "package_engine": ">=20 <21"
+  },
+  "runtime_and_tools": {
+    "canonical_node": "20.20.2",
+    "actual_node": "22.16.0",
+    "actual_node_path": "/opt/nvm/versions/node/v22.16.0/bin/node",
+    "actual_node_authority": "SUPPLEMENTARY_ONLY",
+    "npm": "10.9.2",
+    "python": "3.13.5",
+    "git": "2.47.3",
+    "bash": "5.2.37",
+    "zip": "3.0",
+    "unzip": "6.00",
+    "tar": "1.35",
+    "psql": "UNAVAILABLE",
+    "dependencies_installed": false
+  },
+  "commands_executed": [
+    {
+      "id": "CMD-001",
+      "command": "Python zipfile + sha256 inventory of betting-win-surebet121(1).zip",
+      "purpose": "Freeze archive identity, count, member hashes/modes, and path/type safety.",
+      "exit_code": 0,
+      "duration_seconds": 0.061891,
+      "timed_out": false,
+      "result": "PASS",
+      "timeout_seconds": 120
+    },
+    {
+      "id": "CMD-002",
+      "command": "Python byte comparison betting-win-surebet120(1).zip -> betting-win-surebet121(1).zip",
+      "purpose": "Verify documentation-only rebase and executable compatibility.",
+      "exit_code": 0,
+      "duration_seconds": 0.104125,
+      "timed_out": false,
+      "result": "PASS; 38 docs added, 2 docs changed, 0 removed, 0 non-documentation differences.",
+      "timeout_seconds": 120
+    },
+    {
+      "id": "CMD-003",
+      "command": "Grouped rg/find/nl/sha256sum/JSON parsing over R10 source, callers, tests, validators, current authority, and cumulative ledger",
+      "purpose": "Trace configuration precedence, CLIs, paths, secrets, destination policy, Git/update wrappers, and overlap.",
+      "exit_code": 0,
+      "duration_seconds": 0.007994,
+      "timed_out": false,
+      "result": "PASS",
+      "timeout_seconds": 120
+    },
+    {
+      "id": "CMD-004",
+      "command": "Tool/runtime version discovery (node, npm, python3, git, bash, zip, unzip, tar, psql)",
+      "purpose": "Record actual review environment and canonical-runtime availability.",
+      "exit_code": 0,
+      "duration_seconds": 0.080443,
+      "timed_out": false,
+      "result": "PASS; Node 20 and psql unavailable.",
+      "timeout_seconds": 120
+    },
+    {
+      "id": "CMD-005",
+      "command": "Initial bounded probe harness using /usr/bin/node",
+      "purpose": "Prepare inert external probes.",
+      "exit_code": 1,
+      "duration_seconds": 4.5e-05,
+      "timed_out": false,
+      "result": "FAILED_SETUP_ONLY; /usr/bin/node absent; no target source executed; corrected to actual Node path.",
+      "timeout_seconds": 120
+    },
+    {
+      "id": "CMD-006",
+      "command": "python3 scripts/validate_repo.py",
+      "purpose": "Read-only syntax/static validation; no service or controller execution.",
+      "exit_code": 0,
+      "duration_seconds": 0.825805,
+      "timed_out": false,
+      "result": "PASS_FALSE_GREEN_RELATIVE_TO_R10_FINDINGS",
+      "timeout_seconds": 120
+    },
+    {
+      "id": "CMD-007",
+      "command": "python3 scripts/validate_autonomous_controller_contract.py",
+      "purpose": "Read-only syntax/static validation; no service or controller execution.",
+      "exit_code": 0,
+      "duration_seconds": 0.739431,
+      "timed_out": false,
+      "result": "PASS_FALSE_GREEN_RELATIVE_TO_R10_FINDINGS",
+      "timeout_seconds": 120
+    },
+    {
+      "id": "CMD-008",
+      "command": "python3 scripts/validate_api_only_upstream.py",
+      "purpose": "Read-only syntax/static validation; no service or controller execution.",
+      "exit_code": 0,
+      "duration_seconds": 0.710315,
+      "timed_out": false,
+      "result": "PASS_FALSE_GREEN_RELATIVE_TO_R10_FINDINGS",
+      "timeout_seconds": 120
+    },
+    {
+      "id": "CMD-009",
+      "command": "python3 scripts/validate_remaining_operator_runtime_program.py",
+      "purpose": "Read-only syntax/static validation; no service or controller execution.",
+      "exit_code": 0,
+      "duration_seconds": 0.578942,
+      "timed_out": false,
+      "result": "PASS_FALSE_GREEN_RELATIVE_TO_R10_FINDINGS",
+      "timeout_seconds": 120
+    },
+    {
+      "id": "CMD-010",
+      "command": "python3 scripts/validate_artifact_hygiene.py",
+      "purpose": "Read-only syntax/static validation; no service or controller execution.",
+      "exit_code": 0,
+      "duration_seconds": 0.639666,
+      "timed_out": false,
+      "result": "PASS_FALSE_GREEN_RELATIVE_TO_R10_FINDINGS",
+      "timeout_seconds": 120
+    },
+    {
+      "id": "CMD-011",
+      "command": "python3 scripts/validate_no_provider_connections.py",
+      "purpose": "Read-only syntax/static validation; no service or controller execution.",
+      "exit_code": 0,
+      "duration_seconds": 0.83332,
+      "timed_out": false,
+      "result": "PASS_FALSE_GREEN_RELATIVE_TO_R10_FINDINGS",
+      "timeout_seconds": 120
+    },
+    {
+      "id": "CMD-012",
+      "command": "python3 scripts/validate_no_execution_paths.py",
+      "purpose": "Read-only syntax/static validation; no service or controller execution.",
+      "exit_code": 0,
+      "duration_seconds": 0.746268,
+      "timed_out": false,
+      "result": "PASS_FALSE_GREEN_RELATIVE_TO_R10_FINDINGS",
+      "timeout_seconds": 120
+    },
+    {
+      "id": "CMD-013",
+      "command": "bash -n start.sh stop.sh check_progress.sh watch_progress.sh open_log.sh update_git.sh pull_artifacts_and_zip_codebase.sh zip_codebase.sh scripts/create-source-handoff-archive.sh",
+      "purpose": "Read-only syntax/static validation; no service or controller execution.",
+      "exit_code": 0,
+      "duration_seconds": 0.001954,
+      "timed_out": false,
+      "result": "PASS_FALSE_GREEN_RELATIVE_TO_R10_FINDINGS",
+      "timeout_seconds": 120
+    },
+    {
+      "id": "CMD-014",
+      "command": "node --check cli.js",
+      "purpose": "Read-only syntax/static validation; no service or controller execution.",
+      "exit_code": 0,
+      "duration_seconds": 0.02096,
+      "timed_out": false,
+      "result": "PASS_FALSE_GREEN_RELATIVE_TO_R10_FINDINGS",
+      "timeout_seconds": 120
+    },
+    {
+      "id": "CMD-015",
+      "command": "node --check scripts/bws-root-wrapper-runtime.mjs",
+      "purpose": "Read-only syntax/static validation; no service or controller execution.",
+      "exit_code": 0,
+      "duration_seconds": 0.019028,
+      "timed_out": false,
+      "result": "PASS_FALSE_GREEN_RELATIVE_TO_R10_FINDINGS",
+      "timeout_seconds": 120
+    },
+    {
+      "id": "CMD-016",
+      "command": "node --check scripts/validate_bws_loopback_acceptance.mjs",
+      "purpose": "Read-only syntax/static validation; no service or controller execution.",
+      "exit_code": 0,
+      "duration_seconds": 0.018832,
+      "timed_out": false,
+      "result": "PASS_FALSE_GREEN_RELATIVE_TO_R10_FINDINGS",
+      "timeout_seconds": 120
+    },
+    {
+      "id": "CMD-017",
+      "command": "/opt/nvm/versions/node/v22.16.0/bin/node /mnt/data/BWS121-R10-work/tmp/probes/root-wrapper/scripts/bws-root-wrapper-runtime.mjs start",
+      "purpose": "Bounded inert probe: root_wrapper_environment_and_tuple_probe.",
+      "exit_code": 0,
+      "duration_seconds": 0.866126,
+      "timed_out": false,
+      "result": "PASS_AS_PROBE",
+      "timeout_seconds": 120
+    },
+    {
+      "id": "CMD-018",
+      "command": "/opt/nvm/versions/node/v22.16.0/bin/node /mnt/data/BWS121-R10-work/repo/cli.js status",
+      "purpose": "Bounded inert probe: root_cli_caller_cwd_probe.",
+      "exit_code": 0,
+      "duration_seconds": 0.029774,
+      "timed_out": false,
+      "result": "PASS_AS_PROBE",
+      "timeout_seconds": 120
+    },
+    {
+      "id": "CMD-019",
+      "command": "bash /mnt/data/BWS121-R10-work/repo/open_log.sh --controller --run-dir /mnt/data/BWS121-R10-work/tmp/probes/outside-run --tail 1",
+      "purpose": "Bounded inert probe: open_log_outside_run_dir_probe.",
+      "exit_code": 0,
+      "duration_seconds": 0.004974,
+      "timed_out": false,
+      "result": "PASS_AS_PROBE",
+      "timeout_seconds": 120
+    },
+    {
+      "id": "CMD-020",
+      "command": "bash scripts/create-source-handoff-archive.sh artifacts/probe.tar.gz",
+      "purpose": "Bounded inert probe: source_handoff_secret_inclusion_probe.",
+      "exit_code": 0,
+      "duration_seconds": 0.016333,
+      "timed_out": false,
+      "result": "PASS_AS_PROBE",
+      "timeout_seconds": 120
+    },
+    {
+      "id": "CMD-021",
+      "command": "bash -lc set +e\nsource <(head -n 422 /mnt/data/BWS121-R10-work/repo/update_git.sh)\nfor p in .env config/.env secrets/root.txt nested/secrets/token.txt credentials/root.txt nested/credentials/token.txt nested/private.key; do\n  secret_like_path \"$p\"; rc=$?; printf '%s=%s\\n' \"$p\" \"$rc\"\ndone\nexit 0",
+      "purpose": "Bounded inert probe: update_git_secret_path_match_probe.",
+      "exit_code": 0,
+      "duration_seconds": 0.006962,
+      "timed_out": false,
+      "result": "PASS_AS_PROBE",
+      "timeout_seconds": 120
+    },
+    {
+      "id": "CMD-022",
+      "command": "git init -q",
+      "purpose": "Bounded inert probe: git_fixture_init.",
+      "exit_code": 0,
+      "duration_seconds": 0.004121,
+      "timed_out": false,
+      "result": "PASS_AS_PROBE",
+      "timeout_seconds": 120
+    },
+    {
+      "id": "CMD-023",
+      "command": "bash -lc git config --local http.extraheader 'Authorization: one' && git config --local http.https://example.com/.extraheader 'Authorization: two'",
+      "purpose": "Bounded inert probe: git_fixture_set_extraheaders.",
+      "exit_code": 0,
+      "duration_seconds": 0.006022,
+      "timed_out": false,
+      "result": "PASS_AS_PROBE",
+      "timeout_seconds": 120
+    },
+    {
+      "id": "CMD-024",
+      "command": "bash -lc set -Eeuo pipefail\nsource <(head -n 422 /mnt/data/BWS121-R10-work/repo/update_git.sh)\nprintf 'before='; git config --local --get-regexp 'extraheader' | tr '\\n' ';'; echo\nclear_local_extraheaders_quietly\nprintf 'after='; git config --local --get-regexp 'extraheader' | tr '\\n' ';' || true; echo\n",
+      "purpose": "Bounded inert probe: update_git_extraheader_mutation_probe.",
+      "exit_code": 0,
+      "duration_seconds": 0.013328,
+      "timed_out": false,
+      "result": "PASS_AS_PROBE",
+      "timeout_seconds": 120
+    },
+    {
+      "id": "CMD-025",
+      "command": "/opt/nvm/versions/node/v22.16.0/bin/node /mnt/data/BWS121-R10-work/tmp/probes/runtime-summary/scripts/bws-root-wrapper-runtime.mjs runtime-summary",
+      "purpose": "Bounded inert probe: runtime_summary_state_selected_destination_probe.",
+      "exit_code": 0,
+      "duration_seconds": 0.061471,
+      "timed_out": false,
+      "result": "PASS_AS_PROBE",
+      "timeout_seconds": 120
+    },
+    {
+      "id": "CMD-026",
+      "command": "Python coverage generation and reconciliation",
+      "purpose": "Produce exactly one row for each archive member.",
+      "exit_code": 0,
+      "duration_seconds": 0.008887,
+      "timed_out": false,
+      "result": "PASS_733_UNIQUE_ROWS",
+      "timeout_seconds": 120
+    },
+    {
+      "id": "CMD-027",
+      "command": "Python extracted-tree hash reconciliation against frozen archive inventory",
+      "purpose": "Prove review did not modify repository members.",
+      "exit_code": 0,
+      "duration_seconds": 0.038321,
+      "timed_out": false,
+      "result": "PASS_BYTE_IDENTICAL",
+      "timeout_seconds": 120
+    }
+  ],
+  "checks": {
+    "passed": [
+      "Archive identity, count, path safety, entry-type safety, and per-member hashing",
+      "BWS120-to-BWS121 documentation-only compatibility",
+      "137 inherited findings loaded and overlap-checked",
+      "R10 production/caller/test static tracing",
+      "Shell and JavaScript syntax checks",
+      "Seven static validators",
+      "Bounded external environment, path, archive, Git-config, and local-HTTP probes",
+      "733-row coverage reconciliation",
+      "Final extracted-tree byte-identity check"
+    ],
+    "failed": [
+      "Initial probe setup path `/usr/bin/node` was unavailable; corrected before any target source execution."
+    ],
+    "skipped": [
+      "Controller/service/scheduler/worker/API/database execution",
+      "Git pull/push/commit against the repository",
+      "Provider/external API/SSH/deployed-service access",
+      "Live credential, account, wallet, signer, or financial action"
+    ],
+    "unavailable": [
+      "Canonical Node 20.20.2 build/tests",
+      "TypeScript compiled tests because dependencies were absent",
+      "PostgreSQL/libpq dynamic checks because psql/server were unavailable and database access was prohibited",
+      "Live SSH host-key proof because external network/credential use was prohibited"
+    ]
+  },
+  "probe_summary": {
+    "root_wrapper_ambient_secret_reached_child": true,
+    "root_wrapper_mixed_postgres_tuple_accepted": true,
+    "blank_process_runtime_value_fell_through": true,
+    "root_cli_read_caller_directory_status": true,
+    "open_log_read_outside_run_directory": true,
+    "source_handoff_included_sensitive_nested_members": [
+      "config/.env",
+      "nested/private.key",
+      "nested/secrets/token.txt",
+      "runtime/state.json"
+    ],
+    "update_git_missed_nested_secret_paths": [
+      "config/.env",
+      "nested/secrets/token.txt",
+      "nested/credentials/token.txt"
+    ],
+    "update_git_removed_local_extraheaders": true,
+    "runtime_summary_requested_state_selected_paths": [
+      "/metrics",
+      "/health",
+      "/readiness"
+    ]
+  },
+  "coverage_reconciliation": {
+    "archive_regular_files": 733,
+    "coverage_rows": 733,
+    "unique_coverage_paths": 733,
+    "missing_archive_paths": [],
+    "extra_coverage_paths": [],
+    "verdict": "PASS"
+  },
+  "finding_counts": {
+    "confirmed_findings": 13,
+    "severity_counts": {
+      "P0": 5,
+      "P1": 7,
+      "P2": 1
+    },
+    "release_blocking": 12,
+    "deployment_blocking": 13,
+    "bws_600_blocking": 8,
+    "bws_710_blocking": 4,
+    "inherited_findings_checked": 137,
+    "inherited_duplicate_root_causes_created": 0,
+    "probable_or_hypotheses": 2,
+    "external_upstream_blockers": 0,
+    "environment_blockers": 3,
+    "intentional_safeguards": 7,
+    "rejected_suspicions": 4,
+    "cross_area_handoffs": 8,
+    "test_gaps": 14
+  },
+  "known_validation_limitations": [
+    "Node 22.16.0 does not substitute for canonical Node 20.20.2.",
+    "No repository dependencies were installed; TypeScript build and compiled test suites were not run.",
+    "No live/disposable PostgreSQL server or psql executable was available.",
+    "No SSH destination was contacted, so R10-013 is grounded in exact static authentication/host-key policy rather than a live interception test.",
+    "Filesystem TOCTOU remains probable rather than confirmed through a production caller.",
+    "The user supplied no expected BWS121 archive digest or member count; actual identity was independently derived and compatibility was established against the handoff-pinned BWS120 baseline."
+  ],
+  "repository_mutation_check": {
+    "verdict": "PASS_BYTE_IDENTICAL",
+    "added_paths": [],
+    "missing_paths": [],
+    "changed_paths": []
+  },
+  "network_provider_database_access_attestation": {
+    "external_network_access": false,
+    "provider_access": false,
+    "deployed_service_access": false,
+    "ssh_remote_access": false,
+    "persistent_database_access": false,
+    "local_loopback_probe_only": true,
+    "credentials_used": false,
+    "controllers_or_services_started": false,
+    "live_or_financial_operation": false
+  },
+  "final_validation_completed_at_utc": "2026-09-12T11:14:53.183126Z"
+}

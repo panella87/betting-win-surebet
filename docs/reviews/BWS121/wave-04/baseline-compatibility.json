@@ -1,0 +1,48 @@
+{
+  "current": {
+    "archive": "betting-win-surebet121.zip",
+    "classification": "CURRENT_BASELINE",
+    "regular_files": 733,
+    "sha256": "025936d21db89ac5cf4881863f05ec9ed5ddaaa2b4adfe60e766207fc4c9b9f7"
+  },
+  "prior": {
+    "added": 38,
+    "archive": "betting-win-surebet120.zip",
+    "changed": 2,
+    "non_documentation_differences": 0,
+    "regular_files": 695,
+    "removed": 0,
+    "sha256": "d4565c05ecfe63f5d5511f224a20ff20fb82bfc75b23203c94d7d3e98a8c21bb"
+  },
+  "prior_areas": {
+    "R01-R03": "COMPATIBLE_AND_UNAFFECTED_BY_DELTA",
+    "R04-R06": "COMPATIBLE_AND_UNAFFECTED_BY_DELTA",
+    "R07-R09": "COMPATIBLE_AND_UNAFFECTED_BY_DELTA"
+  },
+  "reviews": [
+    {
+      "archive_sha256": "025936d21db89ac5cf4881863f05ec9ed5ddaaa2b4adfe60e766207fc4c9b9f7",
+      "area": "R10",
+      "classification": "CURRENT_BASELINE",
+      "coverage_rows": 733
+    },
+    {
+      "archive_sha256": "025936d21db89ac5cf4881863f05ec9ed5ddaaa2b4adfe60e766207fc4c9b9f7",
+      "area": "R11",
+      "classification": "CURRENT_BASELINE",
+      "coverage_rows": 733
+    },
+    {
+      "archive_sha256": "025936d21db89ac5cf4881863f05ec9ed5ddaaa2b4adfe60e766207fc4c9b9f7",
+      "area": "R12",
+      "classification": "CURRENT_BASELINE",
+      "coverage_rows": 733
+    }
+  ],
+  "schema": "betting-win-surebet-wave04-baseline-compatibility-v1",
+  "wave03_overlay_postimages": {
+    "classification": "LANDED_IN_CURRENT_REPOSITORY",
+    "expected": 40,
+    "matched": 40
+  }
+}

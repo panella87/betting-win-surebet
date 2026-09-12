@@ -1,0 +1,1209 @@
+{
+  "schema": "bws121-r11-findings-v1",
+  "review_id": "BWS121-R11",
+  "repository": "betting-win-surebet",
+  "source_authority": {
+    "archive_requested_name": "betting-win-surebet121(2).zip",
+    "archive_reviewed_path": "/mnt/data/betting-win-surebet121(2).zip",
+    "actual_sha256": "025936d21db89ac5cf4881863f05ec9ed5ddaaa2b4adfe60e766207fc4c9b9f7",
+    "regular_file_count": 733,
+    "package_name": "betting-win-surebet",
+    "package_version": "0.1.0-bws-full-platform",
+    "canonical_runtime": "Node 20.20.2",
+    "handoff_path": "/mnt/data/betting-win-surebet-wave03-next-review-handoff-r01-r09-rebased-d4565c05-20260912(2).md",
+    "handoff_sha256": "9456766dd3583bdfe33948954c7a9ee287e1d9f47f83cbd073de9f35c2138ea0",
+    "comparison_baseline": "betting-win-surebet120(2).zip",
+    "comparison_sha256": "d4565c05ecfe63f5d5511f224a20ff20fb82bfc75b23203c94d7d3e98a8c21bb",
+    "executable_compatibility": "EXACT_NON_DOCUMENTATION_BYTE_EQUIVALENCE"
+  },
+  "summary": {
+    "confirmed_findings": 10,
+    "severity_counts": {
+      "P1": 10
+    },
+    "classification_counts": {
+      "CONFIRMED_FINDING": 10,
+      "CROSS_AREA_HANDOFF": 6,
+      "ENVIRONMENT_BLOCKER": 3,
+      "HYPOTHESIS": 2,
+      "INTENTIONAL_SAFEGUARD": 5,
+      "REJECTED_SUSPICION": 4,
+      "TEST_GAP": 7
+    },
+    "blocking_counts": {
+      "release": 10,
+      "BWS-600": 10,
+      "B1": 10,
+      "deployment": 10
+    },
+    "inherited_confirmed_findings_checked_for_overlap": 137,
+    "duplicated_inherited_root_causes": 0,
+    "overall_verdict": "BLOCKED_ASSURANCE_AND_DEFECT_CLOSURE_REQUIRED"
+  },
+  "records": [
+    {
+      "id": "BWS121-R11-001",
+      "title": "Source manifest omits 115 current paths and carries eight stale file records",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "SOURCE_MANIFEST.json::manifest document",
+      "exact_line_range": "1-3092",
+      "full_file_sha256": "d9ea618c19fac733cf070c7e9b811ace8a1a0d637680b0b9f8233be5879aba6a",
+      "relevant_assurance_object": "R11 tests, validators, fixtures, generated output, build graph, runtime enforcement, or source/archive proof",
+      "source_evidence": [
+        {
+          "path": "SOURCE_MANIFEST.json",
+          "symbol": "schema/generated/overlay/files",
+          "line_range": "1-9",
+          "full_file_sha256": "d9ea618c19fac733cf070c7e9b811ace8a1a0d637680b0b9f8233be5879aba6a",
+          "note": "The manifest declares an August 26 overlay and begins a 617-entry inventory."
+        },
+        {
+          "path": "scripts/validate_source_manifest.py",
+          "symbol": "expected_entries / main",
+          "line_range": "50-68; 92-103; 134-145",
+          "full_file_sha256": "2235e6c4276dc8dad2a0328e956d3622ec6bfbef0978843cdf35e81e58e956b5",
+          "note": "The validator derives an exact current path, size, and SHA-256 inventory and rejects any mismatch."
+        },
+        {
+          "path": "tests/validate-source-manifest.test.ts",
+          "symbol": "synthetic manifest fixtures",
+          "line_range": "48-108",
+          "full_file_sha256": "194c8fe6f8f0226b3245af7d5f28e23c2b1c886b5658f30167823b0c74f3ab40",
+          "note": "The tests prove validator behavior on synthetic trees but do not keep the current repository manifest regenerated."
+        }
+      ],
+      "preconditions": "The current BWS121 tree is evaluated as the source/archive authority.",
+      "trigger": "Run scripts/validate_source_manifest.py or compare SOURCE_MANIFEST.json with the 732 included non-self files.",
+      "expected_behavior": "The manifest must contain exactly every included current path once, with exact byte size and SHA-256, while intentionally excluding only declared runtime/generated paths.",
+      "current_behavior": "The manifest has 617 entries. It omits 38 Wave 01 files, 38 Wave 02 files, 38 Wave 03 files, and docs/reviews/README.md. Eight existing entries have stale size or hash values: the seven inherited Graphify/update-tooling paths plus docs/000_documentation_index.md.",
+      "impact": "Source identity and archive provenance are not exact. validate:ops fails at the source-manifest step, and release/BWS-600 proof cannot bind the current tree.",
+      "evidence": "Expected non-self entries=732; manifest entries=617; missing=115; extra=0; mismatched=8. The repository validator exited 1 with SOURCE_MANIFEST.json is stale.",
+      "reproduction_status": {
+        "status": "REPRODUCED",
+        "method": "Exact implementation-equivalent Python comparison using the validator inclusion rules",
+        "summary": "Expected non-self entries=732; manifest entries=617; missing=115; extra=0; mismatched=8. The repository validator exited 1 with SOURCE_MANIFEST.json is stale.",
+        "artifact": "/mnt/data/bws121-r11-manifest-diff.json",
+        "secondary_sectors": [
+          "R09",
+          "R12"
+        ]
+      },
+      "transaction_or_state_machine_analysis": "MANIFEST_DECLARED -> TREE_CHANGED -> MANIFEST_NOT_REGENERATED is currently detected, but publication already produced BWS121. The source-proof state is therefore BLOCKED, not VERIFIED.",
+      "root_cause": "The source manifest was not transactionally regenerated and verified after successive documentation overlays and tooling changes.",
+      "minimal_fix_boundary": "During an authorized implementation tranche, regenerate the manifest from the final intended tree, verify exact path/size/hash equality, bind its generated/overlay metadata to the archive publication transaction, and prohibit publishing a new archive when the manifest check fails.",
+      "required_tests": [
+        "Current-tree manifest exact-match test, not only a synthetic fixture",
+        "Overlay installation test that must update manifest or abort atomically",
+        "Archive-to-extracted-tree-to-manifest three-way equality test",
+        "Negative tests for omitted review documents and stale same-path bytes"
+      ],
+      "regression_risks": [
+        "Regeneration must not include runtime locks, secrets, node_modules, dist, artifacts, or transient automation state.",
+        "Documentation-only overlays must remain compatible with immutable executable lineage while updating current source proof."
+      ],
+      "primary_owner": "R11",
+      "secondary_sectors": [
+        "R09",
+        "R12"
+      ],
+      "aliases_or_dependencies": [
+        "KNOWN_BASELINE_MANIFEST_DRIFT is formally closed into this R11 finding; the seven inherited stale records are not reissued separately.",
+        "BWS120-R09-003 owns release-manifest exact path-set closure; this finding owns the repository source manifest."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, fixture, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "All adversarial mutations were confined to disposable copies outside the extracted review tree.",
+        "No provider, external API, account, credential, signer, wallet, deployed service, or betting-win checkout was contacted.",
+        "No persistent database was contacted or mutated; no service, controller, scheduler, worker, or automation process was started.",
+        "Execution, public signals, profitability claims, live writes, and financial operations remain prohibited and unchanged."
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS121-R11-002",
+      "title": "Canonical Node 20.20.2 enforcement accepts any Node 20 minor as NODE_OK",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "scripts/load-node-runtime.sh::load_betting_win_surebet_node_runtime / _surebet_node_matches",
+      "exact_line_range": "27-31; 41-53; 74-113",
+      "full_file_sha256": "ea4bb9bef2995130f632d069dc3c3cbb5c6774047f420ab1a58f6335b3f87abe",
+      "relevant_assurance_object": "R11 tests, validators, fixtures, generated output, build graph, runtime enforcement, or source/archive proof",
+      "source_evidence": [
+        {
+          "path": ".nvmrc",
+          "symbol": "canonical runtime pin",
+          "line_range": "1",
+          "full_file_sha256": "75053fb82fe4512318dd99556daf58b862fb81c96cf1153249b75f8116edf440",
+          "note": "The repository pins 20.20.2."
+        },
+        {
+          "path": "package.json",
+          "symbol": "engines and validation scripts",
+          "line_range": "11-18; 27-32",
+          "full_file_sha256": "b1b69ffa6d0b974c3b3ba55f3ec1acffb21e512c3a862e2a7b2d6b5139e5eac0",
+          "note": "The package supports Node major 20 and the validation graph relies on the runtime selected by the caller/loader."
+        },
+        {
+          "path": "scripts/load-node-runtime.sh",
+          "symbol": "_surebet_node_matches",
+          "line_range": "27-31; 41-53; 74-113",
+          "full_file_sha256": "ea4bb9bef2995130f632d069dc3c3cbb5c6774047f420ab1a58f6335b3f87abe",
+          "note": "The loader reduces the pin to expected_major and accepts any matching major, including lexical fallback candidates."
+        },
+        {
+          "path": "scripts/validate_node_runtime_loader.py",
+          "symbol": "main",
+          "line_range": "44-70",
+          "full_file_sha256": "0673fde5c9877eb064985feeefc0b1043bcf7c5dcefadd675f48bd3371443334",
+          "note": "The validator checks marker presence and prohibition of nvm sourcing, not exact-version rejection behavior."
+        }
+      ],
+      "preconditions": "A Node 20 binary other than 20.20.2 appears first on PATH or in the fallback NVM directories.",
+      "trigger": "Source scripts/load-node-runtime.sh or use a root controller that inherits its NODE_OK result.",
+      "expected_behavior": "Canonical acceptance paths must select exactly 20.20.2 or explicitly classify another supported Node 20 runtime as noncanonical and non-accepting.",
+      "current_behavior": "The loader compares only the major version and emits NODE_OK for 20.0.0. The validator also passes because it does not exercise negative version cases.",
+      "impact": "Build, test, controller, and acceptance evidence can be labeled runtime-correct under a noncanonical Node release, weakening reproducibility and invalidating the exact Node acceptance requirement.",
+      "evidence": "The loader returned 0 and printed node_runtime_target=20.20.2, node_runtime_source=path, NODE_OK=v20.0.0.",
+      "reproduction_status": {
+        "status": "REPRODUCED",
+        "method": "Disposable PATH harness with fake node v20.0.0 and npm 10.0.0",
+        "summary": "The loader returned 0 and printed node_runtime_target=20.20.2, node_runtime_source=path, NODE_OK=v20.0.0.",
+        "artifact": "/mnt/data/bws121-r11-harness-results.json#HARNESS-RUNTIME-PIN",
+        "secondary_sectors": [
+          "R09",
+          "R10",
+          "R12"
+        ]
+      },
+      "transaction_or_state_machine_analysis": "RUNTIME_SELECTED -> MAJOR_MATCH currently transitions to CANONICAL_OK. It must instead transition to SUPPORTED_NONCANONICAL unless exact version equality is proven.",
+      "root_cause": "Runtime selection and runtime validation encode a major-version compatibility policy while current acceptance authority requires an exact canonical version.",
+      "minimal_fix_boundary": "Separate supported-runtime compatibility from canonical-acceptance authority. Require exact 20.20.2 for release/review/controller acceptance, emit a noncanonical status for other 20.x versions, and make downstream gates reject that status.",
+      "required_tests": [
+        "PATH Node 20.0.0, 20.20.1, 20.20.2, and a future 20.x table test",
+        "NVM fallback exact-versus-major test",
+        "Controller rejects supported-but-noncanonical Node",
+        "Validation receipt records exact node and npm bytes/versions"
+      ],
+      "regression_risks": [
+        "Do not break explicitly supported development use on other Node 20 versions; classify it rather than silently treating it as canonical.",
+        "Avoid sourcing or replacing the active shell/session."
+      ],
+      "primary_owner": "R11",
+      "secondary_sectors": [
+        "R09",
+        "R10",
+        "R12"
+      ],
+      "aliases_or_dependencies": [
+        "BWS120-R09-001 owns release-install compatibility promotion; R11 owns exact runtime-loader and validator enforcement.",
+        "R10 retains environment/CLI precedence ownership."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, fixture, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "All adversarial mutations were confined to disposable copies outside the extracted review tree.",
+        "No provider, external API, account, credential, signer, wallet, deployed service, or betting-win checkout was contacted.",
+        "No persistent database was contacted or mutated; no service, controller, scheduler, worker, or automation process was started.",
+        "Execution, public signals, profitability claims, live writes, and financial operations remain prohibited and unchanged."
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS121-R11-003",
+      "title": "Upstream contract static validator proves comment markers in a shim instead of the production implementation",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "scripts/validate_betting_win_upstream_contract.py::main upstream implementation marker loop",
+      "exact_line_range": "170-184",
+      "full_file_sha256": "931cd26b0530ee620ede9063a60fb75f3a5835f25860c8b2842f98950d283c54",
+      "relevant_assurance_object": "R11 tests, validators, fixtures, generated output, build graph, runtime enforcement, or source/archive proof",
+      "source_evidence": [
+        {
+          "path": "scripts/validate_betting_win_upstream_contract.py",
+          "symbol": "main",
+          "line_range": "170-184",
+          "full_file_sha256": "931cd26b0530ee620ede9063a60fb75f3a5835f25860c8b2842f98950d283c54",
+          "note": "The validator reads src/upstream/betting-win-upstream-lock.ts and requires four substrings."
+        },
+        {
+          "path": "src/upstream/betting-win-upstream-lock.ts",
+          "symbol": "compatibility shim",
+          "line_range": "1-6",
+          "full_file_sha256": "01fb9b916a76ce63729eab7426720573fc497c9f88cd296a467a9683ca58807d",
+          "note": "All four required substrings already exist only in comments; the executable statement is a re-export."
+        },
+        {
+          "path": "packages/upstream/src/upstream/betting-win-upstream-lock.ts",
+          "symbol": "production implementation",
+          "line_range": "8-34",
+          "full_file_sha256": "8c0badbfc3dc776eb71e01e1a76280debab30c64739274b06d1ce7343382a6c2",
+          "note": "The production implementation is in a different file that this marker loop does not inspect."
+        },
+        {
+          "path": "tests/betting-win-upstream-contract.test.ts",
+          "symbol": "static validator wiring test",
+          "line_range": "137-155",
+          "full_file_sha256": "97ce19a53408d95bc7cc48fb58497fe82b8716067e1cdae1a7aebae32ac1c06d",
+          "note": "The focused test asserts only that the static validator prints ok, creating a circular proof for this portion."
+        }
+      ],
+      "preconditions": "The compatibility shim retains the required marker text while the package implementation is missing or semantically changed.",
+      "trigger": "Run scripts/validate_betting_win_upstream_contract.py directly or through its static precheck.",
+      "expected_behavior": "The validator must inspect and behaviorally exercise the production implementation that generates and verifies the lock; comments and compatibility shims cannot satisfy executable invariants.",
+      "current_behavior": "The validator scans comment substrings in the six-line shim and never binds those markers to the package implementation.",
+      "impact": "The static upstream-contract check can report success while the executable lock implementation is absent or no longer performs the claimed Git operations. This can conceal regressions in a release-critical trust boundary.",
+      "evidence": "validate_betting_win_upstream_contract.py exited 0 and printed ok. This reproduces the static validator defect; the aggregate build may independently catch a missing module but not a compiling semantic regression.",
+      "reproduction_status": {
+        "status": "REPRODUCED",
+        "method": "Disposable copy; deleted the package implementation and left required tokens only in shim comments",
+        "summary": "validate_betting_win_upstream_contract.py exited 0 and printed ok. This reproduces the static validator defect; the aggregate build may independently catch a missing module but not a compiling semantic regression.",
+        "artifact": "/mnt/data/bws121-r11-harness-results.json#HARNESS-UPSTREAM-MARKERS",
+        "secondary_sectors": [
+          "R01",
+          "R09"
+        ]
+      },
+      "transaction_or_state_machine_analysis": "MARKER_PRESENT currently transitions to CONTRACT_VALIDATED without proving EXECUTABLE_IMPLEMENTATION_PRESENT or REQUIRED_BEHAVIOR_EXECUTED.",
+      "root_cause": "The static proof is based on unparsed substring presence at a compatibility path rather than the executable symbol/call graph or bounded production behavior.",
+      "minimal_fix_boundary": "Point the validator at the production package path, eliminate comment markers as proof, and add bounded tests through the exported generator/verifier using adversarial Git fixtures. Keep the shim only as a compatibility re-export.",
+      "required_tests": [
+        "Comments containing all required markers must fail",
+        "Production implementation missing must fail before build",
+        "Compiling implementation that omits one Git operation must fail behaviorally",
+        "Production export and compatibility shim resolve to the same tested functions"
+      ],
+      "regression_risks": [
+        "Do not duplicate R01 lock-algorithm findings.",
+        "Preserve offline disposable Git testing and no betting-win checkout mutation."
+      ],
+      "primary_owner": "R11",
+      "secondary_sectors": [
+        "R01",
+        "R09"
+      ],
+      "aliases_or_dependencies": [
+        "BWS116-R01-001 and BWS116-R01-002 remain the owners of lock algorithm/source-observation defects. This finding owns the false static proof."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, fixture, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "All adversarial mutations were confined to disposable copies outside the extracted review tree.",
+        "No provider, external API, account, credential, signer, wallet, deployed service, or betting-win checkout was contacted.",
+        "No persistent database was contacted or mutated; no service, controller, scheduler, worker, or automation process was started.",
+        "Execution, public signals, profitability claims, live writes, and financial operations remain prohibited and unchanged."
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS121-R11-004",
+      "title": "API-only validator accepts a named import or comment after the enforcement call is removed",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "scripts/validate_api_only_upstream.py::CLI marker loop",
+      "exact_line_range": "96-113",
+      "full_file_sha256": "2600a915dd6d55cb67432c7ec2731d44794098d42310f5b6c7195c8d2e69f4f1",
+      "relevant_assurance_object": "R11 tests, validators, fixtures, generated output, build graph, runtime enforcement, or source/archive proof",
+      "source_evidence": [
+        {
+          "path": "scripts/validate_api_only_upstream.py",
+          "symbol": "CLI marker loop",
+          "line_range": "96-113",
+          "full_file_sha256": "2600a915dd6d55cb67432c7ec2731d44794098d42310f5b6c7195c8d2e69f4f1",
+          "note": "Each production CLI passes when its text merely contains enforceBwsApiOnlyProcessEnvironment."
+        },
+        {
+          "path": "packages/bootstrap/src/cli/bws-upstream-api-convergence.ts",
+          "symbol": "runBwsUpstreamApiConvergenceCli",
+          "line_range": "1-12",
+          "full_file_sha256": "271a0e0fbf3c733fc502f8accd0a2a2067c70ce6086147994bb993bba83f8f7f",
+          "note": "The actual safety property depends on the call at line 11, but the import at line 1 independently satisfies the substring check."
+        },
+        {
+          "path": "tests/api-only-upstream-contract.test.ts",
+          "symbol": "static validator tests",
+          "line_range": "15-19; 65-76",
+          "full_file_sha256": "10fed128376e386dd0786dd06e4df1b06c712d96673f52a519c5aacdefb03a57",
+          "note": "Tests assert the validator exits 0 and contains selected paths; they do not remove the enforcement call from every CLI."
+        }
+      ],
+      "preconditions": "A CLI retains the import/name string but stops invoking the API-only environment enforcement before work begins.",
+      "trigger": "Run scripts/validate_api_only_upstream.py.",
+      "expected_behavior": "Every production CLI must prove that enforcement executes before parsing or performing work, and negative tests must invoke each entrypoint with retired/export selectors.",
+      "current_behavior": "Any occurrence of the function name is accepted. A dead import, comment, or unreachable branch passes.",
+      "impact": "A production entrypoint can accept retired selectors or ambient export-mode state while the API-only validator prints API_ONLY_UPSTREAM_CONTRACT_OK.",
+      "evidence": "The source remained syntactically valid and validate_api_only_upstream.py exited 0.",
+      "reproduction_status": {
+        "status": "REPRODUCED",
+        "method": "Disposable copy; commented out the enforcement call while retaining import/comment markers",
+        "summary": "The source remained syntactically valid and validate_api_only_upstream.py exited 0.",
+        "artifact": "/mnt/data/bws121-r11-harness-results.json#HARNESS-API-ONLY-CALL",
+        "secondary_sectors": [
+          "R01",
+          "R06",
+          "R10"
+        ]
+      },
+      "transaction_or_state_machine_analysis": "TEXT_CONTAINS_GUARD currently transitions to API_ONLY_PROVEN. Required state is GUARD_EXECUTED_BEFORE_EFFECTS -> API_ONLY_PROVEN.",
+      "root_cause": "The validator proves lexical presence, not invocation, ordering, reachability, or fail-closed behavior.",
+      "minimal_fix_boundary": "Add direct production-entrypoint tests for every CLI with stale selectors, or use an AST/call-graph check that proves an unconditional pre-work call. The static script must not treat imports or comments as enforcement.",
+      "required_tests": [
+        "Remove call but keep import negative case",
+        "Move call after work negative case",
+        "Place call in unreachable branch negative case",
+        "Invoke all production CLIs with each retired selector",
+        "Ensure help/status semantics remain intentionally defined"
+      ],
+      "regression_risks": [
+        "Entrypoint tests must remain inert and avoid provider, database, or service access.",
+        "Do not move R01 configuration semantics into R11."
+      ],
+      "primary_owner": "R11",
+      "secondary_sectors": [
+        "R01",
+        "R06",
+        "R10"
+      ],
+      "aliases_or_dependencies": [
+        "R01 owns API/export mode semantics and R06 owns CLI/service lifecycle. R11 owns whether tests and validators prove those semantics."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, fixture, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "All adversarial mutations were confined to disposable copies outside the extracted review tree.",
+        "No provider, external API, account, credential, signer, wallet, deployed service, or betting-win checkout was contacted.",
+        "No persistent database was contacted or mutated; no service, controller, scheduler, worker, or automation process was started.",
+        "Execution, public signals, profitability claims, live writes, and financial operations remain prohibited and unchanged."
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS121-R11-005",
+      "title": "B1 acceptance validator treats status rows, test titles, and literal tokens as executable capability proof",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "scripts/validate_bws_b1_acceptance.py::main",
+      "exact_line_range": "28-80",
+      "full_file_sha256": "f31f3f38125c3c308859278c77eeebf0db0c6fd13a1adc88f7e7e3ca797394ca",
+      "relevant_assurance_object": "R11 tests, validators, fixtures, generated output, build graph, runtime enforcement, or source/archive proof",
+      "source_evidence": [
+        {
+          "path": "scripts/validate_bws_b1_acceptance.py",
+          "symbol": "main",
+          "line_range": "28-80",
+          "full_file_sha256": "f31f3f38125c3c308859278c77eeebf0db0c6fd13a1adc88f7e7e3ca797394ca",
+          "note": "The validator requires source substrings, test-title substrings, package command text, and a VALIDATED backlog status."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/b1-runtime-evidence.ts",
+          "symbol": "B1RuntimeAcceptanceDecision / decision",
+          "line_range": "84-96; 517-537",
+          "full_file_sha256": "80ea2ca2a8b071dc1fdafc614594fac3d642b0416bcf6beec4c515cd707adbe8",
+          "note": "The no-runtime/no-execution boundary is encoded in literal types and returned values that are only checked as text by the Python validator."
+        },
+        {
+          "path": "tests/b1-runtime-evidence.test.ts",
+          "symbol": "flag assertions and sample evidence",
+          "line_range": "15-24; 262-272",
+          "full_file_sha256": "aebe980faa9efd95c354aace00456a9f93b5952b0e2e29936189dd9d9a68b435",
+          "note": "Focused tests do assert current flags, but the static validate:ops component does not execute them and the sample authority is itself inherited as problematic."
+        },
+        {
+          "path": "package.json",
+          "symbol": "validate:ops / validate:bws-b1",
+          "line_range": "27; 69-70",
+          "full_file_sha256": "b1b69ffa6d0b974c3b3ba55f3ec1acffb21e512c3a862e2a7b2d6b5139e5eac0",
+          "note": "validate:ops runs only the static acceptance script; validate:bws-b1 separately runs focused tests."
+        }
+      ],
+      "preconditions": "The B1 operation retains required strings in comments while its exported contract/returned decision enables runtime evidence, execution, or public signals.",
+      "trigger": "Run scripts/validate_bws_b1_acceptance.py or validate:ops without the separate validate:bws-b1 focused test set.",
+      "expected_behavior": "Acceptance proof must evaluate the production decision contract and behavior, not infer safety from literal tokens, test names, or a self-declared backlog status.",
+      "current_behavior": "The script passes when the actual literal types and values are changed to enabled/allowed and the old strings remain in comments.",
+      "impact": "The static B1 acceptance result can be green despite a capability escalation. The current focused Node tests are a partial independent safeguard, but validate:ops alone is false-positive-capable.",
+      "evidence": "validate_bws_b1_acceptance.py exited 0 and printed ok after runtimeEvidence, executable, liveReadiness, and publicSignals were escalated.",
+      "reproduction_status": {
+        "status": "REPRODUCED",
+        "method": "Disposable compileable TypeScript mutation of the decision type and returned flags; old strings retained in comments",
+        "summary": "validate_bws_b1_acceptance.py exited 0 and printed ok after runtimeEvidence, executable, liveReadiness, and publicSignals were escalated.",
+        "artifact": "/mnt/data/bws121-r11-harness-results.json#HARNESS-B1-CAPABILITY",
+        "secondary_sectors": [
+          "R07",
+          "R09"
+        ]
+      },
+      "transaction_or_state_machine_analysis": "DECLARED_STATUS_AND_MARKERS -> ACCEPTANCE_OK bypasses EXECUTED_PRODUCTION_DECISION -> VERIFIED_NO_LIVE_CAPABILITY.",
+      "root_cause": "Acceptance authority is distributed across marker text, test-title text, command text, and mutable ledger status rather than one executed production contract.",
+      "minimal_fix_boundary": "Make the accepted gate execute the production classifier under canonical Node, inspect exact returned no-live fields, validate the external receipt dependency, and treat backlog status only as routing metadata. Either include the focused gate in validate:ops or remove the static script as acceptance proof.",
+      "required_tests": [
+        "Capability flag escalation with comment markers",
+        "Backlog VALIDATED with failed/missing focused tests",
+        "Forged accepted input-source enum and repeated hashes per BWS120-R07-018",
+        "Canonical Node 20.20.2 focused B1 gate",
+        "Static validator cannot pass on comments alone"
+      ],
+      "regression_risks": [
+        "Preserve the existing no-live types and negative focused tests.",
+        "Do not duplicate the underlying B1 authority defect owned by R07."
+      ],
+      "primary_owner": "R11",
+      "secondary_sectors": [
+        "R07",
+        "R09"
+      ],
+      "aliases_or_dependencies": [
+        "BWS120-R07-018 owns caller-selected B1 upstream authority. This finding owns the validator that fails to detect capability regression."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, fixture, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "All adversarial mutations were confined to disposable copies outside the extracted review tree.",
+        "No provider, external API, account, credential, signer, wallet, deployed service, or betting-win checkout was contacted.",
+        "No persistent database was contacted or mutated; no service, controller, scheduler, worker, or automation process was started.",
+        "Execution, public signals, profitability claims, live writes, and financial operations remain prohibited and unchanged."
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS121-R11-006",
+      "title": "Implementation-program validators can declare completion with the principal implementation trees absent",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "scripts/validate_full_implementation_program.py::EXPECTED_STATUS / main",
+      "exact_line_range": "11-36; 133-177; 184-277",
+      "full_file_sha256": "5d81c01587b0b36713da90bf0226ac6c40cfaafbca8af2e6bdf3edd315a653bb",
+      "relevant_assurance_object": "R11 tests, validators, fixtures, generated output, build graph, runtime enforcement, or source/archive proof",
+      "source_evidence": [
+        {
+          "path": "scripts/validate_full_implementation_program.py",
+          "symbol": "EXPECTED_STATUS / main",
+          "line_range": "11-36; 133-177; 184-277",
+          "full_file_sha256": "5d81c01587b0b36713da90bf0226ac6c40cfaafbca8af2e6bdf3edd315a653bb",
+          "note": "The validator hard-codes task statuses and checks CSV, document, script, and package markers; it does not inventory or exercise task-owned implementation symbols."
+        },
+        {
+          "path": "scripts/validate_remaining_operator_runtime_program.py",
+          "symbol": "VALIDATED_IDS / main",
+          "line_range": "9-18; 85-159",
+          "full_file_sha256": "7c5c302de6ab4483ce21ab6602a5d31ca87c931b570f45184bdb722780ba1cc1",
+          "note": "The remaining-program validator similarly validates blueprint markers, ledger statuses, and non-empty fields."
+        },
+        {
+          "path": "backlog/bws_full_implementation.csv",
+          "symbol": "implementation status ledger",
+          "line_range": "1-43",
+          "full_file_sha256": "bc7380bc47db8aedace602eea5b8556d3afa28582f6e471d5d4353ccd73a4425",
+          "note": "The completion verdict is sourced from declared task rows."
+        },
+        {
+          "path": "package.json",
+          "symbol": "validate:implementation-program / validate:remaining-runtime-program",
+          "line_range": "27; 64-66",
+          "full_file_sha256": "b1b69ffa6d0b974c3b3ba55f3ec1acffb21e512c3a862e2a7b2d6b5139e5eac0",
+          "note": "These scripts are exposed as implementation-program validators and are part of validate:ops."
+        }
+      ],
+      "preconditions": "Documentation, backlog rows, root scripts, and package markers remain while principal TypeScript implementation directories are absent or behaviorally defective.",
+      "trigger": "Run either implementation-program validator.",
+      "expected_behavior": "A completion validator must bind every VALIDATED task to exact production paths/symbols, focused tests, and immutable evidence, or be named and scoped only as a documentation/ledger consistency validator.",
+      "current_behavior": "Both validators return success after packages/bootstrap/src, packages/persistence/src, packages/upstream/src, and src are deleted from a disposable copy.",
+      "impact": "Program completion can be self-attested by metadata. This explains how broad historical VALIDATED status and green marker checks coexist with 137 independently confirmed source defects.",
+      "evidence": "Both validate_full_implementation_program.py and validate_remaining_operator_runtime_program.py exited 0 and printed ok. The aggregate build would independently fail missing source, but these completion validators do not prove implementation.",
+      "reproduction_status": {
+        "status": "REPRODUCED",
+        "method": "Disposable copy with principal implementation source trees removed",
+        "summary": "Both validate_full_implementation_program.py and validate_remaining_operator_runtime_program.py exited 0 and printed ok. The aggregate build would independently fail missing source, but these completion validators do not prove implementation.",
+        "artifact": "/mnt/data/bws121-r11-harness-results.json#HARNESS-PROGRAM-SELF-ATTEST",
+        "secondary_sectors": [
+          "R03",
+          "R06",
+          "R07",
+          "R08",
+          "R09",
+          "R12"
+        ]
+      },
+      "transaction_or_state_machine_analysis": "STATUS_DECLARED_VALIDATED currently implies PROGRAM_COMPLETE. Required transition is SOURCE_BOUND + TESTS_EXECUTED + EVIDENCE_VERIFIED -> TASK_VALIDATED.",
+      "root_cause": "Implementation status is treated as an input assertion and checked for internal textual consistency, not derived from source/test/evidence closure.",
+      "minimal_fix_boundary": "Split documentation consistency from implementation acceptance. Build a task-to-source-to-test-to-evidence map with exact hashes and require production-entrypoint execution before a task can be accepted as implemented.",
+      "required_tests": [
+        "Delete or rename each task-owned production file and require failure",
+        "Keep status VALIDATED while focused test fails and require failure",
+        "Change source bytes without updating task proof and require failure",
+        "No task may validate solely from marker/title/status text"
+      ],
+      "regression_risks": [
+        "Do not turn historical documentation into executable routing authority.",
+        "Task mapping must be maintainable and avoid one giant brittle marker list."
+      ],
+      "primary_owner": "R11",
+      "secondary_sectors": [
+        "R03",
+        "R06",
+        "R07",
+        "R08",
+        "R09",
+        "R12"
+      ],
+      "aliases_or_dependencies": [
+        "All 137 inherited findings retain their original IDs; this finding addresses the assurance mechanism, not those application roots."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, fixture, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "All adversarial mutations were confined to disposable copies outside the extracted review tree.",
+        "No provider, external API, account, credential, signer, wallet, deployed service, or betting-win checkout was contacted.",
+        "No persistent database was contacted or mutated; no service, controller, scheduler, worker, or automation process was started.",
+        "Execution, public signals, profitability claims, live writes, and financial operations remain prohibited and unchanged."
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS121-R11-007",
+      "title": "Boundary validators omit active root executables, commands, scripts, and database migrations from their scan authority",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "scripts/validate_no_provider_connections.py::SCAN_ROOTS / iter_files",
+      "exact_line_range": "8-10; 27-39; 49-65",
+      "full_file_sha256": "e2afd91309af1ce80d0f0c8cd91f4aff944a1408f3443167c80ddb6476f0a003",
+      "relevant_assurance_object": "R11 tests, validators, fixtures, generated output, build graph, runtime enforcement, or source/archive proof",
+      "source_evidence": [
+        {
+          "path": "scripts/validate_no_provider_connections.py",
+          "symbol": "SCAN_ROOTS",
+          "line_range": "8-10; 27-39; 49-65",
+          "full_file_sha256": "e2afd91309af1ce80d0f0c8cd91f4aff944a1408f3443167c80ddb6476f0a003",
+          "note": "The provider scan covers selected roots plus cli.js and one wrapper, but not root controllers, commands, general scripts, database, deployment, or migrations."
+        },
+        {
+          "path": "scripts/validate_no_execution_paths.py",
+          "symbol": "SCAN_ROOTS",
+          "line_range": "7-10; 18-30; 58-64",
+          "full_file_sha256": "da689d340d84cecbf8e5a7b3056fd233820e65187de312f48268806f196dd65b",
+          "note": "The execution scan uses the same narrow allowlist and omits tests as well as active shell/controller surfaces."
+        },
+        {
+          "path": "scripts/validate_contract_boundary.py",
+          "symbol": "SCAN_INPUTS",
+          "line_range": "7-14; 23-35; 47-55",
+          "full_file_sha256": "8d8b4d559a000517e766b14f93b76379c2027dbe269f87f56167be4a5d2bb174",
+          "note": "The contract scan contains SQL patterns but does not scan database/migrations or root scripts."
+        },
+        {
+          "path": "tests/boundary-validator-workspace-scope.test.ts",
+          "symbol": "boundary scope fixtures",
+          "line_range": "10-104",
+          "full_file_sha256": "3ff1bbd46c2eca6e5bc44cd6d86063d3b16c270e80d1018f7e1a3a811a8c8718",
+          "note": "The tests cover packages/apps, package.json, cli.js, and one named wrapper, mirroring rather than challenging the incomplete root list."
+        },
+        {
+          "path": "package.json",
+          "symbol": "validate:boundary",
+          "line_range": "25",
+          "full_file_sha256": "b1b69ffa6d0b974c3b3ba55f3ec1acffb21e512c3a862e2a7b2d6b5139e5eac0",
+          "note": "All three scanners are presented together as the boundary validation gate."
+        }
+      ],
+      "preconditions": "A prohibited provider URL, execution identifier, direct database input, or cross-schema SQL is added under an omitted executable/migration path.",
+      "trigger": "Run npm run validate:boundary or the affected Python scripts.",
+      "expected_behavior": "Boundary proof must enumerate every executable, configuration, deployment, command, shell, and migration surface from the archive/build graph and fail on any unclassified path.",
+      "current_behavior": "The scanners silently ignore major active surfaces. A root controller containing a provider URL and execution identifier plus a surebet migration containing CREATE TABLE core... all passed the respective validators.",
+      "impact": "No-provider, no-execution, and schema-confinement claims can be bypassed by placing code in already active but unscanned paths. This is an assurance-layer failure distinct from any inherited application defect.",
+      "evidence": "validate_no_provider_connections.py, validate_no_execution_paths.py, and validate_contract_boundary.py all exited 0.",
+      "reproduction_status": {
+        "status": "REPRODUCED",
+        "method": "Disposable copy; added inert forbidden text to run-paper-evaluation.sh and cross-schema DDL to a surebet migration",
+        "summary": "validate_no_provider_connections.py, validate_no_execution_paths.py, and validate_contract_boundary.py all exited 0.",
+        "artifact": "/mnt/data/bws121-r11-harness-results.json#HARNESS-BOUNDARY-SCOPE",
+        "secondary_sectors": [
+          "R03",
+          "R06",
+          "R10",
+          "R12"
+        ]
+      },
+      "transaction_or_state_machine_analysis": "PATH_NOT_ENUMERATED currently transitions to NOT_SCANNED and then GATE_OK. It must transition to UNCLASSIFIED_PATH_FAILURE.",
+      "root_cause": "Hard-coded positive scan-root lists are incomplete and there is no archive-to-scanner coverage reconciliation.",
+      "minimal_fix_boundary": "Generate or maintain one explicit executable-surface inventory covering root scripts, commands, scripts, deployment, database/migrations, packages, apps, src, package scripts, and relevant configuration. Fail when a new executable-class path is not classified. Preserve narrow explicit exclusions.",
+      "required_tests": [
+        "Forbidden token in every active root controller",
+        "Forbidden provider URL in commands and general scripts",
+        "Cross-schema DDL in every migration file",
+        "New executable path not present in scan inventory must fail",
+        "Coverage test reconciles scanner path set to archive classifications"
+      ],
+      "regression_risks": [
+        "Avoid scanning review prose as executable code.",
+        "Keep false-positive exceptions explicit, path-and-rule-specific, and reviewed."
+      ],
+      "primary_owner": "R11",
+      "secondary_sectors": [
+        "R03",
+        "R06",
+        "R10",
+        "R12"
+      ],
+      "aliases_or_dependencies": [
+        "BWS116-R03-001 owns migration escape and incomplete SQL enforcement in production. R11 owns the validator scan omission.",
+        "R06/R12 retain controller lifecycle and automation ownership."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, fixture, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "All adversarial mutations were confined to disposable copies outside the extracted review tree.",
+        "No provider, external API, account, credential, signer, wallet, deployed service, or betting-win checkout was contacted.",
+        "No persistent database was contacted or mutated; no service, controller, scheduler, worker, or automation process was started.",
+        "Execution, public signals, profitability claims, live writes, and financial operations remain prohibited and unchanged."
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS121-R11-008",
+      "title": "Regex boundary checks are bypassed by trivial source-level string or identifier composition inside scanned files",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "scripts/validate_no_execution_paths.py::WORKSPACE_PATTERNS",
+      "exact_line_range": "43-50",
+      "full_file_sha256": "da689d340d84cecbf8e5a7b3056fd233820e65187de312f48268806f196dd65b",
+      "relevant_assurance_object": "R11 tests, validators, fixtures, generated output, build graph, runtime enforcement, or source/archive proof",
+      "source_evidence": [
+        {
+          "path": "scripts/validate_no_provider_connections.py",
+          "symbol": "PATTERNS",
+          "line_range": "41-47",
+          "full_file_sha256": "e2afd91309af1ce80d0f0c8cd91f4aff944a1408f3443167c80ddb6476f0a003",
+          "note": "Provider detection requires contiguous import/package/URL text."
+        },
+        {
+          "path": "scripts/validate_no_execution_paths.py",
+          "symbol": "WORKSPACE_PATTERNS",
+          "line_range": "43-50",
+          "full_file_sha256": "da689d340d84cecbf8e5a7b3056fd233820e65187de312f48268806f196dd65b",
+          "note": "Execution detection requires contiguous import text or identifier spelling."
+        },
+        {
+          "path": "tests/boundary-validator-workspace-scope.test.ts",
+          "symbol": "root executable fixtures",
+          "line_range": "48-103",
+          "full_file_sha256": "3ff1bbd46c2eca6e5bc44cd6d86063d3b16c270e80d1018f7e1a3a811a8c8718",
+          "note": "The tests construct a forbidden URL in the test process but write the fully assembled value to the fixture; fragmented source is not tested."
+        },
+        {
+          "path": "cli.js",
+          "symbol": "root executable entrypoint",
+          "line_range": "1-113",
+          "full_file_sha256": "acd4aa4ba64dbcacbc891ffe1af22699d9a240f16d3411ac3ea6998048d63349",
+          "note": "cli.js is an in-scope executable file where fragmented source remains semantically constructible."
+        }
+      ],
+      "preconditions": "A scanned source file constructs a provider endpoint or execution-capability name from fragments, aliases, computed properties, or indirection.",
+      "trigger": "Run the no-provider and no-execution validators.",
+      "expected_behavior": "Safety boundaries must be enforced architecturally and through dependency/capability allowlists plus executable negative tests; lexical regex may be defense-in-depth only.",
+      "current_behavior": "Fragmented provider URL and createOrderClient strings in scanned cli.js pass both validators.",
+      "impact": "The validators can issue clean safety results for semantically equivalent prohibited capabilities. A motivated or accidental refactor can evade the check without leaving the scanned path.",
+      "evidence": "Both lexical validators exited 0. No network or execution occurred.",
+      "reproduction_status": {
+        "status": "REPRODUCED",
+        "method": "Disposable in-scope cli.js mutation using array-fragment joins",
+        "summary": "Both lexical validators exited 0. No network or execution occurred.",
+        "artifact": "/mnt/data/bws121-r11-harness-results.json#HARNESS-BOUNDARY-LEXICAL",
+        "secondary_sectors": [
+          "R06",
+          "R10",
+          "R12"
+        ]
+      },
+      "transaction_or_state_machine_analysis": "NO_REGEX_MATCH currently transitions to CAPABILITY_ABSENT. Required state is STATIC_NO_MATCH plus ARCHITECTURAL_ALLOWLIST plus INERT_RUNTIME_PROOF.",
+      "root_cause": "The assurance boundary equates regular-expression token matches with semantic absence of capability.",
+      "minimal_fix_boundary": "Use dependency/import graph allowlists, typed capability boundaries, package/dependency audits, and inert runtime tests that prove injected transports only. Retain regexes as supplemental diagnostics, not acceptance authority.",
+      "required_tests": [
+        "Fragmented URL and identifier cases",
+        "Aliased import and computed-property cases",
+        "Dynamic import built from fragments",
+        "Benign text false-positive tests",
+        "No-network runtime test for public entrypoints"
+      ],
+      "regression_risks": [
+        "AST analysis must cover JavaScript, TypeScript, shell, JSON package scripts, and generated entrypoints appropriately.",
+        "Avoid claiming formal semantic proof from any single static analyzer."
+      ],
+      "primary_owner": "R11",
+      "secondary_sectors": [
+        "R06",
+        "R10",
+        "R12"
+      ],
+      "aliases_or_dependencies": [
+        "Underlying no-live/no-provider application boundaries remain owned by R01/R06/R10/R12; this finding owns false validator proof."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, fixture, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "All adversarial mutations were confined to disposable copies outside the extracted review tree.",
+        "No provider, external API, account, credential, signer, wallet, deployed service, or betting-win checkout was contacted.",
+        "No persistent database was contacted or mutated; no service, controller, scheduler, worker, or automation process was started.",
+        "Execution, public signals, profitability claims, live writes, and financial operations remain prohibited and unchanged."
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS121-R11-009",
+      "title": "Fixture-integrity gate ignores all twelve substantive strategy and runtime fixture files",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "scripts/validate_fixture_integrity.py::EMPTY_DIRS / validate_placeholder_fixture / main",
+      "exact_line_range": "8-15; 36-78",
+      "full_file_sha256": "fc4eb4e0ccf040ee399659e17ce9983d61d3b16f01de4ea9ebe44da37dbbf5bb",
+      "relevant_assurance_object": "R11 tests, validators, fixtures, generated output, build graph, runtime enforcement, or source/archive proof",
+      "source_evidence": [
+        {
+          "path": "scripts/validate_fixture_integrity.py",
+          "symbol": "fixture scope",
+          "line_range": "8-15; 36-78",
+          "full_file_sha256": "fc4eb4e0ccf040ee399659e17ce9983d61d3b16f01de4ea9ebe44da37dbbf5bb",
+          "note": "The validator covers three reserved empty directories and one historical placeholder only."
+        },
+        {
+          "path": "tests/validate-fixture-integrity.test.ts",
+          "symbol": "makeFixture and two tests",
+          "line_range": "12-53",
+          "full_file_sha256": "35364ca01695419750c3558aeff96ed24b59931bd542bd7497de572d6f9b46c1",
+          "note": "The validator tests reproduce only that same limited synthetic fixture set."
+        },
+        {
+          "path": "tests/fixtures/b1-local-contract/valid-b1-multi-venue-markets.json",
+          "symbol": "substantive B1 fixture",
+          "line_range": "1-104",
+          "full_file_sha256": "df0b5190ca30be3c921c4b37869752feb138faa98565b0a9e333ec7e62da63d7",
+          "note": "A production-shape B1 contract fixture is outside the integrity gate."
+        },
+        {
+          "path": "tests/fixtures/private-paper-mode-smoke/accepted-local-bundle.json",
+          "symbol": "accepted private-paper fixture",
+          "line_range": "1-71",
+          "full_file_sha256": "623ccae2fd5ab78124445d1d3eaceddd829c161472bbfd0ab4e8297739941be4",
+          "note": "An accepted local bundle used by smoke tests is outside the integrity gate."
+        },
+        {
+          "path": "tests/fixtures/local-only-export-bundles/valid-resource-export.json",
+          "symbol": "valid resource fixture",
+          "line_range": "1-16",
+          "full_file_sha256": "7bf48c2a6461f28e75a80c7cb8d3057715fb7ffea3dc00e50705b814c6bee16d",
+          "note": "A valid-resource fixture is outside the integrity gate."
+        }
+      ],
+      "preconditions": "Any of the B1, local-only export, or private-paper smoke fixtures is malformed, enriched with impossible fields, stale, or silently changed.",
+      "trigger": "Run scripts/validate_fixture_integrity.py or npm run validate:boundary.",
+      "expected_behavior": "Every substantive fixture must be inventoried, parseable, schema-valid where applicable, purpose-classified, and bound to tests that reject impossible enrichment or acceptance authority.",
+      "current_behavior": "The archive contains 17 fixture files. Five reserved/placeholder files are within the validator model; twelve substantive JSON fixtures are completely ignored. Replacing representative accepted/valid fixtures with invalid JSON still yields validator success.",
+      "impact": "Tests can consume malformed or overpowered fixtures while the named fixture-integrity gate remains green, enabling false proof of parsing, economics, acceptance, or lifecycle behavior.",
+      "evidence": "validate_fixture_integrity.py exited 0 and printed ok.",
+      "reproduction_status": {
+        "status": "REPRODUCED",
+        "method": "Disposable copy; replaced three representative substantive fixtures with invalid JSON",
+        "summary": "validate_fixture_integrity.py exited 0 and printed ok.",
+        "artifact": "/mnt/data/bws121-r11-harness-results.json#HARNESS-FIXTURE-SCOPE",
+        "secondary_sectors": [
+          "R01",
+          "R02",
+          "R04",
+          "R07"
+        ]
+      },
+      "transaction_or_state_machine_analysis": "FIXTURE_NOT_IN_SMALL_ALLOWLIST currently transitions to NOT_CHECKED while the gate still reports INTEGRITY_OK.",
+      "root_cause": "The fixture validator is a narrow historical-placeholder policy check but is named and wired as repository-wide fixture integrity.",
+      "minimal_fix_boundary": "Create an exact fixture manifest with path, purpose, schema/profile, allowed enrichment, and consumer tests. Validate all twelve substantive fixtures and keep the reserved-empty/placeholder rules as a separate check.",
+      "required_tests": [
+        "Invalid JSON for every substantive fixture",
+        "Missing/extra fixture path reconciliation",
+        "Schema-invalid and enriched-impossible fixture negatives",
+        "Consumer test proves exact native/local shape rather than helper-generated expectation",
+        "Fixture digest change requires explicit review"
+      ],
+      "regression_risks": [
+        "Do not convert local deterministic fixtures into runtime/provider evidence.",
+        "Preserve intentionally malformed negative fixtures with explicit expected-invalid classification."
+      ],
+      "primary_owner": "R11",
+      "secondary_sectors": [
+        "R01",
+        "R02",
+        "R04",
+        "R07"
+      ],
+      "aliases_or_dependencies": [
+        "R02/R04/R07 retain the mathematical, simulation, and acceptance roots exposed by fixtures. R11 owns fixture assurance."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, fixture, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "All adversarial mutations were confined to disposable copies outside the extracted review tree.",
+        "No provider, external API, account, credential, signer, wallet, deployed service, or betting-win checkout was contacted.",
+        "No persistent database was contacted or mutated; no service, controller, scheduler, worker, or automation process was started.",
+        "Execution, public signals, profitability claims, live writes, and financial operations remain prohibited and unchanged."
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS121-R11-010",
+      "title": "Aggregate validation has no machine-enforced closure from 137 inherited findings to 723 required tests and production entrypoints",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "package.json::validate / validate:starter / validate:ops",
+      "exact_line_range": "15-32; 64-70",
+      "full_file_sha256": "b1b69ffa6d0b974c3b3ba55f3ec1acffb21e512c3a862e2a7b2d6b5139e5eac0",
+      "relevant_assurance_object": "R11 tests, validators, fixtures, generated output, build graph, runtime enforcement, or source/archive proof",
+      "source_evidence": [
+        {
+          "path": "package.json",
+          "symbol": "validation graph",
+          "line_range": "15-32; 64-70",
+          "full_file_sha256": "b1b69ffa6d0b974c3b3ba55f3ec1acffb21e512c3a862e2a7b2d6b5139e5eac0",
+          "note": "The aggregate graph runs existing build/tests and static validators but references neither the cumulative issue ledger nor test-evidence matrix."
+        },
+        {
+          "path": "docs/reviews/BWS120/wave-03/cumulative-consolidated-ledger.json",
+          "symbol": "confirmed findings and summary",
+          "line_range": "1-14007",
+          "full_file_sha256": "dc47a624e242f859daed6b256a27cc93f343fcd7b74a630e2e6cc75015c8a894",
+          "note": "The integrated authority contains 137 stable confirmed findings, 136 release/deployment blockers, and explicit required tests."
+        },
+        {
+          "path": "docs/reviews/BWS120/wave-03/test-evidence-matrix.json",
+          "symbol": "records",
+          "line_range": "1-8498",
+          "full_file_sha256": "5cecb3239f7993eaf16864216923e5238bbeedab88ffb9b26ccb83033864b272",
+          "note": "The matrix contains 723 requirements covering all 137 findings; 626 are REQUIRED_NOT_RUN_BY_CONSOLIDATION and 97 are explicit/identified/confirmed test gaps. 571 require production entrypoints."
+        }
+      ],
+      "preconditions": "The current historical tests and validators pass individually except the stale source manifest, but no implementation tranche has closed the inherited issue/test ledger.",
+      "trigger": "Run existing static validators or, after repairing only the manifest, run the historical aggregate gate without adding finding-specific closure evidence.",
+      "expected_behavior": "Release acceptance must prove that every blocking finding is either fixed and covered by named tests at production entrypoints or explicitly retained as an accepted hold. The gate must reject unresolved or unmapped ledger records.",
+      "current_behavior": "No non-review package, script, test, source, or automation path references the cumulative ledger or test-evidence matrix. Current gates can only test historical expectations, not closure of the 137-review backlog.",
+      "impact": "A future green historical suite could be misread as release readiness while all inherited roots remain open. The current archive is already blocked by the manifest, but that failure is unrelated and does not provide defect-closure proof.",
+      "evidence": "137/137 inherited IDs are represented by 723 test requirements, but zero package/scripts/tests outside docs/reviews consume either authority. Status counts: 626 not run, 46 explicit gaps, 35 identified gaps, 16 confirmed gaps.",
+      "reproduction_status": {
+        "status": "CONFIRMED_BY_STATIC_RECONCILIATION",
+        "method": "Parsed the integrated ledger and matrix; searched non-review executable/test/gate surfaces for references",
+        "summary": "137/137 inherited IDs are represented by 723 test requirements, but zero package/scripts/tests outside docs/reviews consume either authority. Status counts: 626 not run, 46 explicit gaps, 35 identified gaps, 16 confirmed gaps.",
+        "artifact": "/mnt/data/bws121-r11-entrypoint-test-map.json and repository search",
+        "secondary_sectors": [
+          "R01",
+          "R02",
+          "R03",
+          "R04",
+          "R05",
+          "R06",
+          "R07",
+          "R08",
+          "R09",
+          "R12"
+        ]
+      },
+      "transaction_or_state_machine_analysis": "HISTORICAL_SUITE_GREEN currently can be interpreted as ACCEPTED despite OPEN_REVIEW_LEDGER. Required state is HISTORICAL_SUITE_GREEN + FINDING_CLOSURE_VERIFIED + REQUIRED_ENVIRONMENT_EVIDENCE -> ACCEPTED.",
+      "root_cause": "The historical validation graph has no defect-ledger closure model, no finding-to-test receipt, and no production-entrypoint coverage requirement tied to review authority.",
+      "minimal_fix_boundary": "After implementation findings are resolved, add a generated but reviewed closure manifest mapping each stable finding ID to source postimages, tests, runtime/environment class, and acceptance receipt. Make unresolved blockers fail the release gate. Keep review documentation non-executable until an authorized integration tranche lands the closure contract.",
+      "required_tests": [
+        "All 137 IDs must be mapped exactly once or intentionally shared by root cause",
+        "Unresolved blocking finding fails release",
+        "Test exists but was not executed fails acceptance",
+        "Unit-only test fails when production entrypoint is required",
+        "Stale test/source hash fails closure",
+        "Accepted external blocker remains non-promotable"
+      ],
+      "regression_risks": [
+        "Do not let mutable review prose become direct controller routing authority.",
+        "Closure generation must preserve stable inherited IDs and avoid duplicating application roots."
+      ],
+      "primary_owner": "R11",
+      "secondary_sectors": [
+        "R01",
+        "R02",
+        "R03",
+        "R04",
+        "R05",
+        "R06",
+        "R07",
+        "R08",
+        "R09",
+        "R12"
+      ],
+      "aliases_or_dependencies": [
+        "All 137 inherited findings remain unchanged and were checked for overlap. This finding owns only aggregate assurance closure."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, fixture, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "All adversarial mutations were confined to disposable copies outside the extracted review tree.",
+        "No provider, external API, account, credential, signer, wallet, deployed service, or betting-win checkout was contacted.",
+        "No persistent database was contacted or mutated; no service, controller, scheduler, worker, or automation process was started.",
+        "Execution, public signals, profitability claims, live writes, and financial operations remain prohibited and unchanged."
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS121-R11-HYP-001",
+      "classification": "HYPOTHESIS",
+      "title": "Additional marker-based validators may admit semantic regressions not covered by the eight adversarial harness groups",
+      "status": "NOT_EXHAUSTIVELY_PROVEN",
+      "evidence": "Ten of 26 validator files have no direct textual test reference, and several additional validators use marker/status checks. They were statically reviewed but not each mutated adversarially.",
+      "required_proof": "Mutation-test every validator against its claimed invariant and run the complete canonical gate.",
+      "primary_owner": "R11",
+      "secondary_sectors": [
+        "R12"
+      ]
+    },
+    {
+      "id": "BWS121-R11-HYP-002",
+      "classification": "HYPOTHESIS",
+      "title": "Canonical build and test execution may reveal further source or test defects",
+      "status": "DYNAMIC_PROOF_UNAVAILABLE",
+      "evidence": "Node 20.20.2 and node_modules were unavailable; dependency installation was prohibited. Global tsc stopped at missing @types/node.",
+      "required_proof": "Run a clean, no-network dependency-preserved checkout under exact Node 20.20.2, then execute build, all 104 tests, web typecheck/build, and accepted controlled integrations.",
+      "primary_owner": "R11",
+      "secondary_sectors": [
+        "R09",
+        "R10"
+      ]
+    },
+    {
+      "id": "BWS121-R11-SAFE-001",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "Archive path, type, mode, and extraction integrity are exact",
+      "evidence": "733 regular files, no unsafe/duplicate/symlink/special entries, and exact extracted byte/mode reconciliation.",
+      "preserve": true
+    },
+    {
+      "id": "BWS121-R11-SAFE-002",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "Source-manifest validator performs exact path, size, and SHA-256 comparison and fails current drift",
+      "evidence": "scripts/validate_source_manifest.py derives expected entries and rejected BWS121 as stale.",
+      "preserve": true
+    },
+    {
+      "id": "BWS121-R11-SAFE-003",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "Build removes dist before TypeScript emit and no dist is committed in the archive",
+      "evidence": "package.json build invokes clean first; archive inventory contains no dist or node_modules paths.",
+      "preserve": true
+    },
+    {
+      "id": "BWS121-R11-SAFE-004",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "TypeScript compiler uses strict optional, unchecked-index, and case-sensitivity settings",
+      "evidence": "tsconfig.json enables strict, noUncheckedIndexedAccess, exactOptionalPropertyTypes, and forceConsistentCasingInFileNames.",
+      "preserve": true
+    },
+    {
+      "id": "BWS121-R11-SAFE-005",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "Root test runner serializes Node tests after a clean build",
+      "evidence": "package.json test uses build and --test-concurrency=1.",
+      "preserve": true
+    },
+    {
+      "id": "BWS121-R11-REJ-001",
+      "classification": "REJECTED_SUSPICION",
+      "title": "BWS121 contains executable changes relative to BWS120",
+      "status": "REJECTED",
+      "evidence": "The 38 additions and two edits are all under docs; non-documentation byte differences are zero."
+    },
+    {
+      "id": "BWS121-R11-REJ-002",
+      "classification": "REJECTED_SUSPICION",
+      "title": "ZIP executable modes are corrupt",
+      "status": "REJECTED",
+      "evidence": "Standard unzip preserved all 733 modes exactly. An earlier Python extraction mode discrepancy was a review-tool artifact, not archive evidence."
+    },
+    {
+      "id": "BWS121-R11-REJ-003",
+      "classification": "REJECTED_SUSPICION",
+      "title": "The 617-entry manifest differs from 733 only because it excludes itself",
+      "status": "REJECTED",
+      "evidence": "Expected non-self included paths total 732, proving 115 omissions plus eight stale same-path records."
+    },
+    {
+      "id": "BWS121-R11-REJ-004",
+      "classification": "REJECTED_SUSPICION",
+      "title": "Committed stale dist output can mask source",
+      "status": "REJECTED_FOR_CURRENT_ARCHIVE",
+      "evidence": "No dist path is present, and build begins with clean."
+    },
+    {
+      "id": "BWS121-R11-HANDOFF-001",
+      "classification": "CROSS_AREA_HANDOFF",
+      "title": "Upstream lock source semantics and immutable committed-HEAD behavior",
+      "target": "R01",
+      "dependencies": [
+        "BWS116-R01-001",
+        "BWS116-R01-002"
+      ],
+      "note": "R11 repairs proof coverage only; R01 application roots remain unchanged."
+    },
+    {
+      "id": "BWS121-R11-HANDOFF-002",
+      "classification": "CROSS_AREA_HANDOFF",
+      "title": "Migration confinement and database role restrictions",
+      "target": "R03",
+      "dependencies": [
+        "BWS116-R03-001"
+      ],
+      "note": "R11 must scan all migrations; R03 owns executable SQL/path and database privilege fixes."
+    },
+    {
+      "id": "BWS121-R11-HANDOFF-003",
+      "classification": "CROSS_AREA_HANDOFF",
+      "title": "B1 upstream receipt and runtime acceptance authority",
+      "target": "R07",
+      "dependencies": [
+        "BWS120-R07-018"
+      ],
+      "note": "R11 tests/validators must consume the corrected receipt; R07 owns its production semantics."
+    },
+    {
+      "id": "BWS121-R11-HANDOFF-004",
+      "classification": "CROSS_AREA_HANDOFF",
+      "title": "Release install compatibility and archive exactness",
+      "target": "R09",
+      "dependencies": [
+        "BWS120-R09-001",
+        "BWS120-R09-003"
+      ],
+      "note": "R11 exact runtime/source proof must feed the R09 release gate without duplicating release logic."
+    },
+    {
+      "id": "BWS121-R11-HANDOFF-005",
+      "classification": "CROSS_AREA_HANDOFF",
+      "title": "Environment and CLI precedence",
+      "target": "R10",
+      "dependencies": [],
+      "note": "Exact runtime classification and API-only negative entrypoint tests must consume R10 authority."
+    },
+    {
+      "id": "BWS121-R11-HANDOFF-006",
+      "classification": "CROSS_AREA_HANDOFF",
+      "title": "Controller and automation finalization assurance",
+      "target": "R12",
+      "dependencies": [],
+      "note": "R12 controller tests must use R11 source/runtime/validator receipts and must not self-attest completion."
+    },
+    {
+      "id": "BWS121-R11-TG-001",
+      "classification": "TEST_GAP",
+      "title": "Exact Node patch-version negative matrix",
+      "required_test": "Reject 20.0.0 and 20.20.1 as canonical; accept exactly 20.20.2; classify other supported 20.x as noncanonical.",
+      "primary_owner": "R11"
+    },
+    {
+      "id": "BWS121-R11-TG-002",
+      "classification": "TEST_GAP",
+      "title": "Semantic mutation tests for marker validators",
+      "required_test": "Comment/dead-import/unreachable-branch mutations must fail upstream, API-only, B1, and program-completion validators.",
+      "primary_owner": "R11"
+    },
+    {
+      "id": "BWS121-R11-TG-003",
+      "classification": "TEST_GAP",
+      "title": "Archive-to-boundary-scanner path coverage reconciliation",
+      "required_test": "Every executable, script, command, migration, package, app, and config path must be classified and scanned or explicitly excluded.",
+      "primary_owner": "R11"
+    },
+    {
+      "id": "BWS121-R11-TG-004",
+      "classification": "TEST_GAP",
+      "title": "Lexical fragmentation and alias bypass suite",
+      "required_test": "Fragmented URLs/identifiers, computed properties, aliases, and dynamic imports must not produce a green boundary verdict.",
+      "primary_owner": "R11"
+    },
+    {
+      "id": "BWS121-R11-TG-005",
+      "classification": "TEST_GAP",
+      "title": "Exact substantive fixture manifest and schema validation",
+      "required_test": "All twelve substantive fixtures require path/digest/purpose/schema reconciliation and negative enrichment cases.",
+      "primary_owner": "R11"
+    },
+    {
+      "id": "BWS121-R11-TG-006",
+      "classification": "TEST_GAP",
+      "title": "Direct production CLI tests are absent for two CLI modules",
+      "required_test": "Directly invoke bws-database-lifecycle and bws-upstream-api-convergence entrypoints with bounded inert negative cases.",
+      "primary_owner": "R11"
+    },
+    {
+      "id": "BWS121-R11-TG-007",
+      "classification": "TEST_GAP",
+      "title": "Finding-to-test-to-entrypoint closure gate",
+      "required_test": "Execute and record all 723 matrix requirements or explicitly retain non-promotable blockers; production-entrypoint-required rows cannot close on unit-only evidence.",
+      "primary_owner": "R11"
+    },
+    {
+      "id": "BWS121-R11-ENV-001",
+      "classification": "ENVIRONMENT_BLOCKER",
+      "title": "Canonical Node 20.20.2 unavailable",
+      "effect": "Node 22.16.0 observations are supplementary and cannot establish canonical build/test acceptance."
+    },
+    {
+      "id": "BWS121-R11-ENV-002",
+      "classification": "ENVIRONMENT_BLOCKER",
+      "title": "Repository dependencies absent and installation prohibited",
+      "effect": "TypeScript emit, Node tests, Vite build, and npm aggregate gates were unavailable; global tsc failed at missing @types/node."
+    },
+    {
+      "id": "BWS121-R11-ENV-003",
+      "classification": "ENVIRONMENT_BLOCKER",
+      "title": "Controlled PostgreSQL, loopback stack, and accepted upstream checkout unavailable or prohibited",
+      "effect": "Database-backed, service, loopback, upstream-lock, and runtime acceptance checks were not executed."
+    }
+  ]
+}

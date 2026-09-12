@@ -1,0 +1,1398 @@
+{
+  "schema": "betting-win-surebet-r12-findings-v1",
+  "review_id": "BWS121-R12",
+  "repository": "betting-win-surebet",
+  "archive": {
+    "logical_name": "betting-win-surebet121.zip",
+    "uploaded_name": "betting-win-surebet121(3).zip",
+    "sha256": "025936d21db89ac5cf4881863f05ec9ed5ddaaa2b4adfe60e766207fc4c9b9f7",
+    "regular_files": 733,
+    "canonical_runtime": "Node 20.20.2",
+    "actual_runtime": "Node 22.16.0 supplementary only",
+    "executable_compatibility": "EXACT_NON_DOCUMENTATION_BYTE_EQUIVALENCE_WITH_BWS120"
+  },
+  "inherited_authority": {
+    "baseline": "BWS120",
+    "confirmed_findings_checked": 137,
+    "new_duplicate_root_causes": 0
+  },
+  "summary": {
+    "confirmed_findings": 13,
+    "severity_counts": {
+      "P1": 12,
+      "P2": 1
+    },
+    "release_blocking": 12,
+    "deployment_blocking": 12,
+    "hypotheses": 1,
+    "cross_area_handoffs": 5,
+    "intentional_safeguards": 5,
+    "rejected_suspicions": 4,
+    "test_gaps": 12,
+    "environment_blockers": 3,
+    "overall_verdict": "BLOCKED_SOURCE_CORRECTNESS_REMEDIATION_REQUIRED"
+  },
+  "confirmed_findings": [
+    {
+      "id": "BWS121-R12-001",
+      "title": "Standalone controllers expose an unrestricted lock-bypass mode for source-affecting runs",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_files_and_symbols": [
+        {
+          "path": "run-autonomous-implementation.sh",
+          "symbol": "usage / parse_args / controller startup",
+          "line_range": "L98-L105, L135-L166, L1179-L1189",
+          "full_file_sha256": "cf373b5b75fdeeb4b7e83c9bdf2ce984e92a4ffecd85da6207481b479861d14a",
+          "note": "The public flag sets ALLOW_PARALLEL and skips automation_acquire_lock before creating a run and entering implementation work."
+        },
+        {
+          "path": "run-autonomous-bugfix.sh",
+          "symbol": "usage / parse_args / controller startup",
+          "line_range": "L90-L96, L123-L161, L915-L925",
+          "full_file_sha256": "fd3f9dcc110763c5ed88c1eba6bcb1ed1a94d4034b7757051b2fb6d1ab385a1b",
+          "note": "The audit controller accepts the same total lock bypass and continues into run creation and managed work."
+        },
+        {
+          "path": "run-paper-evaluation.sh",
+          "symbol": "parse_args / controller startup",
+          "line_range": "L235-L253, L947-L957",
+          "full_file_sha256": "d7d821119d51c3dd5bbcf7a80f0e98488ebd38f7d771310265939a918505e667",
+          "note": "The paper controller accepts an undocumented --allow-parallel flag and skips its standalone lock."
+        },
+        {
+          "path": ".automation/lib/run_common.sh",
+          "symbol": "automation_acquire_lock",
+          "line_range": "L474-L529",
+          "full_file_sha256": "d08ac2827b16df86f0f86fbceb9e5677c72d38ba9853fd67570e87c95bcab619",
+          "note": "The skipped function is also where cross-controller incompatibility checks and atomic lock claiming occur."
+        }
+      ],
+      "preconditions": [
+        "The operator or a parent process invokes a standalone controller with --allow-parallel.",
+        "Another standalone or parent controller, or another lock-bypassed copy, is active in the same repository."
+      ],
+      "trigger": "Start two source-affecting controller invocations against the same repository while at least one uses --allow-parallel.",
+      "expected_behavior": "Every source-affecting controller must have one non-bypassable repository owner. Any concurrency option must be limited to demonstrably read-only inspection that cannot write source, handoffs, locks, run directories, or the shared archive.",
+      "current_behavior": "The flag bypasses both the controller-specific lock and the shared incompatible-controller guard, yet the process still creates run artifacts, executes validation or Codex paths, writes global handoffs, performs cleanup, and publishes artifacts.zip.",
+      "impact": "Two controllers can mutate or inspect a changing source tree concurrently, overwrite global handoffs, interleave validation and source fingerprints, clean each other’s artifacts, and race final archive publication. A completed controller can therefore certify a source generation it did not exclusively own.",
+      "evidence": [
+        "The three startup branches call automation_acquire_lock only when ALLOW_PARALLEL is zero.",
+        "automation_acquire_lock contains automation_assert_no_incompatible_locks; skipping it skips both same-controller and cross-controller exclusion.",
+        "The paper controller parses the bypass although its help text does not disclose it."
+      ],
+      "reproduction_status": {
+        "status": "STATIC_CONFIRMED",
+        "controller_execution": "NOT_PERFORMED_BY_REVIEW_CONSTRAINT"
+      },
+      "transaction_or_state_machine_analysis": "LOCK_ABSENT -> RUN_DIRECTORY_CREATED -> SOURCE_AFFECTING_WORK remains a valid path. There is no reduced capability state associated with ALLOW_PARALLEL, so the state machine loses its single-owner invariant before any source fingerprint, child launch, handoff, cleanup, or publication occurs.",
+      "root_cause": "An operator-convenience switch is implemented as a total ownership bypass rather than a narrowly scoped, read-only concurrency capability.",
+      "minimal_fix_boundary": "Remove the bypass from source-affecting modes. If a concurrent inspection mode is required, give it a separate entrypoint with immutable source input, no global handoffs, no cleanup, no artifacts.zip publication, and no source-writing sandbox.",
+      "required_tests": [
+        "Two-process barrier test proving a second standalone controller fails before run-directory creation.",
+        "Cross-controller matrix covering implementation, bugfix, paper evaluation, paper autopilot, and bugfix autopilot.",
+        "Negative test that --allow-parallel is rejected for all source-affecting modes.",
+        "Read-only inspection mode test, if introduced, proving no mutable repository path is opened."
+      ],
+      "regression_risks": [
+        "Removing the flag may affect undocumented operator workflows.",
+        "Parent-launched child exceptions must continue through authenticated parent-lock contracts rather than a generic bypass."
+      ],
+      "primary_owner": "R12",
+      "secondary_sectors": [
+        "R06",
+        "R09",
+        "R10",
+        "R11"
+      ],
+      "aliases_or_dependencies": [
+        "BWS118-R06-001",
+        "BWS120-R09-007"
+      ],
+      "explicitly_unchanged_areas": [
+        "Authenticated parent-launched child exceptions remain supported.",
+        "Status, print-config, and force-unlock operations remain available without starting a work run.",
+        "No provider or live-execution capability is introduced."
+      ],
+      "blocks": {
+        "release": true,
+        "bws_600": true,
+        "b1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS121-R12-002",
+      "title": "Standalone heartbeat refresh can overwrite newer active-child ownership metadata",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_files_and_symbols": [
+        {
+          "path": ".automation/lib/run_common.sh",
+          "symbol": "automation_write_lock_file / automation_refresh_lock_heartbeat",
+          "line_range": "L348-L387",
+          "full_file_sha256": "d08ac2827b16df86f0f86fbceb9e5677c72d38ba9853fd67570e87c95bcab619",
+          "note": "Heartbeat refresh reads the whole lock into a temporary file and replaces the pathname with no inode, generation, or compare-and-swap check."
+        },
+        {
+          "path": ".automation/lib/run_common.sh",
+          "symbol": "automation_set_active_child / automation_clear_active_child",
+          "line_range": "L562-L578",
+          "full_file_sha256": "d08ac2827b16df86f0f86fbceb9e5677c72d38ba9853fd67570e87c95bcab619",
+          "note": "Child ownership changes independently rewrite the same whole lock file."
+        }
+      ],
+      "preconditions": [
+        "A standalone controller owns a lock and its heartbeat worker is active.",
+        "A managed child is started or cleared while the heartbeat worker holds an earlier lock snapshot."
+      ],
+      "trigger": "Interleave automation_refresh_lock_heartbeat between its read and mv with automation_set_active_child or automation_clear_active_child.",
+      "expected_behavior": "Heartbeat must update only heartbeat authority, or perform an owner- and generation-checked compare-and-swap that cannot roll back any concurrently published child fields.",
+      "current_behavior": "The heartbeat rewrites a stale full-file snapshot. Its final mv can erase a newly written ACTIVE_CHILD_* tuple or resurrect a child tuple that was already cleared.",
+      "impact": "The lock can claim no active child while a detached child is running, or claim an obsolete child after completion. Stop, stale-takeover, force-unlock, and finalization can then leak or signal the wrong work generation.",
+      "evidence": [
+        "Inert harness h01_heartbeat_overwrites_child_metadata captured a lock with child PID 1634 before refresh and an empty active_child_pid after the delayed heartbeat replacement.",
+        "The parent autopilots avoid this specific race by using a validated mtime-only heartbeat; the defect is confined to the shared standalone lock implementation."
+      ],
+      "reproduction_status": {
+        "status": "REPRODUCED_OFFLINE",
+        "harness": "h01_heartbeat_overwrites_child_metadata",
+        "result": "PASS_DEFECT_OBSERVED"
+      },
+      "transaction_or_state_machine_analysis": "LOCK(parent, child=none) -> HEARTBEAT_READ -> CHILD_REGISTERED -> HEARTBEAT_REPLACE(stale child=none). The transition is non-monotonic because heartbeat publication is allowed to replace ownership state.",
+      "root_cause": "Heartbeat and child ownership share one mutable whole-file record without serialization or a monotonic lock generation.",
+      "minimal_fix_boundary": "Use the hardened mtime-only heartbeat pattern or split heartbeat from ownership. If content must change, retain an immutable lock ID and compare inode plus digest/generation immediately before atomic replacement.",
+      "required_tests": [
+        "Deterministic two-writer barrier test for heartbeat versus child registration.",
+        "Heartbeat versus child clear test proving no stale child resurrection.",
+        "Repeated stress test under fixed and regressing clocks.",
+        "Stale takeover test that consumes the resulting lock and proves exact child ownership."
+      ],
+      "regression_risks": [
+        "Changing lock schema requires compatibility handling for existing operator locks.",
+        "A content-CAS loop must remain bounded and must not hide lost ownership."
+      ],
+      "primary_owner": "R12",
+      "secondary_sectors": [
+        "R06",
+        "R11"
+      ],
+      "aliases_or_dependencies": [
+        "BWS118-R06-005"
+      ],
+      "explicitly_unchanged_areas": [
+        "Parent-autopilot mtime heartbeat remains an intentional safeguard.",
+        "Strict PID boot-ID and start-tick checks remain unchanged."
+      ],
+      "blocks": {
+        "release": true,
+        "bws_600": true,
+        "b1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS121-R12-003",
+      "title": "Heartbeat loss does not fence or stop the controller that owns the stale lock",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_files_and_symbols": [
+        {
+          "path": ".automation/lib/run_common.sh",
+          "symbol": "automation_start_heartbeat",
+          "line_range": "L531-L539",
+          "full_file_sha256": "d08ac2827b16df86f0f86fbceb9e5677c72d38ba9853fd67570e87c95bcab619",
+          "note": "Standalone heartbeat refresh errors are suppressed indefinitely."
+        },
+        {
+          "path": "run-paper-autopilot.sh",
+          "symbol": "start_parent_lock_heartbeat",
+          "line_range": "L491-L507",
+          "full_file_sha256": "fa9afc727218b6e533c6f3ef1c2bbb3af9e2c5182538276f509f1986bdfac661",
+          "note": "The parent heartbeat process exits on refresh failure, but the main controller never waits for or monitors that process during the campaign."
+        },
+        {
+          "path": "run-bugfix-autopilot.sh",
+          "symbol": "start_parent_lock_heartbeat",
+          "line_range": "L438-L454",
+          "full_file_sha256": "e96b91399d507f223d4e8ce7c1d74a19597ef15fa21eb1bbf52a4b81408d97f8",
+          "note": "The bugfix parent has the same detached heartbeat-liveness model."
+        }
+      ],
+      "preconditions": [
+        "A controller has acquired its lock.",
+        "The lock disappears, becomes unwriteable, changes inode/ownership, or heartbeat validation otherwise fails."
+      ],
+      "trigger": "Cause a heartbeat refresh to fail while the main controller and a managed child continue running.",
+      "expected_behavior": "Loss of the ownership heartbeat must synchronously transition the controller to a fenced terminal state, stop new work, terminate or drain owned children, and preserve evidence that ownership was lost.",
+      "current_behavior": "Standalone controllers ignore every refresh failure. Parent heartbeat subprocesses terminate on failure, but the main loops do not check HEARTBEAT_PID or a shared failure state and continue work.",
+      "impact": "A live controller can become externally indistinguishable from a stale owner. A replacement can begin stale recovery against an active generation, producing overlapping work, forced termination, or ambiguous source and artifact ownership.",
+      "evidence": [
+        "No call site polls heartbeat subprocess liveness between acquisition and final stop.",
+        "The standalone worker uses “|| true”, so even persistent ownership failure is silent.",
+        "Focused repository tests assert the presence of heartbeat helpers but do not force heartbeat failure while work is active."
+      ],
+      "reproduction_status": {
+        "status": "STATIC_CONFIRMED",
+        "dynamic_reason": "A real controller was not started under the read-only review restrictions."
+      },
+      "transaction_or_state_machine_analysis": "OWNED -> HEARTBEAT_FAILED should become FENCED. Instead it remains OWNED_IN_MEMORY while external ownership evidence ages into STALE. The state machine therefore permits two incompatible ownership views.",
+      "root_cause": "Heartbeat is treated as a best-effort background side effect instead of a mandatory lease/fencing condition.",
+      "minimal_fix_boundary": "Add an error channel or supervised heartbeat task. The main loop must check it before and after every child transition and during waits, then execute one bounded fenced shutdown path.",
+      "required_tests": [
+        "Delete or replace the lock while a standalone managed command is active.",
+        "Force parent heartbeat ownership validation failure during each autopilot child phase.",
+        "Verify no new child starts after heartbeat loss.",
+        "Verify lock-loss evidence and exact child cleanup on shutdown."
+      ],
+      "regression_risks": [
+        "Transient filesystem errors require an explicit bounded retry policy.",
+        "Fencing must not allow an unverified process to delete a successor lock."
+      ],
+      "primary_owner": "R12",
+      "secondary_sectors": [
+        "R06",
+        "R11"
+      ],
+      "aliases_or_dependencies": [
+        "BWS118-R06-005"
+      ],
+      "explicitly_unchanged_areas": [
+        "Normal heartbeat intervals and lock-staleness thresholds remain configurable.",
+        "No automatic takeover is authorized until ownership loss is proven."
+      ],
+      "blocks": {
+        "release": true,
+        "bws_600": true,
+        "b1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS121-R12-004",
+      "title": "Standalone stale-lock takeover deletes ownership without verifying the recorded active child is gone",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_files_and_symbols": [
+        {
+          "path": ".automation/lib/run_common.sh",
+          "symbol": "automation_acquire_lock",
+          "line_range": "L474-L529",
+          "full_file_sha256": "d08ac2827b16df86f0f86fbceb9e5677c72d38ba9853fd67570e87c95bcab619",
+          "note": "Automatic stale recovery reads and terminates only the parent PID, then removes the lock; it does not load or verify ACTIVE_CHILD_*."
+        },
+        {
+          "path": ".automation/lib/run_common.sh",
+          "symbol": "automation_force_unlock",
+          "line_range": "L422-L470",
+          "full_file_sha256": "d08ac2827b16df86f0f86fbceb9e5677c72d38ba9853fd67570e87c95bcab619",
+          "note": "The explicit force-unlock path demonstrates the stricter child-first behavior that automatic stale takeover omits."
+        }
+      ],
+      "preconditions": [
+        "A standalone lock heartbeat is stale while the parent PID is still alive.",
+        "The parent does not successfully clean its detached child during TERM handling, or exits before doing so.",
+        "The lock contains a valid live ACTIVE_CHILD_* tuple."
+      ],
+      "trigger": "Start another standalone controller after the heartbeat threshold.",
+      "expected_behavior": "Stale recovery must authenticate and drain the recorded child/process group before releasing or replacing ownership, and must fail closed if child termination cannot be proven.",
+      "current_behavior": "The automatic path sends TERM only to the parent, waits for that PID, removes the lock, and claims a replacement. It never validates the child tuple or confirms the child process group is empty.",
+      "impact": "Detached work can survive with no owning lock while a replacement controller starts. The orphan can continue source writes, validation, file cleanup, or artifact publication against the new generation.",
+      "evidence": [
+        "Inert harness h02_stale_takeover_leaves_recorded_child produced a successful takeover with the parent dead and the recorded child still alive.",
+        "The stricter explicit force-unlock path already terminates the child first, proving the missing step is localized to automatic stale recovery."
+      ],
+      "reproduction_status": {
+        "status": "REPRODUCED_OFFLINE",
+        "harness": "h02_stale_takeover_leaves_recorded_child",
+        "result": "PASS_DEFECT_OBSERVED"
+      },
+      "transaction_or_state_machine_analysis": "STALE_PARENT_WITH_LIVE_CHILD -> TERM_PARENT -> PARENT_DEAD -> LOCK_REMOVED -> NEW_OWNER, while OLD_CHILD remains live. This creates simultaneous generations with only one represented in the lock state.",
+      "root_cause": "Automatic stale recovery assumes the stale owner’s signal trap will perform complete child cleanup instead of independently proving the durable lock’s recorded ownership graph.",
+      "minimal_fix_boundary": "Reuse one authenticated child-first recovery routine for both automatic and explicit takeover. Preserve the lock and block replacement if any recorded process group cannot be proven empty.",
+      "required_tests": [
+        "Stale parent that ignores TERM while child remains live.",
+        "Parent exits immediately on TERM without child cleanup.",
+        "Dead parent with live verified child.",
+        "Mismatched child identity must preserve the lock and fail closed."
+      ],
+      "regression_risks": [
+        "Recovery must avoid signaling a reused PID.",
+        "A child-first sequence must remain compatible with parent traps that also attempt cleanup."
+      ],
+      "primary_owner": "R12",
+      "secondary_sectors": [
+        "R06",
+        "R11"
+      ],
+      "aliases_or_dependencies": [
+        "BWS118-R06-005",
+        "BWS118-R06-011"
+      ],
+      "explicitly_unchanged_areas": [
+        "Fresh locks continue to block takeover.",
+        "Explicit operator force-unlock remains identity-checked."
+      ],
+      "blocks": {
+        "release": true,
+        "bws_600": true,
+        "b1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS121-R12-005",
+      "title": "Autopilot child duration is advisory because the parent waits without an enforcing deadline",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_files_and_symbols": [
+        {
+          "path": "run-paper-autopilot.sh",
+          "symbol": "run_child_controller",
+          "line_range": "L842-L893",
+          "full_file_sha256": "fa9afc727218b6e533c6f3ef1c2bbb3af9e2c5182538276f509f1986bdfac661",
+          "note": "The parent computes a clamped budget, passes it as --duration, launches with setsid, and performs an unbounded wait on the child PID."
+        },
+        {
+          "path": "run-bugfix-autopilot.sh",
+          "symbol": "run_child_controller",
+          "line_range": "L792-L831",
+          "full_file_sha256": "e96b91399d507f223d4e8ce7c1d74a19597ef15fa21eb1bbf52a4b81408d97f8",
+          "note": "The bugfix parent has the same pass-budget-then-unbounded-wait behavior."
+        }
+      ],
+      "preconditions": [
+        "A child ignores, misparses, or cannot honor --duration.",
+        "The child hangs before reaching its own timeout wrapper, during finalization, or in a helper without an aggregate deadline."
+      ],
+      "trigger": "Run a child whose declared duration is shorter than its actual lifetime.",
+      "expected_behavior": "The parent must enforce one aggregate monotonic deadline independently of child cooperation, terminate the exact child process group when it expires, and classify the result as timed out or unknown.",
+      "current_behavior": "The parent merely passes the computed budget to the child and then waits indefinitely. The later checks for exit code 124 do not create a watchdog and cannot fire until the child returns.",
+      "impact": "A bounded parent campaign can exceed its advertised seven-day or 72-hour ceiling indefinitely, retain locks, suppress final evidence and notification, and block later recovery.",
+      "evidence": [
+        "Inert harness h03_child_budget_is_advisory used a declared 1,000 ms budget and observed 2,004 ms elapsed because the parent-side wait had no enforcement.",
+        "No parent timer, timeout wrapper, wait loop, or heartbeat-loss check surrounds wait in either autopilot."
+      ],
+      "reproduction_status": {
+        "status": "REPRODUCED_OFFLINE",
+        "harness": "h03_child_budget_is_advisory",
+        "result": "PASS_DEFECT_OBSERVED"
+      },
+      "transaction_or_state_machine_analysis": "CHILD_RUNNING has no parent-driven transition to TIMED_OUT. Only CHILD_EXIT can advance the parent, so the parent deadline is not part of the actual state machine.",
+      "root_cause": "Duration is modeled as a child configuration value rather than an independently enforced parent ownership deadline.",
+      "minimal_fix_boundary": "Wrap each child generation in a parent monotonic deadline, retain the process-group identity until drain, and reserve enough aggregate budget for termination, terminal-result reconciliation, lock release, and artifact finalization.",
+      "required_tests": [
+        "Child ignores --duration.",
+        "Child hangs before its main loop.",
+        "Child hangs during finalization after its work budget.",
+        "Parent deadline expires during TERM/KILL grace.",
+        "Clock regression test using monotonic time."
+      ],
+      "regression_risks": [
+        "An overly short reserve can terminate valid finalization and create ambiguous source state.",
+        "Timeout classification must distinguish terminated, still-running, and unknown outcomes."
+      ],
+      "primary_owner": "R12",
+      "secondary_sectors": [
+        "R06",
+        "R11"
+      ],
+      "aliases_or_dependencies": [
+        "BWS118-R06-006"
+      ],
+      "explicitly_unchanged_areas": [
+        "Child-internal command timeouts remain useful secondary bounds.",
+        "Configured campaign ceilings remain operator-selected maxima."
+      ],
+      "blocks": {
+        "release": true,
+        "bws_600": true,
+        "b1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS121-R12-006",
+      "title": "Child ownership is cleared when the leader exits even if descendants remain in its process group",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_files_and_symbols": [
+        {
+          "path": "run-paper-autopilot.sh",
+          "symbol": "run_child_controller / terminate_active_child",
+          "line_range": "L877-L893, L986-L1015",
+          "full_file_sha256": "fa9afc727218b6e533c6f3ef1c2bbb3af9e2c5182538276f509f1986bdfac661",
+          "note": "The parent clears ACTIVE_CHILD_* immediately after wait on the leader; cleanup returns success immediately when that PID is dead."
+        },
+        {
+          "path": "run-bugfix-autopilot.sh",
+          "symbol": "run_child_controller",
+          "line_range": "L823-L831",
+          "full_file_sha256": "e96b91399d507f223d4e8ce7c1d74a19597ef15fa21eb1bbf52a4b81408d97f8",
+          "note": "The bugfix parent also clears ownership immediately after leader wait."
+        },
+        {
+          "path": ".automation/lib/run_common.sh",
+          "symbol": "automation_terminate_active_child",
+          "line_range": "L601-L610",
+          "full_file_sha256": "d08ac2827b16df86f0f86fbceb9e5677c72d38ba9853fd67570e87c95bcab619",
+          "note": "Standalone cleanup clears ownership without a group probe when the recorded leader PID is no longer alive."
+        },
+        {
+          "path": ".automation/lib/controller_hardening_v2.sh",
+          "symbol": "automation_v2_terminate_process_group",
+          "line_range": "L1165-L1184",
+          "full_file_sha256": "d67e2780d7968e5f25b0c7735486b140aa186708bbddda1b3d90cbb5f21f19a1",
+          "note": "Termination waits only for the leader PID and treats leader exit as group success."
+        }
+      ],
+      "preconditions": [
+        "A setsid-launched child spawns a descendant in the same process group.",
+        "The leader exits before the descendant."
+      ],
+      "trigger": "Allow the child leader to exit while a descendant remains alive.",
+      "expected_behavior": "Ownership must retain a stable process-group or stronger containment identity and confirm the entire group is empty before clearing the lock tuple, accepting terminality, or packaging final evidence.",
+      "current_behavior": "Leader death is used as the sole liveness predicate. Parent state is cleared and group termination returns success without checking whether the process group still contains descendants.",
+      "impact": "Unowned descendants can continue source, filesystem, subprocess, or network-capable work after the parent accepts child completion. Later force-unlock cannot discover them from the cleared lock.",
+      "evidence": [
+        "Inert harness h04_leader_exit_leaves_process_group observed leader_dead=yes, descendant_alive=yes, and process_group_alive=yes.",
+        "Both parent controllers launch children with setsid, making process-group identity material rather than hypothetical."
+      ],
+      "reproduction_status": {
+        "status": "REPRODUCED_OFFLINE",
+        "harness": "h04_leader_exit_leaves_process_group",
+        "result": "PASS_DEFECT_OBSERVED"
+      },
+      "transaction_or_state_machine_analysis": "CHILD_GROUP_RUNNING -> LEADER_EXIT is incorrectly treated as CHILD_GROUP_TERMINAL. The descendant generation is omitted from both lock state and finalization.",
+      "root_cause": "The controller conflates process-leader lifetime with process-group lifetime and does not retain an independently verifiable group/container identity.",
+      "minimal_fix_boundary": "Record PGID or use a dedicated cgroup/subreaper boundary. After leader exit, probe and drain the full owned group before clearing ownership or accepting the child result.",
+      "required_tests": [
+        "Leader exits after spawning one and multiple descendants.",
+        "Descendant changes process state during group drain.",
+        "TERM-resistant descendant requiring KILL.",
+        "PID reuse while the original PGID still has members."
+      ],
+      "regression_risks": [
+        "Process-group probing must not signal unrelated processes after PGID reuse.",
+        "A cgroup solution must remain portable to the supported operator environment."
+      ],
+      "primary_owner": "R12",
+      "secondary_sectors": [
+        "R06",
+        "R11"
+      ],
+      "aliases_or_dependencies": [
+        "BWS118-R06-004",
+        "BWS118-R06-011"
+      ],
+      "explicitly_unchanged_areas": [
+        "Exact leader PID boot-ID/start-tick validation remains required.",
+        "Normal single-process children remain supported."
+      ],
+      "blocks": {
+        "release": true,
+        "bws_600": true,
+        "b1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS121-R12-007",
+      "title": "Autopilot restart creates a fresh campaign instead of reconciling and resuming durable progress",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_files_and_symbols": [
+        {
+          "path": "run-paper-autopilot.sh",
+          "symbol": "rotate_stale_handoffs / main_loop / startup",
+          "line_range": "L569-L576, L1158-L1171, L1334-L1345",
+          "full_file_sha256": "fa9afc727218b6e533c6f3ef1c2bbb3af9e2c5182538276f509f1986bdfac661",
+          "note": "Every invocation creates a new run, rotates global handoffs, truncates rounds.tsv, resets next_child to paper, and starts at round one."
+        },
+        {
+          "path": "run-bugfix-autopilot.sh",
+          "symbol": "rotate_stale_handoffs / initialize_campaign_ledger / startup",
+          "line_range": "L542-L571, L1176-L1189",
+          "full_file_sha256": "e96b91399d507f223d4e8ce7c1d74a19597ef15fa21eb1bbf52a4b81408d97f8",
+          "note": "Every invocation rotates handoffs and recreates all campaign areas as pending."
+        },
+        {
+          "path": "run-bugfix-autopilot.sh",
+          "symbol": "update_bug_signature_repeat_guard",
+          "line_range": "L873-L875",
+          "full_file_sha256": "e96b91399d507f223d4e8ce7c1d74a19597ef15fa21eb1bbf52a4b81408d97f8",
+          "note": "The repeated-handoff guard exists only in process memory and resets on restart."
+        }
+      ],
+      "preconditions": [
+        "The parent is interrupted or crashes after a child changes source, writes a handoff, or advances a campaign area but before the parent commits all related artifacts and consumes the handoff.",
+        "The operator restarts the same autopilot normally."
+      ],
+      "trigger": "Restart either autopilot after each externally visible child transition and parent bookkeeping boundary.",
+      "expected_behavior": "Restart must bind to one immutable campaign ID, reconstruct the last committed transition from durable receipts, reconcile source and handoff state, and either resume exactly once or fail closed as ambiguous.",
+      "current_behavior": "A new run is always created. Existing handoffs are moved aside as stale, rounds and campaign coverage restart from initial values, and in-memory repeat counters are lost. There is no --resume contract or recovery reconciliation.",
+      "impact": "Completed work can be repeated, an implementation return handoff can be discarded, a same-area re-audit can be skipped or restarted from the wrong phase, and the repeat guard can be bypassed by process restart.",
+      "evidence": [
+        "The paper loop hardcodes next_child=paper on every process start.",
+        "The bugfix ledger writes every area as pending before inspecting prior campaign evidence.",
+        "No persistent campaign generation or committed transition pointer is consumed during startup."
+      ],
+      "reproduction_status": {
+        "status": "STATIC_STATE_MACHINE_CONFIRMED",
+        "crash_injection": "NOT_PERFORMED_BY_REVIEW_CONSTRAINT"
+      },
+      "transaction_or_state_machine_analysis": "Child side effects and parent phase advancement are separate commits. A crash between them yields AMBIGUOUS, but startup maps every prior state to NEW_CAMPAIGN. That mapping is neither idempotent nor convergent.",
+      "root_cause": "Campaign progress, repeat guards, and handoff consumption are run-local files rather than one durable, generation-bound restart protocol.",
+      "minimal_fix_boundary": "Add immutable campaign identity, append-only transition receipts, exact source/handoff digests, and an explicit resume/reconcile command. New campaigns must not silently consume or rotate unresolved prior-generation state.",
+      "required_tests": [
+        "Crash after child source mutation before terminal-result publication.",
+        "Crash after terminal result before handoff copy/consume.",
+        "Crash after campaign ledger update before rounds append and vice versa.",
+        "Restart with conflicting source fingerprint or handoff generation.",
+        "Repeat-limit persistence across restart."
+      ],
+      "regression_risks": [
+        "Migration of historical run directories requires a conservative non-resumable classification.",
+        "Resume logic must not trust mutable latest pointers or status labels alone."
+      ],
+      "primary_owner": "R12",
+      "secondary_sectors": [
+        "R03",
+        "R06",
+        "R07",
+        "R11"
+      ],
+      "aliases_or_dependencies": [
+        "BWS120-R07-014",
+        "BWS120-R07-016"
+      ],
+      "explicitly_unchanged_areas": [
+        "Starting an explicitly new campaign remains possible through a separate, deliberate action.",
+        "Historical artifacts remain read-only evidence and are not retroactively rewritten."
+      ],
+      "blocks": {
+        "release": true,
+        "bws_600": true,
+        "b1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS121-R12-008",
+      "title": "Second-resolution artifact identities are non-exclusive and can merge or overwrite distinct controller runs",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_files_and_symbols": [
+        {
+          "path": ".automation/lib/run_common.sh",
+          "symbol": "automation_create_run_dir",
+          "line_range": "L646-L672",
+          "full_file_sha256": "d08ac2827b16df86f0f86fbceb9e5677c72d38ba9853fd67570e87c95bcab619",
+          "note": "Run identity is slug plus UTC seconds, mkdir -p accepts an existing path, and controller.log is truncated unconditionally."
+        },
+        {
+          "path": ".automation/lib/run_common.sh",
+          "symbol": "automation_quarantine_lock",
+          "line_range": "L389-L395",
+          "full_file_sha256": "d08ac2827b16df86f0f86fbceb9e5677c72d38ba9853fd67570e87c95bcab619",
+          "note": "Quarantined lock evidence also uses a second-resolution destination with no no-replace primitive."
+        },
+        {
+          "path": "run-paper-autopilot.sh",
+          "symbol": "rotate_stale_handoffs",
+          "line_range": "L569-L576",
+          "full_file_sha256": "fa9afc727218b6e533c6f3ef1c2bbb3af9e2c5182538276f509f1986bdfac661",
+          "note": "Stale handoff destinations use basename plus UTC seconds and ordinary mv."
+        },
+        {
+          "path": "run-bugfix-autopilot.sh",
+          "symbol": "rotate_stale_handoffs",
+          "line_range": "L542-L549",
+          "full_file_sha256": "e96b91399d507f223d4e8ce7c1d74a19597ef15fa21eb1bbf52a4b81408d97f8",
+          "note": "The bugfix parent has the same overwrite-prone handoff identity."
+        }
+      ],
+      "preconditions": [
+        "Two lock-bypassed runs, two fast restarts, or two evidence rotations use the same slug/basename within one second."
+      ],
+      "trigger": "Create two same-slug run directories or rotate the same evidence name under a fixed second.",
+      "expected_behavior": "Every run and rotated evidence object must have a collision-resistant immutable ID and be created with exclusive no-replace semantics.",
+      "current_behavior": "Distinct generations resolve to the same pathname. Run creation reuses it and truncates controller.log; ordinary mv can replace an earlier same-second destination.",
+      "impact": "Evidence from separate controller generations can be interleaved, truncated, or overwritten. Final summaries, child results, cleanup decisions, progress tools, and artifacts.zip can then attribute data to the wrong run.",
+      "evidence": [
+        "Inert harness h05_run_directory_collision called the run-directory constructor twice under one fixed second; both returned the same path and the second call truncated the first log.",
+        "This is the same design anti-pattern as inherited BWS118-R06-016, but in separate R12 controller artifact code and with a separate fix boundary."
+      ],
+      "reproduction_status": {
+        "status": "REPRODUCED_OFFLINE",
+        "harness": "h05_run_directory_collision",
+        "result": "PASS_DEFECT_OBSERVED"
+      },
+      "transaction_or_state_machine_analysis": "RUN_ID is derived from low-cardinality wall-clock text and is not reserved. CREATE(new generation) can therefore transition into REUSE(existing generation) without detection.",
+      "root_cause": "Timestamp is used as uniqueness authority rather than metadata attached to an exclusive generation identifier.",
+      "minimal_fix_boundary": "Use a cryptographically random or monotonic generation ID, mkdir without -p for the final run path, no-replace rename/link semantics for rotated evidence, and a manifest that binds timestamp to generation.",
+      "required_tests": [
+        "Fixed-clock concurrent run creation.",
+        "Immediate restart in the same second.",
+        "Same-second quarantine and stale-handoff rotation.",
+        "Collision must fail without modifying either existing object."
+      ],
+      "regression_risks": [
+        "Progress and operator tooling must learn the new generation format.",
+        "Do not replace one collision-prone timestamp with a process-local counter that resets after restart."
+      ],
+      "primary_owner": "R12",
+      "secondary_sectors": [
+        "R06",
+        "R07",
+        "R11"
+      ],
+      "aliases_or_dependencies": [
+        "BWS118-R06-016"
+      ],
+      "explicitly_unchanged_areas": [
+        "Human-readable timestamps remain available as metadata.",
+        "Existing run directories remain immutable historical evidence."
+      ],
+      "blocks": {
+        "release": true,
+        "bws_600": true,
+        "b1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS121-R12-009",
+      "title": "Standalone finalization packages evidence before proving active children are quiescent",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_files_and_symbols": [
+        {
+          "path": "run-autonomous-implementation.sh",
+          "symbol": "finish / on_signal",
+          "line_range": "L1020-L1054, L1088-L1139, L1152-L1164",
+          "full_file_sha256": "cf373b5b75fdeeb4b7e83c9bdf2ce984e92a4ffecd85da6207481b479861d14a",
+          "note": "The initial snapshot and archive build precede lock release; lock release is where shared cleanup terminates the active child. The signal helper sends TERM to shell jobs but does not prove group quiescence before packaging."
+        },
+        {
+          "path": "run-autonomous-bugfix.sh",
+          "symbol": "finish / on_signal",
+          "line_range": "L713-L797",
+          "full_file_sha256": "fd3f9dcc110763c5ed88c1eba6bcb1ed1a94d4034b7757051b2fb6d1ab385a1b",
+          "note": "The audit controller builds artifacts before attempting final lock release; its signal handler does not pre-clean the managed child."
+        },
+        {
+          "path": "run-paper-evaluation.sh",
+          "symbol": "finish / on_signal",
+          "line_range": "L696-L790",
+          "full_file_sha256": "d7d821119d51c3dd5bbcf7a80f0e98488ebd38f7d771310265939a918505e667",
+          "note": "The paper controller has the same archive-before-release ordering and a signal handler that only exits."
+        },
+        {
+          "path": ".automation/lib/run_common.sh",
+          "symbol": "automation_release_lock",
+          "line_range": "L542-L559",
+          "full_file_sha256": "d08ac2827b16df86f0f86fbceb9e5677c72d38ba9853fd67570e87c95bcab619",
+          "note": "Active-child termination is deferred until lock release, after the first final snapshot and archive build."
+        }
+      ],
+      "preconditions": [
+        "A standalone controller receives INT/TERM or exits unexpectedly while a managed child is active.",
+        "The child continues writing its log, source, handoff, or artifact paths during finalization."
+      ],
+      "trigger": "Interrupt a standalone controller while its managed child is still producing output.",
+      "expected_behavior": "Finalization must first fence new work, terminate/drain the exact child group, reconcile ambiguous side effects, and only then snapshot, summarize, and publish terminal artifacts.",
+      "current_behavior": "The first final summary, repository snapshot, and artifacts.zip are produced before active-child cleanup occurs through lock release. A late child can modify the very tree being archived or write after publication.",
+      "impact": "The published “final” archive can be incomplete or internally inconsistent, while the child may continue source or evidence effects after the controller has recorded terminal status.",
+      "evidence": [
+        "The three finish functions share the same ordering.",
+        "The parent autopilots explicitly terminate_active_child before packaging, so the defect is confined to standalone finalization and is not an inherited parent-finalization symptom.",
+        "Harness h04 demonstrates why waiting only on a leader is also insufficient once cleanup is moved earlier."
+      ],
+      "reproduction_status": {
+        "status": "STATIC_STATE_MACHINE_CONFIRMED",
+        "signal_controller_run": "NOT_PERFORMED_BY_REVIEW_CONSTRAINT"
+      },
+      "transaction_or_state_machine_analysis": "INTERRUPT/UNEXPECTED_EXIT -> SNAPSHOT/PACKAGE -> CHILD_TERMINATION is the reverse of a safe terminal protocol. Publication occurs while the generation can still change.",
+      "root_cause": "Standalone finalization treats lock release as ownership bookkeeping rather than the child-quiescence boundary that must precede terminal evidence.",
+      "minimal_fix_boundary": "Introduce one shared standalone shutdown routine: mark fenced, supervise/terminate the group, confirm drain, reconcile source and handoff state, then write terminal evidence and publish once.",
+      "required_tests": [
+        "INT during Codex execution while the child writes a run log.",
+        "TERM during validation with a descendant process.",
+        "Child ignores TERM and requires KILL.",
+        "Artifact build must observe a stable source and run-directory digest after cleanup."
+      ],
+      "regression_risks": [
+        "Moving cleanup earlier must preserve diagnostic logs and ambiguous-side-effect evidence.",
+        "Signal handling must remain reentrant-safe and execute finalization exactly once."
+      ],
+      "primary_owner": "R12",
+      "secondary_sectors": [
+        "R06",
+        "R07",
+        "R11"
+      ],
+      "aliases_or_dependencies": [
+        "BWS118-R06-015"
+      ],
+      "explicitly_unchanged_areas": [
+        "Parent autopilots keep their child-before-package ordering.",
+        "Lock-release failure remains a blocked terminal state."
+      ],
+      "blocks": {
+        "release": true,
+        "bws_600": true,
+        "b1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS121-R12-010",
+      "title": "Artifact cleanup can recursively delete a live operation solely because its basename is allowlisted",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_files_and_symbols": [
+        {
+          "path": ".automation/lib/run_common.sh",
+          "symbol": "automation_artifact_residue_name_is_transient / automation_cleanup_transient_artifact_residue",
+          "line_range": "L987-L1099",
+          "full_file_sha256": "d08ac2827b16df86f0f86fbceb9e5677c72d38ba9853fd67570e87c95bcab619",
+          "note": "Selection uses basename and age, then rm -rf, with no owner, lock, generation, open-process, or mutation revalidation."
+        },
+        {
+          "path": ".automation/lib/controller_hardening_v2.sh",
+          "symbol": "automation_v2_zip_with_timeout",
+          "line_range": "L1187-L1206",
+          "full_file_sha256": "d67e2780d7968e5f25b0c7735486b140aa186708bbddda1b3d90cbb5f21f19a1",
+          "note": "Full artifact packaging invokes cleanup in apply mode with a default minimum age of zero."
+        },
+        {
+          "path": ".automation/lib/run_common.sh",
+          "symbol": "automation_build_artifacts_zip",
+          "line_range": "L1351-L1375",
+          "full_file_sha256": "d08ac2827b16df86f0f86fbceb9e5677c72d38ba9853fd67570e87c95bcab619",
+          "note": "Standalone full packaging also invokes cleanup apply 0 before zipping."
+        }
+      ],
+      "preconditions": [
+        "A release/test/runtime helper is actively writing a top-level artifacts path whose basename matches the transient allowlist.",
+        "Another controller or cleanup command begins packaging or explicit cleanup."
+      ],
+      "trigger": "Package artifacts while a writer remains active in an allowlisted path such as bws-release-package-live.",
+      "expected_behavior": "Cleanup must prove a candidate belongs to a completed disposable generation and remains unchanged and unowned from selection through deletion.",
+      "current_behavior": "The helper accepts the path based only on canonical containment, name pattern, and mtime threshold. Packaging uses threshold zero and recursively removes the selected directory without checking a lock, owner marker, PID identity, or second stat/digest.",
+      "impact": "Active release, preflight, service, soak, or test output can be deleted mid-write. The producing operation may then fail, recreate a partial path, or publish evidence that no longer matches what another controller archived.",
+      "evidence": [
+        "Inert harness h06_cleanup_deletes_live_named_directory kept a writer process alive while packaging cleanup removed its allowlisted directory.",
+        "The retention document describes these names as scratch classes but does not provide a durable completed-generation receipt for deletion."
+      ],
+      "reproduction_status": {
+        "status": "REPRODUCED_OFFLINE",
+        "harness": "h06_cleanup_deletes_live_named_directory",
+        "result": "PASS_DEFECT_OBSERVED"
+      },
+      "transaction_or_state_machine_analysis": "LIVE_SCRATCH -> SELECTED_BY_NAME -> DELETED is permitted. There is no transition through COMPLETED, UNOWNED, and STABLE before deletion.",
+      "root_cause": "Residue class is inferred from pathname rather than authenticated lifecycle ownership and terminality.",
+      "minimal_fix_boundary": "Require immutable owner/generation metadata, terminal receipt, no-live-owner proof, minimum quiescence, and pre-delete inode/digest revalidation. Packaging should not perform destructive cleanup implicitly unless those proofs pass.",
+      "required_tests": [
+        "Live writer with an allowlisted basename.",
+        "Candidate becomes live after scan but before deletion.",
+        "PID reuse and stale owner marker.",
+        "Completed scratch generation cleanup and archive rebuild happy path."
+      ],
+      "regression_risks": [
+        "Stricter cleanup may leave more residue and needs an explicit operator-visible plan.",
+        "Owner metadata itself must be protected from spoofing and stale reuse."
+      ],
+      "primary_owner": "R12",
+      "secondary_sectors": [
+        "R07",
+        "R08",
+        "R09",
+        "R11"
+      ],
+      "aliases_or_dependencies": [
+        "BWS120-R07-008",
+        "BWS120-R09-004"
+      ],
+      "explicitly_unchanged_areas": [
+        "Canonical containment and no-symlink checks remain mandatory.",
+        "Unknown names continue to be preserved rather than deleted."
+      ],
+      "blocks": {
+        "release": true,
+        "bws_600": true,
+        "b1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS121-R12-011",
+      "title": "Shared artifacts.zip publication is an unversioned last-writer-wins race",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_files_and_symbols": [
+        {
+          "path": ".automation/lib/run_common.sh",
+          "symbol": "automation_publish_final_artifacts_zip",
+          "line_range": "L1268-L1327",
+          "full_file_sha256": "d08ac2827b16df86f0f86fbceb9e5677c72d38ba9853fd67570e87c95bcab619",
+          "note": "A validated candidate is moved over one shared destination with no publication lock, expected generation, or compare-and-swap."
+        },
+        {
+          "path": "run-paper-autopilot.sh",
+          "symbol": "finish",
+          "line_range": "L1091-L1117",
+          "full_file_sha256": "fa9afc727218b6e533c6f3ef1c2bbb3af9e2c5182538276f509f1986bdfac661",
+          "note": "The parent releases its controller lock before refreshing the shared archive."
+        },
+        {
+          "path": "run-bugfix-autopilot.sh",
+          "symbol": "finish",
+          "line_range": "L994-L1020",
+          "full_file_sha256": "e96b91399d507f223d4e8ce7c1d74a19597ef15fa21eb1bbf52a4b81408d97f8",
+          "note": "The bugfix parent also publishes its final refresh after lock release."
+        }
+      ],
+      "preconditions": [
+        "Two controller generations or an operator cleanup/package command prepare archives concurrently.",
+        "Both candidates pass local ZIP validation."
+      ],
+      "trigger": "Publish both candidates to repository-root artifacts.zip with overlapping final mv operations.",
+      "expected_behavior": "Each final archive must have an immutable generation path. Any mutable “latest” pointer must advance through a serialized compare-and-set bound to the expected previous and new generation receipts.",
+      "current_behavior": "Both publishers can succeed. The later mv silently replaces the earlier archive, even after the earlier controller already reported finalization. Controller locks do not cover every final publication window.",
+      "impact": "The root archive can represent an arbitrary controller generation. Operators, bugfix evidence intake, handoffs, and downstream packaging cannot prove which terminal result it belongs to.",
+      "evidence": [
+        "Inert harness h07_shared_artifacts_publication_last_writer_wins ran two concurrent publishers; both succeeded and the final archive contained only one arbitrary generation.",
+        "Atomic rename prevents partial bytes but does not provide generation serialization or correct currentness."
+      ],
+      "reproduction_status": {
+        "status": "REPRODUCED_OFFLINE",
+        "harness": "h07_shared_artifacts_publication_last_writer_wins",
+        "result": "PASS_DEFECT_OBSERVED"
+      },
+      "transaction_or_state_machine_analysis": "CANDIDATE_A_VALID + CANDIDATE_B_VALID -> PUBLISH_A -> PUBLISH_B. Both transitions report success, but A’s terminal evidence is no longer reachable through the shared path.",
+      "root_cause": "Atomic file replacement is incorrectly treated as an atomic publication protocol across generations.",
+      "minimal_fix_boundary": "Publish immutable generation-named archives with manifests, then update a small latest receipt under one repository-scoped publication lock/CAS. Controllers must report their immutable archive ID, not only the shared path.",
+      "required_tests": [
+        "Two-process publication barrier with distinct manifests.",
+        "Publisher crash before and after immutable archive creation.",
+        "Latest-pointer CAS conflict and deterministic loser behavior.",
+        "Controller output remains bound to its archive after later publications."
+      ],
+      "regression_risks": [
+        "Consumers that assume a fixed artifacts.zip path require migration.",
+        "Publication locking must not reuse controller ownership in a way that deadlocks finalization."
+      ],
+      "primary_owner": "R12",
+      "secondary_sectors": [
+        "R07",
+        "R09",
+        "R11",
+        "R24"
+      ],
+      "aliases_or_dependencies": [
+        "BWS120-R07-003",
+        "BWS120-R09-004"
+      ],
+      "explicitly_unchanged_areas": [
+        "Candidate ZIP integrity and symlink checks remain unchanged.",
+        "Historical archives become more, not less, immutable."
+      ],
+      "blocks": {
+        "release": true,
+        "bws_600": true,
+        "b1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS121-R12-012",
+      "title": "Failed or incomplete final publication leaves a prior archive silently reusable as current evidence",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_files_and_symbols": [
+        {
+          "path": ".automation/lib/run_common.sh",
+          "symbol": "automation_build_artifacts_zip / automation_latest_evidence_hint",
+          "line_range": "L1351-L1397",
+          "full_file_sha256": "d08ac2827b16df86f0f86fbceb9e5677c72d38ba9853fd67570e87c95bcab619",
+          "note": "A failed build leaves the prior root archive untouched, while latest-evidence selection returns any existing artifacts.zip without generation or content validation."
+        },
+        {
+          "path": "run-autonomous-bugfix.sh",
+          "symbol": "resolve_artifact_hint",
+          "line_range": "L280-L286",
+          "full_file_sha256": "fd3f9dcc110763c5ed88c1eba6bcb1ed1a94d4034b7757051b2fb6d1ab385a1b",
+          "note": "The audit controller automatically consumes that singleton archive when --from-artifacts is not supplied."
+        },
+        {
+          "path": "run-autonomous-implementation.sh",
+          "symbol": "finish",
+          "line_range": "L1112-L1132",
+          "full_file_sha256": "cf373b5b75fdeeb4b7e83c9bdf2ce984e92a4ffecd85da6207481b479861d14a",
+          "note": "If final refresh and rebuild fail, terminal status is changed and final_summary is rewritten after the last successful archive, with no successful publication of the corrected state."
+        },
+        {
+          "path": "run-bugfix-autopilot.sh",
+          "symbol": "finish",
+          "line_range": "L1015-L1035",
+          "full_file_sha256": "e96b91399d507f223d4e8ce7c1d74a19597ef15fa21eb1bbf52a4b81408d97f8",
+          "note": "The parent has the same blocked-summary-after-last-successful-archive outcome on final publication failure."
+        }
+      ],
+      "preconditions": [
+        "A previously valid artifacts.zip exists.",
+        "A newer controller run exists but its final refresh/build fails, or has not yet been incorporated.",
+        "A later audit uses the default evidence hint."
+      ],
+      "trigger": "Fail the current final publication and start a bugfix audit without an explicit evidence generation.",
+      "expected_behavior": "Publication failure must leave an explicit tombstone/failed-generation receipt, and no consumer may infer currentness from the existence of an older singleton archive.",
+      "current_behavior": "The old archive remains in place and is returned preferentially over newer run directories. Final blocked status may exist only in the filesystem outside the archive that is still presented as latest.",
+      "impact": "A later audit can reason from stale evidence while believing it is current. Operators can download an archive whose summary predates the controller’s actual blocked exit and lock-release outcome.",
+      "evidence": [
+        "Inert harness h09_stale_shared_archive_preempts_newer_run created a newer completed run directory and an older archive; automation_latest_evidence_hint selected the old archive, which did not contain the newer run.",
+        "The singleton destination is deliberately preserved on candidate failure, which is safe for bytes but unsafe when consumers treat existence as current authority."
+      ],
+      "reproduction_status": {
+        "status": "REPRODUCED_OFFLINE",
+        "harness": "h09_stale_shared_archive_preempts_newer_run",
+        "result": "PASS_DEFECT_OBSERVED"
+      },
+      "transaction_or_state_machine_analysis": "NEW_RUN_TERMINAL -> PUBLICATION_FAILED leaves LATEST_POINTER=OLD_SUCCESS. The next consumer maps OLD_SUCCESS to CURRENT_EVIDENCE without a generation comparison.",
+      "root_cause": "Archive durability and archive currentness are conflated; there is no generation-bound publication receipt or failed-publication state.",
+      "minimal_fix_boundary": "Separate immutable archives from current-generation receipts. On failure, publish a small failure receipt bound to the run, and require consumers to select an explicit accepted generation whose manifest contains the referenced terminal result.",
+      "required_tests": [
+        "Old success archive plus new failed publication.",
+        "Newer run directory absent from archive.",
+        "Corrected blocked final summary written after last successful ZIP.",
+        "Default evidence intake must reject ambiguous or stale singleton state."
+      ],
+      "regression_risks": [
+        "Do not delete the last known-good archive; mark it historical rather than current.",
+        "Legacy consumers need an explicit compatibility error, not a silent fallback."
+      ],
+      "primary_owner": "R12",
+      "secondary_sectors": [
+        "R07",
+        "R09",
+        "R11"
+      ],
+      "aliases_or_dependencies": [
+        "BWS120-R07-005",
+        "BWS120-R07-014",
+        "BWS120-R09-004"
+      ],
+      "explicitly_unchanged_areas": [
+        "Atomic candidate validation remains required.",
+        "Operators may still explicitly select a historical archive for historical review."
+      ],
+      "blocks": {
+        "release": true,
+        "bws_600": true,
+        "b1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS121-R12-013",
+      "title": "Telegram delivery outcome is produced after terminal artifact publication and is absent from retained evidence",
+      "severity": "P2",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_files_and_symbols": [
+        {
+          "path": ".automation/lib/telegram_notify.sh",
+          "symbol": "telegram_notify_send_final",
+          "line_range": "L218-L295",
+          "full_file_sha256": "bae37f227389b264cefea86f1792d3642bc9393f0076408f680c02040a120e23",
+          "note": "The helper marks the notification as sent before configuration/network work, records sent/skipped/failed text only in the supplied log, and always returns success."
+        },
+        {
+          "path": "run-paper-autopilot.sh",
+          "symbol": "finish",
+          "line_range": "L1076-L1138",
+          "full_file_sha256": "fa9afc727218b6e533c6f3ef1c2bbb3af9e2c5182538276f509f1986bdfac661",
+          "note": "The parent builds and refreshes artifacts.zip before invoking the Telegram helper."
+        },
+        {
+          "path": "run-bugfix-autopilot.sh",
+          "symbol": "finish",
+          "line_range": "L979-L1041",
+          "full_file_sha256": "e96b91399d507f223d4e8ce7c1d74a19597ef15fa21eb1bbf52a4b81408d97f8",
+          "note": "The bugfix parent has the same post-publication notification ordering."
+        },
+        {
+          "path": "run-autonomous-bugfix.sh",
+          "symbol": "finish",
+          "line_range": "L727-L784",
+          "full_file_sha256": "fd3f9dcc110763c5ed88c1eba6bcb1ed1a94d4034b7757051b2fb6d1ab385a1b",
+          "note": "Standalone audit finalization also publishes before notification status is written."
+        }
+      ],
+      "preconditions": [
+        "Final artifact publication succeeds.",
+        "Telegram is enabled, disabled, missing configuration, times out, or receives a non-2xx response."
+      ],
+      "trigger": "Complete any controller finalization and inspect the already published archive for its notification result.",
+      "expected_behavior": "Telegram may remain best effort, but the exact sent/skipped/failed outcome must be retained in generation-bound terminal evidence or a separately linked immutable delivery receipt.",
+      "current_behavior": "Notification is attempted only after the final archive build/refresh. Its outcome is appended to a log outside the already published archive; no later refresh occurs. The one-shot flag is set before the attempt and failures still return zero.",
+      "impact": "The retained campaign package cannot prove whether the promised parent-final notification was delivered, skipped, or failed, and a transient failure cannot be retried within the same process through the helper.",
+      "evidence": [
+        "Inert harness h08_telegram_result_created_after_archive created an archive, then wrote the dry-run notification result; the archive did not contain that result.",
+        "Repository documentation explicitly allows Telegram failure not to fail the controller; this finding does not challenge that policy, only the missing delivery evidence and ordering."
+      ],
+      "reproduction_status": {
+        "status": "REPRODUCED_OFFLINE",
+        "harness": "h08_telegram_result_created_after_archive",
+        "result": "PASS_DEFECT_OBSERVED"
+      },
+      "transaction_or_state_machine_analysis": "TERMINAL_ARCHIVE_PUBLISHED -> NOTIFICATION_ATTEMPTED -> DELIVERY_RESULT_WRITTEN. The delivery transition is outside the retained terminal generation and has no linked receipt.",
+      "root_cause": "Notification delivery is treated as an unretained log side effect rather than a best-effort sub-state of campaign finalization.",
+      "minimal_fix_boundary": "Write a bounded notification-attempt receipt before publication when dry-run/config status is known, or publish a separate immutable delivery receipt linked by run/archive generation after the attempt. Preserve controller success semantics for notification failure.",
+      "required_tests": [
+        "Sent, skipped-disabled, skipped-missing-config, timeout, and HTTP failure receipts.",
+        "Archive or linked receipt proves the exact message version and final run ID.",
+        "Retry policy does not send duplicate successful notifications."
+      ],
+      "regression_risks": [
+        "Moving a live network attempt before archive publication must not make campaign finalization depend on Telegram.",
+        "Receipt content must redact token, chat ID, and response secrets."
+      ],
+      "primary_owner": "R12",
+      "secondary_sectors": [
+        "R07",
+        "R11"
+      ],
+      "aliases_or_dependencies": [
+        "BWS120-R07-012"
+      ],
+      "explicitly_unchanged_areas": [
+        "Telegram remains best effort and does not authorize or block business operations.",
+        "Child notifications remain suppressed under parent controllers."
+      ],
+      "blocks": {
+        "release": false,
+        "bws_600": false,
+        "b1": false,
+        "deployment": false
+      }
+    }
+  ],
+  "hypotheses": [
+    {
+      "id": "BWS121-R12-HYP-001",
+      "classification": "HYPOTHESIS",
+      "title": "Parent-lock release has a path-replacement window after ownership validation",
+      "severity": "P1_IF_REPRODUCED",
+      "evidence": [
+        {
+          "path": ".automation/lib/controller_hardening_v2.sh",
+          "symbol": "automation_v2_release_owned_parent_lock",
+          "line_range": "L1121-L1130",
+          "full_file_sha256": "d67e2780d7968e5f25b0c7735486b140aa186708bbddda1b3d90cbb5f21f19a1",
+          "note": "The helper validates the current file and then removes the pathname without retaining and comparing the inode immediately before unlink."
+        }
+      ],
+      "required_proof": "A deterministic barrier showing a successor lock can be installed between validation and rm and then removed by the prior owner.",
+      "reason_not_confirmed": "The race window is narrow and no production controller was executed or instrumented during this read-only review."
+    }
+  ],
+  "cross_area_handoffs": [
+    {
+      "id": "BWS121-R12-HO-001",
+      "classification": "CROSS_AREA_HANDOFF",
+      "target": "R07",
+      "existing_ids": [
+        "BWS120-R07-015",
+        "BWS120-R07-016"
+      ],
+      "title": "Campaign manifest and semantic child-evidence authentication remain inherited R07 roots",
+      "note": "R12 traced child-result transport and controller consumption but did not reissue the existing lack of campaign-manifest consumption or evidence-receipt proof as controller findings."
+    },
+    {
+      "id": "BWS121-R12-HO-002",
+      "classification": "CROSS_AREA_HANDOFF",
+      "target": "R07/R09",
+      "existing_ids": [
+        "BWS120-R07-003",
+        "BWS120-R07-004",
+        "BWS120-R07-005",
+        "BWS120-R07-008",
+        "BWS120-R07-012",
+        "BWS120-R07-014",
+        "BWS120-R09-004"
+      ],
+      "title": "Canonical evidence indexing, retention, currentness, and generic publication remain inherited roots",
+      "note": "R12 findings are limited to controller-owned lock, cleanup, singleton archive, and finalization protocols. Generic evidence-index and release-publisher defects retain their existing IDs."
+    },
+    {
+      "id": "BWS121-R12-HO-003",
+      "classification": "CROSS_AREA_HANDOFF",
+      "target": "R09",
+      "existing_ids": [
+        "BWS120-R09-012",
+        "BWS120-R09-013",
+        "BWS120-R09-014",
+        "BWS120-R09-015",
+        "BWS120-R09-016",
+        "BWS120-R09-017",
+        "BWS120-R09-018",
+        "BWS120-R09-019",
+        "BWS120-R09-020",
+        "BWS120-R09-021"
+      ],
+      "title": "Soak, failure-injection, promotion, recovery, and final-acceptance semantics remain inherited R09 roots",
+      "note": "Controllers can route those operations, but R12 did not duplicate the underlying soak or promotion defects."
+    },
+    {
+      "id": "BWS121-R12-HO-004",
+      "classification": "CROSS_AREA_HANDOFF",
+      "target": "R11",
+      "existing_ids": [
+        "KNOWN_BASELINE_MANIFEST_DRIFT"
+      ],
+      "title": "Source-manifest and aggregate false-green assurance remain R11-owned",
+      "note": "The current R12-focused validators and tests passed despite the confirmed controller defects; R11 must evaluate aggregate assurance and the known manifest drift."
+    },
+    {
+      "id": "BWS121-R12-HO-005",
+      "classification": "CROSS_AREA_HANDOFF",
+      "target": "R07",
+      "existing_ids": [
+        "BWS120-R07-008"
+      ],
+      "title": "Unbounded cumulative retained-artifact growth is an R12 manifestation of inherited retention absence",
+      "note": "Every final build zips the complete retained artifacts tree. The resulting cumulative time/disk growth is recorded as an R07 retention manifestation, not a new R12 root cause."
+    }
+  ],
+  "intentional_safeguards": [
+    {
+      "id": "BWS121-R12-SG-001",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "Parent autopilots use atomic complete lock claims and mtime-only heartbeat refresh",
+      "evidence": [
+        {
+          "path": ".automation/lib/controller_hardening_v2.sh",
+          "symbol": "automation_v2_touch_owned_parent_lock",
+          "line_range": "L1106-L1119",
+          "full_file_sha256": "d67e2780d7968e5f25b0c7735486b140aa186708bbddda1b3d90cbb5f21f19a1",
+          "note": "Ownership and inode are checked before and after mtime touch."
+        }
+      ]
+    },
+    {
+      "id": "BWS121-R12-SG-002",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "Parent child-result side channel validates exact parent, child, exit, repository, and run identity",
+      "evidence": [
+        {
+          "path": "run-paper-autopilot.sh",
+          "symbol": "run_child_controller",
+          "line_range": "L858-L932",
+          "full_file_sha256": "fa9afc727218b6e533c6f3ef1c2bbb3af9e2c5182538276f509f1986bdfac661",
+          "note": "The child result is written to a parent-owned path and validated against exact process identities before use."
+        }
+      ]
+    },
+    {
+      "id": "BWS121-R12-SG-003",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "Parent finalization terminates the recorded active child before packaging and preserves the lock on failure",
+      "evidence": [
+        {
+          "path": "run-paper-autopilot.sh",
+          "symbol": "finish",
+          "line_range": "L1048-L1095",
+          "full_file_sha256": "fa9afc727218b6e533c6f3ef1c2bbb3af9e2c5182538276f509f1986bdfac661",
+          "note": "Child cleanup runs first; identity/termination failure becomes blocked and keeps the lock."
+        }
+      ]
+    },
+    {
+      "id": "BWS121-R12-SG-004",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "ZIP publication validates candidate integrity and rejects artifact-tree symlinks",
+      "evidence": [
+        {
+          "path": ".automation/lib/run_common.sh",
+          "symbol": "automation_publish_final_artifacts_zip / automation_reject_artifact_zip_symlinks",
+          "line_range": "L1268-L1349",
+          "full_file_sha256": "d08ac2827b16df86f0f86fbceb9e5677c72d38ba9853fd67570e87c95bcab619",
+          "note": "Candidate bytes are checked before atomic rename, and symlink members are rejected."
+        }
+      ]
+    },
+    {
+      "id": "BWS121-R12-SG-005",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "Temp/inode watchdog signals only an exact authenticated owner and persists bounded diagnostics",
+      "evidence": [
+        {
+          "path": ".automation/lib/temp_inode_guard.sh",
+          "symbol": "_automation_temp_watchdog_loop",
+          "line_range": "L512-L559",
+          "full_file_sha256": "f8cc0a7689aaba4a856cb012c7e51e1368eaf1c9f3a35ca42c43bbe6822f019f",
+          "note": "The watchdog verifies exact owner identity before TERM and persists a bounded event."
+        }
+      ]
+    }
+  ],
+  "rejected_suspicions": [
+    {
+      "id": "BWS121-R12-RS-001",
+      "classification": "REJECTED_SUSPICION",
+      "title": "Parent heartbeat erases ACTIVE_CHILD metadata",
+      "reason": "Rejected for paper and bugfix autopilots: their heartbeat touches only mtime under strict ownership validation. The confirmed whole-file rewrite race is limited to standalone run_common locking."
+    },
+    {
+      "id": "BWS121-R12-RS-002",
+      "classification": "REJECTED_SUSPICION",
+      "title": "Parent autopilots package before child cleanup",
+      "reason": "Rejected: both parent finish paths call terminate_active_child before the first final snapshot and ZIP build. The ordering defect is confined to standalone controllers."
+    },
+    {
+      "id": "BWS121-R12-RS-003",
+      "classification": "REJECTED_SUSPICION",
+      "title": "Telegram delivery failure should fail an otherwise valid controller run",
+      "reason": "Rejected as contrary to the documented best-effort policy. The confirmed defect is missing retained delivery evidence, not controller success classification."
+    },
+    {
+      "id": "BWS121-R12-RS-004",
+      "classification": "REJECTED_SUSPICION",
+      "title": "artifacts.zip can expose a partially written ZIP through the final pathname",
+      "reason": "Rejected for ordinary single publication: candidates are built separately, integrity-checked, then atomically renamed. The confirmed defects concern generation races and stale currentness, not partial final bytes."
+    }
+  ],
+  "test_gaps": [
+    {
+      "id": "BWS121-R12-TG-001",
+      "classification": "TEST_GAP",
+      "title": "No two-process test rejects --allow-parallel source-affecting concurrency before run creation",
+      "related_findings": [
+        "BWS121-R12-001"
+      ]
+    },
+    {
+      "id": "BWS121-R12-TG-002",
+      "classification": "TEST_GAP",
+      "title": "No barrier test interleaves standalone heartbeat replacement with active-child registration",
+      "related_findings": [
+        "BWS121-R12-002"
+      ]
+    },
+    {
+      "id": "BWS121-R12-TG-003",
+      "classification": "TEST_GAP",
+      "title": "No test forces heartbeat failure and proves the main controller fences itself",
+      "related_findings": [
+        "BWS121-R12-003"
+      ]
+    },
+    {
+      "id": "BWS121-R12-TG-004",
+      "classification": "TEST_GAP",
+      "title": "No stale-takeover test retains a live recorded child after parent exit",
+      "related_findings": [
+        "BWS121-R12-004"
+      ]
+    },
+    {
+      "id": "BWS121-R12-TG-005",
+      "classification": "TEST_GAP",
+      "title": "No child that ignores --duration is used to test parent deadline enforcement",
+      "related_findings": [
+        "BWS121-R12-005"
+      ]
+    },
+    {
+      "id": "BWS121-R12-TG-006",
+      "classification": "TEST_GAP",
+      "title": "No leader-exit/descendant-survival process-group test exists",
+      "related_findings": [
+        "BWS121-R12-006"
+      ]
+    },
+    {
+      "id": "BWS121-R12-TG-007",
+      "classification": "TEST_GAP",
+      "title": "No crash matrix reconstructs autopilot state from durable artifacts across every commit boundary",
+      "related_findings": [
+        "BWS121-R12-007"
+      ]
+    },
+    {
+      "id": "BWS121-R12-TG-008",
+      "classification": "TEST_GAP",
+      "title": "No fixed-clock exclusive-creation test covers run, quarantine, and stale-handoff identities",
+      "related_findings": [
+        "BWS121-R12-008"
+      ]
+    },
+    {
+      "id": "BWS121-R12-TG-009",
+      "classification": "TEST_GAP",
+      "title": "No signal-during-child-write test checks standalone final archive stability",
+      "related_findings": [
+        "BWS121-R12-009"
+      ]
+    },
+    {
+      "id": "BWS121-R12-TG-010",
+      "classification": "TEST_GAP",
+      "title": "No live-owner cleanup test prevents deletion of allowlisted active residue",
+      "related_findings": [
+        "BWS121-R12-010"
+      ]
+    },
+    {
+      "id": "BWS121-R12-TG-011",
+      "classification": "TEST_GAP",
+      "title": "No concurrent shared-archive publisher or stale-generation consumer test exists",
+      "related_findings": [
+        "BWS121-R12-011",
+        "BWS121-R12-012"
+      ]
+    },
+    {
+      "id": "BWS121-R12-TG-012",
+      "classification": "TEST_GAP",
+      "title": "No test proves final notification outcome is present in or linked to retained terminal evidence",
+      "related_findings": [
+        "BWS121-R12-013"
+      ]
+    }
+  ],
+  "environment_blockers": [
+    {
+      "id": "BWS121-R12-EB-001",
+      "classification": "ENVIRONMENT_BLOCKER",
+      "title": "Canonical Node 20.20.2 runtime unavailable",
+      "detail": "The environment provided Node 22.16.0. Focused tests are supplementary and are not canonical acceptance."
+    },
+    {
+      "id": "BWS121-R12-EB-002",
+      "classification": "ENVIRONMENT_BLOCKER",
+      "title": "Controller, Codex, service, provider, database, and Telegram network execution prohibited",
+      "detail": "No repository controller, implementation agent, service, provider, credential, persistent database, or Telegram endpoint was invoked. Dynamic evidence uses inert external harnesses only."
+    },
+    {
+      "id": "BWS121-R12-EB-003",
+      "classification": "ENVIRONMENT_BLOCKER",
+      "title": "shellcheck and psql unavailable",
+      "detail": "Shell syntax was checked with bash -n; PostgreSQL was not needed for R12 and no database was contacted."
+    }
+  ]
+}
