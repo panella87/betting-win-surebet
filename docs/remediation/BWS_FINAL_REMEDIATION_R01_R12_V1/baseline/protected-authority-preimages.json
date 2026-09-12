@@ -1,0 +1,184 @@
+{
+  "baseline_sha256": "e303719e5ce64df47df7b0594433a8978e3b01c5a3d0d0bd9129b9b6340b20cd",
+  "documents": [
+    {
+      "historical_hash_rebased_to_bws122": false,
+      "historical_wave04_preimage_sha256": "94c414fbc522623678b3c5e468e7e5d7e8787d842546776f741d36a9e6beeb73",
+      "markers_preserved": [
+        "current_task=BWS-600",
+        "active_implementation_queue=none",
+        "bws710_status=BLOCKED_ACCEPTED_BETTING_WIN_B1_MULTI_VENUE_API_REQUIRED",
+        "BWS-900"
+      ],
+      "path": "AGENTS.md",
+      "preimage_mode": "0744",
+      "preimage_sha256": "94c414fbc522623678b3c5e468e7e5d7e8787d842546776f741d36a9e6beeb73"
+    },
+    {
+      "historical_hash_rebased_to_bws122": false,
+      "historical_wave04_preimage_sha256": "1b08809e477a4fd233464cea1388cede73ac6b9c05c06c15eea960c698004449",
+      "markers_preserved": [
+        "current_task=BWS-600",
+        "active_implementation_queue=none",
+        "bws710_status=BLOCKED_ACCEPTED_BETTING_WIN_B1_MULTI_VENUE_API_REQUIRED",
+        "BWS-900"
+      ],
+      "path": "PROJECT_STATUS.md",
+      "preimage_mode": "0744",
+      "preimage_sha256": "1b08809e477a4fd233464cea1388cede73ac6b9c05c06c15eea960c698004449"
+    },
+    {
+      "historical_hash_rebased_to_bws122": false,
+      "historical_wave04_preimage_sha256": "b0312d4abfa03fad81c6e69ab66c7024647816e305db2c99724c83dacd8f79a4",
+      "markers_preserved": [],
+      "path": "README.md",
+      "preimage_mode": "0744",
+      "preimage_sha256": "b0312d4abfa03fad81c6e69ab66c7024647816e305db2c99724c83dacd8f79a4"
+    },
+    {
+      "historical_hash_rebased_to_bws122": true,
+      "historical_wave04_preimage_sha256": "732b6e6ef7136af4e9fb7074c9606c10c68f1f48546f35feb78f88ec2b3ce40f",
+      "markers_preserved": [
+        "current_task=BWS-600",
+        "active_implementation_queue=none",
+        "bws710_status=BLOCKED_ACCEPTED_BETTING_WIN_B1_MULTI_VENUE_API_REQUIRED",
+        "BWS-900"
+      ],
+      "path": "docs/000_documentation_index.md",
+      "preimage_mode": "0744",
+      "preimage_sha256": "e5cf97e189fa4e9bd7e9c6dd5bbad23d29ef785276fb742e400c5217e6e6cd6b"
+    },
+    {
+      "historical_hash_rebased_to_bws122": false,
+      "historical_wave04_preimage_sha256": "bdba05055d9c507d4d4ba1901d1cb5d18a15e8359b6c84a4027a6eaadb87ec3b",
+      "markers_preserved": [],
+      "path": "docs/002_dependency_contract_with_betting_win.md",
+      "preimage_mode": "0744",
+      "preimage_sha256": "bdba05055d9c507d4d4ba1901d1cb5d18a15e8359b6c84a4027a6eaadb87ec3b"
+    },
+    {
+      "historical_hash_rebased_to_bws122": false,
+      "historical_wave04_preimage_sha256": "c0cfe1e75e4dde78561dae7905411a1b308c3d9c760c735e88ee81c81fdec21c",
+      "markers_preserved": [],
+      "path": "docs/012_runbook.md",
+      "preimage_mode": "0744",
+      "preimage_sha256": "c0cfe1e75e4dde78561dae7905411a1b308c3d9c760c735e88ee81c81fdec21c"
+    },
+    {
+      "historical_hash_rebased_to_bws122": false,
+      "historical_wave04_preimage_sha256": "2b660f97040f6893f0110172a0f3e5ebe0b6e25f64f0e8ea4daf8ab310242620",
+      "markers_preserved": [],
+      "path": "docs/041_external_runtime_preflight_and_bws600_campaign.md",
+      "preimage_mode": "0744",
+      "preimage_sha256": "2b660f97040f6893f0110172a0f3e5ebe0b6e25f64f0e8ea4daf8ab310242620"
+    },
+    {
+      "historical_hash_rebased_to_bws122": false,
+      "historical_wave04_preimage_sha256": "6f0099cd31db79c590159c7134895821072a37209b0daf01a884e8652b8a1c24",
+      "markers_preserved": [],
+      "path": "docs/047_b1_cross_venue_offline_falsification_program.md",
+      "preimage_mode": "0744",
+      "preimage_sha256": "6f0099cd31db79c590159c7134895821072a37209b0daf01a884e8652b8a1c24"
+    },
+    {
+      "historical_hash_rebased_to_bws122": false,
+      "historical_wave04_preimage_sha256": "a37339908cf947ab24dc9580345f0c742f39e1ca167544221a6f4ae138e2cecc",
+      "markers_preserved": [],
+      "path": "docs/048_b1_upstream_contract.md",
+      "preimage_mode": "0644",
+      "preimage_sha256": "a37339908cf947ab24dc9580345f0c742f39e1ca167544221a6f4ae138e2cecc"
+    },
+    {
+      "historical_hash_rebased_to_bws122": false,
+      "historical_wave04_preimage_sha256": "8b6dc3fb7d20213e0a60906d9bb217d4d19bdb5339a79bdd45b9fa4bceb4f543",
+      "markers_preserved": [],
+      "path": "docs/049_b1_market_equivalence.md",
+      "preimage_mode": "0644",
+      "preimage_sha256": "8b6dc3fb7d20213e0a60906d9bb217d4d19bdb5339a79bdd45b9fa4bceb4f543"
+    },
+    {
+      "historical_hash_rebased_to_bws122": false,
+      "historical_wave04_preimage_sha256": "3ea87cc62935c08af9d0535ec13a90be3825c4d8f579a53c58a6beaeeae50735",
+      "markers_preserved": [],
+      "path": "docs/050_b1_falsification_acceptance.md",
+      "preimage_mode": "0644",
+      "preimage_sha256": "3ea87cc62935c08af9d0535ec13a90be3825c4d8f579a53c58a6beaeeae50735"
+    },
+    {
+      "historical_hash_rebased_to_bws122": false,
+      "historical_wave04_preimage_sha256": "a7505e399280e62a17ca90460e135802627c850dbc47a7d8200bb77274774dde",
+      "markers_preserved": [],
+      "path": "docs/051_b1_implementation_map.md",
+      "preimage_mode": "0744",
+      "preimage_sha256": "a7505e399280e62a17ca90460e135802627c850dbc47a7d8200bb77274774dde"
+    },
+    {
+      "historical_hash_rebased_to_bws122": false,
+      "historical_wave04_preimage_sha256": "66114721e6be77ab24e896cfda2e1ae8df32eea2382f03bd696eb39ed4b20dac",
+      "markers_preserved": [],
+      "path": "docs/MASTER_PLAN.md",
+      "preimage_mode": "0744",
+      "preimage_sha256": "66114721e6be77ab24e896cfda2e1ae8df32eea2382f03bd696eb39ed4b20dac"
+    },
+    {
+      "historical_hash_rebased_to_bws122": false,
+      "historical_wave04_preimage_sha256": "54ac0cd2f3819bccd6748db480b5d870d0b21dbac8f42f003a411b72eacdbf10",
+      "markers_preserved": [],
+      "path": "docs/automation/README.md",
+      "preimage_mode": "0744",
+      "preimage_sha256": "54ac0cd2f3819bccd6748db480b5d870d0b21dbac8f42f003a411b72eacdbf10"
+    },
+    {
+      "historical_hash_rebased_to_bws122": false,
+      "historical_wave04_preimage_sha256": "52031ce84c470b72aeb2f70b02de0f63035794c74481b2c3c687f5fdfa12d3ad",
+      "markers_preserved": [],
+      "path": "docs/automation/api-only-upstream.md",
+      "preimage_mode": "0644",
+      "preimage_sha256": "52031ce84c470b72aeb2f70b02de0f63035794c74481b2c3c687f5fdfa12d3ad"
+    },
+    {
+      "historical_hash_rebased_to_bws122": false,
+      "historical_wave04_preimage_sha256": "f67db876487f2ac92ad8bb56fa3f8b851e980f6fd37cbc85476f6370a45a8b4d",
+      "markers_preserved": [
+        "current_task=BWS-600",
+        "active_implementation_queue=none"
+      ],
+      "path": "docs/automation/current-implementation-task.md",
+      "preimage_mode": "0744",
+      "preimage_sha256": "f67db876487f2ac92ad8bb56fa3f8b851e980f6fd37cbc85476f6370a45a8b4d"
+    },
+    {
+      "historical_hash_rebased_to_bws122": false,
+      "historical_wave04_preimage_sha256": "af4f9d0fa5c84385d3d4fae2cf401410f4aa563c9f2649df5d16577ea3ca34b8",
+      "markers_preserved": [
+        "current_task=BWS-600",
+        "active_implementation_queue=none",
+        "bws710_status=BLOCKED_ACCEPTED_BETTING_WIN_B1_MULTI_VENUE_API_REQUIRED",
+        "BWS-900"
+      ],
+      "path": "docs/repo_status_current.md",
+      "preimage_mode": "0744",
+      "preimage_sha256": "af4f9d0fa5c84385d3d4fae2cf401410f4aa563c9f2649df5d16577ea3ca34b8"
+    }
+  ],
+  "excluded_paths": [
+    "AGENTS.md",
+    "PROJECT_STATUS.md",
+    "README.md",
+    "docs/002_dependency_contract_with_betting_win.md",
+    "docs/012_runbook.md",
+    "docs/041_external_runtime_preflight_and_bws600_campaign.md",
+    "docs/047_b1_cross_venue_offline_falsification_program.md",
+    "docs/048_b1_upstream_contract.md",
+    "docs/049_b1_market_equivalence.md",
+    "docs/050_b1_falsification_acceptance.md",
+    "docs/051_b1_implementation_map.md",
+    "docs/MASTER_PLAN.md",
+    "docs/automation/README.md",
+    "docs/automation/api-only-upstream.md",
+    "docs/automation/current-implementation-task.md",
+    "docs/repo_status_current.md"
+  ],
+  "program_id": "BWS_FINAL_REMEDIATION_R01_R12_V1",
+  "schema": "bws-remediation-protected-authority-preimages-v1"
+}

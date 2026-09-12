@@ -1,0 +1,565 @@
+{
+  "$defs": {
+    "changed_path": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "enum": [
+            "ADD",
+            "REPLACE",
+            "DELETE"
+          ]
+        },
+        "path": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "postimage_mode": {
+          "oneOf": [
+            {
+              "pattern": "^[0-7]{4}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "postimage_sha256": {
+          "oneOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "preimage_mode": {
+          "oneOf": [
+            {
+              "pattern": "^[0-7]{4}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "preimage_sha256": {
+          "oneOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "path",
+        "action",
+        "preimage_sha256",
+        "postimage_sha256",
+        "preimage_mode",
+        "postimage_mode"
+      ],
+      "type": "object"
+    },
+    "environment_proof": {
+      "additionalProperties": false,
+      "properties": {
+        "cleanup_result": {
+          "enum": [
+            "PASSED",
+            "FAILED",
+            "NOT_REQUIRED",
+            "NOT_RUN"
+          ]
+        },
+        "evidence_sha256": {
+          "oneOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "identity": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "lane": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "postimage_generation_id": {
+          "oneOf": [
+            {
+              "minLength": 8,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "result": {
+          "enum": [
+            "PASSED",
+            "FAILED",
+            "NOT_RUN",
+            "BLOCKED",
+            "EXTERNAL_PENDING"
+          ]
+        },
+        "source_generation_id": {
+          "minLength": 8,
+          "type": "string"
+        }
+      },
+      "required": [
+        "lane",
+        "identity",
+        "result",
+        "evidence_sha256",
+        "cleanup_result",
+        "source_generation_id",
+        "postimage_generation_id"
+      ],
+      "type": "object"
+    },
+    "hex64": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "holds": {
+      "additionalProperties": false,
+      "properties": {
+        "BWS-600": {
+          "enum": [
+            "BLOCKED",
+            "RELEASED"
+          ]
+        },
+        "BWS-710": {
+          "enum": [
+            "BLOCKED",
+            "RELEASED"
+          ]
+        },
+        "BWS-900": {
+          "enum": [
+            "PARKED_NOT_AUTHORIZED",
+            "AUTHORIZED"
+          ]
+        },
+        "deployment": {
+          "enum": [
+            "BLOCKED",
+            "RELEASED"
+          ]
+        },
+        "live_execution": {
+          "enum": [
+            "PROHIBITED",
+            "AUTHORIZED"
+          ]
+        },
+        "release": {
+          "enum": [
+            "BLOCKED",
+            "RELEASED"
+          ]
+        }
+      },
+      "required": [
+        "BWS-600",
+        "BWS-710",
+        "BWS-900",
+        "release",
+        "deployment",
+        "live_execution"
+      ],
+      "type": "object"
+    },
+    "nullable_hex64": {
+      "oneOf": [
+        {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "path_image": {
+      "additionalProperties": false,
+      "properties": {
+        "exists": {
+          "type": "boolean"
+        },
+        "mode": {
+          "oneOf": [
+            {
+              "pattern": "^[0-7]{4}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "path": {
+          "minLength": 1,
+          "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$",
+          "type": "string"
+        },
+        "sha256": {
+          "oneOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "size": {
+          "oneOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "path",
+        "exists",
+        "sha256",
+        "mode",
+        "size"
+      ],
+      "type": "object"
+    },
+    "repository_identity": {
+      "additionalProperties": false,
+      "properties": {
+        "baseline_archive": {
+          "const": "betting-win-surebet122.zip"
+        },
+        "baseline_sha256": {
+          "const": "e303719e5ce64df47df7b0594433a8978e3b01c5a3d0d0bd9129b9b6340b20cd"
+        },
+        "git_commit": {
+          "oneOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "name": {
+          "const": "betting-win-surebet"
+        },
+        "source_generation_id": {
+          "minLength": 8,
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "baseline_archive",
+        "baseline_sha256",
+        "source_generation_id",
+        "git_commit"
+      ],
+      "type": "object"
+    },
+    "test_execution": {
+      "additionalProperties": false,
+      "properties": {
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "environment_generation_id": {
+          "oneOf": [
+            {
+              "minLength": 8,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "exit_code": {
+          "oneOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "finding_ids": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "node_version": {
+          "oneOf": [
+            {
+              "const": "v20.20.2"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "production_entrypoint": {
+          "type": "boolean"
+        },
+        "status": {
+          "enum": [
+            "PASSED",
+            "FAILED",
+            "NOT_RUN",
+            "TIMED_OUT",
+            "BLOCKED"
+          ]
+        },
+        "stderr_sha256": {
+          "oneOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "stdout_sha256": {
+          "oneOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "test_requirement_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "timeout_seconds": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "working_directory": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "test_requirement_id",
+        "finding_ids",
+        "command",
+        "working_directory",
+        "timeout_seconds",
+        "status",
+        "exit_code",
+        "stdout_sha256",
+        "stderr_sha256",
+        "production_entrypoint",
+        "node_version",
+        "environment_generation_id"
+      ],
+      "type": "object"
+    },
+    "tranche_state": {
+      "enum": [
+        "NOT_ADMITTED",
+        "ADMITTED",
+        "SOURCE_IMPLEMENTED",
+        "FOCUSED_TESTS_PASSED",
+        "ENVIRONMENT_PROOF_PASSED",
+        "ACCEPTED",
+        "BLOCKED",
+        "SOURCE_COMPLETE_EXTERNAL_PENDING"
+      ],
+      "type": "string"
+    }
+  },
+  "$id": "https://betting-win-surebet.invalid/schemas/preimage-receipt.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "campaign_order": {
+      "maximum": 47,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "clock_authority": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "example_notice": {
+      "type": "string"
+    },
+    "git": {
+      "additionalProperties": false,
+      "properties": {
+        "branch": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dirty_state": {
+          "enum": [
+            "CLEAN",
+            "DIRTY",
+            "UNKNOWN",
+            "TO_CAPTURE_AT_ACTIVATION"
+          ]
+        },
+        "head": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/hex64"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "upstream": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "head",
+        "branch",
+        "upstream",
+        "dirty_state"
+      ],
+      "type": "object"
+    },
+    "owner": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "parent_receipt_sha256": {
+      "$ref": "#/$defs/nullable_hex64"
+    },
+    "path_images": {
+      "items": {
+        "$ref": "#/$defs/path_image"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "previous_receipt_sha256": {
+      "$ref": "#/$defs/nullable_hex64"
+    },
+    "program_id": {
+      "const": "BWS_FINAL_REMEDIATION_R01_R12_V1"
+    },
+    "record_type": {
+      "const": "preimage-receipt"
+    },
+    "repository_identity": {
+      "$ref": "#/$defs/repository_identity"
+    },
+    "retained_holds": {
+      "$ref": "#/$defs/holds"
+    },
+    "reviewer": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "source_manifest_classification": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "state": {
+      "$ref": "#/$defs/tranche_state"
+    },
+    "tranche_id": {
+      "type": "string"
+    },
+    "unresolved_blockers": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    }
+  },
+  "required": [
+    "schema_version",
+    "record_type",
+    "program_id",
+    "repository_identity",
+    "created_at",
+    "clock_authority",
+    "owner",
+    "reviewer",
+    "parent_receipt_sha256",
+    "previous_receipt_sha256",
+    "unresolved_blockers",
+    "retained_holds",
+    "tranche_id",
+    "campaign_order",
+    "state",
+    "git",
+    "path_images",
+    "source_manifest_classification"
+  ],
+  "title": "preimage-receipt contract",
+  "type": "object"
+}

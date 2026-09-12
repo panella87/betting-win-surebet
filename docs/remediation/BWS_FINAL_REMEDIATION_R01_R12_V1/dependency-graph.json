@@ -1,0 +1,982 @@
+{
+  "cycles": [],
+  "edges": [
+    {
+      "from": "T39",
+      "to": "T37"
+    },
+    {
+      "from": "T37",
+      "to": "T38"
+    },
+    {
+      "from": "T39",
+      "to": "T38"
+    },
+    {
+      "from": "T38",
+      "to": "T26"
+    },
+    {
+      "from": "T01",
+      "to": "T09"
+    },
+    {
+      "from": "T38",
+      "to": "T30"
+    },
+    {
+      "from": "T01",
+      "to": "T31"
+    },
+    {
+      "from": "T09",
+      "to": "T31"
+    },
+    {
+      "from": "T30",
+      "to": "T31"
+    },
+    {
+      "from": "T37",
+      "to": "T31"
+    },
+    {
+      "from": "T38",
+      "to": "T31"
+    },
+    {
+      "from": "T39",
+      "to": "T40"
+    },
+    {
+      "from": "T40",
+      "to": "T44"
+    },
+    {
+      "from": "T44",
+      "to": "T45"
+    },
+    {
+      "from": "T44",
+      "to": "T46"
+    },
+    {
+      "from": "T45",
+      "to": "T46"
+    },
+    {
+      "from": "T44",
+      "to": "T47"
+    },
+    {
+      "from": "T45",
+      "to": "T47"
+    },
+    {
+      "from": "T46",
+      "to": "T47"
+    },
+    {
+      "from": "T40",
+      "to": "T02"
+    },
+    {
+      "from": "T02",
+      "to": "T03"
+    },
+    {
+      "from": "T37",
+      "to": "T04"
+    },
+    {
+      "from": "T38",
+      "to": "T04"
+    },
+    {
+      "from": "T03",
+      "to": "T05"
+    },
+    {
+      "from": "T03",
+      "to": "T06"
+    },
+    {
+      "from": "T01",
+      "to": "T10"
+    },
+    {
+      "from": "T03",
+      "to": "T10"
+    },
+    {
+      "from": "T06",
+      "to": "T10"
+    },
+    {
+      "from": "T09",
+      "to": "T10"
+    },
+    {
+      "from": "T10",
+      "to": "T11"
+    },
+    {
+      "from": "T37",
+      "to": "T11"
+    },
+    {
+      "from": "T09",
+      "to": "T21"
+    },
+    {
+      "from": "T10",
+      "to": "T21"
+    },
+    {
+      "from": "T40",
+      "to": "T21"
+    },
+    {
+      "from": "T21",
+      "to": "T22"
+    },
+    {
+      "from": "T05",
+      "to": "T23"
+    },
+    {
+      "from": "T11",
+      "to": "T23"
+    },
+    {
+      "from": "T21",
+      "to": "T23"
+    },
+    {
+      "from": "T21",
+      "to": "T24"
+    },
+    {
+      "from": "T23",
+      "to": "T24"
+    },
+    {
+      "from": "T21",
+      "to": "T25"
+    },
+    {
+      "from": "T26",
+      "to": "T25"
+    },
+    {
+      "from": "T24",
+      "to": "T27"
+    },
+    {
+      "from": "T26",
+      "to": "T27"
+    },
+    {
+      "from": "T40",
+      "to": "T27"
+    },
+    {
+      "from": "T27",
+      "to": "T33"
+    },
+    {
+      "from": "T40",
+      "to": "T33"
+    },
+    {
+      "from": "T03",
+      "to": "T13"
+    },
+    {
+      "from": "T10",
+      "to": "T13"
+    },
+    {
+      "from": "T31",
+      "to": "T13"
+    },
+    {
+      "from": "T03",
+      "to": "T14"
+    },
+    {
+      "from": "T10",
+      "to": "T14"
+    },
+    {
+      "from": "T03",
+      "to": "T07"
+    },
+    {
+      "from": "T06",
+      "to": "T07"
+    },
+    {
+      "from": "T06",
+      "to": "T08"
+    },
+    {
+      "from": "T07",
+      "to": "T08"
+    },
+    {
+      "from": "T07",
+      "to": "T15"
+    },
+    {
+      "from": "T14",
+      "to": "T15"
+    },
+    {
+      "from": "T03",
+      "to": "T16"
+    },
+    {
+      "from": "T10",
+      "to": "T16"
+    },
+    {
+      "from": "T14",
+      "to": "T16"
+    },
+    {
+      "from": "T15",
+      "to": "T16"
+    },
+    {
+      "from": "T03",
+      "to": "T12"
+    },
+    {
+      "from": "T07",
+      "to": "T12"
+    },
+    {
+      "from": "T08",
+      "to": "T12"
+    },
+    {
+      "from": "T10",
+      "to": "T12"
+    },
+    {
+      "from": "T14",
+      "to": "T12"
+    },
+    {
+      "from": "T16",
+      "to": "T12"
+    },
+    {
+      "from": "T12",
+      "to": "T17"
+    },
+    {
+      "from": "T14",
+      "to": "T17"
+    },
+    {
+      "from": "T15",
+      "to": "T17"
+    },
+    {
+      "from": "T16",
+      "to": "T17"
+    },
+    {
+      "from": "T03",
+      "to": "T18"
+    },
+    {
+      "from": "T26",
+      "to": "T18"
+    },
+    {
+      "from": "T13",
+      "to": "T19"
+    },
+    {
+      "from": "T18",
+      "to": "T19"
+    },
+    {
+      "from": "T17",
+      "to": "T20"
+    },
+    {
+      "from": "T18",
+      "to": "T20"
+    },
+    {
+      "from": "T19",
+      "to": "T20"
+    },
+    {
+      "from": "T18",
+      "to": "T28"
+    },
+    {
+      "from": "T22",
+      "to": "T28"
+    },
+    {
+      "from": "T23",
+      "to": "T28"
+    },
+    {
+      "from": "T26",
+      "to": "T28"
+    },
+    {
+      "from": "T27",
+      "to": "T28"
+    },
+    {
+      "from": "T27",
+      "to": "T29"
+    },
+    {
+      "from": "T28",
+      "to": "T29"
+    },
+    {
+      "from": "T47",
+      "to": "T29"
+    },
+    {
+      "from": "T10",
+      "to": "T32"
+    },
+    {
+      "from": "T13",
+      "to": "T32"
+    },
+    {
+      "from": "T31",
+      "to": "T32"
+    },
+    {
+      "from": "T21",
+      "to": "T34"
+    },
+    {
+      "from": "T23",
+      "to": "T34"
+    },
+    {
+      "from": "T31",
+      "to": "T34"
+    },
+    {
+      "from": "T33",
+      "to": "T34"
+    },
+    {
+      "from": "T22",
+      "to": "T35"
+    },
+    {
+      "from": "T23",
+      "to": "T35"
+    },
+    {
+      "from": "T25",
+      "to": "T35"
+    },
+    {
+      "from": "T27",
+      "to": "T35"
+    },
+    {
+      "from": "T32",
+      "to": "T35"
+    },
+    {
+      "from": "T34",
+      "to": "T35"
+    },
+    {
+      "from": "T47",
+      "to": "T35"
+    },
+    {
+      "from": "T27",
+      "to": "T36"
+    },
+    {
+      "from": "T28",
+      "to": "T36"
+    },
+    {
+      "from": "T29",
+      "to": "T36"
+    },
+    {
+      "from": "T30",
+      "to": "T36"
+    },
+    {
+      "from": "T31",
+      "to": "T36"
+    },
+    {
+      "from": "T32",
+      "to": "T36"
+    },
+    {
+      "from": "T33",
+      "to": "T36"
+    },
+    {
+      "from": "T34",
+      "to": "T36"
+    },
+    {
+      "from": "T35",
+      "to": "T36"
+    },
+    {
+      "from": "T37",
+      "to": "T36"
+    },
+    {
+      "from": "T36",
+      "to": "T41"
+    },
+    {
+      "from": "T40",
+      "to": "T41"
+    },
+    {
+      "from": "T39",
+      "to": "T42"
+    },
+    {
+      "from": "T41",
+      "to": "T42"
+    },
+    {
+      "from": "T40",
+      "to": "T43"
+    },
+    {
+      "from": "T41",
+      "to": "T43"
+    },
+    {
+      "from": "T42",
+      "to": "T43"
+    },
+    {
+      "from": "T01",
+      "to": "T43"
+    },
+    {
+      "from": "T02",
+      "to": "T43"
+    },
+    {
+      "from": "T03",
+      "to": "T43"
+    },
+    {
+      "from": "T04",
+      "to": "T43"
+    },
+    {
+      "from": "T05",
+      "to": "T43"
+    },
+    {
+      "from": "T06",
+      "to": "T43"
+    },
+    {
+      "from": "T07",
+      "to": "T43"
+    },
+    {
+      "from": "T08",
+      "to": "T43"
+    },
+    {
+      "from": "T09",
+      "to": "T43"
+    },
+    {
+      "from": "T10",
+      "to": "T43"
+    },
+    {
+      "from": "T11",
+      "to": "T43"
+    },
+    {
+      "from": "T12",
+      "to": "T43"
+    },
+    {
+      "from": "T13",
+      "to": "T43"
+    },
+    {
+      "from": "T14",
+      "to": "T43"
+    },
+    {
+      "from": "T15",
+      "to": "T43"
+    },
+    {
+      "from": "T16",
+      "to": "T43"
+    },
+    {
+      "from": "T17",
+      "to": "T43"
+    },
+    {
+      "from": "T18",
+      "to": "T43"
+    },
+    {
+      "from": "T19",
+      "to": "T43"
+    },
+    {
+      "from": "T20",
+      "to": "T43"
+    },
+    {
+      "from": "T21",
+      "to": "T43"
+    },
+    {
+      "from": "T22",
+      "to": "T43"
+    },
+    {
+      "from": "T23",
+      "to": "T43"
+    },
+    {
+      "from": "T24",
+      "to": "T43"
+    },
+    {
+      "from": "T25",
+      "to": "T43"
+    },
+    {
+      "from": "T26",
+      "to": "T43"
+    },
+    {
+      "from": "T27",
+      "to": "T43"
+    },
+    {
+      "from": "T28",
+      "to": "T43"
+    },
+    {
+      "from": "T29",
+      "to": "T43"
+    },
+    {
+      "from": "T30",
+      "to": "T43"
+    },
+    {
+      "from": "T31",
+      "to": "T43"
+    },
+    {
+      "from": "T32",
+      "to": "T43"
+    },
+    {
+      "from": "T33",
+      "to": "T43"
+    },
+    {
+      "from": "T34",
+      "to": "T43"
+    },
+    {
+      "from": "T35",
+      "to": "T43"
+    },
+    {
+      "from": "T36",
+      "to": "T43"
+    },
+    {
+      "from": "T37",
+      "to": "T43"
+    },
+    {
+      "from": "T38",
+      "to": "T43"
+    },
+    {
+      "from": "T39",
+      "to": "T43"
+    },
+    {
+      "from": "T44",
+      "to": "T43"
+    },
+    {
+      "from": "T45",
+      "to": "T43"
+    },
+    {
+      "from": "T46",
+      "to": "T43"
+    },
+    {
+      "from": "T47",
+      "to": "T43"
+    }
+  ],
+  "nodes": [
+    {
+      "campaign_order": 1,
+      "id": "T39",
+      "owner": "R10",
+      "stage": "S1",
+      "tranche_id": "BWS-W4-T39"
+    },
+    {
+      "campaign_order": 2,
+      "id": "T37",
+      "owner": "R10",
+      "stage": "S1",
+      "tranche_id": "BWS-W4-T37"
+    },
+    {
+      "campaign_order": 3,
+      "id": "T38",
+      "owner": "R10",
+      "stage": "S1",
+      "tranche_id": "BWS-W4-T38"
+    },
+    {
+      "campaign_order": 4,
+      "id": "T26",
+      "owner": "R07",
+      "stage": "S1",
+      "tranche_id": "BWS-W3-T26"
+    },
+    {
+      "campaign_order": 5,
+      "id": "T01",
+      "owner": "R03",
+      "stage": "S1",
+      "tranche_id": "BWS-W1-T01"
+    },
+    {
+      "campaign_order": 6,
+      "id": "T09",
+      "owner": "R03",
+      "stage": "S1",
+      "tranche_id": "BWS-W1-T09"
+    },
+    {
+      "campaign_order": 7,
+      "id": "T30",
+      "owner": "R08",
+      "stage": "S1",
+      "tranche_id": "BWS-W3-T30"
+    },
+    {
+      "campaign_order": 8,
+      "id": "T31",
+      "owner": "R08",
+      "stage": "S1",
+      "tranche_id": "BWS-W3-T31"
+    },
+    {
+      "campaign_order": 9,
+      "id": "T40",
+      "owner": "R11",
+      "stage": "S2",
+      "tranche_id": "BWS-W4-T40"
+    },
+    {
+      "campaign_order": 10,
+      "id": "T44",
+      "owner": "R12",
+      "stage": "S2",
+      "tranche_id": "BWS-W4-T44"
+    },
+    {
+      "campaign_order": 11,
+      "id": "T45",
+      "owner": "R12",
+      "stage": "S2",
+      "tranche_id": "BWS-W4-T45"
+    },
+    {
+      "campaign_order": 12,
+      "id": "T46",
+      "owner": "R12",
+      "stage": "S2",
+      "tranche_id": "BWS-W4-T46"
+    },
+    {
+      "campaign_order": 13,
+      "id": "T47",
+      "owner": "R12",
+      "stage": "S2",
+      "tranche_id": "BWS-W4-T47"
+    },
+    {
+      "campaign_order": 14,
+      "id": "T02",
+      "owner": "R01",
+      "stage": "S3",
+      "tranche_id": "BWS-W1-T02"
+    },
+    {
+      "campaign_order": 15,
+      "id": "T03",
+      "owner": "R01",
+      "stage": "S3",
+      "tranche_id": "BWS-W1-T03"
+    },
+    {
+      "campaign_order": 16,
+      "id": "T04",
+      "owner": "R01",
+      "stage": "S3",
+      "tranche_id": "BWS-W1-T04"
+    },
+    {
+      "campaign_order": 17,
+      "id": "T05",
+      "owner": "R01",
+      "stage": "S3",
+      "tranche_id": "BWS-W1-T05"
+    },
+    {
+      "campaign_order": 18,
+      "id": "T06",
+      "owner": "R02",
+      "stage": "S3",
+      "tranche_id": "BWS-W1-T06"
+    },
+    {
+      "campaign_order": 19,
+      "id": "T10",
+      "owner": "R03",
+      "stage": "S3",
+      "tranche_id": "BWS-W1-T10"
+    },
+    {
+      "campaign_order": 20,
+      "id": "T11",
+      "owner": "R03",
+      "stage": "S3",
+      "tranche_id": "BWS-W1-T11"
+    },
+    {
+      "campaign_order": 21,
+      "id": "T21",
+      "owner": "R06",
+      "stage": "S3",
+      "tranche_id": "BWS-W2-T21"
+    },
+    {
+      "campaign_order": 22,
+      "id": "T22",
+      "owner": "R06",
+      "stage": "S3",
+      "tranche_id": "BWS-W2-T22"
+    },
+    {
+      "campaign_order": 23,
+      "id": "T23",
+      "owner": "R06",
+      "stage": "S3",
+      "tranche_id": "BWS-W2-T23"
+    },
+    {
+      "campaign_order": 24,
+      "id": "T24",
+      "owner": "R06",
+      "stage": "S3",
+      "tranche_id": "BWS-W2-T24"
+    },
+    {
+      "campaign_order": 25,
+      "id": "T25",
+      "owner": "R06",
+      "stage": "S3",
+      "tranche_id": "BWS-W2-T25"
+    },
+    {
+      "campaign_order": 26,
+      "id": "T27",
+      "owner": "R07",
+      "stage": "S3",
+      "tranche_id": "BWS-W3-T27"
+    },
+    {
+      "campaign_order": 27,
+      "id": "T33",
+      "owner": "R09",
+      "stage": "S3",
+      "tranche_id": "BWS-W3-T33"
+    },
+    {
+      "campaign_order": 28,
+      "id": "T13",
+      "owner": "R03",
+      "stage": "S4",
+      "tranche_id": "BWS-W1-T13"
+    },
+    {
+      "campaign_order": 29,
+      "id": "T14",
+      "owner": "R04",
+      "stage": "S4",
+      "tranche_id": "BWS-W2-T14"
+    },
+    {
+      "campaign_order": 30,
+      "id": "T07",
+      "owner": "R02",
+      "stage": "S4",
+      "tranche_id": "BWS-W1-T07"
+    },
+    {
+      "campaign_order": 31,
+      "id": "T08",
+      "owner": "R02",
+      "stage": "S4",
+      "tranche_id": "BWS-W1-T08"
+    },
+    {
+      "campaign_order": 32,
+      "id": "T15",
+      "owner": "R04",
+      "stage": "S4",
+      "tranche_id": "BWS-W2-T15"
+    },
+    {
+      "campaign_order": 33,
+      "id": "T16",
+      "owner": "R04",
+      "stage": "S4",
+      "tranche_id": "BWS-W2-T16"
+    },
+    {
+      "campaign_order": 34,
+      "id": "T12",
+      "owner": "R03",
+      "stage": "S4",
+      "tranche_id": "BWS-W1-T12"
+    },
+    {
+      "campaign_order": 35,
+      "id": "T17",
+      "owner": "R04",
+      "stage": "S4",
+      "tranche_id": "BWS-W2-T17"
+    },
+    {
+      "campaign_order": 36,
+      "id": "T18",
+      "owner": "R05",
+      "stage": "S5",
+      "tranche_id": "BWS-W2-T18"
+    },
+    {
+      "campaign_order": 37,
+      "id": "T19",
+      "owner": "R05",
+      "stage": "S5",
+      "tranche_id": "BWS-W2-T19"
+    },
+    {
+      "campaign_order": 38,
+      "id": "T20",
+      "owner": "R05",
+      "stage": "S5",
+      "tranche_id": "BWS-W2-T20"
+    },
+    {
+      "campaign_order": 39,
+      "id": "T28",
+      "owner": "R07",
+      "stage": "S5",
+      "tranche_id": "BWS-W3-T28"
+    },
+    {
+      "campaign_order": 40,
+      "id": "T29",
+      "owner": "R07",
+      "stage": "S5",
+      "tranche_id": "BWS-W3-T29"
+    },
+    {
+      "campaign_order": 41,
+      "id": "T32",
+      "owner": "R08",
+      "stage": "S6",
+      "tranche_id": "BWS-W3-T32"
+    },
+    {
+      "campaign_order": 42,
+      "id": "T34",
+      "owner": "R09",
+      "stage": "S6",
+      "tranche_id": "BWS-W3-T34"
+    },
+    {
+      "campaign_order": 43,
+      "id": "T35",
+      "owner": "R09",
+      "stage": "S6",
+      "tranche_id": "BWS-W3-T35"
+    },
+    {
+      "campaign_order": 44,
+      "id": "T36",
+      "owner": "R09",
+      "stage": "S6",
+      "tranche_id": "BWS-W3-T36"
+    },
+    {
+      "campaign_order": 45,
+      "id": "T41",
+      "owner": "R11",
+      "stage": "S7",
+      "tranche_id": "BWS-W4-T41"
+    },
+    {
+      "campaign_order": 46,
+      "id": "T42",
+      "owner": "R11",
+      "stage": "S7",
+      "tranche_id": "BWS-W4-T42"
+    },
+    {
+      "campaign_order": 47,
+      "id": "T43",
+      "owner": "R11",
+      "stage": "S7",
+      "tranche_id": "BWS-W4-T43"
+    }
+  ],
+  "program_id": "BWS_FINAL_REMEDIATION_R01_R12_V1",
+  "schema": "bws-remediation-dependency-dag-v1"
+}

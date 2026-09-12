@@ -1,0 +1,49 @@
+{
+  "activation_state": "PROPOSED_NOT_ACTIVE",
+  "holds": [
+    {
+      "decision_document": "holds/BWS-600.md",
+      "decision_owner": "explicit reviewed cross-repository acceptance authority",
+      "documentation_alone_releases": false,
+      "id": "BWS-600",
+      "state": "BLOCKED"
+    },
+    {
+      "decision_document": "holds/BWS-710.md",
+      "decision_owner": "explicit accepted upstream runtime-resource authority",
+      "documentation_alone_releases": false,
+      "id": "BWS-710",
+      "state": "BLOCKED"
+    },
+    {
+      "decision_document": "holds/BWS-900.md",
+      "decision_owner": "separate explicit execution authorization program",
+      "documentation_alone_releases": false,
+      "id": "BWS-900",
+      "state": "PARKED_NOT_AUTHORIZED"
+    },
+    {
+      "decision_document": "holds/release.md",
+      "decision_owner": "explicit release acceptance authority",
+      "documentation_alone_releases": false,
+      "id": "release",
+      "state": "BLOCKED"
+    },
+    {
+      "decision_document": "holds/deployment.md",
+      "decision_owner": "explicit deployment acceptance authority",
+      "documentation_alone_releases": false,
+      "id": "deployment",
+      "state": "BLOCKED"
+    },
+    {
+      "decision_document": "holds/live-execution.md",
+      "decision_owner": "separate explicit execution authorization program",
+      "documentation_alone_releases": false,
+      "id": "live_execution",
+      "state": "PROHIBITED"
+    }
+  ],
+  "program_id": "BWS_FINAL_REMEDIATION_R01_R12_V1",
+  "schema": "bws-remediation-hold-register-v1"
+}

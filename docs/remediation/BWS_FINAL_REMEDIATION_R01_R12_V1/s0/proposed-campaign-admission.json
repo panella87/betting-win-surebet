@@ -1,0 +1,115 @@
+{
+  "activation_prerequisites": [
+    "explicit later user instruction naming this program and exactly BWS-W4-T39",
+    "activation-time Git and working-tree capture",
+    "exact protected authority verification",
+    "current-source re-verification for all four findings and four candidate paths",
+    "exact allowed edit set, read-only set, test command set, and rollback root approved",
+    "Node/runtime and safe temporary-fixture capability verified",
+    "no controller process, lock, handoff, artifacts.zip, service, database, provider, or betting-win access active"
+  ],
+  "activation_state": "PROPOSED_NOT_ACTIVE",
+  "allowed_path_candidates": [
+    {
+      "authorization": "TO_CONFIRM_DURING_ADMISSION",
+      "mode": "0755",
+      "path": "pull_artifacts_and_zip_codebase.sh",
+      "present_in_bws122": true,
+      "sha256": "9e7199e2e7efa85963f26374510e7cde6a74eb4cd3f00aca7893de2efe0f6cc7",
+      "size": 10568
+    },
+    {
+      "authorization": "TO_CONFIRM_DURING_ADMISSION",
+      "mode": "0755",
+      "path": "scripts/create-source-handoff-archive.sh",
+      "present_in_bws122": true,
+      "sha256": "3636462392c76a66fae28b84eafd04a7a7db689e63d815bc82855b58f86e2f49",
+      "size": 4069
+    },
+    {
+      "authorization": "TO_CONFIRM_DURING_ADMISSION",
+      "mode": "0755",
+      "path": "update_git.sh",
+      "present_in_bws122": true,
+      "sha256": "afdd43955e7513016f5e53770faf9523df7ae9827608931ed81d168519dce3fe",
+      "size": 12014
+    },
+    {
+      "authorization": "TO_CONFIRM_DURING_ADMISSION",
+      "mode": "0755",
+      "path": "zip_codebase.sh",
+      "present_in_bws122": true,
+      "sha256": "7c9090876b6c558709f6e03a979144f07f501306109ffcc7e6cf95fafc5100a9",
+      "size": 11555
+    }
+  ],
+  "authorization_statement": "This proposed record does not authorize implementation and does not change active_implementation_queue=none.",
+  "baseline": {
+    "archive": "betting-win-surebet122.zip",
+    "inventory_digest_sha256": "b81ff807e4c230bff96fe1fa58f73a2d4bac803ebd7fa58b843cdcb83499f7f0",
+    "regular_files": 771,
+    "sha256": "e303719e5ce64df47df7b0594433a8978e3b01c5a3d0d0bd9129b9b6340b20cd"
+  },
+  "campaign_order": 1,
+  "deactivation_and_rollback": [
+    "admission may be withdrawn before source mutation by a signed/canonical deactivation receipt",
+    "after mutation, rollback must restore every preimage byte and mode and record cleanup outcome",
+    "ambiguous or partial state becomes BLOCKED; no next tranche may start"
+  ],
+  "dependencies": [],
+  "finding_ids": [
+    "BWS121-R10-010",
+    "BWS121-R10-011",
+    "BWS121-R10-012",
+    "BWS121-R10-013"
+  ],
+  "git": {
+    "branch": "TO_CAPTURE_AT_ACTIVATION",
+    "dirty_state": "TO_CAPTURE_AT_ACTIVATION",
+    "head": "TO_CAPTURE_AT_ACTIVATION",
+    "upstream": "TO_CAPTURE_AT_ACTIVATION"
+  },
+  "holds": {
+    "BWS-600": "BLOCKED",
+    "BWS-710": "BLOCKED",
+    "BWS-900": "PARKED_NOT_AUTHORIZED",
+    "deployment": "BLOCKED",
+    "live_execution": "PROHIBITED",
+    "release": "BLOCKED"
+  },
+  "owner": "R10",
+  "program_id": "BWS_FINAL_REMEDIATION_R01_R12_V1",
+  "prohibited_paths": [
+    "betting-win checkout, source, documentation, service, database, or runtime",
+    "all paths outside the explicitly admitted tranche path set",
+    "SOURCE_MANIFEST.json except during admitted T40",
+    "credentials, secrets, environment files, database files, PID/lock files, logs, artifacts, node_modules, dist, coverage",
+    "protected mutable authority documents unless a later explicit authority change separately permits a documentation-only update"
+  ],
+  "proposed_active_tranche": "BWS-W4-T39",
+  "protected_automation_path_allowance": "none for T39; no controller or automation-library edit is admitted",
+  "read_only_shared_paths": [],
+  "repository": "betting-win-surebet",
+  "required_proof_class": {
+    "environments": {
+      "AS_SPECIFIED_BY_REVIEW": 17
+    },
+    "focused_tests": 17,
+    "production_entrypoint_tests": 17
+  },
+  "required_runtime_class": "Node v20.20.2 exact where Node is used; language-neutral shell/filesystem proof otherwise",
+  "schema": "bws-remediation-proposed-campaign-admission-v1",
+  "source_manifest_restriction": {
+    "authoritative": false,
+    "baseline_mode": "0744",
+    "baseline_sha256": "d9ea618c19fac733cf070c7e9b811ace8a1a0d637680b0b9f8233be5879aba6a",
+    "expected_non_self_entries": 770,
+    "extra_entries": 0,
+    "finding": "BWS121-R11-001",
+    "manifest_entries": 617,
+    "mismatched_entries": 8,
+    "missing_entries": 153,
+    "owner_tranche": "BWS-W4-T40"
+  },
+  "stage": "S1"
+}

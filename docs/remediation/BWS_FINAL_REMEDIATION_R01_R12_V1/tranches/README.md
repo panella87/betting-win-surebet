@@ -1,0 +1,51 @@
+# Tranche implementation packets
+
+Exactly 47 packets are canonical. Campaign order controls execution; file-name order is not authority.
+
+- Order 01: [BWS-W4-T39](BWS-W4-T39.md), stage S1, owner R10, findings 4
+- Order 02: [BWS-W4-T37](BWS-W4-T37.md), stage S1, owner R10, findings 4
+- Order 03: [BWS-W4-T38](BWS-W4-T38.md), stage S1, owner R10, findings 5
+- Order 04: [BWS-W3-T26](BWS-W3-T26.md), stage S1, owner R07, findings 2
+- Order 05: [BWS-W1-T01](BWS-W1-T01.md), stage S1, owner R03, findings 1
+- Order 06: [BWS-W1-T09](BWS-W1-T09.md), stage S1, owner R03, findings 3
+- Order 07: [BWS-W3-T30](BWS-W3-T30.md), stage S1, owner R08, findings 3
+- Order 08: [BWS-W3-T31](BWS-W3-T31.md), stage S1, owner R08, findings 6
+- Order 09: [BWS-W4-T40](BWS-W4-T40.md), stage S2, owner R11, findings 2
+- Order 10: [BWS-W4-T44](BWS-W4-T44.md), stage S2, owner R12, findings 4
+- Order 11: [BWS-W4-T45](BWS-W4-T45.md), stage S2, owner R12, findings 3
+- Order 12: [BWS-W4-T46](BWS-W4-T46.md), stage S2, owner R12, findings 3
+- Order 13: [BWS-W4-T47](BWS-W4-T47.md), stage S2, owner R12, findings 3
+- Order 14: [BWS-W1-T02](BWS-W1-T02.md), stage S3, owner R01, findings 2
+- Order 15: [BWS-W1-T03](BWS-W1-T03.md), stage S3, owner R01, findings 4
+- Order 16: [BWS-W1-T04](BWS-W1-T04.md), stage S3, owner R01, findings 1
+- Order 17: [BWS-W1-T05](BWS-W1-T05.md), stage S3, owner R01, findings 3
+- Order 18: [BWS-W1-T06](BWS-W1-T06.md), stage S3, owner R02, findings 6
+- Order 19: [BWS-W1-T10](BWS-W1-T10.md), stage S3, owner R03, findings 6
+- Order 20: [BWS-W1-T11](BWS-W1-T11.md), stage S3, owner R03, findings 2
+- Order 21: [BWS-W2-T21](BWS-W2-T21.md), stage S3, owner R06, findings 4
+- Order 22: [BWS-W2-T22](BWS-W2-T22.md), stage S3, owner R06, findings 4
+- Order 23: [BWS-W2-T23](BWS-W2-T23.md), stage S3, owner R06, findings 6
+- Order 24: [BWS-W2-T24](BWS-W2-T24.md), stage S3, owner R06, findings 2
+- Order 25: [BWS-W2-T25](BWS-W2-T25.md), stage S3, owner R06, findings 1
+- Order 26: [BWS-W3-T27](BWS-W3-T27.md), stage S3, owner R07, findings 6
+- Order 27: [BWS-W3-T33](BWS-W3-T33.md), stage S3, owner R09, findings 4
+- Order 28: [BWS-W1-T13](BWS-W1-T13.md), stage S4, owner R03, findings 2
+- Order 29: [BWS-W2-T14](BWS-W2-T14.md), stage S4, owner R04, findings 3
+- Order 30: [BWS-W1-T07](BWS-W1-T07.md), stage S4, owner R02, findings 6
+- Order 31: [BWS-W1-T08](BWS-W1-T08.md), stage S4, owner R02, findings 2
+- Order 32: [BWS-W2-T15](BWS-W2-T15.md), stage S4, owner R04, findings 2
+- Order 33: [BWS-W2-T16](BWS-W2-T16.md), stage S4, owner R04, findings 3
+- Order 34: [BWS-W1-T12](BWS-W1-T12.md), stage S4, owner R03, findings 3
+- Order 35: [BWS-W2-T17](BWS-W2-T17.md), stage S4, owner R04, findings 6
+- Order 36: [BWS-W2-T18](BWS-W2-T18.md), stage S5, owner R05, findings 3
+- Order 37: [BWS-W2-T19](BWS-W2-T19.md), stage S5, owner R05, findings 6
+- Order 38: [BWS-W2-T20](BWS-W2-T20.md), stage S5, owner R05, findings 4
+- Order 39: [BWS-W3-T28](BWS-W3-T28.md), stage S5, owner R07, findings 5
+- Order 40: [BWS-W3-T29](BWS-W3-T29.md), stage S5, owner R07, findings 6
+- Order 41: [BWS-W3-T32](BWS-W3-T32.md), stage S6, owner R08, findings 3
+- Order 42: [BWS-W3-T34](BWS-W3-T34.md), stage S6, owner R09, findings 7
+- Order 43: [BWS-W3-T35](BWS-W3-T35.md), stage S6, owner R09, findings 6
+- Order 44: [BWS-W3-T36](BWS-W3-T36.md), stage S6, owner R09, findings 4
+- Order 45: [BWS-W4-T41](BWS-W4-T41.md), stage S7, owner R11, findings 4
+- Order 46: [BWS-W4-T42](BWS-W4-T42.md), stage S7, owner R11, findings 3
+- Order 47: [BWS-W4-T43](BWS-W4-T43.md), stage S7, owner R11, findings 1

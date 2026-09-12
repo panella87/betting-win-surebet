@@ -1,0 +1,1612 @@
+{
+  "additions_including_plan": 161,
+  "baseline_sha256": "e303719e5ce64df47df7b0594433a8978e3b01c5a3d0d0bd9129b9b6340b20cd",
+  "controlled_root": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1",
+  "entries": [
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/README.md",
+      "postimage_sha256": "6d852745c39c226f48c52c8209ca91f8bc4a6058af6b75a502939989cc5b21eb",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1936
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/authority-decisions-and-gaps.md",
+      "postimage_sha256": "423e8fbc220cc1ff37fb1d65c31db30ab39cc5a69ba2401a1d6c8b46a1f27187",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1930
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/baseline/archive-member-inventory.json",
+      "postimage_sha256": "10b6a46c80a33b9a107ce692f9618282a616a9927a175dd1ad5da3ef47d43bea",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 158195
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/baseline/protected-authority-preimages.json",
+      "postimage_sha256": "b323cfb015da811586bb74005d1081887871e02fe3dbc252a35fbfbe6f48a551",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 8121
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/baseline-authority.json",
+      "postimage_sha256": "827600361388ba31434e145a6bbdcb66d5a300e880005a4c246ef9422279c816",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1671
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/baseline-authority.md",
+      "postimage_sha256": "5d589118f12519102d978310124ff308b282bae00b0495d12e0c488a5163a515",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1640
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/campaign-order.json",
+      "postimage_sha256": "314991d058aabd83268e186b97e04391b60653106bf87492a6699f8ccf0c7630",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 43204
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/campaign-order.md",
+      "postimage_sha256": "b575f92e612209d1798c9fe2c3b42c1f11f8077d1ffb4a99b4def5d24a338175",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 3561
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/completion-criteria.json",
+      "postimage_sha256": "a40873a22966e2c2d31bf7f322bde349c3d6cc6bc4858ea8ca96cf95882e2953",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1101
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/completion-criteria.md",
+      "postimage_sha256": "01520a669dd1a4969b306d06321269e2a80ebcd25158e345e7c46f3dcc14ce2b",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 984
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/dependency-graph.json",
+      "postimage_sha256": "b39365e2060e0ce20e53fda581fcd0f0075c370eaf0b4a31785fb41a431a9d34",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 14909
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/dependency-graph.md",
+      "postimage_sha256": "0dee71c67c0f354b7c2d647d87f2c569db99703ae42ef37ced0d06504d15e0ac",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1294
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/examples/README.md",
+      "postimage_sha256": "1df12559805904882d6dd78b750201e115090ff161251cd21909254f5ec7a2ed",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 203
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/examples/campaign-admission.example.json",
+      "postimage_sha256": "e00f731420b59324c5c39332b7ddc28a5831700f40f83ad8c84de5b14c47df55",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 2179
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/examples/campaign-result.example.json",
+      "postimage_sha256": "9237d4b60dd5634ffefdc6d22c5416a4c7a4243cf7f90743448d37dc06a20e79",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1180
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/examples/current-source-reverification-receipt.example.json",
+      "postimage_sha256": "2813994b0a5787b2b715b5d0d0d0a847f5dfa7f85a7d90c8dee8ef9e3d80e5fb",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1343
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/examples/environment-proof-receipt.example.json",
+      "postimage_sha256": "1c7a08bbc615de8398ed5814fd8e4a007c4e9e7e98ab5c9e44e0ac5a344d4e36",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1557
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/examples/external-pending-receipt.example.json",
+      "postimage_sha256": "0029dc9bd984ffe335d08c611de212244faf3d1155f393d720d4aa51dd32a3bb",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1471
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/examples/focused-test-receipt.example.json",
+      "postimage_sha256": "58fe4956948ef7aa4d2b7e0df3998dab67997323e47f2457dc60622ef589ced9",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1757
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/examples/hold-release-decision.example.json",
+      "postimage_sha256": "4912a1b5e2ac5d08870ea9388d249d32deff39fb05b404f2332077aba81f2abf",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1514
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/examples/implementation-postimage-receipt.example.json",
+      "postimage_sha256": "b9181af719ac0a8d7da7e77734b211f6b47fd4bc543f778994b7dc25a917ad9c",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1353
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/examples/preimage-receipt.example.json",
+      "postimage_sha256": "f130db4bee6bf0ae48086f16655cc5e71556b92b0d3bb745b001d576c89247a1",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1501
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/examples/production-entrypoint-test-receipt.example.json",
+      "postimage_sha256": "01811ced488b55a91fd13faf931ac5661a5fc4c450aff6693c6b02d664a0ed76",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1769
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/examples/rollback-receipt.example.json",
+      "postimage_sha256": "a5f8ad809fd3a64a44bf9d952d671f838923938af667bdcb600ab269d012ac1b",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1253
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/examples/stage-result.example.json",
+      "postimage_sha256": "5e4a0fc9e61704e669d40410627df278385ea68b92ff9204fba5f2ee8cc29e51",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1112
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/examples/tranche-admission.example.json",
+      "postimage_sha256": "9b1cb1970b38de087386cbb207706f1d6e7ec762310216019de397036a562759",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1553
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/examples/tranche-result.example.json",
+      "postimage_sha256": "535f6637e284ea15c7091d33578edb4e705eb97bea1c47893bfc457e1fce8350",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1659
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/generations/immutable-generations.json",
+      "postimage_sha256": "a3ff6337af5a922545797e79f39ea545a87037416c2f9e5fc4e33218daf93f28",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 17074
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/generations/immutable-generations.md",
+      "postimage_sha256": "e6a9ad0a88dd3833335de6c5f2079ebc6610a3866d0beddcb79a64a54976d325",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 15199
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/hold-register.json",
+      "postimage_sha256": "fd6b4d21c9fcae1e7916e9c4458665eebe13b07c07b74197438765a3cc00918f",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1571
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/hold-register.md",
+      "postimage_sha256": "83bef80f387bb458a61e813e3aa0bf8c5dc1f96767140cb976100ca34b5ec750",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 580
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/holds/BWS-600.md",
+      "postimage_sha256": "343b25b17d12e6df158f451853a6f88207b0e7309f9e04e0b1fd5575d66d9891",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 2427
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/holds/BWS-710.md",
+      "postimage_sha256": "5f30e40cf70923beb01909810783a146ab87999f6b17efd885aa7eb972eea373",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 2256
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/holds/BWS-900.md",
+      "postimage_sha256": "b774e3e5fb2b0ff84db98597506240dfcc716c584ea4fe6128031ff456247876",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 2029
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/holds/README.md",
+      "postimage_sha256": "fbefac5ed5f45553296373ac2945b72dc60ccaa18feccf49cfe81c09828902ba",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 281
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/holds/deployment.md",
+      "postimage_sha256": "c88e083484ba76609e28f326f4b42a69e82c6ce3d3f9b8cf4cfdbf0fae488c95",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1963
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/holds/live-execution.md",
+      "postimage_sha256": "8a507cd6a9b58a516e067ffd32504f90d9a34f78a82d7f75a264962ee465c0b7",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1975
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/holds/release.md",
+      "postimage_sha256": "3006ca2d73a9cd364e682874c6c302cd27fce252154e6c529b4d1f4f7c1c7950",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 2136
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/maps/README.md",
+      "postimage_sha256": "ce2c7be91db07ce4bdef4d010baee0ce4e9f27cf39953403754c1d1571cfb51d",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add finding/path/dependency ownership mapping.",
+      "size": 583
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/maps/dependency-dag.json",
+      "postimage_sha256": "8d3b49a93e5dd4ca3c452a1621c3d337e5fa486875c2931f78795d1e6b450bac",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add finding/path/dependency ownership mapping.",
+      "size": 14985
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/maps/dependency-dag.md",
+      "postimage_sha256": "6cecebf7de7a768c14bb1243af79d36ace443649e4dc426014909fcc89ac47a4",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add finding/path/dependency ownership mapping.",
+      "size": 1221
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/maps/finding-to-tranche.json",
+      "postimage_sha256": "dbb05c2efd7f6ef3d8047c61fe895a008f44e8d833fb29686b1fae3ef55c426e",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add finding/path/dependency ownership mapping.",
+      "size": 330737
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/maps/finding-to-tranche.tsv",
+      "postimage_sha256": "17575a16c0c45e64030ef493c8e07a10b7cc32a5f35688c9ace16ea821dce391",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add finding/path/dependency ownership mapping.",
+      "size": 125914
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/maps/path-to-tranche.json",
+      "postimage_sha256": "0cee0ed553d6effdca7c5a404693ad734e3ba24289919e032f6b04097ed4ef29",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add finding/path/dependency ownership mapping.",
+      "size": 433846
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/maps/shared-path-locks.md",
+      "postimage_sha256": "599ca8587c30f344d6ea06159ccb7d1e0e257704caa2ae6c41822632593a0d98",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add finding/path/dependency ownership mapping.",
+      "size": 17236
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/metadata/input-identities.json",
+      "postimage_sha256": "4da7391ada28e729aeaa95b88c1b8cc5a90dac15db4e0fb8c2cb4ddb07ed8f43",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1910
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/metadata/program-index.json",
+      "postimage_sha256": "4c4cde615ee4d3f2b657996316708e556beb05d031636aae5566c1ef42d05411",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 15539
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/metadata/protected-authority-profile.json",
+      "postimage_sha256": "904a0d1c56299eaebf9b9e05ba056fda6007438fff063645311a266995511cc6",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 8929
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/metadata/reconciliation-summary.json",
+      "postimage_sha256": "5615faaa43d9212559da874237925e3f00d2a0e0de94a347c35590a885dffc16",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 566
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/metadata/validation-contract.md",
+      "postimage_sha256": "9819619b6e66fe105f92003d4269057725ea0173b53514caf7933e887ea08826",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1553
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/operator-workflow.md",
+      "postimage_sha256": "e967f6ba7110e8a165a761c82b056d15375ffb02f36276f601784180d57866bd",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 4453
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/ownership-and-shared-paths.md",
+      "postimage_sha256": "c76d0c83f4a17c87fb58cf296d44af2a89863bc76e66c0ade6eb86ff70087866",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 950
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/program-authority.json",
+      "postimage_sha256": "a2fb8cbd63978603e7cd97a18973ac619a8e7132e349d81ce3579c864af22471",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 12402
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/program-authority.md",
+      "postimage_sha256": "37e140c72b39e58f02851a49c574813e9a5b37ddce4b90ec21b695f7bf7a50fa",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 2724
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/README.md",
+      "postimage_sha256": "bc4498cdfbf6048974d0fbd535c739d5668b63604bcb6810fc4efb3cc5c6f433",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1618
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/campaign-admission.md",
+      "postimage_sha256": "75ca489b159e41f767fdd65c8c6e70e6433a5f25bf07a503984b29d5af7a1d2f",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1522
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/campaign-result.md",
+      "postimage_sha256": "e1b6976fefac864d907f057d5c957d9e0c04fe0a8b4fa0a644ca9f3ac5eb1ac1",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1520
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/current-source-reverification-receipt.md",
+      "postimage_sha256": "0c3a95882fc68a302625eceeb2a87bae1581bf46b10b3bb1c628fc3dcc664110",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1577
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/environment-proof-receipt.md",
+      "postimage_sha256": "e91d7eba56a7065dcb8a4651fef85aa241e53e15dcf54257c112d04adef77398",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1551
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/external-pending-receipt.md",
+      "postimage_sha256": "ee63cd93558ddc22941f0f78890806c0dd36d2414098e5e19d5d9f90aef825a4",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1691
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/focused-test-receipt.md",
+      "postimage_sha256": "7dd1ad7740d79b5a559f40f782898cb643387e1e0d2100fad527f22f88b6ea85",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1584
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/hold-release-decision.md",
+      "postimage_sha256": "aa411b5eb57dc24db770418c92660ec6afcdc394548792d4df22ef08b6e24730",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1767
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/implementation-postimage-receipt.md",
+      "postimage_sha256": "0268ade22ecefeccbcd8a1f5b5b82b00b394db99d8e287a19b5b46b24e326acd",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1633
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/preimage-receipt.md",
+      "postimage_sha256": "07e5e8b3bc02eb38681880b8053968c1ccfd37766c9e1c65f7c811b7d97ddc22",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1499
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/production-entrypoint-test-receipt.md",
+      "postimage_sha256": "2b24c17fe45830100ba7bc8fe6e6a1f015c4702e632233e7f9b23285082d9b77",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1640
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/rollback-receipt.md",
+      "postimage_sha256": "4b27873fd8f08c21a8004b7769c7922690cb4ceeb4ee346391892f0ebc1b840d",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1565
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/stage-result.md",
+      "postimage_sha256": "56bd16cf30fc483603503564f1adca2b6cc4d0939bfa3264600322307be7b021",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1458
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/tranche-admission.md",
+      "postimage_sha256": "0ec728774859730892a5e0fbfb4f029ab88b98592ad513068fdf911167e2be3e",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1602
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/tranche-result.md",
+      "postimage_sha256": "126b7372aea7a59fa19dc7cf4b655c943064cd1d770114d604cf1d6dce60e782",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1984
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/runbooks/01-node20-exact.md",
+      "postimage_sha256": "b1ef80b4b05bceede0fa7f4cbe49bcbd9c98a4114b8d59f2ac8b496f8355835d",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one documentation-only proof-lane runbook.",
+      "size": 1969
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/runbooks/02-source-preimage-capture.md",
+      "postimage_sha256": "23564e45ef497585afa96b08f4a8f8430d666515b96028a2a4ab5ecada40a836",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one documentation-only proof-lane runbook.",
+      "size": 2469
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/runbooks/03-disposable-postgresql-proof.md",
+      "postimage_sha256": "a85f0488f95c7a9138b77f5ae60dcced0cc5b51fc4c668bb97713eb76514e546",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one documentation-only proof-lane runbook.",
+      "size": 2282
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/runbooks/04-database-role-schema-confinement.md",
+      "postimage_sha256": "f635dd1316a86fc9fdf399467a034e0e5121b0c48b3261298cb2687369386244",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one documentation-only proof-lane runbook.",
+      "size": 2209
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/runbooks/05-systemd-process-ownership.md",
+      "postimage_sha256": "bce2a098a2696c6e9a202e68786f337ea368a65ad13377b325612ab39c81034c",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one documentation-only proof-lane runbook.",
+      "size": 2082
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/runbooks/06-multiprocess-barriers-fencing.md",
+      "postimage_sha256": "aa2b9ccb79be8cac28b8aa073e5f741a8394ab4b773de6e9b8e6f44185502162",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one documentation-only proof-lane runbook.",
+      "size": 2455
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/runbooks/07-crash-restart-boundaries.md",
+      "postimage_sha256": "900d660ed889d6d892d97cc7153c3ae3b1bae6646fa400b7c626fac23820a7be",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one documentation-only proof-lane runbook.",
+      "size": 2163
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/runbooks/08-browser-api-projection.md",
+      "postimage_sha256": "813a31d9978019c9a145e84462c782e60c3426673f8457140417ccfcb6e912b3",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one documentation-only proof-lane runbook.",
+      "size": 2115
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/runbooks/09-evidence-publication.md",
+      "postimage_sha256": "e81a2dcbe521af2c589799b4ea309aa5ec0d2facec36bda2225d8fbcd1a9b5b9",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one documentation-only proof-lane runbook.",
+      "size": 1839
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/runbooks/10-backup-restore-retention.md",
+      "postimage_sha256": "ddb661b23836daa283068552083f84be078636c0dc56e3544e6ced8ca21cf904",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one documentation-only proof-lane runbook.",
+      "size": 2109
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/runbooks/11-release-upgrade-rollback.md",
+      "postimage_sha256": "ac86f74a05e90f2ddedd6ec9f7ed8e06693071ca4c4398b09568bc48348590f1",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one documentation-only proof-lane runbook.",
+      "size": 2217
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/runbooks/12-managed-long-soak.md",
+      "postimage_sha256": "983975fd18a7f9470afe8d43a4b57a80c6419f4f56a34b2e498900fdea9c2910",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one documentation-only proof-lane runbook.",
+      "size": 2256
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/runbooks/13-external-upstream-hold.md",
+      "postimage_sha256": "3f40e696282644330d36e3674963dc06daf3c142c7fa4dde1e15624324b58663",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one documentation-only proof-lane runbook.",
+      "size": 2304
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/runbooks/14-final-finding-closure.md",
+      "postimage_sha256": "0fe9d68986e25f2d5ada734d04e8b69ce0546045841b214f29bc70493a19c2f8",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one documentation-only proof-lane runbook.",
+      "size": 2476
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/runbooks/README.md",
+      "postimage_sha256": "a8718e0ae47c55a17c0c35e3cfd2dcd5e9e184c38b7be223602c7d04b606e22f",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one documentation-only proof-lane runbook.",
+      "size": 1075
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/s0/activation-checklist.md",
+      "postimage_sha256": "ee510f298a7923840d35ca9dd9e2bad448deb6031e419ade786aeab159fb075d",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1100
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/s0/authority-conflict-checklist.md",
+      "postimage_sha256": "84460c88c608c9606ea433baf926dbe5e9e9cba026ea58e9c586fea9c9959242",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1021
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/s0/proposed-campaign-admission.json",
+      "postimage_sha256": "d5ee577a38653656ad44a05ca684bfda0421617cb8161549f61d3f8124b9fe1d",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 4557
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/s0/proposed-campaign-admission.md",
+      "postimage_sha256": "2e342392ef0c20e7dca90ca12232eb13fcb6036cfe461b8f8ce629f91d48e545",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 1778
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/schemas/README.md",
+      "postimage_sha256": "beef0e257bbfb3cfe1e20727298ca2842a78a77936e796c5ffdeec8ea26f60f1",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one strict receipt/state JSON Schema.",
+      "size": 996
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/schemas/campaign-admission.schema.json",
+      "postimage_sha256": "b95eb3a5036a299e09ce5a18595d27b9b19df583c66f0a4a234032482c86751f",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one strict receipt/state JSON Schema.",
+      "size": 11032
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/schemas/campaign-result.schema.json",
+      "postimage_sha256": "860630f87aa3f22e3eea0ea8e7e316d4e39a6df0a9ef8d8372bc51989f0ff4b7",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one strict receipt/state JSON Schema.",
+      "size": 11333
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/schemas/current-source-reverification-receipt.schema.json",
+      "postimage_sha256": "a62640bf61f7bda06aeaff384dfa8521c323d79f4960e836c9d6f8a4e607843c",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one strict receipt/state JSON Schema.",
+      "size": 11646
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/schemas/environment-proof-receipt.schema.json",
+      "postimage_sha256": "cc19e2e6dda85d00b1bbd929605cd18f077232cd4cc3251ee07afa57c298672d",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one strict receipt/state JSON Schema.",
+      "size": 11021
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/schemas/external-pending-receipt.schema.json",
+      "postimage_sha256": "40d78b89325f6c5098524d7a42d204f9bdc9875d8c86eba068139ae797b7ff62",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one strict receipt/state JSON Schema.",
+      "size": 11246
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/schemas/focused-test-receipt.schema.json",
+      "postimage_sha256": "39dbda43bb70809f0145ebaf716a192059f3a444071b6c7fe8481f7123587b74",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one strict receipt/state JSON Schema.",
+      "size": 11052
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/schemas/hold-release-decision.schema.json",
+      "postimage_sha256": "006ef0b90afba553d58e481283002b0003652d67e24ed9bef3dac99817a8452c",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one strict receipt/state JSON Schema.",
+      "size": 11346
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/schemas/implementation-postimage-receipt.schema.json",
+      "postimage_sha256": "93830e94231a10410635e948f120b64526748344b5c77c933654794854b7fbf0",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one strict receipt/state JSON Schema.",
+      "size": 11121
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/schemas/preimage-receipt.schema.json",
+      "postimage_sha256": "b23a517ed4168944128127509e825abaeb24861c5cbe78826ada347cc3ba636a",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one strict receipt/state JSON Schema.",
+      "size": 11708
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/schemas/production-entrypoint-test-receipt.schema.json",
+      "postimage_sha256": "6653429b359b7ebbc9e24c63da94d97af580d41a5b85b5d87060bf52c50c5e51",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one strict receipt/state JSON Schema.",
+      "size": 11093
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/schemas/rollback-receipt.schema.json",
+      "postimage_sha256": "d03c4c80cb2bba8334d30c4ef69bec7b7a8f021203577166fa60bcdc2d9d5065",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one strict receipt/state JSON Schema.",
+      "size": 11175
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/schemas/stage-result.schema.json",
+      "postimage_sha256": "ca5c478849f78d2b4eaa53dccaca0a5c5e50d20b04d40f188b7a0112ab427ad3",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one strict receipt/state JSON Schema.",
+      "size": 11201
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/schemas/tranche-admission.schema.json",
+      "postimage_sha256": "cdf8c5b395e5212a03a66a1529575bab606932b7c937fd5cbf2bdd15a3c74189",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one strict receipt/state JSON Schema.",
+      "size": 11829
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/schemas/tranche-result.schema.json",
+      "postimage_sha256": "b6b191375f82f9d9aa5cae0594a6c7cd126a4679c5700d974f36a8543af20776",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one strict receipt/state JSON Schema.",
+      "size": 12014
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/stages/README.md",
+      "postimage_sha256": "cc7dff22508652d17207d917e6877596f27725a3c7790a766881d4b07494febc",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 525
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/stages/S0.md",
+      "postimage_sha256": "fe90de65eeb607702298635e5e289ee08daa78c61de7c770199ddf25b02195f7",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 2935
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/stages/S1.md",
+      "postimage_sha256": "bd730f993a80a268685cfd56b7a506f3698425a4c467f605322e68f7f2425ce6",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 4883
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/stages/S2.md",
+      "postimage_sha256": "07c23abed4284aa49c77b10b7163010e6cb892008603f7091d5b80b6e3680a0e",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 3738
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/stages/S3.md",
+      "postimage_sha256": "5ca002bfa1df6559ba68d9004a7270a2f0a8945c7f72b98494c544d2c9042381",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 6750
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/stages/S4.md",
+      "postimage_sha256": "075623223139579699f8d0c03552a0a39fae52c1aac471269421d3a6a9f885ea",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 5582
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/stages/S5.md",
+      "postimage_sha256": "02232e9a3813150cdfcd9dd18d72314c89ccef053902f051eb8cff6dedc08765",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 4640
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/stages/S6.md",
+      "postimage_sha256": "470afc7b689fc363774a92eaa5da3945514d384ab4c1e362bcf3e0ebe59548cf",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 4125
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/stages/S7.md",
+      "postimage_sha256": "9fccb232bcf0aef07923d9f4cb4bd6991b94d4f541868962aef903ad8567d448",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add canonical remediation implementation documentation without changing current mutable authority.",
+      "size": 3449
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W1-T01.md",
+      "postimage_sha256": "d15003c53f3280121452eb3447ab4ed283c0641e5815049a27d145c90a8d3e30",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 16547
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W1-T02.md",
+      "postimage_sha256": "03796c1f6a218755a287878512ca9b7d60234b3fdf68286fa5064055e2ee1c86",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 20426
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W1-T03.md",
+      "postimage_sha256": "eb5360917a0c94cf84eda99f3717aebdebd26a11d4679a77b8312fd7e8c14070",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 28310
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W1-T04.md",
+      "postimage_sha256": "377cdd0edad59b04ecb97c5d48c6a0ace2e8e4d43c039bf4df224ce0f6f83ce0",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 17265
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W1-T05.md",
+      "postimage_sha256": "ce67b02779646436db2ec7a801d17510f595f54a47eb7d98400ecd97e3d3cc77",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 23402
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W1-T06.md",
+      "postimage_sha256": "28876ce97d66c6362be985e611fce1ba1964d3e86daead55196e2dbb930345a4",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 41549
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W1-T07.md",
+      "postimage_sha256": "109aaba80e4659127f35be21d5803a2c7d1ea57e4e2eb10976259960ba36200c",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 41647
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W1-T08.md",
+      "postimage_sha256": "7a1bc2bf97a7c8284daab583f892a6d9f59ffc8591ffbaa4478300f26e9e64e5",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 20527
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W1-T09.md",
+      "postimage_sha256": "206226bdf22d60a3e55f23bedf4e4d21de5dda990fe17f1afaf5bd63db51ee7e",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 21731
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W1-T10.md",
+      "postimage_sha256": "32bd9fb91d8195faf299585934781892fa2c719c3a273975af4d19c5a7d14096",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 43815
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W1-T11.md",
+      "postimage_sha256": "72f1965211bd79faa79dc2b2fcbafe2afcf942b126d507648c93499aad9ed161",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 21754
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W1-T12.md",
+      "postimage_sha256": "0e9d65341b0e1b109a89454f42ca84232840aee608d5bf18aaaf6964c1ca417b",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 29224
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W1-T13.md",
+      "postimage_sha256": "1bccdc111553b6d2778c1c23745c1dcf3fbf4a0a34d51decc5cd67e8921d4dd9",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 21592
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W2-T14.md",
+      "postimage_sha256": "bb7e1dee3915b1fc9535caea6d5320d5540edd784b296b80d6b01e7ade5e7023",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 29992
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W2-T15.md",
+      "postimage_sha256": "6fdf746a520c7be1799ca1bb5c5affa2db1af2831722093d679c5268d41cb5bb",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 24530
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W2-T16.md",
+      "postimage_sha256": "1e5ca2888152622e4ab51c18ab0267838ddf33af2460b98eeb96514a6b7874d6",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 30169
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W2-T17.md",
+      "postimage_sha256": "bf87616d62fb406222f378bf4c652feaef24311c3f161eed1b40d0c528d98aa1",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 46617
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W2-T18.md",
+      "postimage_sha256": "57b74a15904ac73e713d28fb8dfbc0a48254971edf31e62251a7774d832ec644",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 26636
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W2-T19.md",
+      "postimage_sha256": "1290a0e089614aca3d9cf3ef04dfb30323ac3bd86aff70165627b065789e0531",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 47978
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W2-T20.md",
+      "postimage_sha256": "20871b4d20d3a69cd846a251debd8331f1aaa70ab4000240716bafa2b423b143",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 36560
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W2-T21.md",
+      "postimage_sha256": "706f4996a2e6c3a925efe5774e97131be59962f879fd708906970ec60fe00b9f",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 38590
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W2-T22.md",
+      "postimage_sha256": "be6be1962077b421dba030f44393b8b352f3989879ef9c6f96e7f063430bb5b8",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 39652
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W2-T23.md",
+      "postimage_sha256": "683662bf31e2e980ad7493996fd487370171e4c06b42569f71aec8de81ef5062",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 50875
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W2-T24.md",
+      "postimage_sha256": "e38a72958e81110a73eaaf81f7934b363a080b8f6ea4e6ec03ff696ca675f122",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 24471
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W2-T25.md",
+      "postimage_sha256": "473a11292e343e529de212aaef549dd28b58a18e0cbc8ed8dbbaa0e4ce43a2c9",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 17966
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W3-T26.md",
+      "postimage_sha256": "ac0d0575aed360ebb06176ee1c6da8e0ea5516f1d5b884546c5ab462cce0c993",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 25777
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W3-T27.md",
+      "postimage_sha256": "e6db33b5a95f5ffbdc66c9710a9676982e65b7480b90419126c20fb35419c34b",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 50857
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W3-T28.md",
+      "postimage_sha256": "d451c5e51cca8ee6874aac8c7a65c7e5280da96c6a5cd0e59adb97167126c172",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 44484
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W3-T29.md",
+      "postimage_sha256": "5b8693d06d55e21955afebf47ced0a7fe9bd548a81acf509b54ec1ba27df8053",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 56029
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W3-T30.md",
+      "postimage_sha256": "e88a34bd0ff6b76a5680b1afd26715af773db0ec590de7f72717463d14ddce82",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 27213
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W3-T31.md",
+      "postimage_sha256": "7414c2b83881adc30e8cbf2331946dee203665ffc3efb41ae3cd6ecd91ed02b7",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 46600
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W3-T32.md",
+      "postimage_sha256": "7fc2081c221b9b5c376416b6f0e15678a3f8c7f4e4fd3f27d4a8d96617d7388d",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 32258
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W3-T33.md",
+      "postimage_sha256": "7c9db65758904fecec4e423ddfde7c885421b1275da68117b11346385bba2d70",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 36525
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W3-T34.md",
+      "postimage_sha256": "6f3e5d5860f4ff1417ed1cf6a4f97fb73f0f12417d225c0094c454b8d462dbf4",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 50060
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W3-T35.md",
+      "postimage_sha256": "dc57173355a9ca21a097f509518e51fb63f5289a7d30a2cd6cf0cfb91aed08fb",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 48225
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W3-T36.md",
+      "postimage_sha256": "927c5f86bec6c5e818f38a36c5447823c45300fd54d2baf8b5e1b037b6a136ec",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 35223
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W4-T37.md",
+      "postimage_sha256": "534297caf33764b130d9f987c5741c8922676df166904714ea4e129fcb13aff2",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 33533
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W4-T38.md",
+      "postimage_sha256": "48efbc8058b105ee9797ecfccd532c7d19e5ab4b1e8d011de3191a5220a73314",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 41082
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W4-T39.md",
+      "postimage_sha256": "9f3b69d386e7775233e403d92d407b4c4f00e9354f9dcc2f29c44571781687e6",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 44033
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W4-T40.md",
+      "postimage_sha256": "f4101539abb40cba79632460df3e4945b4a1f8698a5cadf7ab419332422b5d0b",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 22921
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W4-T41.md",
+      "postimage_sha256": "053ee3228a5810a8b4d5b32a5c32399fe102c7254adef3a4a8b771ddd6ef3a12",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 36105
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W4-T42.md",
+      "postimage_sha256": "176ebca3ab781d3032a0ce7f53ab5efd811ecac755aab49fe4868b4c4bea3cc0",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 31364
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W4-T43.md",
+      "postimage_sha256": "955f52aaada597e5a7f8cc96d6c70a292756808dd39430e09eefee0eb6d28129",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 19485
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W4-T44.md",
+      "postimage_sha256": "afbfaef4fd2926e715fbf5e710fb65d70c41c563ca211edda91155d77a435b3d",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 36354
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W4-T45.md",
+      "postimage_sha256": "3e011fafec092ea42ade40e8f13be3bc33d1818af5af005f0f52e00b58a3c2af",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 30611
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W4-T46.md",
+      "postimage_sha256": "ada9c3c5afdd6f744fd41e0d83eb2fb106f1b8deb47b3afae59bb3409610dc37",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 30674
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W4-T47.md",
+      "postimage_sha256": "160504fc9ae72f8cad17904d959badc65501657f6de93a3b42e984553afc983c",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 29630
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/README.md",
+      "postimage_sha256": "33ac362066a7a0346aa2e721786c48a9ff2bb81903343d3b14dec6ebcb63e3e1",
+      "preimage_sha256": null,
+      "protected_content_preserved": true,
+      "reason": "Add one canonical tranche implementation packet.",
+      "size": 3569
+    }
+  ],
+  "forbidden_paths_present": false,
+  "program_id": "BWS_FINAL_REMEDIATION_R01_R12_V1",
+  "replacements": 0,
+  "schema": "bws-remediation-documentation-overlay-plan-v1",
+  "self_hash_policy": "The overlay-plan file SHA-256 and mode are pinned externally by the apply script and standalone complete index; all other entries are listed here."
+}

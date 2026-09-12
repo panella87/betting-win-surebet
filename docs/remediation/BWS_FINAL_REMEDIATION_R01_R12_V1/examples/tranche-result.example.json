@@ -1,0 +1,48 @@
+{
+  "acceptance_authority": "One nested secret policy, non-destructive Git config handling, and pinned SSH destination identity.",
+  "all_internal_requirements_closed": false,
+  "campaign_order": 1,
+  "changed_paths": [],
+  "clock_authority": "DOCUMENTATION_EXAMPLE_FIXED_TIME",
+  "created_at": "2026-09-12T00:00:00Z",
+  "exact_postimage_generation_id": null,
+  "exact_preimage_generation_id": "sha256:e303719e5ce64df47df7b0594433a8978e3b01c5a3d0d0bd9129b9b6340b20cd",
+  "example_notice": "EXAMPLE_ONLY_NOT_EVIDENCE",
+  "finding_ids": [
+    "BWS121-R10-010",
+    "BWS121-R10-011",
+    "BWS121-R10-012",
+    "BWS121-R10-013"
+  ],
+  "node_runtime_identity": null,
+  "owner": "R10",
+  "parent_receipt_sha256": null,
+  "previous_receipt_sha256": null,
+  "program_id": "BWS_FINAL_REMEDIATION_R01_R12_V1",
+  "proof_environments": [],
+  "record_type": "tranche-result",
+  "repository_identity": {
+    "baseline_archive": "betting-win-surebet122.zip",
+    "baseline_sha256": "e303719e5ce64df47df7b0594433a8978e3b01c5a3d0d0bd9129b9b6340b20cd",
+    "git_commit": null,
+    "name": "betting-win-surebet",
+    "source_generation_id": "sha256:e303719e5ce64df47df7b0594433a8978e3b01c5a3d0d0bd9129b9b6340b20cd"
+  },
+  "retained_holds": {
+    "BWS-600": "BLOCKED",
+    "BWS-710": "BLOCKED",
+    "BWS-900": "PARKED_NOT_AUTHORIZED",
+    "deployment": "BLOCKED",
+    "live_execution": "PROHIBITED",
+    "release": "BLOCKED"
+  },
+  "reviewer": "NOT_ASSIGNED_EXAMPLE",
+  "schema_version": "1.0.0",
+  "stage": "S1",
+  "state": "NOT_ADMITTED",
+  "test_commands_and_results": [],
+  "tranche_id": "BWS-W4-T39",
+  "unresolved_blockers": [
+    "EXAMPLE_ONLY_NOT_RUNTIME_EVIDENCE"
+  ]
+}

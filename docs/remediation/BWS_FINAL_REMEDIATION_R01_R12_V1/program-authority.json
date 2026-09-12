@@ -1,0 +1,287 @@
+{
+  "activation_state": "PROPOSED_NOT_ACTIVE",
+  "authority_order": [
+    "exact current files in BWS122",
+    "current canonical status/task/hold/architecture/runbook/review documents",
+    "campaign-map JSON machine identities and exact membership",
+    "architecture Markdown explanatory sequencing",
+    "architecture validation and checksum records",
+    "cumulative R01-R12 ledger and detailed reports",
+    "historical status prose and completion claims"
+  ],
+  "baseline": {
+    "architecture_full_member_digest_sha256": "4edf784ab0211d73f362b814dae9145523e98aa79471f5011134f20daee83f02",
+    "archive": "betting-win-surebet122.zip",
+    "independent_inventory_digest_sha256": "b81ff807e4c230bff96fe1fa58f73a2d4bac803ebd7fa58b843cdcb83499f7f0",
+    "inventory_digest_contract": "sha256 of sorted path, mode, content sha256, and size records encoded by the generation validator",
+    "regular_files": 771,
+    "sha256": "e303719e5ce64df47df7b0594433a8978e3b01c5a3d0d0bd9129b9b6340b20cd"
+  },
+  "betting_win_access": "PROHIBITED_EXCEPT_LATER_ACCEPTED_READ_ONLY_HANDOFF_EVIDENCE",
+  "betting_win_mutation": "PROHIBITED",
+  "campaign_rules": [
+    "Exactly one active source-mutating tranche at a time.",
+    "No existing autonomous controller is permitted before S2 is accepted.",
+    "Every tranche re-verifies exact current source before edit and emits a postimage/test/environment receipt.",
+    "Node 20.20.2 is mandatory; Node 22 evidence is never acceptance.",
+    "No silent defaults, placeholders, fallback authority, or inferred external evidence.",
+    "R11 T43 is last and may accept an explicit non-promotable external hold, never a fabricated pass.",
+    "No betting-win source, checkout, service, database, documentation, or runtime mutation."
+  ],
+  "canonical_node": "20.20.2",
+  "clock_authority": "artifact generation date fixed by supplied authority artifacts",
+  "created_at": "2026-09-12T00:00:00Z",
+  "current_authority": {
+    "active_implementation_queue": "none",
+    "automation_maintenance_allowed": "no",
+    "current_status_document": "docs/repo_status_current.md",
+    "current_task": "BWS-600",
+    "current_task_document": "docs/automation/current-implementation-task.md",
+    "current_task_status": "BLOCKED_EXTERNAL_RUNTIME_EVIDENCE",
+    "documentation_root": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1",
+    "existing_review_roots": [
+      "docs/reviews/BWS117/wave-01",
+      "docs/reviews/BWS118/wave-02",
+      "docs/reviews/BWS120/wave-03",
+      "docs/reviews/BWS121/wave-04"
+    ],
+    "generated_or_transient_paths": [
+      "node_modules",
+      "dist",
+      "coverage",
+      "artifacts",
+      ".automation/runtime",
+      "*.log",
+      "*.pid",
+      "*.lock"
+    ],
+    "holds": {
+      "BWS-600": "BLOCKED",
+      "BWS-710": "BLOCKED",
+      "BWS-900": "PARKED_NOT_AUTHORIZED",
+      "deployment": "BLOCKED",
+      "live_execution": "PROHIBITED",
+      "release": "BLOCKED"
+    },
+    "local_wsl_operator_path": "/mnt/c/Users/feder/Desktop/Development/GitHub/betting-win-surebet",
+    "package_version": "0.1.0-bws-full-platform",
+    "protected_documents": [
+      {
+        "historical_hash_rebased_to_bws122": false,
+        "historical_wave04_preimage_sha256": "94c414fbc522623678b3c5e468e7e5d7e8787d842546776f741d36a9e6beeb73",
+        "markers_preserved": [
+          "current_task=BWS-600",
+          "active_implementation_queue=none",
+          "bws710_status=BLOCKED_ACCEPTED_BETTING_WIN_B1_MULTI_VENUE_API_REQUIRED",
+          "BWS-900"
+        ],
+        "path": "AGENTS.md",
+        "preimage_mode": "0744",
+        "preimage_sha256": "94c414fbc522623678b3c5e468e7e5d7e8787d842546776f741d36a9e6beeb73"
+      },
+      {
+        "historical_hash_rebased_to_bws122": false,
+        "historical_wave04_preimage_sha256": "1b08809e477a4fd233464cea1388cede73ac6b9c05c06c15eea960c698004449",
+        "markers_preserved": [
+          "current_task=BWS-600",
+          "active_implementation_queue=none",
+          "bws710_status=BLOCKED_ACCEPTED_BETTING_WIN_B1_MULTI_VENUE_API_REQUIRED",
+          "BWS-900"
+        ],
+        "path": "PROJECT_STATUS.md",
+        "preimage_mode": "0744",
+        "preimage_sha256": "1b08809e477a4fd233464cea1388cede73ac6b9c05c06c15eea960c698004449"
+      },
+      {
+        "historical_hash_rebased_to_bws122": false,
+        "historical_wave04_preimage_sha256": "b0312d4abfa03fad81c6e69ab66c7024647816e305db2c99724c83dacd8f79a4",
+        "markers_preserved": [],
+        "path": "README.md",
+        "preimage_mode": "0744",
+        "preimage_sha256": "b0312d4abfa03fad81c6e69ab66c7024647816e305db2c99724c83dacd8f79a4"
+      },
+      {
+        "historical_hash_rebased_to_bws122": true,
+        "historical_wave04_preimage_sha256": "732b6e6ef7136af4e9fb7074c9606c10c68f1f48546f35feb78f88ec2b3ce40f",
+        "markers_preserved": [
+          "current_task=BWS-600",
+          "active_implementation_queue=none",
+          "bws710_status=BLOCKED_ACCEPTED_BETTING_WIN_B1_MULTI_VENUE_API_REQUIRED",
+          "BWS-900"
+        ],
+        "path": "docs/000_documentation_index.md",
+        "preimage_mode": "0744",
+        "preimage_sha256": "e5cf97e189fa4e9bd7e9c6dd5bbad23d29ef785276fb742e400c5217e6e6cd6b"
+      },
+      {
+        "historical_hash_rebased_to_bws122": false,
+        "historical_wave04_preimage_sha256": "bdba05055d9c507d4d4ba1901d1cb5d18a15e8359b6c84a4027a6eaadb87ec3b",
+        "markers_preserved": [],
+        "path": "docs/002_dependency_contract_with_betting_win.md",
+        "preimage_mode": "0744",
+        "preimage_sha256": "bdba05055d9c507d4d4ba1901d1cb5d18a15e8359b6c84a4027a6eaadb87ec3b"
+      },
+      {
+        "historical_hash_rebased_to_bws122": false,
+        "historical_wave04_preimage_sha256": "c0cfe1e75e4dde78561dae7905411a1b308c3d9c760c735e88ee81c81fdec21c",
+        "markers_preserved": [],
+        "path": "docs/012_runbook.md",
+        "preimage_mode": "0744",
+        "preimage_sha256": "c0cfe1e75e4dde78561dae7905411a1b308c3d9c760c735e88ee81c81fdec21c"
+      },
+      {
+        "historical_hash_rebased_to_bws122": false,
+        "historical_wave04_preimage_sha256": "2b660f97040f6893f0110172a0f3e5ebe0b6e25f64f0e8ea4daf8ab310242620",
+        "markers_preserved": [],
+        "path": "docs/041_external_runtime_preflight_and_bws600_campaign.md",
+        "preimage_mode": "0744",
+        "preimage_sha256": "2b660f97040f6893f0110172a0f3e5ebe0b6e25f64f0e8ea4daf8ab310242620"
+      },
+      {
+        "historical_hash_rebased_to_bws122": false,
+        "historical_wave04_preimage_sha256": "6f0099cd31db79c590159c7134895821072a37209b0daf01a884e8652b8a1c24",
+        "markers_preserved": [],
+        "path": "docs/047_b1_cross_venue_offline_falsification_program.md",
+        "preimage_mode": "0744",
+        "preimage_sha256": "6f0099cd31db79c590159c7134895821072a37209b0daf01a884e8652b8a1c24"
+      },
+      {
+        "historical_hash_rebased_to_bws122": false,
+        "historical_wave04_preimage_sha256": "a37339908cf947ab24dc9580345f0c742f39e1ca167544221a6f4ae138e2cecc",
+        "markers_preserved": [],
+        "path": "docs/048_b1_upstream_contract.md",
+        "preimage_mode": "0644",
+        "preimage_sha256": "a37339908cf947ab24dc9580345f0c742f39e1ca167544221a6f4ae138e2cecc"
+      },
+      {
+        "historical_hash_rebased_to_bws122": false,
+        "historical_wave04_preimage_sha256": "8b6dc3fb7d20213e0a60906d9bb217d4d19bdb5339a79bdd45b9fa4bceb4f543",
+        "markers_preserved": [],
+        "path": "docs/049_b1_market_equivalence.md",
+        "preimage_mode": "0644",
+        "preimage_sha256": "8b6dc3fb7d20213e0a60906d9bb217d4d19bdb5339a79bdd45b9fa4bceb4f543"
+      },
+      {
+        "historical_hash_rebased_to_bws122": false,
+        "historical_wave04_preimage_sha256": "3ea87cc62935c08af9d0535ec13a90be3825c4d8f579a53c58a6beaeeae50735",
+        "markers_preserved": [],
+        "path": "docs/050_b1_falsification_acceptance.md",
+        "preimage_mode": "0644",
+        "preimage_sha256": "3ea87cc62935c08af9d0535ec13a90be3825c4d8f579a53c58a6beaeeae50735"
+      },
+      {
+        "historical_hash_rebased_to_bws122": false,
+        "historical_wave04_preimage_sha256": "a7505e399280e62a17ca90460e135802627c850dbc47a7d8200bb77274774dde",
+        "markers_preserved": [],
+        "path": "docs/051_b1_implementation_map.md",
+        "preimage_mode": "0744",
+        "preimage_sha256": "a7505e399280e62a17ca90460e135802627c850dbc47a7d8200bb77274774dde"
+      },
+      {
+        "historical_hash_rebased_to_bws122": false,
+        "historical_wave04_preimage_sha256": "66114721e6be77ab24e896cfda2e1ae8df32eea2382f03bd696eb39ed4b20dac",
+        "markers_preserved": [],
+        "path": "docs/MASTER_PLAN.md",
+        "preimage_mode": "0744",
+        "preimage_sha256": "66114721e6be77ab24e896cfda2e1ae8df32eea2382f03bd696eb39ed4b20dac"
+      },
+      {
+        "historical_hash_rebased_to_bws122": false,
+        "historical_wave04_preimage_sha256": "54ac0cd2f3819bccd6748db480b5d870d0b21dbac8f42f003a411b72eacdbf10",
+        "markers_preserved": [],
+        "path": "docs/automation/README.md",
+        "preimage_mode": "0744",
+        "preimage_sha256": "54ac0cd2f3819bccd6748db480b5d870d0b21dbac8f42f003a411b72eacdbf10"
+      },
+      {
+        "historical_hash_rebased_to_bws122": false,
+        "historical_wave04_preimage_sha256": "52031ce84c470b72aeb2f70b02de0f63035794c74481b2c3c687f5fdfa12d3ad",
+        "markers_preserved": [],
+        "path": "docs/automation/api-only-upstream.md",
+        "preimage_mode": "0644",
+        "preimage_sha256": "52031ce84c470b72aeb2f70b02de0f63035794c74481b2c3c687f5fdfa12d3ad"
+      },
+      {
+        "historical_hash_rebased_to_bws122": false,
+        "historical_wave04_preimage_sha256": "f67db876487f2ac92ad8bb56fa3f8b851e980f6fd37cbc85476f6370a45a8b4d",
+        "markers_preserved": [
+          "current_task=BWS-600",
+          "active_implementation_queue=none"
+        ],
+        "path": "docs/automation/current-implementation-task.md",
+        "preimage_mode": "0744",
+        "preimage_sha256": "f67db876487f2ac92ad8bb56fa3f8b851e980f6fd37cbc85476f6370a45a8b4d"
+      },
+      {
+        "historical_hash_rebased_to_bws122": false,
+        "historical_wave04_preimage_sha256": "af4f9d0fa5c84385d3d4fae2cf401410f4aa563c9f2649df5d16577ea3ca34b8",
+        "markers_preserved": [
+          "current_task=BWS-600",
+          "active_implementation_queue=none",
+          "bws710_status=BLOCKED_ACCEPTED_BETTING_WIN_B1_MULTI_VENUE_API_REQUIRED",
+          "BWS-900"
+        ],
+        "path": "docs/repo_status_current.md",
+        "preimage_mode": "0744",
+        "preimage_sha256": "af4f9d0fa5c84385d3d4fae2cf401410f4aa563c9f2649df5d16577ea3ca34b8"
+      }
+    ],
+    "repository": "betting-win-surebet",
+    "selected_controller": "run-paper-autopilot.sh",
+    "source_manifest": {
+      "authoritative": false,
+      "baseline_mode": "0744",
+      "baseline_sha256": "d9ea618c19fac733cf070c7e9b811ace8a1a0d637680b0b9f8233be5879aba6a",
+      "expected_non_self_entries": 770,
+      "extra_entries": 0,
+      "finding": "BWS121-R11-001",
+      "manifest_entries": 617,
+      "mismatched_entries": 8,
+      "missing_entries": 153,
+      "owner_tranche": "BWS-W4-T40"
+    },
+    "target_repo": "$HOME/app_testing/betting-win-surebet",
+    "update_helper": "./update_git.sh --pull"
+  },
+  "finding_counts": {
+    "P0": 10,
+    "P1": 144,
+    "P2": 19,
+    "P3": 0,
+    "confirmed": 173
+  },
+  "implementation_parallelism": "one_source_mutating_tranche_at_a_time",
+  "live_execution": "PROHIBITED",
+  "program_id": "BWS_FINAL_REMEDIATION_R01_R12_V1",
+  "prohibitions": [
+    "no implementation activation by documentation",
+    "no use of existing autonomous controllers before S2 acceptance",
+    "no SOURCE_MANIFEST.json edit in this task",
+    "no application/test/fixture/migration/schema/build/validator/controller/runtime edit",
+    "no release, deployment, database, service, controller, or betting-win action"
+  ],
+  "repository": "betting-win-surebet",
+  "review_program": "COMPLETE_R01_R12",
+  "schema": "bws-remediation-program-authority-v1",
+  "stages": [
+    "S0",
+    "S1",
+    "S2",
+    "S3",
+    "S4",
+    "S5",
+    "S6",
+    "S7"
+  ],
+  "state_machine": [
+    "NOT_ADMITTED",
+    "ADMITTED",
+    "SOURCE_IMPLEMENTED",
+    "FOCUSED_TESTS_PASSED",
+    "ENVIRONMENT_PROOF_PASSED",
+    "ACCEPTED",
+    "BLOCKED",
+    "SOURCE_COMPLETE_EXTERNAL_PENDING"
+  ],
+  "tranches": 47
+}

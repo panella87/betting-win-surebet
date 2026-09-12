@@ -1,0 +1,37 @@
+{
+  "all_hashes_match": true,
+  "inputs": [
+    {
+      "expected_filename": "betting-win-surebet122.zip",
+      "logical_name": "baseline_zip",
+      "sha256": "e303719e5ce64df47df7b0594433a8978e3b01c5a3d0d0bd9129b9b6340b20cd",
+      "supplied_filename": "betting-win-surebet122(2).zip"
+    },
+    {
+      "expected_filename": "betting-win-surebet-final-remediation-architecture-rebased-e303719e-20260912.md",
+      "logical_name": "architecture_md",
+      "sha256": "c9f36cf4a6fa0bcf3b2a70b1460ddfbce8c0908c8a84603e62639e86492960c7",
+      "supplied_filename": "betting-win-surebet-final-remediation-architecture-rebased-e303719e-20260912(1).md"
+    },
+    {
+      "expected_filename": "betting-win-surebet-final-remediation-campaign-map-rebased-e303719e-20260912.json",
+      "logical_name": "campaign_map_json",
+      "sha256": "d5ff33a53b641d1aef231ab602e3ea20749564d7a99b794a9a5f51264724beab",
+      "supplied_filename": "betting-win-surebet-final-remediation-campaign-map-rebased-e303719e-20260912(1).json"
+    },
+    {
+      "expected_filename": "betting-win-surebet-final-remediation-architecture-rebased-e303719e-validation-20260912.txt",
+      "logical_name": "architecture_validation",
+      "sha256": "ae1d36f74ff82e941070c3faf3e8f03fd575b8b27e66b999e671d91007febcad",
+      "supplied_filename": "betting-win-surebet-final-remediation-architecture-rebased-e303719e-validation-20260912(1).txt"
+    },
+    {
+      "expected_filename": "betting-win-surebet-final-remediation-architecture-rebased-e303719e-checksums-20260912.txt",
+      "logical_name": "architecture_checksums",
+      "sha256": "cd2c313f870e0db85ff9521158ad2029d090cb90cd46e9e49bf4009de148643b",
+      "supplied_filename": "betting-win-surebet-final-remediation-architecture-rebased-e303719e-checksums-20260912(1).txt"
+    }
+  ],
+  "program_id": "BWS_FINAL_REMEDIATION_R01_R12_V1",
+  "schema": "bws-remediation-input-identities-v1"
+}

@@ -1,0 +1,32 @@
+{
+  "architecture_full_member_digest_sha256": "4edf784ab0211d73f362b814dae9145523e98aa79471f5011134f20daee83f02",
+  "architecture_non_documentation_digest_sha256": "9e534bbf077d5b2b7bf216b542bff3bb500ebc3ea1751f2c414c290ebf13968a",
+  "architecture_non_documentation_files": 511,
+  "archive": "betting-win-surebet122.zip",
+  "archive_member_inventory_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/baseline/archive-member-inventory.json",
+  "archive_sha256": "e303719e5ce64df47df7b0594433a8978e3b01c5a3d0d0bd9129b9b6340b20cd",
+  "git_branch": "TO_CAPTURE_AT_ACTIVATION",
+  "git_dirty_state": "TO_CAPTURE_AT_ACTIVATION",
+  "git_head": "TO_CAPTURE_AT_ACTIVATION",
+  "git_upstream": "TO_CAPTURE_AT_ACTIVATION",
+  "independent_inventory_digest_sha256": "b81ff807e4c230bff96fe1fa58f73a2d4bac803ebd7fa58b843cdcb83499f7f0",
+  "overlay_additions_are_expected_additional_manifest_drift": true,
+  "program_id": "BWS_FINAL_REMEDIATION_R01_R12_V1",
+  "protected_authority_inventory_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/baseline/protected-authority-preimages.json",
+  "regular_files": 771,
+  "repository": "betting-win-surebet",
+  "schema": "bws-remediation-baseline-authority-v1",
+  "source_manifest": {
+    "authoritative": false,
+    "baseline_mode": "0744",
+    "baseline_sha256": "d9ea618c19fac733cf070c7e9b811ace8a1a0d637680b0b9f8233be5879aba6a",
+    "expected_non_self_entries": 770,
+    "extra_entries": 0,
+    "finding": "BWS121-R11-001",
+    "manifest_entries": 617,
+    "mismatched_entries": 8,
+    "missing_entries": 153,
+    "owner_tranche": "BWS-W4-T40"
+  },
+  "source_manifest_task_rule": "do not edit or regenerate until admitted T40"
+}

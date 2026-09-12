@@ -1,0 +1,21 @@
+{
+  "final_tranche": "BWS-W4-T43",
+  "program_id": "BWS_FINAL_REMEDIATION_R01_R12_V1",
+  "required": [
+    "all 47 tranches have one valid terminal state",
+    "all 173 stable finding IDs are accounted for exactly once",
+    "every internally closed finding has exact postimage, executed focused and production-entrypoint proof, and required environment receipts",
+    "Node v20.20.2 exact acceptance passes wherever Node evidence is required",
+    "all required PostgreSQL, systemd, multi-process, crash/restart, browser, backup/restore, release/rollback, and soak proof is accepted",
+    "T43 machine closure accepts the complete receipt graph",
+    "external blockers remain explicit and non-promotable where evidence is unavailable",
+    "BWS-600, BWS-710, BWS-900, release, deployment, and execution are not implicitly released",
+    "no betting-win source, checkout, documentation, service, database, or runtime was accessed or mutated"
+  ],
+  "schema": "bws-remediation-completion-criteria-v1",
+  "terminal_states": [
+    "ACCEPTED",
+    "BLOCKED",
+    "SOURCE_COMPLETE_EXTERNAL_PENDING"
+  ]
+}

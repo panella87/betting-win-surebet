@@ -1,0 +1,19 @@
+{
+  "T43_is_last": true,
+  "all_P0_findings_in_S1_corridor": true,
+  "authority_conflicts": [],
+  "dependencies": 161,
+  "dependency_cycles": 0,
+  "duplicate_owners": 0,
+  "explicit_activation_time_gaps_document": "../authority-decisions-and-gaps.md",
+  "findings": 173,
+  "production_entrypoint_requirements": 645,
+  "program_id": "BWS_FINAL_REMEDIATION_R01_R12_V1",
+  "schema": "bws-remediation-reconciliation-summary-v1",
+  "schemas": 14,
+  "shared_paths": 66,
+  "stages": 8,
+  "tranche_bound_test_requirements": 797,
+  "tranches": 47,
+  "unmapped_findings": 0
+}
