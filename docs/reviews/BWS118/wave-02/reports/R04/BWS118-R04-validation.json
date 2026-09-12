@@ -1,0 +1,341 @@
+{
+  "schema": "betting-win-surebet-deep-review-validation-v1",
+  "review_id": "BWS118-R04",
+  "repository": "betting-win-surebet",
+  "generated_at_utc": "2026-09-11T10:03:03Z",
+  "archive": {
+    "path": "/mnt/data/betting-win-surebet118.zip",
+    "expected_sha256": "50bbcb0b476904c8209cf7e1287b5ac4f9091fa07f6fd67523fc5430029417f7",
+    "actual_sha256": "50bbcb0b476904c8209cf7e1287b5ac4f9091fa07f6fd67523fc5430029417f7",
+    "expected_regular_file_count": 657,
+    "actual_regular_file_count": 657,
+    "total_uncompressed_bytes": 8401141,
+    "total_compressed_bytes": 2513009,
+    "safety": {
+      "duplicate_paths": 0,
+      "unsafe_paths": 0,
+      "symlinks": 0,
+      "special_entries": 0,
+      "verdict": "PASS"
+    }
+  },
+  "baseline_compatibility": {
+    "prior_baseline": "betting-win-surebet117(1).zip",
+    "prior_baseline_sha256_expected": "0d234e00d015dcab0989b47372ded516bddee9705d9021a0694916dc91a9d494",
+    "prior_baseline_sha256_actual": "0d234e00d015dcab0989b47372ded516bddee9705d9021a0694916dc91a9d494",
+    "added_paths": 39,
+    "changed_paths": 1,
+    "removed_paths": 0,
+    "added_path_list": [
+      "docs/reviews/BWS117/wave-01/README.md",
+      "docs/reviews/BWS117/wave-01/area-coverage.md",
+      "docs/reviews/BWS117/wave-01/authority-map.md",
+      "docs/reviews/BWS117/wave-01/baseline-compatibility.json",
+      "docs/reviews/BWS117/wave-01/baseline-compatibility.md",
+      "docs/reviews/BWS117/wave-01/baseline-file-manifest.tsv",
+      "docs/reviews/BWS117/wave-01/completeness-reconciliation.json",
+      "docs/reviews/BWS117/wave-01/cumulative-consolidated-ledger.json",
+      "docs/reviews/BWS117/wave-01/cumulative-consolidated-ledger.md",
+      "docs/reviews/BWS117/wave-01/decisions.json",
+      "docs/reviews/BWS117/wave-01/decisions.md",
+      "docs/reviews/BWS117/wave-01/dependency-and-tranches.md",
+      "docs/reviews/BWS117/wave-01/documentation-integration-plan.json",
+      "docs/reviews/BWS117/wave-01/incremental-consolidation.md",
+      "docs/reviews/BWS117/wave-01/input-inventory.json",
+      "docs/reviews/BWS117/wave-01/next-wave-handoff.md",
+      "docs/reviews/BWS117/wave-01/non-defect-register.json",
+      "docs/reviews/BWS117/wave-01/original-to-consolidated.json",
+      "docs/reviews/BWS117/wave-01/prior-overlay-lineage.json",
+      "docs/reviews/BWS117/wave-01/prior-overlay-lineage.md",
+      "docs/reviews/BWS117/wave-01/protected-mutable-documents.json",
+      "docs/reviews/BWS117/wave-01/report-index.json",
+      "docs/reviews/BWS117/wave-01/reports/R01/BWS116-R01-coverage.tsv",
+      "docs/reviews/BWS117/wave-01/reports/R01/BWS116-R01-findings.json",
+      "docs/reviews/BWS117/wave-01/reports/R01/BWS116-R01-report.md",
+      "docs/reviews/BWS117/wave-01/reports/R01/BWS116-R01-validation.json",
+      "docs/reviews/BWS117/wave-01/reports/R02/BWS116-R02-coverage.tsv",
+      "docs/reviews/BWS117/wave-01/reports/R02/BWS116-R02-findings.json",
+      "docs/reviews/BWS117/wave-01/reports/R02/BWS116-R02-report.md",
+      "docs/reviews/BWS117/wave-01/reports/R02/BWS116-R02-validation.json",
+      "docs/reviews/BWS117/wave-01/reports/R03/BWS116-R03-coverage.tsv",
+      "docs/reviews/BWS117/wave-01/reports/R03/BWS116-R03-findings.json",
+      "docs/reviews/BWS117/wave-01/reports/R03/BWS116-R03-report.md",
+      "docs/reviews/BWS117/wave-01/reports/R03/BWS116-R03-validation.json",
+      "docs/reviews/BWS117/wave-01/repository-profile.md",
+      "docs/reviews/BWS117/wave-01/source-verification.json",
+      "docs/reviews/BWS117/wave-01/test-evidence-matrix.json",
+      "docs/reviews/BWS117/wave-01/test-evidence-matrix.md",
+      "docs/reviews/README.md"
+    ],
+    "changed_path_list": [
+      "docs/000_documentation_index.md"
+    ],
+    "removed_path_list": [],
+    "non_documentation_differences": [],
+    "executable_compatibility_result": "PASS_EXACT_NON_DOCUMENTATION_BYTE_EQUIVALENCE"
+  },
+  "package_identity": {
+    "name": "betting-win-surebet",
+    "version": "0.1.0-bws-full-platform",
+    "nvmrc": "20.20.2",
+    "package_engine": ">=20 <21"
+  },
+  "runtime_and_tools": {
+    "canonical_node": "20.20.2",
+    "actual_node": "22.16.0",
+    "actual_node_authority": "SUPPLEMENTARY_ONLY",
+    "npm": "10.9.2",
+    "typescript": "5.8.3",
+    "python": "3.13.5",
+    "git": "2.47.3",
+    "unzip": "6.00",
+    "psql": "UNAVAILABLE"
+  },
+  "commands_executed": [
+    {
+      "id": "CMD-001",
+      "command": "sha256sum /mnt/data/betting-win-surebet118.zip; Python zipfile safety/type/count/hash inventory",
+      "purpose": "Freeze archive identity and build the 657-member inventory.",
+      "exit_code": 0,
+      "duration_seconds": null,
+      "timed_out": false,
+      "result": "PASS; exact expected SHA, 657 regular files, no duplicates/unsafe paths/symlinks/special entries."
+    },
+    {
+      "id": "CMD-002",
+      "command": "Python zipfile byte comparison: betting-win-surebet117(1).zip -> betting-win-surebet118.zip",
+      "purpose": "Verify executable compatibility with Wave 01 rebase.",
+      "exit_code": 0,
+      "duration_seconds": null,
+      "timed_out": false,
+      "result": "PASS; 39 added docs, 1 changed docs index, 0 removed, 0 non-documentation differences."
+    },
+    {
+      "id": "CMD-003",
+      "command": "npm run build (disposable copy, Node 22.16.0, no dependency installation)",
+      "purpose": "Supplementary compile check before local type declaration availability was supplied.",
+      "exit_code": 2,
+      "duration_seconds": 6.33,
+      "timed_out": false,
+      "result": "FAILED_ENVIRONMENT; @types/node unavailable in the disposable copy."
+    },
+    {
+      "id": "CMD-004",
+      "command": "ln -s /opt/nvm/versions/node/v22.16.0/lib/node_modules/ts-node/node_modules/@types/node <disposable-copy>/node_modules/@types/node; npm run build",
+      "purpose": "Supplementary build using an already installed local declaration package, without installing or changing source authority.",
+      "exit_code": 0,
+      "duration_seconds": 6.42,
+      "timed_out": false,
+      "result": "PASS_SUPPLEMENTARY_NODE22; source archive/review tree unchanged."
+    },
+    {
+      "id": "CMD-005",
+      "command": "node --test <15 focused compiled R04 test files>",
+      "purpose": "Run focused simulation, settlement, backtest, report, private-paper, and B1 runtime evidence tests.",
+      "exit_code": 0,
+      "duration_seconds": 1.211819487,
+      "timed_out": false,
+      "result": "PASS_SUPPLEMENTARY_NODE22; 171 passed, 0 failed, 0 skipped."
+    },
+    {
+      "id": "CMD-006",
+      "command": "node /mnt/data/BWS118-R04-work/tmp/r04-adversarial-harness.mjs",
+      "purpose": "Exercise production entrypoints with duplicate events, partial+terminal state, kill ordering, cost loss, impossible chronology, incomplete report state, and inferred corrections.",
+      "exit_code": 0,
+      "duration_seconds": 0.07,
+      "timed_out": false,
+      "result": "PASS_AS_PROBE; reproduced findings 001,003,004,005,007,008,009,010,014."
+    },
+    {
+      "id": "CMD-007",
+      "command": "node /mnt/data/BWS118-R04-work/tmp/r04-report-harness.mjs",
+      "purpose": "Exercise report cardinality and malformed observation behavior.",
+      "exit_code": 0,
+      "duration_seconds": 0.03,
+      "timed_out": false,
+      "result": "PASS_AS_PROBE; reproduced marketsCompared inflation and malformed observation TypeError."
+    },
+    {
+      "id": "CMD-008",
+      "command": "python scripts/validate_bws_b1_acceptance.py",
+      "purpose": "Static repository validator relevant to R04 assurance.",
+      "exit_code": 0,
+      "duration_seconds": 0.768004711,
+      "timed_out": false,
+      "result": "PASS; does not constitute runtime acceptance and did not detect the adversarial R04 defects."
+    },
+    {
+      "id": "CMD-009",
+      "command": "python scripts/validate_bws_b1_boundary.py",
+      "purpose": "Static repository validator relevant to R04 assurance.",
+      "exit_code": 0,
+      "duration_seconds": 0.569902532,
+      "timed_out": false,
+      "result": "PASS; does not constitute runtime acceptance and did not detect the adversarial R04 defects."
+    },
+    {
+      "id": "CMD-010",
+      "command": "python scripts/validate_bws_b1_authority.py",
+      "purpose": "Static repository validator relevant to R04 assurance.",
+      "exit_code": 0,
+      "duration_seconds": 0.617604489,
+      "timed_out": false,
+      "result": "PASS; does not constitute runtime acceptance and did not detect the adversarial R04 defects."
+    },
+    {
+      "id": "CMD-011",
+      "command": "python scripts/validate_fixture_integrity.py",
+      "purpose": "Static repository validator relevant to R04 assurance.",
+      "exit_code": 0,
+      "duration_seconds": 0.608091671,
+      "timed_out": false,
+      "result": "PASS; does not constitute runtime acceptance and did not detect the adversarial R04 defects."
+    },
+    {
+      "id": "CMD-012",
+      "command": "python scripts/validate_repo.py",
+      "purpose": "Static repository validator relevant to R04 assurance.",
+      "exit_code": 0,
+      "duration_seconds": 0.737534963,
+      "timed_out": false,
+      "result": "PASS; does not constitute runtime acceptance and did not detect the adversarial R04 defects."
+    },
+    {
+      "id": "CMD-013",
+      "command": "python scripts/validate_source_manifest.py",
+      "purpose": "Confirm known baseline manifest drift without modifying the manifest.",
+      "exit_code": 1,
+      "duration_seconds": 0.652053838,
+      "timed_out": false,
+      "result": "EXPECTED_FAIL_KNOWN_BASELINE_MANIFEST_DRIFT; handed to R11, not an R04 finding."
+    },
+    {
+      "id": "CMD-014",
+      "command": "Grouped static inspection: rg -n, nl -ba, find, sha256sum, and Python source parsers over owned files, tests, docs, and inherited ledger",
+      "purpose": "Trace production entrypoints, types, state transitions, reports, tests, and overlap authority.",
+      "exit_code": 0,
+      "duration_seconds": null,
+      "timed_out": false,
+      "result": "PASS; individual interactive inspection durations were not captured before the command-audit record was assembled."
+    }
+  ],
+  "checks": {
+    "passed": [
+      "Archive hash, count, path safety, type safety, and extracted-byte inventory",
+      "BWS117-to-BWS118 exact non-documentation compatibility",
+      "41 inherited finding IDs loaded and overlap-checked",
+      "Owned production path and focused-test static tracing",
+      "Node 22 supplementary build after local preinstalled type declaration link in disposable copy",
+      "171 focused Node 22 tests",
+      "Two bounded offline adversarial harnesses",
+      "Five static validators",
+      "Coverage row reconciliation"
+    ],
+    "failed": [
+      "Initial supplementary build without @types/node in disposable copy (environmental, no install performed)",
+      "SOURCE_MANIFEST validator due to pre-existing KNOWN_BASELINE_MANIFEST_DRIFT"
+    ],
+    "skipped_by_design": [
+      "Provider/API/RPC/service/account/credential access",
+      "betting-win checkout or database access",
+      "Persistent BWS database access or mutation",
+      "Controllers, services, workers, schedulers, paper campaigns, or live operations",
+      "Dependency installation or update",
+      "Implementation, overlay, commit, push, pull, reset, clean, or branch change"
+    ],
+    "unavailable": [
+      "Canonical Node 20.20.2 execution",
+      "Disposable local PostgreSQL isolation/concurrency execution",
+      "Accepted live B1 runtime resource and provider terminal lifecycle evidence"
+    ]
+  },
+  "adversarial_probe_summary": {
+    "runtime": "v22.16.0",
+    "standard_exact_duplicate": {
+      "ok": false,
+      "blockers": [
+        {
+          "code": "NON_ATOMIC_COMPLETION_EVENT_ORDER_AMBIGUOUS",
+          "message": "Non-atomic completion simulation rejects same-leg events with identical timestamps.",
+          "evidenceRequired": "Unambiguous non-atomic completion event ordering per leg and timestamp."
+        }
+      ]
+    },
+    "standard_shifted_duplicate_filled_yes_minor": "200n",
+    "standard_partial_then_terminal_state": "leg_partial",
+    "standard_retroactive_kill_group_state": "group_killed",
+    "b1_planned_worst_case_net_minor": "964n",
+    "b1_settled_net_minor": "1000n",
+    "b1_impossible_temporal_accepted": true,
+    "b1_incomplete_reported_fillable": 1,
+    "b1_inferred_correction_count": 1,
+    "b1_inferred_finality_progression_count": 1,
+    "report_markets_compared_for_one_market_three_pairs": 3,
+    "malformed_observation_result": null
+  },
+  "coverage_reconciliation": {
+    "archive_members": 657,
+    "coverage_rows_excluding_header": 657,
+    "unique_coverage_paths": 657,
+    "missing_paths": [],
+    "extra_paths": [],
+    "size_or_hash_mismatches": [],
+    "result": "PASS"
+  },
+  "finding_counts": {
+    "confirmed_findings": 14,
+    "by_severity": {
+      "P1": 12,
+      "P2": 2
+    },
+    "by_classification": {
+      "CONFIRMED_FINDING": 14,
+      "HYPOTHESIS": 1,
+      "EXTERNAL_UPSTREAM_BLOCKER": 2,
+      "ENVIRONMENT_BLOCKER": 2,
+      "INTENTIONAL_SAFEGUARD": 5,
+      "REJECTED_SUSPICION": 5,
+      "CROSS_AREA_HANDOFF": 7,
+      "TEST_GAP": 15
+    }
+  },
+  "known_limitations": [
+    "Node 20.20.2 was unavailable; Node 22.16.0 outputs are supplementary and not canonical acceptance.",
+    "No external provider authority was contacted, so complete provider-native terminal lifecycle semantics remain an external blocker.",
+    "No disposable PostgreSQL server was available; R03 transaction/isolation behavior was not dynamically reproduced.",
+    "An exact shell audit log was not started before static tracing. Major executable commands and all persisted outputs are recorded; grouped rg/nl/find/hash inspection commands have no individual durations.",
+    "Focused tests and static validators passing do not prove runtime acceptance and are specifically shown to miss adversarial R04 behavior."
+  ],
+  "repository_mutation_check": {
+    "source_tree": "/mnt/data/BWS118-R04-work/repo",
+    "expected_file_count": 657,
+    "method": "Rehash every regular file after report generation and compare path, size, and SHA-256 with frozen inventory.json.",
+    "result": "PASS_SOURCE_TREE_BYTE_IDENTICAL_TO_FROZEN_INVENTORY",
+    "outputs_location": "/mnt/data/BWS118-R04-work/out",
+    "outputs_inside_source_tree": false,
+    "actual_file_count": 657,
+    "missing_paths": [],
+    "extra_paths": [],
+    "size_or_hash_mismatches": []
+  },
+  "access_attestation": {
+    "external_network_access": false,
+    "provider_access": false,
+    "api_or_rpc_access": false,
+    "account_or_credential_access": false,
+    "betting_win_checkout_access": false,
+    "betting_win_database_access": false,
+    "persistent_bws_database_access": false,
+    "live_or_financial_action": false,
+    "controller_or_service_start": false,
+    "dependency_install_or_update": false
+  },
+  "output_validation": {
+    "json_parse": "PASS",
+    "finding_id_sequence": "PASS",
+    "coverage_rows": 657,
+    "coverage_unique_paths": 657,
+    "coverage_hash_and_size_reconciliation": "PASS",
+    "report_required_sections": "PASS"
+  }
+}

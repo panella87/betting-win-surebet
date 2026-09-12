@@ -1,0 +1,384 @@
+{
+  "schema": "bws118-r05-validation-v1",
+  "review_id": "BWS118-R05",
+  "repository": "betting-win-surebet",
+  "archive": {
+    "reviewed_path": "/mnt/data/betting-win-surebet118(1).zip",
+    "actual_sha256": "50bbcb0b476904c8209cf7e1287b5ac4f9091fa07f6fd67523fc5430029417f7",
+    "regular_file_count": 657,
+    "zip_entry_count": 657,
+    "directories": 0,
+    "symlinks": 0,
+    "special_entries": 0,
+    "duplicate_paths": [],
+    "unsafe_paths": [],
+    "testzip_first_bad_member": null,
+    "extracted_path_size_hash_match": true,
+    "prior_baseline": {
+      "archive": "/mnt/data/betting-win-surebet117(2).zip",
+      "sha256": "0d234e00d015dcab0989b47372ded516bddee9705d9021a0694916dc91a9d494",
+      "regular_file_count": 618,
+      "added_documentation_files": 39,
+      "changed_documentation_files": [
+        "docs/000_documentation_index.md"
+      ],
+      "removed_files": [],
+      "non_documentation_differences": []
+    },
+    "original_review_baseline": {
+      "archive": "/mnt/data/betting-win-surebet116(3).zip",
+      "sha256": "6cc5be4e7f3a637d7c0ed9485f246ade4975b5a8e60d3895943e0471afc29376",
+      "regular_file_count": 618,
+      "non_documentation_differences": []
+    },
+    "executable_compatibility_result": "PASS_EXECUTABLE_SOURCE_EQUIVALENT_DOCUMENTATION_ONLY_REBASE"
+  },
+  "handoff": {
+    "path": "/mnt/data/betting-win-surebet-wave01-next-review-handoff-r01-r03-rebased-0d234e00-20260911(2).md",
+    "sha256": "9a896b8e4100582cb2790c3567cd259068c7c296afd911b93b25cda20464b51e",
+    "r05_scope_applied": true
+  },
+  "package_identity": {
+    "name": "betting-win-surebet",
+    "version": "0.1.0-bws-full-platform",
+    "engine": ">=20 <21",
+    "nvmrc": "20.20.2",
+    "canonical_runtime": "Node 20.20.2"
+  },
+  "runtime_and_tools": {
+    "actual_node": "v22.16.0",
+    "node_20_20_2_available": false,
+    "node_classification": "SUPPLEMENTARY_NONCANONICAL",
+    "npm": "10.9.2",
+    "typescript_compiler": "Version 5.8.3",
+    "python": "3.13.5",
+    "platform": "Linux-6.18.35-x86_64-with-glibc2.41",
+    "node_modules_present": false,
+    "dist_present_before_review": false,
+    "dist_present_after_review": false
+  },
+  "commands_executed": [
+    {
+      "name": "archive_identity_and_safety_audit",
+      "command": [
+        "python3",
+        "/tmp/bws118-r05-review/archive_audit.py",
+        "/mnt/data/betting-win-surebet118(1).zip"
+      ],
+      "cwd": "/tmp/bws118-r05-review",
+      "duration_seconds": 0.078387,
+      "exit_code": 0,
+      "timed_out": false,
+      "classification": "PASS"
+    },
+    {
+      "name": "bws116_bws117_bws118_non_documentation_comparison",
+      "command": [
+        "python3",
+        "bounded zip member hash comparison"
+      ],
+      "cwd": "/tmp/bws118-r05-review",
+      "duration_seconds": null,
+      "exit_code": 0,
+      "timed_out": false,
+      "classification": "PASS_ZERO_NON_DOCUMENTATION_DIFFERENCES"
+    },
+    {
+      "name": "focused_r05_tests",
+      "command": [
+        "node",
+        "--test",
+        "--test-concurrency=1",
+        "tests/bws-read-only-query-api.test.ts",
+        "tests/bws-operator-cockpit.test.ts",
+        "tests/b1-read-only-api.test.ts",
+        "tests/b1-operator-cockpit.test.ts"
+      ],
+      "cwd": "/tmp/bws118-r05-review/repo",
+      "duration_seconds": 2.86,
+      "exit_code": 0,
+      "timed_out": false,
+      "classification": "SUPPLEMENTARY_NODE22_39_PASS_2_SKIP"
+    },
+    {
+      "name": "r05_adversarial_harness",
+      "command": [
+        "node",
+        "--loader",
+        "/opt/nvm/versions/node/v22.16.0/lib/node_modules/ts-node/esm.mjs",
+        "/tmp/bws118-r05-review/r05-adversarial-harness.mts"
+      ],
+      "cwd": "/tmp/bws118-r05-review",
+      "duration_seconds": 0.7,
+      "exit_code": 0,
+      "timed_out": false,
+      "classification": "SUPPLEMENTARY_NODE22_REPRODUCED_R05_001_TO_009_AND_011"
+    },
+    {
+      "name": "r05_wire_adversarial_harness_setup_attempt",
+      "command": [
+        "node",
+        "--loader",
+        "/usr/local/lib/node_modules/ts-node/esm.mjs",
+        "/tmp/bws118-r05-review/r05-wire-adversarial.mts"
+      ],
+      "cwd": "/tmp/bws118-r05-review",
+      "duration_seconds": 0.05,
+      "exit_code": 1,
+      "timed_out": false,
+      "classification": "REVIEW_TOOL_SETUP_ERROR_WRONG_LOADER_PATH_NO_PRODUCT_IMPLICATION"
+    },
+    {
+      "name": "r05_wire_adversarial_harness",
+      "command": [
+        "node",
+        "--loader",
+        "/opt/nvm/versions/node/v22.16.0/lib/node_modules/ts-node/esm.mjs",
+        "/tmp/bws118-r05-review/r05-wire-adversarial.mts"
+      ],
+      "cwd": "/tmp/bws118-r05-review",
+      "duration_seconds": 0.44,
+      "exit_code": 0,
+      "timed_out": false,
+      "classification": "SUPPLEMENTARY_NODE22_REPRODUCED_R05_010"
+    },
+    {
+      "name": "r05_ui_state_harness",
+      "command": [
+        "node",
+        "--loader",
+        "/opt/nvm/versions/node/v22.16.0/lib/node_modules/ts-node/esm.mjs",
+        "/tmp/bws118-r05-review/r05-ui-state-harness.mts"
+      ],
+      "cwd": "/tmp/bws118-r05-review",
+      "duration_seconds": 0.41,
+      "exit_code": 0,
+      "timed_out": false,
+      "classification": "SUPPLEMENTARY_NODE22_REPRODUCED_R05_012_AND_013"
+    },
+    {
+      "name": "validate_repo",
+      "command": [
+        "python3",
+        "scripts/validate_repo.py"
+      ],
+      "cwd": "/tmp/bws118-r05-review/repo",
+      "duration_seconds": 0.64,
+      "exit_code": 0,
+      "timed_out": false,
+      "classification": "PASS"
+    },
+    {
+      "name": "validate_contract_boundary",
+      "command": [
+        "python3",
+        "scripts/validate_contract_boundary.py"
+      ],
+      "cwd": "/tmp/bws118-r05-review/repo",
+      "duration_seconds": 0.78,
+      "exit_code": 0,
+      "timed_out": false,
+      "classification": "PASS"
+    },
+    {
+      "name": "validate_no_provider_connections",
+      "command": [
+        "python3",
+        "scripts/validate_no_provider_connections.py"
+      ],
+      "cwd": "/tmp/bws118-r05-review/repo",
+      "duration_seconds": 0.73,
+      "exit_code": 0,
+      "timed_out": false,
+      "classification": "PASS"
+    },
+    {
+      "name": "validate_no_execution_paths",
+      "command": [
+        "python3",
+        "scripts/validate_no_execution_paths.py"
+      ],
+      "cwd": "/tmp/bws118-r05-review/repo",
+      "duration_seconds": 0.82,
+      "exit_code": 0,
+      "timed_out": false,
+      "classification": "PASS"
+    },
+    {
+      "name": "validate_bws_b1_boundary",
+      "command": [
+        "python3",
+        "scripts/validate_bws_b1_boundary.py"
+      ],
+      "cwd": "/tmp/bws118-r05-review/repo",
+      "duration_seconds": 0.64,
+      "exit_code": 0,
+      "timed_out": false,
+      "classification": "PASS"
+    },
+    {
+      "name": "validate_bws_b1_authority",
+      "command": [
+        "python3",
+        "scripts/validate_bws_b1_authority.py"
+      ],
+      "cwd": "/tmp/bws118-r05-review/repo",
+      "duration_seconds": 0.6,
+      "exit_code": 0,
+      "timed_out": false,
+      "classification": "PASS"
+    },
+    {
+      "name": "validate_bws_b1_acceptance",
+      "command": [
+        "python3",
+        "scripts/validate_bws_b1_acceptance.py"
+      ],
+      "cwd": "/tmp/bws118-r05-review/repo",
+      "duration_seconds": 0.61,
+      "exit_code": 0,
+      "timed_out": false,
+      "classification": "PASS"
+    },
+    {
+      "name": "validate_source_manifest",
+      "command": [
+        "python3",
+        "scripts/validate_source_manifest.py"
+      ],
+      "cwd": "/tmp/bws118-r05-review/repo",
+      "duration_seconds": 0.6,
+      "exit_code": 1,
+      "timed_out": false,
+      "classification": "KNOWN_BASELINE_MANIFEST_DRIFT_R11_HANDOFF"
+    },
+    {
+      "name": "web_typecheck",
+      "command": [
+        "tsc",
+        "-p",
+        "apps/web/tsconfig.json",
+        "--noEmit",
+        "--incremental",
+        "false"
+      ],
+      "cwd": "/tmp/bws118-r05-review/repo",
+      "duration_seconds": 0.55,
+      "exit_code": 2,
+      "timed_out": false,
+      "classification": "UNAVAILABLE_MISSING_LOCKFILE_DEPENDENCY_TYPES_INSTALL_PROHIBITED"
+    }
+  ],
+  "checks": {
+    "passed": [
+      "Archive SHA/member/type/path/decompression audit.",
+      "BWS116/BWS117/BWS118 non-documentation byte equivalence.",
+      "All 41 inherited confirmed findings indexed for overlap.",
+      "39 focused tests under supplementary Node 22.",
+      "Adversarial HTTP/cursor/pagination/runtime-cycle/cockpit/snapshot/wire/UI-state harnesses.",
+      "validate_repo, validate_contract_boundary, validate_no_provider_connections, validate_no_execution_paths.",
+      "validate_bws_b1_boundary, validate_bws_b1_authority, validate_bws_b1_acceptance.",
+      "657-row coverage path/size/hash reconciliation.",
+      "Post-review extracted-source hash equality with archive."
+    ],
+    "failed": [
+      "validate_source_manifest.py: expected known baseline drift, handed to R11; not an R05 product finding."
+    ],
+    "skipped": [
+      "Two focused database-backed tests were skipped by the test suite.",
+      "No external provider/API/service/account/credential checks were permitted.",
+      "No persistent or disposable PostgreSQL database was contacted."
+    ],
+    "unavailable": [
+      "Canonical Node 20.20.2 execution.",
+      "Clean full web typecheck/build because node/react/react-dom type dependencies were absent and installation was prohibited.",
+      "PostgreSQL isolation, query-plan, snapshot, and concurrent mutation proof."
+    ]
+  },
+  "bounded_harnesses": {
+    "http_error_taxonomy": "Injected inert exception; observed 400/raw message collapse.",
+    "cursor_integrity": "Synthesized token accepted; arbitrary afterId reached repository.",
+    "pagination_mutation": "Concurrent lexically earlier insert omitted across pages.",
+    "runtime_cycle_old_match": "Cycle 6 not scanned when pageSize=1 and upper cycle=10.",
+    "runtime_cycle_work_count": "10,000 cycles and 50,000 minimum dependency calls at max page shape.",
+    "cockpit_continuation": "Seven nextCursor responses, zero continuation fetches.",
+    "query_scope_vacuity": "Wrong-scope empty page accepted.",
+    "snapshot_coherence": "Seven dates from 2000 to 2099 accepted as one snapshot.",
+    "wire_mutation": "Closed-policy, fixed-point, timestamp, terminal, and status violations accepted.",
+    "b1_contract_roundtrip": "Producer-valid null rejected; malformed children accepted.",
+    "browser_request_race": "Older completion overwrote newer active scope.",
+    "empty_state": "Search-empty and applied-scope empty rendered misleading source/scope copy."
+  },
+  "coverage_reconciliation": {
+    "archive_regular_files": 657,
+    "coverage_data_rows": 657,
+    "unique_coverage_paths": 657,
+    "missing_archive_paths": [],
+    "extra_coverage_paths": [],
+    "path_size_hash_reconciled": true
+  },
+  "finding_counts": {
+    "confirmed_total": 13,
+    "confirmed_by_severity": {
+      "P1": 10,
+      "P2": 3
+    },
+    "records_by_classification": {
+      "CONFIRMED_FINDING": 13,
+      "CROSS_AREA_HANDOFF": 7,
+      "EXTERNAL_INPUT_BLOCKER": 4,
+      "HYPOTHESIS": 1,
+      "INTENTIONAL_SAFEGUARD": 5,
+      "REJECTED_SUSPICION": 3,
+      "TEST_GAP": 11
+    },
+    "inherited_confirmed_checked": 41,
+    "inherited_duplicate_ids_created": 0
+  },
+  "known_limitations": [
+    "Node 22 behavior is supplementary and cannot substitute for Node 20.20.2 acceptance.",
+    "No real PostgreSQL execution, isolation, snapshot, index, or query-plan evidence was obtained.",
+    "No React DOM/browser automation runtime was installed; shell race and empty-state behavior were reproduced through source-executing and state-machine harnesses.",
+    "No external runtime acceptance was attempted; BWS-600/BWS-710 holds remain unchanged.",
+    "Static validator passes do not prove API/cockpit semantic correctness.",
+    "The known SOURCE_MANIFEST drift prevents exact manifest validation but does not affect ZIP byte authority."
+  ],
+  "repository_mutation_attestation": {
+    "source_tree_modified": false,
+    "added_paths": [],
+    "removed_paths": [],
+    "changed_paths": [],
+    "post_review_hash_matches_archive": true,
+    "temporary_review_root": "/tmp/bws118-r05-review",
+    "outputs_written_outside_repository": true
+  },
+  "network_provider_database_access_attestation": {
+    "external_network_accessed": false,
+    "provider_contacted": false,
+    "external_api_contacted": false,
+    "account_or_credential_accessed": false,
+    "persistent_database_contacted": false,
+    "persistent_database_mutated": false,
+    "wallet_signer_or_execution_contacted": false,
+    "live_operation_performed": false
+  },
+  "output_files": {
+    "BWS118-R05-report.md": {
+      "size": 61802,
+      "sha256": "37a873ac346aab7e1292a91034490501dab6f558bd977dad557baddb013f7310"
+    },
+    "BWS118-R05-findings.json": {
+      "size": 87336,
+      "sha256": "a028eb13e1786b76e942df3fd09b69d6aabe2cd6a83f9941cc694cfcc6b75ef9"
+    },
+    "BWS118-R05-coverage.tsv": {
+      "size": 177970,
+      "sha256": "777d5a09500a6097e1c80501eb3dd0d73e3c33d1a412e3c4f826f9c918dc3f70"
+    },
+    "BWS118-R05-validation.json": {
+      "size": null,
+      "sha256": null,
+      "note": "Self-hash intentionally not embedded; verified after write."
+    }
+  }
+}

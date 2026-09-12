@@ -1,0 +1,606 @@
+{
+  "files": [
+    {
+      "action": "REPLACE",
+      "mode": "0744",
+      "path": "docs/000_documentation_index.md",
+      "postimage_sha256": "ec4b7d3c4c85023e57575ef3b924b1d11fb9cf95b120dad2d1dbf47de4463667",
+      "preimage_mode": "0744",
+      "preimage_sha256": "bc08819c6cecc0691e0716ef31e1cb4d1de4c337de511017d724f6fab7879752",
+      "protected_content_preserved": true,
+      "reason": "Wave 02 review evidence, cumulative consolidation, navigation, or machine-readable validation",
+      "source_reports_represented": [
+        "BWS118-R04",
+        "BWS118-R05",
+        "BWS118-R06"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS118/wave-02/README.md",
+      "postimage_sha256": "4e8fd0b6073015d2ce588bee8bfc376e24024b8010d486db05d867a54a88a5e3",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 02 review evidence, cumulative consolidation, navigation, or machine-readable validation",
+      "source_reports_represented": [
+        "BWS118-R04",
+        "BWS118-R05",
+        "BWS118-R06"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS118/wave-02/area-coverage.md",
+      "postimage_sha256": "f5f01a7d9922c9faa0d0aa0e42f5fb3766a004f8d5a5fe4809ff1957432bc0e1",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 02 review evidence, cumulative consolidation, navigation, or machine-readable validation",
+      "source_reports_represented": [
+        "BWS118-R04",
+        "BWS118-R05",
+        "BWS118-R06"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS118/wave-02/authority-map.md",
+      "postimage_sha256": "0f576987d497558a4c182af585e51e582cfd4e214431f362cf2d186c0c5b4883",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 02 review evidence, cumulative consolidation, navigation, or machine-readable validation",
+      "source_reports_represented": [
+        "BWS118-R04",
+        "BWS118-R05",
+        "BWS118-R06"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS118/wave-02/baseline-compatibility.json",
+      "postimage_sha256": "c6c40d4cfaf433c1ad9def37d7c1388d48bee27c11bd84393ca30696f4d3da8c",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 02 review evidence, cumulative consolidation, navigation, or machine-readable validation",
+      "source_reports_represented": [
+        "BWS118-R04",
+        "BWS118-R05",
+        "BWS118-R06"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS118/wave-02/baseline-compatibility.md",
+      "postimage_sha256": "9f0abe3f6e23c9573a6449c2e415fca2e0d65adc69bc79e609b8533d510271d9",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 02 review evidence, cumulative consolidation, navigation, or machine-readable validation",
+      "source_reports_represented": [
+        "BWS118-R04",
+        "BWS118-R05",
+        "BWS118-R06"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS118/wave-02/baseline-file-manifest.tsv",
+      "postimage_sha256": "5fc1c02af99c4d8e1b6a611c9ea2c88a7dd693b3703d7134584cd33a3e94eaf0",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 02 review evidence, cumulative consolidation, navigation, or machine-readable validation",
+      "source_reports_represented": [
+        "BWS118-R04",
+        "BWS118-R05",
+        "BWS118-R06"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS118/wave-02/completeness-reconciliation.json",
+      "postimage_sha256": "51048cd5eceafea110975d494aaa38953a5be0b19b5e965742c32d1672a00fe6",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 02 review evidence, cumulative consolidation, navigation, or machine-readable validation",
+      "source_reports_represented": [
+        "BWS118-R04",
+        "BWS118-R05",
+        "BWS118-R06"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS118/wave-02/cumulative-consolidated-ledger.json",
+      "postimage_sha256": "87bcf3cb0204150aae8c73257822ef2666bdbdcbcefe96da2b509d4b2cac718e",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 02 review evidence, cumulative consolidation, navigation, or machine-readable validation",
+      "source_reports_represented": [
+        "BWS118-R04",
+        "BWS118-R05",
+        "BWS118-R06"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS118/wave-02/cumulative-consolidated-ledger.md",
+      "postimage_sha256": "c2ee9c0f4f5f1fbbec91b981ad5744d1aa0b68ff66ab01a7bd7ae7ab48511767",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 02 review evidence, cumulative consolidation, navigation, or machine-readable validation",
+      "source_reports_represented": [
+        "BWS118-R04",
+        "BWS118-R05",
+        "BWS118-R06"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS118/wave-02/decisions.json",
+      "postimage_sha256": "d3571100feef51675ea9672fb347eb8e70173db705b61968b4055ae1ef029cf0",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 02 review evidence, cumulative consolidation, navigation, or machine-readable validation",
+      "source_reports_represented": [
+        "BWS118-R04",
+        "BWS118-R05",
+        "BWS118-R06"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS118/wave-02/decisions.md",
+      "postimage_sha256": "d0efc7aa233857a7e3dd0b3c01b9148f2b482ec6afabcb2ea743896286b024ee",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 02 review evidence, cumulative consolidation, navigation, or machine-readable validation",
+      "source_reports_represented": [
+        "BWS118-R04",
+        "BWS118-R05",
+        "BWS118-R06"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS118/wave-02/dependency-and-tranches.md",
+      "postimage_sha256": "abadae065d49bd9fcc24dbd5f2a8cd2a4b710ec698844cf8a65d06feebaf22a5",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 02 review evidence, cumulative consolidation, navigation, or machine-readable validation",
+      "source_reports_represented": [
+        "BWS118-R04",
+        "BWS118-R05",
+        "BWS118-R06"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS118/wave-02/documentation-integration-plan.json",
+      "postimage_sha256": "EXTERNALLY_BOUND_BY_APPLY_CONTROL_AND_CHECKSUM_MANIFEST",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 02 review evidence, cumulative consolidation, navigation, or machine-readable validation",
+      "source_reports_represented": [
+        "BWS118-R04",
+        "BWS118-R05",
+        "BWS118-R06"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS118/wave-02/incremental-consolidation.md",
+      "postimage_sha256": "cae6609caf23e2f8c5d34233640fdabb7b782a420ffb94eeec46676caa7e8c9e",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 02 review evidence, cumulative consolidation, navigation, or machine-readable validation",
+      "source_reports_represented": [
+        "BWS118-R04",
+        "BWS118-R05",
+        "BWS118-R06"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS118/wave-02/input-inventory.json",
+      "postimage_sha256": "c617dc5a5a515225e4cd2aef0fb0a4bbc47c9ddb7801497b69194755be5e6352",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 02 review evidence, cumulative consolidation, navigation, or machine-readable validation",
+      "source_reports_represented": [
+        "BWS118-R04",
+        "BWS118-R05",
+        "BWS118-R06"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS118/wave-02/next-wave-handoff.md",
+      "postimage_sha256": "de53490aeba125d467b7e7561de87a3342f3a9ddf197785a0ddfd82b0c485d1c",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 02 review evidence, cumulative consolidation, navigation, or machine-readable validation",
+      "source_reports_represented": [
+        "BWS118-R04",
+        "BWS118-R05",
+        "BWS118-R06"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS118/wave-02/non-defect-register.json",
+      "postimage_sha256": "fb4f5aab53a733533779e4242d47c70b64b66a83fbd84e7a3be0fa25e3ea64f4",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 02 review evidence, cumulative consolidation, navigation, or machine-readable validation",
+      "source_reports_represented": [
+        "BWS118-R04",
+        "BWS118-R05",
+        "BWS118-R06"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS118/wave-02/original-to-consolidated.json",
+      "postimage_sha256": "45892f6ec1e367f10c5b103349284e1b6f23cfdf295c9d598a08551f90d6520c",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 02 review evidence, cumulative consolidation, navigation, or machine-readable validation",
+      "source_reports_represented": [
+        "BWS118-R04",
+        "BWS118-R05",
+        "BWS118-R06"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS118/wave-02/prior-overlay-lineage.json",
+      "postimage_sha256": "891ed0290bbd7bf3ad8320c904b8cbbcf32d695d23432b91408a346711a1473a",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 02 review evidence, cumulative consolidation, navigation, or machine-readable validation",
+      "source_reports_represented": [
+        "BWS118-R04",
+        "BWS118-R05",
+        "BWS118-R06"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS118/wave-02/prior-overlay-lineage.md",
+      "postimage_sha256": "a0ca5b2f4f7b5d2f209827377c1d51ebb75b107a7fe421d33f383d2b3258627c",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 02 review evidence, cumulative consolidation, navigation, or machine-readable validation",
+      "source_reports_represented": [
+        "BWS118-R04",
+        "BWS118-R05",
+        "BWS118-R06"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS118/wave-02/protected-mutable-documents.json",
+      "postimage_sha256": "85183962b656f4a8723b0eb988e185dfd52af0b4c0ea3ab430413c9a283c241e",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 02 review evidence, cumulative consolidation, navigation, or machine-readable validation",
+      "source_reports_represented": [
+        "BWS118-R04",
+        "BWS118-R05",
+        "BWS118-R06"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS118/wave-02/report-index.json",
+      "postimage_sha256": "dc6004bd93a0afaff424c7b3fd9cb8f77b09019d600a012856b69bf6b4a1abca",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 02 review evidence, cumulative consolidation, navigation, or machine-readable validation",
+      "source_reports_represented": [
+        "BWS118-R04",
+        "BWS118-R05",
+        "BWS118-R06"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS118/wave-02/reports/R04/BWS118-R04-coverage.tsv",
+      "postimage_sha256": "95405dc41ca715df39778634677f168a5e93d1640c59ba7c89140eaaa4745dfe",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 02 review evidence, cumulative consolidation, navigation, or machine-readable validation",
+      "source_reports_represented": [
+        "BWS118-R04",
+        "BWS118-R05",
+        "BWS118-R06"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS118/wave-02/reports/R04/BWS118-R04-findings.json",
+      "postimage_sha256": "640e569dacffa17bf46e5417bb95ecc9449a6c2923a63b4c9c92b4b3f22ef0b0",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 02 review evidence, cumulative consolidation, navigation, or machine-readable validation",
+      "source_reports_represented": [
+        "BWS118-R04",
+        "BWS118-R05",
+        "BWS118-R06"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS118/wave-02/reports/R04/BWS118-R04-report.md",
+      "postimage_sha256": "8b45839108123457e9aa4b9689ae6f892f3578be6b62b33bb87430505bd0fb0b",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 02 review evidence, cumulative consolidation, navigation, or machine-readable validation",
+      "source_reports_represented": [
+        "BWS118-R04",
+        "BWS118-R05",
+        "BWS118-R06"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS118/wave-02/reports/R04/BWS118-R04-validation.json",
+      "postimage_sha256": "4318d562dce35f559e7573dfc333ce44651c24c7daaf0a049b862904534c18ef",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 02 review evidence, cumulative consolidation, navigation, or machine-readable validation",
+      "source_reports_represented": [
+        "BWS118-R04",
+        "BWS118-R05",
+        "BWS118-R06"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS118/wave-02/reports/R05/BWS118-R05-coverage.tsv",
+      "postimage_sha256": "777d5a09500a6097e1c80501eb3dd0d73e3c33d1a412e3c4f826f9c918dc3f70",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 02 review evidence, cumulative consolidation, navigation, or machine-readable validation",
+      "source_reports_represented": [
+        "BWS118-R04",
+        "BWS118-R05",
+        "BWS118-R06"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS118/wave-02/reports/R05/BWS118-R05-findings.json",
+      "postimage_sha256": "a028eb13e1786b76e942df3fd09b69d6aabe2cd6a83f9941cc694cfcc6b75ef9",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 02 review evidence, cumulative consolidation, navigation, or machine-readable validation",
+      "source_reports_represented": [
+        "BWS118-R04",
+        "BWS118-R05",
+        "BWS118-R06"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS118/wave-02/reports/R05/BWS118-R05-report.md",
+      "postimage_sha256": "a8fe24e6be41e64abb157be6c33b15a864da429cb6ab12e0b333a1e915cdfb4c",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 02 review evidence, cumulative consolidation, navigation, or machine-readable validation",
+      "source_reports_represented": [
+        "BWS118-R04",
+        "BWS118-R05",
+        "BWS118-R06"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS118/wave-02/reports/R05/BWS118-R05-validation.json",
+      "postimage_sha256": "6fb8e3f8abf3cc092fefb19f1b0975e1f2bb500b64341e90652e7cdf897e1cd1",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 02 review evidence, cumulative consolidation, navigation, or machine-readable validation",
+      "source_reports_represented": [
+        "BWS118-R04",
+        "BWS118-R05",
+        "BWS118-R06"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS118/wave-02/reports/R06/BWS118-R06-coverage.tsv",
+      "postimage_sha256": "727e821c56ca598fac52cb30df6fc5cff348e5c5521fb5780a9006e60ef78d57",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 02 review evidence, cumulative consolidation, navigation, or machine-readable validation",
+      "source_reports_represented": [
+        "BWS118-R04",
+        "BWS118-R05",
+        "BWS118-R06"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS118/wave-02/reports/R06/BWS118-R06-findings.json",
+      "postimage_sha256": "bbaadabb6fceccc7c977c57a924d206f4ce2cbde43cc60d2d4ab24d9b6377ee1",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 02 review evidence, cumulative consolidation, navigation, or machine-readable validation",
+      "source_reports_represented": [
+        "BWS118-R04",
+        "BWS118-R05",
+        "BWS118-R06"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS118/wave-02/reports/R06/BWS118-R06-report.md",
+      "postimage_sha256": "b3cd68c0d0fc96ce84febc405bc1c1e67715856f1723adfe739d21165f84fe32",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 02 review evidence, cumulative consolidation, navigation, or machine-readable validation",
+      "source_reports_represented": [
+        "BWS118-R04",
+        "BWS118-R05",
+        "BWS118-R06"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS118/wave-02/reports/R06/BWS118-R06-validation.json",
+      "postimage_sha256": "d4b77ee70c47d96eff4ccd1dc3f44b04175b674f14899ecab67d3696058602b4",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 02 review evidence, cumulative consolidation, navigation, or machine-readable validation",
+      "source_reports_represented": [
+        "BWS118-R04",
+        "BWS118-R05",
+        "BWS118-R06"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS118/wave-02/repository-profile.md",
+      "postimage_sha256": "2a61b172913460328df71dd76fd577aadb3032315a90dc8d69f36ac0e6efabfc",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 02 review evidence, cumulative consolidation, navigation, or machine-readable validation",
+      "source_reports_represented": [
+        "BWS118-R04",
+        "BWS118-R05",
+        "BWS118-R06"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS118/wave-02/source-verification.json",
+      "postimage_sha256": "5b2b677daef45cfa441ceb50eff8cab8323d1328d594001c577597e6bde915c9",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 02 review evidence, cumulative consolidation, navigation, or machine-readable validation",
+      "source_reports_represented": [
+        "BWS118-R04",
+        "BWS118-R05",
+        "BWS118-R06"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS118/wave-02/test-evidence-matrix.json",
+      "postimage_sha256": "5c39f0780a0a8fb4c8c4ffbc9da2eb226b0a5d1e0316802e5064fc338246b5c2",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 02 review evidence, cumulative consolidation, navigation, or machine-readable validation",
+      "source_reports_represented": [
+        "BWS118-R04",
+        "BWS118-R05",
+        "BWS118-R06"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS118/wave-02/test-evidence-matrix.md",
+      "postimage_sha256": "07201eae4cb0be11d97b7624d844585f3249fd40e9fee359b3c5e777d02f4511",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 02 review evidence, cumulative consolidation, navigation, or machine-readable validation",
+      "source_reports_represented": [
+        "BWS118-R04",
+        "BWS118-R05",
+        "BWS118-R06"
+      ]
+    },
+    {
+      "action": "REPLACE",
+      "mode": "0644",
+      "path": "docs/reviews/README.md",
+      "postimage_sha256": "4a19ea4f94498e7343a6bffdc31fd6aa50368736b9c68f8a1b28bc1713f62098",
+      "preimage_mode": "0644",
+      "preimage_sha256": "42357f9104ded01ebca92ec57137c3a19e62286f87c96370ec5b1589f89107ac",
+      "protected_content_preserved": true,
+      "reason": "Wave 02 review evidence, cumulative consolidation, navigation, or machine-readable validation",
+      "source_reports_represented": [
+        "BWS118-R04",
+        "BWS118-R05",
+        "BWS118-R06"
+      ]
+    }
+  ],
+  "note": "The plan excludes a recursive self-hash guarantee; the external apply script, overlay digest, and checksum manifest bind this file.",
+  "schema": "betting-win-surebet-wave02-documentation-integration-plan-v1"
+}

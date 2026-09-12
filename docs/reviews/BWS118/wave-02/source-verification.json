@@ -1,0 +1,2969 @@
+{
+  "canonical_node_20_20_2": "NOT_RUN_BY_SUPPLIED_REVIEWS",
+  "coverage_results": [
+    {
+      "area": "R04",
+      "extra": [],
+      "mismatches": [],
+      "missing": [],
+      "reconciled": true,
+      "rows": 657,
+      "unique_paths": 657
+    },
+    {
+      "area": "R05",
+      "extra": [],
+      "mismatches": [],
+      "missing": [],
+      "reconciled": true,
+      "rows": 657,
+      "unique_paths": 657
+    },
+    {
+      "area": "R06",
+      "extra": [],
+      "mismatches": [],
+      "missing": [],
+      "reconciled": true,
+      "rows": 657,
+      "unique_paths": 657
+    }
+  ],
+  "current_archive": {
+    "filename": "betting-win-surebet118.zip",
+    "regular_files": 657,
+    "sha256": "50bbcb0b476904c8209cf7e1287b5ac4f9091fa07f6fd67523fc5430029417f7"
+  },
+  "postgresql_execution": "UNAVAILABLE_IN_RELEVANT_REVIEWS",
+  "prior_archive": {
+    "filename": "betting-win-surebet117.zip",
+    "regular_files": 618,
+    "sha256": "0d234e00d015dcab0989b47372ded516bddee9705d9021a0694916dc91a9d494"
+  },
+  "schema": "betting-win-surebet-wave02-source-verification-v1",
+  "source_guard": [
+    {
+      "mode": "0744",
+      "path": ".automation/README.md",
+      "sha256": "eafb60dfd16504e09275ee6701927c6118f0522db95e3cd92511aa8fb841c897",
+      "size": 5801
+    },
+    {
+      "mode": "0644",
+      "path": ".automation/lib/controller_hardening_v2.sh",
+      "sha256": "d67e2780d7968e5f25b0c7735486b140aa186708bbddda1b3d90cbb5f21f19a1",
+      "size": 48016
+    },
+    {
+      "mode": "0755",
+      "path": ".automation/lib/run_common.sh",
+      "sha256": "d08ac2827b16df86f0f86fbceb9e5677c72d38ba9853fd67570e87c95bcab619",
+      "size": 56138
+    },
+    {
+      "mode": "0744",
+      "path": ".automation/lib/telegram_notify.sh",
+      "sha256": "bae37f227389b264cefea86f1792d3642bc9393f0076408f680c02040a120e23",
+      "size": 15762
+    },
+    {
+      "mode": "0744",
+      "path": ".automation/lib/temp_inode_guard.sh",
+      "sha256": "f8cc0a7689aaba4a856cb012c7e51e1368eaf1c9f3a35ca42c43bbe6822f019f",
+      "size": 32343
+    },
+    {
+      "mode": "0644",
+      "path": ".codex/hooks.json",
+      "sha256": "58bf90947f8736f354dc40291d94d66c2c0675f4f8689c08739fc6b1618a191b",
+      "size": 239
+    },
+    {
+      "mode": "0644",
+      "path": ".codex/skills/graphify/.graphify_version",
+      "sha256": "06386c15e573db2db7bd29599358db8e07fcd875b97213f2afd8240d1ae0812a",
+      "size": 6
+    },
+    {
+      "mode": "0644",
+      "path": ".codex/skills/graphify/SKILL.md",
+      "sha256": "3898b1042721cad27d6f87ca44f638415a7f763203aefd86b90f9358ffea3a43",
+      "size": 41318
+    },
+    {
+      "mode": "0644",
+      "path": ".codex/skills/graphify/references/add-watch.md",
+      "sha256": "b3f67570240582689c2834b4831917550c2d1aaf042148868c39dcbf387ce3fd",
+      "size": 2486
+    },
+    {
+      "mode": "0644",
+      "path": ".codex/skills/graphify/references/exports.md",
+      "sha256": "ee47fae477f106d8aed38798c58493b5a7f060a0d9d2581ce6132302827bc14b",
+      "size": 3362
+    },
+    {
+      "mode": "0644",
+      "path": ".codex/skills/graphify/references/extraction-spec.md",
+      "sha256": "32d7decad42d58129c6694ea4e4ce1f72a531bc5161827d2095787e9448735e9",
+      "size": 4431
+    },
+    {
+      "mode": "0644",
+      "path": ".codex/skills/graphify/references/github-and-merge.md",
+      "sha256": "e5ebd90c7686f50363ff7a535556bc2f596d4c47ec1e6c8b95e11e36a0dfea2b",
+      "size": 2177
+    },
+    {
+      "mode": "0644",
+      "path": ".codex/skills/graphify/references/hooks.md",
+      "sha256": "b9a4e9f66813c6fc720589f1071d1a03c95756ab7101447e14e57291fe7844e5",
+      "size": 1267
+    },
+    {
+      "mode": "0644",
+      "path": ".codex/skills/graphify/references/query.md",
+      "sha256": "e563ddcb1e155aa230f107e5ef9380bc1249c5cd8241128de7ed8a7bd9c20cf5",
+      "size": 13456
+    },
+    {
+      "mode": "0644",
+      "path": ".codex/skills/graphify/references/transcribe.md",
+      "sha256": "676a1e39aa6d43cdfcc416ec56616e36f7bad74066a82bd33a9485515b9a865c",
+      "size": 3173
+    },
+    {
+      "mode": "0644",
+      "path": ".codex/skills/graphify/references/update.md",
+      "sha256": "661f559b3ff4f3db7ba47bc2ba1c7e19f1c1d66a36f647e49221eecb174f2228",
+      "size": 10425
+    },
+    {
+      "mode": "0744",
+      "path": ".env.example",
+      "sha256": "8c15f2d28ce8d4822911e4753bcf6345267d33c6f9e210c60c49df6cb0aa1192",
+      "size": 2533
+    },
+    {
+      "mode": "0744",
+      "path": ".gitattributes",
+      "sha256": "fff9628fd61eec217522750bed304b13f3f33e1ff2745772730759e122e68994",
+      "size": 413
+    },
+    {
+      "mode": "0744",
+      "path": ".gitignore",
+      "sha256": "6d6cd47ce4466d49195123a6a3b266cc8bc308e3979a1265c71690f17b6d36c3",
+      "size": 1438
+    },
+    {
+      "mode": "0644",
+      "path": ".graphifyignore",
+      "sha256": "802e632173ed7b36e1c5867e9d7078e891f3163e089db551aa2691e7847bfa0c",
+      "size": 871
+    },
+    {
+      "mode": "0744",
+      "path": ".nvmrc",
+      "sha256": "75053fb82fe4512318dd99556daf58b862fb81c96cf1153249b75f8116edf440",
+      "size": 8
+    },
+    {
+      "mode": "0744",
+      "path": "SOURCE_MANIFEST.json",
+      "sha256": "d9ea618c19fac733cf070c7e9b811ace8a1a0d637680b0b9f8233be5879aba6a",
+      "size": 111888
+    },
+    {
+      "mode": "0644",
+      "path": "apps/web/index.html",
+      "sha256": "af5fe0ede1db4d5d1dbb7a33cb083637717c222c68ccfab9a1df3d55ac5da45b",
+      "size": 325
+    },
+    {
+      "mode": "0644",
+      "path": "apps/web/package.json",
+      "sha256": "6c5197409d203246bb187e69d6fcd10319d2de29ceca44284458c37ba88b8bb6",
+      "size": 752
+    },
+    {
+      "mode": "0644",
+      "path": "apps/web/src/api/client.ts",
+      "sha256": "8b9ba5b322e4b3333925b8b1ee2aa4d12b2db1693ae32cac2eafb7a94fc1bb97",
+      "size": 63297
+    },
+    {
+      "mode": "0644",
+      "path": "apps/web/src/api/contracts.ts",
+      "sha256": "11c9bcc7cacad4505c7d24f5e66c819723bc9165b1b65c96271b449df2bc3417",
+      "size": 4424
+    },
+    {
+      "mode": "0644",
+      "path": "apps/web/src/api/mock-data.ts",
+      "sha256": "17fe530d64bbae547a9098d520cb0949bac168d22b3a38e705a53e8afb4c1f7c",
+      "size": 27728
+    },
+    {
+      "mode": "0644",
+      "path": "apps/web/src/api/models.ts",
+      "sha256": "3b08b0fe2d3559cc1e51bf3f570ea43b3b3c4379234ceaec33abe7d9c1c034c3",
+      "size": 34603
+    },
+    {
+      "mode": "0644",
+      "path": "apps/web/src/app/data-mode.ts",
+      "sha256": "0653ee8bd4681fa019f643bda056b360e766e7227d52a3a82582bc60b23e7af3",
+      "size": 2862
+    },
+    {
+      "mode": "0644",
+      "path": "apps/web/src/app/page-chrome.ts",
+      "sha256": "9572a4053861cf29280cf411c6a54b0b637e4d144cbc9c9e40043cb36137e0f4",
+      "size": 4960
+    },
+    {
+      "mode": "0644",
+      "path": "apps/web/src/app/process-contract.ts",
+      "sha256": "05fff3436bf4c461b5cc934eed9fe50380f56890222049d10cbb61806a463187",
+      "size": 2672
+    },
+    {
+      "mode": "0644",
+      "path": "apps/web/src/app/router.tsx",
+      "sha256": "3be4c086ff9898a0a204f064563277712077ada5eff621644ba55aed9d892b92",
+      "size": 1186
+    },
+    {
+      "mode": "0644",
+      "path": "apps/web/src/app/shell.tsx",
+      "sha256": "ca853137503ad688e08f287170378fc4ab2aea368d618863037e5f4b5f746189",
+      "size": 22536
+    },
+    {
+      "mode": "0644",
+      "path": "apps/web/src/app/url-state.ts",
+      "sha256": "1507612e1a16f75868d8579401ece2d7df44005eff78ae8000a4e547d4e7cae4",
+      "size": 2236
+    },
+    {
+      "mode": "0644",
+      "path": "apps/web/src/index.ts",
+      "sha256": "bd900fbc3f1470aba84043cdd354d73f3d6507553661e39bb029414bf1261f8f",
+      "size": 2186
+    },
+    {
+      "mode": "0644",
+      "path": "apps/web/src/main.tsx",
+      "sha256": "eee8f4d6f3d9bfd028a2fd1ae52c58a3439919f08ed004b10c2bc144450de075",
+      "size": 708
+    },
+    {
+      "mode": "0644",
+      "path": "apps/web/src/styles/app.css",
+      "sha256": "1c73c7a7734f56267d532581719d51e91e081034cff3f8f836b3621ebf912ab5",
+      "size": 7247
+    },
+    {
+      "mode": "0644",
+      "path": "apps/web/src/styles/tokens.css",
+      "sha256": "a7b1c813bf3b0350dd7ac0bd516eb6c16e2d534c94d8419e1074c68edddcd98e",
+      "size": 717
+    },
+    {
+      "mode": "0644",
+      "path": "apps/web/src/types/css.d.ts",
+      "sha256": "da5bf71d48cf909584a01c80b445f730507068f5b34c920f352e2bfcf0315e4c",
+      "size": 24
+    },
+    {
+      "mode": "0644",
+      "path": "apps/web/src/types/import-meta.d.ts",
+      "sha256": "6a643cefd551bc6af93c5d0a1ae5c819e5ed8e5d6c2fd71c44a2574ac666d555",
+      "size": 137
+    },
+    {
+      "mode": "0644",
+      "path": "apps/web/tsconfig.json",
+      "sha256": "08d14185e9ef726ff624d50ad3acbfa4b833bbbf68d1977f809639b23545440b",
+      "size": 280
+    },
+    {
+      "mode": "0644",
+      "path": "apps/web/vite.config.ts",
+      "sha256": "e301880118cb5b78f7996a7478bdb4fab617ab85873fcea19a99ae3029364a5b",
+      "size": 1310
+    },
+    {
+      "mode": "0744",
+      "path": "automation.config.sh",
+      "sha256": "67b4bc779c586d5318ce66bc5e35dd1e0b643ebb6cc5b85c2f21082a97e74ead",
+      "size": 5189
+    },
+    {
+      "mode": "0744",
+      "path": "backlog/README.md",
+      "sha256": "729c0577280eac3343aa2bb20afcb094c7c5722458c9363482dcf46952319288",
+      "size": 2762
+    },
+    {
+      "mode": "0644",
+      "path": "backlog/bws_b1_cross_venue_implementation.csv",
+      "sha256": "edc4efcfba09c8623d6f62a90f506471970b851bb8e094ee367225a35d389bf5",
+      "size": 3218
+    },
+    {
+      "mode": "0644",
+      "path": "backlog/bws_b1_cross_venue_map.csv",
+      "sha256": "551a63bca5d80b43a1b242d7cedffeac652de0e61099305d505a48a125e4b17e",
+      "size": 3331
+    },
+    {
+      "mode": "0744",
+      "path": "backlog/bws_full_implementation.csv",
+      "sha256": "bc7380bc47db8aedace602eea5b8556d3afa28582f6e471d5d4353ccd73a4425",
+      "size": 11239
+    },
+    {
+      "mode": "0644",
+      "path": "backlog/bws_remaining_safe_local_map.csv",
+      "sha256": "78d69e5a7ceadfb9e7dec9e296a9dd658c7586668421552fc4cfea8e6e425246",
+      "size": 5112
+    },
+    {
+      "mode": "0755",
+      "path": "check_progress.sh",
+      "sha256": "26bb85d1ff30c852af5370c158ff00c62b6e87a54a11f870983273b7a0cb6cdb",
+      "size": 4262
+    },
+    {
+      "mode": "0755",
+      "path": "cleanup_automation_artifact_residue.sh",
+      "sha256": "9f949c69c1b1bafd865d6c75c814a7ba3ed4faffc51cf0b3702bda358cd9c43a",
+      "size": 4128
+    },
+    {
+      "mode": "0744",
+      "path": "cleanup_automation_temp_inode_residue.sh",
+      "sha256": "f0cb436ad5f0b49f7c9b55d059f93f7751183ef8bb8e8eb32d855062dc708d4f",
+      "size": 4977
+    },
+    {
+      "mode": "0744",
+      "path": "cli.js",
+      "sha256": "acd4aa4ba64dbcacbc891ffe1af22699d9a240f16d3411ac3ea6998048d63349",
+      "size": 5323
+    },
+    {
+      "mode": "0755",
+      "path": "commands/run-pinned-interface-smoke.sh",
+      "sha256": "38531aa3ca33ad2e034af1de3628c349f1836eaf322411228fa65b791c46c85d",
+      "size": 1930
+    },
+    {
+      "mode": "0755",
+      "path": "commands/run-sure-001-autonomous.sh",
+      "sha256": "9d72647327173d1c7fc7e6ee3da9ea62555fbee6368de4ef8389250c7f5333f2",
+      "size": 307
+    },
+    {
+      "mode": "0755",
+      "path": "commands/run-sure-local-engine-autonomous.sh",
+      "sha256": "9d72647327173d1c7fc7e6ee3da9ea62555fbee6368de4ef8389250c7f5333f2",
+      "size": 307
+    },
+    {
+      "mode": "0755",
+      "path": "commands/run-sure-paper-mode-autonomous.sh",
+      "sha256": "7ede53128d16aba34662fa3d136626b53950934a1eb468da1478f124943495e5",
+      "size": 506
+    },
+    {
+      "mode": "0744",
+      "path": "config/betting-win.upstream-baseline.json",
+      "sha256": "34eadb2cbf27e416d44e205229f6328c8e48ad83edaabd3aad7772e2988e2a1f",
+      "size": 2160
+    },
+    {
+      "mode": "0744",
+      "path": "config/bws.private.env.template",
+      "sha256": "23a839551763514d6357a919d062662f32ac08fa4cbf10eafb23d7375709d1f2",
+      "size": 2335
+    },
+    {
+      "mode": "0644",
+      "path": "database/migrations/surebet/001_create_upstream_locks_and_import_runs.sql",
+      "sha256": "9e42a36b06adc858c25e72c4fd6ab41500cdfdcbbb3e0a7ae556efd2ec771584",
+      "size": 2004
+    },
+    {
+      "mode": "0644",
+      "path": "database/migrations/surebet/002_create_pinned_strategy_exports.sql",
+      "sha256": "ade03b500f36cfc1bd1b85aaa551db6945918e25a64f6934b3d85f6eec245e3d",
+      "size": 1503
+    },
+    {
+      "mode": "0644",
+      "path": "database/migrations/surebet/003_create_strategy_ledger_entries.sql",
+      "sha256": "b3a7695bfba8fedaa0bb3fccefdde9ae11d893e63a67b493647f0818ce507071",
+      "size": 2530
+    },
+    {
+      "mode": "0644",
+      "path": "database/migrations/surebet/004_create_worker_jobs.sql",
+      "sha256": "9756445dbfbdac6226413098d1253527578d9420543287842c30d034df162b9c",
+      "size": 5389
+    },
+    {
+      "mode": "0644",
+      "path": "database/migrations/surebet/005_create_upstream_export_convergence_checkpoints.sql",
+      "sha256": "8d3c09c06b61e4fb1774879c51467381b70bbe6f46c86c660345c63667089e3c",
+      "size": 2040
+    },
+    {
+      "mode": "0644",
+      "path": "database/migrations/surebet/006_create_upstream_api_convergence_checkpoints.sql",
+      "sha256": "3d5ac1c0f2d89aac08acb057668b87b2e9116f274ff78020568dc82522f270f7",
+      "size": 1652
+    },
+    {
+      "mode": "0644",
+      "path": "database/migrations/surebet/007_create_private_paper_runtime_scheduler_checkpoints.sql",
+      "sha256": "b0ec918132e247f3265145787e3bf9b30320ae2c415937c0578d373e5ec8be57",
+      "size": 1181
+    },
+    {
+      "mode": "0644",
+      "path": "database/migrations/surebet/008_create_b1_upstream_convergence_checkpoints.sql",
+      "sha256": "33a2287c537afe1aa2a666b14365fa3a3247900d41d4303116fdcecd04b54672",
+      "size": 1265
+    },
+    {
+      "mode": "0644",
+      "path": "database/migrations/surebet/009_create_b1_backtest_runs.sql",
+      "sha256": "c5b9b66325ca16346c48176236b73dea7fd79f51b5b18aba8ae73d33d7ad12ea",
+      "size": 1575
+    },
+    {
+      "mode": "0644",
+      "path": "database/migrations/surebet/010_create_b1_candidate_snapshots.sql",
+      "sha256": "83da55cee8bc46ca6f47b8584aaa81c08794a268f5147fc9bef320201a79b78a",
+      "size": 832
+    },
+    {
+      "mode": "0644",
+      "path": "database/migrations/surebet/011_create_b1_simulation_results.sql",
+      "sha256": "3e748cb212558268e675df42f809ce9e3cd29b8527a83fd9c00c5897341d15fa",
+      "size": 826
+    },
+    {
+      "mode": "0644",
+      "path": "database/migrations/surebet/012_create_b1_private_observation_cycles.sql",
+      "sha256": "5c4858bb130178460e45226677c6cc74610628badeca3632425c0a0838a474a6",
+      "size": 1529
+    },
+    {
+      "mode": "0644",
+      "path": "deployment/systemd-user/bws-operator.service.template",
+      "sha256": "ea4b7762d1c747f25f2cd9a779ef05e44ea25a2c026363461f85fe6608d64b4c",
+      "size": 807
+    },
+    {
+      "mode": "0755",
+      "path": "graphify_repo_install.sh",
+      "sha256": "fbc15189b39bbe214476123a4b7964ddca49622d6de8f3c522acca7ac6fd1a3a",
+      "size": 37741
+    },
+    {
+      "mode": "0755",
+      "path": "graphify_repo_refresh.sh",
+      "sha256": "927360cf926d14f8fdba81ed939f591240e8bef1128bde918e11188368f8da97",
+      "size": 9412
+    },
+    {
+      "mode": "0755",
+      "path": "open_log.sh",
+      "sha256": "3a9886b0439c468483142d77e22bcab874c14fb2dd50c5293d014727f0c7a7b1",
+      "size": 5285
+    },
+    {
+      "mode": "0644",
+      "path": "package-lock.json",
+      "sha256": "a184bd12b31fe127067b63a3171e545e469c2f86268477565fc14aeca102365c",
+      "size": 34655
+    },
+    {
+      "mode": "0644",
+      "path": "package.json",
+      "sha256": "b1b69ffa6d0b974c3b3ba55f3ec1acffb21e512c3a862e2a7b2d6b5139e5eac0",
+      "size": 9098
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/package.json",
+      "sha256": "a173eafc8e33b5438f9ba7fcbe26e29c471dd2cfb53c8115ef420e7d274b82ac",
+      "size": 154
+    },
+    {
+      "mode": "0744",
+      "path": "packages/bootstrap/src/adapters/betting-win-export-reader.ts",
+      "sha256": "6d8ce48edf68d17ef244e3637f800f64d89f1f5fb94d2a4c9bf97ea2e227231b",
+      "size": 3949
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/adapters/betting-win-local-bundle-reader.ts",
+      "sha256": "835fbdd26a71658f53298759ed2c5fb4a31bcdc722012ec76b916d4cd4b812e4",
+      "size": 4212
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/adapters/betting-win-pinned-bundle-intake.ts",
+      "sha256": "d22fc6007f4d2980bab9419126ec00652dc5b27114e4347871bc66ff3abc5026",
+      "size": 3828
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/adapters/betting-win-query-client.ts",
+      "sha256": "7b50ba9a6c6e0dd5486bdca723a6f6c605bd7609151e062fe72ee36100d307ae",
+      "size": 40988
+    },
+    {
+      "mode": "0744",
+      "path": "packages/bootstrap/src/adapters/betting-win-strategy-export-intake.ts",
+      "sha256": "ef02f5b1e8d47db7c1d367d628fb2683a2bf5f3f9d30da8b09941a0b1e9fc523",
+      "size": 41799
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/api/bws-read-only-query-http.ts",
+      "sha256": "fc644a168e07d1afa63d84fa85582cda9c37994b2b4d66ea7366c1f442c7ac17",
+      "size": 15039
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/api/bws-read-only-query-service.ts",
+      "sha256": "896bb5ff7db46af530b8e80f93b01b293295f98aa983c948eb57ee3f2a13c424",
+      "size": 78813
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/backtest/b1-cross-venue-backtest.ts",
+      "sha256": "b367b8880c8461a50912e13b3cb1489a1f5c8e2c235dfd556d2ef615b6a575d4",
+      "size": 19493
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/backtest/standard-binary-backtest.ts",
+      "sha256": "b89833bedd366b9d4b714cb0eddd6610e5eabd7217477063d7a1a2006b60e438",
+      "size": 34707
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/cli/api-only-upstream.ts",
+      "sha256": "9bd88e91ef0e5035086cc5ede4ddd696884e1afe6bd976f7b32fde27d1f1be1a",
+      "size": 607
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/cli/bws-database-lifecycle.ts",
+      "sha256": "4e6da6bfca8e7c622ccd04e66d3789b4f4eaf490f93fd8265bfa458d3c22b06a",
+      "size": 5511
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/cli/bws-external-runtime-preflight.ts",
+      "sha256": "b02200f62578bd2b273c0e9df020132b8dd49e613fc5a788555efda2dc0d8c5f",
+      "size": 7584
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/cli/bws-final-local-acceptance.ts",
+      "sha256": "218d99afdbef03328786d155dd23766bf87e19a75eb03c5ba1e835922c251d43",
+      "size": 10355
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/cli/bws-observability.ts",
+      "sha256": "0f52747def0faf2b8593c4edc98a646d9baf7d13b9b89f7144fb053bf413c0cc",
+      "size": 2117
+    },
+    {
+      "mode": "0744",
+      "path": "packages/bootstrap/src/cli/bws-operator-lifecycle.ts",
+      "sha256": "b17dff2d4e4012091b01943761efa1fe593c3de159e318b7fece264e751bedb5",
+      "size": 2980
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/cli/bws-paper-runtime-evidence.ts",
+      "sha256": "cd8b60ede9c77dc08a7f575115cd8dac3bad1fdbeac595d4046b2100d4d11de1",
+      "size": 3567
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/cli/bws-paper-runtime-handoff.ts",
+      "sha256": "bf3ec6992bf083c749460f8d967d3b4e8bc018f66b15811840c6b166230a2d36",
+      "size": 1816
+    },
+    {
+      "mode": "0744",
+      "path": "packages/bootstrap/src/cli/bws-private-paper-scheduler-service.ts",
+      "sha256": "a27fbc4a8ef4044dcc9cf9919eb7bcd44903e57ba9f53a63d1d619249138c1ad",
+      "size": 2813
+    },
+    {
+      "mode": "0744",
+      "path": "packages/bootstrap/src/cli/bws-private-paper-scheduler.ts",
+      "sha256": "488211d784d1bc88ceb520f9030700a8ce623eb90bf996a7cfd771155df1e4dc",
+      "size": 2319
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/cli/bws-private-paper-worker-service.ts",
+      "sha256": "29093b7ae96e534202ada195d193d7be1339c0a452b8c192318c635de2c502f8",
+      "size": 2496
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/cli/bws-private-paper-worker.ts",
+      "sha256": "99c54079e8d355bbe1585ac6e86fba87d588637ee7560646496cf27baac1e939",
+      "size": 1728
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/cli/bws-read-only-api.ts",
+      "sha256": "5e08f4cc0b5f76a7c5c04e735c791281607fa007031c55b2dc0bf38c9d4cf811",
+      "size": 2512
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/cli/bws-release-packaging.ts",
+      "sha256": "a3f0d96bd9d3e3c45df37538dd99f4c07eb27934fd77eb4d80cc3143edef4ec7",
+      "size": 4810
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/cli/bws-release-upgrade.ts",
+      "sha256": "362783fada2194c4c62c5bd1b545270c4f94ea358a816f45051c0b95a870daa7",
+      "size": 5422
+    },
+    {
+      "mode": "0744",
+      "path": "packages/bootstrap/src/cli/bws-soak-campaign.ts",
+      "sha256": "55a3b486f879b367fb30e3d67b465e457f1f258c209d131603ce3916e51e534a",
+      "size": 11853
+    },
+    {
+      "mode": "0744",
+      "path": "packages/bootstrap/src/cli/bws-upstream-api-convergence.ts",
+      "sha256": "271a0e0fbf3c733fc502f8accd0a2a2067c70ce6086147994bb993bba83f8f7f",
+      "size": 2197
+    },
+    {
+      "mode": "0744",
+      "path": "packages/bootstrap/src/cli/bws-upstream-convergence-service.ts",
+      "sha256": "d87e03ef955c11c33ea1bcb6c2aedbd6234ca54c552d0a25b888401518c15b2d",
+      "size": 2705
+    },
+    {
+      "mode": "0744",
+      "path": "packages/bootstrap/src/cli/bws-upstream-export-convergence.ts",
+      "sha256": "e234ac3d5c739763ad041c084bfe6573d709e9c3acd85aa08a8af728bb783479",
+      "size": 957
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/cli/local-paper-batch-report.ts",
+      "sha256": "4c577cf7bdfef21c627c59dcd46f62375988e3a66e630e94474ea83f850c9f17",
+      "size": 39493
+    },
+    {
+      "mode": "0744",
+      "path": "packages/bootstrap/src/cli/local-paper-report.ts",
+      "sha256": "83820a8fd970b76a6592e4bcb1af7e4fb60adc36d0136a99d5966bcb6e1e40e6",
+      "size": 19739
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/contracts/b1-local-types.ts",
+      "sha256": "22a43ced9a713e4144e343529a8940edfa00676659aa01f48f739e3f28ca03e1",
+      "size": 3335
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/contracts/betting-win-b1-resource-records.ts",
+      "sha256": "2068f5dea3a115cbbc4e7b7fde16774b9a0fc9c964be1550215cc2c7508604e8",
+      "size": 27266
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/contracts/betting-win-contract-imports.ts",
+      "sha256": "4c10018198cb06d6d3eabba90a9b27209ccf7ec11a3420ea8faad9775f6b2c3a",
+      "size": 2703
+    },
+    {
+      "mode": "0744",
+      "path": "packages/bootstrap/src/contracts/betting-win-resource-records.ts",
+      "sha256": "8ca3a040b691242eb1025ab74f545157c1072b85332fdc1313924e57396c6903",
+      "size": 16194
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/contracts/local-types.ts",
+      "sha256": "b1c307fcd025e9b92d53a8e83b208b63b38b1a07ca7f8590594945c2e428f81b",
+      "size": 2762
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/economics/b1-capital-lock.ts",
+      "sha256": "5f74dcde80a30a7243ce56965b23361c6d7c4b0977eab144fb1980486bcfa5a3",
+      "size": 3929
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/economics/b1-fee-matrix.ts",
+      "sha256": "081e148be8c1e3ffce089cca44c14cb16fa94ee25ae06a320d422b23e9e37175",
+      "size": 5470
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/economics/b1-lateness-penalty.ts",
+      "sha256": "5ebdeb74a8e21d37c102c7925cf377ba2dd06a35a46976756fa6e68bb9fa2d91",
+      "size": 3770
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/economics/b1-net-spread.ts",
+      "sha256": "0f4bbd52d105d75aef34baa43bea49b09b5c6fde8e3afc8ef7f51383cda0947b",
+      "size": 13275
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/identity/b1-market-equivalence.ts",
+      "sha256": "b7bd85ede3224740021fdc676db69c690820e2634c13c32a6719190feedb6f75",
+      "size": 11736
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/identity/b1-selection-equivalence.ts",
+      "sha256": "ac7dcc2ddf2d9bf660931b639e10b6659ffe90ec8115ab80b765884784bc0ae2",
+      "size": 1775
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/identity/b1-venue-pair-key.ts",
+      "sha256": "3c1f4864a055c479d758ec070804a285aa1441ad7b14418061039d45d44517fa",
+      "size": 1775
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/identity/equivalence-precheck.ts",
+      "sha256": "2b1671eb9da1f5a5dfc01b3120bac1c48197f6a6cf07b347f399cc83cf127045",
+      "size": 6086
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/identity/market-group-key.ts",
+      "sha256": "dfde3f32800875939831e70dfe3f4834f7f3659059c65188d7ba1ce5483a501c",
+      "size": 515
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/index.ts",
+      "sha256": "c40f2c3f09347ad58d97e7e1ee4dac1affdf15aadd3b616c1c01733740a4ae21",
+      "size": 6918
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/operations/b1-runtime-evidence.ts",
+      "sha256": "80ea2ca2a8b071dc1fdafc614594fac3d642b0416bcf6beec4c515cd707adbe8",
+      "size": 20155
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/operations/bws-soak-runtime-integration.ts",
+      "sha256": "3426f30a61e5e1300b640ca7b242949e7b2627274a399db815ddc40de79976a9",
+      "size": 11525
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/operations/database-lifecycle.ts",
+      "sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+      "size": 51632
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/operations/external-runtime-preflight.ts",
+      "sha256": "724a419567dc2c6f737166660092d5c0d8e09be24a4b22bc9377c324949ec427",
+      "size": 46078
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/operations/final-local-acceptance.ts",
+      "sha256": "1f7b5675b2d307cf8ecc7ab791eba825036ba850fe28ccacae1f8a78deb6a3c5",
+      "size": 44266
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/operations/observability.ts",
+      "sha256": "ab2024a942781e074e1d719a7d368814cf1173fb524c567d2d894ab2ef8c3923",
+      "size": 42388
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/operations/operator-lifecycle.ts",
+      "sha256": "704457608967fcb4bd736d372f1e65d252bc1d762f5efd63e52de5c9348e0f31",
+      "size": 47227
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/operations/paper-runtime-evidence.ts",
+      "sha256": "d5ece548916a8de8d594fc1121468db2cf8a38d652ac813b458729df48047b7d",
+      "size": 42869
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/operations/paper-runtime-handoff.ts",
+      "sha256": "6152e779214713ae2faa4ad1d447bc43e4d47c2c1a47d33c83fe303787d9a76f",
+      "size": 15164
+    },
+    {
+      "mode": "0744",
+      "path": "packages/bootstrap/src/operations/private-paper-runtime-scheduler.ts",
+      "sha256": "46311916b8d4df07c09183f7e8563bd69fae1d5330927e325a45e21e5f48be58",
+      "size": 34317
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/operations/private-paper-scheduler-service.ts",
+      "sha256": "876cd3d1b142d369b999f10a49e7a01e9b8469af14d84bbef64efdc6ae3bc967",
+      "size": 45023
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/operations/private-paper-worker-service.ts",
+      "sha256": "1527b3a36e20f2221793a612011b65edf34d0d190534b95f43136ab9ebe58d36",
+      "size": 45691
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/operations/release-packaging.ts",
+      "sha256": "d3b51b0cf2dcd00cb70f2ebc383ed34669484cd39a4c3baeee804d5f845bcdce",
+      "size": 78152
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/operations/release-upgrade.ts",
+      "sha256": "5c5aadcab32d9a937ea6100434f7b3644df5c31954e096af19a80c1958bfeef7",
+      "size": 66120
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/operations/repository-paths.ts",
+      "sha256": "c1c9f29f472abc2b5f6a571973ca3974fcc3c7206737b29465276aad189f7e57",
+      "size": 4565
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/operations/runtime-applications.ts",
+      "sha256": "216b980403a59909b07a27fb475d22cf6ee35b41364fd0bb46c510d17d9e0322",
+      "size": 31550
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/operations/service-runtime.ts",
+      "sha256": "5ef569931413868cf0b2e69a653ee65cdcace9bb561f52eea1d9fb82e3ce93f3",
+      "size": 25468
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/operations/soak-campaign.ts",
+      "sha256": "779c0901b003ad6510608e54136fcb3e5c7dd38f64f07bd5916d49fcafd950a1",
+      "size": 91365
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/operations/upstream-api-convergence.ts",
+      "sha256": "4f066cc40d08e6ad4748866073c0a14683bd8b7066cb9f41c87f239e28ae5a63",
+      "size": 42937
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/operations/upstream-convergence-service.ts",
+      "sha256": "937ad8b789002504b674351c04e2179ba2800e17deea1d5e17aa0dd31786d5a8",
+      "size": 42799
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/operations/upstream-export-convergence.ts",
+      "sha256": "62f3683da2e85d1113588ff363574dfae9f2da02534dacc3139000eb389bf673",
+      "size": 34212
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/operations/upstream-transport-constants.ts",
+      "sha256": "dd5591b1c0fd7d57aeeacba4c49d25d8bca77f6acfee324cc6441c87f0175c15",
+      "size": 302
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/opportunity/b1-cross-venue-derivation.ts",
+      "sha256": "29866c6839497502a2f9371166dd3865026bc8bca7a8cc57dad12c5717ba2543",
+      "size": 16559
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/opportunity/b1-gross-spread.ts",
+      "sha256": "48ecd0e6402a23610f9582222e86e31c943948f31b6edf0896a66751edfddafb",
+      "size": 6822
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/opportunity/standard-binary-derivation.ts",
+      "sha256": "04059b7cd11e946fd8f997d215732e514b5d03cf9faaf9ba86bb42910f25d653",
+      "size": 2563
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/opportunity/standard-binary-stake-solver.ts",
+      "sha256": "a68d4ea89b2ec4a7d83d8e2ced929732522e0e4af5a36efaac4712e88255dc92",
+      "size": 7922
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/quotes/b1-capacity-model.ts",
+      "sha256": "6a98bd374fff19cd414d04fc3410ad944b234043733d8f258a383537e0a28617",
+      "size": 8148
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/quotes/b1-quote-age-penalty.ts",
+      "sha256": "6b5100f98a7f3500ce5b30e508f333106a7410da87480f873d2612405dedb9e6",
+      "size": 53
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/quotes/b1-quote-synchronization.ts",
+      "sha256": "4746d1bd364a7389a95b4aa912e66f66041c44fc51083dcd02a12e9ad1fa9bde",
+      "size": 8339
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/quotes/b1-venue-limit-model.ts",
+      "sha256": "2709fb059a2b0fa24558d564f94394c939ff9f252920edcca65d3c94f53a0b9c",
+      "size": 2796
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/quotes/fee-cost-model.ts",
+      "sha256": "72549760951cc57f1b2321160f8a9e9a6c222cb7c5e848e41f99a1b244d00c5d",
+      "size": 1066
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/quotes/quote-capacity.ts",
+      "sha256": "9b53f44d2427b0953424a09eda33fe0e165db2ff0239b5c8acb7b81f957d84c8",
+      "size": 2200
+    },
+    {
+      "mode": "0744",
+      "path": "packages/bootstrap/src/quotes/quote-freshness.ts",
+      "sha256": "38a0042d488084145e2438fe30d9e5b0ed665733af97b561587ca78d5bb9718f",
+      "size": 2155
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/reporting/b1-backtest-report.ts",
+      "sha256": "8c8cbc440a521c4ee32de8bde89c547fe3c97c36d43935008c3f0b39a2657272",
+      "size": 18911
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/reporting/b1-false-positive-report.ts",
+      "sha256": "55d3a251830501a284214bac6e94a16eb3f194fcce33195df5e3ee37cb985f95",
+      "size": 6429
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/reporting/blocker-report.ts",
+      "sha256": "0fc5e9eb9ee2f5c044a03bb0373f97b29336a27cf7e1eaecc63cc819dafa5f80",
+      "size": 1245
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/reporting/opportunity-report.ts",
+      "sha256": "0441883ab6aa2b257d538fa29ffc1737d2783d92fe7569fd839acd72fe6c2a84",
+      "size": 3009
+    },
+    {
+      "mode": "0744",
+      "path": "packages/bootstrap/src/reporting/private-run-report.ts",
+      "sha256": "cb6471c28814b75007afb35a992fed23aae06e9a53eb92f555ec8f47c66db022",
+      "size": 28729
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/runtime/private-paper-runtime.ts",
+      "sha256": "252e38a52693f3fa598c9ea92a83b184de0c4b29c4ab0bd5c952b750d009c6f5",
+      "size": 50613
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/scenarios/b1-scenario-cashflow.ts",
+      "sha256": "f48a4d0f697fcc2d9d48328ef665689807f3f97d6c74fbcba67b01520293a580",
+      "size": 16082
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/scenarios/b1-terminal-scenario.ts",
+      "sha256": "4f3ee12a400f4a034a177043213f785df2c6a60f33f8cdd85a84be652401b47c",
+      "size": 2291
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/scenarios/complete-set.ts",
+      "sha256": "bdea2ee4db048e553d69f379ab4599c28bae68e372b2821bacb2a64611c98bac",
+      "size": 9072
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/scenarios/scenario-cashflow.ts",
+      "sha256": "11c1608a8d1cb5341f6125b9a30af4afd7c22aac64e228545636446b38476228",
+      "size": 9359
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/scenarios/terminal-scenario.ts",
+      "sha256": "c535c3ae751f23c497a38e93a12ef6d007d3d6f32cbaa6d974e57166c0745daf",
+      "size": 427
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/simulation/b1-leg-completion.ts",
+      "sha256": "108996f173a566dfb8b72de38c364d3f1d7b3610bcceadbe6c415d94a5fc5b3b",
+      "size": 18757
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/simulation/b1-residual-exposure.ts",
+      "sha256": "95752368da2da1bae3778ca9eae94892cb06db0876a8655beba9c6127c26a516",
+      "size": 10683
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/simulation/b1-settlement-replay.ts",
+      "sha256": "d81e781e3499dfd1ed7a6135daa40e56b3e189124bf6df5cb74974d24df6d09d",
+      "size": 38387
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/simulation/b1-void-rule-replay.ts",
+      "sha256": "107607954dc2d9cf911e51e8e68d39592d4b5d8f06cddfcdb018ed92212ad2fb",
+      "size": 5450
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/simulation/leg-completion.ts",
+      "sha256": "934fb7e5b36545bbc393d0c4909cd4fbc5ddaaf2d540819acc222577ba672aa7",
+      "size": 7756
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/simulation/non-atomic-completion.ts",
+      "sha256": "3b9944da581cc8fafeb99037e714e4b99a9c1765a512616a7a4bde65d47611df",
+      "size": 29546
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/simulation/partial-fill.ts",
+      "sha256": "84ea147e7d449e3ffdfcfcd662f29803dc5905f4d207b556ed04ab6b39071a93",
+      "size": 826
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/simulation/residual-exposure.ts",
+      "sha256": "b79022cc35f342f5002932b083259326c773a12919541af18976684a455d16d4",
+      "size": 11930
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/simulation/settlement-replay.ts",
+      "sha256": "7967faca4d58a884c8c6762aaccac6fd1f04c630a3d5632f54c273202c89e8d2",
+      "size": 46691
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/solver/b1-generalized-stake-vector.ts",
+      "sha256": "822a6ca6802ffb6fbfd52145679b2575536701d4c936a16ab06ab7d70123d1a0",
+      "size": 20893
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/solver/b1-rounding.ts",
+      "sha256": "32275d20e5de782278e33df95e94e207bee5b662a3fd23fb695ab98bed0ac281",
+      "size": 1466
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/solver/constraints.ts",
+      "sha256": "8493c4d6055f3ef8377c921cc154d532284ef5ab2d63f3451deaf105ddfff2b2",
+      "size": 1198
+    },
+    {
+      "mode": "0744",
+      "path": "packages/bootstrap/src/solver/rounding.ts",
+      "sha256": "c01bfcf66916c6a235aca4aa174959b2ab3624ae0ebf77c9ead2fe2dc4367ed1",
+      "size": 921
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/solver/stake-vector.ts",
+      "sha256": "d5022b515bbac8672ed337933887276d590424c89b75c3e5acd290f3a5561029",
+      "size": 18757
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/strategy/strategy-ledger.ts",
+      "sha256": "d05e339a5692a9218f2146c153570ee7d9c8d79ae88282e162b7ece0c0cb5dbc",
+      "size": 37932
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/workers/b1-private-observation-jobs.ts",
+      "sha256": "ee293ef0e7a3edeef6ef6729c987f477f049523ccd3d0b150b874796e032a5cc",
+      "size": 9857
+    },
+    {
+      "mode": "0644",
+      "path": "packages/bootstrap/src/workers/bounded-job-worker.ts",
+      "sha256": "3f319fc5ad09636121698b36817f1762c4431dffb775535a2d62e3289b111dd7",
+      "size": 12986
+    },
+    {
+      "mode": "0744",
+      "path": "packages/bootstrap/src/workers/private-paper-runtime-jobs.ts",
+      "sha256": "cbf9794410c3c374c7cd22844c5fd1c5fc4e51c7322856b921753479f4b0ca5c",
+      "size": 30543
+    },
+    {
+      "mode": "0644",
+      "path": "packages/persistence/package.json",
+      "sha256": "10977f54df272da68a1748f428943b04ec932f8b7c416d9073485a0909658c4f",
+      "size": 156
+    },
+    {
+      "mode": "0644",
+      "path": "packages/persistence/src/config.ts",
+      "sha256": "03cc5a97ec98091f4a47b9f2ac65682ad298b03617185884e75fea0999ecd4cb",
+      "size": 3484
+    },
+    {
+      "mode": "0644",
+      "path": "packages/persistence/src/errors.ts",
+      "sha256": "b27a45ca0fe4410b63cd67f283a14a19b9e0c43cc96b846776529ce84e60d2cc",
+      "size": 174
+    },
+    {
+      "mode": "0644",
+      "path": "packages/persistence/src/index.ts",
+      "sha256": "d68727b6651118d7d5db705ee9f24311257ed8530e927744cd4882ea96d0589d",
+      "size": 886
+    },
+    {
+      "mode": "0644",
+      "path": "packages/persistence/src/migrations.ts",
+      "sha256": "2ae8d8e9d9cdb6c08003371083c2065dd803ad5d82258f5be3166a17da01f57b",
+      "size": 3902
+    },
+    {
+      "mode": "0644",
+      "path": "packages/persistence/src/psql.ts",
+      "sha256": "86053cd5690b15a2ba6ea210e3073c3324017d12fb36ec1fe815c84edab50343",
+      "size": 9068
+    },
+    {
+      "mode": "0744",
+      "path": "packages/persistence/src/repositories/b1-backtest-run-repository.ts",
+      "sha256": "fca39b72d06d2685cf82445e95d033830af1eea4b60d9896b8bce69d1d53ec04",
+      "size": 26071
+    },
+    {
+      "mode": "0644",
+      "path": "packages/persistence/src/repositories/b1-private-observation-repository.ts",
+      "sha256": "a057be720b8d7794b5d3a29cac35879ea555a65f2238e085b98fb7ea730f9941",
+      "size": 11362
+    },
+    {
+      "mode": "0644",
+      "path": "packages/persistence/src/repositories/b1-upstream-convergence-repository.ts",
+      "sha256": "468cde29f264349925fe65e33d5b7e05fb34390877bb0f2503345154160d6884",
+      "size": 10456
+    },
+    {
+      "mode": "0644",
+      "path": "packages/persistence/src/repositories/import-run-repository.ts",
+      "sha256": "9bb1a79b2b27ea6cd3eaaf38cb22bb20148615a2400ff929b834ad2dbd08e00b",
+      "size": 11152
+    },
+    {
+      "mode": "0744",
+      "path": "packages/persistence/src/repositories/pinned-strategy-export-repository.ts",
+      "sha256": "0d8924d7d3f23a1689dc351b7be468ce4c2e3473121b2376bfba868fca4ea547",
+      "size": 20481
+    },
+    {
+      "mode": "0644",
+      "path": "packages/persistence/src/repositories/private-paper-runtime-scheduler-checkpoint-repository.ts",
+      "sha256": "fd997e6c563e93a0055066ae7ffc64173402495429983e0574b6e929aa743489",
+      "size": 16979
+    },
+    {
+      "mode": "0644",
+      "path": "packages/persistence/src/repositories/strategy-ledger-repository.ts",
+      "sha256": "a3874447d9cf6334eafd4eaf1e7a45c3cd95b48fe865fcc68ba1f5583ca32528",
+      "size": 16625
+    },
+    {
+      "mode": "0644",
+      "path": "packages/persistence/src/repositories/upstream-api-convergence-repository.ts",
+      "sha256": "298c9e2b2d874f5e11e7278893f00acaaaf16b48a47fde0cab41c33e59017ba0",
+      "size": 19832
+    },
+    {
+      "mode": "0644",
+      "path": "packages/persistence/src/repositories/upstream-export-convergence-repository.ts",
+      "sha256": "dbfac37a5aac9e6139532312a0635f25f655c8739782e186f72bc6717bd79600",
+      "size": 16314
+    },
+    {
+      "mode": "0644",
+      "path": "packages/persistence/src/repositories/upstream-lock-repository.ts",
+      "sha256": "c77663c55b41255a4c1f455012d5427b55f8a5cf1c733e7b800cc334f407a8bc",
+      "size": 4935
+    },
+    {
+      "mode": "0644",
+      "path": "packages/persistence/src/repositories/worker-job-repository.ts",
+      "sha256": "263481bca4ae76ceda0e134e7b1d707f17b9de89679c5e0a51f0f5e10431b57e",
+      "size": 47066
+    },
+    {
+      "mode": "0644",
+      "path": "packages/persistence/src/types.ts",
+      "sha256": "af8821a29f8d6022e53fbf5d7d86943f412557fbdbb8ab2fc5ad32dfe1b371fa",
+      "size": 686
+    },
+    {
+      "mode": "0644",
+      "path": "packages/upstream/package.json",
+      "sha256": "5cb51a5e70fb9b62c903dd53f6eea2866ffd4c36384b990c4bfbc912161df025",
+      "size": 153
+    },
+    {
+      "mode": "0644",
+      "path": "packages/upstream/src/index.ts",
+      "sha256": "239d1c6aae4b06e01b8d19f085b141673d9e4431adf67157b87e48e8aadd1298",
+      "size": 57
+    },
+    {
+      "mode": "0744",
+      "path": "packages/upstream/src/upstream/betting-win-upstream-lock.ts",
+      "sha256": "8c0badbfc3dc776eb71e01e1a76280debab30c64739274b06d1ce7343382a6c2",
+      "size": 27559
+    },
+    {
+      "mode": "0755",
+      "path": "pull_artifacts_and_zip_codebase.sh",
+      "sha256": "9e7199e2e7efa85963f26374510e7cde6a74eb4cd3f00aca7893de2efe0f6cc7",
+      "size": 10568
+    },
+    {
+      "mode": "0755",
+      "path": "run-autonomous-bugfix.sh",
+      "sha256": "fd3f9dcc110763c5ed88c1eba6bcb1ed1a94d4034b7757051b2fb6d1ab385a1b",
+      "size": 47163
+    },
+    {
+      "mode": "0744",
+      "path": "run-autonomous-implementation.sh",
+      "sha256": "cf373b5b75fdeeb4b7e83c9bdf2ce984e92a4ffecd85da6207481b479861d14a",
+      "size": 66416
+    },
+    {
+      "mode": "0744",
+      "path": "run-bugfix-autopilot.sh",
+      "sha256": "e96b91399d507f223d4e8ce7c1d74a19597ef15fa21eb1bbf52a4b81408d97f8",
+      "size": 63186
+    },
+    {
+      "mode": "0744",
+      "path": "run-paper-autopilot.sh",
+      "sha256": "fa9afc727218b6e533c6f3ef1c2bbb3af9e2c5182538276f509f1986bdfac661",
+      "size": 71257
+    },
+    {
+      "mode": "0744",
+      "path": "run-paper-evaluation.sh",
+      "sha256": "d7d821119d51c3dd5bbcf7a80f0e98488ebd38f7d771310265939a918505e667",
+      "size": 50433
+    },
+    {
+      "mode": "0744",
+      "path": "schemas/betting-win-upstream-lock.v1.schema.json",
+      "sha256": "0af6057a273134ca2bd0a4246be109271fd25cc5c6b32464b5be64b37b61ceee",
+      "size": 2001
+    },
+    {
+      "mode": "0644",
+      "path": "schemas/bws-external-runtime-campaign.v1.schema.json",
+      "sha256": "28bb35bd98c7e99a4ee474a1cde594578a1751c76f776d5021e5cbe2fcdb6868",
+      "size": 9241
+    },
+    {
+      "mode": "0644",
+      "path": "schemas/bws-release-manifest.v1.schema.json",
+      "sha256": "52b22842dbdedb04c4ff5766fc3e8c07fceda866472cbb76a0e6369684c517cb",
+      "size": 8267
+    },
+    {
+      "mode": "0644",
+      "path": "schemas/bws-soak-campaign-checkpoint.v1.schema.json",
+      "sha256": "16bd4f159db9b962900b6159ddb0eda69d7e7daee5b6811ef61541cf42a772e0",
+      "size": 1355
+    },
+    {
+      "mode": "0644",
+      "path": "schemas/bws-soak-campaign-result.v1.schema.json",
+      "sha256": "278f7a3040ee3ec311021cc31b0af51c0e236b87efcb89d5b25e5463f1f7e87b",
+      "size": 5296
+    },
+    {
+      "mode": "0644",
+      "path": "schemas/bws-soak-campaign-state.v1.schema.json",
+      "sha256": "a41270072e7d7cfad68117508d247a8140f89e900c2c4dd3c038ee7b421ed6a8",
+      "size": 2005
+    },
+    {
+      "mode": "0644",
+      "path": "schemas/bws-soak-campaign-validation.v1.schema.json",
+      "sha256": "91e3224bb34ca77a05c5dbf9e593d5707b244cbc784b18a89fd4b581c51ba155",
+      "size": 936
+    },
+    {
+      "mode": "0644",
+      "path": "schemas/bws-soak-campaign.v1.schema.json",
+      "sha256": "d0464c985c5ca1e15306c336327054630d9b8e322a6feaa7dae7cb71096c8dd9",
+      "size": 8109
+    },
+    {
+      "mode": "0644",
+      "path": "scripts/build_bws_operator_cockpit.mjs",
+      "sha256": "3da7027ad98c9c610de436d7ab8fcca1c38eccf4da35a8f5bbc586450183f2fb",
+      "size": 2616
+    },
+    {
+      "mode": "0744",
+      "path": "scripts/bws-root-wrapper-runtime.mjs",
+      "sha256": "1d1d5fe74a399da77aeaffecf784c6d7f47176c5101e85ae9987cac87cc2bcb8",
+      "size": 28135
+    },
+    {
+      "mode": "0755",
+      "path": "scripts/create-source-handoff-archive.sh",
+      "sha256": "3636462392c76a66fae28b84eafd04a7a7db689e63d815bc82855b58f86e2f49",
+      "size": 4069
+    },
+    {
+      "mode": "0755",
+      "path": "scripts/load-node-runtime.sh",
+      "sha256": "ea4bb9bef2995130f632d069dc3c3cbb5c6774047f420ab1a58f6335b3f87abe",
+      "size": 4349
+    },
+    {
+      "mode": "0744",
+      "path": "scripts/prepare_bws_test_environment.mjs",
+      "sha256": "3fa00e995688e0dba40147640bfb70f93a73d69570ee887991e22d17b87bb589",
+      "size": 1584
+    },
+    {
+      "mode": "0644",
+      "path": "scripts/regenerate_source_manifest.py",
+      "sha256": "a8bddfe398f3be7f764f2efa0a844f32389967edb99b9c6b6ef0bdf105d7fc15",
+      "size": 1562
+    },
+    {
+      "mode": "0744",
+      "path": "scripts/restore-required-executable-bits.js",
+      "sha256": "ba678ee0d636ef8adefccdc30e0558fb9f90d82a283d9a5c15b8c36fa77791f5",
+      "size": 1238
+    },
+    {
+      "mode": "0644",
+      "path": "scripts/run_betting_win_upstream_lock.mjs",
+      "sha256": "25637a7836621ad268a28f30d5f32c75ae3f73ee960a54291fd0b81006d24b33",
+      "size": 1370
+    },
+    {
+      "mode": "0644",
+      "path": "scripts/validate_api_only_upstream.py",
+      "sha256": "2600a915dd6d55cb67432c7ec2731d44794098d42310f5b6c7195c8d2e69f4f1",
+      "size": 13337
+    },
+    {
+      "mode": "0644",
+      "path": "scripts/validate_artifact_hygiene.py",
+      "sha256": "c832883d005e974d42cc4aa25eec2b5af80e0bb71f9a89c44b3fc47248b93d8b",
+      "size": 10201
+    },
+    {
+      "mode": "0744",
+      "path": "scripts/validate_autonomous_continuation_contract.py",
+      "sha256": "881edd78af76d3c9cb1197da374ded2d9c4525b384061b30f217dc5f710cf626",
+      "size": 4347
+    },
+    {
+      "mode": "0744",
+      "path": "scripts/validate_autonomous_controller_contract.py",
+      "sha256": "c129f6b0b8b979563d336f37d191e828d098a2f80e3ad11a1d3a8db305c5a3a3",
+      "size": 30609
+    },
+    {
+      "mode": "0744",
+      "path": "scripts/validate_betting_win_upstream_contract.py",
+      "sha256": "931cd26b0530ee620ede9063a60fb75f3a5835f25860c8b2842f98950d283c54",
+      "size": 10030
+    },
+    {
+      "mode": "0644",
+      "path": "scripts/validate_bws_b1_acceptance.py",
+      "sha256": "f31f3f38125c3c308859278c77eeebf0db0c6fd13a1adc88f7e7e3ca797394ca",
+      "size": 3339
+    },
+    {
+      "mode": "0644",
+      "path": "scripts/validate_bws_b1_authority.py",
+      "sha256": "57fe8799577d65daccf69c4b638f0e7d35e061ce76da13ede16f57f8f6891f94",
+      "size": 10855
+    },
+    {
+      "mode": "0644",
+      "path": "scripts/validate_bws_b1_boundary.py",
+      "sha256": "1471aa0a3c467e010b9ab5a9b14cbffc63e17856eb63b088ff583d9ae7536dd8",
+      "size": 9495
+    },
+    {
+      "mode": "0744",
+      "path": "scripts/validate_bws_loopback_acceptance.mjs",
+      "sha256": "1624933a115da5e14c687b95913d7de272bfddf528039fb90acdb502087d1c50",
+      "size": 10779
+    },
+    {
+      "mode": "0644",
+      "path": "scripts/validate_contract_boundary.py",
+      "sha256": "8d8b4d559a000517e766b14f93b76379c2027dbe269f87f56167be4a5d2bb174",
+      "size": 2028
+    },
+    {
+      "mode": "0744",
+      "path": "scripts/validate_documentation_slimming.py",
+      "sha256": "5a0cdf3f6be338428780e7cf7889e64bcb09eab58576ff7b2b7443eeada3a0b8",
+      "size": 3983
+    },
+    {
+      "mode": "0644",
+      "path": "scripts/validate_executable_bits.py",
+      "sha256": "1c12dfba6da59560b91ba9b41776bea31c77959a5a3cffd58bb84168ea315d66",
+      "size": 1698
+    },
+    {
+      "mode": "0744",
+      "path": "scripts/validate_fixture_integrity.py",
+      "sha256": "fc4eb4e0ccf040ee399659e17ce9983d61d3b16f01de4ea9ebe44da37dbbf5bb",
+      "size": 3369
+    },
+    {
+      "mode": "0744",
+      "path": "scripts/validate_full_implementation_program.py",
+      "sha256": "5d81c01587b0b36713da90bf0226ac6c40cfaafbca8af2e6bdf3edd315a653bb",
+      "size": 12877
+    },
+    {
+      "mode": "0744",
+      "path": "scripts/validate_local_engine_backlog_contract.py",
+      "sha256": "400227b56aecaf876c24d37dce7dd6d5cff9f4d248f644fba5d3465926310f01",
+      "size": 2224
+    },
+    {
+      "mode": "0744",
+      "path": "scripts/validate_master_plan.py",
+      "sha256": "5fc6ead681527e69d646cb23613514ac1c29afaf111ca3722588eac5d289b468",
+      "size": 3810
+    },
+    {
+      "mode": "0644",
+      "path": "scripts/validate_no_execution_paths.py",
+      "sha256": "da689d340d84cecbf8e5a7b3056fd233820e65187de312f48268806f196dd65b",
+      "size": 2869
+    },
+    {
+      "mode": "0644",
+      "path": "scripts/validate_no_provider_connections.py",
+      "sha256": "e2afd91309af1ce80d0f0c8cd91f4aff944a1408f3443167c80ddb6476f0a003",
+      "size": 2807
+    },
+    {
+      "mode": "0744",
+      "path": "scripts/validate_node_runtime_loader.py",
+      "sha256": "0673fde5c9877eb064985feeefc0b1043bcf7c5dcefadd675f48bd3371443334",
+      "size": 3461
+    },
+    {
+      "mode": "0744",
+      "path": "scripts/validate_private_paper_mode_backlog_contract.py",
+      "sha256": "e7da066d7bf76c1903813078b79a8071003478a6a253671046c0869e07e6395f",
+      "size": 3055
+    },
+    {
+      "mode": "0644",
+      "path": "scripts/validate_remaining_operator_runtime_program.py",
+      "sha256": "7c5c302de6ab4483ce21ab6602a5d31ca87c931b570f45184bdb722780ba1cc1",
+      "size": 7688
+    },
+    {
+      "mode": "0744",
+      "path": "scripts/validate_repo.py",
+      "sha256": "52c41ced74b54ddb973f23d59fc2777d4ba27df64e101cf8e390b71d2312aa82",
+      "size": 20526
+    },
+    {
+      "mode": "0744",
+      "path": "scripts/validate_shell_local_assignments.py",
+      "sha256": "0f27e6eb5c0a87d60efe69eb5e14d1dd357c0e5f957512747e19bc0523ca8390",
+      "size": 2572
+    },
+    {
+      "mode": "0744",
+      "path": "scripts/validate_source_manifest.py",
+      "sha256": "2235e6c4276dc8dad2a0328e956d3622ec6bfbef0978843cdf35e81e58e956b5",
+      "size": 5569
+    },
+    {
+      "mode": "0744",
+      "path": "scripts/validate_temp_inode_safety.py",
+      "sha256": "68a3a8b67a6cae099b0b19c3a6291fbce2bbd89bcf5605d7d2075ad50e9ea22a",
+      "size": 5098
+    },
+    {
+      "mode": "0744",
+      "path": "scripts/validate_three_repo_surebet_boundary.py",
+      "sha256": "ae3c88816217df963d0fa047e65f7334fbf552505ace9d81764bb181eb69c0cd",
+      "size": 5834
+    },
+    {
+      "mode": "0644",
+      "path": "src/adapters/betting-win-export-reader.ts",
+      "sha256": "f1a47389999a190c5699f006e8c2ae5e9d3f15918438c14fdc648fb92c4b16f3",
+      "size": 84
+    },
+    {
+      "mode": "0644",
+      "path": "src/adapters/betting-win-local-bundle-reader.ts",
+      "sha256": "944cfb31a6fccecfa114239d993b78336703cff9a8395ff23c6cd9642aa6722b",
+      "size": 90
+    },
+    {
+      "mode": "0644",
+      "path": "src/adapters/betting-win-pinned-bundle-intake.ts",
+      "sha256": "96ecd8eaf168424866369b3b05ce427fbe4e8651bbd3ade126ba35eceed03989",
+      "size": 91
+    },
+    {
+      "mode": "0644",
+      "path": "src/adapters/betting-win-query-client.ts",
+      "sha256": "d0be639f2d5449a110592d0505c650d64335590cb2d86de51a22aa7e92f59803",
+      "size": 83
+    },
+    {
+      "mode": "0644",
+      "path": "src/adapters/betting-win-strategy-export-intake.ts",
+      "sha256": "7554602cf3b3ab5b553c07f904dd4029111df5f4c4bc2fb9e29ef687942f2876",
+      "size": 93
+    },
+    {
+      "mode": "0644",
+      "path": "src/api/bws-read-only-query-http.ts",
+      "sha256": "5b0c6ba1d552bb3f44368ea21bcc894a49f6cd01fb94a81637e068ae8a886cf8",
+      "size": 78
+    },
+    {
+      "mode": "0644",
+      "path": "src/api/bws-read-only-query-service.ts",
+      "sha256": "7844834a44e07db032f9fad357755e5d939931a6cabb176ed7e52bcba12c46b9",
+      "size": 81
+    },
+    {
+      "mode": "0644",
+      "path": "src/backtest/b1-cross-venue-backtest.ts",
+      "sha256": "8f64ce0d51a1e35ae960972f21da956342207bce57ace5068b974f7680a02fb3",
+      "size": 82
+    },
+    {
+      "mode": "0644",
+      "path": "src/backtest/standard-binary-backtest.ts",
+      "sha256": "bb6e335ac68114beeafd03edc8f7840c8ce8b874b04e7470743f8ec9b68abef4",
+      "size": 83
+    },
+    {
+      "mode": "0644",
+      "path": "src/cli/bws-database-lifecycle.ts",
+      "sha256": "92e46c2e16b8171fa9eb6e6d7504ceaf147cecc3d3a09054a9e13d954be009d3",
+      "size": 76
+    },
+    {
+      "mode": "0644",
+      "path": "src/cli/bws-external-runtime-preflight.ts",
+      "sha256": "964cd88ced0677032411af7e5bd5b1476b75d96566eb0bdf0047a22df5705d87",
+      "size": 84
+    },
+    {
+      "mode": "0644",
+      "path": "src/cli/bws-final-local-acceptance.ts",
+      "sha256": "73f86ef08cd80017a173708e955ce1e476075a3d7413fdc99cafb85339399429",
+      "size": 80
+    },
+    {
+      "mode": "0644",
+      "path": "src/cli/bws-observability.ts",
+      "sha256": "f9a959973fe405aec5dec09f8a2fc87dd7ff1580a16d7abf768a6094e641c47f",
+      "size": 71
+    },
+    {
+      "mode": "0644",
+      "path": "src/cli/bws-paper-runtime-evidence.ts",
+      "sha256": "de655a65a87e535559620d4e2cc0be82e9041626a8c96ec94be86a9d6bff88b9",
+      "size": 80
+    },
+    {
+      "mode": "0644",
+      "path": "src/cli/bws-paper-runtime-handoff.ts",
+      "sha256": "8fe36367ee90681b51880f676ddfbafc19f3e0121bfa09026f95bbe874345514",
+      "size": 79
+    },
+    {
+      "mode": "0644",
+      "path": "src/cli/bws-private-paper-scheduler-service.ts",
+      "sha256": "d396d90389adadb480c1d435fc2ca0a554fc30594e0471feeb35818a989ad387",
+      "size": 89
+    },
+    {
+      "mode": "0644",
+      "path": "src/cli/bws-private-paper-scheduler.ts",
+      "sha256": "f41be8960f96ef1d395b56cd67492684699b2c54c1cbd76b7a837f308afa6d5a",
+      "size": 81
+    },
+    {
+      "mode": "0644",
+      "path": "src/cli/bws-private-paper-worker-service.ts",
+      "sha256": "d57e500ce3b88ec0c91b8b60da2c885739063ad22b56fc9c185671adfb1cf3f6",
+      "size": 86
+    },
+    {
+      "mode": "0644",
+      "path": "src/cli/bws-private-paper-worker.ts",
+      "sha256": "e49cc551a5f18e70770b7b26a7dec237fc9b8fc89a7356524ee18e538de43755",
+      "size": 78
+    },
+    {
+      "mode": "0644",
+      "path": "src/cli/bws-read-only-api.ts",
+      "sha256": "ec83e68a061ba198398bb174ddf5c989599ddf8aeeedb68da08db1a116d01ed4",
+      "size": 71
+    },
+    {
+      "mode": "0644",
+      "path": "src/cli/bws-release-packaging.ts",
+      "sha256": "7724db5825f569c83ab8da92e8a5d39f9b60cec191dace4b43a6d14ec04c8618",
+      "size": 75
+    },
+    {
+      "mode": "0644",
+      "path": "src/cli/bws-release-upgrade.ts",
+      "sha256": "33ae49aebe04e4b30ac3a15d63527978f147e9a4e41029e47fd75e37ca1e693e",
+      "size": 73
+    },
+    {
+      "mode": "0644",
+      "path": "src/cli/bws-soak-campaign.ts",
+      "sha256": "574a2043eb0a93b927c0747b2818215bb0bb64e75398c7fd8acdb77613eedb93",
+      "size": 71
+    },
+    {
+      "mode": "0644",
+      "path": "src/cli/bws-upstream-api-convergence.ts",
+      "sha256": "780211b0e1d8c2201e17d1d2dede6329477d4fa4662abf3638fff47a18416b94",
+      "size": 82
+    },
+    {
+      "mode": "0644",
+      "path": "src/cli/bws-upstream-convergence-service.ts",
+      "sha256": "d6a9e3f7f637d77d8a91eb69181c36e1a30834926e0f625001b57e07b17b542e",
+      "size": 86
+    },
+    {
+      "mode": "0644",
+      "path": "src/cli/bws-upstream-export-convergence.ts",
+      "sha256": "dc61817784ad94f0a556619c19198dd9e2b429a30101aa91b8b9c1dc297eb11c",
+      "size": 85
+    },
+    {
+      "mode": "0644",
+      "path": "src/cli/local-paper-batch-report.ts",
+      "sha256": "f0571e7661021137cb1848e6f5cde1c6d92413ee8d83dfac21c0f7f6d10c27ff",
+      "size": 476
+    },
+    {
+      "mode": "0644",
+      "path": "src/cli/local-paper-report.ts",
+      "sha256": "55221e2cb64c76fb2702655f8ef30da8bd5977518345f170e47c04e81b8d98c0",
+      "size": 454
+    },
+    {
+      "mode": "0644",
+      "path": "src/contracts/b1-local-types.ts",
+      "sha256": "37048008d76a6c642e1b05f81c611ce9a24f09e3d7fe756b99978d3b0a65998a",
+      "size": 74
+    },
+    {
+      "mode": "0644",
+      "path": "src/contracts/betting-win-b1-resource-records.ts",
+      "sha256": "e1f11127cde211bc114604c01def9361a34b55d0475d5ae2bd38f2791863aa06",
+      "size": 91
+    },
+    {
+      "mode": "0644",
+      "path": "src/contracts/betting-win-contract-imports.ts",
+      "sha256": "b811271ccec8d58e57ef8d105ae35dba7797a3682428eb555ca271b693fb354a",
+      "size": 88
+    },
+    {
+      "mode": "0644",
+      "path": "src/contracts/betting-win-resource-records.ts",
+      "sha256": "5a8376b2b9424898228f35ebee942ee7dd2b9b4cb07c99bfa28dbb389f61955e",
+      "size": 88
+    },
+    {
+      "mode": "0644",
+      "path": "src/contracts/local-types.ts",
+      "sha256": "fbf658d57653d59d91ab3b4948e81ebde80e5dabab7c50d90015a0fd2a8d8ff8",
+      "size": 71
+    },
+    {
+      "mode": "0644",
+      "path": "src/economics/b1-capital-lock.ts",
+      "sha256": "a154b950e18a0454761b398e8afa41ea49a738f0ca545e1bb94c4bc3aadc3d93",
+      "size": 75
+    },
+    {
+      "mode": "0644",
+      "path": "src/economics/b1-fee-matrix.ts",
+      "sha256": "dc528370e9bc539f1709a356dc152470112d8afa5ec02e1219e5959e08c6f5b0",
+      "size": 73
+    },
+    {
+      "mode": "0644",
+      "path": "src/economics/b1-lateness-penalty.ts",
+      "sha256": "b8293047e56c3e53277564f83449d8153579a5edcd93de8bcbb8dbe161592834",
+      "size": 79
+    },
+    {
+      "mode": "0644",
+      "path": "src/economics/b1-net-spread.ts",
+      "sha256": "420c2a206c7cdeebe3b1645390fb44374280a61c244b9ec10a0b17d22bb3d7a7",
+      "size": 73
+    },
+    {
+      "mode": "0644",
+      "path": "src/identity/b1-market-equivalence.ts",
+      "sha256": "5ee7a4cabaf03d0ca832f1ed561b8108c8851fcfe45efadc048c12fd87ddc37e",
+      "size": 80
+    },
+    {
+      "mode": "0644",
+      "path": "src/identity/b1-selection-equivalence.ts",
+      "sha256": "13e6d840254c42bb89761272dc52359e0bfa691717ddd4af97584e7d05db235d",
+      "size": 83
+    },
+    {
+      "mode": "0644",
+      "path": "src/identity/b1-venue-pair-key.ts",
+      "sha256": "6143ccbae44dbdb9a4c1b0850a89a0752f0d605d1fcc4dfea995e2758eb9e4d3",
+      "size": 76
+    },
+    {
+      "mode": "0644",
+      "path": "src/identity/equivalence-precheck.ts",
+      "sha256": "9c095f85eae05239447c95dcb5623eb372a780198c794424657292e68b9b6202",
+      "size": 79
+    },
+    {
+      "mode": "0644",
+      "path": "src/identity/market-group-key.ts",
+      "sha256": "bd312f31752aacdc3e3b4f78578c11db0f15e2846a92c2840b153c121fd75870",
+      "size": 75
+    },
+    {
+      "mode": "0644",
+      "path": "src/operations/b1-runtime-evidence.ts",
+      "sha256": "9a4bc2076e09b9ec050a1bcaa3954406b16c4968f0ce282d72dfde4e8a2e7997",
+      "size": 80
+    },
+    {
+      "mode": "0644",
+      "path": "src/operations/database-lifecycle.ts",
+      "sha256": "e9675e677e24845dfd2b2a1c815803bd7af83d94f687555d4a94810f5fc7298e",
+      "size": 79
+    },
+    {
+      "mode": "0644",
+      "path": "src/operations/external-runtime-preflight.ts",
+      "sha256": "fe3fe2ea28888932943dfea59a6f3d775fb782ebb9e010efd09d5cc8b308ae02",
+      "size": 87
+    },
+    {
+      "mode": "0644",
+      "path": "src/operations/final-local-acceptance.ts",
+      "sha256": "07d9de47fb4f827c0a9309c70996122db908406c43fffa75a7d4450026d56a4f",
+      "size": 83
+    },
+    {
+      "mode": "0644",
+      "path": "src/operations/observability.ts",
+      "sha256": "3b6b3b520ae3f0c462202cf7260a12a531319424228cd49159996393bab46cec",
+      "size": 74
+    },
+    {
+      "mode": "0644",
+      "path": "src/operations/operator-lifecycle.ts",
+      "sha256": "15ea2f683718ec53c601d107d271b67377a7820e4d7b6f9b5a196c77c14560cd",
+      "size": 79
+    },
+    {
+      "mode": "0644",
+      "path": "src/operations/paper-runtime-evidence.ts",
+      "sha256": "b2b453dd43ac4eaecdfcdad791110a92b3812e29ebbfaa5b1ffe511492047f59",
+      "size": 83
+    },
+    {
+      "mode": "0644",
+      "path": "src/operations/paper-runtime-handoff.ts",
+      "sha256": "459895818baa0f49fabefce45d302617a06e11aa36cc2640f9ffcf41f350c7d1",
+      "size": 82
+    },
+    {
+      "mode": "0644",
+      "path": "src/operations/private-paper-runtime-scheduler.ts",
+      "sha256": "d682ab47a3ca4e33a399b180baad0c8de327c0f27267c782a455a73eccbb3b88",
+      "size": 92
+    },
+    {
+      "mode": "0644",
+      "path": "src/operations/private-paper-scheduler-service.ts",
+      "sha256": "aa3ffe866dd8341725d2f2b1dba6d4031287e09208a195a8c5850689b88d9f36",
+      "size": 92
+    },
+    {
+      "mode": "0644",
+      "path": "src/operations/private-paper-worker-service.ts",
+      "sha256": "48819bda3917c08bbfa8d659a48fdb93b9b1705d50fcef48ee8c1cdb0a165724",
+      "size": 89
+    },
+    {
+      "mode": "0644",
+      "path": "src/operations/release-packaging.ts",
+      "sha256": "e5411049c3bda94a28a471890c5137b139e23d5a54fc41389a11017b311c5e40",
+      "size": 78
+    },
+    {
+      "mode": "0644",
+      "path": "src/operations/release-upgrade.ts",
+      "sha256": "a5869873cc95a773a23c6e25d80992b2dc11e3bdec225fa83f004563a17b8c23",
+      "size": 76
+    },
+    {
+      "mode": "0644",
+      "path": "src/operations/runtime-applications.ts",
+      "sha256": "51ba54202c1ee32a5abef53494031bc6f14087dbdb67313ef6ebdcf058dcaee7",
+      "size": 81
+    },
+    {
+      "mode": "0644",
+      "path": "src/operations/service-runtime.ts",
+      "sha256": "0875e59c64aab8c0f840e3e6c8642e7b8ce08ca340e054bb4f6db53b892b629e",
+      "size": 76
+    },
+    {
+      "mode": "0644",
+      "path": "src/operations/soak-campaign.ts",
+      "sha256": "7c3952d34f2cc7c01d9826ce1248974cd9af29de9da2ba3133b5e128714bba68",
+      "size": 74
+    },
+    {
+      "mode": "0644",
+      "path": "src/operations/upstream-api-convergence.ts",
+      "sha256": "bc53c52774c5aaced0324cd2ae9d00e3f31f43d60068b9131495b6803e22368e",
+      "size": 85
+    },
+    {
+      "mode": "0644",
+      "path": "src/operations/upstream-convergence-service.ts",
+      "sha256": "574ebd51e0246f2ec513108d50122b1e11f409b969ccf356e44ea28d885c80bf",
+      "size": 89
+    },
+    {
+      "mode": "0644",
+      "path": "src/operations/upstream-export-convergence.ts",
+      "sha256": "69949bdbae031801d4d158769242e3e75d5a2e5564f6b293f9e3bc6de4a49b6a",
+      "size": 351
+    },
+    {
+      "mode": "0644",
+      "path": "src/opportunity/b1-cross-venue-derivation.ts",
+      "sha256": "37859275a31a673ad7d889c1a215b35c4d545a82a0aec01f5d03c31490d6bb62",
+      "size": 87
+    },
+    {
+      "mode": "0644",
+      "path": "src/opportunity/b1-gross-spread.ts",
+      "sha256": "73d0f3a7fc9a26354d1fa167c47f2ba8ff36863373496442a7e4f77431c7a635",
+      "size": 77
+    },
+    {
+      "mode": "0644",
+      "path": "src/opportunity/standard-binary-derivation.ts",
+      "sha256": "68e30478957274111ae43aadbbd3b8e20e46ced35687f90ef596b7d19ac6c472",
+      "size": 88
+    },
+    {
+      "mode": "0644",
+      "path": "src/opportunity/standard-binary-stake-solver.ts",
+      "sha256": "0dddae578a40b577c32a7d930644432af7ea251a8efe81ab9bc5a797a77406db",
+      "size": 90
+    },
+    {
+      "mode": "0644",
+      "path": "src/persistence/surebet-persistence.ts",
+      "sha256": "7ff6366cccab5b31e4db88657b1e0435b801c1104345265f7f0b1e3ba9198571",
+      "size": 57
+    },
+    {
+      "mode": "0644",
+      "path": "src/quotes/b1-capacity-model.ts",
+      "sha256": "7770d650f1929b6aaac83f0bc4ca6c7cba116452793d2e7b0682350d49f6a496",
+      "size": 74
+    },
+    {
+      "mode": "0644",
+      "path": "src/quotes/b1-quote-age-penalty.ts",
+      "sha256": "1223fa7c3cbe64e51de4c28bf1e71b1f604bf5de296162b8e7308098f76bf10c",
+      "size": 77
+    },
+    {
+      "mode": "0644",
+      "path": "src/quotes/b1-quote-synchronization.ts",
+      "sha256": "6c429abddd6057214c4c3937d5a2e137861306400427b69ea50306a41b129915",
+      "size": 81
+    },
+    {
+      "mode": "0644",
+      "path": "src/quotes/b1-venue-limit-model.ts",
+      "sha256": "e6acaba9bf5d0ebba46b77c2ae1274621ce24224d6c6aafcff5ffc5f6b0b0a8f",
+      "size": 77
+    },
+    {
+      "mode": "0644",
+      "path": "src/quotes/fee-cost-model.ts",
+      "sha256": "3ceb2e7ed383391e45fe91723bcf3d413d9fb77aa1c65f30005303b732bbb692",
+      "size": 71
+    },
+    {
+      "mode": "0644",
+      "path": "src/quotes/quote-capacity.ts",
+      "sha256": "3ba15b57410219ea49252010f3ac29990d72a70d38ebe4608cc98458909117a8",
+      "size": 71
+    },
+    {
+      "mode": "0644",
+      "path": "src/quotes/quote-freshness.ts",
+      "sha256": "32bda9bd0336d34d36302df13fbc198d9f302d1fe408e7dc0b26c3ea9311ddb3",
+      "size": 72
+    },
+    {
+      "mode": "0644",
+      "path": "src/reporting/b1-backtest-report.ts",
+      "sha256": "b6e57d60e79babfd51e79fbb8db2e40f30ecdb5db9c71c01fe3f7b15524df455",
+      "size": 78
+    },
+    {
+      "mode": "0644",
+      "path": "src/reporting/b1-false-positive-report.ts",
+      "sha256": "de7a9a8c1ba81da197bf53fe08b9012bcfe3b8b1b31031aa566ad2248cc70e84",
+      "size": 84
+    },
+    {
+      "mode": "0644",
+      "path": "src/reporting/blocker-report.ts",
+      "sha256": "fcb4a2ea1a793889edfb2e657411b803c5dd7906276456ad260f9c845c336961",
+      "size": 74
+    },
+    {
+      "mode": "0644",
+      "path": "src/reporting/opportunity-report.ts",
+      "sha256": "7274c5cf9f303b265c495e0ea4544ebfd1287d30b49582c8a230d04b4eac2848",
+      "size": 78
+    },
+    {
+      "mode": "0644",
+      "path": "src/reporting/private-run-report.ts",
+      "sha256": "5897fe385e9261de0d90aba71c02462250b21e456d3adadabe538f9f4c9582e3",
+      "size": 78
+    },
+    {
+      "mode": "0744",
+      "path": "src/runtime/private-paper-runtime.ts",
+      "sha256": "e51cbfee3c32a96d4c3998e513f88575cb86c12fb04d074d326c22dd76dcefc7",
+      "size": 79
+    },
+    {
+      "mode": "0644",
+      "path": "src/scenarios/b1-scenario-cashflow.ts",
+      "sha256": "570751ca3f105fd9bae29cf723aadecf6013b69ca4c61f2bb5ac63a57c1808f2",
+      "size": 80
+    },
+    {
+      "mode": "0644",
+      "path": "src/scenarios/b1-terminal-scenario.ts",
+      "sha256": "3b40c0f975e9d083f278e10824bdfcf7d89dd7fc60d5a22117c792aebaa829e5",
+      "size": 80
+    },
+    {
+      "mode": "0644",
+      "path": "src/scenarios/complete-set.ts",
+      "sha256": "9e861f9bc194f2edddbb253c2917f9849752fc0af72c6e83ed18c64a2a333792",
+      "size": 72
+    },
+    {
+      "mode": "0644",
+      "path": "src/scenarios/scenario-cashflow.ts",
+      "sha256": "367920fd2b532dbb959d2258c4e0c71b3b5ab7d9588091bed980dadfb793fa52",
+      "size": 77
+    },
+    {
+      "mode": "0644",
+      "path": "src/scenarios/terminal-scenario.ts",
+      "sha256": "43af49d45344da71a2d76c945b7b8c4d75c6da5b6d6c459e49e2868ab3433756",
+      "size": 77
+    },
+    {
+      "mode": "0644",
+      "path": "src/simulation/b1-leg-completion.ts",
+      "sha256": "d2061bc37ff722517ab3644ba457167fc875ec03e631b51be402364f7ef36bc0",
+      "size": 78
+    },
+    {
+      "mode": "0644",
+      "path": "src/simulation/b1-residual-exposure.ts",
+      "sha256": "f6930c3d96e99a95d5da1ba4f136c7093bd4f7c70fa01bdd7d120d8ad5d28f19",
+      "size": 81
+    },
+    {
+      "mode": "0644",
+      "path": "src/simulation/b1-settlement-replay.ts",
+      "sha256": "be8f2286758dc28d2602dfc1e8925c679dbe1efed551dbefc5b2d2952e6a7ca0",
+      "size": 81
+    },
+    {
+      "mode": "0644",
+      "path": "src/simulation/b1-void-rule-replay.ts",
+      "sha256": "e18e26546b499a40a7d64710a29b03f3e36de2aff623f2fcff61f426a2d1464d",
+      "size": 80
+    },
+    {
+      "mode": "0644",
+      "path": "src/simulation/leg-completion.ts",
+      "sha256": "c2eb6c1edb3398e6fb5fbb101a3657324024eb525a5f56411abd4f8cb44b75b6",
+      "size": 75
+    },
+    {
+      "mode": "0644",
+      "path": "src/simulation/non-atomic-completion.ts",
+      "sha256": "c59b045e0072a045de0b7b364269dd7c79b4d0f84ad8da6ebce6b805f2b76a69",
+      "size": 82
+    },
+    {
+      "mode": "0644",
+      "path": "src/simulation/partial-fill.ts",
+      "sha256": "66c96b590fd0c26df1d5906acb9aecf11499f17788c98fc7cf86db294cde75b8",
+      "size": 73
+    },
+    {
+      "mode": "0644",
+      "path": "src/simulation/residual-exposure.ts",
+      "sha256": "8d2e7b080bf70e74e0e903559718c83ae671a94b984dc51dc21ae654bce10152",
+      "size": 78
+    },
+    {
+      "mode": "0644",
+      "path": "src/simulation/settlement-replay.ts",
+      "sha256": "71e188bc428b4c5c8eba5cc48fb0290de65605268577cf2f9de7de2766e4dff9",
+      "size": 78
+    },
+    {
+      "mode": "0644",
+      "path": "src/solver/b1-generalized-stake-vector.ts",
+      "sha256": "13c0c0339e3b55f09bb72c5653ff8617602ae9a39c22eb2b169decf49f182abe",
+      "size": 84
+    },
+    {
+      "mode": "0644",
+      "path": "src/solver/b1-rounding.ts",
+      "sha256": "e96bbb1afccb293699d300cb3533370d3b85c8338993d49cbf58a63c0628ac90",
+      "size": 68
+    },
+    {
+      "mode": "0644",
+      "path": "src/solver/constraints.ts",
+      "sha256": "d4551d60e365e8f193df11ca95ba05614bd85e5191ed3424b49ba8cd155e7e42",
+      "size": 68
+    },
+    {
+      "mode": "0644",
+      "path": "src/solver/rounding.ts",
+      "sha256": "3817f8055d57bea7959a78d9d51af1d449777ca7d41336323578a3d6067f31d7",
+      "size": 65
+    },
+    {
+      "mode": "0644",
+      "path": "src/solver/stake-vector.ts",
+      "sha256": "43eec77ca4977e785d30aacf5dcfd0f58ee1fe1ce2e695ff121ae0d1f0d1b8b2",
+      "size": 69
+    },
+    {
+      "mode": "0644",
+      "path": "src/strategy/strategy-ledger.ts",
+      "sha256": "7ed33648bd5a4fe87eecfa3a9040f32d42bc7e5726960142c949e74967f68f19",
+      "size": 74
+    },
+    {
+      "mode": "0644",
+      "path": "src/upstream/betting-win-upstream-lock.ts",
+      "sha256": "01fb9b916a76ce63729eab7426720573fc497c9f88cd296a467a9683ca58807d",
+      "size": 356
+    },
+    {
+      "mode": "0644",
+      "path": "src/workers/b1-private-observation-jobs.ts",
+      "sha256": "6e20ad05ad10a5539fcaf9acbb47dceae351c4fbd444cacf86f64a54ff93ae2f",
+      "size": 85
+    },
+    {
+      "mode": "0644",
+      "path": "src/workers/bounded-job-worker.ts",
+      "sha256": "c3fb70978f6152f7f658b651555b1062a8703fa7297e60e4576a689b53b5ccfe",
+      "size": 76
+    },
+    {
+      "mode": "0644",
+      "path": "src/workers/private-paper-runtime-jobs.ts",
+      "sha256": "4b3927fc7bd408dcb4ce0e220445c37bcffc72b473fd193b4116722ad03bc2e6",
+      "size": 84
+    },
+    {
+      "mode": "0755",
+      "path": "start.sh",
+      "sha256": "7642e1dd37dfc9eb98866d84f6e784fba0a6037be4d47826b400267b3abd41dc",
+      "size": 1009
+    },
+    {
+      "mode": "0755",
+      "path": "stop.sh",
+      "sha256": "e7eee13fd4aa0f4671f991ba01441081a1b3dfa31528eb30822a1223af950d3d",
+      "size": 831
+    },
+    {
+      "mode": "0644",
+      "path": "tests/api-only-upstream-contract.test.ts",
+      "sha256": "10fed128376e386dd0786dd06e4df1b06c712d96673f52a519c5aacdefb03a57",
+      "size": 5718
+    },
+    {
+      "mode": "0744",
+      "path": "tests/autonomous-continuation-contract.test.ts",
+      "sha256": "16eea0100db4077d76193f98954e5df5938fe66b6cf4312cb2386af1fa0754e2",
+      "size": 2819
+    },
+    {
+      "mode": "0644",
+      "path": "tests/autonomous-controller-contract.test.ts",
+      "sha256": "516dbd6232aea95d60cf28f82dfac05ea4e503c23c0ceba10c12e4ffa3f01782",
+      "size": 34215
+    },
+    {
+      "mode": "0644",
+      "path": "tests/b1-capital-lock.test.ts",
+      "sha256": "331250c1e354ce9f4aa515b943574147b6385088c11d4b6b54a05c04818581f3",
+      "size": 2881
+    },
+    {
+      "mode": "0644",
+      "path": "tests/b1-cross-venue-backtest.test.ts",
+      "sha256": "a35fdb26d0aecaf174e5b66195eb6b0e06d2457b15df60b9483092f57098d7ce",
+      "size": 15068
+    },
+    {
+      "mode": "0644",
+      "path": "tests/b1-cross-venue-derivation.test.ts",
+      "sha256": "69d33842639aefbc36d93485abdab4796a1cf42f2672b748120d91cb41c6242f",
+      "size": 11405
+    },
+    {
+      "mode": "0644",
+      "path": "tests/b1-false-positive-report.test.ts",
+      "sha256": "ef70de9884a62146513b09657bda1ad55953534aa663bfd80cc4ef3dfdfb3c7a",
+      "size": 3997
+    },
+    {
+      "mode": "0644",
+      "path": "tests/b1-generalized-stake-vector.test.ts",
+      "sha256": "6844b204dea930d3f90ca29f65d45f4446eb1b421a8c7f9e0eef461a4bde7767",
+      "size": 19075
+    },
+    {
+      "mode": "0644",
+      "path": "tests/b1-gross-spread.test.ts",
+      "sha256": "59f5eb1a90c251bc7ab4697eac2177278c0c7c7b44a0de07f7b511a83c72c2d1",
+      "size": 4173
+    },
+    {
+      "mode": "0644",
+      "path": "tests/b1-market-equivalence.test.ts",
+      "sha256": "67f5d57889c48c5b77cb978db189ab656120b22895b121bc1096b853769809fc",
+      "size": 14014
+    },
+    {
+      "mode": "0644",
+      "path": "tests/b1-net-spread.test.ts",
+      "sha256": "2a4ded52d13f4366cda91b18af6a3575a78aef9e5c41f674cc802db5230265d4",
+      "size": 17908
+    },
+    {
+      "mode": "0644",
+      "path": "tests/b1-operator-cockpit.test.ts",
+      "sha256": "7263214119661a53a8d55d2999c16a761999d1eda7aa841c9f4488537256272b",
+      "size": 2052
+    },
+    {
+      "mode": "0744",
+      "path": "tests/b1-persistence.test.ts",
+      "sha256": "c51b6a753d32397ac0b20e0e4040bf035bf759dda505175a6155d848fcf8caf9",
+      "size": 9938
+    },
+    {
+      "mode": "0644",
+      "path": "tests/b1-private-observation-jobs.test.ts",
+      "sha256": "a0c795e5f9558268bc33f8590ecfe1f94dabc2276d4cf69a55df2f93021a3ee9",
+      "size": 11214
+    },
+    {
+      "mode": "0644",
+      "path": "tests/b1-quote-synchronization.test.ts",
+      "sha256": "ce0fc8d630a658225665f060cf84910263589364cf9aa66364ab7883b494112a",
+      "size": 14355
+    },
+    {
+      "mode": "0644",
+      "path": "tests/b1-read-only-api.test.ts",
+      "sha256": "72c194a3bc5eeb8fead4d5a5c55827e8a9df42c41880a9c2024113d41a699e39",
+      "size": 4148
+    },
+    {
+      "mode": "0644",
+      "path": "tests/b1-rejection-model.test.ts",
+      "sha256": "2b170f593b098d3825e7e80d3664062af4725c0a31b8e035f1f520224753e5fa",
+      "size": 23971
+    },
+    {
+      "mode": "0644",
+      "path": "tests/b1-residual-exposure.test.ts",
+      "sha256": "ba7d780ab1c0b7cd60ce86383cc85887fcb8315e215da164fe40bc284f0c100f",
+      "size": 15506
+    },
+    {
+      "mode": "0644",
+      "path": "tests/b1-runtime-evidence.test.ts",
+      "sha256": "aebe980faa9efd95c354aace00456a9f93b5952b0e2e29936189dd9d9a68b435",
+      "size": 10364
+    },
+    {
+      "mode": "0644",
+      "path": "tests/b1-scenario-cashflow.test.ts",
+      "sha256": "e7a2f637255e4d35b6595a5c8b2af5f73475578eeb9d84dd969e761ef45985ed",
+      "size": 27868
+    },
+    {
+      "mode": "0644",
+      "path": "tests/b1-settlement-replay.test.ts",
+      "sha256": "0a937ae842b942d1443be193fb5029e22bad25904b9a7909963210aa30538f29",
+      "size": 37530
+    },
+    {
+      "mode": "0644",
+      "path": "tests/b1-void-rule-replay.test.ts",
+      "sha256": "5d211f947e77088ddce4baf5518e459327b507767471faf8331a9a15517a7d2c",
+      "size": 2023
+    },
+    {
+      "mode": "0644",
+      "path": "tests/betting-win-adapters.test.ts",
+      "sha256": "85d85994e9aafb6a9a55c855b87410692a2a3b8fef03ed531d5a84c54c0a07a1",
+      "size": 19725
+    },
+    {
+      "mode": "0644",
+      "path": "tests/betting-win-b1-resource-records.test.ts",
+      "sha256": "4d9bcbde5976040123393ee75577bc3cd55728fecf4fc2bbb29ef2f66ae7ebbd",
+      "size": 14998
+    },
+    {
+      "mode": "0644",
+      "path": "tests/betting-win-query-client.test.ts",
+      "sha256": "f8702467b22fd9f4419ced441676064bcfbfda963c7d3edcbce7d46ed93b8880",
+      "size": 32780
+    },
+    {
+      "mode": "0744",
+      "path": "tests/betting-win-resource-records.test.ts",
+      "sha256": "e16e4faf873705a0f88c3d28cfdbc56ee018cae0aec491e189fd472a3df4476f",
+      "size": 6869
+    },
+    {
+      "mode": "0744",
+      "path": "tests/betting-win-strategy-export-intake.test.ts",
+      "sha256": "db19c7ad4284bd340f94eca15ca201fc1f7f22fe5cbebcc5f131bdc5cf6455c1",
+      "size": 26212
+    },
+    {
+      "mode": "0744",
+      "path": "tests/betting-win-upstream-contract.test.ts",
+      "sha256": "97ce19a53408d95bc7cc48fb58497fe82b8716067e1cdae1a7aebae32ac1c06d",
+      "size": 20616
+    },
+    {
+      "mode": "0644",
+      "path": "tests/blocker-report.test.ts",
+      "sha256": "f620f7571db03fb3bf17a78226163b7bd53e6eac0f65e0ef53669346bb2e55ec",
+      "size": 8477
+    },
+    {
+      "mode": "0644",
+      "path": "tests/boundary-validator-workspace-scope.test.ts",
+      "sha256": "3ff1bbd46c2eca6e5bc44cd6d86063d3b16c270e80d1018f7e1a3a811a8c8718",
+      "size": 7363
+    },
+    {
+      "mode": "0644",
+      "path": "tests/bounded-worker-jobs.test.ts",
+      "sha256": "59aa7be3ad2725cdbb8aad00e205dd3ab758b9ace08dd605d337943b0a079e2d",
+      "size": 30064
+    },
+    {
+      "mode": "0644",
+      "path": "tests/bugfix-autopilot-contract.test.ts",
+      "sha256": "3b961f46d1cf945442189fdbbf1ea704683c7d9e018c39c6a10f63b503351a1f",
+      "size": 36100
+    },
+    {
+      "mode": "0644",
+      "path": "tests/bws-database-lifecycle.test.ts",
+      "sha256": "b9a19a6f4eec6749f1c6a6c07e685f952ec3e960004b029ee763d6974c5bbdaa",
+      "size": 22853
+    },
+    {
+      "mode": "0644",
+      "path": "tests/bws-external-runtime-preflight.test.ts",
+      "sha256": "9bfd84b9e7b479d4074120ccb599017ad4ecef42351ad31c808a9b1acc63664f",
+      "size": 33537
+    },
+    {
+      "mode": "0644",
+      "path": "tests/bws-final-local-acceptance.test.ts",
+      "sha256": "c2ca8b6bfb9fb49cc387c781844440de074932533cd97acddaa60679281c6b2d",
+      "size": 34450
+    },
+    {
+      "mode": "0744",
+      "path": "tests/bws-loopback-acceptance-command.test.ts",
+      "sha256": "421613807fea52aaf752ec2aa9cc12274a80be4da1efb68210e4307b4bb5d9b3",
+      "size": 8289
+    },
+    {
+      "mode": "0644",
+      "path": "tests/bws-loopback-acceptance.test.ts",
+      "sha256": "a3b3358a40ff8862049e5b9de3f533ffeeee3244fdbd131623056db4f468df7d",
+      "size": 21991
+    },
+    {
+      "mode": "0744",
+      "path": "tests/bws-observability.test.ts",
+      "sha256": "b1f86186bd8cc389a620c6ef53b60b83e2b8c3ef3dd7e0dc635ca6e9f5fda6c5",
+      "size": 13166
+    },
+    {
+      "mode": "0644",
+      "path": "tests/bws-operator-cockpit.test.ts",
+      "sha256": "90132182405afdc86f21282c96d3f8ee6a9caf7c09460ee2614d1766c5a65fc4",
+      "size": 36184
+    },
+    {
+      "mode": "0644",
+      "path": "tests/bws-operator-lifecycle.test.ts",
+      "sha256": "ff44f4a8b802187d11c4b9eb4d84cfc15570107a9080c27cfd0f48123a74a9e6",
+      "size": 30069
+    },
+    {
+      "mode": "0644",
+      "path": "tests/bws-paper-runtime-evidence.test.ts",
+      "sha256": "64b1c04c9d626dedf3059393e095c4a4e8c5cf4399ccb3deb88d60d433d51439",
+      "size": 56224
+    },
+    {
+      "mode": "0644",
+      "path": "tests/bws-paper-runtime-handoff.test.ts",
+      "sha256": "6dd1a6b648fcd814835da7f5c58bbfc2a57e70fba743c49e03daaea214750ab2",
+      "size": 17991
+    },
+    {
+      "mode": "0644",
+      "path": "tests/bws-private-paper-scheduler-service.test.ts",
+      "sha256": "63c1067cb56985ebc2eb41392dae471d3885e4c58d4e91a3ad643991f348d96a",
+      "size": 19031
+    },
+    {
+      "mode": "0744",
+      "path": "tests/bws-private-paper-scheduler.test.ts",
+      "sha256": "cd66d8b65bc9352e188ff3fcd0cf650bed865ffd59e37eb0a810cb6f25725f55",
+      "size": 38191
+    },
+    {
+      "mode": "0644",
+      "path": "tests/bws-private-paper-worker-service.test.ts",
+      "sha256": "1a25191b979481a30d998bda9d5f2b3f8579114d72d80ee26464f09a65284175",
+      "size": 19421
+    },
+    {
+      "mode": "0644",
+      "path": "tests/bws-read-only-query-api.test.ts",
+      "sha256": "25c1c19ab90a1ecd8c99aeb1b24acfa3d29d3c4c9b3f26dd6720d20b4b5a6871",
+      "size": 68565
+    },
+    {
+      "mode": "0644",
+      "path": "tests/bws-release-packaging.test.ts",
+      "sha256": "3462fc7e28e82057b26cf805ee7b868e1863ca2cf6b24a1e45593c4ebc8abae2",
+      "size": 42588
+    },
+    {
+      "mode": "0644",
+      "path": "tests/bws-release-upgrade.test.ts",
+      "sha256": "87838040f891b46b10e329808c71e0f8c120ef3d3dfd29afa7283c6c371a7227",
+      "size": 35921
+    },
+    {
+      "mode": "0644",
+      "path": "tests/bws-runtime-applications.test.ts",
+      "sha256": "f4f7e24c582054808d8eb92b0217162956942ce50b63d9705e4ccc18d7360599",
+      "size": 32224
+    },
+    {
+      "mode": "0644",
+      "path": "tests/bws-service-runtime.test.ts",
+      "sha256": "6d6e726a0a688c6d673457287173d07a5359caf9ce4c09dde73b2dcb938d63cc",
+      "size": 18326
+    },
+    {
+      "mode": "0644",
+      "path": "tests/bws-soak-campaign.test.ts",
+      "sha256": "d0d027bfe0dd0ef866c175c59dfe71cfbc5c1f8707097ac7790298ea96aefe0e",
+      "size": 62431
+    },
+    {
+      "mode": "0644",
+      "path": "tests/bws-upstream-api-convergence.test.ts",
+      "sha256": "3852ccb8defc6625a76297c0e3f7e4786e3d86009e9e045d8f88ea24ebe7318b",
+      "size": 46454
+    },
+    {
+      "mode": "0644",
+      "path": "tests/bws-upstream-convergence-service.test.ts",
+      "sha256": "8b2e580ae218fa3f55945783439d6339689072ae906e7d1bf4bcb91cb9356f0c",
+      "size": 23817
+    },
+    {
+      "mode": "0644",
+      "path": "tests/bws-upstream-export-convergence.test.ts",
+      "sha256": "436b4008ef7349bc9a2b3c2619b550e91e22e8cef38e88e15067d8bcc56c0b6c",
+      "size": 32052
+    },
+    {
+      "mode": "0644",
+      "path": "tests/complete-set.test.ts",
+      "sha256": "0c82fd01c33b8c3bff9e44e6127c43ce9166d3771aef101261243f6b318f6cd6",
+      "size": 9011
+    },
+    {
+      "mode": "0644",
+      "path": "tests/contract-boundary.test.ts",
+      "sha256": "9bb4c7fc9892b21e053c5e0b64c144fa55491c958fc700b5e231f69c3baf3d68",
+      "size": 4033
+    },
+    {
+      "mode": "0744",
+      "path": "tests/documentation-slimming-contract.test.ts",
+      "sha256": "6be71311c0dfbd4ff6d6a1cf20f0cfd3156f837d7fca464d3a44492dfca0fa54",
+      "size": 2949
+    },
+    {
+      "mode": "0644",
+      "path": "tests/equivalence-precheck.test.ts",
+      "sha256": "772ce00512c4c084ef45baee1aa790ea3b8f3b412f9c0547081ca33ae5b3f917",
+      "size": 4598
+    },
+    {
+      "mode": "0644",
+      "path": "tests/fee-cost-model.test.ts",
+      "sha256": "7b059ad43b079a248e04c3c5bbeec223e53cb6a2a79ebf20f05ab6a450816ea1",
+      "size": 1201
+    },
+    {
+      "mode": "0644",
+      "path": "tests/fixtures/b1-local-contract/valid-b1-multi-venue-markets.json",
+      "sha256": "df0b5190ca30be3c921c4b37869752feb138faa98565b0a9e333ec7e62da63d7",
+      "size": 4473
+    },
+    {
+      "mode": "0744",
+      "path": "tests/fixtures/betting-win-exports/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "mode": "0744",
+      "path": "tests/fixtures/complete-set/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "mode": "0744",
+      "path": "tests/fixtures/local-only-export-bundles/invalid-export-metadata.json",
+      "sha256": "ccbc11095e66ad09ad551dea7726192de4ea070055665ad8d45780ddd84c4a25",
+      "size": 389
+    },
+    {
+      "mode": "0744",
+      "path": "tests/fixtures/local-only-export-bundles/malformed-json.json",
+      "sha256": "e898d0566048c8296e4b2ccb36c1491fc305d5a5b233188af44606f267f9425a",
+      "size": 113
+    },
+    {
+      "mode": "0744",
+      "path": "tests/fixtures/local-only-export-bundles/solver-ready-resource-export.json",
+      "sha256": "dc9c87538bef4f3bdea902d0a35351894f9a56d6dbf0764e2544efe22fc08cda",
+      "size": 2132
+    },
+    {
+      "mode": "0744",
+      "path": "tests/fixtures/local-only-export-bundles/valid-resource-export.json",
+      "sha256": "7bf48c2a6461f28e75a80c7cb8d3057715fb7ffea3dc00e50705b814c6bee16d",
+      "size": 405
+    },
+    {
+      "mode": "0744",
+      "path": "tests/fixtures/local-only-export-bundles/valid-resource-records-export.json",
+      "sha256": "6abb1a89f9121633a61e86c3063173da51608728c8307ad312281b1a432adf13",
+      "size": 1680
+    },
+    {
+      "mode": "0744",
+      "path": "tests/fixtures/pinned-interface-placeholder/.gitkeep",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "size": 1
+    },
+    {
+      "mode": "0744",
+      "path": "tests/fixtures/pinned-interface-placeholder/local-placeholder.json",
+      "sha256": "f6c73f1bf9f83b878d11d87db559491826681314b958a177dff3a0edbab2178e",
+      "size": 468
+    },
+    {
+      "mode": "0644",
+      "path": "tests/fixtures/private-paper-mode-smoke/accepted-local-bundle.json",
+      "sha256": "623ccae2fd5ab78124445d1d3eaceddd829c161472bbfd0ab4e8297739941be4",
+      "size": 2369
+    },
+    {
+      "mode": "0644",
+      "path": "tests/fixtures/private-paper-mode-smoke/blocked-insufficient-capacity-bundle.json",
+      "sha256": "2d27e001c87fee4e8b7390737105bf9924de56bd903320b8b9c47acb1a2607e3",
+      "size": 2383
+    },
+    {
+      "mode": "0644",
+      "path": "tests/fixtures/private-paper-mode-smoke/blocked-missing-settlement-bundle.json",
+      "sha256": "8c0244387d55e451ab705a42962c6afb34696c837bd9418b7d3344ea1302805b",
+      "size": 1908
+    },
+    {
+      "mode": "0644",
+      "path": "tests/fixtures/private-paper-mode-smoke/blocked-mixed-currency-bundle.json",
+      "sha256": "168a726c60d44e58756c8f973212cd35cb2e10fbdea5f718410c0a305b8e90d9",
+      "size": 2376
+    },
+    {
+      "mode": "0644",
+      "path": "tests/fixtures/private-paper-mode-smoke/blocked-stale-quotes-bundle.json",
+      "sha256": "84258f8369c3364ed0b0543a5c91b4515b904fa466f0c57c17e25c54b87a55e7",
+      "size": 2375
+    },
+    {
+      "mode": "0644",
+      "path": "tests/fixtures/private-paper-mode-smoke/multi-candidate-bundle.json",
+      "sha256": "2b947fd401a9530e97da532ddf9032b103dbeadd5c9fccb426252c5e4aa6b2e0",
+      "size": 4203
+    },
+    {
+      "mode": "0744",
+      "path": "tests/fixtures/settlement/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "mode": "0744",
+      "path": "tests/full-implementation-program-contract.test.ts",
+      "sha256": "b1ac372379a7a62ed00e4add11f1886442c9ea979d1d80c14dbbda1809325381",
+      "size": 2838
+    },
+    {
+      "mode": "0744",
+      "path": "tests/helpers.ts",
+      "sha256": "61272ed2401e06e26cfd6bf2e63bba0dd8a4dc787652b8d28febcab3044831c1",
+      "size": 531
+    },
+    {
+      "mode": "0644",
+      "path": "tests/leg-completion.test.ts",
+      "sha256": "f3e273e97b4388f9aa45e6cb4197874f90aafdedceebea4892a2293abeadce24",
+      "size": 8155
+    },
+    {
+      "mode": "0744",
+      "path": "tests/local-engine-backlog-contract.test.ts",
+      "sha256": "ab965a4fcc617376c0b3a3908a28b18f318071a7f8c3e03d05ad52be2ae9b215",
+      "size": 991
+    },
+    {
+      "mode": "0644",
+      "path": "tests/local-paper-batch-report.test.ts",
+      "sha256": "541c1ebdaf0bcdfe5b8ed183e238310da800d69e23269741a536f48cb6e4a473",
+      "size": 32761
+    },
+    {
+      "mode": "0644",
+      "path": "tests/local-paper-report.test.ts",
+      "sha256": "074197aad6eb558af4669e860671fc9e05a822006fbe7233b02b25194738c420",
+      "size": 21055
+    },
+    {
+      "mode": "0644",
+      "path": "tests/market-group-key.test.ts",
+      "sha256": "4cdf482f7784147722d404e6992b468153d300c475b281b3abef78d7ab382a6e",
+      "size": 2078
+    },
+    {
+      "mode": "0644",
+      "path": "tests/non-atomic-completion.test.ts",
+      "sha256": "cdb51954537be75c9ac5f51ce480f5e55d525c693e4a89ba91de126070fab359",
+      "size": 19280
+    },
+    {
+      "mode": "0644",
+      "path": "tests/opportunity-derivation.test.ts",
+      "sha256": "aebbaf5a6c263b3e47f0651a4c20b2910ff67d30226e85b0cf9fd78aead10904",
+      "size": 6126
+    },
+    {
+      "mode": "0644",
+      "path": "tests/packaging-helpers.test.ts",
+      "sha256": "4894c3d8553b389336f09710febe76f0ee6cb93caddb073894d49182ab49b21c",
+      "size": 107548
+    },
+    {
+      "mode": "0744",
+      "path": "tests/paper-autopilot-contract.test.ts",
+      "sha256": "02e200a28c8fe0074457eb0e1b390678af6c7663d6df10a94a2cfcf8a035649f",
+      "size": 6037
+    },
+    {
+      "mode": "0744",
+      "path": "tests/paper-evaluation-shell-hardening.test.ts",
+      "sha256": "6b03fdf9113eacc56dca315fbaad152b80040c416858c55da5cc29e9b8b1bff9",
+      "size": 6154
+    },
+    {
+      "mode": "0744",
+      "path": "tests/private-paper-mode-backlog-contract.test.ts",
+      "sha256": "4bcadffcf72e5fd717343fb546a6d5f73b4e0113ca28ccdd861d46085dd5aba1",
+      "size": 1768
+    },
+    {
+      "mode": "0744",
+      "path": "tests/private-paper-report-artifact-contract.test.ts",
+      "sha256": "0b8423ce1578d3d5c63439e04b5378a11e60f75cf8ac1acfcc46cb15d75722c1",
+      "size": 21361
+    },
+    {
+      "mode": "0644",
+      "path": "tests/private-paper-runtime.test.ts",
+      "sha256": "93edf430d20eb63a5e60cd743f5a7fcc4964b31940a4164b3810849b9be5662d",
+      "size": 35621
+    },
+    {
+      "mode": "0644",
+      "path": "tests/quote-capacity.test.ts",
+      "sha256": "a6a976fac27844aacdc5a8a3771e9599374de219b3405d4c5d73178e25f312c4",
+      "size": 5971
+    },
+    {
+      "mode": "0644",
+      "path": "tests/remaining-operator-runtime-program-contract.test.ts",
+      "sha256": "f2448a113f0f7dac4b0bdc3c4b3d7697470fcd26e46089ee57b86df83186a3c3",
+      "size": 2302
+    },
+    {
+      "mode": "0644",
+      "path": "tests/residual-exposure.test.ts",
+      "sha256": "b59d3ae4e33568ea8f9df6a8ded9170fad00b9efaa43d47e77d019531bf71633",
+      "size": 16462
+    },
+    {
+      "mode": "0644",
+      "path": "tests/root-cli-contract.test.ts",
+      "sha256": "ea27b911d7604230556c2347891f78ba567115b098bf5bfdc753674f0e334586",
+      "size": 2188
+    },
+    {
+      "mode": "0744",
+      "path": "tests/root-wrapper-runtime.test.ts",
+      "sha256": "f216fabdae694a4848855786d665f2ac05e627648d7332d0b1e37c45dc9d22c3",
+      "size": 19015
+    },
+    {
+      "mode": "0744",
+      "path": "tests/rounding.test.ts",
+      "sha256": "6e6eb5ca92a4b86fbf559ad16991983dde682d7a5637ce1da80bb6928b973f25",
+      "size": 992
+    },
+    {
+      "mode": "0644",
+      "path": "tests/run-script-hardening-wave2.test.ts",
+      "sha256": "ba201959657c3c148d27c120870794c4d1faa7da119b4f644ac55f7d12d71d39",
+      "size": 13469
+    },
+    {
+      "mode": "0644",
+      "path": "tests/run-script-hardening-wave4.test.ts",
+      "sha256": "fca7748498e0f937729bb5af13aa17c0159dfaad5794bb0ef04be521979af8a1",
+      "size": 10704
+    },
+    {
+      "mode": "0744",
+      "path": "tests/run-script-hardening-wave5.test.ts",
+      "sha256": "54ae1ec93a46756f70d0f83f388460b43fe0ddb60a6890f99ba1d044d64a0e22",
+      "size": 6641
+    },
+    {
+      "mode": "0744",
+      "path": "tests/run-script-hardening-wave7.test.ts",
+      "sha256": "fffaad8d8d80cad51d46d28014dedbaad4898f6909a2800b0d57de325c94d0d2",
+      "size": 9841
+    },
+    {
+      "mode": "0744",
+      "path": "tests/run-script-hardening-wave8.test.ts",
+      "sha256": "7f6eb358061ba81cebff5d49f35423d20856b965e2939e8f42333269804e7059",
+      "size": 13842
+    },
+    {
+      "mode": "0744",
+      "path": "tests/run-script-hardening-wave9.test.ts",
+      "sha256": "1f87983738124f52b16b29e650ee764e41af63510d4b177a44a7b8dc4745f9a3",
+      "size": 20092
+    },
+    {
+      "mode": "0644",
+      "path": "tests/scenario-cashflow.test.ts",
+      "sha256": "061816893afbef3033ff859773f3e4e4d12b0bcbd12f0ed1963a8b5104659bf3",
+      "size": 13315
+    },
+    {
+      "mode": "0644",
+      "path": "tests/settlement-replay.test.ts",
+      "sha256": "e2de2539a7a06a4b114e8b369b763947604dcbfa6142af069bbbf0ea73fdbd3a",
+      "size": 37975
+    },
+    {
+      "mode": "0644",
+      "path": "tests/stake-vector.test.ts",
+      "sha256": "992b56274ff3e6dec9af86c24cf35bad31b7c9d0f4616d5345fc04af659eb0ae",
+      "size": 25643
+    },
+    {
+      "mode": "0644",
+      "path": "tests/standard-binary-backtest.test.ts",
+      "sha256": "230007af7b5a3df23d38005287ad80096763c9fb83f553f45ff296688c1d7935",
+      "size": 16645
+    },
+    {
+      "mode": "0644",
+      "path": "tests/standard-binary-stake-solver.test.ts",
+      "sha256": "b36b431fcc0242f16067e8a14bd8117505a7d2982c42bc963e48a5a5daa2df54",
+      "size": 5948
+    },
+    {
+      "mode": "0644",
+      "path": "tests/strategy-ledger.test.ts",
+      "sha256": "d56ee981efc67677ca00473965c84f9821423629b6c58514d128202a6c11a976",
+      "size": 11877
+    },
+    {
+      "mode": "0644",
+      "path": "tests/support/betting-win-fixture.ts",
+      "sha256": "ff4221cc1f123d0045a80d7c624e289dc7d562e82fd6867f9d47c9a705253753",
+      "size": 3454
+    },
+    {
+      "mode": "0744",
+      "path": "tests/surebet-persistence.test.ts",
+      "sha256": "76ad61f52a0cefd1885dc8413197378cc85e2c041540b3568b9afaed03b11310",
+      "size": 21716
+    },
+    {
+      "mode": "0744",
+      "path": "tests/telegram-notify-format.test.ts",
+      "sha256": "65f37c6c5c4f10061b61e8ba9824de9f4c83b8b098551a75fb284cbe300ff11d",
+      "size": 6488
+    },
+    {
+      "mode": "0744",
+      "path": "tests/telegram-notify-helper.test.ts",
+      "sha256": "ca8ddf985538361bc9e2491148b81dacc3a8c090d881b8ad5b9b9ea8f4e7ab37",
+      "size": 2765
+    },
+    {
+      "mode": "0744",
+      "path": "tests/temp-inode-safety.test.ts",
+      "sha256": "30978f3c982f931dc27418c30558792a7766e688c2ac6fcebe3f2ed4d3d0d133",
+      "size": 13495
+    },
+    {
+      "mode": "0644",
+      "path": "tests/temp-inode-watchdog-race.test.ts",
+      "sha256": "28c5f84e8fabaf783b52a5802731c02457818c1223cf798fe7dbdd7409ece40c",
+      "size": 9101
+    },
+    {
+      "mode": "0744",
+      "path": "tests/three-repo-surebet-boundary.test.ts",
+      "sha256": "18c580c89469746388b73e33a692f2494ce11d43b021c0bc8f5777c84128559c",
+      "size": 1749
+    },
+    {
+      "mode": "0644",
+      "path": "tests/validate-artifact-hygiene.test.ts",
+      "sha256": "2d6aa6b1cfb11b5a6fc63f3966881f9b7a28efa0bef99dbdd330b6773614f285",
+      "size": 7396
+    },
+    {
+      "mode": "0744",
+      "path": "tests/validate-fixture-integrity.test.ts",
+      "sha256": "35364ca01695419750c3558aeff96ed24b59931bd542bd7497de572d6f9b46c1",
+      "size": 2453
+    },
+    {
+      "mode": "0744",
+      "path": "tests/validate-repo-contract.test.ts",
+      "sha256": "d3e30d8567c19acf7f261da86552411edd45497de583bd6505e1b094e05fe29f",
+      "size": 2629
+    },
+    {
+      "mode": "0744",
+      "path": "tests/validate-shell-local-assignments.test.ts",
+      "sha256": "e5c30af8a4618c3cfa074b695974def0071d269b87c7b166a81c01f49d75053c",
+      "size": 1794
+    },
+    {
+      "mode": "0744",
+      "path": "tests/validate-source-manifest.test.ts",
+      "sha256": "194c8fe6f8f0226b3245af7d5f28e23c2b1c886b5658f30167823b0c74f3ab40",
+      "size": 19830
+    },
+    {
+      "mode": "0644",
+      "path": "tests/validation-matrix-contract.test.ts",
+      "sha256": "0ea65f5830c56d26ad7d8f37aaa0c19f467a24de15b1f717b04eac5f94e5b08e",
+      "size": 997
+    },
+    {
+      "mode": "0644",
+      "path": "tests/workspace-migration-compat.test.ts",
+      "sha256": "32e8bbbc3ef077feb45d12e19e93b7512e919bc60a27b4106d10ce17dbb2f5f9",
+      "size": 6333
+    },
+    {
+      "mode": "0744",
+      "path": "tools/required_executable_paths.js",
+      "sha256": "ea07de4b9d11fdbd155f3076712c7d747bc84f17c15085d24addd1fb18cd2518",
+      "size": 866
+    },
+    {
+      "mode": "0644",
+      "path": "tsconfig.json",
+      "sha256": "74d9974568c23ab3d5c86f7a6783d39e6a5456c34581fdd44de8a2653bfda979",
+      "size": 547
+    },
+    {
+      "mode": "0755",
+      "path": "update_git.sh",
+      "sha256": "afdd43955e7513016f5e53770faf9523df7ae9827608931ed81d168519dce3fe",
+      "size": 12014
+    },
+    {
+      "mode": "0755",
+      "path": "watch_progress.sh",
+      "sha256": "dddaf227440e6b848f7a33d2b92aebc06ad729b35f8f87cb95a51750676144e8",
+      "size": 1589
+    },
+    {
+      "mode": "0755",
+      "path": "zip_codebase.sh",
+      "sha256": "7c9090876b6c558709f6e03a979144f07f501306109ffcc7e6cf95fafc5100a9",
+      "size": 11555
+    }
+  ],
+  "source_manifest_status": "KNOWN_BASELINE_MANIFEST_DRIFT; documentation overlay leaves SOURCE_MANIFEST.json unchanged",
+  "source_reference_count": 270,
+  "source_reference_hash_mismatches": [],
+  "source_reference_missing": [],
+  "source_reference_unique_path_hash_pairs": 90,
+  "systemd_execution": "UNAVAILABLE_IN_R06_REVIEW",
+  "wave01_overlay_postimage_match": "40_OF_40_EXACT"
+}

@@ -1,0 +1,395 @@
+{
+  "schema": "bws118-r06-validation-v1",
+  "review_id": "BWS118-R06",
+  "repository": "betting-win-surebet",
+  "archive": {
+    "reviewed_path": "/mnt/data/betting-win-surebet118(2).zip",
+    "actual_sha256": "50bbcb0b476904c8209cf7e1287b5ac4f9091fa07f6fd67523fc5430029417f7",
+    "expected_sha256": null,
+    "expected_hash_supplied": false,
+    "identity_classification": "ACTUAL_HASH_RECORDED_AND_LINEAGE_VERIFIED",
+    "archive_member_count": 657,
+    "regular_file_count": 657,
+    "duplicate_paths": [],
+    "unsafe_paths": [],
+    "symlinks": [],
+    "special_entries": [],
+    "extraction_path_size_hash_match": true
+  },
+  "executable_compatibility": {
+    "comparison_baseline": "/mnt/data/betting-win-surebet117(3).zip",
+    "baseline_sha256": "0d234e00d015dcab0989b47372ded516bddee9705d9021a0694916dc91a9d494",
+    "added_paths": 39,
+    "changed_paths": [
+      "docs/000_documentation_index.md"
+    ],
+    "removed_paths": 0,
+    "non_documentation_differences": [],
+    "result": "PASS_EXECUTABLE_BYTES_COMPATIBLE"
+  },
+  "package_identity": {
+    "name": "betting-win-surebet",
+    "version": "0.1.0-bws-full-platform",
+    "engine": ">=20 <21",
+    "nvmrc": "20.20.2",
+    "canonical_runtime": "Node 20.20.2"
+  },
+  "runtime_and_tools": {
+    "actual_node": "v22.16.0",
+    "node_20_20_2_available": false,
+    "node_classification": "SUPPLEMENTARY_NONCANONICAL",
+    "npm": "10.9.2",
+    "global_ts_node": "v10.9.2",
+    "python": "3.13.5",
+    "git": "2.47.3",
+    "gnu_timeout": "9.7",
+    "platform": "Linux-6.18.35-x86_64-with-glibc2.41",
+    "node_modules_present": false
+  },
+  "postgresql": {
+    "availability": "UNAVAILABLE_NO_LOCAL_PSQL_OR_SAFE_SERVER_CONFIGURATION",
+    "database_created": false,
+    "database_contacted": false,
+    "persistent_database_mutated": false,
+    "classification": "ENVIRONMENT_BLOCKER",
+    "consequence": "R06 used R03 static authority and did not execute database-dependent lifecycle paths."
+  },
+  "commands_executed": [
+    {
+      "command": [
+        "python3",
+        "/tmp/bws118-r06-final-verification.py"
+      ],
+      "cwd": "/tmp",
+      "duration_ms": 2370,
+      "exit_code": 0,
+      "timed_out": false,
+      "classification": "PASS"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/validate_remaining_operator_runtime_program.py"
+      ],
+      "cwd": "/tmp/bws118-r06-src",
+      "duration_ms": 2219,
+      "exit_code": 0,
+      "timed_out": false,
+      "classification": "PASS"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/validate_repo.py"
+      ],
+      "cwd": "/tmp/bws118-r06-src",
+      "duration_ms": 2343,
+      "exit_code": 0,
+      "timed_out": false,
+      "classification": "PASS"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/validate_node_runtime_loader.py"
+      ],
+      "cwd": "/tmp/bws118-r06-src",
+      "duration_ms": 2077,
+      "exit_code": 0,
+      "timed_out": false,
+      "classification": "PASS"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/validate_no_provider_connections.py"
+      ],
+      "cwd": "/tmp/bws118-r06-src",
+      "duration_ms": 2284,
+      "exit_code": 0,
+      "timed_out": false,
+      "classification": "PASS"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/validate_no_execution_paths.py"
+      ],
+      "cwd": "/tmp/bws118-r06-src",
+      "duration_ms": 2398,
+      "exit_code": 0,
+      "timed_out": false,
+      "classification": "PASS"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/validate_source_manifest.py"
+      ],
+      "cwd": "/tmp/bws118-r06-src",
+      "duration_ms": 2154,
+      "exit_code": 1,
+      "timed_out": false,
+      "classification": "KNOWN_BASELINE_MANIFEST_DRIFT"
+    },
+    {
+      "command": [
+        "npx-or-global-tsc",
+        "-p",
+        "tsconfig.json",
+        "--noEmit"
+      ],
+      "cwd": "/tmp/bws118-r06-src",
+      "duration_ms": 3980,
+      "exit_code": 2,
+      "timed_out": false,
+      "classification": "ENVIRONMENT_BLOCKER_MISSING_TYPES"
+    },
+    {
+      "command": [
+        "node",
+        "--test",
+        "seven focused R06 test files",
+        "via global ts-node ESM loader"
+      ],
+      "cwd": "/tmp/bws118-r06-src",
+      "duration_ms": 72838,
+      "exit_code": 1,
+      "timed_out": false,
+      "classification": "SUPPLEMENTARY_35_PASS_6_ENVIRONMENT_FAILURES"
+    },
+    {
+      "command": [
+        "node",
+        "--loader",
+        "global ts-node",
+        "/tmp/bws118-r06-timer-harness.mts"
+      ],
+      "cwd": "/tmp/bws118-r06-harness-repo",
+      "duration_ms": 7840,
+      "exit_code": 0,
+      "timed_out": false,
+      "classification": "SUPPLEMENTARY_REPRODUCED"
+    },
+    {
+      "command": [
+        "node",
+        "/tmp/bws118-r06-wrapper-harness-async.mjs"
+      ],
+      "cwd": "/tmp/bws118-r06-harness-repo",
+      "duration_ms": 1050,
+      "exit_code": 0,
+      "timed_out": false,
+      "classification": "SUPPLEMENTARY_REPRODUCED"
+    },
+    {
+      "command": [
+        "node",
+        "--loader",
+        "global ts-node",
+        "/tmp/bws118-r06-http-rejection-harness.mts"
+      ],
+      "cwd": "/tmp/bws118-r06-harness-repo",
+      "duration_ms": 7680,
+      "exit_code": 0,
+      "timed_out": false,
+      "classification": "SUPPLEMENTARY_REPRODUCED"
+    },
+    {
+      "command": [
+        "node",
+        "--loader",
+        "global ts-node",
+        "/tmp/bws118-r06-rejection-state-harness.mts"
+      ],
+      "cwd": "/tmp/bws118-r06-harness-repo",
+      "duration_ms": 5220,
+      "exit_code": 0,
+      "timed_out": false,
+      "classification": "SUPPLEMENTARY_REPRODUCED"
+    },
+    {
+      "command": [
+        "node",
+        "--loader",
+        "global ts-node",
+        "/tmp/bws118-r06-evidence-collision-harness.mts"
+      ],
+      "cwd": "/tmp/bws118-r06-harness-repo",
+      "duration_ms": 7830,
+      "exit_code": 0,
+      "timed_out": false,
+      "classification": "SUPPLEMENTARY_REPRODUCED"
+    }
+  ],
+  "focused_tests": {
+    "files": [
+      "tests/bws-operator-lifecycle.test.ts",
+      "tests/bws-private-paper-scheduler-service.test.ts",
+      "tests/bws-private-paper-worker-service.test.ts",
+      "tests/bws-runtime-applications.test.ts",
+      "tests/bws-service-runtime.test.ts",
+      "tests/bws-upstream-convergence-service.test.ts",
+      "tests/root-wrapper-runtime.test.ts"
+    ],
+    "total": 41,
+    "passed": 35,
+    "failed": 6,
+    "cancelled": 0,
+    "skipped": 0,
+    "duration_ms": 72838,
+    "runtime": "v22.16.0",
+    "classification": "SUPPLEMENTARY",
+    "failure_breakdown": {
+      "missing_generated_upstream_lock_fixture": 5,
+      "canonical_node20_guard_rejected_node22": 1,
+      "confirmed_product_assertion_failures": 0
+    },
+    "output": "/tmp/bws118-r06-focused-tests.out"
+  },
+  "adversarial_harnesses": [
+    {
+      "name": "losing pass timeout timer",
+      "status": "REPRODUCED",
+      "inert": true,
+      "provider_access": false,
+      "database_access": false,
+      "harness": "/tmp/bws118-r06-timer-harness.mts",
+      "output": "/tmp/bws118-r06-timer-harness.out"
+    },
+    {
+      "name": "root wrapper production/test envelope divergence",
+      "status": "REPRODUCED",
+      "inert": true,
+      "loopback_only": true,
+      "harness": "/tmp/bws118-r06-wrapper-harness-async.mjs",
+      "output": "/tmp/bws118-r06-wrapper-async.out"
+    },
+    {
+      "name": "unowned async metrics rejection",
+      "status": "REPRODUCED",
+      "inert": true,
+      "loopback_only": true,
+      "harness": "/tmp/bws118-r06-http-rejection-harness.mts",
+      "output": "/tmp/bws118-r06-http-rejection.out"
+    },
+    {
+      "name": "unexpected pass rejection leaves running state",
+      "status": "REPRODUCED",
+      "inert": true,
+      "provider_access": false,
+      "database_access": false,
+      "harness": "/tmp/bws118-r06-rejection-state-harness.mts",
+      "output": "/tmp/bws118-r06-rejection-state.out"
+    },
+    {
+      "name": "same-millisecond evidence collision",
+      "status": "REPRODUCED",
+      "inert": true,
+      "provider_access": false,
+      "database_access": false,
+      "harness": "/tmp/bws118-r06-evidence-collision-harness.mts",
+      "output": "/tmp/bws118-r06-evidence-collision.out"
+    }
+  ],
+  "checks": {
+    "passed": [
+      "archive path/type safety",
+      "extraction path/size/hash integrity",
+      "BWS117 to BWS118 executable compatibility",
+      "package identity and runtime contract",
+      "657-row coverage reconciliation",
+      "41 inherited finding overlap reconciliation",
+      "five selected static validators",
+      "no-provider and no-execution validators",
+      "five inert adversarial harnesses",
+      "post-review extracted-source mutation check"
+    ],
+    "failed": [
+      "source manifest validator: inherited KNOWN_BASELINE_MANIFEST_DRIFT"
+    ],
+    "skipped": [
+      "full npm test/build/validate suite because dependencies and Node 20 were unavailable and installation was prohibited",
+      "systemd user service integration",
+      "large-file stress testing"
+    ],
+    "unavailable": [
+      "canonical Node 20.20.2 execution",
+      "PostgreSQL integration",
+      "clean TypeScript typecheck with repository dependencies"
+    ]
+  },
+  "coverage_reconciliation": {
+    "archive_regular_files": 657,
+    "coverage_rows_excluding_header": 657,
+    "unique_coverage_paths": 657,
+    "missing_archive_paths": [],
+    "extra_coverage_paths": [],
+    "duplicate_coverage_paths": [],
+    "all_coverage_size_hashes_match_archive": true
+  },
+  "finding_counts": {
+    "confirmed": 17,
+    "severity": {
+      "P1": 15,
+      "P2": 2
+    },
+    "classification": {
+      "CONFIRMED_FINDING": 17,
+      "CROSS_AREA_HANDOFF": 10,
+      "ENVIRONMENT_BLOCKER": 3,
+      "HYPOTHESIS": 1,
+      "INTENTIONAL_SAFEGUARD": 7,
+      "REJECTED_SUSPICION": 5,
+      "TEST_GAP": 9
+    },
+    "blocking": {
+      "release": 15,
+      "BWS-600": 15,
+      "B1": 15,
+      "deployment": 16
+    },
+    "inherited_checked": 41,
+    "inherited_duplicates_created": 0
+  },
+  "known_limitations": [
+    "No frozen expected BWS118 hash was supplied; actual hash and lineage compatibility are recorded.",
+    "Node 22.16.0 results are supplementary and not canonical Node 20.20.2 acceptance.",
+    "No dependency installation was permitted; clean compilation could not resolve @types/node.",
+    "No PostgreSQL or systemd integration environment was available.",
+    "Process ownership and PID-reuse races were proved by static interleaving, not by signaling user processes.",
+    "Filesystem boundedness was established statically without resource-intensive stress execution."
+  ],
+  "repository_mutation_attestation": {
+    "archive_modified": false,
+    "extracted_source_modified": false,
+    "post_review_member_hash_reconciliation": "PASS",
+    "temporary_files_location": "/tmp only",
+    "outputs_location": "/mnt/data"
+  },
+  "access_attestation": {
+    "external_network_access": false,
+    "provider_access": false,
+    "account_access": false,
+    "credential_access": false,
+    "betting_win_checkout_access": false,
+    "persistent_database_access": false,
+    "signer_wallet_or_live_operation_access": false,
+    "loopback_harness_only": true
+  },
+  "output_files": {
+    "BWS118-R06-report.md": {
+      "sha256": "b3cd68c0d0fc96ce84febc405bc1c1e67715856f1723adfe739d21165f84fe32",
+      "size": 94076
+    },
+    "BWS118-R06-findings.json": {
+      "sha256": "bbaadabb6fceccc7c977c57a924d206f4ce2cbde43cc60d2d4ab24d9b6377ee1",
+      "size": 100497
+    },
+    "BWS118-R06-coverage.tsv": {
+      "sha256": "727e821c56ca598fac52cb30df6fc5cff348e5c5521fb5780a9006e60ef78d57",
+      "size": 155323,
+      "rows_excluding_header": 657
+    }
+  }
+}

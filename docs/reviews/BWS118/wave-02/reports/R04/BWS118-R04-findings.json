@@ -1,0 +1,1540 @@
+{
+  "schema": "betting-win-surebet-deep-review-findings-v1",
+  "review_id": "BWS118-R04",
+  "repository": "betting-win-surebet",
+  "generated_at_utc": "2026-09-11T10:03:03Z",
+  "source_authority": {
+    "archive": "betting-win-surebet118.zip",
+    "sha256": "50bbcb0b476904c8209cf7e1287b5ac4f9091fa07f6fd67523fc5430029417f7",
+    "regular_files": 657,
+    "package_name": "betting-win-surebet",
+    "package_version": "0.1.0-bws-full-platform",
+    "canonical_runtime": "Node 20.20.2",
+    "actual_runtime_for_supplementary_probes": "Node 22.16.0",
+    "prior_rebased_baseline": {
+      "archive": "betting-win-surebet117(1).zip",
+      "sha256": "0d234e00d015dcab0989b47372ded516bddee9705d9021a0694916dc91a9d494"
+    },
+    "original_wave_01_review_baseline": {
+      "archive": "betting-win-surebet116(1).zip",
+      "sha256": "6cc5be4e7f3a637d7c0ed9485f246ade4975b5a8e60d3895943e0471afc29376"
+    },
+    "executable_compatibility": "EXACT_NON_DOCUMENTATION_BYTE_EQUIVALENCE_WITH_BWS117"
+  },
+  "inherited_authority": {
+    "confirmed_finding_count": 41,
+    "stable_id_range": [
+      "BWS116-R01-001",
+      "BWS116-R03-017"
+    ],
+    "ledger_path": "docs/reviews/BWS117/wave-01/cumulative-consolidated-ledger.json",
+    "overlap_policy": "Inherited root causes retain their IDs; R04 records only distinct simulation/backtest/reporting correction boundaries."
+  },
+  "summary": {
+    "confirmed_findings": 14,
+    "severity_counts": {
+      "P1": 12,
+      "P2": 2
+    },
+    "release_blocking": 14,
+    "deployment_blocking": 12,
+    "bws_600_blocking": 7,
+    "bws_710_blocking": 10,
+    "hypotheses": 1,
+    "external_upstream_blockers": 2,
+    "environment_blockers": 2,
+    "intentional_safeguards": 5,
+    "rejected_suspicions": 5,
+    "cross_area_handoffs": 7,
+    "test_gaps": 15
+  },
+  "records": [
+    {
+      "id": "BWS118-R04-001",
+      "title": "Completion replay has no immutable event or attempt identity, so duplicates are either rejected as ambiguous or applied twice",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "packages/bootstrap/src/simulation/non-atomic-completion.ts",
+      "current_symbol": "NonAtomicCompletionEvent / replayLegEvents",
+      "exact_line_range": "L38-L43",
+      "full_file_sha256": "3b9944da581cc8fafeb99037e714e4b99a9c1765a512616a7a4bde65d47611df",
+      "source_locations": [
+        {
+          "path": "packages/bootstrap/src/simulation/non-atomic-completion.ts",
+          "symbol": "NonAtomicCompletionEvent",
+          "line_range": "L38-L43",
+          "sha256": "3b9944da581cc8fafeb99037e714e4b99a9c1765a512616a7a4bde65d47611df",
+          "note": "No immutable event/attempt/receipt field."
+        },
+        {
+          "path": "packages/bootstrap/src/simulation/non-atomic-completion.ts",
+          "symbol": "replayLegEvents / validateNoSameLegTimestampTies",
+          "line_range": "L375-L504",
+          "sha256": "3b9944da581cc8fafeb99037e714e4b99a9c1765a512616a7a4bde65d47611df",
+          "note": "Timestamp/index ordering and tie rejection replace idempotent identity."
+        },
+        {
+          "path": "packages/bootstrap/src/simulation/non-atomic-completion.ts",
+          "symbol": "applyEvent",
+          "line_range": "L530-L575",
+          "sha256": "3b9944da581cc8fafeb99037e714e4b99a9c1765a512616a7a4bde65d47611df",
+          "note": "Fill stake is accumulated for every accepted event."
+        },
+        {
+          "path": "packages/bootstrap/src/simulation/b1-leg-completion.ts",
+          "symbol": "B1FillabilityEvent",
+          "line_range": "L36-L42",
+          "sha256": "108996f173a566dfb8b72de38c364d3f1d7b3610bcceadbe6c415d94a5fc5b3b",
+          "note": "B1 event shape has the same identity omission."
+        },
+        {
+          "path": "packages/bootstrap/src/simulation/b1-leg-completion.ts",
+          "symbol": "replayB1FillabilityEvents / validateNoSameLegTimestampTies",
+          "line_range": "L259-L430",
+          "sha256": "108996f173a566dfb8b72de38c364d3f1d7b3610bcceadbe6c415d94a5fc5b3b",
+          "note": "B1 uses timestamp ordering and additive mutation without idempotency identity."
+        }
+      ],
+      "preconditions": [
+        "A completion event is retried, replayed after restart, or re-received with the same logical provider attempt.",
+        "The replay caller supplies only leg identity, event type, optional stake, and wall-clock timestamp."
+      ],
+      "trigger": "Submit the same logical fill twice at the same timestamp, or submit it again with a different timestamp.",
+      "expected_behavior": "Each provider event or execution attempt must carry an immutable identity. An exact duplicate must be idempotent, while the same identity with a different payload must fail closed.",
+      "current_behavior": "The event contracts have no event ID, attempt ID, source receipt, sequence, or payload digest. Same-leg same-time duplicates are rejected as ordering ambiguity, while a timestamp-shifted duplicate is treated as a second fill and added to the accumulator.",
+      "impact": "Restart, retry, or page replay can change filled stake, residual exposure, settlement, and reported profitability. Exact replays are not convergent.",
+      "evidence": [
+        "The standard event type contains only legId, type, stakeMinor, and occurredAt; the B1 event type likewise contains selection/venue, type, timestamp, and stake.",
+        "Both replay functions sort by timestamp and input index, reject same-leg timestamp ties, and then mutate stake additively without a processed-event identity set.",
+        "The bounded Node 22 harness returned NON_ATOMIC_COMPLETION_EVENT_ORDER_AMBIGUOUS for the exact duplicate but accepted the shifted duplicate and increased the filled YES stake from 100 to 200 minor units."
+      ],
+      "reproduction_status": "REPRODUCED_OFFLINE_NODE22_SUPPLEMENTARY; STATIC_SOURCE_CONFIRMED",
+      "root_cause": "Replay ordering is used as a substitute for event identity and idempotency. The state machine cannot distinguish a retry from a second real fill.",
+      "minimal_fix_boundary": "Add an immutable provider-event/attempt identity and source receipt to the standard and B1 completion event boundaries, make replay create-or-compare idempotent by that identity, and preserve conflict evidence. Durable transaction mechanics remain R03-owned.",
+      "required_tests": [
+        "Exact duplicate event in the same and different array positions is a no-op.",
+        "Same immutable event ID with any changed type, stake, leg, timestamp, or receipt is blocked.",
+        "Restart/replay permutation tests produce byte-identical completion and residual snapshots.",
+        "Durable duplicate delivery test handed to R03 verifies one economic effect after crash and retry."
+      ],
+      "regression_risks": [
+        "Event schema compatibility",
+        "Migration or persistence changes if identities become durable",
+        "Provider adapters that cannot yet supply a stable event identity"
+      ],
+      "primary_owner": "R04",
+      "secondary_sectors": [
+        "R01 upstream provenance",
+        "R03 durable idempotency",
+        "R06 retry/cancellation lifecycle",
+        "R11 test truth"
+      ],
+      "existing_aliases_or_dependencies": [
+        "BWS116-R01-003",
+        "BWS116-R01-004",
+        "BWS116-R03-014",
+        "BWS116-R03-016"
+      ],
+      "explicitly_unchanged_areas": [
+        "Stake-vector mathematics",
+        "Supported event-type transition guards",
+        "BWS-900 no-execution hold"
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "deployment": true,
+        "bws_600": true,
+        "bws_710": true
+      }
+    },
+    {
+      "id": "BWS118-R04-002",
+      "title": "Fill simulation records stake only and reuses planned odds and cash-flow terms instead of actual execution terms",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "packages/bootstrap/src/simulation/non-atomic-completion.ts",
+      "current_symbol": "NonAtomicCompletionEvent",
+      "exact_line_range": "L38-L43",
+      "full_file_sha256": "3b9944da581cc8fafeb99037e714e4b99a9c1765a512616a7a4bde65d47611df",
+      "source_locations": [
+        {
+          "path": "packages/bootstrap/src/simulation/non-atomic-completion.ts",
+          "symbol": "NonAtomicCompletionEvent",
+          "line_range": "L38-L43",
+          "sha256": "3b9944da581cc8fafeb99037e714e4b99a9c1765a512616a7a4bde65d47611df",
+          "note": "Standard fill has no actual execution terms."
+        },
+        {
+          "path": "packages/bootstrap/src/simulation/b1-leg-completion.ts",
+          "symbol": "B1FillabilityEvent",
+          "line_range": "L36-L42",
+          "sha256": "108996f173a566dfb8b72de38c364d3f1d7b3610bcceadbe6c415d94a5fc5b3b",
+          "note": "B1 fill has no actual execution terms."
+        },
+        {
+          "path": "packages/bootstrap/src/simulation/non-atomic-completion.ts",
+          "symbol": "analyzeNonAtomicResidualExposure / sumScenarioNetForLiveFilledUnits",
+          "line_range": "L701-L802",
+          "sha256": "3b9944da581cc8fafeb99037e714e4b99a9c1765a512616a7a4bde65d47611df",
+          "note": "Residual economics reuse planned matrix contribution."
+        },
+        {
+          "path": "packages/bootstrap/src/simulation/b1-residual-exposure.ts",
+          "symbol": "buildScenarioNets",
+          "line_range": "L200-L245",
+          "sha256": "95752368da2da1bae3778ca9eae94892cb06db0876a8655beba9c6127c26a516",
+          "note": "B1 residual payout is proportional scaling of planned scenario rows."
+        },
+        {
+          "path": "packages/bootstrap/src/simulation/b1-settlement-replay.ts",
+          "symbol": "calculateSettledNetMinor",
+          "line_range": "L705-L745",
+          "sha256": "d81e781e3499dfd1ed7a6135daa40e56b3e189124bf6df5cb74974d24df6d09d",
+          "note": "B1 settlement uses planned row payout and filled stake only."
+        }
+      ],
+      "preconditions": [
+        "A paper fill occurs at a price, fee, quantity, or source receipt different from the candidate plan.",
+        "Residual exposure or settlement is calculated from the completion state."
+      ],
+      "trigger": "Replay a fill event that should carry actual execution price/odds, fee, slippage, capacity source, or provider receipt.",
+      "expected_behavior": "A fill must preserve actual stake, price/odds, fees/costs, source time, receive time, provider generation, and immutable receipt before residual or settlement economics are calculated.",
+      "current_behavior": "Standard and B1 fill events contain only stake and time. Residual exposure scales the precomputed plan matrix by filled stake, and B1 settlement calculates payout from the planned scenario rows. No actual execution price, fee, slippage, or source receipt can affect the result.",
+      "impact": "Simulated residual loss, settled net, and false-positive classification can be materially wrong even when fill quantity is correct. The system cannot audit a deviation between quoted, planned, and executed terms.",
+      "evidence": [
+        "The event interfaces have no price/odds, fee, slippage, contract, generation, or receipt fields.",
+        "Standard residual exposure multiplies planned per-unit matrix contributions by live filled units.",
+        "B1 residual and settlement scale planned scenario payout rows by live fill and subtract only stake."
+      ],
+      "reproduction_status": "STATIC_SOURCE_CONFIRMED; ECONOMIC_DEVIATION_NOT_LIVE_REPRODUCED",
+      "root_cause": "The completion boundary models quantity transitions but not execution terms, while downstream economics assume planned matrix terms remain authoritative after fill.",
+      "minimal_fix_boundary": "Introduce immutable actual-fill terms and a quote-to-fill receipt at the simulation boundary, then compute residual and settlement from accepted actuals. Pure quote and solver mathematics remain R02-owned.",
+      "required_tests": [
+        "Adverse and favorable slippage change residual and settled net deterministically.",
+        "Fill fee and fixed fee are included exactly once.",
+        "Planned quote identity differs from actual fill receipt and is preserved rather than overwritten.",
+        "Missing actual execution terms block any metric that claims settled or residual economics."
+      ],
+      "regression_risks": [
+        "Compatibility with existing fixtures",
+        "Avoid double-counting R02 fee calculations",
+        "Fixed-point scale migration"
+      ],
+      "primary_owner": "R04",
+      "secondary_sectors": [
+        "R01 provenance",
+        "R02 numeric/economic authority",
+        "R03 durable fill storage",
+        "R07 evidence publication"
+      ],
+      "existing_aliases_or_dependencies": [
+        "BWS116-R01-004",
+        "BWS116-R02-004",
+        "BWS116-R02-005",
+        "BWS116-R02-014"
+      ],
+      "explicitly_unchanged_areas": [
+        "Candidate derivation",
+        "Stake-vector feasibility",
+        "No-live-write boundary"
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "deployment": true,
+        "bws_600": true,
+        "bws_710": true
+      }
+    },
+    {
+      "id": "BWS118-R04-003",
+      "title": "Standard partial fill followed by rejection or expiry loses the terminal disposition in the public leg snapshot",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "packages/bootstrap/src/simulation/non-atomic-completion.ts",
+      "current_symbol": "freezeLegSnapshot / deriveLegState",
+      "exact_line_range": "L637-L679",
+      "full_file_sha256": "3b9944da581cc8fafeb99037e714e4b99a9c1765a512616a7a4bde65d47611df",
+      "source_locations": [
+        {
+          "path": "packages/bootstrap/src/simulation/non-atomic-completion.ts",
+          "symbol": "LegAccumulator",
+          "line_range": "L100-L107",
+          "sha256": "3b9944da581cc8fafeb99037e714e4b99a9c1765a512616a7a4bde65d47611df",
+          "note": "Terminal disposition exists only internally."
+        },
+        {
+          "path": "packages/bootstrap/src/simulation/non-atomic-completion.ts",
+          "symbol": "applyEvent reject/expire",
+          "line_range": "L577-L612",
+          "sha256": "3b9944da581cc8fafeb99037e714e4b99a9c1765a512616a7a4bde65d47611df",
+          "note": "Terminal status is set after a partial fill."
+        },
+        {
+          "path": "packages/bootstrap/src/simulation/non-atomic-completion.ts",
+          "symbol": "freezeLegSnapshot / deriveLegState",
+          "line_range": "L637-L679",
+          "sha256": "3b9944da581cc8fafeb99037e714e4b99a9c1765a512616a7a4bde65d47611df",
+          "note": "Snapshot drops terminal disposition and partial state wins by precedence."
+        }
+      ],
+      "preconditions": [
+        "A standard leg receives one or more partial fills.",
+        "The remaining quantity is later rejected or expires."
+      ],
+      "trigger": "Replay fill(less than plan) followed by reject or expire on the same leg.",
+      "expected_behavior": "The snapshot must preserve both the partial filled quantity and the terminal disposition of the unfilled remainder, or expose an exhaustive compound state.",
+      "current_behavior": "The accumulator stores terminalDisposition internally, but the public snapshot omits it. deriveLegState checks liveFilledStakeMinor before terminalDisposition and therefore emits leg_partial, making partial+rejected and partial+expired indistinguishable from a still-open partial leg.",
+      "impact": "Reports, recovery, settlement, and operators cannot tell whether more fill is possible or whether the remainder is terminal. State may appear nonterminal after a terminal provider outcome.",
+      "evidence": [
+        "reject/expire sets terminalDisposition and clears reservation.",
+        "freezeLegSnapshot does not serialize terminalDisposition.",
+        "deriveLegState returns leg_partial whenever any live fill exists before checking rejected/expired.",
+        "The bounded harness accepted partial fill then reject and serialized the leg only as leg_partial."
+      ],
+      "reproduction_status": "REPRODUCED_OFFLINE_NODE22_SUPPLEMENTARY; STATIC_SOURCE_CONFIRMED",
+      "root_cause": "The standard state model compresses two independent dimensions, fill quantity and terminal disposition, into one precedence-ordered enum and drops the secondary dimension.",
+      "minimal_fix_boundary": "Expose terminalDisposition in NonAtomicPaperLegSnapshot or replace the enum with an exhaustive compound lifecycle representation; update settlement/report consumers without changing B1 semantics unnecessarily.",
+      "required_tests": [
+        "Partial+rejected and partial+expired snapshots retain both quantity and terminal disposition.",
+        "Recovery and report round trips preserve the compound state.",
+        "A subsequent fill after terminal remains blocked.",
+        "An open partial leg remains distinguishable from a terminal partial leg."
+      ],
+      "regression_risks": [
+        "Schema and report compatibility",
+        "State-name migrations",
+        "Avoid allowing terminal reopen implicitly"
+      ],
+      "primary_owner": "R04",
+      "secondary_sectors": [
+        "R03 durable state",
+        "R05 API/cockpit projection",
+        "R07 evidence reports"
+      ],
+      "existing_aliases_or_dependencies": [
+        "BWS116-R03-014"
+      ],
+      "explicitly_unchanged_areas": [
+        "B1 snapshot already carries terminalDisposition",
+        "Residual arithmetic",
+        "Manual kill semantics"
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "deployment": true,
+        "bws_600": true,
+        "bws_710": false
+      }
+    },
+    {
+      "id": "BWS118-R04-004",
+      "title": "Manual or residual-floor kill is an unordered boolean that can retroactively relabel a fully completed group as killed",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "packages/bootstrap/src/simulation/non-atomic-completion.ts",
+      "current_symbol": "deriveGroupState",
+      "exact_line_range": "L682-L698",
+      "full_file_sha256": "3b9944da581cc8fafeb99037e714e4b99a9c1765a512616a7a4bde65d47611df",
+      "source_locations": [
+        {
+          "path": "packages/bootstrap/src/simulation/non-atomic-completion.ts",
+          "symbol": "NonAtomicCompletionInput",
+          "line_range": "L80-L85",
+          "sha256": "3b9944da581cc8fafeb99037e714e4b99a9c1765a512616a7a4bde65d47611df",
+          "note": "Kill is supplied outside the event stream."
+        },
+        {
+          "path": "packages/bootstrap/src/simulation/non-atomic-completion.ts",
+          "symbol": "freezeCompletionSnapshot / deriveGroupState",
+          "line_range": "L649-L698",
+          "sha256": "3b9944da581cc8fafeb99037e714e4b99a9c1765a512616a7a4bde65d47611df",
+          "note": "Kill boolean overrides full completion."
+        },
+        {
+          "path": "packages/bootstrap/src/runtime/private-paper-runtime.ts",
+          "symbol": "simulateRuntimeCandidate",
+          "line_range": "L878-L924",
+          "sha256": "252e38a52693f3fa598c9ea92a83b184de0c4b29c4ab0bd5c952b750d009c6f5",
+          "note": "Runtime may rerun identical events with manualKill=true."
+        }
+      ],
+      "preconditions": [
+        "Completion events fully fill every leg.",
+        "manualKill is true, or the runtime reruns the same event list with manualKill=true after residual-floor evaluation."
+      ],
+      "trigger": "Evaluate a completed event history with manualKill=true or trigger the residual-floor kill rerun.",
+      "expected_behavior": "Kill must be an ordered lifecycle event with identity and timestamp, and it must not rewrite economic facts that completed before the kill. The model must distinguish stop-future-work from cancellation, liquidation, and completed exposure.",
+      "current_behavior": "manualKill is an input boolean outside the ordered event stream. deriveGroupState returns group_killed before checking whether every leg is filled. The private runtime may rerun the identical completion history with only manualKill changed to true.",
+      "impact": "A fully completed portfolio can be represented as killed without saying when or what was stopped. Reports cannot reconstruct whether the kill preceded fills, followed completion, or had any economic effect.",
+      "evidence": [
+        "NonAtomicCompletionInput carries manualKill separately from events.",
+        "deriveGroupState gives manualKill absolute precedence over group_complete.",
+        "The private runtime repeats the same events with manualKill=true when the residual floor is crossed.",
+        "The bounded harness produced group_killed with both legs leg_filled."
+      ],
+      "reproduction_status": "REPRODUCED_OFFLINE_NODE22_SUPPLEMENTARY; STATIC_SOURCE_CONFIRMED",
+      "root_cause": "Kill authority is modeled as an unordered final label instead of an immutable, causally ordered transition with a defined effect.",
+      "minimal_fix_boundary": "Represent kill request/acceptance/effect as explicit ordered evidence, define terminal precedence, and preserve completed fills and post-kill prohibited work separately. Generic cancellation propagation remains R06-owned.",
+      "required_tests": [
+        "Kill before any fill prevents subsequent modeled work and retains kill time/receipt.",
+        "Kill after full completion preserves group_complete plus a separate post-completion stop marker.",
+        "Residual-floor kill has deterministic trigger evidence and no duplicate rerun effect.",
+        "Permutation and restart tests retain causal order."
+      ],
+      "regression_risks": [
+        "Existing report status compatibility",
+        "Avoid implying unwind or rollback",
+        "Coordination with runtime cancellation semantics"
+      ],
+      "primary_owner": "R04",
+      "secondary_sectors": [
+        "R03 durable transition storage",
+        "R06 cancellation/shutdown",
+        "R07 kill evidence publication"
+      ],
+      "existing_aliases_or_dependencies": [
+        "BWS116-R03-011"
+      ],
+      "explicitly_unchanged_areas": [
+        "Fill transition validation",
+        "Settlement outcome calculation",
+        "BWS-900 parked state"
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "deployment": true,
+        "bws_600": true,
+        "bws_710": false
+      }
+    },
+    {
+      "id": "BWS118-R04-005",
+      "title": "B1 settlement and false-positive economics omit fees, quote-age penalties, and capital-lock cost accepted by net evaluation",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "packages/bootstrap/src/simulation/b1-settlement-replay.ts",
+      "current_symbol": "calculateSettledNetMinor",
+      "exact_line_range": "L705-L745",
+      "full_file_sha256": "d81e781e3499dfd1ed7a6135daa40e56b3e189124bf6df5cb74974d24df6d09d",
+      "source_locations": [
+        {
+          "path": "packages/bootstrap/src/economics/b1-net-spread.ts",
+          "symbol": "evaluateB1NetEconomics",
+          "line_range": "L114-L214",
+          "sha256": "0f4bbd52d105d75aef34baa43bea49b09b5c6fde8e3afc8ef7f51383cda0947b",
+          "note": "Net path explicitly computes all three cost classes."
+        },
+        {
+          "path": "packages/bootstrap/src/scenarios/b1-scenario-cashflow.ts",
+          "symbol": "B1ScenarioCashflowRow / buildB1ScenarioCashflowMatrix",
+          "line_range": "L11-L87",
+          "sha256": "f48a4d0f697fcc2d9d48328ef665689807f3f97d6c74fbcba67b01520293a580",
+          "note": "Matrix passed forward carries stake and payout but no accepted cost ledger."
+        },
+        {
+          "path": "packages/bootstrap/src/simulation/b1-settlement-replay.ts",
+          "symbol": "analyzeB1SettlementReplay",
+          "line_range": "L168-L203",
+          "sha256": "d81e781e3499dfd1ed7a6135daa40e56b3e189124bf6df5cb74974d24df6d09d",
+          "note": "Settlement false-positive decision uses the cost-free settled net."
+        },
+        {
+          "path": "packages/bootstrap/src/simulation/b1-settlement-replay.ts",
+          "symbol": "calculateSettledNetMinor",
+          "line_range": "L705-L745",
+          "sha256": "d81e781e3499dfd1ed7a6135daa40e56b3e189124bf6df5cb74974d24df6d09d",
+          "note": "Settled net is payout minus filled stake only."
+        }
+      ],
+      "preconditions": [
+        "A B1 candidate passes net evaluation with nonzero fee, quote-age penalty, or capital-lock cost.",
+        "Settlement replay is then calculated for that candidate."
+      ],
+      "trigger": "Compare netCandidate.worstCaseNetMinor with settlementReplay.settledNetMinor under nonzero accepted costs.",
+      "expected_behavior": "Settlement and false-positive classification must carry forward every accepted economic cost exactly once, or explicitly reconcile actual settlement costs against the net model.",
+      "current_behavior": "Net evaluation subtracts total fees, quote-age penalties, and capital-lock cost. Settlement replay ignores those values and computes each leg as planned payout minus live filled stake. falsePositive is then based on this gross settlement number.",
+      "impact": "A net-negative or materially weaker result can be reported as a positive settled result and not counted as a false positive. Backtest profitability is internally inconsistent across stages.",
+      "evidence": [
+        "evaluateB1NetEconomics calculates totalFeeMinor, totalQuoteAgePenaltyMinor, capitalLockCostMinor, and net scenario cash flows.",
+        "B1 scenario rows contain only stake and payout.",
+        "calculateSettledNetMinor subtracts filled stake only.",
+        "The bounded harness produced planned worst-case net 964 minor units but settled net 1000 minor units from the same candidate."
+      ],
+      "reproduction_status": "REPRODUCED_OFFLINE_NODE22_SUPPLEMENTARY; STATIC_SOURCE_CONFIRMED",
+      "root_cause": "The backtest passes only the stake/payout scenario matrix and fillability snapshots into settlement, dropping the net-economics cost ledger at the stage boundary.",
+      "minimal_fix_boundary": "Bind settlement analysis to the accepted net-economics cost breakdown or a settlement-cost ledger and define cost reconciliation. R02 retains ownership of cost formulas and fee expressiveness.",
+      "required_tests": [
+        "Nonzero percentage fee reduces settled net exactly once.",
+        "Quote-age and capital-lock costs survive fill and settlement stages.",
+        "A candidate whose gross settlement is positive but net settlement is nonpositive is marked false positive.",
+        "Zero-cost control retains existing result."
+      ],
+      "regression_risks": [
+        "Avoid double charging costs",
+        "Partial-fill cost allocation",
+        "Scenario-conditional fee limitations inherited from R02"
+      ],
+      "primary_owner": "R04",
+      "secondary_sectors": [
+        "R02 economics",
+        "R03 persistence",
+        "R07 evidence metrics"
+      ],
+      "existing_aliases_or_dependencies": [
+        "BWS116-R02-004",
+        "BWS116-R02-005",
+        "BWS116-R02-014"
+      ],
+      "explicitly_unchanged_areas": [
+        "Gross candidate derivation",
+        "B1 fill state machine",
+        "No-live-operation markers"
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "deployment": true,
+        "bws_600": false,
+        "bws_710": true
+      }
+    },
+    {
+      "id": "BWS118-R04-006",
+      "title": "Settlement domains cannot represent void, refund, push, reopen, or generation lifecycle despite claiming replay coverage",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "packages/bootstrap/src/simulation/b1-settlement-replay.ts",
+      "current_symbol": "B1SettlementReplayRecord",
+      "exact_line_range": "L30-L35",
+      "full_file_sha256": "d81e781e3499dfd1ed7a6135daa40e56b3e189124bf6df5cb74974d24df6d09d",
+      "source_locations": [
+        {
+          "path": "packages/bootstrap/src/simulation/settlement-replay.ts",
+          "symbol": "ConsumedSettlementReplay",
+          "line_range": "L19-L29",
+          "sha256": "7967faca4d58a884c8c6762aaccac6fd1f04c630a3d5632f54c273202c89e8d2",
+          "note": "Standard outcome domain is winner-only yes/no."
+        },
+        {
+          "path": "packages/bootstrap/src/simulation/b1-settlement-replay.ts",
+          "symbol": "B1SettlementReplayRecord",
+          "line_range": "L30-L35",
+          "sha256": "d81e781e3499dfd1ed7a6135daa40e56b3e189124bf6df5cb74974d24df6d09d",
+          "note": "B1 record has final winner but no terminal action or adjustment."
+        },
+        {
+          "path": "packages/bootstrap/src/simulation/b1-void-rule-replay.ts",
+          "symbol": "B1VoidRuleReplayRecord / validateB1VoidRuleReplay",
+          "line_range": "L8-L85",
+          "sha256": "107607954dc2d9cf911e51e8e68d39592d4b5d8f06cddfcdb018ed92212ad2fb",
+          "note": "Void replay compares static compatibility IDs only."
+        }
+      ],
+      "preconditions": [
+        "A provider emits a void, refund, push, cancellation, reopened result, reorg, or generation change.",
+        "BWS attempts to replay or reconcile that terminal lifecycle."
+      ],
+      "trigger": "Supply lifecycle evidence that is not simply a yes/no or one B1 selection final outcome.",
+      "expected_behavior": "The replay contract must encode the native terminal action, monetary consequence, revision/supersession relation, generation, and reopen/finality state without coercing it to a winner.",
+      "current_behavior": "The standard consumed record supports only finalOutcome yes/no. The B1 record supports one finalOutcomeSelectionEquivalenceKey plus static settlementRuleVersion/voidRuleId compatibility. The B1 \u201cvoid-rule replay\u201d only verifies equal IDs and never represents an actual void, refund amount, push, reopen, or supersession event.",
+      "impact": "Unsupported terminal events cannot be faithfully replayed. They may be blocked elsewhere, coerced into a winner, or omitted from reports, and no deterministic recovery contract exists for reopened outcomes.",
+      "evidence": [
+        "ConsumedSettlementReplay finalOutcome is a closed yes/no union.",
+        "B1SettlementReplayRecord has no terminal action or monetary adjustment field.",
+        "validateB1VoidRuleReplay returns compatibility metadata after comparing static rule IDs; it consumes no void/refund occurrence.",
+        "Repository documentation promises void/refund/correction replay, but the executable R04 contracts do not contain those states."
+      ],
+      "reproduction_status": "STATIC_SOURCE_CONFIRMED; EXTERNAL_NATIVE_LIFECYCLE_EVIDENCE_UNAVAILABLE",
+      "root_cause": "Rule compatibility identifiers are treated as if they were lifecycle evidence, while the replay state machines model only winner replacement over time.",
+      "minimal_fix_boundary": "Add explicit provider-bound terminal lifecycle records and monetary effects, with unsupported states held fail-closed. Canonical upstream rule semantics remain external/R10-owned; BWS replay projection is R04-owned.",
+      "required_tests": [
+        "Void with full refund, partial refund, push, cancellation, and reopen cases.",
+        "Generation change or reorg cannot join the prior lifecycle without explicit authority.",
+        "Unsupported terminal action remains held and never produces settled profitability.",
+        "Round-trip replay preserves action, amount, currency, revision, and source receipt."
+      ],
+      "regression_risks": [
+        "Contract versioning",
+        "Provider-specific rule differences",
+        "Historical fixture compatibility"
+      ],
+      "primary_owner": "R04",
+      "secondary_sectors": [
+        "R01 upstream contract/currentness",
+        "R02 scenario semantics",
+        "R03 persistence",
+        "R05 projection",
+        "R07 evidence"
+      ],
+      "existing_aliases_or_dependencies": [
+        "BWS116-R01-004",
+        "BWS116-R01-010"
+      ],
+      "explicitly_unchanged_areas": [
+        "Static settlement-rule compatibility checks",
+        "Candidate identity",
+        "No execution"
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "deployment": true,
+        "bws_600": true,
+        "bws_710": true
+      }
+    },
+    {
+      "id": "BWS118-R04-007",
+      "title": "Correction and finality progression are inferred from timestamp and outcome changes without explicit revision authority",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "packages/bootstrap/src/simulation/b1-settlement-replay.ts",
+      "current_symbol": "resolveB1SettlementReplaySequence",
+      "exact_line_range": "L400-L445",
+      "full_file_sha256": "d81e781e3499dfd1ed7a6135daa40e56b3e189124bf6df5cb74974d24df6d09d",
+      "source_locations": [
+        {
+          "path": "packages/bootstrap/src/simulation/settlement-replay.ts",
+          "symbol": "consumeStandardBinarySettlementReplaySequence",
+          "line_range": "L333-L392",
+          "sha256": "7967faca4d58a884c8c6762aaccac6fd1f04c630a3d5632f54c273202c89e8d2",
+          "note": "Standard progression is inferred from time and outcome equality/change."
+        },
+        {
+          "path": "packages/bootstrap/src/simulation/b1-settlement-replay.ts",
+          "symbol": "resolveB1SettlementReplaySequence",
+          "line_range": "L400-L445",
+          "sha256": "d81e781e3499dfd1ed7a6135daa40e56b3e189124bf6df5cb74974d24df6d09d",
+          "note": "B1 uses the same inference."
+        }
+      ],
+      "preconditions": [
+        "Two or more accepted replay manifests share a finalityAuthorityId.",
+        "Their replayAcceptedAt values are strictly increasing."
+      ],
+      "trigger": "Add a later replay with the same outcome or a different outcome, regardless of whether it declares a correction or finality transition.",
+      "expected_behavior": "Every correction or finality advance must be explicitly bound to a monotonic provider revision, superseded record, transition type, generation, and authoritative receipt.",
+      "current_behavior": "Both standard and B1 replay sequences count a later same-outcome record as finality progression and a later different-outcome record as correction solely by timestamp and value comparison. There is no revision number, supersedes hash, correction reason, prior-state digest, or finality-state field.",
+      "impact": "Unrelated duplicate snapshots, delayed pages, mixed generations, or reordered retained evidence can manufacture corrections/finality and select an arbitrary latest result.",
+      "evidence": [
+        "The sequence sort uses accepted time plus manifest hash.",
+        "One authority ID and strict timestamp inequality are the only progression constraints.",
+        "The bounded harness submitted three later groups and obtained correctionCount=1 and finalityProgressionCount=1 without any explicit transition evidence."
+      ],
+      "reproduction_status": "REPRODUCED_OFFLINE_NODE22_SUPPLEMENTARY; STATIC_SOURCE_CONFIRMED",
+      "root_cause": "Temporal succession is conflated with semantic supersession and finality progression.",
+      "minimal_fix_boundary": "Require explicit revision/supersession/finality transition evidence and reject gaps, forks, regressions, mixed generations, or unverifiable latest pointers. Upstream provenance fields remain R01-owned.",
+      "required_tests": [
+        "Same-outcome duplicate snapshot does not advance finality without transition evidence.",
+        "Changed outcome does not count as correction without explicit supersession.",
+        "Revision gaps, forks, regressions, mixed generations, and equal revisions conflict deterministically.",
+        "Permutation/restart tests resolve one identical authoritative chain."
+      ],
+      "regression_risks": [
+        "Provider revision availability",
+        "Historical fixtures without revisions",
+        "Interaction with retained-currentness semantics"
+      ],
+      "primary_owner": "R04",
+      "secondary_sectors": [
+        "R01 provenance/currentness",
+        "R03 durable ordering",
+        "R05 API projection",
+        "R07 evidence"
+      ],
+      "existing_aliases_or_dependencies": [
+        "BWS116-R01-004",
+        "BWS116-R01-010",
+        "BWS116-R03-017"
+      ],
+      "explicitly_unchanged_areas": [
+        "Per-manifest B1 leg completeness",
+        "Finality authority equality check",
+        "Static void-rule ID check"
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "deployment": true,
+        "bws_600": true,
+        "bws_710": true
+      }
+    },
+    {
+      "id": "BWS118-R04-008",
+      "title": "B1 backtest has no cross-stage decision chronology and accepts settlement before quotes with fills after settlement",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "packages/bootstrap/src/backtest/b1-cross-venue-backtest.ts",
+      "current_symbol": "B1CrossVenueBacktestPlan / runCandidateBacktest",
+      "exact_line_range": "L20-L29",
+      "full_file_sha256": "b367b8880c8461a50912e13b3cb1489a1f5c8e2c235dfd556d2ef615b6a575d4",
+      "source_locations": [
+        {
+          "path": "packages/bootstrap/src/backtest/b1-cross-venue-backtest.ts",
+          "symbol": "B1CrossVenueBacktestPlan",
+          "line_range": "L20-L29",
+          "sha256": "b367b8880c8461a50912e13b3cb1489a1f5c8e2c235dfd556d2ef615b6a575d4",
+          "note": "No decision timestamp or cross-stage time authority."
+        },
+        {
+          "path": "packages/bootstrap/src/backtest/b1-cross-venue-backtest.ts",
+          "symbol": "runCandidateBacktest",
+          "line_range": "L372-L429",
+          "sha256": "b367b8880c8461a50912e13b3cb1489a1f5c8e2c235dfd556d2ef615b6a575d4",
+          "note": "Stages are composed without chronology checks."
+        },
+        {
+          "path": "packages/bootstrap/src/backtest/standard-binary-backtest.ts",
+          "symbol": "validateExecutionPlanTemporalWindow / validateCompletionEventWindow",
+          "line_range": "L465-L568",
+          "sha256": "b89833bedd366b9d4b714cb0eddd6610e5eabd7217477063d7a1a2006b60e438",
+          "note": "Standard path provides the missing explicit chronology safeguards."
+        }
+      ],
+      "preconditions": [
+        "A deterministic B1 fixture has quote timestamps and a plan has fill and settlement timestamps.",
+        "Each individual component is syntactically valid."
+      ],
+      "trigger": "Place settlement replay time before quote comparison and fill events after settlement.",
+      "expected_behavior": "Backtest orchestration must bind one explicit decision time and require source observations at or before decision, completion events at or after decision, and settlement strictly after the final completion event.",
+      "current_behavior": "B1CrossVenueBacktestPlan contains no decision timestamp. runCandidateBacktest validates stages independently and never compares quote, decision, fill, or settlement times. The impossible temporal sequence is accepted.",
+      "impact": "Lookahead and post-settlement fills can generate accepted B1 profitability evidence. The run cannot prove that only information available at decision time was consumed.",
+      "evidence": [
+        "The B1 plan interface contains policy, events, residual limit, and settlement records but no decision time.",
+        "The orchestration calls gross, solver, net, fillability, and settlement sequentially without temporal cross-checks.",
+        "The bounded harness accepted settlement at 2026-06-30T23:00Z, quote comparison at 2026-07-01T00:00:02.250Z, and fills on 2026-07-02.",
+        "The standard backtest contains explicit decision/settlement and completion-window guards, showing the missing B1 boundary is not an unavoidable design limitation."
+      ],
+      "reproduction_status": "REPRODUCED_OFFLINE_NODE22_SUPPLEMENTARY; STATIC_SOURCE_CONFIRMED",
+      "root_cause": "B1 orchestration composes locally valid artifacts without a shared temporal authority or monotonic cross-stage invariant.",
+      "minimal_fix_boundary": "Add a B1 decision timestamp and cross-stage time validation at orchestration input, binding quote source/receive/comparison, fills, and settlement. Durable timestamp constraints remain R03-owned.",
+      "required_tests": [
+        "Settlement before decision is blocked.",
+        "Fill before decision and fill at/after settlement are blocked.",
+        "Future quote or changed data after decision is blocked.",
+        "Boundary equality behavior is specified and tested.",
+        "Standard and B1 chronology tests share explicit invariant fixtures without sharing implementation outputs."
+      ],
+      "regression_risks": [
+        "Fixture schema change",
+        "Time-zone and precision consistency",
+        "Interaction with R01 source/receive time"
+      ],
+      "primary_owner": "R04",
+      "secondary_sectors": [
+        "R01 time/currentness",
+        "R03 durable timestamp constraints",
+        "R11 adversarial tests"
+      ],
+      "existing_aliases_or_dependencies": [
+        "BWS116-R01-010",
+        "BWS116-R03-017"
+      ],
+      "explicitly_unchanged_areas": [
+        "Standard backtest chronology guards",
+        "B1 pure math",
+        "BWS-900 hold"
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "deployment": true,
+        "bws_600": false,
+        "bws_710": true
+      }
+    },
+    {
+      "id": "BWS118-R04-009",
+      "title": "B1 report labels in-limit incomplete, rejected, or timed-out simulations as accepted and fillable while discarding leg state",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "packages/bootstrap/src/backtest/b1-cross-venue-backtest.ts",
+      "current_symbol": "toReportCandidateSummary",
+      "exact_line_range": "L452-L493",
+      "full_file_sha256": "b367b8880c8461a50912e13b3cb1489a1f5c8e2c235dfd556d2ef615b6a575d4",
+      "source_locations": [
+        {
+          "path": "packages/bootstrap/src/simulation/b1-leg-completion.ts",
+          "symbol": "simulateB1FillRejectionTimeout",
+          "line_range": "L83-L135",
+          "sha256": "108996f173a566dfb8b72de38c364d3f1d7b3610bcceadbe6c415d94a5fc5b3b",
+          "note": "Incomplete groups are accepted when residual exposure is within limit."
+        },
+        {
+          "path": "packages/bootstrap/src/backtest/b1-cross-venue-backtest.ts",
+          "symbol": "toReportCandidateSummary",
+          "line_range": "L452-L493",
+          "sha256": "b367b8880c8461a50912e13b3cb1489a1f5c8e2c235dfd556d2ef615b6a575d4",
+          "note": "Accepted summary drops fill and residual lifecycle."
+        },
+        {
+          "path": "packages/bootstrap/src/reporting/b1-backtest-report.ts",
+          "symbol": "B1BacktestReportCandidateSummary",
+          "line_range": "L6-L25",
+          "sha256": "8c8cbc440a521c4ee32de8bde89c547fe3c97c36d43935008c3f0b39a2657272",
+          "note": "Report schema has no fillability or residual state fields."
+        },
+        {
+          "path": "packages/bootstrap/src/reporting/b1-backtest-report.ts",
+          "symbol": "calculateMetrics",
+          "line_range": "L369-L419",
+          "sha256": "8c8cbc440a521c4ee32de8bde89c547fe3c97c36d43935008c3f0b39a2657272",
+          "note": "Accepted count is used as fillable count."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/b1-runtime-evidence.ts",
+          "symbol": "runtimeAcceptanceMetrics",
+          "line_range": "L485-L514",
+          "sha256": "80ea2ca2a8b071dc1fdafc614594fac3d642b0416bcf6beec4c515cd707adbe8",
+          "note": "Runtime acceptance consumes the collapsed report counters directly."
+        }
+      ],
+      "preconditions": [
+        "B1 fillability returns ok for group_incomplete because residual exposure is within the configured limit.",
+        "Settlement replay accepts the partial exposure."
+      ],
+      "trigger": "Run a candidate with a partially filled rejected leg and another timed-out leg whose residual remains inside the limit.",
+      "expected_behavior": "Report status must distinguish fully filled, incomplete-with-residual, rejected, timed-out, settled, and unreconciled states. \u201cFillable\u201d must not mean merely that the pipeline returned ok.",
+      "current_behavior": "Any candidate result that reaches settlement is mapped to status=accepted, stage=accepted. The summary drops fillability group state, leg snapshots, terminal dispositions, residual exposure, and exposure-limit status. calculateMetrics sets fillableCandidateCount to the number of accepted summaries.",
+      "impact": "A rejected/timed-out partial portfolio is reported as fillable and can satisfy acceptance gates. Operators cannot see the residual state from the report.",
+      "evidence": [
+        "simulateB1FillRejectionTimeout intentionally returns accepted for in-limit group_incomplete states.",
+        "toReportCandidateSummary maps every successful pipeline result to accepted without lifecycle fields.",
+        "calculateMetrics equates acceptedCandidates.length with fillableCandidateCount.",
+        "The bounded harness accepted a 5000/10000 rejected leg plus a zero-fill timed-out leg and reported fillableCandidateCount=1 with status/stage accepted."
+      ],
+      "reproduction_status": "REPRODUCED_OFFLINE_NODE22_SUPPLEMENTARY; STATIC_SOURCE_CONFIRMED",
+      "root_cause": "The report collapses \u201cpipeline completed with analyzable residual exposure\u201d into \u201caccepted/fillable\u201d and its schema lacks the state needed to preserve that distinction.",
+      "minimal_fix_boundary": "Expand candidate summaries and metrics to preserve fill group state, terminal dispositions, residual exposure, reconciliation state, and distinct fillability classification. Public UI projection remains R05-owned.",
+      "required_tests": [
+        "Fully filled and incomplete-in-limit candidates produce different report states and counters.",
+        "Rejected/timed-out leg details survive report serialization and hashing.",
+        "Acceptance gates do not count incomplete candidates as filled.",
+        "Blocked, incomplete, settled, and fully filled states remain mutually exclusive."
+      ],
+      "regression_risks": [
+        "Report hash/version change",
+        "Acceptance threshold recalibration",
+        "Cockpit/API consumer compatibility"
+      ],
+      "primary_owner": "R04",
+      "secondary_sectors": [
+        "R03 persistence",
+        "R05 API/cockpit",
+        "R07 evidence acceptance",
+        "R11 validator truth"
+      ],
+      "existing_aliases_or_dependencies": [
+        "BWS116-R02-005",
+        "BWS116-R03-016"
+      ],
+      "explicitly_unchanged_areas": [
+        "B1 residual limit calculation",
+        "Candidate identity markers",
+        "No-live-readiness markers"
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "deployment": true,
+        "bws_600": false,
+        "bws_710": true
+      }
+    },
+    {
+      "id": "BWS118-R04-010",
+      "title": "B1 false-positive analysis excludes failures before settlement and computes the rate only over accepted settlements",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "packages/bootstrap/src/backtest/b1-cross-venue-backtest.ts",
+      "current_symbol": "runDeterministicB1CrossVenueBacktest",
+      "exact_line_range": "L100-L121",
+      "full_file_sha256": "b367b8880c8461a50912e13b3cb1489a1f5c8e2c235dfd556d2ef615b6a575d4",
+      "source_locations": [
+        {
+          "path": "packages/bootstrap/src/backtest/b1-cross-venue-backtest.ts",
+          "symbol": "falsePositiveObservations collection",
+          "line_range": "L100-L121",
+          "sha256": "b367b8880c8461a50912e13b3cb1489a1f5c8e2c235dfd556d2ef615b6a575d4",
+          "note": "Pre-settlement blocked candidates are omitted."
+        },
+        {
+          "path": "packages/bootstrap/src/reporting/b1-false-positive-report.ts",
+          "symbol": "createB1FalsePositiveReport",
+          "line_range": "L31-L100",
+          "sha256": "55d3a251830501a284214bac6e94a16eb3f194fcce33195df5e3ee37cb985f95",
+          "note": "Rate denominator is accepted settlements only."
+        }
+      ],
+      "preconditions": [
+        "A candidate is blocked at gross, stake-vector, net-economics, or fillability stage, or settlement itself is blocked.",
+        "The false-positive report is generated for the run."
+      ],
+      "trigger": "Include candidates that fail before settlement and a mix of accepted and blocked settlement observations.",
+      "expected_behavior": "The falsification denominator and stage metrics must account for every derived candidate and distinguish pre-settlement false positives, fill failures, blocked/unknown settlement, and accepted settlement outcomes.",
+      "current_behavior": "The backtest adds false-positive observations only for fully successful candidates and settlement-stage blockers. Gross, solver, net, and fillability failures disappear. createB1FalsePositiveReport divides falsePositiveCount by acceptedSettlementCount only, excluding blocked settlements from the rate.",
+      "impact": "The reported false-positive rate can improve when more candidates fail or remain unknown. It cannot measure end-to-end candidate false positives or compare candidate-to-fill-to-settlement attrition truthfully.",
+      "evidence": [
+        "Observation collection has branches only for candidateResult.ok and candidateResult.stage===settlement.",
+        "The report tracks accepted and blocked settlement counts but uses only acceptedSettlementCount as denominator.",
+        "The bounded harness with one accepted and one blocked observation returned a 0 bps rate based solely on the accepted observation."
+      ],
+      "reproduction_status": "REPRODUCED_OFFLINE_NODE22_SUPPLEMENTARY; STATIC_SOURCE_CONFIRMED",
+      "root_cause": "The falsification model is settlement-only, but its name and downstream acceptance usage imply end-to-end candidate false-positive analysis.",
+      "minimal_fix_boundary": "Define explicit stage denominators and an end-to-end candidate outcome taxonomy; include every derived candidate exactly once and keep blocked/unknown rates separate from accepted settlement rates.",
+      "required_tests": [
+        "Gross, stake, net, fillability, and settlement failures each appear in stage counts.",
+        "Blocked/unknown settlements cannot reduce the accepted-outcome false-positive rate silently.",
+        "End-to-end denominator equals unique derived candidates.",
+        "Duplicate candidate IDs and reordered observations do not alter counts."
+      ],
+      "regression_risks": [
+        "Historical metric comparability",
+        "Acceptance threshold semantics",
+        "Do not call operational blockage economic false positive"
+      ],
+      "primary_owner": "R04",
+      "secondary_sectors": [
+        "R02 pure economics",
+        "R07 acceptance evidence",
+        "R11 test/validator truth"
+      ],
+      "existing_aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "Settlement blocker code classification",
+        "Private-only/no-profit markers",
+        "Candidate derivation ordering"
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "deployment": true,
+        "bws_600": false,
+        "bws_710": true
+      }
+    },
+    {
+      "id": "BWS118-R04-011",
+      "title": "B1 marketsCompared counts venue-pair candidates rather than unique markets and can inflate the 50,000-market gate",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "packages/bootstrap/src/reporting/b1-backtest-report.ts",
+      "current_symbol": "calculateMetrics",
+      "exact_line_range": "L369-L419",
+      "full_file_sha256": "8c8cbc440a521c4ee32de8bde89c547fe3c97c36d43935008c3f0b39a2657272",
+      "source_locations": [
+        {
+          "path": "packages/bootstrap/src/opportunity/b1-cross-venue-derivation.ts",
+          "symbol": "deriveB1CrossVenueGrossOpportunityCandidates",
+          "line_range": "L88-L142",
+          "sha256": "29866c6839497502a2f9371166dd3865026bc8bca7a8cc57dad12c5717ba2543",
+          "note": "One candidate is derived per venue pair within a market group."
+        },
+        {
+          "path": "packages/bootstrap/src/reporting/b1-backtest-report.ts",
+          "symbol": "calculateMetrics",
+          "line_range": "L369-L419",
+          "sha256": "8c8cbc440a521c4ee32de8bde89c547fe3c97c36d43935008c3f0b39a2657272",
+          "note": "marketsCompared aliases candidate cardinality."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/b1-runtime-evidence.ts",
+          "symbol": "dataCoverageBlockers / runtimeAcceptanceMetrics",
+          "line_range": "L418-L500",
+          "sha256": "80ea2ca2a8b071dc1fdafc614594fac3d642b0416bcf6beec4c515cd707adbe8",
+          "note": "Acceptance consumes the inflated value."
+        }
+      ],
+      "preconditions": [
+        "One market produces multiple valid venue-pair candidates.",
+        "The B1 runtime evidence gate consumes report.metrics.marketsCompared."
+      ],
+      "trigger": "Generate three candidate summaries for one marketEquivalenceKey across three venue pairs.",
+      "expected_behavior": "marketsCompared must count unique market identities, separately from candidate and venue-pair counts.",
+      "current_behavior": "calculateMetrics sets marketsCompared=candidates.length and candidateCount=candidates.length. Candidate derivation emits one candidate per market and venue pair, so one market is counted repeatedly. Runtime acceptance trusts this value for minimumMarketsCompared.",
+      "impact": "A run can satisfy the minimum 50,000 market requirement with materially fewer unique markets, creating false data-coverage readiness.",
+      "evidence": [
+        "B1 candidate derivation iterates venue pairs within a market group.",
+        "Report code assigns candidate length to marketsCompared.",
+        "Runtime evidence compares that report field directly with minimumMarketsCompared.",
+        "The bounded report harness supplied three venue-pair candidates for one market and returned marketsCompared=3, candidateCount=3, uniqueEvents=1."
+      ],
+      "reproduction_status": "REPRODUCED_OFFLINE_NODE22_SUPPLEMENTARY; STATIC_SOURCE_CONFIRMED",
+      "root_cause": "The report has no independent unique-market set and aliases a coverage metric to the candidate cardinality.",
+      "minimal_fix_boundary": "Derive marketsCompared from unique canonical market/equivalence identity, retain candidateCount separately, and bind acceptance to the corrected metric.",
+      "required_tests": [
+        "Multiple venue pairs for one market count as one market and multiple candidates.",
+        "Same market across duplicate rows remains one market.",
+        "Distinct markets on one event count separately.",
+        "Runtime threshold test proves candidate multiplication cannot satisfy market coverage."
+      ],
+      "regression_risks": [
+        "Acceptance baselines may fall after correction",
+        "Market identity dependency on R02",
+        "Historical report hash changes"
+      ],
+      "primary_owner": "R04",
+      "secondary_sectors": [
+        "R02 market identity",
+        "R07 runtime acceptance",
+        "R11 validator truth"
+      ],
+      "existing_aliases_or_dependencies": [
+        "BWS116-R02-002",
+        "BWS116-R02-007"
+      ],
+      "explicitly_unchanged_areas": [
+        "Unique-event deduplication",
+        "Venue-pair counting",
+        "Candidate IDs"
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "deployment": true,
+        "bws_600": false,
+        "bws_710": true
+      }
+    },
+    {
+      "id": "BWS118-R04-012",
+      "title": "Standard backtest and private-paper strategy reports discard per-leg lifecycle evidence while labeling candidates accepted_local_evidence",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "packages/bootstrap/src/strategy/strategy-ledger.ts",
+      "current_symbol": "SurebetStrategyCandidateReport / toBacktestCandidateReport / toPrivatePaperCandidateReport",
+      "exact_line_range": "L113-L123",
+      "full_file_sha256": "d05e339a5692a9218f2146c153570ee7d9c8d79ae88282e162b7ece0c0cb5dbc",
+      "source_locations": [
+        {
+          "path": "packages/bootstrap/src/backtest/standard-binary-backtest.ts",
+          "symbol": "StandardBinaryBacktestAcceptedCandidateResult",
+          "line_range": "L43-L62",
+          "sha256": "b89833bedd366b9d4b714cb0eddd6610e5eabd7217477063d7a1a2006b60e438",
+          "note": "Accepted result lacks leg snapshots and raw completion events."
+        },
+        {
+          "path": "packages/bootstrap/src/backtest/standard-binary-backtest.ts",
+          "symbol": "createAcceptedCandidateResult",
+          "line_range": "L571-L607",
+          "sha256": "b89833bedd366b9d4b714cb0eddd6610e5eabd7217477063d7a1a2006b60e438",
+          "note": "Projection retains only aggregate completion evidence."
+        },
+        {
+          "path": "packages/bootstrap/src/runtime/private-paper-runtime.ts",
+          "symbol": "PrivatePaperRuntimeAcceptedCandidateResult",
+          "line_range": "L106-L126",
+          "sha256": "252e38a52693f3fa598c9ea92a83b184de0c4b29c4ab0bd5c952b750d009c6f5",
+          "note": "Private accepted result is also aggregate-only."
+        },
+        {
+          "path": "packages/bootstrap/src/runtime/private-paper-runtime.ts",
+          "symbol": "create accepted runtime candidate result",
+          "line_range": "L1161-L1191",
+          "sha256": "252e38a52693f3fa598c9ea92a83b184de0c4b29c4ab0bd5c952b750d009c6f5",
+          "note": "Runtime maps reconciliation to aggregate fields."
+        },
+        {
+          "path": "packages/bootstrap/src/strategy/strategy-ledger.ts",
+          "symbol": "SurebetStrategyCandidateReport",
+          "line_range": "L113-L123",
+          "sha256": "d05e339a5692a9218f2146c153570ee7d9c8d79ae88282e162b7ece0c0cb5dbc",
+          "note": "Strategy report schema has no per-leg/event evidence."
+        },
+        {
+          "path": "packages/bootstrap/src/strategy/strategy-ledger.ts",
+          "symbol": "toBacktestCandidateReport / toPrivatePaperCandidateReport",
+          "line_range": "L795-L841",
+          "sha256": "d05e339a5692a9218f2146c153570ee7d9c8d79ae88282e162b7ece0c0cb5dbc",
+          "note": "Both accepted paths emit accepted_local_evidence from lossy aggregates."
+        }
+      ],
+      "preconditions": [
+        "A standard candidate completes with partial, rejected, expired, rolled-back, killed, or otherwise nontrivial per-leg history.",
+        "A strategy report or ledger entry is generated."
+      ],
+      "trigger": "Project an accepted backtest/private-paper result into SurebetStrategyCandidateReport.",
+      "expected_behavior": "The accepted evidence report must retain the exact completion snapshots, terminal dispositions, event/receipt identities, residual scenario evidence, and reconciliation state needed to audit the acceptance label.",
+      "current_behavior": "Standard accepted results retain only aggregate group state, counts, filled/excluded IDs, settlement, and optional residual summary. The strategy report reduces this further to completionGroupState, settledNetMinor, finalOutcome, and optional killReason, then labels it accepted_local_evidence.",
+      "impact": "Partial, rejected, expired, rolled-back, or kill-order facts can disappear from the authoritative report. Consumers cannot independently prove that accepted_local_evidence is consistent with the underlying lifecycle.",
+      "evidence": [
+        "StandardBinaryBacktestAcceptedCandidateResult has no leg snapshots or completion event records.",
+        "PrivatePaperRuntimeAcceptedCandidateResult likewise carries aggregate IDs rather than the complete replay evidence.",
+        "SurebetStrategyCandidateReport has nine scalar/array fields and no per-leg/event evidence.",
+        "Both mapping functions assign resultState=accepted_local_evidence for any accepted candidate result."
+      ],
+      "reproduction_status": "STATIC_SOURCE_CONFIRMED",
+      "root_cause": "Evidence projection is lossy at two consecutive boundaries and the acceptance label is derived from pipeline success rather than an independently auditable lifecycle packet.",
+      "minimal_fix_boundary": "Preserve or content-address the full completion/reconciliation packet in accepted candidate reports and bind the acceptance label to that immutable evidence. API/UI rendering remains R05-owned; publication lineage remains R07-owned.",
+      "required_tests": [
+        "Per-leg terminal and quantity state survives backtest/private report generation.",
+        "Report digest changes when any underlying event or snapshot changes.",
+        "A consumer can validate accepted_local_evidence without an in-memory source object.",
+        "Killed and incomplete candidates cannot appear equivalent to fully completed candidates."
+      ],
+      "regression_risks": [
+        "Larger report artifacts",
+        "Backward compatibility and report hashes",
+        "Retention/reference requirements"
+      ],
+      "primary_owner": "R04",
+      "secondary_sectors": [
+        "R03 persistence",
+        "R05 API/cockpit",
+        "R07 evidence publication",
+        "R11 artifact tests"
+      ],
+      "existing_aliases_or_dependencies": [
+        "BWS116-R01-003",
+        "BWS116-R01-004",
+        "BWS116-R03-014",
+        "BWS116-R03-016"
+      ],
+      "explicitly_unchanged_areas": [
+        "Upstream lock reference fields",
+        "Privacy=private_only",
+        "No public profitability claim"
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "deployment": true,
+        "bws_600": true,
+        "bws_710": false
+      }
+    },
+    {
+      "id": "BWS118-R04-013",
+      "title": "B1 false-positive report throws on malformed top-level or observation objects instead of returning a blocked boundary result",
+      "severity": "P2",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "packages/bootstrap/src/reporting/b1-false-positive-report.ts",
+      "current_symbol": "createB1FalsePositiveReport / validateB1FalsePositiveObservation",
+      "exact_line_range": "L31-L105",
+      "full_file_sha256": "55d3a251830501a284214bac6e94a16eb3f194fcce33195df5e3ee37cb985f95",
+      "source_locations": [
+        {
+          "path": "packages/bootstrap/src/reporting/b1-false-positive-report.ts",
+          "symbol": "createB1FalsePositiveReport",
+          "line_range": "L31-L100",
+          "sha256": "55d3a251830501a284214bac6e94a16eb3f194fcce33195df5e3ee37cb985f95",
+          "note": "Top-level input is dereferenced before type validation."
+        },
+        {
+          "path": "packages/bootstrap/src/reporting/b1-false-positive-report.ts",
+          "symbol": "validateB1FalsePositiveObservation",
+          "line_range": "L102-L163",
+          "sha256": "55d3a251830501a284214bac6e94a16eb3f194fcce33195df5e3ee37cb985f95",
+          "note": "candidateId.trim is called before structural validation."
+        }
+      ],
+      "preconditions": [
+        "An untyped JavaScript caller, deserialized payload, or future caller passes null/non-array input or an observation without a string candidateId."
+      ],
+      "trigger": "Call createB1FalsePositiveReport(null) or pass {settlementStatus:\"accepted\"} as an observation.",
+      "expected_behavior": "All public boundary helpers must validate container and field types before dereference and return BoundaryResult blockers for malformed input.",
+      "current_behavior": "The function immediately reads observations.length and the validator immediately calls observation.candidateId.trim() without checking object or string shape. Malformed input throws TypeError.",
+      "impact": "A malformed retained report or caller bug can crash a bounded backtest/report process rather than producing explicit blocker evidence. Diagnostics and batch isolation are weakened.",
+      "evidence": [
+        "No Array.isArray check precedes observations.length.",
+        "No object/string guard precedes candidateId.trim().",
+        "Both malformed cases were reproduced in bounded Node 22 harnesses."
+      ],
+      "reproduction_status": "REPRODUCED_OFFLINE_NODE22_SUPPLEMENTARY; STATIC_SOURCE_CONFIRMED",
+      "root_cause": "The report helper relies on TypeScript compile-time shape guarantees at a runtime boundary that is called with deserialized/untrusted structures elsewhere in the repository.",
+      "minimal_fix_boundary": "Add top-level array and per-observation structural validation before dereference; return stable blocker codes and preserve current valid-output shape.",
+      "required_tests": [
+        "null, object, string, sparse array, null observation, missing candidateId, and non-string candidateId return blockers without throwing.",
+        "Valid accepted and blocked observations remain unchanged.",
+        "Batch runner continues after one malformed report input where policy permits."
+      ],
+      "regression_risks": [
+        "Blocker code compatibility",
+        "Avoid masking programmer invariants as user input",
+        "Performance for large arrays"
+      ],
+      "primary_owner": "R04",
+      "secondary_sectors": [
+        "R11 aggregate boundary tests"
+      ],
+      "existing_aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "Valid report arithmetic",
+        "Settlement blocker classification",
+        "Runtime acceptance semantics"
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "deployment": false,
+        "bws_600": false,
+        "bws_710": true
+      }
+    },
+    {
+      "id": "BWS118-R04-014",
+      "title": "Exported partial-fill status falsely identifies a legacy state machine that has no partial-fill state",
+      "severity": "P2",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "packages/bootstrap/src/simulation/partial-fill.ts",
+      "current_symbol": "partialFillModelStatus",
+      "exact_line_range": "L3-L18",
+      "full_file_sha256": "84ea147e7d449e3ffdfcfcd662f29803dc5905f4d207b556ed04ab6b39071a93",
+      "source_locations": [
+        {
+          "path": "packages/bootstrap/src/simulation/partial-fill.ts",
+          "symbol": "PartialFillModelStatus / partialFillModelStatus",
+          "line_range": "L3-L18",
+          "sha256": "84ea147e7d449e3ffdfcfcd662f29803dc5905f4d207b556ed04ab6b39071a93",
+          "note": "Accepted capability marker points to legacy module."
+        },
+        {
+          "path": "packages/bootstrap/src/simulation/leg-completion.ts",
+          "symbol": "PAPER_LEG_COMPLETION_STATES",
+          "line_range": "L5-L12",
+          "sha256": "934fb7e5b36545bbc393d0c4909cd4fbc5ddaaf2d540819acc222577ba672aa7",
+          "note": "Referenced module has no partial state."
+        },
+        {
+          "path": "tests/leg-completion.test.ts",
+          "symbol": "partial-fill status assertions",
+          "line_range": "L1-L246",
+          "sha256": "f3e273e97b4388f9aa45e6cb4197874f90aafdedceebea4892a2293abeadce24",
+          "note": "Focused tests exercise marker/status behavior rather than partial fill through the declared module."
+        }
+      ],
+      "preconditions": [
+        "A validator, operator, or consumer relies on partialFillModelStatus as implementation capability evidence."
+      ],
+      "trigger": "Read the accepted status payload and follow implementationModule to src/simulation/leg-completion.ts.",
+      "expected_behavior": "Capability/status evidence must identify the actual production partial-fill implementation and prove the claimed state is representable through its entrypoint.",
+      "current_behavior": "partialFillModelStatus returns accepted and names src/simulation/leg-completion.ts, but PAPER_LEG_COMPLETION_STATES in that module contains open, reserved, filled, failed, stale, and settlement_pending only. The actual partial-fill behavior lives in non-atomic-completion.ts and B1 modules.",
+      "impact": "Marker-based validators and documentation can report partial-fill implementation present while following a module that cannot represent partial state, creating false assurance and confusing callers.",
+      "evidence": [
+        "The accepted status payload hard-codes the legacy module path.",
+        "The referenced enum has no leg_partial state.",
+        "The focused tests pass because they assert marker/status strings rather than exercising partial fill through the referenced entrypoint.",
+        "The bounded harness returned the accepted status unchanged."
+      ],
+      "reproduction_status": "REPRODUCED_OFFLINE_NODE22_SUPPLEMENTARY; STATIC_SOURCE_CONFIRMED",
+      "root_cause": "A static capability marker was not updated when implementation moved to a different state machine, and tests validate the declaration rather than the declared behavior.",
+      "minimal_fix_boundary": "Retire the stale status helper or point it to the actual production entrypoint with a behavioral validator. Aggregate validator ownership remains R11.",
+      "required_tests": [
+        "Status-referenced entrypoint accepts a genuine partial fill and returns a partial state.",
+        "Renaming/removing the implementation causes the validator to fail.",
+        "No marker-only test can pass without invoking the production path."
+      ],
+      "regression_risks": [
+        "Legacy consumer expectations",
+        "Documentation links",
+        "Avoid treating local capability as runtime acceptance"
+      ],
+      "primary_owner": "R04",
+      "secondary_sectors": [
+        "R11 tests/validators/manifest trust"
+      ],
+      "existing_aliases_or_dependencies": [
+        "KNOWN_BASELINE_MANIFEST_DRIFT"
+      ],
+      "explicitly_unchanged_areas": [
+        "Actual non-atomic and B1 partial-fill implementations",
+        "BWS-600 external hold",
+        "No execution"
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "deployment": false,
+        "bws_600": false,
+        "bws_710": false
+      }
+    }
+  ],
+  "hypotheses": [
+    {
+      "id": "BWS118-R04-HYP-001",
+      "classification": "HYPOTHESIS",
+      "title": "Provider-native lifecycle may require additional terminal and correction states beyond those represented in the supplied archive",
+      "confidence": "MEDIUM",
+      "basis": "Executable BWS contracts are narrower than the documented void/refund/correction scope, but external provider authority and accepted live payloads were explicitly unavailable and not contacted.",
+      "required_proof": "Accepted upstream contract plus sanitized native lifecycle captures for each supported provider/generation."
+    }
+  ],
+  "external_upstream_blockers": [
+    {
+      "id": "BWS118-R04-EXT-001",
+      "classification": "EXTERNAL_UPSTREAM_BLOCKER",
+      "title": "Accepted betting-win B1 multi-venue runtime resource and API handoff remain unavailable",
+      "effect": "BWS-710 and runtime-level verification of B1 fill/settlement semantics remain blocked. Offline fixtures cannot establish provider acceptance."
+    },
+    {
+      "id": "BWS118-R04-EXT-002",
+      "classification": "EXTERNAL_UPSTREAM_BLOCKER",
+      "title": "Current provider void, refund, correction, reopen, and finality authority is absent from the supplied BWS archive",
+      "effect": "R04 can confirm representational gaps but cannot establish the complete provider-native lifecycle contract without external upstream evidence."
+    }
+  ],
+  "environment_blockers": [
+    {
+      "id": "BWS118-R04-ENV-001",
+      "classification": "ENVIRONMENT_BLOCKER",
+      "title": "Canonical Node 20.20.2 was unavailable",
+      "effect": "Node 22.16.0 build, test, and harness observations are supplementary only."
+    },
+    {
+      "id": "BWS118-R04-ENV-002",
+      "classification": "ENVIRONMENT_BLOCKER",
+      "title": "Local disposable PostgreSQL execution was unavailable",
+      "effect": "R03-owned transaction/isolation behavior was not dynamically retested during R04."
+    }
+  ],
+  "intentional_safeguards": [
+    {
+      "id": "BWS118-R04-SAFE-001",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "B1 fixtures and reports preserve runtimeEvidence=false and the accepted upstream block marker."
+    },
+    {
+      "id": "BWS118-R04-SAFE-002",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "Standard backtest enforces quote/decision/settlement ordering and completion events inside the decision-to-settlement window."
+    },
+    {
+      "id": "BWS118-R04-SAFE-003",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "Completion replay rejects same-leg timestamp ties, fill after terminal, overfill, and duplicate terminal markers."
+    },
+    {
+      "id": "BWS118-R04-SAFE-004",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "B1 explicitly forbids unwind/rollback and keeps executable=false with BWS-900 parked."
+    },
+    {
+      "id": "BWS118-R04-SAFE-005",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "Report contracts retain private-only and no-public-profitability markers."
+    }
+  ],
+  "rejected_suspicions": [
+    {
+      "id": "BWS118-R04-REJ-001",
+      "classification": "REJECTED_SUSPICION",
+      "title": "Standard deterministic backtest consumes settlement available at or before decision time",
+      "result": "Rejected. Source lines L465-L568 fail closed on quote/decision, settlement/decision, and completion/settlement ordering."
+    },
+    {
+      "id": "BWS118-R04-REJ-002",
+      "classification": "REJECTED_SUSPICION",
+      "title": "B1 duplicate candidate plans silently overwrite each other",
+      "result": "Rejected. indexBacktestPlans blocks duplicate candidateId plans."
+    },
+    {
+      "id": "BWS118-R04-REJ-003",
+      "classification": "REJECTED_SUSPICION",
+      "title": "Standard settlement accepts one manifest hash with conflicting payloads",
+      "result": "Rejected. The sequence consumer blocks idempotency mismatch for one replay manifest hash."
+    },
+    {
+      "id": "BWS118-R04-REJ-004",
+      "classification": "REJECTED_SUSPICION",
+      "title": "B1 settlement accepts a manifest group missing one compared leg",
+      "result": "Rejected. Each manifest group is checked against the full expected leg-key set."
+    },
+    {
+      "id": "BWS118-R04-REJ-005",
+      "classification": "REJECTED_SUSPICION",
+      "title": "Local B1 fixtures or reports can directly satisfy runtime evidence acceptance",
+      "result": "Rejected for the inspected path. runtimeEvidence=false and upstreamReadiness hold checks remain enforced."
+    }
+  ],
+  "cross_area_handoffs": [
+    {
+      "id": "BWS118-R04-HO-R01-001",
+      "classification": "CROSS_AREA_HANDOFF",
+      "target": "R01",
+      "title": "Bind completion/settlement inputs to exact cycle, page, route, contract, generation, and immutable receive provenance",
+      "dependencies": [
+        "BWS116-R01-003",
+        "BWS116-R01-004",
+        "BWS116-R01-010"
+      ],
+      "reason": "R04 can preserve only identity and currentness receipts that R01 intake exposes; do not duplicate upstream provenance roots."
+    },
+    {
+      "id": "BWS118-R04-HO-R02-001",
+      "classification": "CROSS_AREA_HANDOFF",
+      "target": "R02",
+      "title": "Provide quote-bound actual economic authority and corrected unique market identity",
+      "dependencies": [
+        "BWS116-R02-002",
+        "BWS116-R02-004",
+        "BWS116-R02-005",
+        "BWS116-R02-014"
+      ],
+      "reason": "R04 owns lifecycle preservation, not pure identity, fee, solver, or scenario formulas."
+    },
+    {
+      "id": "BWS118-R04-HO-R03-001",
+      "classification": "CROSS_AREA_HANDOFF",
+      "target": "R03",
+      "title": "Persist replay IDs, compound terminal state, revisions, and chronology atomically with fenced restart semantics",
+      "dependencies": [
+        "BWS116-R03-014",
+        "BWS116-R03-015",
+        "BWS116-R03-016",
+        "BWS116-R03-017"
+      ],
+      "reason": "R04 defines semantic state; R03 owns durable atomicity, crash repair, and timestamp constraints."
+    },
+    {
+      "id": "BWS118-R04-HO-R05-001",
+      "classification": "CROSS_AREA_HANDOFF",
+      "target": "R05",
+      "title": "Ensure API and cockpit expose incomplete, terminal, residual, unknown, and unreconciled states without green projection",
+      "dependencies": [
+        "BWS118-R04-003",
+        "BWS118-R04-009",
+        "BWS118-R04-012"
+      ],
+      "reason": "The R04 source packet is lossy; R05 must not further manufacture truth during projection."
+    },
+    {
+      "id": "BWS118-R04-HO-R06-001",
+      "classification": "CROSS_AREA_HANDOFF",
+      "target": "R06",
+      "title": "Bind kill, cancellation, timeout, and late completion to process ownership and shutdown semantics",
+      "dependencies": [
+        "BWS118-R04-001",
+        "BWS118-R04-004"
+      ],
+      "reason": "Generic in-flight cancellation and late child completion are R06-owned."
+    },
+    {
+      "id": "BWS118-R04-HO-R07-001",
+      "classification": "CROSS_AREA_HANDOFF",
+      "target": "R07",
+      "title": "Do not publish BWS-600/B1 acceptance evidence from collapsed or inflated R04 metrics",
+      "dependencies": [
+        "BWS118-R04-005",
+        "BWS118-R04-009",
+        "BWS118-R04-010",
+        "BWS118-R04-011",
+        "BWS118-R04-012"
+      ],
+      "reason": "Evidence publication and campaign artifact truth are R07-owned."
+    },
+    {
+      "id": "BWS118-R04-HO-R11-001",
+      "classification": "CROSS_AREA_HANDOFF",
+      "target": "R11",
+      "title": "Validators and tests remain green despite R04 defects; retain known source-manifest drift under R11",
+      "dependencies": [
+        "BWS118-R04-001",
+        "BWS118-R04-005",
+        "BWS118-R04-008",
+        "BWS118-R04-009",
+        "BWS118-R04-011",
+        "BWS118-R04-013",
+        "BWS118-R04-014",
+        "KNOWN_BASELINE_MANIFEST_DRIFT"
+      ],
+      "reason": "Five static validators and 171 focused tests passed while adversarial production-entrypoint probes reproduced these defects."
+    }
+  ],
+  "test_gaps": [
+    {
+      "id": "BWS118-R04-TG-001",
+      "classification": "TEST_GAP",
+      "title": "No immutable completion event ID duplicate/conflict/restart matrix."
+    },
+    {
+      "id": "BWS118-R04-TG-002",
+      "classification": "TEST_GAP",
+      "title": "No actual-fill odds, price, fee, slippage, or source-receipt settlement test."
+    },
+    {
+      "id": "BWS118-R04-TG-003",
+      "classification": "TEST_GAP",
+      "title": "No standard partial-fill plus reject/expire snapshot round-trip test."
+    },
+    {
+      "id": "BWS118-R04-TG-004",
+      "classification": "TEST_GAP",
+      "title": "No causally ordered kill-before-fill, kill-during-fill, and kill-after-completion test."
+    },
+    {
+      "id": "BWS118-R04-TG-005",
+      "classification": "TEST_GAP",
+      "title": "No B1 settlement test with nonzero fee, quote-age, and capital-lock costs."
+    },
+    {
+      "id": "BWS118-R04-TG-006",
+      "classification": "TEST_GAP",
+      "title": "No void, refund, push, reopen, generation-change, or partial-refund replay test."
+    },
+    {
+      "id": "BWS118-R04-TG-007",
+      "classification": "TEST_GAP",
+      "title": "No explicit revision/supersedes/finality fork, gap, regression, and mixed-generation tests."
+    },
+    {
+      "id": "BWS118-R04-TG-008",
+      "classification": "TEST_GAP",
+      "title": "No B1 decision/quote/fill/settlement cross-stage chronology tests."
+    },
+    {
+      "id": "BWS118-R04-TG-009",
+      "classification": "TEST_GAP",
+      "title": "No report assertion that incomplete rejected/timed-out candidates are not counted as fillable."
+    },
+    {
+      "id": "BWS118-R04-TG-010",
+      "classification": "TEST_GAP",
+      "title": "No end-to-end false-positive denominator test covering every blocked stage."
+    },
+    {
+      "id": "BWS118-R04-TG-011",
+      "classification": "TEST_GAP",
+      "title": "No unique-market-versus-venue-pair coverage metric test."
+    },
+    {
+      "id": "BWS118-R04-TG-012",
+      "classification": "TEST_GAP",
+      "title": "No malformed null/nonobject report-boundary test for createB1FalsePositiveReport."
+    },
+    {
+      "id": "BWS118-R04-TG-013",
+      "classification": "TEST_GAP",
+      "title": "No behavioral validator proving the module named by partialFillModelStatus implements partial fills."
+    },
+    {
+      "id": "BWS118-R04-TG-014",
+      "classification": "TEST_GAP",
+      "title": "Canonical Node 20.20.2 build and focused suite were not rerun in this environment."
+    },
+    {
+      "id": "BWS118-R04-TG-015",
+      "classification": "TEST_GAP",
+      "title": "Accepted live B1 and provider terminal-lifecycle fixtures were unavailable by design."
+    }
+  ]
+}

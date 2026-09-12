@@ -1,0 +1,17 @@
+{
+  "application_implementation_performed": false,
+  "confirmed_findings": 85,
+  "confirmed_ids_unique": true,
+  "current_mutable_authority_overwritten": false,
+  "duplicate_raw_ids": {
+    "KNOWN_BASELINE_MANIFEST_DRIFT": 2
+  },
+  "input_records_accounted_for": 251,
+  "input_reports_accounted_for": 6,
+  "intentional_duplicate_canonical_record": "KNOWN_BASELINE_MANIFEST_DRIFT",
+  "mapping_records": 251,
+  "new_wave_reports_accounted_for": 3,
+  "schema": "betting-win-surebet-wave02-completeness-reconciliation-v1",
+  "silent_renumbering": false,
+  "unmapped_records": 0
+}

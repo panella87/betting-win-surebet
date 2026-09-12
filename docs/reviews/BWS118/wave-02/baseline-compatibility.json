@@ -1,0 +1,77 @@
+{
+  "bws117_to_bws118": {
+    "added_paths": [
+      "docs/reviews/BWS117/wave-01/README.md",
+      "docs/reviews/BWS117/wave-01/area-coverage.md",
+      "docs/reviews/BWS117/wave-01/authority-map.md",
+      "docs/reviews/BWS117/wave-01/baseline-compatibility.json",
+      "docs/reviews/BWS117/wave-01/baseline-compatibility.md",
+      "docs/reviews/BWS117/wave-01/baseline-file-manifest.tsv",
+      "docs/reviews/BWS117/wave-01/completeness-reconciliation.json",
+      "docs/reviews/BWS117/wave-01/cumulative-consolidated-ledger.json",
+      "docs/reviews/BWS117/wave-01/cumulative-consolidated-ledger.md",
+      "docs/reviews/BWS117/wave-01/decisions.json",
+      "docs/reviews/BWS117/wave-01/decisions.md",
+      "docs/reviews/BWS117/wave-01/dependency-and-tranches.md",
+      "docs/reviews/BWS117/wave-01/documentation-integration-plan.json",
+      "docs/reviews/BWS117/wave-01/incremental-consolidation.md",
+      "docs/reviews/BWS117/wave-01/input-inventory.json",
+      "docs/reviews/BWS117/wave-01/next-wave-handoff.md",
+      "docs/reviews/BWS117/wave-01/non-defect-register.json",
+      "docs/reviews/BWS117/wave-01/original-to-consolidated.json",
+      "docs/reviews/BWS117/wave-01/prior-overlay-lineage.json",
+      "docs/reviews/BWS117/wave-01/prior-overlay-lineage.md",
+      "docs/reviews/BWS117/wave-01/protected-mutable-documents.json",
+      "docs/reviews/BWS117/wave-01/report-index.json",
+      "docs/reviews/BWS117/wave-01/reports/R01/BWS116-R01-coverage.tsv",
+      "docs/reviews/BWS117/wave-01/reports/R01/BWS116-R01-findings.json",
+      "docs/reviews/BWS117/wave-01/reports/R01/BWS116-R01-report.md",
+      "docs/reviews/BWS117/wave-01/reports/R01/BWS116-R01-validation.json",
+      "docs/reviews/BWS117/wave-01/reports/R02/BWS116-R02-coverage.tsv",
+      "docs/reviews/BWS117/wave-01/reports/R02/BWS116-R02-findings.json",
+      "docs/reviews/BWS117/wave-01/reports/R02/BWS116-R02-report.md",
+      "docs/reviews/BWS117/wave-01/reports/R02/BWS116-R02-validation.json",
+      "docs/reviews/BWS117/wave-01/reports/R03/BWS116-R03-coverage.tsv",
+      "docs/reviews/BWS117/wave-01/reports/R03/BWS116-R03-findings.json",
+      "docs/reviews/BWS117/wave-01/reports/R03/BWS116-R03-report.md",
+      "docs/reviews/BWS117/wave-01/reports/R03/BWS116-R03-validation.json",
+      "docs/reviews/BWS117/wave-01/repository-profile.md",
+      "docs/reviews/BWS117/wave-01/source-verification.json",
+      "docs/reviews/BWS117/wave-01/test-evidence-matrix.json",
+      "docs/reviews/BWS117/wave-01/test-evidence-matrix.md",
+      "docs/reviews/README.md"
+    ],
+    "changed_paths": [
+      "docs/000_documentation_index.md"
+    ],
+    "non_documentation_differences": [],
+    "removed_paths": [],
+    "wave01_overlay_path_set_matches": true,
+    "wave01_overlay_postimages_match": true
+  },
+  "current_archive": {
+    "filename": "betting-win-surebet118.zip",
+    "regular_files": 657,
+    "sha256": "50bbcb0b476904c8209cf7e1287b5ac4f9091fa07f6fd67523fc5430029417f7"
+  },
+  "executable_compatibility": "PASS_EXACT_NON_DOCUMENTATION_BYTE_EQUIVALENCE",
+  "original_wave01_source": {
+    "filename": "betting-win-surebet116.zip",
+    "regular_files": 618,
+    "sha256": "6cc5be4e7f3a637d7c0ed9485f246ade4975b5a8e60d3895943e0471afc29376"
+  },
+  "prior_archive": {
+    "filename": "betting-win-surebet117.zip",
+    "regular_files": 618,
+    "sha256": "0d234e00d015dcab0989b47372ded516bddee9705d9021a0694916dc91a9d494"
+  },
+  "report_classifications": {
+    "R01": "COMPATIBLE_AND_UNAFFECTED_BY_DELTA",
+    "R02": "COMPATIBLE_AND_UNAFFECTED_BY_DELTA",
+    "R03": "COMPATIBLE_AND_UNAFFECTED_BY_DELTA",
+    "R04": "CURRENT_BASELINE",
+    "R05": "CURRENT_BASELINE",
+    "R06": "CURRENT_BASELINE"
+  },
+  "schema": "betting-win-surebet-wave02-baseline-compatibility-v1"
+}

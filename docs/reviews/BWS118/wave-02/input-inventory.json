@@ -1,0 +1,269 @@
+{
+  "inputs": [
+    {
+      "accepted_authority_class": "CURRENT_REPOSITORY_AUTHORITY",
+      "derivative_or_primary": "primary",
+      "filename": "betting-win-surebet118.zip",
+      "format": "ZIP",
+      "notes": "",
+      "role": "current repository archive",
+      "sha256": "50bbcb0b476904c8209cf7e1287b5ac4f9091fa07f6fd67523fc5430029417f7",
+      "stated_baseline": "BWS118",
+      "supersession_status": "current"
+    },
+    {
+      "accepted_authority_class": "OLDER_REPOSITORY_AUTHORITY",
+      "derivative_or_primary": "primary",
+      "filename": "betting-win-surebet117.zip",
+      "format": "ZIP",
+      "notes": "",
+      "role": "prior exact repository archive",
+      "sha256": "0d234e00d015dcab0989b47372ded516bddee9705d9021a0694916dc91a9d494",
+      "stated_baseline": "BWS117",
+      "supersession_status": "superseded_by_BWS118"
+    },
+    {
+      "accepted_authority_class": "OLDER_REPOSITORY_AUTHORITY",
+      "derivative_or_primary": "primary",
+      "filename": "betting-win-surebet116.zip",
+      "format": "ZIP",
+      "notes": "",
+      "role": "Wave 01 source-review baseline",
+      "sha256": "6cc5be4e7f3a637d7c0ed9485f246ade4975b5a8e60d3895943e0471afc29376",
+      "stated_baseline": "BWS116",
+      "supersession_status": "source_equivalent_non_documentation"
+    },
+    {
+      "accepted_authority_class": "HISTORICAL_RUNTIME_CONTEXT",
+      "derivative_or_primary": "primary",
+      "filename": "artifacts62(6).zip",
+      "format": "ZIP",
+      "notes": "",
+      "role": "historical BWS campaign evidence",
+      "sha256": "25f8b16d63787f0641f11d779e8e0ff1830f07cda482e1b2df002df3a3aa86b4",
+      "stated_baseline": "historical",
+      "supersession_status": "not_current_runtime_proof"
+    },
+    {
+      "accepted_authority_class": "PRIOR_OVERLAY_EVIDENCE",
+      "derivative_or_primary": "derivative",
+      "filename": "betting-win-surebet-cross-review-docs-overlay-r01-r03-wave01-rebased-0d234e00-20260911.zip",
+      "format": "ZIP",
+      "notes": "",
+      "role": "prior documentation overlay",
+      "sha256": "3e7cac2faa605e946716ea2452198968e40438f0f256c9db5883a2b31863f481",
+      "stated_baseline": "BWS117",
+      "supersession_status": "landed_in_BWS118"
+    },
+    {
+      "accepted_authority_class": "PRIOR_PROCESS_EVIDENCE",
+      "derivative_or_primary": "derivative",
+      "filename": "apply-betting-win-surebet-cross-review-docs-overlay-r01-r03-wave01-rebased-0d234e00-20260911.sh",
+      "format": "SH",
+      "notes": "",
+      "role": "prior local apply script",
+      "sha256": "fa49a0ed8bcbf6862dcc44d823152005e2eec3a9ff1c83aa30364789ead3b1fa",
+      "stated_baseline": "BWS117",
+      "supersession_status": "superseded"
+    },
+    {
+      "accepted_authority_class": "PRIOR_CONSOLIDATED_LEDGER",
+      "derivative_or_primary": "derivative",
+      "filename": "betting-win-surebet-cross-review-consolidation-r01-r03-wave01-rebased-0d234e00-20260911.md",
+      "format": "MD",
+      "notes": "",
+      "role": "prior standalone ledger",
+      "sha256": "ef98192718c328aba2eac91817d81827e9209778b30283d7f6aa64036196283b",
+      "stated_baseline": "BWS117",
+      "supersession_status": "preserved_in_current_repo"
+    },
+    {
+      "accepted_authority_class": "PRIOR_PROCESS_EVIDENCE",
+      "derivative_or_primary": "derivative",
+      "filename": "betting-win-surebet-cross-review-docs-overlay-r01-r03-wave01-rebased-0d234e00-validation-20260911.txt",
+      "format": "TXT",
+      "notes": "",
+      "role": "prior validation record",
+      "sha256": "16642157bbe6dbfeb5bb6944b928df42a658f7598ff5ed71fb88208c4a2354f5",
+      "stated_baseline": "BWS117",
+      "supersession_status": "preserved_as_process_evidence"
+    },
+    {
+      "accepted_authority_class": "PRIOR_PROCESS_EVIDENCE",
+      "derivative_or_primary": "derivative",
+      "filename": "betting-win-surebet-cross-review-docs-overlay-r01-r03-wave01-rebased-0d234e00-checksums-20260911.txt",
+      "format": "TXT",
+      "notes": "",
+      "role": "prior checksum manifest",
+      "sha256": "5aeab05792e6cf5f6f9a6b19ff49c6294dd97ed03d7e302120e006aa2a960bda",
+      "stated_baseline": "BWS117",
+      "supersession_status": "preserved_as_process_evidence"
+    },
+    {
+      "accepted_authority_class": "PRIOR_PROCESS_EVIDENCE",
+      "derivative_or_primary": "derivative",
+      "filename": "verify-betting-win-surebet-cross-review-docs-r01-r03-wave01-rebased-0d234e00-server-20260911.sh",
+      "format": "SH",
+      "notes": "",
+      "role": "prior target verification script",
+      "sha256": "f5e317f5d210a7777d4ad400082d3180d9f8709b5844dea35674d08ce2be5965",
+      "stated_baseline": "BWS117",
+      "supersession_status": "superseded"
+    },
+    {
+      "accepted_authority_class": "PRIOR_HANDOFF",
+      "derivative_or_primary": "derivative",
+      "filename": "betting-win-surebet-wave01-next-review-handoff-r01-r03-rebased-0d234e00-20260911.md",
+      "format": "MD",
+      "notes": "",
+      "role": "Wave 02 input handoff",
+      "sha256": "9a896b8e4100582cb2790c3567cd259068c7c296afd911b93b25cda20464b51e",
+      "stated_baseline": "BWS117",
+      "supersession_status": "consumed"
+    },
+    {
+      "accepted_authority_class": "CURRENT_BASELINE_REVIEW_EVIDENCE",
+      "derivative_or_primary": "primary",
+      "filename": "BWS118-R04-report(1).md",
+      "format": "MD",
+      "notes": "",
+      "role": "R04 review report",
+      "sha256": "7371612b96b32131fd0c7f8e9bab9189c64b7eddcb231befe79c70300da3ed22",
+      "stated_baseline": "BWS118",
+      "supersession_status": "accepted"
+    },
+    {
+      "accepted_authority_class": "CURRENT_BASELINE_REVIEW_EVIDENCE",
+      "derivative_or_primary": "primary",
+      "filename": "BWS118-R04-findings(1).json",
+      "format": "JSON",
+      "notes": "",
+      "role": "R04 finding records",
+      "sha256": "640e569dacffa17bf46e5417bb95ecc9449a6c2923a63b4c9c92b4b3f22ef0b0",
+      "stated_baseline": "BWS118",
+      "supersession_status": "accepted"
+    },
+    {
+      "accepted_authority_class": "CURRENT_BASELINE_REVIEW_EVIDENCE",
+      "derivative_or_primary": "primary",
+      "filename": "BWS118-R04-coverage(1).tsv",
+      "format": "TSV",
+      "notes": "",
+      "role": "R04 coverage manifest",
+      "sha256": "95405dc41ca715df39778634677f168a5e93d1640c59ba7c89140eaaa4745dfe",
+      "stated_baseline": "BWS118",
+      "supersession_status": "accepted"
+    },
+    {
+      "accepted_authority_class": "CURRENT_BASELINE_REVIEW_EVIDENCE",
+      "derivative_or_primary": "primary",
+      "filename": "BWS118-R04-validation(1).json",
+      "format": "JSON",
+      "notes": "",
+      "role": "R04 validation record",
+      "sha256": "4318d562dce35f559e7573dfc333ce44651c24c7daaf0a049b862904534c18ef",
+      "stated_baseline": "BWS118",
+      "supersession_status": "accepted"
+    },
+    {
+      "accepted_authority_class": "CURRENT_BASELINE_REVIEW_EVIDENCE",
+      "derivative_or_primary": "primary",
+      "filename": "BWS118-R05-report(1).md",
+      "format": "MD",
+      "notes": "",
+      "role": "R05 review report",
+      "sha256": "37a873ac346aab7e1292a91034490501dab6f558bd977dad557baddb013f7310",
+      "stated_baseline": "BWS118",
+      "supersession_status": "accepted"
+    },
+    {
+      "accepted_authority_class": "CURRENT_BASELINE_REVIEW_EVIDENCE",
+      "derivative_or_primary": "primary",
+      "filename": "BWS118-R05-findings(1).json",
+      "format": "JSON",
+      "notes": "",
+      "role": "R05 finding records",
+      "sha256": "a028eb13e1786b76e942df3fd09b69d6aabe2cd6a83f9941cc694cfcc6b75ef9",
+      "stated_baseline": "BWS118",
+      "supersession_status": "accepted"
+    },
+    {
+      "accepted_authority_class": "CURRENT_BASELINE_REVIEW_EVIDENCE",
+      "derivative_or_primary": "primary",
+      "filename": "BWS118-R05-coverage(1).tsv",
+      "format": "TSV",
+      "notes": "",
+      "role": "R05 coverage manifest",
+      "sha256": "777d5a09500a6097e1c80501eb3dd0d73e3c33d1a412e3c4f826f9c918dc3f70",
+      "stated_baseline": "BWS118",
+      "supersession_status": "accepted"
+    },
+    {
+      "accepted_authority_class": "CURRENT_BASELINE_REVIEW_EVIDENCE",
+      "derivative_or_primary": "primary",
+      "filename": "BWS118-R05-validation(1).json",
+      "format": "JSON",
+      "notes": "",
+      "role": "R05 validation record",
+      "sha256": "6fb8e3f8abf3cc092fefb19f1b0975e1f2bb500b64341e90652e7cdf897e1cd1",
+      "stated_baseline": "BWS118",
+      "supersession_status": "accepted"
+    },
+    {
+      "accepted_authority_class": "CURRENT_BASELINE_REVIEW_EVIDENCE",
+      "derivative_or_primary": "primary",
+      "filename": "BWS118-R06-report(1).md",
+      "format": "MD",
+      "notes": "",
+      "role": "R06 review report",
+      "sha256": "b3cd68c0d0fc96ce84febc405bc1c1e67715856f1723adfe739d21165f84fe32",
+      "stated_baseline": "BWS118",
+      "supersession_status": "accepted"
+    },
+    {
+      "accepted_authority_class": "CURRENT_BASELINE_REVIEW_EVIDENCE",
+      "derivative_or_primary": "primary",
+      "filename": "BWS118-R06-findings(1).json",
+      "format": "JSON",
+      "notes": "",
+      "role": "R06 finding records",
+      "sha256": "bbaadabb6fceccc7c977c57a924d206f4ce2cbde43cc60d2d4ab24d9b6377ee1",
+      "stated_baseline": "BWS118",
+      "supersession_status": "accepted"
+    },
+    {
+      "accepted_authority_class": "CURRENT_BASELINE_REVIEW_EVIDENCE",
+      "derivative_or_primary": "primary",
+      "filename": "BWS118-R06-coverage(1).tsv",
+      "format": "TSV",
+      "notes": "",
+      "role": "R06 coverage manifest",
+      "sha256": "727e821c56ca598fac52cb30df6fc5cff348e5c5521fb5780a9006e60ef78d57",
+      "stated_baseline": "BWS118",
+      "supersession_status": "accepted"
+    },
+    {
+      "accepted_authority_class": "CURRENT_BASELINE_REVIEW_EVIDENCE",
+      "derivative_or_primary": "primary",
+      "filename": "BWS118-R06-validation(1).json",
+      "format": "JSON",
+      "notes": "",
+      "role": "R06 validation record",
+      "sha256": "d4b77ee70c47d96eff4ccd1dc3f44b04175b674f14899ecab67d3696058602b4",
+      "stated_baseline": "BWS118",
+      "supersession_status": "accepted"
+    },
+    {
+      "accepted_authority_class": "PROCESS_EVIDENCE_ONLY",
+      "derivative_or_primary": "primary",
+      "filename": "current conversation transcript",
+      "format": "CONVERSATION_TRANSCRIPT",
+      "notes": "Does not override repository bytes.",
+      "role": "prior overlay/process lineage and task instructions",
+      "sha256": "NOT_STANDALONE_FILE",
+      "stated_baseline": "BWS117/BWS118",
+      "supersession_status": "current_process_context"
+    }
+  ],
+  "schema": "betting-win-surebet-wave02-input-inventory-v1"
+}

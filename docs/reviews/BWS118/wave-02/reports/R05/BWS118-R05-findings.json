@@ -1,0 +1,1704 @@
+{
+  "schema": "betting-win-surebet-r05-findings-v1",
+  "review_id": "BWS118-R05",
+  "repository": "betting-win-surebet",
+  "archive": "betting-win-surebet118(1).zip",
+  "archive_sha256": "50bbcb0b476904c8209cf7e1287b5ac4f9091fa07f6fd67523fc5430029417f7",
+  "regular_file_count": 657,
+  "source_equivalence": {
+    "original_review_baseline": "betting-win-surebet116.zip",
+    "original_review_baseline_sha256": "6cc5be4e7f3a637d7c0ed9485f246ade4975b5a8e60d3895943e0471afc29376",
+    "prior_rebased_baseline": "betting-win-surebet117.zip",
+    "prior_rebased_baseline_sha256": "0d234e00d015dcab0989b47372ded516bddee9705d9021a0694916dc91a9d494",
+    "non_documentation_differences_from_bws117": [],
+    "non_documentation_differences_from_bws116": [],
+    "verdict": "EXECUTABLE_SOURCE_EQUIVALENT_DOCUMENTATION_ONLY_REBASE"
+  },
+  "package": {
+    "name": "betting-win-surebet",
+    "version": "0.1.0-bws-full-platform"
+  },
+  "canonical_runtime": "Node 20.20.2",
+  "actual_runtime": "Node 22.16.0",
+  "actual_runtime_classification": "SUPPLEMENTARY_NONCANONICAL",
+  "verdict": "BLOCKED_API_AND_PRESENTATION_CORRECTNESS_REMEDIATION_REQUIRED",
+  "confirmed_finding_count": 13,
+  "confirmed_severity_counts": {
+    "P1": 10,
+    "P2": 3
+  },
+  "record_classification_counts": {
+    "CONFIRMED_FINDING": 13,
+    "CROSS_AREA_HANDOFF": 7,
+    "EXTERNAL_INPUT_BLOCKER": 4,
+    "HYPOTHESIS": 1,
+    "INTENTIONAL_SAFEGUARD": 5,
+    "REJECTED_SUSPICION": 3,
+    "TEST_GAP": 11
+  },
+  "inherited_finding_overlap": {
+    "count_checked": 41,
+    "duplicate_ids_created": [],
+    "checks": [
+      {
+        "id": "BWS116-R01-001",
+        "title": "Committed-HEAD lock derivation honors repository-local Git replacement objects",
+        "disposition": "INDEXED_NO_R05_DUPLICATE_ROOT",
+        "owner_preserved": "R01"
+      },
+      {
+        "id": "BWS116-R01-002",
+        "title": "Upstream lock is assembled from multiple unconstrained HEAD observations rather than one pinned object graph",
+        "disposition": "INDEXED_NO_R05_DUPLICATE_ROOT",
+        "owner_preserved": "R01"
+      },
+      {
+        "id": "BWS116-R01-003",
+        "title": "API convergence records completion metadata but not the exact records later consumed",
+        "disposition": "DEPENDENCY_R05_007_NO_DUPLICATE",
+        "owner_preserved": "R01"
+      },
+      {
+        "id": "BWS116-R01-004",
+        "title": "Accepted API records are not cryptographically bound to exact response bytes, route, query, contract, generation, and page",
+        "disposition": "DEPENDENCY_R05_006_R05_007_NO_DUPLICATE",
+        "owner_preserved": "R01"
+      },
+      {
+        "id": "BWS116-R01-005",
+        "title": "Pagination does not bind every page to one immutable contract, profile, generation, and query identity",
+        "disposition": "DEPENDENCY_R05_002_R05_006_R05_007_NO_DUPLICATE",
+        "owner_preserved": "R01"
+      },
+      {
+        "id": "BWS116-R01-006",
+        "title": "Cursor traversal lacks a complete fail-closed proof against repetition, cycles, and non-progress",
+        "disposition": "INDEXED_NO_R05_DUPLICATE_ROOT",
+        "owner_preserved": "R01"
+      },
+      {
+        "id": "BWS116-R01-007",
+        "title": "Per-request timeout and retry controls do not establish one aggregate convergence deadline or late-result ownership",
+        "disposition": "INDEXED_NO_R05_DUPLICATE_ROOT",
+        "owner_preserved": "R01"
+      },
+      {
+        "id": "BWS116-R01-008",
+        "title": "Response-size enforcement occurs after fetch buffering and therefore is not a transport memory bound",
+        "disposition": "INDEXED_NO_R05_DUPLICATE_ROOT",
+        "owner_preserved": "R01"
+      },
+      {
+        "id": "BWS116-R01-009",
+        "title": "External-runtime URL validation is lexical and does not prove the destination is non-local across all address forms",
+        "disposition": "INDEXED_NO_R05_DUPLICATE_ROOT",
+        "owner_preserved": "R01"
+      },
+      {
+        "id": "BWS116-R01-010",
+        "title": "Source, receive, verification, import, and consumption times are not jointly enforced as distinct currentness evidence",
+        "disposition": "DEPENDENCY_R05_008_NO_DUPLICATE",
+        "owner_preserved": "R01"
+      },
+      {
+        "id": "BWS116-R02-001",
+        "title": "B1 complete-set acceptance proves only key cardinality, not mutually exclusive and exhaustive outcome semantics",
+        "disposition": "INDEXED_NO_R05_DUPLICATE_ROOT",
+        "owner_preserved": "R02"
+      },
+      {
+        "id": "BWS116-R02-002",
+        "title": "B1 market grouping and venue-pair identity omit provider and provider-generation authority",
+        "disposition": "DEPENDENCY_R05_011_NO_DUPLICATE",
+        "owner_preserved": "R02"
+      },
+      {
+        "id": "BWS116-R02-003",
+        "title": "B1 synchronization is pair-local and can combine terminal outcomes outside the configured global quote window",
+        "disposition": "INDEXED_NO_R05_DUPLICATE_ROOT",
+        "owner_preserved": "R02"
+      },
+      {
+        "id": "BWS116-R02-004",
+        "title": "B1 net economics accepts selected odds that are not value-bound to synchronized quote evidence",
+        "disposition": "DEPENDENCY_R05_010_R05_011_NO_DUPLICATE",
+        "owner_preserved": "R02"
+      },
+      {
+        "id": "BWS116-R02-005",
+        "title": "B1 integrated solver and net path is not bound to quote capacity or venue-limit decisions",
+        "disposition": "DEPENDENCY_R05_010_R05_011_NO_DUPLICATE",
+        "owner_preserved": "R02"
+      },
+      {
+        "id": "BWS116-R02-006",
+        "title": "B1 generalized solver can reject feasible two-way and three-way integer stake vectors",
+        "disposition": "INDEXED_NO_R05_DUPLICATE_ROOT",
+        "owner_preserved": "R02"
+      },
+      {
+        "id": "BWS116-R02-007",
+        "title": "Unescaped delimiter-based composite keys collide for distinct B1 identities and constraints",
+        "disposition": "REVIEWED_NO_R05_ROOT",
+        "owner_preserved": "R02"
+      },
+      {
+        "id": "BWS116-R02-008",
+        "title": "B1 line equivalence compares raw decimal text and rejects numerically identical markets",
+        "disposition": "INDEXED_NO_R05_DUPLICATE_ROOT",
+        "owner_preserved": "R02"
+      },
+      {
+        "id": "BWS116-R02-009",
+        "title": "Standard-binary complete-set assembly can mix YES and NO quotes from different source manifests",
+        "disposition": "INDEXED_NO_R05_DUPLICATE_ROOT",
+        "owner_preserved": "R02"
+      },
+      {
+        "id": "BWS116-R02-010",
+        "title": "Standard-binary quote freshness is per leg and permits an asynchronous YES/NO snapshot",
+        "disposition": "INDEXED_NO_R05_DUPLICATE_ROOT",
+        "owner_preserved": "R02"
+      },
+      {
+        "id": "BWS116-R02-011",
+        "title": "Standard-binary quote contract omits stake increment and silently substitutes minimum stake as the rounding step",
+        "disposition": "INDEXED_NO_R05_DUPLICATE_ROOT",
+        "owner_preserved": "R02"
+      },
+      {
+        "id": "BWS116-R02-012",
+        "title": "Standard scenario cash-flow validator accepts incomplete and non-rectangular matrices",
+        "disposition": "INDEXED_NO_R05_DUPLICATE_ROOT",
+        "owner_preserved": "R02"
+      },
+      {
+        "id": "BWS116-R02-013",
+        "title": "Locale-sensitive localeCompare calls make candidate, scenario, and solver ordering environment-dependent",
+        "disposition": "HANDOFF_ORDERING_NO_DUPLICATE",
+        "owner_preserved": "R02"
+      },
+      {
+        "id": "BWS116-R02-014",
+        "title": "B1 fee matrix cannot represent scenario-conditional or non-stake fee bases accepted by its venue-type domain",
+        "disposition": "INDEXED_NO_R05_DUPLICATE_ROOT",
+        "owner_preserved": "R02"
+      },
+      {
+        "id": "BWS116-R03-001",
+        "title": "Migration discovery can escape the repository and the SQL scope scanner admits cross-schema executable DDL",
+        "disposition": "INDEXED_NO_R05_DUPLICATE_ROOT",
+        "owner_preserved": "R03"
+      },
+      {
+        "id": "BWS116-R03-002",
+        "title": "The migration-status read path creates schema objects before reporting status",
+        "disposition": "INDEXED_NO_R05_DUPLICATE_ROOT",
+        "owner_preserved": "R03"
+      },
+      {
+        "id": "BWS116-R03-003",
+        "title": "Unknown applied migration rows are ignored and can be reported as compatible",
+        "disposition": "DEPENDENCY_R05_001_NO_DUPLICATE",
+        "owner_preserved": "R03"
+      },
+      {
+        "id": "BWS116-R03-004",
+        "title": "Concurrent migration applications are not serialized around ledger observation and insertion",
+        "disposition": "INDEXED_NO_R05_DUPLICATE_ROOT",
+        "owner_preserved": "R03"
+      },
+      {
+        "id": "BWS116-R03-005",
+        "title": "psql subprocesses have no explicit timeout or cancellation boundary",
+        "disposition": "INDEXED_NO_R05_DUPLICATE_ROOT",
+        "owner_preserved": "R03"
+      },
+      {
+        "id": "BWS116-R03-006",
+        "title": "Repository idempotency claims use read-then-insert races instead of atomic create-or-compare operations",
+        "disposition": "INDEXED_NO_R05_DUPLICATE_ROOT",
+        "owner_preserved": "R03"
+      },
+      {
+        "id": "BWS116-R03-007",
+        "title": "Finalization and checkpoint advances validate expected state in one session but update by ID in another",
+        "disposition": "DEPENDENCY_R05_001_R05_002_NO_DUPLICATE",
+        "owner_preserved": "R03"
+      },
+      {
+        "id": "BWS116-R03-008",
+        "title": "Worker heartbeat, checkpoint, completion, and retry transitions omit the lease fence from their mutation predicates",
+        "disposition": "INDEXED_NO_R05_DUPLICATE_ROOT",
+        "owner_preserved": "R03"
+      },
+      {
+        "id": "BWS116-R03-009",
+        "title": "Worker availability and lease validity are controlled by caller timestamps with inconsistent expiry boundaries",
+        "disposition": "INDEXED_NO_R05_DUPLICATE_ROOT",
+        "owner_preserved": "R03"
+      },
+      {
+        "id": "BWS116-R03-010",
+        "title": "Expired leases are always dead-lettered even when retry budget remains",
+        "disposition": "INDEXED_NO_R05_DUPLICATE_ROOT",
+        "owner_preserved": "R03"
+      },
+      {
+        "id": "BWS116-R03-011",
+        "title": "Configured service timeouts and shutdown signals do not cancel in-flight scheduler or worker work",
+        "disposition": "INDEXED_NO_R05_DUPLICATE_ROOT",
+        "owner_preserved": "R03"
+      },
+      {
+        "id": "BWS116-R03-012",
+        "title": "Checkpoint, dead-letter, B1 child-row, and expired-lease reads are unbounded",
+        "disposition": "DEPENDENCY_R05_003_R05_004_R05_005_NO_DUPLICATE",
+        "owner_preserved": "R03"
+      },
+      {
+        "id": "BWS116-R03-013",
+        "title": "Import-run retention ignores convergence references, causing either deletion failure or dangling durable identity",
+        "disposition": "DEPENDENCY_R05_003_NO_DUPLICATE",
+        "owner_preserved": "R03"
+      },
+      {
+        "id": "BWS116-R03-014",
+        "title": "Standard private-paper retries do not reconstruct durable previous cycle state",
+        "disposition": "INDEXED_NO_R05_DUPLICATE_ROOT",
+        "owner_preserved": "R03"
+      },
+      {
+        "id": "BWS116-R03-015",
+        "title": "B1 backtest persistence commits the parent before children and suppresses repair on replay",
+        "disposition": "INDEXED_NO_R05_DUPLICATE_ROOT",
+        "owner_preserved": "R03"
+      },
+      {
+        "id": "BWS116-R03-016",
+        "title": "B1 observation terminality and worker-job terminality can diverge after a crash",
+        "disposition": "INDEXED_NO_R05_DUPLICATE_ROOT",
+        "owner_preserved": "R03"
+      },
+      {
+        "id": "BWS116-R03-017",
+        "title": "Durable lifecycle tables accept impossible timestamp orderings",
+        "disposition": "DEPENDENCY_R05_010_NO_DUPLICATE",
+        "owner_preserved": "R03"
+      }
+    ]
+  },
+  "records": [
+    {
+      "id": "BWS118-R05-001",
+      "title": "The HTTP boundary collapses validation, policy, persistence, and internal failures into HTTP 400 and returns raw exception text",
+      "severity": "P2",
+      "confidence": 0.99,
+      "classification": "CONFIRMED_FINDING",
+      "current_files_symbols_line_ranges_hashes": [
+        {
+          "path": "packages/bootstrap/src/api/bws-read-only-query-http.ts",
+          "symbol": "createBwsReadOnlyQueryHttpHandler query dispatch and catch",
+          "line_range": "157-217",
+          "full_file_sha256": "fc644a168e07d1afa63d84fa85582cda9c37994b2b4d66ea7366c1f442c7ac17"
+        },
+        {
+          "path": "packages/bootstrap/src/api/bws-read-only-query-http.ts",
+          "symbol": "writeBlockedResponse",
+          "line_range": "380-401",
+          "full_file_sha256": "fc644a168e07d1afa63d84fa85582cda9c37994b2b4d66ea7366c1f442c7ac17"
+        }
+      ],
+      "preconditions": [
+        "A GET request reaches any read-only query route.",
+        "The service returns a blocker or a repository/service dependency throws an exception."
+      ],
+      "trigger": "Trigger a repository exception, service availability failure, malformed persisted row, or a blocked result with more than one diagnostic.",
+      "expected_behavior": "Request-validation failures, domain-policy holds, not-found results, dependency outages, and unexpected internal faults must retain distinct status classes and sanitized envelopes; all relevant blockers must remain available to operators without exposing internals.",
+      "current_behavior": "Every service blocker is emitted as HTTP 400 using only blockers[0]. A single broad catch also maps unexpected exceptions to HTTP 400/BWS_QUERY_REQUEST_INVALID and returns Error.message verbatim.",
+      "impact": "Clients cannot distinguish an empty/invalid query from a database or service fault, retry policy becomes wrong, and internal SQL/relation/path detail can cross the HTTP boundary. Operational dashboards can classify infrastructure failure as caller error.",
+      "independent_evidence": [
+        "Static trace shows all four query routes select only result.blockers[0], and writeBlockedResponse always uses status 400.",
+        "The bounded inert harness injected an exception with internal relation text; the handler returned status 400 and the exact message in JSON while retaining cache-control=no-store."
+      ],
+      "reproduction_status": "REPRODUCED_OFFLINE_NODE22_SUPPLEMENTARY",
+      "root_cause": "The HTTP adapter has one catch-all request error path and no typed translation layer from query/domain/repository errors to a stable public error taxonomy.",
+      "minimal_fix_boundary": "Change only the R05 HTTP/error-envelope boundary: classify malformed input, policy hold, not found, conflict, unavailable dependency, timeout, and internal failure; sanitize internal exceptions; preserve a bounded blocker list or diagnostic identifier. Do not alter repository transaction semantics.",
+      "required_tests": [
+        "Production-handler tests for 400/404/409/422/503/504/500 distinctions using inert typed failures.",
+        "Test that raw SQL, filesystem, connection, and stack detail never appears in the response.",
+        "Test that multiple blockers are retained deterministically or referenced by a stable diagnostic ID.",
+        "Client test proving non-2xx classes remain distinguishable from an empty successful page."
+      ],
+      "regression_risks": [
+        "Status-code changes can affect cockpit copy and operator retry behavior.",
+        "Sanitization must retain enough stable diagnostic identity for support.",
+        "Do not convert accepted holds into transient infrastructure failures."
+      ],
+      "primary_owner": "R05",
+      "secondary_sectors": [
+        "R03 persistence error production",
+        "R06 service availability and health",
+        "R07 operational evidence",
+        "R11 validator truth"
+      ],
+      "aliases_or_dependencies": [
+        "BWS116-R03-003",
+        "BWS116-R03-007"
+      ],
+      "explicitly_unchanged_areas": [
+        "Repository SQL and transaction behavior",
+        "BWS query mathematics",
+        "GET-only route set"
+      ],
+      "blocks": {
+        "release": true,
+        "bws_600_evidence": true,
+        "b1_acceptance": true,
+        "later_execution": false
+      }
+    },
+    {
+      "id": "BWS118-R05-002",
+      "title": "Pagination cursors are caller-forgeable position tokens with no immutable snapshot, version, or high-watermark binding",
+      "severity": "P1",
+      "confidence": 0.99,
+      "classification": "CONFIRMED_FINDING",
+      "current_files_symbols_line_ranges_hashes": [
+        {
+          "path": "packages/bootstrap/src/api/bws-read-only-query-service.ts",
+          "symbol": "CursorPayload",
+          "line_range": "306-310",
+          "full_file_sha256": "896bb5ff7db46af530b8e80f93b01b293295f98aa983c948eb57ee3f2a13c424"
+        },
+        {
+          "path": "packages/bootstrap/src/api/bws-read-only-query-service.ts",
+          "symbol": "queryB1BacktestRuns / queryStrategyLedger cursor production",
+          "line_range": "397-473",
+          "full_file_sha256": "896bb5ff7db46af530b8e80f93b01b293295f98aa983c948eb57ee3f2a13c424"
+        },
+        {
+          "path": "packages/bootstrap/src/api/bws-read-only-query-service.ts",
+          "symbol": "hashCursorScope / decodeCursor / encodeCursor",
+          "line_range": "1991-2052",
+          "full_file_sha256": "896bb5ff7db46af530b8e80f93b01b293295f98aa983c948eb57ee3f2a13c424"
+        }
+      ],
+      "preconditions": [
+        "A resource has more than one page or changes between page requests.",
+        "The caller knows the resource and filters, which are already visible in the request."
+      ],
+      "trigger": "Reuse a cursor after rows are inserted/reordered, or synthesize base64url JSON containing an arbitrary afterId and the public filter hash.",
+      "expected_behavior": "A continuation token must be server-authenticated or otherwise non-malleable and must bind resource, exact query/sort contract, API version, and one immutable snapshot/high-watermark so continuation is deterministic and restart-safe.",
+      "current_behavior": "The token is plain base64url JSON with only resource, filtersSha256, and afterId. The SHA-256 is unkeyed and recomputable by any caller. There is no snapshot ID, high-watermark, sort version, expiry, or server-side continuation state.",
+      "impact": "A caller can skip directly to an arbitrary ID, and normal concurrent insertion can omit records across pages while both responses appear complete and valid. Restarted or delayed consumers cannot prove which dataset the cursor continues.",
+      "independent_evidence": [
+        "The inert harness built a valid cursor without receiving one from the service and confirmed attacker-selected-after-id reached the repository.",
+        "A two-page harness inserted a lexically earlier row after page one; page two continued after the prior ID and omitted the inserted row. The response had no snapshot identity."
+      ],
+      "reproduction_status": "REPRODUCED_OFFLINE_NODE22_SUPPLEMENTARY",
+      "root_cause": "The query layer treats an opaque encoding plus public scope hash as cursor integrity and treats live keyset position as snapshot continuity.",
+      "minimal_fix_boundary": "At the R05 query boundary, introduce a versioned cursor contract bound to canonical sort and immutable high-watermark/snapshot identity; authenticate or server-register it; reject expired, unknown, or mismatched continuations. Hand database snapshot/fencing implementation to R03 where required.",
+      "required_tests": [
+        "Forged-cursor rejection test using a recomputed filter hash.",
+        "Concurrent insert/delete/update continuation tests with a fixed snapshot.",
+        "Restart test proving a valid continuation resumes the same snapshot or fails explicitly as expired.",
+        "Sort-version and API-version mismatch tests.",
+        "Property test that concatenated pages equal one snapshot query without duplicate or omission."
+      ],
+      "regression_risks": [
+        "Stateful cursors add retention and cleanup needs.",
+        "Snapshot semantics may require PostgreSQL support and a migration.",
+        "Cursor format changes require explicit versioning rather than silent compatibility."
+      ],
+      "primary_owner": "R05",
+      "secondary_sectors": [
+        "R03 transaction/snapshot support",
+        "R10 environment/secret policy if cursor authentication uses a key",
+        "R11 adversarial pagination tests"
+      ],
+      "aliases_or_dependencies": [
+        "BWS116-R01-005",
+        "BWS116-R03-007"
+      ],
+      "explicitly_unchanged_areas": [
+        "Repository key ordering itself",
+        "Upstream API pagination",
+        "B1 economic calculations"
+      ],
+      "blocks": {
+        "release": true,
+        "bws_600_evidence": true,
+        "b1_acceptance": true,
+        "later_execution": true
+      }
+    },
+    {
+      "id": "BWS118-R05-003",
+      "title": "Private-paper runtime-cycle queries scan only a recent heuristic window and can return a false empty page with no continuation or truncation signal",
+      "severity": "P1",
+      "confidence": 0.99,
+      "classification": "CONFIRMED_FINDING",
+      "current_files_symbols_line_ranges_hashes": [
+        {
+          "path": "packages/bootstrap/src/api/bws-read-only-query-service.ts",
+          "symbol": "BwsPrivatePaperRuntimeCycleQueryRequest",
+          "line_range": "152-164",
+          "full_file_sha256": "896bb5ff7db46af530b8e80f93b01b293295f98aa983c948eb57ee3f2a13c424"
+        },
+        {
+          "path": "packages/bootstrap/src/api/bws-read-only-query-service.ts",
+          "symbol": "queryPrivatePaperRuntimeCycles",
+          "line_range": "581-678",
+          "full_file_sha256": "896bb5ff7db46af530b8e80f93b01b293295f98aa983c948eb57ee3f2a13c424"
+        }
+      ],
+      "preconditions": [
+        "A scheduler has more than pageSize*4 historical cycles.",
+        "A requested acceptance/filter match exists outside the most recent scan window."
+      ],
+      "trigger": "Query pageSize=1 for a filter whose newest match is cycle 6 while the scheduler upper cycle is 10.",
+      "expected_behavior": "The API must either query the entire bounded keyspace using deterministic continuation or explicitly return partial/truncated/incomplete state and a continuation mechanism. An empty page may mean no matching row only after the searchable snapshot is exhausted.",
+      "current_behavior": "The request has no cursor. For each scheduler, only the last pageSize*4 cycle numbers are inspected, then the global results are sliced to pageSize. The response never emits nextCursor, scanned range, truncation, or completeness.",
+      "impact": "Operators can receive returnedCount=0 and infer no runtime evidence even though older matching cycles exist. This can manufacture absence, hide held/failed history, and make restart investigation incomplete.",
+      "independent_evidence": [
+        "The bounded harness used upper cycle 10 and a matching row at cycle 6 with pageSize=1. Only cycles 10, 9, 8, and 7 were scanned; the API returned an accepted empty page with no cursor.",
+        "Static tracing confirms lowerCycleNumber is derived solely from pageSize*4, not from a stored continuation or matching-row boundary."
+      ],
+      "reproduction_status": "REPRODUCED_OFFLINE_NODE22_SUPPLEMENTARY",
+      "root_cause": "Runtime-cycle projection is implemented as recent-window sampling but uses the same successful page contract as an exhaustive filtered query.",
+      "minimal_fix_boundary": "Replace heuristic sampling with a deterministic repository/read-model query and continuation, or introduce an explicit bounded scan contract carrying searched range, truncation, partial/completeness status, and continuation. Do not change worker/job durable state in R05.",
+      "required_tests": [
+        "Older-match test proving it is returned through continuation or the response is explicitly partial.",
+        "No-match test that distinguishes exhausted snapshot from truncated scan.",
+        "Multiple-scheduler ordering and continuation tests.",
+        "Restart test with the same search snapshot/high-watermark.",
+        "UI test that partial runtime-cycle results cannot be presented as absence."
+      ],
+      "regression_risks": [
+        "A new read model may require indexes or schema support.",
+        "Changing from sampling to exhaustive query can expose large historical datasets.",
+        "Continuation order must remain deterministic across scheduler IDs and timestamps."
+      ],
+      "primary_owner": "R05",
+      "secondary_sectors": [
+        "R03 runtime-cycle persistence/read model",
+        "R06 service resource limits",
+        "R08 retention lifecycle",
+        "R11 pagination/property tests"
+      ],
+      "aliases_or_dependencies": [
+        "BWS116-R03-012",
+        "BWS116-R03-013"
+      ],
+      "explicitly_unchanged_areas": [
+        "Scheduler checkpoint write semantics",
+        "Worker state transitions",
+        "Strategy acceptance computation"
+      ],
+      "blocks": {
+        "release": true,
+        "bws_600_evidence": true,
+        "b1_acceptance": false,
+        "later_execution": true
+      }
+    },
+    {
+      "id": "BWS118-R05-004",
+      "title": "Maximum-size runtime-cycle reads expand into at least 50,000 synchronous dependency calls before optional provenance work",
+      "severity": "P2",
+      "confidence": 0.98,
+      "classification": "CONFIRMED_FINDING",
+      "current_files_symbols_line_ranges_hashes": [
+        {
+          "path": "packages/bootstrap/src/api/bws-read-only-query-service.ts",
+          "symbol": "queryPrivatePaperRuntimeCycles scheduler/cycle nested scan",
+          "line_range": "592-660",
+          "full_file_sha256": "896bb5ff7db46af530b8e80f93b01b293295f98aa983c948eb57ee3f2a13c424"
+        },
+        {
+          "path": "packages/bootstrap/src/api/bws-read-only-query-service.ts",
+          "symbol": "buildPrivatePaperRuntimeCycleItem",
+          "line_range": "853-945",
+          "full_file_sha256": "896bb5ff7db46af530b8e80f93b01b293295f98aa983c948eb57ee3f2a13c424"
+        },
+        {
+          "path": "packages/bootstrap/src/api/bws-read-only-query-service.ts",
+          "symbol": "findPrivatePaperRuntimeStrategyLedger / findCompletedCycleImportRun",
+          "line_range": "1041-1117",
+          "full_file_sha256": "896bb5ff7db46af530b8e80f93b01b293295f98aa983c948eb57ee3f2a13c424"
+        },
+        {
+          "path": "packages/bootstrap/src/operations/runtime-applications.ts",
+          "symbol": "DEFAULT_API_QUERY_MAX_PAGE_SIZE / createBwsReadOnlyQueryService",
+          "line_range": "58,203-207",
+          "full_file_sha256": "216b980403a59909b07a27fb475d22cf6ee35b41364fd0bb46c510d17d9e0322"
+        }
+      ],
+      "preconditions": [
+        "The API uses the production maximum page size 25.",
+        "At least 100 scheduler checkpoints are returned and each has at least 100 recent cycle numbers."
+      ],
+      "trigger": "Request private-paper runtime cycles at pageSize=25.",
+      "expected_behavior": "One page request must have a declared and enforced operation/query budget with set-based reads, bounded fanout, timeout/cancellation, and explicit partial or unavailable results when the budget cannot be met.",
+      "current_behavior": "The service lists up to pageSize*4 schedulers and scans pageSize*4 cycles per scheduler. Each candidate cycle performs upstream-checkpoint get, upstream-lock get, worker-job get, and two strategy-ledger lists before optional checkpoint/dead-letter/import expansion.",
+      "impact": "A single loopback GET can monopolize the synchronous service path, amplify database work, and delay health, cockpit, and other query traffic. The nominal page limit does not bound backend work.",
+      "independent_evidence": [
+        "The inert maximum-shape harness scanned 10,000 cycles and counted 10,000 upstream-checkpoint gets, 10,000 lock gets, 10,000 worker-job gets, and 20,000 strategy-ledger lists: 50,000 calls before optional expansion.",
+        "The production maxPageSize is 25, yielding 100 schedulers times 100 cycles under the current multipliers."
+      ],
+      "reproduction_status": "REPRODUCED_OFFLINE_NODE22_SUPPLEMENTARY_OPERATION_COUNT",
+      "root_cause": "The response-size bound is incorrectly used as a work bound while nested per-record reconstruction creates quadratic fanout and N+1 repository access.",
+      "minimal_fix_boundary": "At the R05 read-model boundary, use one bounded set-based query or precomputed read model, enforce an explicit operation/time budget, and surface partial/unavailable state. R03 owns repository/index/transaction changes; R06 owns request cancellation and service-wide concurrency.",
+      "required_tests": [
+        "Operation-count test at maxPageSize with a hard upper bound independent of scheduler history.",
+        "Database-backed query-plan and latency test under realistic retained history.",
+        "Cancellation/timeout test proving no late query work continues after client disconnect or request deadline.",
+        "Concurrency test with health/readiness and multiple cockpit readers."
+      ],
+      "regression_risks": [
+        "Set-based projection may change error ordering.",
+        "New indexes can affect migration and retention work.",
+        "Budget enforcement must not silently truncate without an explicit partial marker."
+      ],
+      "primary_owner": "R05",
+      "secondary_sectors": [
+        "BWS116-R03-012",
+        "R03 repository/index work",
+        "R06 request lifecycle",
+        "R11 performance gates"
+      ],
+      "aliases_or_dependencies": [
+        "BWS116-R03-012"
+      ],
+      "explicitly_unchanged_areas": [
+        "Persistent worker state machine",
+        "Scheduler ownership",
+        "API maximum returned row count"
+      ],
+      "blocks": {
+        "release": true,
+        "bws_600_evidence": true,
+        "b1_acceptance": false,
+        "later_execution": false
+      }
+    },
+    {
+      "id": "BWS118-R05-005",
+      "title": "The cockpit discards every server continuation and presents first-page counts, search, and local pagination as whole-scope data",
+      "severity": "P1",
+      "confidence": 0.99,
+      "classification": "CONFIRMED_FINDING",
+      "current_files_symbols_line_ranges_hashes": [
+        {
+          "path": "apps/web/src/api/client.ts",
+          "symbol": "loadBwsOperatorCockpitSnapshot",
+          "line_range": "1240-1325",
+          "full_file_sha256": "8b9ba5b322e4b3333925b8b1ee2aa4d12b2db1693ae32cac2eafb7a94fc1bb97"
+        },
+        {
+          "path": "apps/web/src/api/models.ts",
+          "symbol": "buildBwsOperatorCockpitPageModel count cards and rows",
+          "line_range": "657-801",
+          "full_file_sha256": "3b08b0fe2d3559cc1e51bf3f570ea43b3b3c4379234ceaec33abe7d9c1c034c3"
+        },
+        {
+          "path": "apps/web/src/app/shell.tsx",
+          "symbol": "filterRows / paginateRows / local page model",
+          "line_range": "116-188",
+          "full_file_sha256": "ca853137503ad688e08f287170378fc4ab2aea368d618863037e5f4b5f746189"
+        },
+        {
+          "path": "apps/web/src/app/shell.tsx",
+          "symbol": "empty table and local pager",
+          "line_range": "460-518",
+          "full_file_sha256": "ca853137503ad688e08f287170378fc4ab2aea368d618863037e5f4b5f746189"
+        }
+      ],
+      "preconditions": [
+        "Any API surface returns nextCursor or contains more rows than its first page.",
+        "The operator uses a metric card, search box, or Next button to assess the scope."
+      ],
+      "trigger": "Load the cockpit with all seven core responses containing nextCursor and at least one row.",
+      "expected_behavior": "The cockpit must either exhaust deterministic continuations within a declared cap, implement server-driven paging/search, or visibly label every metric and row set as partial/first-page with continuation controls and completeness state.",
+      "current_behavior": "The snapshot loader issues exactly one request per surface and never uses nextCursor. Models label returnedCount as Accepted Backtests, Blocked Backtests, Cycle Rows, B1 Research Runs, and similar totals. Search and pager operate only on loaded first-page rows.",
+      "impact": "The UI can undercount accepted, blocked, failed, or held records; search can falsely report no matching data; and the Next button can be disabled while the server has more pages. This manufactures completeness and can hide release blockers.",
+      "independent_evidence": [
+        "The harness returned nextCursor on all seven surfaces. The loader made seven requests, zero cursor follow-ups, displayed Accepted Backtests=1, and exposed only the first-page model rows.",
+        "Static tracing shows the shell pageCount derives solely from model.rows.length and the pager slices that local array."
+      ],
+      "reproduction_status": "REPRODUCED_OFFLINE_NODE22_SUPPLEMENTARY",
+      "root_cause": "The web snapshot contract models one server page per logical dataset, while presentation code treats page-local counts and rows as scope totals.",
+      "minimal_fix_boundary": "Choose one R05 UI contract: server-driven pagination/filter/search with surfaced continuation, or bounded multi-page aggregation carrying explicit completeness/truncation. Rename all page-local metrics and empty states until completeness is proven.",
+      "required_tests": [
+        "Snapshot-loader test that follows continuations or deliberately returns explicit partial state.",
+        "UI test where nextCursor exists: cards, search, empty state, and pager must not claim completeness.",
+        "Multi-page accepted/blocked/B1/runtime/evidence cases.",
+        "Cursor failure midway must preserve partial/error distinction rather than silently showing page one."
+      ],
+      "regression_risks": [
+        "Exhausting pages can increase load; pair with R05/R06 budgets.",
+        "Server-driven pagination changes URL-state semantics.",
+        "Metric names and operator procedures may require updates."
+      ],
+      "primary_owner": "R05",
+      "secondary_sectors": [
+        "R03 bounded list behavior",
+        "R06 query cancellation/budget",
+        "R07 operator evidence",
+        "R11 browser integration tests"
+      ],
+      "aliases_or_dependencies": [
+        "BWS116-R03-012"
+      ],
+      "explicitly_unchanged_areas": [
+        "Underlying persisted counts",
+        "Strategy acceptance semantics",
+        "B1 mathematics"
+      ],
+      "blocks": {
+        "release": true,
+        "bws_600_evidence": true,
+        "b1_acceptance": true,
+        "later_execution": true
+      }
+    },
+    {
+      "id": "BWS118-R05-006",
+      "title": "Successful response envelopes omit the exact query, filter, sort, and snapshot scope, so empty wrong-scope pages pass client validation vacuously",
+      "severity": "P1",
+      "confidence": 0.99,
+      "classification": "CONFIRMED_FINDING",
+      "current_files_symbols_line_ranges_hashes": [
+        {
+          "path": "packages/bootstrap/src/api/bws-read-only-query-service.ts",
+          "symbol": "BwsReadOnlyQueryPage / BwsReadOnlyQueryResponse",
+          "line_range": "97-115",
+          "full_file_sha256": "896bb5ff7db46af530b8e80f93b01b293295f98aa983c948eb57ee3f2a13c424"
+        },
+        {
+          "path": "apps/web/src/api/client.ts",
+          "symbol": "assertReadOnlyQueryResponse",
+          "line_range": "692-762",
+          "full_file_sha256": "8b9ba5b322e4b3333925b8b1ee2aa4d12b2db1693ae32cac2eafb7a94fc1bb97"
+        },
+        {
+          "path": "apps/web/src/api/client.ts",
+          "symbol": "response-versus-request item-loop assertions",
+          "line_range": "980-1144",
+          "full_file_sha256": "8b9ba5b322e4b3333925b8b1ee2aa4d12b2db1693ae32cac2eafb7a94fc1bb97"
+        }
+      ],
+      "preconditions": [
+        "A loopback API returns the expected resource name and a structurally valid page.",
+        "The response is empty or its returned items happen to satisfy the requested filter."
+      ],
+      "trigger": "Request one scope but return an empty successful page generated for another filter/sort/page scope.",
+      "expected_behavior": "Every page must carry or cryptographically bind the exact normalized query/filter/sort/expand contract, page size, cursor lineage, snapshot/high-watermark, and response completeness. The client must compare this receipt before interpreting items.",
+      "current_behavior": "The envelope contains only boundary strings, generatedAt, resource, items, pageSize, returnedCount, and optional cursor. The client verifies scope by iterating returned items; an empty array makes every scope check pass.",
+      "impact": "A proxy, stale cache, incompatible server, or server defect can return data for the wrong request while the cockpit accepts it. Empty responses can manufacture absence for any requested scope.",
+      "independent_evidence": [
+        "The adversarial harness supplied a valid empty response for a different requested scope; the production client accepted it because no item existed to contradict the request.",
+        "The response type has no request/filter/sort digest or echoed normalized request."
+      ],
+      "reproduction_status": "REPRODUCED_OFFLINE_NODE22_SUPPLEMENTARY",
+      "root_cause": "Scope integrity is inferred from row contents instead of being an explicit page-level contract.",
+      "minimal_fix_boundary": "Extend the R05 response envelope with a versioned normalized-request receipt/digest, canonical order, snapshot identity, and completeness status; validate it before item parsing. Use R01 page/record receipt concepts as dependencies without duplicating upstream intake defects.",
+      "required_tests": [
+        "Wrong-scope empty-page rejection test.",
+        "Wrong expand/pageSize/sort/cursor-lineage rejection tests.",
+        "Property test that every emitted response receipt equals the service-normalized request.",
+        "Compatibility/version test for changed query semantics."
+      ],
+      "regression_risks": [
+        "Envelope changes require web/client compatibility versioning.",
+        "Do not trust a caller-supplied echoed request without server binding.",
+        "Canonical filter serialization must not inherit locale-dependent ordering."
+      ],
+      "primary_owner": "R05",
+      "secondary_sectors": [
+        "R01 upstream page/query binding",
+        "R03 snapshot implementation",
+        "R11 contract tests"
+      ],
+      "aliases_or_dependencies": [
+        "BWS116-R01-004",
+        "BWS116-R01-005",
+        "BWS116-R02-013"
+      ],
+      "explicitly_unchanged_areas": [
+        "Upstream intake provenance root causes",
+        "Database transaction isolation",
+        "Domain filter semantics"
+      ],
+      "blocks": {
+        "release": true,
+        "bws_600_evidence": true,
+        "b1_acceptance": true,
+        "later_execution": true
+      }
+    },
+    {
+      "id": "BWS118-R05-007",
+      "title": "The cockpit combines seven independently timed pages into one apparent snapshot without a shared coherence receipt",
+      "severity": "P1",
+      "confidence": 0.99,
+      "classification": "CONFIRMED_FINDING",
+      "current_files_symbols_line_ranges_hashes": [
+        {
+          "path": "apps/web/src/api/contracts.ts",
+          "symbol": "BwsOperatorCockpitSnapshot",
+          "line_range": "117-127",
+          "full_file_sha256": "11c9bcc7cacad4505c7d24f5e66c819723bc9165b1b65c96271b449df2bc3417"
+        },
+        {
+          "path": "apps/web/src/api/client.ts",
+          "symbol": "loadBwsOperatorCockpitSnapshot Promise.all aggregation",
+          "line_range": "1267-1324",
+          "full_file_sha256": "8b9ba5b322e4b3333925b8b1ee2aa4d12b2db1693ae32cac2eafb7a94fc1bb97"
+        },
+        {
+          "path": "packages/bootstrap/src/api/bws-read-only-query-service.ts",
+          "symbol": "BwsReadOnlyQueryResponse",
+          "line_range": "110-115",
+          "full_file_sha256": "896bb5ff7db46af530b8e80f93b01b293295f98aa983c948eb57ee3f2a13c424"
+        }
+      ],
+      "preconditions": [
+        "The underlying ledger/runtime/B1 resources can change while the cockpit performs its parallel requests.",
+        "Each individual response is structurally valid."
+      ],
+      "trigger": "Return the seven pages with mutually different generatedAt values, generations, or database high-watermarks.",
+      "expected_behavior": "A cockpit snapshot must carry one server-issued snapshot/coherence identity or prove all component responses share compatible as-of/high-watermark/authority receipts. Mixed snapshots must be rejected or visibly presented as independent partial observations.",
+      "current_behavior": "The client runs separate requests in Promise.all and places them into one object. There is no shared snapshot ID, database high-watermark, source cycle, asOf, or cross-response coherence validation.",
+      "impact": "Accepted and blocked totals, exposure, runtime cycles, and evidence can describe different moments. A candidate may appear accepted while its blocker or runtime state comes from another snapshot, manufacturing profitability, terminality, or readiness relationships.",
+      "independent_evidence": [
+        "The harness supplied seven responses with generatedAt values from 2000 through 2099. The production loader accepted them as one snapshot and no shared receipt existed.",
+        "The TypeScript snapshot interface contains only independent response objects."
+      ],
+      "reproduction_status": "REPRODUCED_OFFLINE_NODE22_SUPPLEMENTARY",
+      "root_cause": "UI aggregation is equated with data snapshot coherence; the server exposes only independent page responses.",
+      "minimal_fix_boundary": "Add an R05 snapshot/batch read contract or common snapshot token/high-watermark accepted by all queries, and require the cockpit to validate it. If independent observations remain intentional, label and render them independently rather than deriving cross-surface totals.",
+      "required_tests": [
+        "Concurrent mutation test during seven-surface load.",
+        "Mixed snapshot/high-watermark rejection test.",
+        "Batch endpoint or shared-token test proving all surfaces resolve one snapshot.",
+        "Partial surface failure test that does not retain a synthetic combined snapshot."
+      ],
+      "regression_risks": [
+        "A database snapshot spanning requests may require a server-side snapshot lifecycle.",
+        "Batch responses can become large; preserve page and work bounds.",
+        "Cross-surface derivations must define which resources are semantically comparable."
+      ],
+      "primary_owner": "R05",
+      "secondary_sectors": [
+        "BWS116-R01-003",
+        "BWS116-R01-004",
+        "BWS116-R01-005",
+        "R03 transaction snapshot",
+        "R06 request lifecycle"
+      ],
+      "aliases_or_dependencies": [
+        "BWS116-R01-003",
+        "BWS116-R01-004",
+        "BWS116-R01-005"
+      ],
+      "explicitly_unchanged_areas": [
+        "Individual repository row correctness",
+        "Upstream convergence ownership",
+        "Paper settlement semantics"
+      ],
+      "blocks": {
+        "release": true,
+        "bws_600_evidence": true,
+        "b1_acceptance": true,
+        "later_execution": true
+      }
+    },
+    {
+      "id": "BWS118-R05-008",
+      "title": "API and cockpit accept arbitrarily stale or future response timestamps and loaded state never transitions to stale",
+      "severity": "P1",
+      "confidence": 0.99,
+      "classification": "CONFIRMED_FINDING",
+      "current_files_symbols_line_ranges_hashes": [
+        {
+          "path": "packages/bootstrap/src/api/bws-read-only-query-service.ts",
+          "symbol": "validateGeneratedAt",
+          "line_range": "1419-1428",
+          "full_file_sha256": "896bb5ff7db46af530b8e80f93b01b293295f98aa983c948eb57ee3f2a13c424"
+        },
+        {
+          "path": "apps/web/src/api/client.ts",
+          "symbol": "assertReadOnlyQueryResponse generatedAt parsing",
+          "line_range": "692-717",
+          "full_file_sha256": "8b9ba5b322e4b3333925b8b1ee2aa4d12b2db1693ae32cac2eafb7a94fc1bb97"
+        },
+        {
+          "path": "apps/web/src/app/shell.tsx",
+          "symbol": "load lifecycle effect",
+          "line_range": "144-180",
+          "full_file_sha256": "ca853137503ad688e08f287170378fc4ab2aea368d618863037e5f4b5f746189"
+        }
+      ],
+      "preconditions": [
+        "A response carries any syntactically valid ISO-8601 UTC timestamp.",
+        "The page remains open after loading."
+      ],
+      "trigger": "Return a response dated 2000 or 2099, or leave a valid response displayed indefinitely.",
+      "expected_behavior": "The API/client contract must define response age, future-skew, source/as-of time, and stale transition. The cockpit must label stale data and refresh or require operator reload; future or incompatible time must fail closed.",
+      "current_behavior": "Both service and client validate only ISO syntax/Date.parse. The shell loads on route/config/scope changes only; it has no clock, refresh interval, visibility refresh, expiry, stale state, or future-skew check.",
+      "impact": "Historical or clock-skewed data can remain visually current, and old held/failed/accepted state can be used for operational decisions without any stale indication.",
+      "independent_evidence": [
+        "The production client accepted generatedAt=2000-01-01T00:00:00.000Z and a mixed snapshot containing a 2099 timestamp.",
+        "Static tracing found no time-based state transition after load."
+      ],
+      "reproduction_status": "REPRODUCED_OFFLINE_NODE22_SUPPLEMENTARY_AND_STATIC",
+      "root_cause": "Timestamp validity is treated as currentness, and the browser state machine has no stale concept.",
+      "minimal_fix_boundary": "Define R05 response currentness fields and policy using a caller-provided/testable clock; reject excessive future skew, mark age explicitly, and add a browser stale/refresh state. R01 remains owner of upstream source/receive-time truth.",
+      "required_tests": [
+        "Ancient and future generatedAt rejection/stale tests with injected clock.",
+        "Open-page expiry test transitioning current to stale without route change.",
+        "Visibility/reconnect refresh test.",
+        "Distinguish API response time from upstream source/receive/as-of time."
+      ],
+      "regression_risks": [
+        "Clock policy must tolerate bounded skew.",
+        "Automatic refresh must be bounded and cancellable.",
+        "Do not imply current provider acceptance from a fresh local response over historical data."
+      ],
+      "primary_owner": "R05",
+      "secondary_sectors": [
+        "BWS116-R01-010",
+        "R06 timers/cancellation",
+        "R07 evidence currentness",
+        "R11 time tests"
+      ],
+      "aliases_or_dependencies": [
+        "BWS116-R01-010"
+      ],
+      "explicitly_unchanged_areas": [
+        "Upstream source timestamp creation",
+        "Persistence timestamp ordering",
+        "Provider currentness acceptance"
+      ],
+      "blocks": {
+        "release": true,
+        "bws_600_evidence": true,
+        "b1_acceptance": true,
+        "later_execution": true
+      }
+    },
+    {
+      "id": "BWS118-R05-009",
+      "title": "The cockpit accepts arbitrary non-empty service and upstream-client boundary identifiers instead of exact compatible versions",
+      "severity": "P1",
+      "confidence": 0.99,
+      "classification": "CONFIRMED_FINDING",
+      "current_files_symbols_line_ranges_hashes": [
+        {
+          "path": "packages/bootstrap/src/api/bws-read-only-query-service.ts",
+          "symbol": "describeBwsReadOnlyQueryServiceBoundary / boundary construction",
+          "line_range": "345-366",
+          "full_file_sha256": "896bb5ff7db46af530b8e80f93b01b293295f98aa983c948eb57ee3f2a13c424"
+        },
+        {
+          "path": "apps/web/src/api/client.ts",
+          "symbol": "assertReadOnlyQueryResponse boundary validation",
+          "line_range": "707-717",
+          "full_file_sha256": "8b9ba5b322e4b3333925b8b1ee2aa4d12b2db1693ae32cac2eafb7a94fc1bb97"
+        }
+      ],
+      "preconditions": [
+        "A loopback endpoint emits the expected resource shape and automaticFallback=forbidden.",
+        "Its service/client contract versions differ from those the cockpit was built against."
+      ],
+      "trigger": "Return arbitrary-old-or-incompatible-service and arbitrary-client as the two boundary strings.",
+      "expected_behavior": "The web client must require an explicit supported boundary/version pair and reject unknown, future, historical, or mixed contracts before reading items.",
+      "current_behavior": "Only automaticFallback is checked exactly. Both boundary identifiers are accepted as any non-empty string.",
+      "impact": "The cockpit can silently consume a contract with changed field, cursor, filter, unit, or hold semantics and then present a structurally plausible but semantically incompatible result.",
+      "independent_evidence": [
+        "The adversarial harness returned an arbitrary incompatible service boundary; the production parser accepted the response.",
+        "The server does emit deterministic boundary identifiers, so exact compatibility enforcement is available but unused."
+      ],
+      "reproduction_status": "REPRODUCED_OFFLINE_NODE22_SUPPLEMENTARY",
+      "root_cause": "Boundary strings are treated as diagnostics rather than negotiated compatibility constraints.",
+      "minimal_fix_boundary": "Define the exact supported R05 boundary versions in one shared contract, validate both identifiers before page parsing, and require an explicit version bump/migration for incompatible response changes.",
+      "required_tests": [
+        "Known-current pair acceptance test.",
+        "Unknown older/newer/mixed boundary rejection tests.",
+        "Package/build test proving server and web consume one generated/shared boundary authority rather than duplicated literals."
+      ],
+      "regression_risks": [
+        "Tight validation can break older deployed cockpits; use explicit compatibility policy.",
+        "Do not silently accept a list of versions without semantic tests.",
+        "Shared generation belongs to R11 if generated output is introduced."
+      ],
+      "primary_owner": "R05",
+      "secondary_sectors": [
+        "R10 deployment configuration",
+        "R11 build/generated contract",
+        "R24 release packaging"
+      ],
+      "aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "API route set",
+        "Browser loopback confinement",
+        "Underlying record validation"
+      ],
+      "blocks": {
+        "release": true,
+        "bws_600_evidence": true,
+        "b1_acceptance": true,
+        "later_execution": true
+      }
+    },
+    {
+      "id": "BWS118-R05-010",
+      "title": "Selective wire validation weakens closed policy, terminal, fixed-point, status, and timestamp contracts to arbitrary non-empty strings",
+      "severity": "P1",
+      "confidence": 0.99,
+      "classification": "CONFIRMED_FINDING",
+      "current_files_symbols_line_ranges_hashes": [
+        {
+          "path": "apps/web/src/api/client.ts",
+          "symbol": "assertImportRunRecord / assertCandidateReport",
+          "line_range": "238-316",
+          "full_file_sha256": "8b9ba5b322e4b3333925b8b1ee2aa4d12b2db1693ae32cac2eafb7a94fc1bb97"
+        },
+        {
+          "path": "apps/web/src/api/client.ts",
+          "symbol": "assertStrategyLedgerEntry",
+          "line_range": "319-378",
+          "full_file_sha256": "8b9ba5b322e4b3333925b8b1ee2aa4d12b2db1693ae32cac2eafb7a94fc1bb97"
+        },
+        {
+          "path": "apps/web/src/api/client.ts",
+          "symbol": "assertPrivatePaperRuntimeCycleItem job validation",
+          "line_range": "426-447",
+          "full_file_sha256": "8b9ba5b322e4b3333925b8b1ee2aa4d12b2db1693ae32cac2eafb7a94fc1bb97"
+        },
+        {
+          "path": "packages/bootstrap/src/strategy/strategy-ledger.ts",
+          "symbol": "strategy report kind and closed-policy validation",
+          "line_range": "401-450",
+          "full_file_sha256": "d05e339a5692a9218f2146c153570ee7d9c8d79ae88282e162b7ece0c0cb5dbc"
+        },
+        {
+          "path": "apps/web/src/api/models.ts",
+          "symbol": "toExposureRows",
+          "line_range": "439-465",
+          "full_file_sha256": "3b08b0fe2d3559cc1e51bf3f570ea43b3b3c4379234ceaec33abe7d9c1c034c3"
+        }
+      ],
+      "preconditions": [
+        "A compromised, stale, incompatible, or defective loopback API returns structurally shaped records.",
+        "Critical values are non-empty strings but violate canonical literals or integer/timestamp formats."
+      ],
+      "trigger": "Return liveState=live, privacy=public, profitabilityState=guaranteed_profitable, publicDistributionState=published, reportKind=forged_report, completionGroupState=ready_to_execute, finalOutcome=guaranteed_win, settledNetMinor=not-an-integer, job.status=fully_live, or completedAt=not-a-time.",
+      "expected_behavior": "The client must validate every canonical literal, closed-state invariant, fixed-point integer string, timestamp, and status against the same contract used by the producer before a typed cast or rendering.",
+      "current_behavior": "Several critical fields are checked only with requireNonEmptyString or requireOptionalNonEmptyString, then the object is cast to the strong TypeScript type. Models render the accepted values directly.",
+      "impact": "A defective response can manufacture live/public/profitable/executable-looking state, false terminality, malformed money, or impossible runtime status in the operator cockpit while all client validation passes.",
+      "independent_evidence": [
+        "The wire harness passed the live/public/profitable/published/forged values and malformed candidate money/terminal fields through the production parser; the exposure model rendered them.",
+        "The same harness passed malformed optional timestamps and an arbitrary runtime job status.",
+        "The canonical strategy-ledger validator explicitly requires private_only, not_reported, withheld, not_claimed, and surebet_strategy_report_v1, proving the web parser is weaker than source authority."
+      ],
+      "reproduction_status": "REPRODUCED_OFFLINE_NODE22_SUPPLEMENTARY",
+      "root_cause": "The web parser validates selected structural relationships but relies on unsafe type assertions for the remaining semantic contract.",
+      "minimal_fix_boundary": "Replace ad hoc selective checks with exhaustive shared/generated validators at the R05 wire boundary, including canonical policy literals, union exhaustiveness, integer-string format/range, timestamp format/order, optional-state dependencies, and unknown-field rejection where required. Canonical producer rules remain owned by R02/R03/R04.",
+      "required_tests": [
+        "Mutation/property tests over every union member and every unknown string.",
+        "Closed-policy escalation tests for live/public/profitability/distribution/report kind.",
+        "Integer-string tests for sign, decimals, exponent, whitespace, unsafe length, and overflow policy.",
+        "Optional timestamp/status/state dependency tests.",
+        "Round-trip test from actual service output through the external web parser."
+      ],
+      "regression_risks": [
+        "Shared validation must not create circular workspace imports.",
+        "Stricter parsing can expose historical malformed rows; surface them as explicit errors, not empty data.",
+        "Integer ranges and terminal states must follow owner-sector authority."
+      ],
+      "primary_owner": "R05",
+      "secondary_sectors": [
+        "BWS116-R02-004",
+        "BWS116-R02-005",
+        "BWS116-R03-017",
+        "R04 simulation result contracts",
+        "R11 generated validator truth"
+      ],
+      "aliases_or_dependencies": [
+        "BWS116-R02-004",
+        "BWS116-R02-005",
+        "BWS116-R03-017"
+      ],
+      "explicitly_unchanged_areas": [
+        "Canonical strategy-ledger producer validation",
+        "Persistence timestamp ordering root cause",
+        "B1 economic correctness"
+      ],
+      "blocks": {
+        "release": true,
+        "bws_600_evidence": true,
+        "b1_acceptance": true,
+        "later_execution": true
+      }
+    },
+    {
+      "id": "BWS118-R05-011",
+      "title": "The B1 browser contract rejects producer-valid null simulation results while accepting malformed child identity, economics, status, and time fields",
+      "severity": "P1",
+      "confidence": 0.99,
+      "classification": "CONFIRMED_FINDING",
+      "current_files_symbols_line_ranges_hashes": [
+        {
+          "path": "apps/web/src/api/client.ts",
+          "symbol": "assertB1BacktestRunItem child validation",
+          "line_range": "573-663",
+          "full_file_sha256": "8b9ba5b322e4b3333925b8b1ee2aa4d12b2db1693ae32cac2eafb7a94fc1bb97"
+        },
+        {
+          "path": "packages/persistence/src/repositories/b1-backtest-run-repository.ts",
+          "symbol": "buildSurebetB1SimulationResultInsertValues",
+          "line_range": "451-510",
+          "full_file_sha256": "fca39b72d06d2685cf82445e95d033830af1eea4b60d9896b8bce69d1d53ec04"
+        },
+        {
+          "path": "packages/persistence/src/repositories/b1-backtest-run-repository.ts",
+          "symbol": "normalizeSimulationRow",
+          "line_range": "646-653",
+          "full_file_sha256": "fca39b72d06d2685cf82445e95d033830af1eea4b60d9896b8bce69d1d53ec04"
+        },
+        {
+          "path": "apps/web/src/api/models.ts",
+          "symbol": "createB1BacktestRunRow",
+          "line_range": "550-608",
+          "full_file_sha256": "3b08b0fe2d3559cc1e51bf3f570ea43b3b3c4379234ceaec33abe7d9c1c034c3"
+        }
+      ],
+      "preconditions": [
+        "A B1 run contains an accepted residual-exposure result with no residual exposure, or any malformed candidate/simulation child row.",
+        "The parent run and policy literals satisfy the strict top-level checks."
+      ],
+      "trigger": "Return result=null for the producer-valid residual_exposure row, or return children with mismatched run/candidate IDs, non-integer spread/money strings, invalid status/stage, non-array blockers, non-boolean falsePositive, or invalid timestamps.",
+      "expected_behavior": "The external client schema must exactly match the producer contract, including valid nullability, parent-child identity, discriminated simulation kinds/statuses, fixed-point values, blockers, booleans, timestamps, and result-shape dependencies.",
+      "current_behavior": "The parser requires every simulation result to be an object, although persistence intentionally emits result:null for one accepted case. Conversely, candidate and simulation children receive only four shallow non-empty/object checks and are then cast to the full types.",
+      "impact": "Valid B1 reporting can fail closed in the browser, while malformed B1 economics and identity can be displayed as research evidence. B1 acceptance and false-positive analysis become unreliable at the presentation boundary.",
+      "independent_evidence": [
+        "The harness proved a producer-valid result:null row is rejected with \u201cmust be an object\u201d.",
+        "The same production parser accepted a malformed child with wrong run ID, non-integer gross spread, non-boolean falsePositive, and NaN settled net; the model rendered the malformed value.",
+        "Persistence source explicitly constructs and normalizes the null residual-exposure result."
+      ],
+      "reproduction_status": "REPRODUCED_OFFLINE_NODE22_SUPPLEMENTARY",
+      "root_cause": "The B1 client validator is a hand-written partial projection that diverges from the producer/persistence discriminated contract in both directions.",
+      "minimal_fix_boundary": "Create one shared/generated B1 reporting wire schema and validate all child discriminants, identities, units, timestamps, and nullability in R05. Hand any discovered producer-contract defect to R02/R04/R03 rather than changing economics here.",
+      "required_tests": [
+        "Producer-valid null residual-exposure round-trip test.",
+        "Parent-child runId/candidateId mismatch rejection tests.",
+        "All candidate/simulation status and kind union tests.",
+        "Fixed-point, boolean, blockers, timestamp, and result-shape property tests.",
+        "Model test proving malformed child data cannot render."
+      ],
+      "regression_risks": [
+        "Historical stored B1 rows may expose additional schema drift.",
+        "Generated schema changes must preserve deliberate null semantics.",
+        "Do not \u201cfix\u201d by replacing null with a fabricated object."
+      ],
+      "primary_owner": "R05",
+      "secondary_sectors": [
+        "BWS116-R02-002",
+        "BWS116-R02-004",
+        "BWS116-R02-005",
+        "R04 simulation semantics",
+        "R03 persistence shape",
+        "R11 generated contract tests"
+      ],
+      "aliases_or_dependencies": [
+        "BWS116-R02-002",
+        "BWS116-R02-004",
+        "BWS116-R02-005"
+      ],
+      "explicitly_unchanged_areas": [
+        "B1 derivation mathematics",
+        "Persistence transaction behavior",
+        "Top-level BWS-900 and runtime-evidence holds"
+      ],
+      "blocks": {
+        "release": true,
+        "bws_600_evidence": false,
+        "b1_acceptance": true,
+        "later_execution": true
+      }
+    },
+    {
+      "id": "BWS118-R05-012",
+      "title": "Cockpit loads are not request-generation-bound or cancellable, allowing a late older scope or route response to overwrite newer state",
+      "severity": "P1",
+      "confidence": 0.98,
+      "classification": "CONFIRMED_FINDING",
+      "current_files_symbols_line_ranges_hashes": [
+        {
+          "path": "apps/web/src/api/client.ts",
+          "symbol": "BwsOperatorCockpitFetchLike",
+          "line_range": "60-72",
+          "full_file_sha256": "8b9ba5b322e4b3333925b8b1ee2aa4d12b2db1693ae32cac2eafb7a94fc1bb97"
+        },
+        {
+          "path": "apps/web/src/api/client.ts",
+          "symbol": "loadBwsOperatorCockpitSnapshot",
+          "line_range": "1240-1325",
+          "full_file_sha256": "8b9ba5b322e4b3333925b8b1ee2aa4d12b2db1693ae32cac2eafb7a94fc1bb97"
+        },
+        {
+          "path": "apps/web/src/app/shell.tsx",
+          "symbol": "loadSnapshot effect and state updates",
+          "line_range": "144-180",
+          "full_file_sha256": "ca853137503ad688e08f287170378fc4ab2aea368d618863037e5f4b5f746189"
+        }
+      ],
+      "preconditions": [
+        "The operator changes route, API configuration, or evidence scope while an earlier load is still in flight.",
+        "The earlier request completes after the newer request."
+      ],
+      "trigger": "Start an old-scope load, start and complete a new-scope load, then complete the old load last.",
+      "expected_behavior": "Only the active request generation may publish snapshot/error/loading state. Superseded loads must be aborted where possible and ignored on completion; loading must represent the active generation only.",
+      "current_behavior": "Every effect invocation writes the same snapshot/error/loading state without a generation token or active flag. The fetch abstraction carries no AbortSignal. Older completion can call setSnapshot and finally setIsLoading(false after a newer load.",
+      "impact": "The cockpit can display data for the wrong route/filter/API base while URL controls show the new scope. A late failure can also erase a valid newer snapshot or mark loading complete prematurely.",
+      "independent_evidence": [
+        "The bounded state-machine harness completed a new-scope request first and an old-scope request last; finalSnapshotScope became old while activeScope remained new.",
+        "Static tracing shows no AbortController, request ID, cleanup guard, or completion ownership check."
+      ],
+      "reproduction_status": "REPRODUCED_OFFLINE_STATE_MACHINE_NODE22_SUPPLEMENTARY_AND_STATIC",
+      "root_cause": "Asynchronous fetch completion has no monotonic ownership relation to the effect generation that initiated it.",
+      "minimal_fix_boundary": "Add one request-generation/AbortController boundary in the shell/client; pass AbortSignal through the fetch abstraction; ignore completion from superseded generations; make loading/error state generation-specific. Generic HTTP cancellation propagation remains R06-owned.",
+      "required_tests": [
+        "Deterministic deferred-promise race tests for route, scope, and configuration changes.",
+        "Old success after new success; old failure after new success; old finally after new pending.",
+        "Unmount and abort test proving no state publication or retained listener.",
+        "Client test proving AbortSignal reaches fetch."
+      ],
+      "regression_risks": [
+        "React Strict Mode can expose duplicate-effect behavior and must be covered.",
+        "Abort is advisory; late completion still needs generation checks.",
+        "Do not retain an old snapshot as fallback unless explicitly labeled stale and scope-bound."
+      ],
+      "primary_owner": "R05",
+      "secondary_sectors": [
+        "R06 cancellation/resource ownership",
+        "R11 browser race tests"
+      ],
+      "aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "Server query correctness",
+        "URL-state parsing",
+        "Data-mode confinement"
+      ],
+      "blocks": {
+        "release": true,
+        "bws_600_evidence": true,
+        "b1_acceptance": true,
+        "later_execution": true
+      }
+    },
+    {
+      "id": "BWS118-R05-013",
+      "title": "The cockpit conflates source-empty, search-no-match, and evidence-scope states under the same empty labels",
+      "severity": "P2",
+      "confidence": 0.99,
+      "classification": "CONFIRMED_FINDING",
+      "current_files_symbols_line_ranges_hashes": [
+        {
+          "path": "apps/web/src/api/models.ts",
+          "symbol": "buildBwsOperatorCockpitPageModel empty labels",
+          "line_range": "657-724",
+          "full_file_sha256": "3b08b0fe2d3559cc1e51bf3f570ea43b3b3c4379234ceaec33abe7d9c1c034c3"
+        },
+        {
+          "path": "apps/web/src/app/shell.tsx",
+          "symbol": "filteredRows / visibleRows",
+          "line_range": "182-188",
+          "full_file_sha256": "ca853137503ad688e08f287170378fc4ab2aea368d618863037e5f4b5f746189"
+        },
+        {
+          "path": "apps/web/src/app/shell.tsx",
+          "symbol": "empty-state rendering",
+          "line_range": "460-485",
+          "full_file_sha256": "ca853137503ad688e08f287170378fc4ab2aea368d618863037e5f4b5f746189"
+        }
+      ],
+      "preconditions": [
+        "The source page contains rows but local search removes all of them, or an explicit evidence scope returns zero rows.",
+        "The table renders visibleRows.length=0."
+      ],
+      "trigger": "Search for a nonmatching term against a nonempty page, or apply a valid evidence filter that produces an empty result.",
+      "expected_behavior": "Presentation must distinguish at least: source/query returned no rows, loaded page is partial, active search has no matches, explicit evidence scope has no matches, scope is missing, and request failed.",
+      "current_behavior": "The shell always renders model.emptyLabel when filtered visible rows are empty. The evidence page always says to provide an explicit filter even when one is applied; other pages claim no source rows when only local search is empty.",
+      "impact": "Operators can believe evidence is absent, a filter was not applied, or the source contains no blockers when only the local view is empty. Diagnostics and review decisions become misleading.",
+      "independent_evidence": [
+        "The harness loaded two source rows, applied a nonmatching search, and rendered \u201cNo backtest ledger rows are available...\u201d.",
+        "With an explicit evidence scope applied and zero returned rows, the model still rendered \u201cProvide an explicit evidence filter...\u201d."
+      ],
+      "reproduction_status": "REPRODUCED_OFFLINE_NODE22_SUPPLEMENTARY",
+      "root_cause": "Empty copy is fixed at route-model construction and is not derived from query, scope, pagination, or local-filter state.",
+      "minimal_fix_boundary": "Introduce explicit R05 UI view states for source empty, filtered empty, missing scope, applied-scope no match, partial page, and error; derive copy from those states and keep counts visible.",
+      "required_tests": [
+        "Nonempty source plus zero local-search results.",
+        "Explicit evidence scope with zero results.",
+        "Missing evidence scope.",
+        "Server partial page and server error states.",
+        "Reset-search action restoring source rows without refetch confusion."
+      ],
+      "regression_risks": [
+        "Copy changes may affect snapshots/accessibility tests.",
+        "Do not conflate a filtered empty with a successful exhaustive no-match unless completeness is known.",
+        "Local and server filters need separate labels."
+      ],
+      "primary_owner": "R05",
+      "secondary_sectors": [
+        "R07 operator evidence interpretation",
+        "R11 UI state tests"
+      ],
+      "aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "Query filtering semantics",
+        "Server error taxonomy",
+        "Underlying row contents"
+      ],
+      "blocks": {
+        "release": true,
+        "bws_600_evidence": true,
+        "b1_acceptance": true,
+        "later_execution": false
+      }
+    },
+    {
+      "id": "BWS118-R05-SG-001",
+      "title": "The public query HTTP surface is GET-only and emits no-store and browser-hardening headers",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "severity": null,
+      "confidence": 0.98,
+      "evidence": [
+        "packages/bootstrap/src/api/bws-read-only-query-http.ts L113-L123 and L371-L378."
+      ],
+      "disposition": "Preserve while repairing response/error and snapshot semantics.",
+      "primary_owner": "R05",
+      "dependencies": []
+    },
+    {
+      "id": "BWS118-R05-SG-002",
+      "title": "Browser data mode is explicit mock or loopback API with no silent fallback and no embedded credentials",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "severity": null,
+      "confidence": 0.98,
+      "evidence": [
+        "apps/web/src/app/data-mode.ts rejects missing mode, non-loopback API URLs, credentials, query, fragment, and non-root paths.",
+        "apps/web/src/app/process-contract.ts keeps fallback, execution, and provider connectivity disabled."
+      ],
+      "disposition": "Preserve; do not use mock data as an error fallback.",
+      "primary_owner": "R05",
+      "dependencies": []
+    },
+    {
+      "id": "BWS118-R05-SG-003",
+      "title": "B1 parent reporting keeps execution, public signals, runtime evidence, and BWS-900 closed",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "severity": null,
+      "confidence": 0.98,
+      "evidence": [
+        "packages/bootstrap/src/api/bws-read-only-query-service.ts L494-L524.",
+        "apps/web/src/api/client.ts L573-L647."
+      ],
+      "disposition": "Preserve exact top-level hold checks while strengthening child validation.",
+      "primary_owner": "R05",
+      "dependencies": []
+    },
+    {
+      "id": "BWS118-R05-SG-004",
+      "title": "The shell clears the snapshot and shows a visible no-fallback error panel on load failure",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "severity": null,
+      "confidence": 0.98,
+      "evidence": [
+        "apps/web/src/app/shell.tsx L159-L175 and L388-L399."
+      ],
+      "disposition": "Preserve, but bind it to the active request generation and typed error classes.",
+      "primary_owner": "R05",
+      "dependencies": []
+    },
+    {
+      "id": "BWS118-R05-SG-005",
+      "title": "Page-size and filter inputs are syntactically bounded before repository access",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "severity": null,
+      "confidence": 0.98,
+      "evidence": [
+        "packages/bootstrap/src/api/bws-read-only-query-service.ts request validators and production maxPageSize=25."
+      ],
+      "disposition": "Preserve; it does not substitute for backend operation budgets or completeness semantics.",
+      "primary_owner": "R05",
+      "dependencies": []
+    },
+    {
+      "id": "BWS118-R05-RS-001",
+      "title": "No read-only API write route or live provider operation was found",
+      "classification": "REJECTED_SUSPICION",
+      "severity": null,
+      "confidence": 0.98,
+      "evidence": [
+        "The handler accepts only GET and exposes only health/readiness and four query resources.",
+        "No provider/account/write invocation was executed during review."
+      ],
+      "disposition": "Rejected for current source; no authorization is implied for future execution.",
+      "primary_owner": "R05",
+      "dependencies": []
+    },
+    {
+      "id": "BWS118-R05-RS-002",
+      "title": "The cockpit does not silently fall back from API mode to mock mode",
+      "classification": "REJECTED_SUSPICION",
+      "severity": null,
+      "confidence": 0.98,
+      "evidence": [
+        "data-mode.ts and snapshot loader branch explicitly on configured mode; API failures are shown."
+      ],
+      "disposition": "Rejected; preserve explicit mode separation.",
+      "primary_owner": "R05",
+      "dependencies": []
+    },
+    {
+      "id": "BWS118-R05-RS-003",
+      "title": "No literal green success palette was found for accepted/ready state",
+      "classification": "REJECTED_SUSPICION",
+      "severity": null,
+      "confidence": 0.98,
+      "evidence": [
+        "apps/web/src/styles/tokens.css uses blue accent and separate warning tokens.",
+        "Semantic false-positive presentation remains confirmed through values/counts, not a green color conversion."
+      ],
+      "disposition": "Rejected as a color-specific suspicion only.",
+      "primary_owner": "R05",
+      "dependencies": []
+    },
+    {
+      "id": "BWS118-R05-HY-001",
+      "title": "Generic renderValue may erase distinctions among absent, null, complex, and typed unknown values",
+      "classification": "HYPOTHESIS",
+      "severity": "P3",
+      "confidence": 0.9,
+      "evidence": [
+        "apps/web/src/api/models.ts L25-L38 maps null and undefined to one string, joins arrays, and JSON-stringifies objects."
+      ],
+      "disposition": "Requires a field-by-field semantic inventory after wire validators are made exhaustive; do not promote without a concrete authority violation.",
+      "primary_owner": "R05",
+      "dependencies": []
+    },
+    {
+      "id": "BWS118-R05-HO-001",
+      "title": "KNOWN_BASELINE_MANIFEST_DRIFT",
+      "classification": "CROSS_AREA_HANDOFF",
+      "severity": null,
+      "confidence": 0.98,
+      "evidence": [
+        "scripts/validate_source_manifest.py failed on the previously accepted seven-file Graphify/update-tooling drift.",
+        "The ZIP path set and extracted bytes were independently verified."
+      ],
+      "disposition": "Do not create an R05 finding; formal owner remains future R11.",
+      "primary_owner": "R11",
+      "dependencies": []
+    },
+    {
+      "id": "BWS118-R05-HO-002",
+      "title": "Upstream page/record/query receipt defects remain inherited rather than reissued as R05 findings",
+      "classification": "CROSS_AREA_HANDOFF",
+      "severity": null,
+      "confidence": 0.98,
+      "evidence": [
+        "BWS116-R01-003, R01-004, and R01-005 cover exact upstream cycle/page/query/generation binding.",
+        "R05-006 and R05-007 are local public API and cockpit contract defects."
+      ],
+      "disposition": "Retain inherited IDs for upstream intake; coordinate the envelope vocabulary.",
+      "primary_owner": "R01",
+      "dependencies": [
+        "BWS116-R01-003",
+        "BWS116-R01-004",
+        "BWS116-R01-005"
+      ]
+    },
+    {
+      "id": "BWS118-R05-HO-003",
+      "title": "Source, receive, and cycle timestamp authority remains R01-owned",
+      "classification": "CROSS_AREA_HANDOFF",
+      "severity": null,
+      "confidence": 0.98,
+      "evidence": [
+        "BWS116-R01-010 owns joint upstream time enforcement.",
+        "R05-008 owns response age and browser stale presentation only."
+      ],
+      "disposition": "Use R01 time receipts; do not recreate source-currentness logic in the UI.",
+      "primary_owner": "R01",
+      "dependencies": [
+        "BWS116-R01-010"
+      ]
+    },
+    {
+      "id": "BWS118-R05-HO-004",
+      "title": "Locale-dependent ordering in stableJsonStringify and runtime-cycle tie breaking remains inherited",
+      "classification": "CROSS_AREA_HANDOFF",
+      "severity": null,
+      "confidence": 0.98,
+      "evidence": [
+        "packages/bootstrap/src/api/bws-read-only-query-service.ts uses localeCompare in stableJsonStringify and runtime-cycle ordering.",
+        "BWS116-R02-013 already owns localeCompare nondeterminism."
+      ],
+      "disposition": "No duplicate R05 finding; R05 cursor/query receipts must consume a deterministic ordering primitive.",
+      "primary_owner": "R02",
+      "dependencies": [
+        "BWS116-R02-013"
+      ]
+    },
+    {
+      "id": "BWS118-R05-HO-005",
+      "title": "Unbounded repository child/checkpoint reads remain R03-owned",
+      "classification": "CROSS_AREA_HANDOFF",
+      "severity": null,
+      "confidence": 0.98,
+      "evidence": [
+        "BWS116-R03-012 covers unbounded child/checkpoint/dead-letter list methods.",
+        "R05-004 is limited to query-layer combinatorial fanout."
+      ],
+      "disposition": "R03 supplies bounded set-based primitives; R05 defines page/work semantics.",
+      "primary_owner": "R03",
+      "dependencies": [
+        "BWS116-R03-012"
+      ]
+    },
+    {
+      "id": "BWS118-R05-HO-006",
+      "title": "Persisted impossible timestamp ordering remains R03-owned",
+      "classification": "CROSS_AREA_HANDOFF",
+      "severity": null,
+      "confidence": 0.98,
+      "evidence": [
+        "BWS116-R03-017 covers persistence allowing impossible timestamp combinations.",
+        "R05-010 covers accepting malformed timestamp strings and policy/status values over the wire."
+      ],
+      "disposition": "Do not duplicate the persistence root cause.",
+      "primary_owner": "R03",
+      "dependencies": [
+        "BWS116-R03-017"
+      ]
+    },
+    {
+      "id": "BWS118-R05-HO-007",
+      "title": "HTTP cancellation, request lifetime, and health/readiness ownership require R06 follow-up",
+      "classification": "CROSS_AREA_HANDOFF",
+      "severity": null,
+      "confidence": 0.98,
+      "evidence": [
+        "R05-004 and R05-012 identify unbounded request work and browser supersession.",
+        "Generic service shutdown, client disconnect, child ownership, and operational health are reserved for R06."
+      ],
+      "disposition": "R06 must prove cancellation reaches in-flight repository work and health cannot remain green while query capacity is exhausted.",
+      "primary_owner": "R06",
+      "dependencies": []
+    },
+    {
+      "id": "BWS118-R05-EB-001",
+      "title": "Canonical Node 20.20.2 was unavailable",
+      "classification": "EXTERNAL_INPUT_BLOCKER",
+      "severity": null,
+      "confidence": 0.98,
+      "evidence": [
+        "Actual runtime was Node 22.16.0.",
+        "All Node harness and focused-test results are supplementary."
+      ],
+      "disposition": "Rerun focused and adversarial tests under Node 20.20.2 before acceptance.",
+      "primary_owner": "R05",
+      "dependencies": []
+    },
+    {
+      "id": "BWS118-R05-EB-002",
+      "title": "PostgreSQL-backed query tests were unavailable and two focused tests remained skipped",
+      "classification": "EXTERNAL_INPUT_BLOCKER",
+      "severity": null,
+      "confidence": 0.98,
+      "evidence": [
+        "Focused suite reported 41 tests: 39 passed and 2 database-backed tests skipped.",
+        "No persistent or disposable database was contacted."
+      ],
+      "disposition": "Run production SQL/read-model concurrency and plan checks in an isolated Node 20 environment.",
+      "primary_owner": "R05",
+      "dependencies": []
+    },
+    {
+      "id": "BWS118-R05-EB-003",
+      "title": "Full web typecheck could not resolve repository dependencies without installation",
+      "classification": "EXTERNAL_INPUT_BLOCKER",
+      "severity": null,
+      "confidence": 0.98,
+      "evidence": [
+        "tsc reported missing node, react, and react-dom type definitions.",
+        "Dependency installation was prohibited."
+      ],
+      "disposition": "Run the normal clean workspace build/typecheck under Node 20 with lockfile dependencies already available.",
+      "primary_owner": "R05",
+      "dependencies": []
+    },
+    {
+      "id": "BWS118-R05-EB-004",
+      "title": "BWS-600 and BWS-710 external runtime evidence remains unavailable by accepted hold",
+      "classification": "EXTERNAL_INPUT_BLOCKER",
+      "severity": null,
+      "confidence": 0.98,
+      "evidence": [
+        "Current status keeps BWS-600 blocked on external runtime evidence, BWS-710 blocked on the accepted B1 resource, and BWS-900 parked."
+      ],
+      "disposition": "Do not infer runtime acceptance from static API/cockpit review.",
+      "primary_owner": "R05",
+      "dependencies": []
+    },
+    {
+      "id": "BWS118-R05-TG-001",
+      "title": "No invariant/property test proves cursor page concatenation over a stable snapshot",
+      "classification": "TEST_GAP",
+      "severity": "P3",
+      "confidence": 0.9,
+      "evidence": [
+        "Focused tests validate malformed cursor shape but not forged tokens, concurrent mutation, restart, or snapshot equality."
+      ],
+      "disposition": "Add to the R05-focused Node 20 and browser integration gate.",
+      "primary_owner": "R11",
+      "dependencies": []
+    },
+    {
+      "id": "BWS118-R05-TG-002",
+      "title": "No test rejects empty responses generated for the wrong query scope",
+      "classification": "TEST_GAP",
+      "severity": "P3",
+      "confidence": 0.9,
+      "evidence": [
+        "Existing response-scope tests inspect returned rows and therefore do not cover vacuous empty pages."
+      ],
+      "disposition": "Add to the R05-focused Node 20 and browser integration gate.",
+      "primary_owner": "R11",
+      "dependencies": []
+    },
+    {
+      "id": "BWS118-R05-TG-003",
+      "title": "No test proves the cockpit handles server nextCursor or labels partial data",
+      "classification": "TEST_GAP",
+      "severity": "P3",
+      "confidence": 0.9,
+      "evidence": [
+        "The snapshot loader tests assert one bounded request per surface and do not supply a continuation."
+      ],
+      "disposition": "Add to the R05-focused Node 20 and browser integration gate.",
+      "primary_owner": "R11",
+      "dependencies": []
+    },
+    {
+      "id": "BWS118-R05-TG-004",
+      "title": "No currentness test covers ancient/future generatedAt or open-page expiry",
+      "classification": "TEST_GAP",
+      "severity": "P3",
+      "confidence": 0.9,
+      "evidence": [
+        "The focused service test validates timestamp syntax only."
+      ],
+      "disposition": "Add to the R05-focused Node 20 and browser integration gate.",
+      "primary_owner": "R11",
+      "dependencies": []
+    },
+    {
+      "id": "BWS118-R05-TG-005",
+      "title": "No compatibility test rejects unknown service/client boundary versions",
+      "classification": "TEST_GAP",
+      "severity": "P3",
+      "confidence": 0.9,
+      "evidence": [
+        "Boundary strings are checked only for non-emptiness."
+      ],
+      "disposition": "Add to the R05-focused Node 20 and browser integration gate.",
+      "primary_owner": "R11",
+      "dependencies": []
+    },
+    {
+      "id": "BWS118-R05-TG-006",
+      "title": "No exhaustive wire test mutates policy, terminal, fixed-point, status, and optional timestamp fields",
+      "classification": "TEST_GAP",
+      "severity": "P3",
+      "confidence": 0.9,
+      "evidence": [
+        "Current tests cover selected hashes/scopes and ambiguous blocked summaries, not all canonical unions and formats."
+      ],
+      "disposition": "Add to the R05-focused Node 20 and browser integration gate.",
+      "primary_owner": "R11",
+      "dependencies": []
+    },
+    {
+      "id": "BWS118-R05-TG-007",
+      "title": "No B1 round-trip test covers producer-valid null simulation results and malformed children",
+      "classification": "TEST_GAP",
+      "severity": "P3",
+      "confidence": 0.9,
+      "evidence": [
+        "The client and persistence contracts currently disagree without a focused integration test."
+      ],
+      "disposition": "Add to the R05-focused Node 20 and browser integration gate.",
+      "primary_owner": "R11",
+      "dependencies": []
+    },
+    {
+      "id": "BWS118-R05-TG-008",
+      "title": "No operation-budget or database query-plan test covers runtime-cycle fanout",
+      "classification": "TEST_GAP",
+      "severity": "P3",
+      "confidence": 0.9,
+      "evidence": [
+        "Max-shape work can reach at least 50,000 dependency calls."
+      ],
+      "disposition": "Add to the R05-focused Node 20 and browser integration gate.",
+      "primary_owner": "R11",
+      "dependencies": []
+    },
+    {
+      "id": "BWS118-R05-TG-009",
+      "title": "No browser race test covers superseded route/filter/configuration loads",
+      "classification": "TEST_GAP",
+      "severity": "P3",
+      "confidence": 0.9,
+      "evidence": [
+        "Deferred completion can overwrite active state."
+      ],
+      "disposition": "Add to the R05-focused Node 20 and browser integration gate.",
+      "primary_owner": "R11",
+      "dependencies": []
+    },
+    {
+      "id": "BWS118-R05-TG-010",
+      "title": "No presentation-state test distinguishes source empty, filtered empty, missing scope, and applied-scope no match",
+      "classification": "TEST_GAP",
+      "severity": "P3",
+      "confidence": 0.9,
+      "evidence": [
+        "One fixed model.emptyLabel is reused after local filtering."
+      ],
+      "disposition": "Add to the R05-focused Node 20 and browser integration gate.",
+      "primary_owner": "R11",
+      "dependencies": []
+    },
+    {
+      "id": "BWS118-R05-TG-011",
+      "title": "No HTTP boundary test requires sanitized 5xx/503/504 taxonomy",
+      "classification": "TEST_GAP",
+      "severity": "P3",
+      "confidence": 0.9,
+      "evidence": [
+        "Current tests prove security headers and fail-closed 400 behavior only."
+      ],
+      "disposition": "Add to the R05-focused Node 20 and browser integration gate.",
+      "primary_owner": "R11",
+      "dependencies": []
+    }
+  ]
+}
