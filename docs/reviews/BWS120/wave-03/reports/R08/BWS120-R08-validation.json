@@ -1,0 +1,394 @@
+{
+  "schema": "bws120-r08-validation-v1",
+  "review_id": "BWS120-R08",
+  "generated_at": "2026-09-12T04:49:23Z",
+  "archive": {
+    "path": "/mnt/data/betting-win-surebet120(2).zip",
+    "name": "betting-win-surebet120(2).zip",
+    "actual_sha256": "d4565c05ecfe63f5d5511f224a20ff20fb82bfc75b23203c94d7d3e98a8c21bb",
+    "size_bytes": 3184672,
+    "regular_file_count": 695,
+    "archive_safety": {
+      "archive_entry_count": 695,
+      "regular_file_count": 695,
+      "duplicate_paths": [],
+      "unsafe_paths": [],
+      "symlink_entries": [],
+      "special_entries": [],
+      "safe": true
+    },
+    "extraction_integrity": true
+  },
+  "handoff": {
+    "path": "/mnt/data/betting-win-surebet-wave02-next-review-handoff-r01-r06-rebased-50bbcb0b-20260912(2).md",
+    "sha256": "de53490aeba125d467b7e7561de87a3342f3a9ddf197785a0ddfd82b0c485d1c",
+    "size_bytes": 3885,
+    "authority": "Wave 02 to Wave 03 R08 ownership and shared rules"
+  },
+  "package_identity": {
+    "name": "betting-win-surebet",
+    "version": "0.1.0-bws-full-platform",
+    "engines_node": ">=20 <21",
+    "canonical_runtime": "Node 20.20.2"
+  },
+  "executable_compatibility": {
+    "baseline_archive": "betting-win-surebet118(1).zip",
+    "baseline_sha256": "50bbcb0b476904c8209cf7e1287b5ac4f9091fa07f6fd67523fc5430029417f7",
+    "baseline_regular_files": 657,
+    "added_paths": [
+      "docs/reviews/BWS118/wave-02/README.md",
+      "docs/reviews/BWS118/wave-02/area-coverage.md",
+      "docs/reviews/BWS118/wave-02/authority-map.md",
+      "docs/reviews/BWS118/wave-02/baseline-compatibility.json",
+      "docs/reviews/BWS118/wave-02/baseline-compatibility.md",
+      "docs/reviews/BWS118/wave-02/baseline-file-manifest.tsv",
+      "docs/reviews/BWS118/wave-02/completeness-reconciliation.json",
+      "docs/reviews/BWS118/wave-02/cumulative-consolidated-ledger.json",
+      "docs/reviews/BWS118/wave-02/cumulative-consolidated-ledger.md",
+      "docs/reviews/BWS118/wave-02/decisions.json",
+      "docs/reviews/BWS118/wave-02/decisions.md",
+      "docs/reviews/BWS118/wave-02/dependency-and-tranches.md",
+      "docs/reviews/BWS118/wave-02/documentation-integration-plan.json",
+      "docs/reviews/BWS118/wave-02/incremental-consolidation.md",
+      "docs/reviews/BWS118/wave-02/input-inventory.json",
+      "docs/reviews/BWS118/wave-02/next-wave-handoff.md",
+      "docs/reviews/BWS118/wave-02/non-defect-register.json",
+      "docs/reviews/BWS118/wave-02/original-to-consolidated.json",
+      "docs/reviews/BWS118/wave-02/prior-overlay-lineage.json",
+      "docs/reviews/BWS118/wave-02/prior-overlay-lineage.md",
+      "docs/reviews/BWS118/wave-02/protected-mutable-documents.json",
+      "docs/reviews/BWS118/wave-02/report-index.json",
+      "docs/reviews/BWS118/wave-02/reports/R04/BWS118-R04-coverage.tsv",
+      "docs/reviews/BWS118/wave-02/reports/R04/BWS118-R04-findings.json",
+      "docs/reviews/BWS118/wave-02/reports/R04/BWS118-R04-report.md",
+      "docs/reviews/BWS118/wave-02/reports/R04/BWS118-R04-validation.json",
+      "docs/reviews/BWS118/wave-02/reports/R05/BWS118-R05-coverage.tsv",
+      "docs/reviews/BWS118/wave-02/reports/R05/BWS118-R05-findings.json",
+      "docs/reviews/BWS118/wave-02/reports/R05/BWS118-R05-report.md",
+      "docs/reviews/BWS118/wave-02/reports/R05/BWS118-R05-validation.json",
+      "docs/reviews/BWS118/wave-02/reports/R06/BWS118-R06-coverage.tsv",
+      "docs/reviews/BWS118/wave-02/reports/R06/BWS118-R06-findings.json",
+      "docs/reviews/BWS118/wave-02/reports/R06/BWS118-R06-report.md",
+      "docs/reviews/BWS118/wave-02/reports/R06/BWS118-R06-validation.json",
+      "docs/reviews/BWS118/wave-02/repository-profile.md",
+      "docs/reviews/BWS118/wave-02/source-verification.json",
+      "docs/reviews/BWS118/wave-02/test-evidence-matrix.json",
+      "docs/reviews/BWS118/wave-02/test-evidence-matrix.md"
+    ],
+    "removed_paths": [],
+    "changed_paths": [
+      "docs/000_documentation_index.md",
+      "docs/reviews/README.md"
+    ],
+    "non_documentation_differences": [],
+    "result": "EXACT_NON_DOCUMENTATION_EQUIVALENCE"
+  },
+  "runtime_and_tools": {
+    "node": {
+      "version": "v22.16.0",
+      "authority": "supplementary_only"
+    },
+    "python": "3.13.5",
+    "typescript_compiler": "5.8.3",
+    "git": "2.47.3",
+    "gnu_coreutils_timeout": "9.7",
+    "postgresql_utilities": {
+      "psql": "unavailable",
+      "pg_dump": "unavailable",
+      "pg_restore": "unavailable",
+      "createdb": "unavailable",
+      "dropdb": "unavailable"
+    },
+    "node_modules_present": false,
+    "dist_present": false
+  },
+  "commands_executed": [
+    {
+      "argv": [
+        "python3",
+        "scripts/validate_repo.py"
+      ],
+      "command": "python3 scripts/validate_repo.py",
+      "cwd": "/mnt/data/r08_review_work/src120",
+      "duration_ms": 676.017,
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "validate_repo: ok\n",
+      "timeout": false
+    },
+    {
+      "argv": [
+        "python3",
+        "scripts/validate_source_manifest.py"
+      ],
+      "command": "python3 scripts/validate_source_manifest.py",
+      "cwd": "/mnt/data/r08_review_work/src120",
+      "duration_ms": 593.603,
+      "exit_code": 1,
+      "stderr": "ERROR: SOURCE_MANIFEST.json is stale; regenerate it from the current source tree\n",
+      "stdout": "",
+      "timeout": false
+    },
+    {
+      "argv": [
+        "python3",
+        "scripts/validate_three_repo_surebet_boundary.py"
+      ],
+      "command": "python3 scripts/validate_three_repo_surebet_boundary.py",
+      "cwd": "/mnt/data/r08_review_work/src120",
+      "duration_ms": 627.531,
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "validate_three_repo_surebet_boundary: ok\n",
+      "timeout": false
+    },
+    {
+      "argv": [
+        "python3",
+        "scripts/validate_no_provider_connections.py"
+      ],
+      "command": "python3 scripts/validate_no_provider_connections.py",
+      "cwd": "/mnt/data/r08_review_work/src120",
+      "duration_ms": 705.808,
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "validate_no_provider_connections: ok\n",
+      "timeout": false
+    },
+    {
+      "argv": [
+        "python3",
+        "scripts/validate_no_execution_paths.py"
+      ],
+      "command": "python3 scripts/validate_no_execution_paths.py",
+      "cwd": "/mnt/data/r08_review_work/src120",
+      "duration_ms": 779.559,
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "validate_no_execution_paths: ok\n",
+      "timeout": false
+    },
+    {
+      "argv": [
+        "python3",
+        "scripts/validate_remaining_operator_runtime_program.py"
+      ],
+      "command": "python3 scripts/validate_remaining_operator_runtime_program.py",
+      "cwd": "/mnt/data/r08_review_work/src120",
+      "duration_ms": 556.463,
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "validate_remaining_operator_runtime_program: ok\n",
+      "timeout": false
+    },
+    {
+      "argv": [
+        "tsc",
+        "-p",
+        "tsconfig.json",
+        "--noEmit"
+      ],
+      "command": "tsc -p tsconfig.json --noEmit",
+      "cwd": "/mnt/data/r08_review_work/src120",
+      "duration_ms": 1089.979,
+      "exit_code": 2,
+      "stderr": "",
+      "stdout": "error TS2688: Cannot find type definition file for 'node'.\n  The file is in the program because:\n    Entry point of type library 'node' specified in compilerOptions\n",
+      "timeout": false
+    },
+    {
+      "argv": [
+        "python3",
+        "/mnt/data/r08_review_work/r08_static_harness.py"
+      ],
+      "command": "python3 /mnt/data/r08_review_work/r08_static_harness.py",
+      "cwd": "/mnt/data/r08_review_work/src120",
+      "duration_ms": 618.085,
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "{\n  \"schema\": \"bws120-r08-static-harness-v1\",\n  \"inert\": true,\n  \"network_access\": false,\n  \"database_access\": false,\n  \"destructive_action\": false,\n  \"checks\": {\n    \"retention_fingerprint_omits_database_identity\": {\n      \"passed\": true,\n      \"fingerprint\": \"6f69ca768e35b2ce987051e94f8b21ebf4a9a5e11226e921f1d56bdbf525b5de\"\n    },\n    \"restore_receipt_manifest_only_binding_accepts_distinct_dump_digests\": {\n      \"passed\": true,\n      \"dump_a_sha256\": \"5eaf819e2bc85be3b1beb4d2def4d9ac6c8d3d6abf594f780ed7d78ce88412bd\",\n      \"dump_b_sha256\": \"d619da04398fdeeac85baccaec618b9328d15ec77849196c61f7774c8446cc16\"\n    },\n    \"disposable_name_not_unique_for_same_clock_and_pid\": {\n      \"passed\": true,\n      \"name\": \"bws_restore_verify_20260912000000000_1234\"\n    },\n    \"backup_output_predicate_does_not_confine_to_backup_root\": {\n      \"passed\": true\n    },\n    \"backup_metadata_calls_are_separate_from_dump_snapshot\": {\n      \"passed\": true\n    },\n    \"upgrade_apply_omits_environment_and_live_database_revalidation\": {\n      \"passed\": true\n    },\n    \"retention_apply_uses_separate_plan_and_delete_calls\": {\n      \"passed\": true\n    },\n    \"restore_restart_flag_is_unconditional_after_smoke queries\": {\n      \"passed\": true\n    }\n  }\n}\n",
+      "timeout": false
+    }
+  ],
+  "checks": {
+    "passed": [
+      "archive SHA-256 and 695-member reconciliation",
+      "archive path/type safety",
+      "extraction byte integrity",
+      "BWS118-to-BWS120 non-documentation equivalence",
+      "scripts/validate_repo.py",
+      "scripts/validate_three_repo_surebet_boundary.py",
+      "scripts/validate_no_provider_connections.py",
+      "scripts/validate_no_execution_paths.py",
+      "scripts/validate_remaining_operator_runtime_program.py",
+      "inert R08 static harness",
+      "coverage path reconciliation",
+      "source tree mutation check"
+    ],
+    "failed": [
+      {
+        "check": "scripts/validate_source_manifest.py",
+        "classification": "KNOWN_BASELINE_MANIFEST_DRIFT",
+        "owner": "R11",
+        "new_R08_finding": false
+      },
+      {
+        "check": "tsc -p tsconfig.json --noEmit",
+        "classification": "ENVIRONMENT_BLOCKER",
+        "reason": "Cannot find type definition file for 'node'; dependency installation was prohibited."
+      }
+    ],
+    "skipped": [
+      "npm install/update",
+      "full build and Node test suite",
+      "focused database lifecycle Node tests",
+      "controller/service/runtime commands",
+      "provider or external API checks",
+      "offensive cybersecurity and destructive path tests"
+    ],
+    "unavailable": [
+      "canonical Node 20.20.2",
+      "safe disposable PostgreSQL server",
+      "psql, pg_dump, pg_restore, createdb, dropdb",
+      "repository dependencies and Node type declarations",
+      "accepted BWS-600/BWS-710 external runtime evidence"
+    ]
+  },
+  "static_harness": {
+    "schema": "bws120-r08-static-harness-v1",
+    "inert": true,
+    "network_access": false,
+    "database_access": false,
+    "destructive_action": false,
+    "checks": {
+      "retention_fingerprint_omits_database_identity": {
+        "passed": true,
+        "fingerprint": "6f69ca768e35b2ce987051e94f8b21ebf4a9a5e11226e921f1d56bdbf525b5de"
+      },
+      "restore_receipt_manifest_only_binding_accepts_distinct_dump_digests": {
+        "passed": true,
+        "dump_a_sha256": "5eaf819e2bc85be3b1beb4d2def4d9ac6c8d3d6abf594f780ed7d78ce88412bd",
+        "dump_b_sha256": "d619da04398fdeeac85baccaec618b9328d15ec77849196c61f7774c8446cc16"
+      },
+      "disposable_name_not_unique_for_same_clock_and_pid": {
+        "passed": true,
+        "name": "bws_restore_verify_20260912000000000_1234"
+      },
+      "backup_output_predicate_does_not_confine_to_backup_root": {
+        "passed": true
+      },
+      "backup_metadata_calls_are_separate_from_dump_snapshot": {
+        "passed": true
+      },
+      "upgrade_apply_omits_environment_and_live_database_revalidation": {
+        "passed": true
+      },
+      "retention_apply_uses_separate_plan_and_delete_calls": {
+        "passed": true
+      },
+      "restore_restart_flag_is_unconditional_after_smoke queries": {
+        "passed": true
+      }
+    }
+  },
+  "package_inspection_method": [
+    "ZIP-byte inventory and SHA-256 hashing",
+    "read-only extraction to /mnt/data/r08_review_work/src120",
+    "static call/data/state-machine tracing",
+    "inert Python source-structure and canonicalization checks outside the repository",
+    "focused repository static validators",
+    "no package installation and no database/provider access"
+  ],
+  "coverage_reconciliation": {
+    "expected_archive_members": 695,
+    "coverage_rows": 695,
+    "unique_coverage_paths": 695,
+    "missing_paths": [],
+    "extra_paths": [],
+    "duplicate_paths": [],
+    "reconciled": true
+  },
+  "finding_counts": {
+    "confirmed_total": 12,
+    "confirmed_by_severity": {
+      "P0": 2,
+      "P1": 9,
+      "P2": 1
+    },
+    "all_records_by_classification": {
+      "CONFIRMED_FINDING": 12,
+      "CROSS_AREA_HANDOFF": 6,
+      "ENVIRONMENT_BLOCKER": 3,
+      "EXTERNAL_INPUT_BLOCKER": 1,
+      "HYPOTHESIS": 2,
+      "INTENTIONAL_SAFEGUARD": 5,
+      "REJECTED_SUSPICION": 4,
+      "TEST_GAP": 11
+    },
+    "release_blocking": 12,
+    "deployment_blocking": 12,
+    "BWS-600_blocking": 12
+  },
+  "inherited_overlap": {
+    "R03_confirmed_checked": 17,
+    "R03_duplicate_root_causes_created": 0,
+    "R06_material_findings_checked": 6,
+    "known_manifest_handoff": "KNOWN_BASELINE_MANIFEST_DRIFT"
+  },
+  "known_validation_limitations": [
+    "Node 22.16.0 is not canonical acceptance for a Node 20.20.2 repository.",
+    "PostgreSQL transaction, snapshot, crash, restore, retention, and cleanup behavior was not dynamically executed.",
+    "TypeScript compilation and focused Node tests could not run without absent dependencies.",
+    "The static harness proves source predicates and artifact-binding omissions, not production runtime behavior.",
+    "Permission, encryption, credential, and offensive cybersecurity analysis was intentionally excluded at the user request."
+  ],
+  "cybersecurity_scope_exclusion": {
+    "excluded": [
+      "exploit development",
+      "attack chains and weaponization",
+      "credential or provider probing",
+      "permission-bypass experimentation",
+      "destructive race reproduction"
+    ],
+    "retained_defensive_scope": "Fail-closed wrong-path, wrong-target, stale-evidence, and recovery correctness at a non-exploitable operational contract level."
+  },
+  "repository_mutation_attestation": {
+    "source_tree_inventory_before_sha256": "3ff7ee47fac4c6156efe02db796cc0c0c68684ad5c58ac2806fcaedde0d45fbf",
+    "source_tree_inventory_after_sha256": "3ff7ee47fac4c6156efe02db796cc0c0c68684ad5c58ac2806fcaedde0d45fbf",
+    "source_tree_unchanged": true,
+    "review_outputs_written_inside_repository": false
+  },
+  "network_provider_database_access_attestation": {
+    "network_access": false,
+    "provider_access": false,
+    "external_api_access": false,
+    "account_or_credential_access": false,
+    "persistent_database_access": false,
+    "database_mutation": false,
+    "service_or_controller_execution": false,
+    "betting_win_checkout_access": false,
+    "live_operation": false
+  },
+  "outputs": {
+    "BWS120-R08-report.md": {
+      "path": "/mnt/data/BWS120-R08-report.md",
+      "sha256": "c8987c1c2385c7e37195cd967f17e815d43c74847afd351814f02ff8018beaf2",
+      "size_bytes": 59545
+    },
+    "BWS120-R08-findings.json": {
+      "path": "/mnt/data/BWS120-R08-findings.json",
+      "sha256": "9c307db8926a548aac02c24981e99529efeb69069d954489db4d2ea0199ddece",
+      "size_bytes": 78835
+    },
+    "BWS120-R08-coverage.tsv": {
+      "path": "/mnt/data/BWS120-R08-coverage.tsv",
+      "sha256": "1eb6541c1d4fc83ff6984d7c5b1da622439f3b6fe176b8fb5846ed0ef3f5e5be",
+      "size_bytes": 157644
+    },
+    "BWS120-R08-validation.json": {
+      "path": "/mnt/data/BWS120-R08-validation.json",
+      "self_hash_embedded": false,
+      "reason": "Avoid recursive self-hash."
+    }
+  }
+}

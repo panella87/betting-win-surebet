@@ -1,0 +1,1526 @@
+{
+  "schema": "bws120-r08-findings-v1",
+  "review_id": "BWS120-R08",
+  "repository": "betting-win-surebet",
+  "generated_at": "2026-09-12T04:49:23Z",
+  "source_authority": {
+    "archive": "betting-win-surebet120(2).zip",
+    "archive_sha256": "d4565c05ecfe63f5d5511f224a20ff20fb82bfc75b23203c94d7d3e98a8c21bb",
+    "regular_files": 695,
+    "package": "betting-win-surebet@0.1.0-bws-full-platform",
+    "canonical_runtime": "Node 20.20.2",
+    "prior_executable_baseline": "betting-win-surebet118(1).zip",
+    "prior_executable_baseline_sha256": "50bbcb0b476904c8209cf7e1287b5ac4f9091fa07f6fd67523fc5430029417f7",
+    "executable_compatibility": "EXACT_NON_DOCUMENTATION_EQUIVALENCE"
+  },
+  "scope": {
+    "owned": [
+      "operational migration orchestration after R03 source semantics",
+      "backup consistency, naming, manifests, checksums, and publication",
+      "restore verification and disposable-target confinement",
+      "retention planning/apply parity and reference safety",
+      "crash/interruption recovery and wrong-target protection"
+    ],
+    "cybersecurity_exclusions": [
+      "offensive exploit development",
+      "attack-chain construction or weaponization",
+      "credential attacks or provider probing",
+      "permission-bypass experimentation",
+      "destructive path-race reproduction"
+    ],
+    "defensive_operational_safety_retained": "Wrong-path deletion, wrong-database migration, stale evidence, and recovery defects are reported only as fail-closed operational contract defects."
+  },
+  "summary": {
+    "confirmed_findings": 12,
+    "severity_counts": {
+      "P0": 2,
+      "P1": 9,
+      "P2": 1
+    },
+    "classification_counts": {
+      "CONFIRMED_FINDING": 12,
+      "CROSS_AREA_HANDOFF": 6,
+      "ENVIRONMENT_BLOCKER": 3,
+      "EXTERNAL_INPUT_BLOCKER": 1,
+      "HYPOTHESIS": 2,
+      "INTENTIONAL_SAFEGUARD": 5,
+      "REJECTED_SUSPICION": 4,
+      "TEST_GAP": 11
+    },
+    "release_blocking_confirmed_findings": 12,
+    "deployment_blocking_confirmed_findings": 12,
+    "BWS-600_blocking_confirmed_findings": 12
+  },
+  "inherited_overlap_checked": {
+    "R03_confirmed_ids": [
+      "BWS116-R03-001",
+      "BWS116-R03-002",
+      "BWS116-R03-003",
+      "BWS116-R03-004",
+      "BWS116-R03-005",
+      "BWS116-R03-006",
+      "BWS116-R03-007",
+      "BWS116-R03-008",
+      "BWS116-R03-009",
+      "BWS116-R03-010",
+      "BWS116-R03-011",
+      "BWS116-R03-012",
+      "BWS116-R03-013",
+      "BWS116-R03-014",
+      "BWS116-R03-015",
+      "BWS116-R03-016",
+      "BWS116-R03-017"
+    ],
+    "R06_material_ids": [
+      "BWS118-R06-001",
+      "BWS118-R06-005",
+      "BWS118-R06-006",
+      "BWS118-R06-011",
+      "BWS118-R06-015",
+      "BWS118-R06-016"
+    ],
+    "known_manifest_handoff": "KNOWN_BASELINE_MANIFEST_DRIFT",
+    "duplicate_root_causes_created": 0
+  },
+  "confirmed_findings": [
+    {
+      "id": "BWS120-R08-001",
+      "title": "Backup overwrite can recursively remove an unrelated pre-existing directory",
+      "severity": "P0",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": [
+        "packages/bootstrap/src/operations/database-lifecycle.ts::createBwsDatabaseBackup",
+        "packages/bootstrap/src/operations/database-lifecycle.ts::requireOutputPath",
+        "packages/bootstrap/src/cli/bws-database-lifecycle.ts::runBwsDatabaseLifecycleCli"
+      ],
+      "exact_line_range": [
+        "311-373",
+        "1395-1409",
+        "25-32"
+      ],
+      "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+      "relevant_database_lifecycle_object": "backup output path and overwrite publication",
+      "preconditions": [
+        "The operator invokes the backup command with the explicit overwrite flag.",
+        "The selected output path already exists and is outside only the two specifically rejected transient directories."
+      ],
+      "trigger": "Backup publication reaches the overwrite branch for an existing path.",
+      "expected_behavior": "Overwrite must be confined to a dedicated backup destination and must never recursively remove unrelated operator data.",
+      "current_behavior": "The path guard excludes only repository runtime directories. Any other existing path is recursively removed before the staged backup is renamed into place.",
+      "impact": "A misdirected but explicitly requested backup can cause irreversible deletion outside the backup domain. This is an operational destructive-path defect and is release blocking.",
+      "evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/database-lifecycle.ts",
+          "symbol": "createBwsDatabaseBackup",
+          "line_range": "311-373",
+          "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+          "note": "The overwrite branch calls recursive removal on the resolved output path before publication."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/database-lifecycle.ts",
+          "symbol": "requireOutputPath",
+          "line_range": "1395-1409",
+          "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+          "note": "The path predicate rejects only runtime and runtime-state and does not confine output to an approved backup root or generated leaf."
+        },
+        {
+          "path": "packages/bootstrap/src/cli/bws-database-lifecycle.ts",
+          "symbol": "runBwsDatabaseLifecycleCli backup",
+          "line_range": "25-32",
+          "full_file_sha256": "4e6da6bfca8e7c622ccd04e66d3789b4f4eaf490f93fd8265bfa458d3c22b06a",
+          "note": "The public CLI exposes the overwrite branch through --allow-overwrite."
+        },
+        {
+          "path": "docs/037_database_backup_retention_and_recovery.md",
+          "symbol": "Backup contract",
+          "line_range": "21-31",
+          "full_file_sha256": "6d65630b7d351c1e59318f4761cbb05de099d1661c37fea18d5bf603fd560d10",
+          "note": "The authority requires an explicit safe overwrite flag and atomic publication."
+        }
+      ],
+      "independent_evidence": "The inert static predicate harness confirmed that the production path validator accepts non-transient paths without executing any deletion.",
+      "reproduction_status": "CONFIRMED_BY_STATIC_TRACE_AND_INERT_NON_DESTRUCTIVE_HARNESS",
+      "transaction_or_state_machine_analysis": "The staged backup becomes authoritative only after publication, but existing content is destroyed before the new publication transition is committed.",
+      "root_cause": "Output authorization is represented as a negative denylist instead of a positively bound backup root and exact destination identity.",
+      "minimal_fix_boundary": "Confine backup output to an operator-selected approved backup root, require a backup-specific destination leaf, reject unrelated existing directories, and preserve the prior verified backup until replacement publication is committed.",
+      "required_tests": [
+        "Reject an overwrite target outside the approved backup root.",
+        "Reject an existing unrelated directory even when overwrite intent is present.",
+        "Prove a failed replacement leaves the previous verified backup intact.",
+        "Prove normal publication remains atomic inside the approved root."
+      ],
+      "regression_risks": [
+        "Existing workflows that use arbitrary output directories will become invalid and need an explicit approved backup root."
+      ],
+      "primary_owner": "R08",
+      "secondary_sectors": [
+        "R09",
+        "R10",
+        "R11"
+      ],
+      "aliases_or_dependencies": [
+        "BWS116-R03-HO-002"
+      ],
+      "explicitly_unchanged_areas": [
+        "pg_dump schema selection",
+        "backup checksum format",
+        "provider and execution boundaries"
+      ],
+      "blocks": {
+        "release": true,
+        "deployment": true,
+        "BWS-600 evidence": true,
+        "B1 acceptance": false,
+        "later execution": true
+      }
+    },
+    {
+      "id": "BWS120-R08-002",
+      "title": "Release-upgrade apply can migrate a different database than the reviewed plan",
+      "severity": "P0",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": [
+        "packages/bootstrap/src/operations/release-upgrade.ts::createBwsReleaseUpgradePlan",
+        "packages/bootstrap/src/operations/release-upgrade.ts::applyBwsReleaseUpgrade"
+      ],
+      "exact_line_range": [
+        "385-443",
+        "519-535",
+        "631-645"
+      ],
+      "full_file_sha256": "5c5aadcab32d9a937ea6100434f7b3644df5c31954e096af19a80c1958bfeef7",
+      "relevant_database_lifecycle_object": "upgrade plan to migration-apply target binding",
+      "preconditions": [
+        "A ready upgrade plan has been produced.",
+        "The environment file or effective PostgreSQL tuple changes before apply, or the live migration ledger changes after planning."
+      ],
+      "trigger": "The apply path re-reads the mutable environment and reaches migration application.",
+      "expected_behavior": "Apply must re-prove the exact environment bytes, target database identity, migration ledger, and release binding recorded by the plan before any drain or migration effect.",
+      "current_behavior": "Planning fingerprints the environment file and database identity, but apply only checks the caller-supplied plan fingerprint, re-reads the environment, resolves a fresh database configuration, and applies migrations without comparing that target or ledger to the plan.",
+      "impact": "A valid plan can authorize migration effects against a different database or changed ledger. The mismatch can create irreversible schema or data effects on the wrong target.",
+      "evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/release-upgrade.ts",
+          "symbol": "createBwsReleaseUpgradePlan",
+          "line_range": "385-443",
+          "full_file_sha256": "5c5aadcab32d9a937ea6100434f7b3644df5c31954e096af19a80c1958bfeef7",
+          "note": "The plan records the database identity and environment file hash."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/release-upgrade.ts",
+          "symbol": "applyBwsReleaseUpgrade",
+          "line_range": "519-535",
+          "full_file_sha256": "5c5aadcab32d9a937ea6100434f7b3644df5c31954e096af19a80c1958bfeef7",
+          "note": "Apply accepts the stored plan, then re-reads the mutable environment without rechecking its hash or database identity."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/release-upgrade.ts",
+          "symbol": "applyBwsReleaseUpgrade migration phase",
+          "line_range": "631-645",
+          "full_file_sha256": "5c5aadcab32d9a937ea6100434f7b3644df5c31954e096af19a80c1958bfeef7",
+          "note": "Migrations are applied through the freshly resolved configuration without a live target parity gate."
+        },
+        {
+          "path": "docs/039_release_deployment_and_upgrade_contract.md",
+          "symbol": "Upgrade contract",
+          "line_range": "33-49",
+          "full_file_sha256": "62bffb897f6ec26c58782fa097e31d0e4c2a7c9e3f9f2bd9a8b4da1c9d3f3ad5",
+          "note": "The authority requires current/target identity, migration compatibility, backup proof, and fail-closed migration behavior."
+        }
+      ],
+      "independent_evidence": "The inert source harness confirmed that the apply path contains no environment-fingerprint or live database-identity comparison before applyMigrations.",
+      "reproduction_status": "CONFIRMED_BY_STATIC_STATE_MACHINE_TRACE_AND_INERT_SOURCE_HARNESS",
+      "transaction_or_state_machine_analysis": "The plan/apply state machine binds the decision to one target at planning time but discards that target binding at the effectful transition.",
+      "root_cause": "The plan fingerprint is treated as sufficient authorization even though effectful configuration is re-resolved from mutable inputs at apply time.",
+      "minimal_fix_boundary": "Before draining or applying migrations, re-hash the environment, resolve and query the live database identity and ledger, compare every plan-bound field, and abort on any difference. The apply path must use the revalidated immutable target tuple for all subsequent steps.",
+      "required_tests": [
+        "Change the environment file database between plan and apply and require a pre-effect failure.",
+        "Change host or socket target while keeping the same database name and require failure.",
+        "Change the live applied-migration ledger between plan and apply and require failure.",
+        "Prove no lifecycle drain or migration callback occurs before target parity succeeds."
+      ],
+      "regression_risks": [
+        "Long-lived plans will become stale by design when configuration or database state changes."
+      ],
+      "primary_owner": "R08",
+      "secondary_sectors": [
+        "R09",
+        "R10",
+        "R11"
+      ],
+      "aliases_or_dependencies": [
+        "BWS116-R03-HO-002",
+        "BWS116-R03-004",
+        "BWS118-R06-001"
+      ],
+      "explicitly_unchanged_areas": [
+        "release inventory verification",
+        "migration SQL semantics owned by R03",
+        "service lifecycle internals owned by R06"
+      ],
+      "blocks": {
+        "release": true,
+        "deployment": true,
+        "BWS-600 evidence": true,
+        "B1 acceptance": false,
+        "later execution": true
+      }
+    },
+    {
+      "id": "BWS120-R08-003",
+      "title": "Backup manifest metadata and row counts are not captured from the pg_dump snapshot",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": [
+        "packages/bootstrap/src/operations/database-lifecycle.ts::createBwsDatabaseBackup"
+      ],
+      "exact_line_range": [
+        "331-357"
+      ],
+      "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+      "relevant_database_lifecycle_object": "backup snapshot and manifest consistency",
+      "preconditions": [
+        "The database changes while backup creation is in progress."
+      ],
+      "trigger": "Migration status is queried before pg_dump and table counts are queried after pg_dump using independent sessions.",
+      "expected_behavior": "The dump, migration ledger, source identity, and table counts must describe one transactionally consistent database snapshot.",
+      "current_behavior": "Migration status, pg_dump, and row counts are three independent observations with no shared snapshot or write exclusion.",
+      "impact": "The manifest can describe rows or a migration ledger that are absent from the dump, or omit rows present in it. Restore verification can then reject a sound dump or accept misleading metadata.",
+      "evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/database-lifecycle.ts",
+          "symbol": "createBwsDatabaseBackup",
+          "line_range": "331-357",
+          "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+          "note": "Migration status precedes pg_dump, while row counts follow it, and no exported snapshot identifier is shared."
+        },
+        {
+          "path": "packages/persistence/src/psql.ts",
+          "symbol": "queryPsqlJsonRows and runPsql",
+          "line_range": "77-91,191-208",
+          "full_file_sha256": "86053cd5690b15a2ba6ea210e3073c3324017d12fb36ec1fe815c84edab50343",
+          "note": "Each metadata query starts an independent psql process/session."
+        },
+        {
+          "path": "docs/037_database_backup_retention_and_recovery.md",
+          "symbol": "Backup and restore contract",
+          "line_range": "21-40",
+          "full_file_sha256": "6d65630b7d351c1e59318f4761cbb05de099d1661c37fea18d5bf603fd560d10",
+          "note": "The authority requires machine-readable, restorable backup proof with row-count and invariant validation."
+        }
+      ],
+      "independent_evidence": "The inert harness confirmed the three production calls are structurally separate and there is no snapshot token flow.",
+      "reproduction_status": "CONFIRMED_BY_STATIC_TRANSACTION_TRACE; DYNAMIC_CONCURRENT_POSTGRESQL_PROOF_UNAVAILABLE",
+      "transaction_or_state_machine_analysis": "The backup transitions through pre-dump metadata, dump, and post-dump metadata without one database snapshot boundary.",
+      "root_cause": "Backup metadata is assembled around pg_dump rather than from the same exported or locked snapshot.",
+      "minimal_fix_boundary": "Capture dump and metadata from one database snapshot or an equivalent write-quiesced boundary, record the snapshot identity, and bind all manifest values to it.",
+      "required_tests": [
+        "Mutate rows concurrently during backup and prove dump and manifest counts remain consistent.",
+        "Apply a migration concurrently and prove backup either blocks or records one exact ledger.",
+        "Restore the produced backup and require exact manifest parity."
+      ],
+      "regression_risks": [
+        "Snapshot coordination may require PostgreSQL-specific session ownership and can increase backup duration."
+      ],
+      "primary_owner": "R08",
+      "secondary_sectors": [
+        "R03",
+        "R09",
+        "R11"
+      ],
+      "aliases_or_dependencies": [
+        "BWS116-R03-004",
+        "BWS116-R03-HO-002"
+      ],
+      "explicitly_unchanged_areas": [
+        "surebet-only dump scope",
+        "checksum generation",
+        "retention behavior"
+      ],
+      "blocks": {
+        "release": true,
+        "deployment": true,
+        "BWS-600 evidence": true,
+        "B1 acceptance": false,
+        "later execution": true
+      }
+    },
+    {
+      "id": "BWS120-R08-004",
+      "title": "Backup replacement deletes the previous verified backup before the new publication commits",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": [
+        "packages/bootstrap/src/operations/database-lifecycle.ts::createBwsDatabaseBackup"
+      ],
+      "exact_line_range": [
+        "322-385"
+      ],
+      "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+      "relevant_database_lifecycle_object": "backup staging, replacement, and interruption recovery",
+      "preconditions": [
+        "A prior verified backup exists at the selected destination.",
+        "Overwrite intent is present."
+      ],
+      "trigger": "The replacement branch removes the old directory and is interrupted or fails before rename completes.",
+      "expected_behavior": "The old verified backup must remain recoverable until the replacement has been durably published.",
+      "current_behavior": "The old directory is recursively removed before renameSync publishes the staged directory. The catch block cleans only the staging directory.",
+      "impact": "A publication failure or process interruption in the replacement window can leave neither the old verified backup nor the new published backup.",
+      "evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/database-lifecycle.ts",
+          "symbol": "createBwsDatabaseBackup",
+          "line_range": "322-385",
+          "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+          "note": "The previous output is removed at lines 370-372 before the publication rename at line 373."
+        },
+        {
+          "path": "docs/037_database_backup_retention_and_recovery.md",
+          "symbol": "Backup and recovery contract",
+          "line_range": "21-31,56-58",
+          "full_file_sha256": "6d65630b7d351c1e59318f4761cbb05de099d1661c37fea18d5bf603fd560d10",
+          "note": "The authority requires atomic publication and interrupted-backup recovery evidence."
+        }
+      ],
+      "independent_evidence": "Static transition ordering proves the loss window. No destructive interruption was executed.",
+      "reproduction_status": "CONFIRMED_BY_STATIC_PUBLICATION_ORDER_TRACE",
+      "transaction_or_state_machine_analysis": "The replacement state machine has a gap between retiring the current backup and committing the next backup, with no rollback pointer or recovery journal.",
+      "root_cause": "Replacement is implemented as delete-then-rename rather than versioned publication or an atomic commit that preserves the predecessor.",
+      "minimal_fix_boundary": "Publish to a new immutable version, durably validate it, switch an authoritative pointer atomically, and retire the predecessor only after commit. Add bounded reconciliation for abandoned staging directories.",
+      "required_tests": [
+        "Inject failure after staging and before publication and prove the predecessor remains valid.",
+        "Inject failure after pointer switch and prove one complete version remains authoritative.",
+        "Reconcile abandoned staging directories without touching unrelated paths."
+      ],
+      "regression_risks": [
+        "Versioned publication requires explicit retention for old backup versions and additional disk headroom."
+      ],
+      "primary_owner": "R08",
+      "secondary_sectors": [
+        "R09",
+        "R11",
+        "R24"
+      ],
+      "aliases_or_dependencies": [
+        "BWS116-R03-HO-002"
+      ],
+      "explicitly_unchanged_areas": [
+        "dump contents",
+        "source database identity format",
+        "restore target behavior"
+      ],
+      "blocks": {
+        "release": true,
+        "deployment": true,
+        "BWS-600 evidence": true,
+        "B1 acceptance": false,
+        "later execution": true
+      }
+    },
+    {
+      "id": "BWS120-R08-005",
+      "title": "Migration status reports compatibility without evaluating PostgreSQL server-version compatibility",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": [
+        "packages/bootstrap/src/operations/database-lifecycle.ts::getBwsDatabaseMigrationStatus",
+        "packages/bootstrap/src/operations/database-lifecycle.ts::queryDatabaseIdentity"
+      ],
+      "exact_line_range": [
+        "262-308",
+        "1158-1187"
+      ],
+      "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+      "relevant_database_lifecycle_object": "migration compatibility classification",
+      "preconditions": [
+        "The target PostgreSQL server version is unsupported or outside the accepted compatibility policy."
+      ],
+      "trigger": "Migration status is evaluated.",
+      "expected_behavior": "Compatibility must include an explicit supported server-version policy and reject unknown or unsupported versions.",
+      "current_behavior": "The server version and numeric version are recorded, but compatibility reasons are derived only from checksum mismatches and schema existence.",
+      "impact": "Migration, backup, restore, upgrade, and acceptance gates can classify an unsupported PostgreSQL target as compatible.",
+      "evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/database-lifecycle.ts",
+          "symbol": "getBwsDatabaseMigrationStatus",
+          "line_range": "262-308",
+          "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+          "note": "Compatibility reasons do not inspect database.serverVersion or serverVersionNum."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/database-lifecycle.ts",
+          "symbol": "queryDatabaseIdentity",
+          "line_range": "1158-1187",
+          "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+          "note": "Server version data is collected but remains informational."
+        },
+        {
+          "path": "docs/037_database_backup_retention_and_recovery.md",
+          "symbol": "Migration status contract",
+          "line_range": "9-19",
+          "full_file_sha256": "6d65630b7d351c1e59318f4761cbb05de099d1661c37fea18d5bf603fd560d10",
+          "note": "The contract explicitly requires database/server-version compatibility."
+        }
+      ],
+      "independent_evidence": "Direct source comparison between the collected identity fields and compatibility-reason construction confirms the missing decision branch.",
+      "reproduction_status": "CONFIRMED_BY_STATIC_DECISION_TRACE; MULTI_VERSION_POSTGRESQL_MATRIX_UNAVAILABLE",
+      "transaction_or_state_machine_analysis": "All downstream gates inherit a compatible status that lacks one required compatibility dimension.",
+      "root_cause": "Server version is modeled as evidence but not as an authority input to compatibility.",
+      "minimal_fix_boundary": "Define the accepted PostgreSQL version range, validate numeric version fail closed, include the decision in status evidence, and require the same version binding at plan/apply and restore verification.",
+      "required_tests": [
+        "Supported major/minor version is compatible.",
+        "Unsupported, malformed, and unknown numeric versions are incompatible.",
+        "Upgrade apply rejects server-version drift after planning."
+      ],
+      "regression_risks": [
+        "Existing environments outside the newly explicit support range will become blocked until formally accepted."
+      ],
+      "primary_owner": "R08",
+      "secondary_sectors": [
+        "R03",
+        "R09",
+        "R11"
+      ],
+      "aliases_or_dependencies": [
+        "BWS116-R03-HO-002"
+      ],
+      "explicitly_unchanged_areas": [
+        "migration checksums",
+        "schema existence check",
+        "migration ordering"
+      ],
+      "blocks": {
+        "release": true,
+        "deployment": true,
+        "BWS-600 evidence": true,
+        "B1 acceptance": false,
+        "later execution": true
+      }
+    },
+    {
+      "id": "BWS120-R08-006",
+      "title": "Restore verification does not bind manifest semantics to the exact restored database state",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": [
+        "packages/bootstrap/src/operations/database-lifecycle.ts::readAndValidateBackupManifest",
+        "packages/bootstrap/src/operations/database-lifecycle.ts::verifyBwsDatabaseRestore",
+        "packages/bootstrap/src/operations/database-lifecycle.ts::assertRowCountsMatch"
+      ],
+      "exact_line_range": [
+        "389-458",
+        "1004-1018",
+        "1323-1336"
+      ],
+      "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+      "relevant_database_lifecycle_object": "backup manifest validation and restored-state parity",
+      "preconditions": [
+        "A checksummed backup bundle contains a malformed, incomplete, or mismatched manifest relative to its dump."
+      ],
+      "trigger": "Restore verification reads the manifest and validates the restored database.",
+      "expected_behavior": "The manifest must be fully schema validated and the restored database must match its exact database identity, migration ledger, complete table set, row counts, and invariants.",
+      "current_behavior": "Manifest validation checks only the schema tag and that rowCounts is an array. Restore requires general migration compatibility and no pending migrations but does not compare the manifest ledger or source identity to the restored state. Row-count comparison checks only manifest-listed tables and ignores unexpected restored tables.",
+      "impact": "A self-consistent checksum file can still certify a semantically mismatched manifest/dump pair or incomplete restored-state proof.",
+      "evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/database-lifecycle.ts",
+          "symbol": "readAndValidateBackupManifest",
+          "line_range": "1004-1018",
+          "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+          "note": "The parsed object is cast after two shallow checks."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/database-lifecycle.ts",
+          "symbol": "verifyBwsDatabaseRestore",
+          "line_range": "389-458",
+          "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+          "note": "Restored migration status and row counts are collected, but exact manifest-to-restored ledger and identity parity is not asserted."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/database-lifecycle.ts",
+          "symbol": "assertRowCountsMatch",
+          "line_range": "1323-1336",
+          "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+          "note": "The comparison iterates expected rows only and does not reject extra restored tables."
+        },
+        {
+          "path": "docs/037_database_backup_retention_and_recovery.md",
+          "symbol": "Restore verification contract",
+          "line_range": "33-42",
+          "full_file_sha256": "6d65630b7d351c1e59318f4761cbb05de099d1661c37fea18d5bf603fd560d10",
+          "note": "The contract requires migrations, row counts, checksums, invariants, and read-only API proof."
+        }
+      ],
+      "independent_evidence": "Static field-flow tracing confirmed that manifest.database and manifest.migrationLedger do not participate in restored-state equality checks.",
+      "reproduction_status": "CONFIRMED_BY_STATIC_DATAFLOW_TRACE; POSTGRESQL_RESTORE_MATRIX_UNAVAILABLE",
+      "transaction_or_state_machine_analysis": "Checksum verification authenticates the supplied files as a bundle but the semantic proof does not establish that the manifest truth and restored dump truth are the same state.",
+      "root_cause": "The restore verifier treats a typed interface assertion as full validation and uses partial parity checks instead of one canonical restored-state comparison.",
+      "minimal_fix_boundary": "Apply strict runtime schema validation, record the exact dump/checksum identity, compare exact migration ledger and source/restore identity fields, compare complete expected and actual table sets, and execute explicit invariants.",
+      "required_tests": [
+        "Reject missing, extra, wrong-type, malformed, and duplicate manifest fields.",
+        "Reject manifest/dump migration-ledger mismatch.",
+        "Reject missing and unexpected surebet tables.",
+        "Reject source identity mismatch and invariant failure despite matching row counts."
+      ],
+      "regression_risks": [
+        "Older manifests that were accepted through structural casting may become invalid."
+      ],
+      "primary_owner": "R08",
+      "secondary_sectors": [
+        "R03",
+        "R09",
+        "R11"
+      ],
+      "aliases_or_dependencies": [
+        "BWS116-R03-003",
+        "BWS116-R03-HO-002"
+      ],
+      "explicitly_unchanged_areas": [
+        "checksum algorithm",
+        "disposable database selection",
+        "API query semantics owned by R05"
+      ],
+      "blocks": {
+        "release": true,
+        "deployment": true,
+        "BWS-600 evidence": true,
+        "B1 acceptance": false,
+        "later execution": true
+      }
+    },
+    {
+      "id": "BWS120-R08-007",
+      "title": "Restore verification hard-codes restart success after two loopback API smoke runs",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": [
+        "packages/bootstrap/src/operations/database-lifecycle.ts::verifyBwsDatabaseRestore",
+        "packages/bootstrap/src/operations/database-lifecycle.ts::verifyReadOnlyApiQueries",
+        "packages/bootstrap/src/operations/external-runtime-preflight.ts::validateBackupEvidence",
+        "packages/bootstrap/src/operations/final-local-acceptance.ts::createBwsFinalLocalAcceptanceRecoveryResult"
+      ],
+      "exact_line_range": [
+        "431-458",
+        "1228-1300",
+        "504-527",
+        "535-613"
+      ],
+      "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+      "relevant_database_lifecycle_object": "restore restart and recovery proof",
+      "preconditions": [
+        "Restore, migration, and basic read-only API queries succeed."
+      ],
+      "trigger": "verifyBwsDatabaseRestore returns its receipt.",
+      "expected_behavior": "Restart proof must represent actual database, scheduler, worker, and service restart/recovery behavior or remain explicitly unproven.",
+      "current_behavior": "The verifier starts and closes two in-process loopback API servers, performs three small read queries per run, then returns serverRestartsVerified=true unconditionally. Downstream preflight and final acceptance trust that boolean.",
+      "impact": "Restore evidence can become green without scheduler/worker restart, durable checkpoint recovery, process replacement, or database restart proof.",
+      "evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/database-lifecycle.ts",
+          "symbol": "verifyBwsDatabaseRestore",
+          "line_range": "431-458",
+          "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+          "note": "The restart field is assigned true after two calls to the API smoke helper."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/database-lifecycle.ts",
+          "symbol": "verifyReadOnlyApiQueries",
+          "line_range": "1228-1300",
+          "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+          "note": "The helper creates an in-process loopback HTTP server and performs only three pageSize=1 reads."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/external-runtime-preflight.ts",
+          "symbol": "validateBackupEvidence",
+          "line_range": "504-527",
+          "full_file_sha256": "724a419567dc2c6f737166660092d5c0d8e09be24a4b22bc9377c324949ec427",
+          "note": "External preflight accepts the boolean as required restart proof."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/final-local-acceptance.ts",
+          "symbol": "createBwsFinalLocalAcceptanceRecoveryResult",
+          "line_range": "535-613",
+          "full_file_sha256": "1f7b5675b2d307cf8ecc7ab791eba825036ba850fe28ccacae1f8a78deb6a3c5",
+          "note": "Final local acceptance also treats the boolean as sufficient recovery evidence."
+        },
+        {
+          "path": "docs/037_database_backup_retention_and_recovery.md",
+          "symbol": "Restore verification contract",
+          "line_range": "33-42",
+          "full_file_sha256": "6d65630b7d351c1e59318f4761cbb05de099d1661c37fea18d5bf603fd560d10",
+          "note": "The authority requires representative scheduler, worker, and restart checks."
+        }
+      ],
+      "independent_evidence": "The inert harness confirmed that the restart flag has no conditional evidence branch after the smoke-query sequence.",
+      "reproduction_status": "CONFIRMED_BY_STATIC_CONTROL_FLOW_TRACE",
+      "transaction_or_state_machine_analysis": "The evidence state machine conflates two successful API construction cycles with successful restart and durable recovery of the managed runtime.",
+      "root_cause": "A broad acceptance claim is represented by an unconditional boolean rather than typed evidence for each required recovery component.",
+      "minimal_fix_boundary": "Replace the boolean with explicit, hashed database-restart, scheduler-recovery, worker-recovery, service-restart, and API-read evidence. Require each consumer to validate the detailed receipt and preserve held states when any component is unavailable.",
+      "required_tests": [
+        "Database/API smoke passes but scheduler recovery fails and receipt remains blocked.",
+        "Worker restart loses checkpoint and receipt remains blocked.",
+        "Service restart evidence is absent or stale and preflight rejects it.",
+        "All component receipts are bound to the same restored database and source generation."
+      ],
+      "regression_risks": [
+        "Existing restore receipts containing only serverRestartsVerified will no longer satisfy acceptance."
+      ],
+      "primary_owner": "R08",
+      "secondary_sectors": [
+        "R06",
+        "R07",
+        "R09",
+        "R11"
+      ],
+      "aliases_or_dependencies": [
+        "BWS118-R06-007",
+        "BWS118-R06-008",
+        "BWS116-R03-HO-002"
+      ],
+      "explicitly_unchanged_areas": [
+        "read-only API query correctness",
+        "generic service lifecycle implementation",
+        "provider/runtime external holds"
+      ],
+      "blocks": {
+        "release": true,
+        "deployment": true,
+        "BWS-600 evidence": true,
+        "B1 acceptance": false,
+        "later execution": true
+      }
+    },
+    {
+      "id": "BWS120-R08-008",
+      "title": "Restore verification receipt is not bound to the exact dump bytes it claims to verify",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": [
+        "packages/bootstrap/src/operations/database-lifecycle.ts::BwsVerifyDatabaseRestoreResult",
+        "packages/bootstrap/src/operations/database-lifecycle.ts::verifyBwsDatabaseRestore",
+        "packages/bootstrap/src/operations/release-upgrade.ts::verifyBackupEvidence"
+      ],
+      "exact_line_range": [
+        "183-195",
+        "446-458",
+        "1293-1338"
+      ],
+      "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+      "relevant_database_lifecycle_object": "restore receipt and backup bundle identity",
+      "preconditions": [
+        "A restore receipt exists for one dump.",
+        "A different dump is later placed beside the same manifest with a matching updated checksum file."
+      ],
+      "trigger": "Release upgrade validates current bundle checksums and compares the old receipt only to the current manifest.",
+      "expected_behavior": "A restore receipt must be valid only for the exact dump, manifest, checksum file, and source database snapshot that were restored.",
+      "current_behavior": "The receipt includes the manifest but no dump or checksum-file digest. Release verification checks current file checksums, then compares only the receipt manifest fingerprint to the current manifest.",
+      "impact": "A stale restore receipt can be reused for different dump bytes when the manifest remains unchanged, so upgrade and acceptance gates can rely on restore proof for a bundle that was never restored.",
+      "evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/database-lifecycle.ts",
+          "symbol": "BwsVerifyDatabaseRestoreResult",
+          "line_range": "183-195",
+          "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+          "note": "The receipt has no dumpSha256, checksum-manifest digest, or complete backup bundle identity."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/database-lifecycle.ts",
+          "symbol": "verifyBwsDatabaseRestore return",
+          "line_range": "446-458",
+          "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+          "note": "The returned receipt binds the manifest object but not the dump bytes."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/release-upgrade.ts",
+          "symbol": "verifyBackupEvidence",
+          "line_range": "1293-1338",
+          "full_file_sha256": "5c5aadcab32d9a937ea6100434f7b3644df5c31954e096af19a80c1958bfeef7",
+          "note": "Current dump checksums are verified separately, while receipt parity is checked only through backupManifest."
+        },
+        {
+          "path": "docs/043_upgrade_rollback_recovery_implementation_blueprint.md",
+          "symbol": "Required contracts",
+          "line_range": "18-39",
+          "full_file_sha256": "46513efa6bd4be9b897a26dae42431a8c0b5438f3f9c44f2a42af70a4dc811a3",
+          "note": "Upgrade evidence is required to bind exact evidence paths and SHA-256 values."
+        }
+      ],
+      "independent_evidence": "The inert harness produced two distinct dump digests, 5eaf819e... and d619da04..., that share one manifest identity under the current receipt comparison model.",
+      "reproduction_status": "CONFIRMED_BY_STATIC_ARTIFACT_BINDING_TRACE_AND_INERT_DIGEST_HARNESS",
+      "transaction_or_state_machine_analysis": "Restore verification and later backup verification are separate transactions without one immutable bundle identifier carried across both.",
+      "root_cause": "The restore receipt models semantic manifest identity but omits content identity for the dump and checksum manifest.",
+      "minimal_fix_boundary": "Add one canonical backup-bundle identity containing dump SHA-256, manifest SHA-256, checksum-file SHA-256, source snapshot identity, and schema. Persist it in the restore receipt and require exact equality in every consumer.",
+      "required_tests": [
+        "Change only dump bytes and checksum file after restore; upgrade verification must reject the stale receipt.",
+        "Change only manifest bytes; reject.",
+        "Change checksum-file bytes without changing referenced digests; reject.",
+        "Accept only an exact bundle identity produced by the restore run."
+      ],
+      "regression_risks": [
+        "All existing restore receipts lacking bundle identity must be regenerated."
+      ],
+      "primary_owner": "R08",
+      "secondary_sectors": [
+        "R07",
+        "R09",
+        "R11",
+        "R24"
+      ],
+      "aliases_or_dependencies": [
+        "BWS116-R03-HO-002"
+      ],
+      "explicitly_unchanged_areas": [
+        "SHA-256 algorithm",
+        "release package identity",
+        "database row-count semantics"
+      ],
+      "blocks": {
+        "release": true,
+        "deployment": true,
+        "BWS-600 evidence": true,
+        "B1 acceptance": false,
+        "later execution": true
+      }
+    },
+    {
+      "id": "BWS120-R08-009",
+      "title": "Interrupted restore verification can leave untracked disposable databases",
+      "severity": "P2",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": [
+        "packages/bootstrap/src/operations/database-lifecycle.ts::verifyBwsDatabaseRestore",
+        "packages/bootstrap/src/operations/database-lifecycle.ts::buildDisposableRestoreDatabaseName",
+        "packages/bootstrap/src/operations/database-lifecycle.ts::createDisposableDatabase/dropDisposableDatabase"
+      ],
+      "exact_line_range": [
+        "389-461",
+        "1338-1393"
+      ],
+      "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+      "relevant_database_lifecycle_object": "disposable restore database ownership and interruption recovery",
+      "preconditions": [
+        "The disposable database has been created.",
+        "The process terminates without executing JavaScript finally cleanup."
+      ],
+      "trigger": "Process interruption occurs during restore or verification.",
+      "expected_behavior": "Every disposable database must have durable ownership metadata and bounded recovery that can identify and safely remove only abandoned review-owned targets.",
+      "current_behavior": "Cleanup exists only in an in-process finally block. The database name is derived from timestamp and PID, and there is no durable registry, owner token, startup reconciliation, or verified leak enumeration.",
+      "impact": "Interrupted verification can leave databases that consume storage, collide with later runs, or create ambiguous cleanup decisions.",
+      "evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/database-lifecycle.ts",
+          "symbol": "verifyBwsDatabaseRestore",
+          "line_range": "389-461",
+          "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+          "note": "Database creation precedes verification and cleanup depends on the same process reaching finally."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/database-lifecycle.ts",
+          "symbol": "buildDisposableRestoreDatabaseName and create/drop",
+          "line_range": "1338-1393",
+          "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+          "note": "Ownership is encoded only in a timestamp/PID name and no durable registry is written."
+        },
+        {
+          "path": "docs/037_database_backup_retention_and_recovery.md",
+          "symbol": "Recovery contract",
+          "line_range": "33-42,56-58",
+          "full_file_sha256": "6d65630b7d351c1e59318f4761cbb05de099d1661c37fea18d5bf603fd560d10",
+          "note": "The authority requires unique disposable databases and interrupted-restore recovery evidence."
+        }
+      ],
+      "independent_evidence": "The inert harness confirmed deterministic name reuse for the same timestamp and PID. No database was created or dropped.",
+      "reproduction_status": "CONFIRMED_BY_STATIC_INTERRUPTION_TRACE; PROCESS_KILL_AND_POSTGRESQL_PROOF_UNAVAILABLE",
+      "transaction_or_state_machine_analysis": "The durable resource outlives the process, but its ownership state is not durable. The cleanup transition therefore disappears with the process.",
+      "root_cause": "Disposable-resource ownership is process-local rather than persisted and reconciled.",
+      "minimal_fix_boundary": "Use a strong unique owner token, persist a restore-run registry before creation, tag the database with that run identity, and provide a bounded reconciler that proves ownership before cleanup.",
+      "required_tests": [
+        "Terminate verification after create and prove the next bounded reconciliation discovers only the abandoned owned database.",
+        "Run two verifications with equal injected time and prove unique database identities.",
+        "Prove reconciliation does not remove non-owned databases."
+      ],
+      "regression_risks": [
+        "Recovery introduces durable bookkeeping that must itself be retained and reconciled."
+      ],
+      "primary_owner": "R08",
+      "secondary_sectors": [
+        "R09",
+        "R10",
+        "R11"
+      ],
+      "aliases_or_dependencies": [
+        "BWS116-R03-HO-002"
+      ],
+      "explicitly_unchanged_areas": [
+        "normal finally cleanup",
+        "restore SQL flags",
+        "active project database prohibition"
+      ],
+      "blocks": {
+        "release": true,
+        "deployment": true,
+        "BWS-600 evidence": true,
+        "B1 acceptance": false,
+        "later execution": true
+      }
+    },
+    {
+      "id": "BWS120-R08-010",
+      "title": "Retention plan fingerprints omit target database and schema-generation identity",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": [
+        "packages/bootstrap/src/operations/database-lifecycle.ts::BwsDatabaseRetentionPlan",
+        "packages/bootstrap/src/operations/database-lifecycle.ts::computeRetentionPlanFingerprint",
+        "packages/bootstrap/src/cli/bws-database-lifecycle.ts::retention plan/apply"
+      ],
+      "exact_line_range": [
+        "202-237",
+        "464-535",
+        "980-1001",
+        "42-73"
+      ],
+      "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+      "relevant_database_lifecycle_object": "retention plan authorization and target binding",
+      "preconditions": [
+        "Two databases or generations expose the same scope, cutoff, maxRows, candidate keys, and recorded timestamps."
+      ],
+      "trigger": "A fingerprint generated for one target is supplied to retention apply against another target with the same candidate payload.",
+      "expected_behavior": "A destructive retention authorization must bind one exact database, server/cluster identity, schema generation, migration ledger, and candidate snapshot.",
+      "current_behavior": "The fingerprint includes only scope, cutoff, maxRows, and candidates. The plan and apply receipts expose no database identity or migration/release generation.",
+      "impact": "A valid plan fingerprint is portable across targets with matching candidate payloads and can authorize pruning on the wrong database.",
+      "evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/database-lifecycle.ts",
+          "symbol": "BwsDatabaseRetentionPlan interfaces",
+          "line_range": "202-237",
+          "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+          "note": "Plan and apply records contain no database identity or generation fields."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/database-lifecycle.ts",
+          "symbol": "plan/applyBwsDatabaseRetention",
+          "line_range": "464-535",
+          "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+          "note": "Apply re-plans using current configuration and compares only the portable fingerprint."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/database-lifecycle.ts",
+          "symbol": "computeRetentionPlanFingerprint",
+          "line_range": "980-1001",
+          "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+          "note": "Fingerprint payload contains only candidates, cutoff, maxRows, and scope."
+        },
+        {
+          "path": "packages/bootstrap/src/cli/bws-database-lifecycle.ts",
+          "symbol": "retention-plan and retention-apply",
+          "line_range": "42-73",
+          "full_file_sha256": "4e6da6bfca8e7c622ccd04e66d3789b4f4eaf490f93fd8265bfa458d3c22b06a",
+          "note": "The public commands exchange only the portable fingerprint and request fields."
+        }
+      ],
+      "independent_evidence": "The inert harness computed the same fingerprint without any target identity input.",
+      "reproduction_status": "CONFIRMED_BY_STATIC_FINGERPRINT_TRACE_AND_INERT_CANONICALIZATION_HARNESS",
+      "transaction_or_state_machine_analysis": "Plan authorization is detached from the database state transition it is intended to authorize.",
+      "root_cause": "Retention identity is modeled as a candidate-set digest rather than an operation intent bound to one target generation.",
+      "minimal_fix_boundary": "Include exact live database identity, accepted server/cluster identifier, migration-ledger fingerprint, schema/release generation, and candidate snapshot transaction identity in the plan and apply receipt. Re-prove all fields before deletion.",
+      "required_tests": [
+        "Generate identical candidates on two disposable databases and reject cross-target fingerprint reuse.",
+        "Change migration ledger after planning and reject apply.",
+        "Change database host/socket identity while keeping database name and reject apply."
+      ],
+      "regression_risks": [
+        "Retention plans will become intentionally non-portable and short-lived."
+      ],
+      "primary_owner": "R08",
+      "secondary_sectors": [
+        "R10",
+        "R11"
+      ],
+      "aliases_or_dependencies": [
+        "BWS116-R03-HO-002"
+      ],
+      "explicitly_unchanged_areas": [
+        "candidate ordering",
+        "cutoff parsing",
+        "scope list"
+      ],
+      "blocks": {
+        "release": true,
+        "deployment": true,
+        "BWS-600 evidence": true,
+        "B1 acceptance": false,
+        "later execution": true
+      }
+    },
+    {
+      "id": "BWS120-R08-011",
+      "title": "Retention planning and deletion are separate transactions and partial prune is detected only after commit",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": [
+        "packages/bootstrap/src/operations/database-lifecycle.ts::planBwsDatabaseRetention",
+        "packages/bootstrap/src/operations/database-lifecycle.ts::applyBwsDatabaseRetention",
+        "packages/bootstrap/src/operations/database-lifecycle.ts::buildRetentionDeleteSql",
+        "packages/persistence/src/psql.ts::queryPsqlJsonRows/runPsql"
+      ],
+      "exact_line_range": [
+        "464-535",
+        "854-952",
+        "77-91,191-208"
+      ],
+      "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+      "relevant_database_lifecycle_object": "retention plan/apply transactionality and eligibility revalidation",
+      "preconditions": [
+        "Candidate eligibility or references change between the plan queries and deletion, or only a subset of keys remains deletable."
+      ],
+      "trigger": "Retention apply re-plans, then executes a key-only DELETE through a later psql session.",
+      "expected_behavior": "Candidate selection, reference checks, fingerprint verification, and deletion must execute atomically with eligibility predicates reasserted at mutation time. Any mismatch must roll back all deletions.",
+      "current_behavior": "Candidate and total counts use separate psql sessions. Apply calls plan again, then performs deletion in another session using only primary keys. A count mismatch is raised after the DELETE statement has committed.",
+      "impact": "Rows can be deleted after becoming referenced, and a partial deletion can be reported as an error even though irreversible pruning already occurred.",
+      "evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/database-lifecycle.ts",
+          "symbol": "plan/applyBwsDatabaseRetention",
+          "line_range": "464-535",
+          "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+          "note": "Planning, total count, and deletion are separate query calls; the mismatch check occurs after the deletion result returns."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/database-lifecycle.ts",
+          "symbol": "buildRetentionDeleteSql",
+          "line_range": "854-952",
+          "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+          "note": "Deletion predicates match candidate keys only and do not reassert cutoff, rank, terminal state, or reference safety."
+        },
+        {
+          "path": "packages/persistence/src/psql.ts",
+          "symbol": "queryPsqlJsonRows and runPsql",
+          "line_range": "77-91,191-208",
+          "full_file_sha256": "86053cd5690b15a2ba6ea210e3073c3324017d12fb36ec1fe815c84edab50343",
+          "note": "Each call executes in a separate psql process and transaction."
+        },
+        {
+          "path": "docs/037_database_backup_retention_and_recovery.md",
+          "symbol": "Retention and recovery contract",
+          "line_range": "44-58",
+          "full_file_sha256": "6d65630b7d351c1e59318f4761cbb05de099d1661c37fea18d5bf603fd560d10",
+          "note": "The authority requires reference preservation and partial-prune recovery."
+        }
+      ],
+      "independent_evidence": "The inert harness confirmed distinct plan and delete call sites. No database mutation was performed.",
+      "reproduction_status": "CONFIRMED_BY_STATIC_TRANSACTION_TRACE; CONCURRENT_POSTGRESQL_PROOF_UNAVAILABLE",
+      "transaction_or_state_machine_analysis": "The authorization snapshot and effect are not one serializable transition. Post-effect validation cannot restore rows if the transition was partial or stale.",
+      "root_cause": "Retention is composed from independent command invocations rather than one database transaction with mutation-time predicates and rollback.",
+      "minimal_fix_boundary": "Execute target validation, candidate selection, reference checks, exact count, and DELETE in one explicit transaction at an accepted isolation level. Reassert every eligibility predicate in the DELETE and roll back on any mismatch.",
+      "required_tests": [
+        "Insert a new reference between planning and apply and prove no row is deleted.",
+        "Delete or alter one candidate before apply and prove the whole transaction rolls back.",
+        "Run concurrent applies with the same plan and prove at most one commits with truthful receipts.",
+        "Force an error after the first internal mutation and prove zero committed deletions."
+      ],
+      "regression_risks": [
+        "Longer transactions can increase lock duration and require bounded batches."
+      ],
+      "primary_owner": "R08",
+      "secondary_sectors": [
+        "R03",
+        "R11"
+      ],
+      "aliases_or_dependencies": [
+        "BWS116-R03-007",
+        "BWS116-R03-HO-002"
+      ],
+      "explicitly_unchanged_areas": [
+        "pure candidate ordering",
+        "retention scope taxonomy",
+        "generic psql timeout defect owned by BWS116-R03-005"
+      ],
+      "blocks": {
+        "release": true,
+        "deployment": true,
+        "BWS-600 evidence": true,
+        "B1 acceptance": false,
+        "later execution": true
+      }
+    },
+    {
+      "id": "BWS120-R08-012",
+      "title": "Retention can prune provenance rows still required by retained blocked or terminal parent state",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": [
+        "packages/bootstrap/src/operations/database-lifecycle.ts::buildRetentionPlanQuery/buildRetentionDeleteSql",
+        "packages/bootstrap/src/api/bws-read-only-query-service.ts::buildPrivatePaperRuntimeCycleItem",
+        "database/migrations/surebet/004_create_worker_jobs.sql",
+        "database/migrations/surebet/006_create_upstream_api_convergence_checkpoints.sql",
+        "database/migrations/surebet/007_create_private_paper_runtime_scheduler_checkpoints.sql"
+      ],
+      "exact_line_range": [
+        "600-808",
+        "854-952",
+        "853-1007",
+        "1-153",
+        "1-31",
+        "1-25"
+      ],
+      "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+      "relevant_database_lifecycle_object": "retention reference graph for runtime checkpoints and dead letters",
+      "preconditions": [
+        "A retained worker job, scheduler checkpoint, or blocked runtime cycle is older than the cutoff.",
+        "No accepted_local_evidence strategy-ledger row exists for that blocked or dead-lettered cycle."
+      ],
+      "trigger": "Retention selects old worker checkpoints, dead letters, scheduler checkpoints, or upstream API checkpoints using only accepted-ledger protection and then deletes by key.",
+      "expected_behavior": "All provenance required to reconstruct any retained parent, terminal blocked cycle, active investigation, or API-visible state must remain referenced and undeletable.",
+      "current_behavior": "Candidate queries protect accepted ledger rows but not retained blocked/dead-lettered parent states. Worker jobs retain last-checkpoint fields without a foreign key to checkpoint rows, scheduler checkpoints retain upstream checkpoint IDs as unqualified text, and the API requires those child/provenance rows to reconstruct blocked cycles.",
+      "impact": "Retention can leave retained jobs or scheduler state whose required checkpoint, dead-letter, or upstream provenance is gone. The read-only API then reports provenance-missing or dead-letter-missing blockers for previously reconstructable cycles.",
+      "evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/database-lifecycle.ts",
+          "symbol": "buildRetentionPlanQuery",
+          "line_range": "600-808",
+          "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+          "note": "Checkpoint and dead-letter protection is based on accepted strategy-ledger rows, excluding blocked/dead-lettered cycles that intentionally lack such rows."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/database-lifecycle.ts",
+          "symbol": "buildRetentionDeleteSql",
+          "line_range": "854-952",
+          "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+          "note": "Deletion removes child rows by key without checking retained parents or current API reconstruction requirements."
+        },
+        {
+          "path": "packages/bootstrap/src/api/bws-read-only-query-service.ts",
+          "symbol": "buildPrivatePaperRuntimeCycleItem",
+          "line_range": "853-1007",
+          "full_file_sha256": "896bb5ff7db46af530b8e80f93b01b293295f98aa983c948eb57ee3f2a13c424",
+          "note": "Runtime cycle reconstruction requires scheduler, upstream API checkpoint, worker job, dead-letter, and recent checkpoint provenance."
+        },
+        {
+          "path": "database/migrations/surebet/004_create_worker_jobs.sql",
+          "symbol": "worker_jobs/checkpoints/dead_letters",
+          "line_range": "1-153",
+          "full_file_sha256": "9756445dbfbdac6226413098d1253527578d9420543287842c30d034df162b9c",
+          "note": "Parent jobs retain checkpoint identity fields; child rows reference the parent, but parent fields do not preserve the child row through a reverse foreign key."
+        },
+        {
+          "path": "database/migrations/surebet/006_create_upstream_api_convergence_checkpoints.sql",
+          "symbol": "upstream_api_convergence_checkpoints",
+          "line_range": "1-31",
+          "full_file_sha256": "3d5ac1c0f2d89aac08acb057668b87b2e9116f274ff78020568dc82522f270f7",
+          "note": "The upstream checkpoint can be referenced by later scheduler state."
+        },
+        {
+          "path": "database/migrations/surebet/007_create_private_paper_runtime_scheduler_checkpoints.sql",
+          "symbol": "private_paper_runtime_scheduler_checkpoints",
+          "line_range": "1-25",
+          "full_file_sha256": "b0ec918132e247f3265145787e3bf9b30320ae2c415937c0578d373e5ec8be57",
+          "note": "upstream_checkpoint_id is retained as text without a foreign-key protection edge."
+        },
+        {
+          "path": "docs/037_database_backup_retention_and_recovery.md",
+          "symbol": "Retention contract",
+          "line_range": "44-54",
+          "full_file_sha256": "6d65630b7d351c1e59318f4761cbb05de099d1661c37fea18d5bf603fd560d10",
+          "note": "Retention must preserve accepted runtime cycles and active investigations; blocked terminal evidence is also required by current API semantics."
+        }
+      ],
+      "independent_evidence": "Static join analysis proves that a dead-lettered blocked cycle has no accepted ledger row, can therefore qualify for child-row deletion, while the API still requires its dead-letter and checkpoint records.",
+      "reproduction_status": "CONFIRMED_BY_STATIC_REFERENCE_GRAPH_AND_QUERY_TRACE; POSTGRESQL_MUTATION_PROOF_UNAVAILABLE",
+      "transaction_or_state_machine_analysis": "Retention treats accepted success evidence as the only durable-reference authority, but terminal blocked state is also retained and reconstructable. The child deletion transition breaks that parent state.",
+      "root_cause": "The retention authority map is incomplete and is not derived from the full persisted/API reference graph for all terminal states.",
+      "minimal_fix_boundary": "Define one canonical retention reference graph covering success, blocked, dead-lettered, investigation, settlement, and active runtime states. Encode protective foreign keys or mutation-time NOT EXISTS checks and require post-plan reference parity before deletion.",
+      "required_tests": [
+        "Retain a dead-lettered blocked cycle and prove its dead-letter and required checkpoints are not candidates.",
+        "Retain a scheduler checkpoint and prove its upstream API checkpoint cannot be pruned.",
+        "Exercise all six retention scopes against success, blocked, active-investigation, and unreferenced fixtures.",
+        "Prove API reconstruction remains identical before and after allowed pruning."
+      ],
+      "regression_risks": [
+        "More evidence will be retained; storage budgets and higher-level artifact retention need recalculation."
+      ],
+      "primary_owner": "R08",
+      "secondary_sectors": [
+        "R03",
+        "R05",
+        "R07",
+        "R11"
+      ],
+      "aliases_or_dependencies": [
+        "BWS116-R03-013 (import-run manifestation remains inherited and is not duplicated)",
+        "BWS116-R03-HO-002"
+      ],
+      "explicitly_unchanged_areas": [
+        "import-run convergence reference root cause owned by BWS116-R03-013",
+        "API projection formatting",
+        "strategy acceptance semantics"
+      ],
+      "blocks": {
+        "release": true,
+        "deployment": true,
+        "BWS-600 evidence": true,
+        "B1 acceptance": false,
+        "later execution": true
+      }
+    }
+  ],
+  "other_records": [
+    {
+      "id": "BWS120-R08-HYP-001",
+      "classification": "HYPOTHESIS",
+      "severity": "P1",
+      "title": "Database identity may be insufficient to distinguish replacement clusters with identical connection tuples",
+      "status": "UNPROVEN_POLICY_REQUIREMENT",
+      "evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/database-lifecycle.ts",
+          "symbol": "BwsDatabaseIdentity/queryDatabaseIdentity",
+          "line_range": "94-102,1158-1187",
+          "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+          "note": "Identity contains target, database, user, and server version but no immutable cluster/system identifier."
+        }
+      ],
+      "required_proof": "Define the accepted PostgreSQL cluster-identity authority and test whether host/socket plus database/user/version is sufficient in the deployment model.",
+      "primary_owner": "R08",
+      "secondary_sectors": [
+        "R10",
+        "R23"
+      ]
+    },
+    {
+      "id": "BWS120-R08-HYP-002",
+      "classification": "HYPOTHESIS",
+      "severity": "P2",
+      "title": "COUNT(*)::int may become unavailable at extreme table cardinality",
+      "status": "NOT_REPRODUCED",
+      "evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/database-lifecycle.ts",
+          "symbol": "retention/table count SQL",
+          "line_range": "568-851,1189-1225",
+          "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+          "note": "Several counts are cast to PostgreSQL int rather than bigint."
+        }
+      ],
+      "required_proof": "Execute bounded schema-level tests with counts above the signed 32-bit range or replace count transport with bigint-safe parsing.",
+      "primary_owner": "R08",
+      "secondary_sectors": [
+        "R03",
+        "R09"
+      ]
+    },
+    {
+      "id": "BWS120-R08-ENV-001",
+      "classification": "ENVIRONMENT_BLOCKER",
+      "title": "Canonical Node 20.20.2 runtime was unavailable",
+      "status": "BLOCKED",
+      "evidence": "The environment provided Node v22.16.0. All Node observations are supplementary."
+    },
+    {
+      "id": "BWS120-R08-ENV-002",
+      "classification": "ENVIRONMENT_BLOCKER",
+      "title": "Disposable PostgreSQL and PostgreSQL utilities were unavailable",
+      "status": "BLOCKED",
+      "evidence": "psql, pg_dump, pg_restore, createdb, and dropdb were not installed, and no safe disposable database credentials were supplied."
+    },
+    {
+      "id": "BWS120-R08-ENV-003",
+      "classification": "ENVIRONMENT_BLOCKER",
+      "title": "Clean TypeScript compilation and focused Node tests were unavailable without installing dependencies",
+      "status": "BLOCKED",
+      "evidence": "tsc --noEmit failed because the repository's Node type definitions were absent; dependency installation was prohibited."
+    },
+    {
+      "id": "BWS120-R08-EXT-001",
+      "classification": "EXTERNAL_INPUT_BLOCKER",
+      "title": "BWS-600 and BWS-710 external runtime evidence remains unavailable",
+      "status": "ACCEPTED_HOLD",
+      "evidence": "Current repository authority keeps BWS-600 blocked on external runtime evidence and BWS-710 blocked on an accepted upstream B1 multi-venue API."
+    },
+    {
+      "id": "BWS120-R08-SAFE-001",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "Backup scope is limited to the surebet schema",
+      "evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/database-lifecycle.ts",
+          "symbol": "createBwsDatabaseBackup",
+          "line_range": "337-348",
+          "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+          "note": "pg_dump receives --schema=surebet."
+        }
+      ]
+    },
+    {
+      "id": "BWS120-R08-SAFE-002",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "Backup checksums are verified before disposable database creation",
+      "evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/database-lifecycle.ts",
+          "symbol": "verifyBwsDatabaseRestore",
+          "line_range": "400-408",
+          "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+          "note": "Manifest and checksum verification precede createdb."
+        }
+      ]
+    },
+    {
+      "id": "BWS120-R08-SAFE-003",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "Restore targets a disposable database and suppresses ownership and privilege restoration",
+      "evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/database-lifecycle.ts",
+          "symbol": "verifyBwsDatabaseRestore",
+          "line_range": "403-430",
+          "full_file_sha256": "b3e4657765a6152f8ee96e0bf688d4df116412ee08db877dab02abb17f68f377",
+          "note": "Restore uses a disposable name with --no-owner and --no-privileges."
+        }
+      ]
+    },
+    {
+      "id": "BWS120-R08-SAFE-004",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "Retention apply requires explicit scope, cutoff, maximum rows, and a plan fingerprint",
+      "evidence": [
+        {
+          "path": "packages/bootstrap/src/cli/bws-database-lifecycle.ts",
+          "symbol": "retention-apply",
+          "line_range": "58-73",
+          "full_file_sha256": "4e6da6bfca8e7c622ccd04e66d3789b4f4eaf490f93fd8265bfa458d3c22b06a",
+          "note": "All destructive request fields are explicit at the CLI boundary."
+        }
+      ]
+    },
+    {
+      "id": "BWS120-R08-SAFE-005",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "Repository validators preserve no-provider and no-execution boundaries",
+      "evidence": "validate_no_provider_connections.py and validate_no_execution_paths.py passed against the frozen archive."
+    },
+    {
+      "id": "BWS120-R08-REJ-001",
+      "classification": "REJECTED_SUSPICION",
+      "title": "Restore verification directly overwrites the active project database",
+      "basis": "Rejected. The restore path creates a separately named disposable database and points restoreConfig to it."
+    },
+    {
+      "id": "BWS120-R08-REJ-002",
+      "classification": "REJECTED_SUSPICION",
+      "title": "Backups omit content checksums",
+      "basis": "Rejected. SHA256SUMS contains dump and manifest hashes and restore verifies both before database creation."
+    },
+    {
+      "id": "BWS120-R08-REJ-003",
+      "classification": "REJECTED_SUSPICION",
+      "title": "Retention apply can run without a plan fingerprint",
+      "basis": "Rejected. The CLI requires --plan-fingerprint and apply compares it with a freshly computed plan."
+    },
+    {
+      "id": "BWS120-R08-REJ-004",
+      "classification": "REJECTED_SUSPICION",
+      "title": "Database utilities are invoked through a command shell",
+      "basis": "Rejected. The production helpers use execFileSync with an argument array. Generic timeout/cancellation remains inherited BWS116-R03-005."
+    },
+    {
+      "id": "BWS120-R08-HO-001",
+      "classification": "CROSS_AREA_HANDOFF",
+      "title": "Inherited R03 persistence defects remain authoritative and are not duplicated",
+      "target_owner": "R03",
+      "dependencies": [
+        "BWS116-R03-001",
+        "BWS116-R03-002",
+        "BWS116-R03-003",
+        "BWS116-R03-004",
+        "BWS116-R03-005",
+        "BWS116-R03-006",
+        "BWS116-R03-007",
+        "BWS116-R03-008",
+        "BWS116-R03-009",
+        "BWS116-R03-010",
+        "BWS116-R03-011",
+        "BWS116-R03-012",
+        "BWS116-R03-013",
+        "BWS116-R03-014",
+        "BWS116-R03-015",
+        "BWS116-R03-016",
+        "BWS116-R03-017"
+      ],
+      "note": "R08 consumes these findings, especially migration confinement, status mutation, unknown migrations, migration serialization, psql bounds, split-session mutation, unbounded reads, and import-run retention references."
+    },
+    {
+      "id": "BWS120-R08-HO-002",
+      "classification": "CROSS_AREA_HANDOFF",
+      "title": "Soak failure injection does not dynamically prove backup interruption or database cleanup",
+      "target_owner": "R09",
+      "evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/bws-soak-runtime-integration.ts",
+          "symbol": "ARTIFACT_MARKER_FAILURE_TARGETS/executeArtifactMarkerFailure",
+          "line_range": "32-39,120-139,203-241",
+          "full_file_sha256": "3426f30a61e5e1300b640ca7b242949e7b2627274a399db815ddc40de79976a9",
+          "note": "backup_interruption creates and removes a marker rather than interrupting backup work."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/bws-soak-runtime-integration.ts",
+          "symbol": "verifyDatabaseCleanup",
+          "line_range": "141-154",
+          "full_file_sha256": "3426f30a61e5e1300b640ca7b242949e7b2627274a399db815ddc40de79976a9",
+          "note": "Cleanup reports leakedDatabases: 0 without enumerating disposable databases."
+        }
+      ]
+    },
+    {
+      "id": "BWS120-R08-HO-003",
+      "classification": "CROSS_AREA_HANDOFF",
+      "title": "Environment, CLI parsing, approved roots, and secret/permission policy remain R10-owned",
+      "target_owner": "R10",
+      "note": "R08 requires exact target binding and safe operator-selected paths. Repository-wide precedence, unknown flag rejection, backup file permissions, encryption policy, and secret handling are not reassigned here."
+    },
+    {
+      "id": "BWS120-R08-HO-004",
+      "classification": "CROSS_AREA_HANDOFF",
+      "title": "Aggregate false-green tests, validators, fixtures, and source-manifest drift remain R11-owned",
+      "target_owner": "R11",
+      "dependencies": [
+        "KNOWN_BASELINE_MANIFEST_DRIFT"
+      ],
+      "note": "The stale SOURCE_MANIFEST result is recorded but not promoted to an R08 finding."
+    },
+    {
+      "id": "BWS120-R08-HO-005",
+      "classification": "CROSS_AREA_HANDOFF",
+      "title": "Restore and retention receipt publication identity remains R07-owned",
+      "target_owner": "R07",
+      "note": "R08 defines truthful receipt contents. Evidence indexing, immutable publication, filenames, and downstream handoff transactions belong to R07."
+    },
+    {
+      "id": "BWS120-R08-HO-006",
+      "classification": "CROSS_AREA_HANDOFF",
+      "title": "Generic process restart, drain, timeout, and child ownership remain R06-owned",
+      "target_owner": "R06",
+      "dependencies": [
+        "BWS118-R06-001",
+        "BWS118-R06-005",
+        "BWS118-R06-006",
+        "BWS118-R06-011",
+        "BWS118-R06-015",
+        "BWS118-R06-016"
+      ],
+      "note": "R08 finding 007 concerns the truth of restore evidence, not implementation of the generic service lifecycle."
+    },
+    {
+      "id": "BWS120-R08-TG-001",
+      "classification": "TEST_GAP",
+      "severity": "P1",
+      "title": "No safe-root or predecessor-preservation test for backup overwrite",
+      "owned_findings": [
+        "BWS120-R08-001",
+        "BWS120-R08-004"
+      ]
+    },
+    {
+      "id": "BWS120-R08-TG-002",
+      "classification": "TEST_GAP",
+      "severity": "P1",
+      "title": "No concurrent-write test proving dump and manifest share one snapshot",
+      "owned_findings": [
+        "BWS120-R08-003"
+      ]
+    },
+    {
+      "id": "BWS120-R08-TG-003",
+      "classification": "TEST_GAP",
+      "severity": "P0",
+      "title": "No plan/apply environment or database-target drift test",
+      "owned_findings": [
+        "BWS120-R08-002"
+      ]
+    },
+    {
+      "id": "BWS120-R08-TG-004",
+      "classification": "TEST_GAP",
+      "severity": "P1",
+      "title": "No strict malformed-manifest, exact-ledger, or exact-table-set restore test",
+      "owned_findings": [
+        "BWS120-R08-006"
+      ]
+    },
+    {
+      "id": "BWS120-R08-TG-005",
+      "classification": "TEST_GAP",
+      "severity": "P1",
+      "title": "No real scheduler, worker, database, and service restart recovery proof",
+      "owned_findings": [
+        "BWS120-R08-007"
+      ]
+    },
+    {
+      "id": "BWS120-R08-TG-006",
+      "classification": "TEST_GAP",
+      "severity": "P1",
+      "title": "No stale restore receipt versus changed dump test",
+      "owned_findings": [
+        "BWS120-R08-008"
+      ]
+    },
+    {
+      "id": "BWS120-R08-TG-007",
+      "classification": "TEST_GAP",
+      "severity": "P2",
+      "title": "No interrupted-process orphaned disposable database reconciliation test",
+      "owned_findings": [
+        "BWS120-R08-009"
+      ]
+    },
+    {
+      "id": "BWS120-R08-TG-008",
+      "classification": "TEST_GAP",
+      "severity": "P1",
+      "title": "No cross-database retention fingerprint reuse test",
+      "owned_findings": [
+        "BWS120-R08-010"
+      ]
+    },
+    {
+      "id": "BWS120-R08-TG-009",
+      "classification": "TEST_GAP",
+      "severity": "P1",
+      "title": "No concurrent reference change, partial delete, or double-apply transaction test",
+      "owned_findings": [
+        "BWS120-R08-011"
+      ]
+    },
+    {
+      "id": "BWS120-R08-TG-010",
+      "classification": "TEST_GAP",
+      "severity": "P1",
+      "title": "Only import_runs retention is integration-tested; the other five scopes and blocked-cycle graph are unproved",
+      "owned_findings": [
+        "BWS120-R08-012"
+      ]
+    },
+    {
+      "id": "BWS120-R08-TG-011",
+      "classification": "TEST_GAP",
+      "severity": "P1",
+      "title": "No supported and unsupported PostgreSQL server-version compatibility matrix",
+      "owned_findings": [
+        "BWS120-R08-005"
+      ]
+    }
+  ]
+}

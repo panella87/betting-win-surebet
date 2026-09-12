@@ -1,0 +1,591 @@
+{
+  "schema": "bws120-r09-validation-v1",
+  "review_id": "BWS120-R09",
+  "repository": "betting-win-surebet",
+  "archive": {
+    "reviewed_path": "/mnt/data/betting-win-surebet120(3).zip",
+    "actual_sha256": "d4565c05ecfe63f5d5511f224a20ff20fb82bfc75b23203c94d7d3e98a8c21bb",
+    "expected_sha256": null,
+    "expected_hash_supplied": false,
+    "identity_classification": "ACTUAL_HASH_RECORDED_AND_LINEAGE_VERIFIED",
+    "archive_member_count": 695,
+    "regular_file_count": 695,
+    "duplicate_paths": [],
+    "unsafe_paths": [],
+    "directories": [],
+    "symlinks": [],
+    "special_entries": [],
+    "extraction_path_size_hash_match": true
+  },
+  "executable_compatibility": {
+    "comparison_baseline": "/mnt/data/betting-win-surebet118(2).zip",
+    "baseline_sha256": "50bbcb0b476904c8209cf7e1287b5ac4f9091fa07f6fd67523fc5430029417f7",
+    "added_paths": 38,
+    "changed_paths": [
+      "docs/000_documentation_index.md",
+      "docs/reviews/README.md"
+    ],
+    "removed_paths": 0,
+    "non_documentation_differences": [],
+    "result": "PASS_EXACT_NON_DOCUMENTATION_BYTE_EQUIVALENCE"
+  },
+  "package_identity": {
+    "name": "betting-win-surebet",
+    "version": "0.1.0-bws-full-platform",
+    "engine": ">=20 <21",
+    "nvmrc": "20.20.2",
+    "canonical_runtime": "Node 20.20.2"
+  },
+  "runtime_and_tools": {
+    "actual_node": "v22.16.0",
+    "node_20_20_2_available": false,
+    "node_classification": "SUPPLEMENTARY_NONCANONICAL",
+    "npm": "10.9.2",
+    "global_ts_node": "v10.9.2",
+    "typescript": "5.8.3",
+    "python": "3.13.5",
+    "gnu_tar": "1.35",
+    "platform": "Linux-6.18.35-x86_64-with-glibc2.41",
+    "node_modules_present": false
+  },
+  "postgresql": {
+    "availability": "UNAVAILABLE_NO_LOCAL_PSQL_OR_SAFE_SERVER_CONFIGURATION",
+    "database_created": false,
+    "database_contacted": false,
+    "persistent_database_mutated": false,
+    "classification": "ENVIRONMENT_BLOCKER",
+    "consequence": "R09 used static SQL/lifecycle authority and no disposable upgrade/restore transaction was executed."
+  },
+  "commands_executed": [
+    {
+      "command": [
+        "python3",
+        "scripts/validate_repo.py"
+      ],
+      "cwd": "/mnt/data/bws120-r09-review/repo",
+      "duration_ms": 657,
+      "exit_code": 0,
+      "timed_out": false,
+      "classification": "PASS"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/validate_remaining_operator_runtime_program.py"
+      ],
+      "cwd": "/mnt/data/bws120-r09-review/repo",
+      "duration_ms": 565,
+      "exit_code": 0,
+      "timed_out": false,
+      "classification": "PASS"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/validate_bws_b1_acceptance.py"
+      ],
+      "cwd": "/mnt/data/bws120-r09-review/repo",
+      "duration_ms": 552,
+      "exit_code": 0,
+      "timed_out": false,
+      "classification": "PASS"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/validate_source_manifest.py"
+      ],
+      "cwd": "/mnt/data/bws120-r09-review/repo",
+      "duration_ms": 1217,
+      "exit_code": 1,
+      "timed_out": false,
+      "classification": "KNOWN_BASELINE_MANIFEST_DRIFT"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/validate_node_runtime_loader.py"
+      ],
+      "cwd": "/mnt/data/bws120-r09-review/repo",
+      "duration_ms": 1137,
+      "exit_code": 0,
+      "timed_out": false,
+      "classification": "PASS"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/validate_no_provider_connections.py"
+      ],
+      "cwd": "/mnt/data/bws120-r09-review/repo",
+      "duration_ms": 1230,
+      "exit_code": 0,
+      "timed_out": false,
+      "classification": "PASS"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/validate_no_execution_paths.py"
+      ],
+      "cwd": "/mnt/data/bws120-r09-review/repo",
+      "duration_ms": 1444,
+      "exit_code": 0,
+      "timed_out": false,
+      "classification": "PASS"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/validate_full_implementation_program.py"
+      ],
+      "cwd": "/mnt/data/bws120-r09-review/repo",
+      "duration_ms": 1230,
+      "exit_code": 0,
+      "timed_out": false,
+      "classification": "PASS"
+    },
+    {
+      "command": [
+        "node",
+        "--loader",
+        "/opt/nvm/versions/node/v22.16.0/lib/node_modules/ts-node/esm.mjs",
+        "--test",
+        "tests/bws-release-packaging.test.ts",
+        "tests/bws-release-upgrade.test.ts",
+        "tests/bws-soak-campaign.test.ts",
+        "tests/bws-external-runtime-preflight.test.ts",
+        "tests/bws-final-local-acceptance.test.ts"
+      ],
+      "cwd": "/mnt/data/bws120-r09-review/repo",
+      "duration_ms": 13905,
+      "exit_code": 1,
+      "timed_out": false,
+      "classification": "SUPPLEMENTARY_ENVIRONMENT_BLOCKED"
+    },
+    {
+      "command": [
+        "node",
+        "--loader",
+        "global-ts-node/esm.mjs",
+        "--test",
+        "--test-name-pattern=final local acceptance recovery evidence|final local acceptance manifest binds",
+        "tests/bws-final-local-acceptance.test.ts"
+      ],
+      "cwd": "/mnt/data/bws120-r09-review/repo",
+      "duration_ms": 4921,
+      "exit_code": 0,
+      "timed_out": false,
+      "classification": "SUPPLEMENTARY_PASS_2_OF_2"
+    },
+    {
+      "command": [
+        "python3",
+        "/mnt/data/bws120-r09-work/adversarial_models.py"
+      ],
+      "cwd": "/mnt/data",
+      "duration_ms": 1166,
+      "exit_code": 0,
+      "timed_out": false,
+      "classification": "PASS_REPRODUCED_15_MODELS"
+    },
+    {
+      "command": [
+        "env",
+        "TS_NODE_TRANSPILE_ONLY=1",
+        "node",
+        "--loader",
+        "global-ts-node/esm.mjs",
+        "/mnt/data/bws120-r09-work/final_cleanup_harness.mts"
+      ],
+      "cwd": "/mnt/data",
+      "duration_ms": 831,
+      "exit_code": 1,
+      "timed_out": false,
+      "classification": "UNAVAILABLE_LOADER_RESOLUTION_FAILURE"
+    },
+    {
+      "command": [
+        "tar",
+        "-xzf",
+        "traversal.tar.gz",
+        "-C",
+        "bounded-temp"
+      ],
+      "cwd": "/mnt/data/bws120-r09-work/tar-safety",
+      "duration_ms": 4,
+      "exit_code": 2,
+      "timed_out": false,
+      "classification": "PASS_REJECTED_UNSAFE_ARCHIVE_NO_OUTSIDE_WRITE"
+    },
+    {
+      "command": [
+        "tar",
+        "-xzf",
+        "symlink-pivot.tar.gz",
+        "-C",
+        "bounded-temp"
+      ],
+      "cwd": "/mnt/data/bws120-r09-work/tar-safety",
+      "duration_ms": 4,
+      "exit_code": 2,
+      "timed_out": false,
+      "classification": "PASS_REJECTED_UNSAFE_ARCHIVE_NO_OUTSIDE_WRITE"
+    }
+  ],
+  "focused_tests": {
+    "files": [
+      "tests/bws-release-packaging.test.ts",
+      "tests/bws-release-upgrade.test.ts",
+      "tests/bws-soak-campaign.test.ts",
+      "tests/bws-external-runtime-preflight.test.ts",
+      "tests/bws-final-local-acceptance.test.ts"
+    ],
+    "total": 65,
+    "passed": 16,
+    "failed": 48,
+    "cancelled": 0,
+    "skipped": 1,
+    "duration_ms": 13905,
+    "runtime": "v22.16.0",
+    "classification": "SUPPLEMENTARY_ENVIRONMENT_BLOCKED",
+    "failure_breakdown": {
+      "missing_generated_upstream_lock_fixture_or_setup": 48,
+      "postgresql_unavailable_skip": 1,
+      "confirmed_product_assertion_failures": 0
+    },
+    "output": "/mnt/data/bws120-r09-work/focused-r09-tests.out",
+    "focused_final_acceptance": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "duration_ms": 4921,
+      "classification": "SUPPLEMENTARY_PASS_AND_DEFECT_EVIDENCE",
+      "output": "/mnt/data/bws120-r09-work/final-acceptance-focused.out"
+    }
+  },
+  "adversarial_harnesses": [
+    {
+      "name": "release_preflight_false_success_on_incompatible_runtime",
+      "status": "REPRODUCED_BY_EXACT_BRANCH_MODEL",
+      "source_anchors": [
+        "packages/bootstrap/src/operations/release-packaging.ts:691-761",
+        "packages/bootstrap/src/operations/release-packaging.ts:643-660"
+      ],
+      "inert": true,
+      "network_access": false,
+      "database_access": false,
+      "service_control": false
+    },
+    {
+      "name": "release_unmanifested_extra_file_acceptance",
+      "status": "REPRODUCED_BY_EXACT_BRANCH_MODEL",
+      "source_anchors": [
+        "packages/bootstrap/src/operations/release-packaging.ts:900-949",
+        "packages/bootstrap/src/operations/release-packaging.ts:964-996",
+        "packages/bootstrap/src/operations/release-packaging.ts:817-858"
+      ],
+      "inert": true,
+      "network_access": false,
+      "database_access": false,
+      "service_control": false
+    },
+    {
+      "name": "upgrade_plan_content_tamper_keeps_embedded_fingerprint",
+      "status": "REPRODUCED_BY_EXACT_BRANCH_MODEL",
+      "source_anchors": [
+        "packages/bootstrap/src/operations/release-upgrade.ts:427-443",
+        "packages/bootstrap/src/operations/release-upgrade.ts:1371-1385",
+        "packages/bootstrap/src/operations/release-upgrade.ts:519-535"
+      ],
+      "inert": true,
+      "network_access": false,
+      "database_access": false,
+      "service_control": false
+    },
+    {
+      "name": "upgrade_resolved_state_cross_plan_reuse",
+      "status": "REPRODUCED_BY_EXACT_BRANCH_MODEL",
+      "source_anchors": [
+        "packages/bootstrap/src/operations/release-upgrade.ts:1388-1421",
+        "packages/bootstrap/src/operations/release-upgrade.ts:539-542"
+      ],
+      "inert": true,
+      "network_access": false,
+      "database_access": false,
+      "service_control": false
+    },
+    {
+      "name": "upgrade_checkpoint_false_completion_and_rollback_overlap",
+      "status": "REPRODUCED_BY_STATIC_INTERLEAVING",
+      "source_anchors": [
+        "packages/bootstrap/src/operations/release-upgrade.ts:545-770",
+        "packages/bootstrap/src/operations/release-upgrade.ts:1428-1493"
+      ],
+      "inert": true,
+      "network_access": false,
+      "database_access": false,
+      "service_control": false
+    },
+    {
+      "name": "synthetic_soak_duration_and_recovery_pass",
+      "status": "REPRODUCED_BY_EXACT_BRANCH_MODEL",
+      "source_anchors": [
+        "packages/bootstrap/src/operations/soak-campaign.ts:764-788",
+        "packages/bootstrap/src/operations/soak-campaign.ts:986-1028",
+        "packages/bootstrap/src/operations/soak-campaign.ts:1659-1667",
+        "packages/bootstrap/src/operations/soak-campaign.ts:1911-1960"
+      ],
+      "inert": true,
+      "network_access": false,
+      "database_access": false,
+      "service_control": false
+    },
+    {
+      "name": "soak_failure_crash_windows_duplicate_or_skip_faults",
+      "status": "REPRODUCED_BY_STATIC_INTERLEAVING",
+      "source_anchors": [
+        "packages/bootstrap/src/operations/soak-campaign.ts:793-905",
+        "packages/bootstrap/src/operations/soak-campaign.ts:1768-1865"
+      ],
+      "inert": true,
+      "network_access": false,
+      "database_access": false,
+      "service_control": false
+    },
+    {
+      "name": "soak_resume_result_cannot_validate_cumulative_checkpoint_history",
+      "status": "REPRODUCED_BY_EXACT_BRANCH_MODEL",
+      "source_anchors": [
+        "packages/bootstrap/src/operations/soak-campaign.ts:790-791",
+        "packages/bootstrap/src/operations/soak-campaign.ts:947-965",
+        "packages/bootstrap/src/operations/soak-campaign.ts:1056-1062"
+      ],
+      "inert": true,
+      "network_access": false,
+      "database_access": false,
+      "service_control": false
+    },
+    {
+      "name": "managed_soak_integration_collapses_named_faults",
+      "status": "REPRODUCED_BY_EXACT_DISPATCH_MODEL",
+      "source_anchors": [
+        "packages/bootstrap/src/operations/bws-soak-runtime-integration.ts:17-39",
+        "packages/bootstrap/src/operations/bws-soak-runtime-integration.ts:121-155",
+        "packages/bootstrap/src/operations/bws-soak-runtime-integration.ts:161-241"
+      ],
+      "inert": true,
+      "network_access": false,
+      "database_access": false,
+      "service_control": false
+    },
+    {
+      "name": "soak_validation_ignores_observation_health_and_resource_bounds",
+      "status": "REPRODUCED_BY_SOURCE_DATAFLOW",
+      "source_anchors": [
+        "packages/bootstrap/src/operations/soak-campaign.ts:986-1108",
+        "packages/bootstrap/src/operations/soak-campaign.ts:2020-2049"
+      ],
+      "inert": true,
+      "network_access": false,
+      "database_access": false,
+      "service_control": false
+    },
+    {
+      "name": "external_preflight_soak_promotion_without_validated_result",
+      "status": "REPRODUCED_BY_SOURCE_DATAFLOW",
+      "source_anchors": [
+        "packages/bootstrap/src/operations/external-runtime-preflight.ts:260-267",
+        "packages/bootstrap/src/operations/external-runtime-preflight.ts:529-585",
+        "packages/bootstrap/src/operations/external-runtime-preflight.ts:811-824"
+      ],
+      "inert": true,
+      "network_access": false,
+      "database_access": false,
+      "service_control": false
+    },
+    {
+      "name": "external_campaign_identity_omits_environment_bytes",
+      "status": "REPRODUCED_BY_EXACT_DESCRIPTOR_MODEL",
+      "source_anchors": [
+        "packages/bootstrap/src/operations/external-runtime-preflight.ts:267-280",
+        "packages/bootstrap/src/operations/external-runtime-preflight.ts:332-407"
+      ],
+      "inert": true,
+      "network_access": false,
+      "database_access": false,
+      "service_control": false
+    },
+    {
+      "name": "final_recovery_evidence_unbound_across_artifact_bytes_and_generations",
+      "status": "REPRODUCED_BY_EXACT_DESCRIPTOR_MODEL",
+      "source_anchors": [
+        "packages/bootstrap/src/operations/final-local-acceptance.ts:541-627"
+      ],
+      "inert": true,
+      "network_access": false,
+      "database_access": false,
+      "service_control": false
+    },
+    {
+      "name": "final_cleanup_self_attestation",
+      "status": "REPRODUCED_BY_EXACT_BRANCH_MODEL",
+      "source_anchors": [
+        "packages/bootstrap/src/operations/final-local-acceptance.ts:660-691",
+        "packages/bootstrap/src/cli/bws-final-local-acceptance.ts:75-83"
+      ],
+      "inert": true,
+      "network_access": false,
+      "database_access": false,
+      "service_control": false
+    },
+    {
+      "name": "final_manifest_caller_digest_and_mutable_path_identity",
+      "status": "REPRODUCED_BY_EXACT_DESCRIPTOR_MODEL_AND_FOCUSED_TEST",
+      "source_anchors": [
+        "packages/bootstrap/src/operations/final-local-acceptance.ts:694-798",
+        "tests/bws-final-local-acceptance.test.ts:240-287"
+      ],
+      "inert": true,
+      "network_access": false,
+      "database_access": false,
+      "service_control": false
+    }
+  ],
+  "archive_safety_harnesses": [
+    {
+      "name": "gnu_tar_parent_traversal",
+      "status": "REJECTED_UNSAFE_ARCHIVE",
+      "exit_code": 2,
+      "outside_write": false,
+      "stderr_file": "/mnt/data/bws120-r09-work/tar-safety/traversal.stderr"
+    },
+    {
+      "name": "gnu_tar_symlink_pivot",
+      "status": "REJECTED_UNSAFE_ARCHIVE",
+      "exit_code": 2,
+      "outside_write": false,
+      "stderr_file": "/mnt/data/bws120-r09-work/tar-safety/symlink-pivot.stderr"
+    }
+  ],
+  "checks": {
+    "passed": [
+      "archive_sha256_and_695_member_inventory",
+      "archive_path_type_safety",
+      "extraction_integrity",
+      "BWS118_non_documentation_byte_equivalence",
+      "package_identity",
+      "validate_repo",
+      "validate_remaining_operator_runtime_program",
+      "validate_bws_b1_acceptance",
+      "validate_node_runtime_loader",
+      "validate_no_provider_connections",
+      "validate_no_execution_paths",
+      "validate_full_implementation_program",
+      "15_inert_adversarial_models",
+      "2_focused_final_acceptance_tests_supplementary",
+      "post_review_repository_hash_reconciliation"
+    ],
+    "failed": [
+      "validate_source_manifest_known_baseline_drift"
+    ],
+    "skipped": [
+      "postgresql_dependent_test_without_local_postgresql"
+    ],
+    "unavailable": [
+      "canonical_Node_20_20_2_execution",
+      "disposable_PostgreSQL_upgrade_restore_integration",
+      "systemd_integration",
+      "multi_hour_managed_soak",
+      "real_service_restart_and_failure_injection"
+    ]
+  },
+  "migration_release_soak_inventory_reconciliation": {
+    "release_operations": 2,
+    "upgrade_operations": 1,
+    "soak_operations": 2,
+    "external_and_final_promotion_operations": 2,
+    "focused_cli_entrypoints": 5,
+    "focused_test_files": 5,
+    "archive_members_covered": 695
+  },
+  "coverage_reconciliation": {
+    "expected_rows": 695,
+    "actual_rows": 695,
+    "unique_paths": 695,
+    "duplicate_rows": 0,
+    "missing_archive_paths": [],
+    "extra_coverage_paths": [],
+    "path_size_sha256_match": true
+  },
+  "finding_counts": {
+    "confirmed_findings": 21,
+    "severity_counts": {
+      "P1": 21
+    },
+    "classification_counts": {
+      "CONFIRMED_FINDING": 21,
+      "CROSS_AREA_HANDOFF": 9,
+      "ENVIRONMENT_BLOCKER": 4,
+      "HYPOTHESIS": 3,
+      "INTENTIONAL_SAFEGUARD": 8,
+      "REJECTED_SUSPICION": 4,
+      "TEST_GAP": 16
+    },
+    "blocking_counts": {
+      "release": 21,
+      "BWS-600": 21,
+      "B1": 21,
+      "deployment": 21
+    },
+    "inherited_confirmed_findings_checked": 85,
+    "duplicated_inherited_root_causes": 0
+  },
+  "known_limitations": [
+    "Node 20.20.2 was unavailable; Node 22.16.0 observations are supplementary only.",
+    "No local PostgreSQL client/server was available, so database-specific upgrade/restore behavior was not dynamically executed.",
+    "The broad focused test command was blocked by the absent generated betting-win upstream lock and missing prepared test environment.",
+    "No systemd, multi-hour soak, real service restart, provider, or external runtime was invoked under the read-only safety contract.",
+    "Tar safety conclusions apply to GNU tar 1.35 and the bounded cases executed; cross-platform behavior remains a hypothesis."
+  ],
+  "repository_mutation_attestation": {
+    "source_archive_modified": false,
+    "extracted_repository_modified_final": false,
+    "temporary_test_artifacts_created_inside_extraction": true,
+    "temporary_test_artifacts_description": "Focused tests created one isolated artifacts/bws-soak-campaign-* fixture directory; it was removed exactly after the test command.",
+    "post_review_path_size_sha256_reconciliation": true,
+    "pre_review_regular_files": 695,
+    "post_review_regular_files": 695,
+    "added_paths": [],
+    "removed_paths": [],
+    "changed_paths": [],
+    "symlinks": []
+  },
+  "access_attestation": {
+    "network_access": false,
+    "provider_access": false,
+    "external_api_access": false,
+    "account_access": false,
+    "credential_access": false,
+    "persistent_database_access": false,
+    "service_start_stop_restart": false,
+    "controller_execution": false,
+    "betting_win_checkout_access": false,
+    "signer_wallet_access": false,
+    "live_operation": false
+  },
+  "output_files": {
+    "BWS120-R09-report.md": {
+      "sha256": "dac73b497eaaa5f3c3c71e196f1568fb99611fddb90641c0f86e9e7955c0dc56",
+      "bytes": 109420
+    },
+    "BWS120-R09-findings.json": {
+      "sha256": "132344ea137ad854c959c4e22ad1eb10b0d43ee416efec8cbccbd87b74fba580",
+      "bytes": 120072
+    },
+    "BWS120-R09-coverage.tsv": {
+      "sha256": "b735b660f7c8bcf5fb1b4dc8690bedb607b3a832770a3e6390694f048d8e7c62",
+      "bytes": 185482
+    }
+  }
+}

@@ -1,0 +1,1831 @@
+{
+  "schema": "betting-win-surebet-deep-review-findings-v1",
+  "review_id": "BWS120-R07",
+  "repository": "betting-win-surebet",
+  "generated_at_utc": "2026-09-12T04:19:29Z",
+  "source_authority": {
+    "archive": "betting-win-surebet120(1).zip",
+    "actual_sha256": "d4565c05ecfe63f5d5511f224a20ff20fb82bfc75b23203c94d7d3e98a8c21bb",
+    "regular_files": 695,
+    "package": "betting-win-surebet@0.1.0-bws-full-platform",
+    "canonical_runtime": "Node 20.20.2"
+  },
+  "inherited_authority": {
+    "baseline": "betting-win-surebet118.zip",
+    "sha256": "50bbcb0b476904c8209cf7e1287b5ac4f9091fa07f6fd67523fc5430029417f7",
+    "confirmed_findings": 85,
+    "severity_counts": {
+      "P0": 1,
+      "P1": 71,
+      "P2": 13,
+      "P3": 0
+    },
+    "preserved_ids": true
+  },
+  "summary": {
+    "confirmed_findings": 19,
+    "severity_counts": {
+      "P0": 2,
+      "P1": 14,
+      "P2": 3
+    },
+    "release_blocking": 17,
+    "deployment_blocking": 19,
+    "bws_600_blocking": 17,
+    "bws_710_blocking": 1,
+    "inherited_findings_checked": 85,
+    "inherited_duplicate_root_causes_created": 0,
+    "hypotheses": 2,
+    "external_upstream_blockers": 2,
+    "environment_blockers": 2,
+    "intentional_safeguards": 6,
+    "rejected_suspicions": 5,
+    "cross_area_handoffs": 9,
+    "test_gaps": 19
+  },
+  "records": [
+    {
+      "id": "BWS120-R07-001",
+      "title": "Configurable structured-log paths escape the repository and can rotate or append to out-of-bound files",
+      "severity": "P0",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "packages/bootstrap/src/operations/observability.ts",
+      "current_symbol": "createBwsStructuredLogger",
+      "exact_line_range": "L268-L331",
+      "full_file_sha256": "ab2024a942781e074e1d719a7d368814cf1173fb524c567d2d894ab2ef8c3923",
+      "source_locations": [
+        {
+          "path": "packages/bootstrap/src/operations/observability.ts",
+          "symbol": "createBwsStructuredLogger",
+          "line_range": "L268-L331",
+          "sha256": "ab2024a942781e074e1d719a7d368814cf1173fb524c567d2d894ab2ef8c3923",
+          "note": "The caller or BWS_OBSERVABILITY_LOG_DIRECTORY is passed to path.resolve without repository confinement or symlink rejection, then directories are created and role-named files are rotated/appended."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/observability.ts",
+          "symbol": "rotateLogFileIfNeeded",
+          "line_range": "L783-L803",
+          "sha256": "ab2024a942781e074e1d719a7d368814cf1173fb524c567d2d894ab2ef8c3923",
+          "note": "Rotation renames existing role-named files in the selected directory."
+        }
+      ],
+      "preconditions": [
+        "A caller or deployment environment can supply BWS_OBSERVABILITY_LOG_DIRECTORY or request.logDirectory.",
+        "The BWS process has write permission to the resolved path."
+      ],
+      "trigger": "Supply an absolute path or traversal path outside the repository, then emit a structured event for a role such as api.",
+      "expected_behavior": "All managed observability output must be confined to a canonical repo-owned runtime directory, reject absolute/traversal paths, and reject every existing symlink segment before creating, rotating, or appending files.",
+      "current_behavior": "path.resolve(repositoryRoot, configuredValue) accepts an absolute value as-is and normalizes traversal outside the repository. mkdirSync, renameSync, and appendFileSync then operate there without a boundary check.",
+      "impact": "A configuration mistake or hostile environment can write, append, or rotate files outside the repository. This violates the review taxonomy repository-escape boundary and can damage unrelated files whose names collide with role logs.",
+      "evidence": [
+        "Static source trace shows no requireRepositoryPath, relative-boundary comparison, realpath containment, or symlink-segment check in the logger path.",
+        "The bounded static probe confirmed the absolute-path branch remains reachable."
+      ],
+      "reproduction_status": "STATIC_SOURCE_CONFIRMED; OFFLINE_PATH_RESOLUTION_PROBE_CONFIRMED",
+      "root_cause": "The logger treats an operator-controlled filesystem location as a generic resolved path rather than a confined repository resource.",
+      "minimal_fix_boundary": "Confine the effective log directory under one explicit repo-owned root; reject absolute paths, traversal, and existing symlink segments before mkdir, rotation, and append. Keep the public logger API and valid relative paths unchanged.",
+      "required_tests": [
+        "Absolute-path rejection",
+        "../ traversal rejection",
+        "existing and intermediate symlink rejection",
+        "outside-directory api.jsonl collision/rotation rejection",
+        "valid repo-relative log rotation"
+      ],
+      "regression_risks": [
+        "Over-confinement could reject legitimate test temp directories; tests should allow an explicit already-confined repositoryRoot fixture rather than a global fallback."
+      ],
+      "primary_owner": "R07",
+      "secondary_sectors": [
+        "R10",
+        "R11"
+      ],
+      "existing_aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "Log record schema",
+        "role names",
+        "rotation size/count semantics for valid paths",
+        "runtime process lifecycle"
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "bws_600": true,
+        "bws_710": false,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS120-R07-002",
+      "title": "Structured-log redaction misses Authorization, Cookie, API-key, header, and value-shaped secrets",
+      "severity": "P0",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "packages/bootstrap/src/operations/observability.ts",
+      "current_symbol": "SENSITIVE_KEY_PATTERN / sanitizeJsonValue",
+      "exact_line_range": "L50-L51; L805-L837",
+      "full_file_sha256": "ab2024a942781e074e1d719a7d368814cf1173fb524c567d2d894ab2ef8c3923",
+      "source_locations": [
+        {
+          "path": "packages/bootstrap/src/operations/observability.ts",
+          "symbol": "SENSITIVE_KEY_PATTERN",
+          "line_range": "L50-L51",
+          "sha256": "ab2024a942781e074e1d719a7d368814cf1173fb524c567d2d894ab2ef8c3923",
+          "note": "The key matcher covers credential/password/private-key/secret/seed/token families but not authorization, cookie, set-cookie, apiKey, headers, or common auth aliases."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/observability.ts",
+          "symbol": "sanitizeJsonValue",
+          "line_range": "L805-L837",
+          "sha256": "ab2024a942781e074e1d719a7d368814cf1173fb524c567d2d894ab2ef8c3923",
+          "note": "Strings that are not URLs are emitted verbatim; nested values are redacted only when their immediate key matches the narrow pattern."
+        },
+        {
+          "path": "tests/bws-observability.test.ts",
+          "symbol": "structured observability logs rotate and redact sensitive fields",
+          "line_range": "L16-L66",
+          "sha256": "b1f86186bd8cc389a620c6ef53b60b83e2b8c3ef3dd7e0dc635ca6e9f5fda6c5",
+          "note": "The focused test checks password and URL query stripping but does not cover authorization headers, cookies, API keys, or bearer/basic values under neutral keys."
+        }
+      ],
+      "preconditions": [
+        "A managed role includes request headers, auth metadata, cookies, provider/API credentials, or a bearer/basic value in log details."
+      ],
+      "trigger": "Log details such as {Authorization:\"Bearer ...\"}, {Cookie:\"session=...\"}, {apiKey:\"...\"}, or {headers:{authorization:\"...\"}}.",
+      "expected_behavior": "Secret-bearing keys and recognizable credential values must be redacted recursively before any file write, rotation, diagnostic collection, or artifact packaging.",
+      "current_behavior": "Those keys do not match the source pattern, and non-URL strings are returned unchanged. The structured log is then retained and included in diagnostics.",
+      "impact": "Credentials, session cookies, or authorization material can be persisted to logs and diagnostics/artifact archives. This is a direct secret-exposure defect.",
+      "evidence": [
+        "The offline key-pattern probe returned false for Authorization, Cookie, Set-Cookie, apiKey, and headers while returning true for password and access_token.",
+        "No value-shape sanitizer covers Bearer, Basic, signed cookies, PEM blocks, or connection strings under neutral keys."
+      ],
+      "reproduction_status": "STATIC_SOURCE_CONFIRMED; BOUNDED_OFFLINE_PATTERN_PROBE_CONFIRMED",
+      "root_cause": "Redaction is based on an incomplete immediate-key allow/deny regex and URL-origin coercion, not a closed recursive secret policy.",
+      "minimal_fix_boundary": "Centralize redaction in a shared closed policy covering authorization/cookie/header/API-key aliases and credential-shaped values. Apply it before log serialization and diagnostics inclusion; do not expose raw values in error paths.",
+      "required_tests": [
+        "Authorization/Bearer redaction",
+        "Cookie and Set-Cookie redaction",
+        "apiKey/x-api-key redaction",
+        "nested headers redaction",
+        "Basic auth/PEM/connection-string value redaction",
+        "negative tests for benign tokens such as event identifiers"
+      ],
+      "regression_risks": [
+        "Aggressive value-shape redaction can hide benign evidence identifiers; use explicit categories and preserve nonsecret hashes/IDs."
+      ],
+      "primary_owner": "R07",
+      "secondary_sectors": [
+        "R10",
+        "R11",
+        "R12"
+      ],
+      "existing_aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "Nonsecret event codes",
+        "source fingerprints",
+        "bounded URL-origin behavior",
+        "provider/execution disabled policy"
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "bws_600": true,
+        "bws_710": false,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS120-R07-003",
+      "title": "Evidence-index deduplication and latest-summary publication are not serialized across processes",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "packages/bootstrap/src/operations/observability.ts",
+      "current_symbol": "registerBwsEvidenceArtifact",
+      "exact_line_range": "L376-L408",
+      "full_file_sha256": "ab2024a942781e074e1d719a7d368814cf1173fb524c567d2d894ab2ef8c3923",
+      "source_locations": [
+        {
+          "path": "packages/bootstrap/src/operations/observability.ts",
+          "symbol": "registerBwsEvidenceArtifact",
+          "line_range": "L376-L408",
+          "sha256": "ab2024a942781e074e1d719a7d368814cf1173fb524c567d2d894ab2ef8c3923",
+          "note": "Each process independently reads the full index, checks for a duplicate, appends, rereads, and rewrites latest.json with no lock, CAS, append receipt, or atomic transaction."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/observability.ts",
+          "symbol": "writeJsonFile",
+          "line_range": "L1057-L1062",
+          "sha256": "ab2024a942781e074e1d719a7d368814cf1173fb524c567d2d894ab2ef8c3923",
+          "note": "The shared summary temporary name is keyed only by PID; publication is independent from the index append."
+        }
+      ],
+      "preconditions": [
+        "Two managed processes register the same or different artifacts concurrently."
+      ],
+      "trigger": "Both processes read the pre-append index before either append/summary write completes.",
+      "expected_behavior": "Index append, exact duplicate suppression, and latest-summary advancement must be one serialized, crash-recoverable publication transaction.",
+      "current_behavior": "Concurrent publishers can both append an exact duplicate, overwrite each other’s latest summary with different snapshots, or fail on shared publication state. There is no sequence, lock, or compare-and-set authority.",
+      "impact": "Duplicate or stale evidence-index state breaks exactly-once publication, recent-evidence diagnostics, retention references, and campaign completion accounting.",
+      "evidence": [
+        "The register function has a classic read-check-append-read-rewrite sequence with no interprocess exclusion.",
+        "The focused test performs two sequential registrations in one process and therefore cannot exercise the race."
+      ],
+      "reproduction_status": "STATIC_CONCURRENCY_DEFECT_CONFIRMED; DYNAMIC_MULTIPROCESS_POSTGRES/FLOCK_PROOF_NOT_RUN",
+      "root_cause": "Evidence publication is implemented as independent filesystem operations instead of a single-owner append protocol with a monotonic receipt.",
+      "minimal_fix_boundary": "Add one repository-scoped publication lock or durable append repository, assign monotonic entry identity, make duplicate detection atomic, and derive latest.json from the committed append receipt.",
+      "required_tests": [
+        "Two-process exact-duplicate barrier test",
+        "two-process distinct-artifact barrier test",
+        "crash between append and summary",
+        "stale writer/CAS rejection",
+        "restart reconciliation from index"
+      ],
+      "regression_risks": [
+        "A new lock must not deadlock diagnostics or controllers; recovery must distinguish a live owner from stale ownership."
+      ],
+      "primary_owner": "R07",
+      "secondary_sectors": [
+        "R03",
+        "R06",
+        "R11",
+        "R12"
+      ],
+      "existing_aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "Artifact hash calculation",
+        "entry field schema",
+        "read-only summary API for a consistent committed index"
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "bws_600": true,
+        "bws_710": false,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS120-R07-004",
+      "title": "Indexed evidence can be mutated or deleted after registration without invalidating acceptance",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "packages/bootstrap/src/operations/observability.ts",
+      "current_symbol": "registerBwsEvidenceArtifact / summarizeBwsEvidenceIndex",
+      "exact_line_range": "L376-L417",
+      "full_file_sha256": "ab2024a942781e074e1d719a7d368814cf1173fb524c567d2d894ab2ef8c3923",
+      "source_locations": [
+        {
+          "path": "packages/bootstrap/src/operations/observability.ts",
+          "symbol": "registerBwsEvidenceArtifact",
+          "line_range": "L376-L408",
+          "sha256": "ab2024a942781e074e1d719a7d368814cf1173fb524c567d2d894ab2ef8c3923",
+          "note": "The artifact hash is sampled once and only path+hash are appended."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/observability.ts",
+          "symbol": "readEvidenceIndexEntries / summarizeEntries",
+          "line_range": "L746-L780",
+          "sha256": "ab2024a942781e074e1d719a7d368814cf1173fb524c567d2d894ab2ef8c3923",
+          "note": "Later reads trust recorded JSON entries and never require the referenced file to exist or still match the recorded SHA-256."
+        }
+      ],
+      "preconditions": [
+        "An evidence artifact remains at a mutable path after registration or is pruned/overwritten out of band."
+      ],
+      "trigger": "Modify, replace, truncate, or delete the artifact after the index entry is written.",
+      "expected_behavior": "Accepted evidence must be immutable by construction, content-addressed/copied to retained storage, or revalidated against its recorded hash and file identity whenever used as current/accepted evidence.",
+      "current_behavior": "The index continues to report the old path/hash as recent evidence even when the path no longer exists or contains different bytes. Re-registering the same path with a new hash simply adds another entry.",
+      "impact": "Campaigns and diagnostics can claim retained evidence that cannot be reproduced or whose current bytes differ from the acceptance receipt.",
+      "evidence": [
+        "No read path in observability re-hashes referenced files.",
+        "Repository-wide tracing found no immutable evidence-store promotion step attached to registerBwsEvidenceArtifact."
+      ],
+      "reproduction_status": "STATIC_SOURCE_CONFIRMED; MUTATION/DELETION STATE_TRANSITION_CONFIRMED_BY_CODE_PATH",
+      "root_cause": "The append-only metadata record is treated as immutability proof while the referenced artifact remains mutable path state.",
+      "minimal_fix_boundary": "Publish evidence to a non-replaceable content-addressed location or bind path inode/content to an immutable receipt; reject same-path content drift and verify existence/hash before acceptance and retention decisions.",
+      "required_tests": [
+        "Post-registration mutation",
+        "post-registration deletion",
+        "same-path different-content conflict",
+        "content-address collision refusal",
+        "accepted-evidence revalidation"
+      ],
+      "regression_risks": [
+        "Copying large artifacts can increase disk use; use bounded streaming and reference-aware retention."
+      ],
+      "primary_owner": "R07",
+      "secondary_sectors": [
+        "R03",
+        "R08",
+        "R11",
+        "R12"
+      ],
+      "existing_aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "Original producer semantics",
+        "artifact JSON schemas",
+        "historical entries that remain byte-valid"
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "bws_600": true,
+        "bws_710": false,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS120-R07-005",
+      "title": "Evidence “latest” state is append-order state, not monotonic currentness",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "packages/bootstrap/src/operations/observability.ts",
+      "current_symbol": "summarizeEntries / readEvidenceIndexEntries",
+      "exact_line_range": "L746-L780",
+      "full_file_sha256": "ab2024a942781e074e1d719a7d368814cf1173fb524c567d2d894ab2ef8c3923",
+      "source_locations": [
+        {
+          "path": "packages/bootstrap/src/operations/observability.ts",
+          "symbol": "registerBwsEvidenceArtifact",
+          "line_range": "L376-L408",
+          "sha256": "ab2024a942781e074e1d719a7d368814cf1173fb524c567d2d894ab2ef8c3923",
+          "note": "createdAt is caller-supplied and only ISO-shaped; there is no monotonicity, future-skew, generation, or predecessor check."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/observability.ts",
+          "symbol": "summarizeEntries",
+          "line_range": "L746-L758",
+          "sha256": "ab2024a942781e074e1d719a7d368814cf1173fb524c567d2d894ab2ef8c3923",
+          "note": "The final physical line becomes lastCreatedAt/lastRuntimeId and recentEntries are a raw tail."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/observability.ts",
+          "symbol": "readEvidenceIndexEntries",
+          "line_range": "L761-L780",
+          "sha256": "ab2024a942781e074e1d719a7d368814cf1173fb524c567d2d894ab2ef8c3923",
+          "note": "Entries are accepted by schema marker and file order, not validated chronology/currentness."
+        }
+      ],
+      "preconditions": [
+        "A delayed, retried, backdated, future-dated, or reordered publisher appends after a newer artifact."
+      ],
+      "trigger": "Append a valid entry whose createdAt/runtime generation is older, unrelated, or implausibly future relative to the current accepted entry.",
+      "expected_behavior": "Latest/current evidence must be selected by an explicit monotonic generation or campaign sequence with bounded clock validation and conflict rejection.",
+      "current_behavior": "The last appended line becomes current regardless of timestamp, runtime generation, source fingerprint, or campaign relationship.",
+      "impact": "Diagnostics, progress, retention, and acceptance can point at stale or future evidence and misreport current runtime/campaign state.",
+      "evidence": [
+        "The summary uses entries.slice(-limit) and entries[entries.length-1].",
+        "No code compares createdAt, runtimeId, sourceFingerprint, or campaign predecessor before advancing latest."
+      ],
+      "reproduction_status": "STATIC_SOURCE_CONFIRMED; ORDERING_MODEL_PROBE_CONFIRMED",
+      "root_cause": "Physical append position is used as currentness authority without a monotonic logical generation contract.",
+      "minimal_fix_boundary": "Add explicit campaign/runtime generation, monotonic sequence, bounded timestamp policy, and compare-and-set latest advancement. Preserve conflicting/out-of-order entries as historical without promoting them.",
+      "required_tests": [
+        "Backdated append",
+        "future-dated append",
+        "delayed old runtime append",
+        "cross-runtime conflict",
+        "same-sequence different-hash rejection",
+        "restart latest reconstruction"
+      ],
+      "regression_risks": [
+        "Strict clocks can reject valid delayed uploads; currentness should use logical sequence and treat wall time as bounded evidence, not sole authority."
+      ],
+      "primary_owner": "R07",
+      "secondary_sectors": [
+        "R01",
+        "R03",
+        "R05",
+        "R11",
+        "R12"
+      ],
+      "existing_aliases_or_dependencies": [
+        "BWS116-R01-010",
+        "BWS118-R05-008"
+      ],
+      "explicitly_unchanged_areas": [
+        "Historical evidence retention",
+        "append-only audit history",
+        "exact artifact bytes"
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "bws_600": true,
+        "bws_710": false,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS120-R07-006",
+      "title": "Loopback diagnostics accept non-2xx and schema-invalid JSON as successful health/readiness/metrics evidence",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "packages/bootstrap/src/operations/observability.ts",
+      "current_symbol": "fetchLoopbackJson",
+      "exact_line_range": "L691-L713",
+      "full_file_sha256": "ab2024a942781e074e1d719a7d368814cf1173fb524c567d2d894ab2ef8c3923",
+      "source_locations": [
+        {
+          "path": "packages/bootstrap/src/operations/observability.ts",
+          "symbol": "collectDiagnosticsStateSnapshot",
+          "line_range": "L631-L677",
+          "sha256": "ab2024a942781e074e1d719a7d368814cf1173fb524c567d2d894ab2ef8c3923",
+          "note": "The three probe results are trusted when fetchLoopbackJson returns ok=true."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/observability.ts",
+          "symbol": "fetchLoopbackJson",
+          "line_range": "L691-L713",
+          "sha256": "ab2024a942781e074e1d719a7d368814cf1173fb524c567d2d894ab2ef8c3923",
+          "note": "The helper parses JSON and returns ok=true without checking response.ok, status, content type, redirect behavior, route schema, or required envelope fields."
+        },
+        {
+          "path": "tests/bws-observability.test.ts",
+          "symbol": "diagnostics fetchJson fixture",
+          "line_range": "L138-L180",
+          "sha256": "b1f86186bd8cc389a620c6ef53b60b83e2b8c3ef3dd7e0dc635ca6e9f5fda6c5",
+          "note": "The test injects already-enriched success objects and never exercises real non-2xx or malformed responses."
+        }
+      ],
+      "preconditions": [
+        "A loopback endpoint returns JSON on an HTTP error, wrong route, stale proxy, or incompatible server version."
+      ],
+      "trigger": "Return HTTP 500/404/3xx with JSON containing ready-shaped fields, or 200 with a wrong schema.",
+      "expected_behavior": "Every probe must require an exact route-specific 2xx status, content type, closed schema, runtime/source generation, and fail-closed error classification.",
+      "current_behavior": "Any parseable JSON is represented as an ok response. Downstream diagnostics and runtime-evidence sampling read its fields without a transport receipt.",
+      "impact": "Error bodies, route confusion, or an incompatible local process can be promoted into healthy/ready/metrics evidence.",
+      "evidence": [
+        "The helper never references response.ok or response.status.",
+        "The bounded static probe confirmed the response-status branch is absent."
+      ],
+      "reproduction_status": "STATIC_SOURCE_CONFIRMED; BOUNDED_SOURCE_ASSERTION_CONFIRMED",
+      "root_cause": "JSON parse success is conflated with HTTP and contract success.",
+      "minimal_fix_boundary": "Return a typed probe receipt containing status, content type, final URL, route, body hash, schema/version, runtime ID, and source fingerprint; reject non-2xx, redirects, and malformed/extra-state bodies.",
+      "required_tests": [
+        "500 JSON ready body",
+        "404 JSON",
+        "redirect",
+        "wrong content type",
+        "wrong schema/version",
+        "different runtime ID",
+        "oversized body and timeout"
+      ],
+      "regression_risks": [
+        "Closed schema validation must remain compatible with explicitly versioned endpoint upgrades."
+      ],
+      "primary_owner": "R07",
+      "secondary_sectors": [
+        "R05",
+        "R06",
+        "R10",
+        "R11"
+      ],
+      "existing_aliases_or_dependencies": [
+        "BWS118-R06-007",
+        "BWS118-R06-008"
+      ],
+      "explicitly_unchanged_areas": [
+        "Loopback-only destination",
+        "2-second timeout",
+        "provider/execution disabled policy"
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "bws_600": true,
+        "bws_710": false,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS120-R07-007",
+      "title": "A failed metrics request is silently replaced by synthesized metrics that declare the API ready",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "packages/bootstrap/src/operations/observability.ts",
+      "current_symbol": "collectDiagnosticsStateSnapshot / createBwsMetricsSnapshot",
+      "exact_line_range": "L479-L484; L631-L677",
+      "full_file_sha256": "ab2024a942781e074e1d719a7d368814cf1173fb524c567d2d894ab2ef8c3923",
+      "source_locations": [
+        {
+          "path": "packages/bootstrap/src/operations/observability.ts",
+          "symbol": "createBwsMetricsSnapshot",
+          "line_range": "L479-L484",
+          "sha256": "ab2024a942781e074e1d719a7d368814cf1173fb524c567d2d894ab2ef8c3923",
+          "note": "The locally created snapshot always sets api.status to ready."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/observability.ts",
+          "symbol": "collectDiagnosticsStateSnapshot",
+          "line_range": "L631-L677",
+          "sha256": "ab2024a942781e074e1d719a7d368814cf1173fb524c567d2d894ab2ef8c3923",
+          "note": "When /metrics fails, diagnostics substitute createBwsMetricsSnapshot without recording fetched-versus-synthesized origin in the metrics object."
+        }
+      ],
+      "preconditions": [
+        "The /metrics fetch fails while diagnostics can still inspect local state/database helpers."
+      ],
+      "trigger": "Time out, refuse, or return invalid JSON from the metrics endpoint.",
+      "expected_behavior": "Missing endpoint evidence must remain missing/blocked and be explicitly labeled by origin; synthesized operational context must never claim endpoint readiness.",
+      "current_behavior": "The diagnostics bundle contains a locally synthesized bws.metrics_snapshot.v1 with api.status=ready. Its shape is indistinguishable from fetched metrics to downstream readers.",
+      "impact": "Diagnostics can fabricate partial readiness and obscure an endpoint failure. Combined with stale lifecycle/readiness sources, this weakens false-readiness resistance.",
+      "evidence": [
+        "The fallback branch is explicit at L663-L672.",
+        "The bounded source probe confirmed the fallback calls a constructor whose API status is hard-coded ready."
+      ],
+      "reproduction_status": "STATIC_SOURCE_CONFIRMED; BOUNDED_SOURCE_ASSERTION_CONFIRMED",
+      "root_cause": "The code uses a convenience snapshot as evidence fallback without origin or conservative status semantics.",
+      "minimal_fix_boundary": "Split fetched endpoint evidence from local diagnostic context. On fetch failure set metrics origin=synthesized and API status=blocked/unknown; prohibit synthesized fields from satisfying acceptance.",
+      "required_tests": [
+        "Metrics timeout/refusal",
+        "non-JSON metrics response",
+        "fetched-versus-synthesized origin",
+        "fallback cannot satisfy sampleIsReady",
+        "mixed stale-state regression"
+      ],
+      "regression_risks": [
+        "Operators may still need local context during an outage; preserve it in a separate non-acceptance field."
+      ],
+      "primary_owner": "R07",
+      "secondary_sectors": [
+        "R05",
+        "R06",
+        "R11"
+      ],
+      "existing_aliases_or_dependencies": [
+        "BWS118-R06-007",
+        "BWS118-R06-008"
+      ],
+      "explicitly_unchanged_areas": [
+        "Database/queue diagnostic collection",
+        "health/readiness failure objects",
+        "loopback-only policy"
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "bws_600": true,
+        "bws_710": false,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS120-R07-008",
+      "title": "Retention classes are recorded but no reference-aware retention or pruning lifecycle is implemented",
+      "severity": "P2",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "packages/bootstrap/src/operations/observability.ts",
+      "current_symbol": "registerBwsEvidenceArtifact / collectBwsDiagnosticsBundle",
+      "exact_line_range": "L376-L408; L530-L592",
+      "full_file_sha256": "ab2024a942781e074e1d719a7d368814cf1173fb524c567d2d894ab2ef8c3923",
+      "source_locations": [
+        {
+          "path": "packages/bootstrap/src/operations/observability.ts",
+          "symbol": "registerBwsEvidenceArtifact",
+          "line_range": "L376-L408",
+          "sha256": "ab2024a942781e074e1d719a7d368814cf1173fb524c567d2d894ab2ef8c3923",
+          "note": "retentionClass is metadata only."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/observability.ts",
+          "symbol": "collectBwsDiagnosticsBundle",
+          "line_range": "L530-L592",
+          "sha256": "ab2024a942781e074e1d719a7d368814cf1173fb524c567d2d894ab2ef8c3923",
+          "note": "Each collection creates a new diagnostics directory and side files with no expiry or pruning transaction."
+        },
+        {
+          "path": "docs/038_observability_metrics_and_evidence_contract.md",
+          "symbol": "Evidence index and retention contract",
+          "line_range": "L53-L57",
+          "sha256": "b244f607ae9a2f03f808cf746aa820a263fb669dadcbc74c9ed5a6ec33b9e556",
+          "note": "The binding contract requires reference checks before expired evidence is removed."
+        }
+      ],
+      "preconditions": [
+        "BWS-600 or long-lived services continuously produce logs, diagnostics, lifecycle, runtime, backup, or campaign evidence."
+      ],
+      "trigger": "Allow normal repeated evidence production over time.",
+      "expected_behavior": "Every retention class must have an explicit plan/apply policy that protects accepted ledger rows, active runtimes, unresolved blockers, and retained handoffs while bounding disk/inode growth.",
+      "current_behavior": "Retention class values are written and displayed, but repository-wide tracing found no R07 retention planner/apply path for the observability index or diagnostics directories.",
+      "impact": "Long campaigns can exhaust disk or inodes; ad-hoc cleanup risks deleting still-referenced acceptance evidence.",
+      "evidence": [
+        "No retention consumer was found for BwsEvidenceRetentionClass.",
+        "Diagnostics directory names are append-only by timestamp/hash and are never reconciled to accepted references."
+      ],
+      "reproduction_status": "STATIC_REPOSITORY_TRACE_CONFIRMED; LONG_DURATION_RESOURCE_PROOF_NOT_RUN",
+      "root_cause": "Retention metadata was implemented without the state machine that interprets it and proves reference safety.",
+      "minimal_fix_boundary": "Add dry-run retention planning, immutable reference graph evaluation, bounded apply, interruption recovery, and post-apply index reconciliation. R08 owns generic backup/retention mechanics; R07 owns evidence reference semantics.",
+      "required_tests": [
+        "Plan/apply parity",
+        "active runtime protection",
+        "accepted handoff protection",
+        "unresolved blocker protection",
+        "interrupted pruning recovery",
+        "disk/inode bound soak"
+      ],
+      "regression_risks": [
+        "Incorrect reference discovery can cause data loss; deletion must remain fail-closed and separately authorized."
+      ],
+      "primary_owner": "R07",
+      "secondary_sectors": [
+        "R08",
+        "R11",
+        "R12"
+      ],
+      "existing_aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "Existing evidence bytes",
+        "retentionClass vocabulary",
+        "backup-specific retention mechanics owned by R08"
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": false,
+        "bws_600": true,
+        "bws_710": false,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS120-R07-009",
+      "title": "BWS-600 readiness can be certified from one ready sample and does not require a continuously ready window",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "packages/bootstrap/src/operations/paper-runtime-evidence.ts",
+      "current_symbol": "createBwsPaperRuntimeEvidence",
+      "exact_line_range": "L206-L330",
+      "full_file_sha256": "d5ece548916a8de8d594fc1121468db2cf8a38d652ac813b458729df48047b7d",
+      "source_locations": [
+        {
+          "path": "packages/bootstrap/src/operations/paper-runtime-evidence.ts",
+          "symbol": "createBwsPaperRuntimeEvidence",
+          "line_range": "L206-L330",
+          "sha256": "d5ece548916a8de8d594fc1121468db2cf8a38d652ac813b458729df48047b7d",
+          "note": "keepMonitoringWhenReady defaults false, the loop breaks on the first ready sample, and when monitoring continues only the final sample controls the verdict."
+        },
+        {
+          "path": "run-paper-autopilot.sh",
+          "symbol": "defaults / run_child_controller",
+          "line_range": "L15-L30; L842-L872",
+          "sha256": "fa9afc727218b6e533c6f3ef1c2bbb3af9e2c5182538276f509f1986bdfac661",
+          "note": "The seven-day parent launches a nominal 72-hour child without --keep-monitoring-when-ready by default."
+        },
+        {
+          "path": "run-paper-evaluation.sh",
+          "symbol": "run_runtime_evidence_mode",
+          "line_range": "L845-L933",
+          "sha256": "d7d821119d51c3dd5bbcf7a80f0e98488ebd38f7d771310265939a918505e667",
+          "note": "The child forwards the flag only when explicitly enabled and exits success for the ready label."
+        },
+        {
+          "path": "tests/bws-paper-runtime-evidence.test.ts",
+          "symbol": "ready observation test",
+          "line_range": "L519-L598",
+          "sha256": "64b1c04c9d626dedf3059393e095c4a4e8c5cf4399ccb3deb88d60d433d51439",
+          "note": "The focused success test expects one ready sample rather than a full continuous observation window."
+        }
+      ],
+      "preconditions": [
+        "Preflight passes and any single observation sample has ready labels."
+      ],
+      "trigger": "Run the default BWS-600 route; alternatively run keep-monitoring with earlier blocked samples followed by one final ready sample.",
+      "expected_behavior": "A configured 72-hour evidence window must evaluate every scheduled interval, require an explicit continuity policy, account for missed samples, and fail/qualify any degradation according to that policy.",
+      "current_behavior": "The default exits immediately on the first ready sample. With monitoring enabled, a blocked-to-ready sequence ends ready because the mutable ready variable contains only the last sample; earlier failures are not part of the verdict.",
+      "impact": "A nominal multi-day campaign can complete in one cycle and advertise continuous readiness without continuous evidence.",
+      "evidence": [
+        "The exact first-ready break is at L314-L315.",
+        "The final decision at L324-L330 uses only the last iteration value.",
+        "Controller defaults keep monitoring disabled."
+      ],
+      "reproduction_status": "STATIC_STATE_MACHINE_CONFIRMED; FOCUSED_TEST_PROVES_ONE_SAMPLE_SUCCESS_CONTRACT",
+      "root_cause": "The implementation models readiness as a latest-sample boolean instead of a window aggregate with continuity requirements.",
+      "minimal_fix_boundary": "Define an explicit window policy: minimum elapsed monotonic duration, expected sample schedule, maximum gap, minimum sample count, and all/threshold readiness semantics. Keep ready handoff provisional until the window closes.",
+      "required_tests": [
+        "One ready sample must not satisfy 72h",
+        "ready→blocked",
+        "blocked→ready",
+        "missed intervals",
+        "collection gap",
+        "exact duration/minimum sample count",
+        "restart/resume continuity"
+      ],
+      "regression_risks": [
+        "A strict all-samples policy may be too brittle; the policy must be explicit and machine-bound rather than implicit latest state."
+      ],
+      "primary_owner": "R07",
+      "secondary_sectors": [
+        "R04",
+        "R06",
+        "R11",
+        "R12"
+      ],
+      "existing_aliases_or_dependencies": [
+        "BWS118-R06-007",
+        "BWS118-R06-015"
+      ],
+      "explicitly_unchanged_areas": [
+        "API-only preflight",
+        "closed execution/provider policy",
+        "stack ownership and stop behavior outside the verdict aggregation"
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "bws_600": true,
+        "bws_710": false,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS120-R07-010",
+      "title": "Runtime-evidence readiness is not bound to one exact source, data, process, campaign, and artifact generation",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "packages/bootstrap/src/operations/paper-runtime-evidence.ts",
+      "current_symbol": "buildObservationSample / sampleIsReady / createResult",
+      "exact_line_range": "L406-L519",
+      "full_file_sha256": "d5ece548916a8de8d594fc1121468db2cf8a38d652ac813b458729df48047b7d",
+      "source_locations": [
+        {
+          "path": "packages/bootstrap/src/operations/paper-runtime-evidence.ts",
+          "symbol": "buildObservationSample",
+          "line_range": "L406-L439",
+          "sha256": "d5ece548916a8de8d594fc1121468db2cf8a38d652ac813b458729df48047b7d",
+          "note": "Samples retain status labels, paths, a count, and optional upstream time/blockers but omit diagnostics manifest hash, runtime IDs, source fingerprints, campaign sequence, exact evidence entry identity, and response receipts."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/paper-runtime-evidence.ts",
+          "symbol": "sampleIsReady",
+          "line_range": "L455-L468",
+          "sha256": "d5ece548916a8de8d594fc1121468db2cf8a38d652ac813b458729df48047b7d",
+          "note": "The promotion predicate checks labels and mere presence of upstreamLastSuccessAt; it does not validate freshness or cross-artifact identity."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/paper-runtime-evidence.ts",
+          "symbol": "createResult",
+          "line_range": "L471-L519",
+          "sha256": "d5ece548916a8de8d594fc1121468db2cf8a38d652ac813b458729df48047b7d",
+          "note": "The result has no semantic/content hash, parent campaign manifest fingerprint, or exact artifact digest set."
+        }
+      ],
+      "preconditions": [
+        "Diagnostics, lifecycle status, evidence index, and handoff can originate from different or stale runtime/source generations."
+      ],
+      "trigger": "Present individually valid ready-shaped inputs whose runtime IDs/source fingerprints/campaigns differ, or a stale upstreamLastSuccessAt.",
+      "expected_behavior": "One observation must cryptographically bind exact source/release/upstream lock, runtime/process identities, data generation/currentness, response receipts, diagnostics manifest, lifecycle evidence, evidence-index sequence, and parent campaign.",
+      "current_behavior": "The sample and result contain no fields capable of proving those relationships, and sampleIsReady does not compare them.",
+      "impact": "Mixed-generation or stale evidence can satisfy R07 readiness even when no coherent runtime state ever existed.",
+      "evidence": [
+        "The sample interface has no runtimeId/sourceFingerprint/manifestSha256/campaignFingerprint fields.",
+        "upstreamLastSuccessAt is checked only for defined, not bounded relative to sample time.",
+        "The diagnostics result manifestSha256 is discarded by buildObservationSample."
+      ],
+      "reproduction_status": "STATIC_CONTRACT_AND_PROMOTION_TRACE_CONFIRMED",
+      "root_cause": "R07 promotion reduces rich source artifacts to unbound status labels and paths before acceptance.",
+      "minimal_fix_boundary": "Introduce an immutable observation receipt with hashes and generation IDs for every component; validate all joins, freshness, and parent campaign fingerprint before promotion; include the receipt digest in the result and parent terminal protocol.",
+      "required_tests": [
+        "Mixed runtime IDs",
+        "mixed source fingerprints",
+        "stale/future lastSuccessAt",
+        "diagnostics path with different hash",
+        "lifecycle/handoff generation mismatch",
+        "evidence-index sequence mismatch",
+        "campaign-manifest mismatch"
+      ],
+      "regression_risks": [
+        "Adding binding fields changes evidence schemas; retain explicit versioning and migration/rejection for historical evidence."
+      ],
+      "primary_owner": "R07",
+      "secondary_sectors": [
+        "R01",
+        "R03",
+        "R04",
+        "R05",
+        "R06",
+        "R11",
+        "R12"
+      ],
+      "existing_aliases_or_dependencies": [
+        "BWS116-R01-003",
+        "BWS116-R01-004",
+        "BWS116-R01-010",
+        "BWS118-R05-007",
+        "BWS118-R05-008",
+        "BWS118-R06-007",
+        "BWS118-R06-008"
+      ],
+      "explicitly_unchanged_areas": [
+        "Upstream semantic correctness remains R01-owned",
+        "process lifecycle correctness remains R06-owned",
+        "report economics remain R04-owned"
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "bws_600": true,
+        "bws_710": false,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS120-R07-011",
+      "title": "Observation duration is governed by wall-clock strings and can be unbounded or prematurely complete after clock changes",
+      "severity": "P2",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "packages/bootstrap/src/operations/paper-runtime-evidence.ts",
+      "current_symbol": "createBwsPaperRuntimeEvidence observation loop",
+      "exact_line_range": "L289-L322",
+      "full_file_sha256": "d5ece548916a8de8d594fc1121468db2cf8a38d652ac813b458729df48047b7d",
+      "source_locations": [
+        {
+          "path": "packages/bootstrap/src/operations/paper-runtime-evidence.ts",
+          "symbol": "createBwsPaperRuntimeEvidence observation loop",
+          "line_range": "L289-L322",
+          "sha256": "d5ece548916a8de8d594fc1121468db2cf8a38d652ac813b458729df48047b7d",
+          "note": "The deadline is Date.parse(now()) minus Date.parse(startedAt); no monotonic deadline or independent maximum-iteration guard exists."
+        }
+      ],
+      "preconditions": [
+        "The system clock regresses/freezes, jumps forward, or the injectable now function returns non-advancing valid timestamps."
+      ],
+      "trigger": "Run a never-ready observation with constant or decreasing timestamps.",
+      "expected_behavior": "Max duration must use a monotonic clock/deadline and bounded cancellation, while UTC timestamps are recorded only as evidence.",
+      "current_behavior": "The elapsed calculation may never reach maxDurationMs after a backward/frozen clock, or may terminate early after a forward jump.",
+      "impact": "Runtime evidence collection can hang beyond its budget or produce a truncated window unrelated to the configured duration.",
+      "evidence": [
+        "The loop has no attempt/sample cap and evaluates duration solely from Date.parse(cycleGeneratedAt).",
+        "The now function is injectable, making the non-advancing case directly representable."
+      ],
+      "reproduction_status": "STATIC_BOUNDEDNESS_DEFECT_CONFIRMED; DYNAMIC_LONG_WAIT_NOT_RUN",
+      "root_cause": "Wall-clock evidence time is also used as the control-plane deadline.",
+      "minimal_fix_boundary": "Use performance.now/process.hrtime or an injected monotonic clock plus AbortSignal; retain bounded wall-clock skew checks separately.",
+      "required_tests": [
+        "Frozen time",
+        "backward jump",
+        "forward jump",
+        "abort during sleep/collection",
+        "maximum sample/iteration guard"
+      ],
+      "regression_risks": [
+        "Monotonic and UTC clocks must be sampled together without falsely rejecting legitimate NTP adjustment."
+      ],
+      "primary_owner": "R07",
+      "secondary_sectors": [
+        "R06",
+        "R10",
+        "R11"
+      ],
+      "existing_aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "UTC generatedAt fields",
+        "configured interval and duration values",
+        "sample content semantics"
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "bws_600": true,
+        "bws_710": false,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS120-R07-012",
+      "title": "Diagnostics, runtime-evidence, and handoff outputs bypass the canonical evidence index and publication transaction",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "packages/bootstrap/src/operations/paper-runtime-evidence.ts",
+      "current_symbol": "writeBwsPaperRuntimeEvidence",
+      "exact_line_range": "L375-L404",
+      "full_file_sha256": "d5ece548916a8de8d594fc1121468db2cf8a38d652ac813b458729df48047b7d",
+      "source_locations": [
+        {
+          "path": "packages/bootstrap/src/operations/observability.ts",
+          "symbol": "collectBwsDiagnosticsBundle",
+          "line_range": "L530-L592",
+          "sha256": "ab2024a942781e074e1d719a7d368814cf1173fb524c567d2d894ab2ef8c3923",
+          "note": "Diagnostics writes four files and renames a directory but does not register the bundle in the evidence index."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/paper-runtime-evidence.ts",
+          "symbol": "writeBwsPaperRuntimeEvidence",
+          "line_range": "L375-L404",
+          "sha256": "d5ece548916a8de8d594fc1121468db2cf8a38d652ac813b458729df48047b7d",
+          "note": "Runtime evidence atomically renames to a caller path, replacing any existing file, and never registers it."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/paper-runtime-handoff.ts",
+          "symbol": "createBwsPaperRuntimeHandoff",
+          "line_range": "L104-L196",
+          "sha256": "6152e779214713ae2faa4ad1d447bc43e4d47c2c1a47d33c83fe303787d9a76f",
+          "note": "Handoff and source archive are written outside a shared evidence publication receipt and are not registered."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/external-runtime-preflight.ts",
+          "symbol": "createBwsExternalRuntimeCampaignManifest",
+          "line_range": "L414-L425",
+          "sha256": "724a419567dc2c6f737166660092d5c0d8e09be24a4b22bc9377c324949ec427",
+          "note": "The external campaign manifest demonstrates the intended registration path, but only for repo-local preflight output."
+        }
+      ],
+      "preconditions": [
+        "R07 produces the core artifacts used for diagnostics, runtime readiness, or downstream handoff."
+      ],
+      "trigger": "Complete any diagnostics collection, paper runtime evidence run, or handoff creation.",
+      "expected_behavior": "Every acceptance-relevant artifact set must be published once through the canonical index with exact hashes, dependencies, retention class, campaign/runtime generation, and an atomic completion receipt.",
+      "current_behavior": "These artifacts are written independently. The index may know none of them, runtime-evidence output can replace an existing path, and no shared receipt proves the set completed together.",
+      "impact": "Retention, discovery, latest/current selection, downstream handoff, and post-crash reconciliation cannot prove the exact evidence set used for acceptance.",
+      "evidence": [
+        "No registerBwsEvidenceArtifact call exists in the three producer paths.",
+        "The runtime evidence writer uses renameSync over the destination without an exists/refuse policy."
+      ],
+      "reproduction_status": "STATIC_PUBLICATION_TRACE_CONFIRMED",
+      "root_cause": "Core evidence producers implement file creation but not the repository’s declared evidence publication lifecycle.",
+      "minimal_fix_boundary": "Create one R07 evidence-set transaction that stages immutable files, computes hashes, records dependency edges, appends one committed index receipt, and advances latest only after full verification. Refuse accidental overwrite.",
+      "required_tests": [
+        "Each producer indexed exactly once",
+        "same-output collision",
+        "crash before/after each staged file",
+        "index append failure",
+        "restart reconciliation",
+        "retention reference graph"
+      ],
+      "regression_risks": [
+        "Changing paths can break operator tools; preserve stable aliases as verified pointers to immutable versioned artifacts."
+      ],
+      "primary_owner": "R07",
+      "secondary_sectors": [
+        "R03",
+        "R08",
+        "R11",
+        "R12"
+      ],
+      "existing_aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "Artifact payload schemas where otherwise valid",
+        "external preflight semantic validation",
+        "source archive bytes"
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "bws_600": true,
+        "bws_710": false,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS120-R07-013",
+      "title": "Runtime handoff can combine a lifecycle snapshot with a different source-tree generation",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "packages/bootstrap/src/operations/paper-runtime-handoff.ts",
+      "current_symbol": "createBwsPaperRuntimeHandoff / createSourceHandoffArchive",
+      "exact_line_range": "L104-L223",
+      "full_file_sha256": "6152e779214713ae2faa4ad1d447bc43e4d47c2c1a47d33c83fe303787d9a76f",
+      "source_locations": [
+        {
+          "path": "packages/bootstrap/src/operations/paper-runtime-handoff.ts",
+          "symbol": "createBwsPaperRuntimeHandoff",
+          "line_range": "L104-L147",
+          "sha256": "6152e779214713ae2faa4ad1d447bc43e4d47c2c1a47d33c83fe303787d9a76f",
+          "note": "Lifecycle status and source fingerprints are captured before source archive creation."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/paper-runtime-handoff.ts",
+          "symbol": "createSourceHandoffArchive",
+          "line_range": "L198-L223",
+          "sha256": "6152e779214713ae2faa4ad1d447bc43e4d47c2c1a47d33c83fe303787d9a76f",
+          "note": "The archive is created from the current mutable repository tree after the status snapshot; only archive bytes are hashed."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/paper-runtime-handoff.ts",
+          "symbol": "handoff assembly",
+          "line_range": "L148-L184",
+          "sha256": "6152e779214713ae2faa4ad1d447bc43e4d47c2c1a47d33c83fe303787d9a76f",
+          "note": "The earlier lifecycle sourceFingerprints and later archive record are combined without proving they describe the same tree/build/process generation."
+        }
+      ],
+      "preconditions": [
+        "Repository bytes or generated runtime entrypoints change between lifecycle status capture and source archive completion."
+      ],
+      "trigger": "Mutate a tracked/source file through an authorized competing process during the handoff window, or inject an archive creator that captures different bytes.",
+      "expected_behavior": "A handoff must pin one immutable source/build generation before status inspection, prove the running process uses it, archive exactly it, and compare the resulting digest before publication.",
+      "current_behavior": "The lifecycle snapshot and source archive are sequential observations of mutable state with no lock, tree fingerprint pre/post comparison, or process-executable digest join.",
+      "impact": "Downstream consumers can receive an internally valid handoff whose process evidence and packaged source describe different generations.",
+      "evidence": [
+        "The code provides an injectable createSourceHandoffArchive after status capture, making the TOCTOU boundary explicit.",
+        "archive.sha256 proves only the produced archive, not equality to lifecycleStatus.sourceFingerprints."
+      ],
+      "reproduction_status": "STATIC_TOCTOU_CONFIRMED; MUTATION_HARNESS_NOT_RUN",
+      "root_cause": "Source packaging is not performed from a frozen source authority bound to the running process receipt.",
+      "minimal_fix_boundary": "Acquire/verify an immutable source generation receipt, capture lifecycle status against it, package from that exact generation, compare pre/post source fingerprints, and fail closed on drift.",
+      "required_tests": [
+        "Mutation between status/archive",
+        "generated dist drift",
+        "source-manifest/tree mismatch",
+        "process executable digest mismatch",
+        "unchanged happy path"
+      ],
+      "regression_risks": [
+        "Freezing source must not stop or restart active services during review/acceptance; use immutable release bytes or read locks."
+      ],
+      "primary_owner": "R07",
+      "secondary_sectors": [
+        "R06",
+        "R09",
+        "R10",
+        "R11",
+        "R12"
+      ],
+      "existing_aliases_or_dependencies": [
+        "BWS118-R06-003"
+      ],
+      "explicitly_unchanged_areas": [
+        "Archive hash/size validation",
+        "closed provider/execution policy",
+        "handoff JSON field names"
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "bws_600": true,
+        "bws_710": false,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS120-R07-014",
+      "title": "Versioned handoff and latest pointer publish as two independent writes with no crash recovery or digest link",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "packages/bootstrap/src/operations/paper-runtime-handoff.ts",
+      "current_symbol": "createBwsPaperRuntimeHandoff / writeJsonAtomically",
+      "exact_line_range": "L186-L195; L290-L312",
+      "full_file_sha256": "6152e779214713ae2faa4ad1d447bc43e4d47c2c1a47d33c83fe303787d9a76f",
+      "source_locations": [
+        {
+          "path": "packages/bootstrap/src/operations/paper-runtime-handoff.ts",
+          "symbol": "createBwsPaperRuntimeHandoff",
+          "line_range": "L186-L195",
+          "sha256": "6152e779214713ae2faa4ad1d447bc43e4d47c2c1a47d33c83fe303787d9a76f",
+          "note": "The versioned file is committed first and latest.json second."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/paper-runtime-handoff.ts",
+          "symbol": "writeJsonAtomically",
+          "line_range": "L290-L312",
+          "sha256": "6152e779214713ae2faa4ad1d447bc43e4d47c2c1a47d33c83fe303787d9a76f",
+          "note": "Each single file is temp+rename atomic, but the pair has no transaction, manifest, predecessor, checksum pointer, or recovery scan."
+        }
+      ],
+      "preconditions": [
+        "A crash, disk-full condition, permission error, or concurrent publisher occurs after the versioned handoff is renamed but before latest.json commits."
+      ],
+      "trigger": "Interrupt publication between the two calls.",
+      "expected_behavior": "Publish a versioned immutable handoff and its latest pointer under one recoverable transaction; latest must reference the exact version/hash and advance monotonically.",
+      "current_behavior": "The versioned handoff may exist while latest remains stale. Downstream readers have no authoritative way to distinguish an incomplete publication from a historical version.",
+      "impact": "Consumers can miss the newest accepted handoff or use an older one; retries can create divergent files and pointers.",
+      "evidence": [
+        "The two calls are adjacent but independent.",
+        "No startup/read path reconciles latest.json against versioned handoffs."
+      ],
+      "reproduction_status": "STATIC_CRASH_WINDOW_CONFIRMED; POWER_LOSS_FSYNC_BEHAVIOR_NOT_TESTED",
+      "root_cause": "Per-file atomic rename is incorrectly treated as multi-file publication atomicity.",
+      "minimal_fix_boundary": "Add a handoff manifest/commit marker with version path+SHA, atomic compare-and-set latest pointer, and startup recovery. Preserve BWS118-R06-016 as the separate inherited filename-collision root.",
+      "required_tests": [
+        "Crash after version write",
+        "crash during latest write",
+        "concurrent publishers",
+        "latest hash mismatch",
+        "recovery selects highest committed sequence"
+      ],
+      "regression_risks": [
+        "Recovery must not promote an uncommitted version merely because its filename sorts last."
+      ],
+      "primary_owner": "R07",
+      "secondary_sectors": [
+        "R03",
+        "R06",
+        "R11",
+        "R12"
+      ],
+      "existing_aliases_or_dependencies": [
+        "BWS118-R06-016"
+      ],
+      "explicitly_unchanged_areas": [
+        "Timestamp-collision root remains inherited",
+        "source archive content verification",
+        "valid single handoff schema"
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "bws_600": true,
+        "bws_710": false,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS120-R07-015",
+      "title": "The selected BWS-600 controller never consumes or verifies the accepted external campaign manifest",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "run-paper-autopilot.sh",
+      "current_symbol": "controller admission / run_child_controller",
+      "exact_line_range": "L15-L30; L842-L872",
+      "full_file_sha256": "fa9afc727218b6e533c6f3ef1c2bbb3af9e2c5182538276f509f1986bdfac661",
+      "source_locations": [
+        {
+          "path": "packages/bootstrap/src/operations/external-runtime-preflight.ts",
+          "symbol": "createBwsExternalRuntimeCampaignManifest",
+          "line_range": "L248-L432",
+          "sha256": "724a419567dc2c6f737166660092d5c0d8e09be24a4b22bc9377c324949ec427",
+          "note": "The preflight creates a strongly described campaign manifest and semantic fingerprint."
+        },
+        {
+          "path": "docs/041_external_runtime_preflight_and_bws600_campaign.md",
+          "symbol": "BWS-600 evidence campaign",
+          "line_range": "L53-L68",
+          "sha256": "2b660f97040f6893f0110172a0f3e5ebe0b6e25f64f0e8ea4daf8ab310242620",
+          "note": "Binding authority says BWS-600 starts only after an accepted campaign manifest and retains continuous evidence for that approved input."
+        },
+        {
+          "path": "run-paper-autopilot.sh",
+          "symbol": "defaults / run_child_controller",
+          "line_range": "L15-L30; L842-L872",
+          "sha256": "fa9afc727218b6e533c6f3ef1c2bbb3af9e2c5182538276f509f1986bdfac661",
+          "note": "The selected controller has no manifest argument, schema/fingerprint verification, or selected-input binding before launching the child."
+        },
+        {
+          "path": "run-paper-evaluation.sh",
+          "symbol": "run_runtime_evidence_mode",
+          "line_range": "L845-L919",
+          "sha256": "d7d821119d51c3dd5bbcf7a80f0e98488ebd38f7d771310265939a918505e667",
+          "note": "The runtime campaign ID is assigned from AUTOMATION_PARENT_RUN_ID, not from a verified external campaign manifest."
+        }
+      ],
+      "preconditions": [
+        "An operator invokes run-paper-autopilot.sh with otherwise valid environment/preflight conditions."
+      ],
+      "trigger": "Start the selected controller without supplying an accepted bws.external_runtime_campaign.v1 file, or with environment values that differ from a previously generated manifest.",
+      "expected_behavior": "Controller admission must require one exact accepted campaign manifest, verify schema/hash/semantic fingerprint/currentness, and bind release, source, lock, API input, database, storage, schedule, and evidence paths before any child starts.",
+      "current_behavior": "The controller never reads the manifest. It derives a run identity from its own artifacts directory and launches runtime evidence directly.",
+      "impact": "BWS-600 can start outside the operator-approved release/input/database/storage/schedule authority even though documentation and preflight claim the manifest is mandatory.",
+      "evidence": [
+        "Repository-wide executable search found the campaign schema only in the producer, final-local-acceptance, schema/tests/validators, not in run-paper-autopilot.sh or run-paper-evaluation.sh.",
+        "The bounded source probe confirmed no external-runtime-campaign reference exists in the selected parent controller."
+      ],
+      "reproduction_status": "STATIC_ADMISSION_TRACE_CONFIRMED",
+      "root_cause": "The BWS-593 handoff is produced but not made an executable prerequisite of BWS-600.",
+      "minimal_fix_boundary": "Add an explicit manifest argument/environment selector, verify exact content/hash and all bound authorities before lock/run-dir/child creation, and propagate its semantic fingerprint through every child/result/evidence receipt.",
+      "required_tests": [
+        "Missing manifest",
+        "tampered manifest",
+        "stale manifest",
+        "release/lock/input/database/schedule mismatch",
+        "manifest fingerprint propagation",
+        "no side effects before failure"
+      ],
+      "regression_risks": [
+        "Admission ordering must remain fail-closed before creating mutable campaign state."
+      ],
+      "primary_owner": "R07",
+      "secondary_sectors": [
+        "R01",
+        "R03",
+        "R06",
+        "R09",
+        "R10",
+        "R11",
+        "R12"
+      ],
+      "existing_aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "Preflight producer validation",
+        "BWS-600 closed execution policy",
+        "current external blockers"
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "bws_600": true,
+        "bws_710": false,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS120-R07-016",
+      "title": "Paper-autopilot completion trusts a child status label and exit code without an evidence receipt",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "run-paper-autopilot.sh",
+      "current_symbol": "run_child_controller / completion case / write_final_summary",
+      "exact_line_range": "L906-L975; L1196-L1205",
+      "full_file_sha256": "fa9afc727218b6e533c6f3ef1c2bbb3af9e2c5182538276f509f1986bdfac661",
+      "source_locations": [
+        {
+          "path": ".automation/lib/controller_hardening_v2.sh",
+          "symbol": "automation_v2_publish_child_result",
+          "line_range": "L439-L612",
+          "sha256": "d67e2780d7968e5f25b0c7735486b140aa186708bbddda1b3d90cbb5f21f19a1",
+          "note": "The authenticated child result carries process/lock identity, status, reason, exit, cycles, and run directory but no runtime-evidence path, hash, campaign fingerprint, source/data generation, or acceptance receipt."
+        },
+        {
+          "path": "run-paper-evaluation.sh",
+          "symbol": "run_runtime_evidence_mode",
+          "line_range": "L845-L933",
+          "sha256": "d7d821119d51c3dd5bbcf7a80f0e98488ebd38f7d771310265939a918505e667",
+          "note": "The child parses evidence labels into shell variables; artifact paths remain only in its human-readable final summary."
+        },
+        {
+          "path": "run-paper-autopilot.sh",
+          "symbol": "run_child_controller",
+          "line_range": "L906-L933",
+          "sha256": "fa9afc727218b6e533c6f3ef1c2bbb3af9e2c5182538276f509f1986bdfac661",
+          "note": "The parent validates the side-channel identity and copies only label fields."
+        },
+        {
+          "path": "run-paper-autopilot.sh",
+          "symbol": "completion case / write_final_summary",
+          "line_range": "L942-L975; L1196-L1205",
+          "sha256": "fa9afc727218b6e533c6f3ef1c2bbb3af9e2c5182538276f509f1986bdfac661",
+          "note": "The parent marks ready from status+rc and writes an unhashed key/value summary without the exact evidence receipt."
+        }
+      ],
+      "preconditions": [
+        "The child publishes a syntactically valid terminal side channel with the ready label and exits zero."
+      ],
+      "trigger": "Delete, mutate, replace, or disconnect the runtime evidence artifact before the parent consumes the child result; alternatively publish a valid label without an evidence digest.",
+      "expected_behavior": "Parent completion must verify a typed child receipt binding exact campaign manifest, source/data/process generation, evidence result path+hash, observation continuity result, and terminal status before promotion.",
+      "current_behavior": "The parent checks status and exit code only. Its summary records labels and a run directory but no exact evidence artifact identity.",
+      "impact": "A validly owned child process can produce false parent completion when the underlying evidence is missing, stale, tampered, or unrelated.",
+      "evidence": [
+        "The side-channel schema contains no evidence fields.",
+        "The parent case at L1196-L1205 has no artifact read/hash verification.",
+        "The parent summary is plain text and not content-addressed."
+      ],
+      "reproduction_status": "STATIC_PARENT_CHILD_PROTOCOL_TRACE_CONFIRMED",
+      "root_cause": "Process ownership authentication is mistaken for semantic evidence authentication.",
+      "minimal_fix_boundary": "Version the child result protocol to include an immutable evidence receipt and campaign fingerprint; verify it atomically before parent state advancement and include it in a signed/hashed parent completion artifact.",
+      "required_tests": [
+        "Evidence deleted after child exit",
+        "evidence tampered after child exit",
+        "wrong campaign fingerprint",
+        "wrong source/runtime generation",
+        "status/exit mismatch",
+        "parent restart before promotion"
+      ],
+      "regression_risks": [
+        "Protocol changes affect other autonomous parents; preserve controller-specific validation and reject legacy ready results for BWS-600."
+      ],
+      "primary_owner": "R07",
+      "secondary_sectors": [
+        "R06",
+        "R11",
+        "R12"
+      ],
+      "existing_aliases_or_dependencies": [
+        "BWS118-R06-015"
+      ],
+      "explicitly_unchanged_areas": [
+        "Existing PID/boot/start-tick ownership checks",
+        "lock release fields",
+        "source-before/after mutation check"
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "bws_600": true,
+        "bws_710": false,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS120-R07-017",
+      "title": "Final-local runtime acceptance validates labels and file existence rather than cryptographic evidence relationships",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "packages/bootstrap/src/operations/final-local-acceptance.ts",
+      "current_symbol": "createBwsFinalLocalAcceptanceRuntimeResult",
+      "exact_line_range": "L411-L531",
+      "full_file_sha256": "1f7b5675b2d307cf8ecc7ab791eba825036ba850fe28ccacae1f8a78deb6a3c5",
+      "source_locations": [
+        {
+          "path": "packages/bootstrap/src/operations/final-local-acceptance.ts",
+          "symbol": "createBwsFinalLocalAcceptanceRuntimeResult",
+          "line_range": "L411-L531",
+          "sha256": "1f7b5675b2d307cf8ecc7ab791eba825036ba850fe28ccacae1f8a78deb6a3c5",
+          "note": "Acceptance checks final labels, last-sample status strings, path existence, a two-field parent summary, and a Telegram substring; it does not validate referenced artifact schemas/hashes/generation relationships."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/final-local-acceptance.ts",
+          "symbol": "readRuntimeEvidenceFile / resolveEvidencePath",
+          "line_range": "L942-L980",
+          "sha256": "1f7b5675b2d307cf8ecc7ab791eba825036ba850fe28ccacae1f8a78deb6a3c5",
+          "note": "Runtime evidence is gated by top-level schema/status/mode and referenced evidence paths are only asserted to be regular files."
+        },
+        {
+          "path": "tests/bws-final-local-acceptance.test.ts",
+          "symbol": "runtime evidence acceptance test",
+          "line_range": "L144-L182",
+          "sha256": "c2ca8b6bfb9fb49cc387c781844440de074932533cd97acddaa60679281c6b2d",
+          "note": "The production acceptance function is expected to accept lifecycle, diagnostics, and handoff files containing only {ok:true}."
+        }
+      ],
+      "preconditions": [
+        "A caller can construct a ready-shaped runtime-evidence JSON plus existing placeholder files and summary/capture text."
+      ],
+      "trigger": "Use arbitrary regular files for lifecycle/diagnostics/handoff, set expected labels in the runtime evidence and parent summary, and include PAPER_AUTOPILOT_ in the capture.",
+      "expected_behavior": "Final acceptance must verify every referenced artifact schema/hash, source/runtime/campaign identity, chronological relationship, immutable index receipt, parent-child completion receipt, and external campaign fingerprint.",
+      "current_behavior": "The exact placeholder construction is accepted by the focused test. The final semantic fingerprint hashes the parsed runtime document and absolute path strings, not the bytes/relationships of referenced files.",
+      "impact": "A fabricated or tampered evidence set can become a final local acceptance result despite lacking genuine lifecycle, diagnostics, handoff, or campaign proof.",
+      "evidence": [
+        "The source checks only regular-file existence for referenced evidence.",
+        "The test’s three referenced files are each {ok:true} and acceptance succeeds.",
+        "The Telegram check is a substring test."
+      ],
+      "reproduction_status": "STATIC_SOURCE_CONFIRMED; PRODUCTION_TEST_EXPLICITLY_REPRODUCES_FALSE_ACCEPTANCE_BOUNDARY",
+      "root_cause": "Final acceptance is a shape/label aggregator rather than a verifier of the evidence graph it claims to bind.",
+      "minimal_fix_boundary": "Require typed schema validation and SHA-256 for every reference, verify one coherent generation/campaign DAG, consume the canonical index receipt, validate parent/child terminal receipt, and hash all referenced bytes into the final manifest.",
+      "required_tests": [
+        "Placeholder artifact rejection",
+        "tampered artifact",
+        "wrong schema/hash",
+        "cross-generation mix",
+        "stale parent summary",
+        "forged Telegram substring",
+        "external campaign mismatch",
+        "accepted happy path"
+      ],
+      "regression_risks": [
+        "Tightening verification will invalidate historical synthetic fixtures; retain them as test-only non-acceptance inputs."
+      ],
+      "primary_owner": "R07",
+      "secondary_sectors": [
+        "R03",
+        "R04",
+        "R06",
+        "R09",
+        "R11",
+        "R12"
+      ],
+      "existing_aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "BWS-900 remains parked",
+        "closed policy fields",
+        "recovery/backup mechanics outside this runtime acceptance function"
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "bws_600": true,
+        "bws_710": false,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS120-R07-018",
+      "title": "B1 runtime acceptance trusts a caller-selected “accepted upstream” enum and arbitrary repeated hashes",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "packages/bootstrap/src/operations/b1-runtime-evidence.ts",
+      "current_symbol": "evaluateB1RuntimeEvidenceAcceptance / validateEvidence",
+      "exact_line_range": "L5-L17; L231-L365; L469-L480",
+      "full_file_sha256": "80ea2ca2a8b071dc1fdafc614594fac3d642b0416bcf6beec4c515cd707adbe8",
+      "source_locations": [
+        {
+          "path": "packages/bootstrap/src/operations/b1-runtime-evidence.ts",
+          "symbol": "B1RuntimeAcceptanceEvidence",
+          "line_range": "L5-L17",
+          "sha256": "80ea2ca2a8b071dc1fdafc614594fac3d642b0416bcf6beec4c515cd707adbe8",
+          "note": "The upstream authority is represented only by an inputSource string plus coverage values and rerun hash strings."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/b1-runtime-evidence.ts",
+          "symbol": "evaluateB1RuntimeEvidenceAcceptance",
+          "line_range": "L231-L255",
+          "sha256": "80ea2ca2a8b071dc1fdafc614594fac3d642b0416bcf6beec4c515cd707adbe8",
+          "note": "Any non-fixture value equal to accepted_betting_win_b1_multi_venue_markets_v1 is delegated to offline threshold acceptance."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/b1-runtime-evidence.ts",
+          "symbol": "validateEvidence / dataCoverageBlockers",
+          "line_range": "L309-L365; L469-L480",
+          "sha256": "80ea2ca2a8b071dc1fdafc614594fac3d642b0416bcf6beec4c515cd707adbe8",
+          "note": "Validation checks enum/shape/SHA syntax and equality of rerun hash strings, not upstream receipts or report bytes."
+        },
+        {
+          "path": "tests/b1-runtime-evidence.test.ts",
+          "symbol": "sampleEvidence",
+          "line_range": "L262-L272",
+          "sha256": "aebe980faa9efd95c354aace00456a9f93b5952b0e2e29936189dd9d9a68b435",
+          "note": "Focused tests default to the accepted upstream enum and three identical arbitrary hashes without constructing an upstream resource receipt."
+        }
+      ],
+      "preconditions": [
+        "A caller supplies a locally constructed report/evidence object meeting numerical thresholds."
+      ],
+      "trigger": "Set inputSource to accepted_betting_win_b1_multi_venue_markets_v1 and supply identical 64-hex values as rerunRunHashes.",
+      "expected_behavior": "BWS-710 acceptance must require an immutable accepted upstream resource receipt bound to exact API route/contract/commit/generation/page/data window, exact report artifacts, and deterministic rerun bytes.",
+      "current_behavior": "The caller assertion is sufficient to bypass the fixture blocker and can return status=accepted with terminalCode=B1_OFFLINE_ACCEPTANCE_THRESHOLDS_MET. The decision still correctly keeps runtimeEvidence/executable false, but the acceptance label itself is unproven.",
+      "impact": "B1 schema declaration or local fixture data can be misrepresented as accepted runtime resource evidence, obscuring the current BWS-710 external block.",
+      "evidence": [
+        "The accepted input source has no receipt fields.",
+        "run hashes are not re-derived from report files.",
+        "The focused fixture encodes the unsupported authority as a normal default."
+      ],
+      "reproduction_status": "STATIC_CONTRACT_AND_TEST_TRACE_CONFIRMED",
+      "root_cause": "External authority is modeled as a caller-controlled enum instead of a verified resource receipt.",
+      "minimal_fix_boundary": "Replace the enum-only branch with a validated B1 upstream acceptance receipt and exact artifact/hash joins; keep deterministic fixtures permanently blocked from runtime acceptance.",
+      "required_tests": [
+        "Forged accepted enum",
+        "arbitrary equal hashes",
+        "hash not matching report bytes",
+        "wrong contract/generation/page",
+        "stale data window",
+        "valid accepted receipt",
+        "fixture remains blocked"
+      ],
+      "regression_risks": [
+        "Preserve offline falsification as a distinct non-runtime research result and keep execution/public signals disabled."
+      ],
+      "primary_owner": "R07",
+      "secondary_sectors": [
+        "R01",
+        "R02",
+        "R04",
+        "R11"
+      ],
+      "existing_aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "Offline classifier mathematics",
+        "runtimeEvidence=false",
+        "executable=false",
+        "BWS-900 parked policy"
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": true,
+        "bws_600": false,
+        "bws_710": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS120-R07-019",
+      "title": "Progress and log helpers select the lexically greatest controller prefix instead of the newest run",
+      "severity": "P2",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path": "check_progress.sh",
+      "current_symbol": "latest_run selection",
+      "exact_line_range": "L27-L35",
+      "full_file_sha256": "26bb85d1ff30c852af5370c158ff00c62b6e87a54a11f870983273b7a0cb6cdb",
+      "source_locations": [
+        {
+          "path": "check_progress.sh",
+          "symbol": "latest_run selection",
+          "line_range": "L27-L35",
+          "sha256": "26bb85d1ff30c852af5370c158ff00c62b6e87a54a11f870983273b7a0cb6cdb",
+          "note": "All controller families are combined, then plain sort|tail selects by full path prefix before timestamp."
+        },
+        {
+          "path": "open_log.sh",
+          "symbol": "default RUN_DIR selection",
+          "line_range": "L42-L45",
+          "sha256": "3a9886b0439c468483142d77e22bcab874c14fb2dd50c5293d014727f0c7a7b1",
+          "note": "The same cross-family lexical selection is used for logs."
+        },
+        {
+          "path": "watch_progress.sh",
+          "symbol": "check_progress delegation",
+          "line_range": "L1-L40",
+          "sha256": "dddaf227440e6b848f7a33d2b92aebc06ad729b35f8f87cb95a51750676144e8",
+          "note": "The watcher inherits check_progress selection behavior."
+        }
+      ],
+      "preconditions": [
+        "Artifacts contains runs from more than one controller family."
+      ],
+      "trigger": "Create bugfix_autopilot_20990101T000000Z and paper_autopilot_20200101T000000Z directories, then invoke the helper without --run-dir.",
+      "expected_behavior": "The default must select the greatest parsed UTC run timestamp, with deterministic tie handling and explicit controller filtering when needed.",
+      "current_behavior": "Plain lexical ordering selects paper_autopilot_2020 because the p prefix sorts after b, even though bugfix_autopilot_2099 is newer.",
+      "impact": "Operators can inspect stale progress/logs, misdiagnose current campaign state, or act on the wrong controller output.",
+      "evidence": [
+        "The bounded offline filename probe reproduced the wrong selection.",
+        "Both helper scripts contain the same expression."
+      ],
+      "reproduction_status": "REPRODUCED_OFFLINE_FILENAME_PROBE; STATIC_SOURCE_CONFIRMED",
+      "root_cause": "Run family and timestamp are encoded in one string and sorted as an undifferentiated path.",
+      "minimal_fix_boundary": "Parse controller family and timestamp explicitly, compare timestamp values, validate directory schema, and expose the selected family/time in output. Keep explicit --run-dir authoritative.",
+      "required_tests": [
+        "Cross-family timestamps",
+        "same timestamp tie",
+        "malformed directory ignored",
+        "explicit --run-dir",
+        "no artifacts"
+      ],
+      "regression_risks": [
+        "Changing default selection can surprise operators relying on prefix priority; document and test timestamp authority."
+      ],
+      "primary_owner": "R07",
+      "secondary_sectors": [
+        "R10",
+        "R11",
+        "R12"
+      ],
+      "existing_aliases_or_dependencies": [],
+      "explicitly_unchanged_areas": [
+        "Per-run summary parsing",
+        "explicit runtime-log mode",
+        "cycle/round selection inside an already selected run"
+      ],
+      "blocks": {
+        "review_progression": false,
+        "release": false,
+        "bws_600": false,
+        "bws_710": false,
+        "deployment": true
+      }
+    }
+  ],
+  "hypotheses": [
+    {
+      "id": "BWS120-R07-H01",
+      "classification": "HYPOTHESIS",
+      "title": "Filesystem rename durability across sudden power loss is not established",
+      "status": "UNPROVEN",
+      "required_proof": "Filesystem-specific fsync/crash testing of staged files and parent directories."
+    },
+    {
+      "id": "BWS120-R07-H02",
+      "classification": "HYPOTHESIS",
+      "title": "Concurrent structured-log rotation can lose or reorder segments",
+      "status": "LIKELY_NOT_SEPARATELY_CONFIRMED",
+      "required_proof": "Multi-process barrier test; keep separate from confirmed evidence-index publication race."
+    }
+  ],
+  "external_upstream_blockers": [
+    {
+      "id": "BWS120-R07-EXT-001",
+      "classification": "EXTERNAL_UPSTREAM_BLOCKER",
+      "title": "Accepted betting-win API handoff and provider-to-PostgreSQL-to-API parity are absent",
+      "impact": "BWS-600 remains externally blocked; no provider/service request was authorized or performed."
+    },
+    {
+      "id": "BWS120-R07-EXT-002",
+      "classification": "EXTERNAL_UPSTREAM_BLOCKER",
+      "title": "Accepted betting-win.b1_multi_venue_markets.v1 runtime resource is absent",
+      "impact": "BWS-710 remains blocked independently of the local enum-trust defect."
+    }
+  ],
+  "environment_blockers": [
+    {
+      "id": "BWS120-R07-ENV-001",
+      "classification": "ENVIRONMENT_BLOCKER",
+      "title": "Canonical Node 20.20.2 is unavailable",
+      "impact": "Node 22.16.0 observations and static validators are supplementary only."
+    },
+    {
+      "id": "BWS120-R07-ENV-002",
+      "classification": "ENVIRONMENT_BLOCKER",
+      "title": "Repository dependencies are not installed",
+      "impact": "TypeScript no-emit check stopped at missing @types/node; no dependency installation was authorized."
+    }
+  ],
+  "intentional_safeguards": [
+    {
+      "id": "BWS120-R07-S01",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "Runtime evidence enforces API mode and a closed provider/execution policy before observation."
+    },
+    {
+      "id": "BWS120-R07-S02",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "Runtime-evidence and handoff artifact paths under artifacts reject traversal and existing symlink segments."
+    },
+    {
+      "id": "BWS120-R07-S03",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "Source handoff archives are checked for exact path, size, and SHA-256."
+    },
+    {
+      "id": "BWS120-R07-S04",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "Parent/child result transport verifies process boot/start identity, canonical result location, exit code, lock release, and source mutation."
+    },
+    {
+      "id": "BWS120-R07-S05",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "B1 decisions keep runtimeEvidence=false, executable=false, public signals forbidden, and BWS-900 parked."
+    },
+    {
+      "id": "BWS120-R07-S06",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "External-runtime preflight validates release, upstream lock, migration, backup/restore, soak, storage, and closed policy before producing its manifest."
+    }
+  ],
+  "rejected_suspicions": [
+    {
+      "id": "BWS120-R07-RS01",
+      "classification": "REJECTED_SUSPICION",
+      "title": "Historical BWS-580 constants in the runtime handoff are not treated as current routing authority",
+      "reason": "The handoff explicitly identifies nextGate=BWS-600; current task authority remains in mutable status docs. No independent R07 defect was assigned."
+    },
+    {
+      "id": "BWS120-R07-RS02",
+      "classification": "REJECTED_SUSPICION",
+      "title": "Millisecond handoff/evidence filename collision",
+      "reason": "Already owned by BWS118-R06-016; R07 records only the multi-file publication defect."
+    },
+    {
+      "id": "BWS120-R07-RS03",
+      "classification": "REJECTED_SUSPICION",
+      "title": "Unexpected pass failure without terminal service evidence",
+      "reason": "Already owned by BWS118-R06-015."
+    },
+    {
+      "id": "BWS120-R07-RS04",
+      "classification": "REJECTED_SUSPICION",
+      "title": "Local runtime evidence enables live betting",
+      "reason": "Execution, provider connections, public signals, and BWS-900 remain explicitly disabled/parked."
+    },
+    {
+      "id": "BWS120-R07-RS05",
+      "classification": "REJECTED_SUSPICION",
+      "title": "BWS120 changed executable behavior relative to BWS118",
+      "reason": "Byte comparison found 38 documentation additions, two documentation edits, and zero non-documentation differences."
+    }
+  ],
+  "cross_area_handoffs": [
+    {
+      "id": "BWS120-R07-X01",
+      "classification": "CROSS_AREA_HANDOFF",
+      "target": "R01",
+      "subject": "Exact upstream response bytes, route/query/contract/page receipt and source/receive/currentness semantics remain R01-owned. R07 must consume their receipts."
+    },
+    {
+      "id": "BWS120-R07-X02",
+      "classification": "CROSS_AREA_HANDOFF",
+      "target": "R03",
+      "subject": "Durable publication lock/CAS and crash recovery mechanics for the evidence index require R03 transaction expertise; R07 owns evidence semantics."
+    },
+    {
+      "id": "BWS120-R07-X03",
+      "classification": "CROSS_AREA_HANDOFF",
+      "target": "R04",
+      "subject": "Economic/report lifecycle truth remains R04-owned; R07 must bind the exact accepted report artifact rather than reinterpret it."
+    },
+    {
+      "id": "BWS120-R07-X04",
+      "classification": "CROSS_AREA_HANDOFF",
+      "target": "R05",
+      "subject": "Cockpit/API stale and incoherent read-model state remains R05-owned; R07 must reject stale/unbound projections as acceptance inputs."
+    },
+    {
+      "id": "BWS120-R07-X05",
+      "classification": "CROSS_AREA_HANDOFF",
+      "target": "R06",
+      "subject": "Process generation, stale health/readiness, shutdown, filename collision, and unexpected-pass terminal evidence remain R06-owned."
+    },
+    {
+      "id": "BWS120-R07-X06",
+      "classification": "CROSS_AREA_HANDOFF",
+      "target": "R08",
+      "subject": "Generic retention planning/apply, backup/restore references, and deletion recovery belong to R08; R07 defines accepted evidence references."
+    },
+    {
+      "id": "BWS120-R07-X07",
+      "classification": "CROSS_AREA_HANDOFF",
+      "target": "R10",
+      "subject": "Repository-wide environment/path/secret/wrapper policy must close log path and redaction defects consistently."
+    },
+    {
+      "id": "BWS120-R07-X08",
+      "classification": "CROSS_AREA_HANDOFF",
+      "target": "R11",
+      "subject": "Focused tests and static validators pass while the confirmed false-evidence paths remain; R11 owns aggregate false-green assurance."
+    },
+    {
+      "id": "BWS120-R07-X09",
+      "classification": "CROSS_AREA_HANDOFF",
+      "target": "R12",
+      "subject": "Controller result schema, campaign locks, artifact lifecycle, cleanup, and parent finalization must consume R07 evidence receipts."
+    }
+  ],
+  "test_gaps": [
+    {
+      "id": "BWS120-R07-TG-01",
+      "classification": "TEST_GAP",
+      "title": "No absolute/traversal/symlink observability log-path confinement test."
+    },
+    {
+      "id": "BWS120-R07-TG-02",
+      "classification": "TEST_GAP",
+      "title": "No Authorization/Cookie/apiKey/nested-header/value-shaped secret redaction test."
+    },
+    {
+      "id": "BWS120-R07-TG-03",
+      "classification": "TEST_GAP",
+      "title": "No multi-process evidence-index duplicate/latest publication race test."
+    },
+    {
+      "id": "BWS120-R07-TG-04",
+      "classification": "TEST_GAP",
+      "title": "No post-registration artifact mutation/deletion revalidation test."
+    },
+    {
+      "id": "BWS120-R07-TG-05",
+      "classification": "TEST_GAP",
+      "title": "No out-of-order/backdated/future evidence-currentness test."
+    },
+    {
+      "id": "BWS120-R07-TG-06",
+      "classification": "TEST_GAP",
+      "title": "No real HTTP non-2xx/redirect/content-type/schema diagnostics probe test."
+    },
+    {
+      "id": "BWS120-R07-TG-07",
+      "classification": "TEST_GAP",
+      "title": "No assertion that synthesized metrics are labeled and cannot satisfy readiness."
+    },
+    {
+      "id": "BWS120-R07-TG-08",
+      "classification": "TEST_GAP",
+      "title": "No reference-aware retention plan/apply/interruption test."
+    },
+    {
+      "id": "BWS120-R07-TG-09",
+      "classification": "TEST_GAP",
+      "title": "No full-duration continuity test; current success test accepts one sample."
+    },
+    {
+      "id": "BWS120-R07-TG-10",
+      "classification": "TEST_GAP",
+      "title": "No mixed source/runtime/data/campaign generation runtime-evidence test."
+    },
+    {
+      "id": "BWS120-R07-TG-11",
+      "classification": "TEST_GAP",
+      "title": "No frozen/backward/forward clock deadline test."
+    },
+    {
+      "id": "BWS120-R07-TG-12",
+      "classification": "TEST_GAP",
+      "title": "No canonical evidence-index registration/recovery test for diagnostics, runtime evidence, and handoff outputs."
+    },
+    {
+      "id": "BWS120-R07-TG-13",
+      "classification": "TEST_GAP",
+      "title": "No mutation-between-status-and-source-archive handoff test."
+    },
+    {
+      "id": "BWS120-R07-TG-14",
+      "classification": "TEST_GAP",
+      "title": "No crash between versioned handoff and latest pointer test."
+    },
+    {
+      "id": "BWS120-R07-TG-15",
+      "classification": "TEST_GAP",
+      "title": "No controller admission test requiring the exact accepted external campaign manifest."
+    },
+    {
+      "id": "BWS120-R07-TG-16",
+      "classification": "TEST_GAP",
+      "title": "No child-evidence deletion/tampering test before parent completion."
+    },
+    {
+      "id": "BWS120-R07-TG-17",
+      "classification": "TEST_GAP",
+      "title": "Final-local acceptance test positively accepts {ok:true} placeholder evidence files."
+    },
+    {
+      "id": "BWS120-R07-TG-18",
+      "classification": "TEST_GAP",
+      "title": "B1 tests default to a caller asserted accepted input source with arbitrary equal hashes."
+    },
+    {
+      "id": "BWS120-R07-TG-19",
+      "classification": "TEST_GAP",
+      "title": "No cross-controller timestamp selection test for progress/log helpers."
+    }
+  ]
+}

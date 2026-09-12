@@ -1,0 +1,17 @@
+{
+  "application_implementation_performed": false,
+  "confirmed_findings": 137,
+  "confirmed_ids_unique": true,
+  "current_mutable_authority_overwritten": false,
+  "duplicate_raw_ids": {
+    "KNOWN_BASELINE_MANIFEST_DRIFT": "intentional cross-wave handoff only"
+  },
+  "input_records_accounted_for": 424,
+  "input_reports_accounted_for": 9,
+  "intentional_duplicate_canonical_record": "KNOWN_BASELINE_MANIFEST_DRIFT",
+  "mapping_records": 424,
+  "new_wave_reports_accounted_for": 3,
+  "schema": "betting-win-surebet-wave03-completeness-reconciliation-v1",
+  "silent_renumbering": false,
+  "unmapped_records": 0
+}

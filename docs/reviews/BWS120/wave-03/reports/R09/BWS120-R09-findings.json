@@ -1,0 +1,2048 @@
+{
+  "schema": "bws120-r09-findings-v1",
+  "review_id": "BWS120-R09",
+  "repository": "betting-win-surebet",
+  "source_authority": {
+    "archive_requested_name": "betting-win-surebet120(3).zip",
+    "archive_reviewed_path": "/mnt/data/betting-win-surebet120(3).zip",
+    "actual_sha256": "d4565c05ecfe63f5d5511f224a20ff20fb82bfc75b23203c94d7d3e98a8c21bb",
+    "expected_sha256": null,
+    "expected_identity_note": "No frozen BWS120 hash was supplied. Actual bytes were independently hashed and exact non-documentation byte compatibility with BWS118 was verified.",
+    "regular_file_count": 695,
+    "member_count": 695,
+    "package_name": "betting-win-surebet",
+    "package_version": "0.1.0-bws-full-platform",
+    "canonical_runtime": "Node 20.20.2",
+    "handoff_path": "/mnt/data/betting-win-surebet-wave02-next-review-handoff-r01-r06-rebased-50bbcb0b-20260912(3).md",
+    "handoff_sha256": "de53490aeba125d467b7e7561de87a3342f3a9ddf197785a0ddfd82b0c485d1c",
+    "source_review_lineage": {
+      "BWS118_sha256": "50bbcb0b476904c8209cf7e1287b5ac4f9091fa07f6fd67523fc5430029417f7",
+      "BWS118_to_BWS120_added_review_documents": 38,
+      "BWS118_to_BWS120_changed_documents": 2,
+      "non_documentation_differences": 0,
+      "executable_compatible": true
+    }
+  },
+  "summary": {
+    "confirmed_findings": 21,
+    "severity_counts": {
+      "P1": 21
+    },
+    "classification_counts": {
+      "CONFIRMED_FINDING": 21,
+      "CROSS_AREA_HANDOFF": 9,
+      "ENVIRONMENT_BLOCKER": 4,
+      "HYPOTHESIS": 3,
+      "INTENTIONAL_SAFEGUARD": 8,
+      "REJECTED_SUSPICION": 4,
+      "TEST_GAP": 16
+    },
+    "blocking_counts": {
+      "release": 21,
+      "BWS-600": 21,
+      "B1": 21,
+      "deployment": 21
+    },
+    "inherited_confirmed_findings_checked_for_overlap": 85,
+    "duplicated_inherited_root_causes": 0,
+    "overall_verdict": "BLOCKED_SOURCE_CORRECTNESS_REMEDIATION_REQUIRED"
+  },
+  "records": [
+    {
+      "id": "BWS120-R09-001",
+      "title": "Install verification records incompatible runtimes and an unperformed server check as a passed preflight",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "packages/bootstrap/src/operations/release-packaging.ts::verifyBwsReleaseInstallation / runBwsReleasePreflight",
+      "exact_line_range": "606-760",
+      "full_file_sha256": "d3b51b0cf2dcd00cb70f2ebc383ed34669484cd39a4c3baeee804d5f845bcdce",
+      "relevant_release_upgrade_or_soak_object": "Release install verification and BWS-600 preflight authority",
+      "source_evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/release-packaging.ts",
+          "symbol": "verifyBwsReleaseInstallation / runBwsReleasePreflight",
+          "line_range": "606-760",
+          "full_file_sha256": "d3b51b0cf2dcd00cb70f2ebc383ed34669484cd39a4c3baeee804d5f845bcdce",
+          "note": "The preflight returns node.compatible and postgresql.clientCompatible booleans, records the server check as not performed, and does not fail. The caller unconditionally adds non_mutating_preflight_passed."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/external-runtime-preflight.ts",
+          "symbol": "createBwsExternalRuntimeCampaignManifest",
+          "line_range": "260-277",
+          "full_file_sha256": "724a419567dc2c6f737166660092d5c0d8e09be24a4b22bc9377c324949ec427",
+          "note": "External promotion requires only the string marker non_mutating_preflight_passed and does not inspect the runtime-compatibility booleans or require a PostgreSQL server check."
+        },
+        {
+          "path": "tests/bws-release-packaging.test.ts",
+          "symbol": "extracted release verifies itself through the bundled CLI",
+          "line_range": "132-203",
+          "full_file_sha256": "3462fc7e28e82057b26cf805ee7b868e1863ca2cf6b24a1e45593c4ebc8abae2",
+          "note": "The positive test uses the ambient Node runtime and a fake psql client; it does not exercise incompatible Node/client versions or a missing server-compatibility receipt."
+        }
+      ],
+      "preconditions": "The release directory is otherwise well formed, but Node is not major 20, psql is below the minimum client major, or PostgreSQL server compatibility has not been checked.",
+      "trigger": "Run verify-install and then use the generated result as upgrade or external-runtime evidence.",
+      "expected_behavior": "Install verification must fail closed and must not emit a passed-preflight marker until every required runtime and server compatibility condition is positively established.",
+      "current_behavior": "The result can contain node.compatible=false, postgresql.clientCompatible=false, and serverCompatibilityCheck=not_performed_in_check_only_mode while verifiedChecks still contains non_mutating_preflight_passed.",
+      "impact": "An incompatible installation can be promoted into upgrade, final-local-acceptance, or BWS-600 evidence, causing runtime failures or unsupported database behavior after release acceptance.",
+      "evidence": "The exact production branches were modeled with Node 22 and psql 12 against required majors 20 and 14; the branch returns a verification object instead of throwing and includes the passed marker.",
+      "reproduction_status": {
+        "status": "REPRODUCED_BY_EXACT_BRANCH_MODEL",
+        "runtime": "Python source model; Node v22.16.0 supplementary tests",
+        "harness": "/mnt/data/bws120-r09-work/adversarial_models.py",
+        "result": "Incompatible booleans coexist with non_mutating_preflight_passed and no exception."
+      },
+      "transaction_or_state_machine_analysis": "CHECKED -> INCOMPATIBLE is incorrectly represented as CHECKED -> PASSED. The server state remains UNKNOWN but is promoted as successful evidence.",
+      "root_cause": "Compatibility fields are descriptive rather than gate-authoritative, and downstream promotion trusts a marker rather than recomputing or checking the fields.",
+      "minimal_fix_boundary": "Make preflight return one explicit fail-closed verdict, reject incompatible Node and psql versions, require a bounded server-compatibility receipt before promotion, and make all consumers verify that verdict rather than a marker string.",
+      "required_tests": [
+        "Node 19/21/22 negative verification",
+        "psql below minimum negative verification",
+        "missing PostgreSQL server receipt negative verification",
+        "external preflight rejects any false or unknown compatibility field",
+        "canonical Node 20.20.2 install verification"
+      ],
+      "regression_risks": [
+        "A check-only diagnostic mode may still be useful, but it must be a distinct non-promotable result schema/status.",
+        "Server checks must remain read-only and bounded."
+      ],
+      "primary_owner": "R09",
+      "secondary_sectors": [
+        "R03",
+        "R06",
+        "R10",
+        "R11"
+      ],
+      "aliases_or_dependencies": [
+        "BWS118-R06-007 and BWS118-R06-009 own process/readiness false-green behavior after start; this finding owns release/install compatibility promotion.",
+        "KNOWN_BASELINE_MANIFEST_DRIFT remains R11-owned."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "No provider, external API, account, credential, signer, wallet, deployed service, or persistent database was contacted.",
+        "Execution, public signals, and live financial operations remain disabled and out of scope."
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS120-R09-002",
+      "title": "Install and upgrade verification permit release-directory evidence without the published archive",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "packages/bootstrap/src/operations/release-packaging.ts::verifyArchiveIfPresent / verifyBwsReleaseInstallation",
+      "exact_line_range": "606-671; 796-807",
+      "full_file_sha256": "d3b51b0cf2dcd00cb70f2ebc383ed34669484cd39a4c3baeee804d5f845bcdce",
+      "relevant_release_upgrade_or_soak_object": "Published archive identity and target-install evidence",
+      "source_evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/release-packaging.ts",
+          "symbol": "verifyBwsReleaseInstallation / verifyArchiveIfPresent",
+          "line_range": "606-671; 796-807",
+          "full_file_sha256": "d3b51b0cf2dcd00cb70f2ebc383ed34669484cd39a4c3baeee804d5f845bcdce",
+          "note": "Omitting archivePath returns archiveCheck.verified=false without rejection, and the install result is still published."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/release-upgrade.ts",
+          "symbol": "verifyTargetInstallEvidence",
+          "line_range": "1341-1368",
+          "full_file_sha256": "5c5aadcab32d9a937ea6100434f7b3644df5c31954e096af19a80c1958bfeef7",
+          "note": "Upgrade planning accepts the install-verification schema, semantic fingerprint, and closed policy without requiring archiveCheck.verified or the archive verification marker."
+        },
+        {
+          "path": "tests/bws-release-upgrade.test.ts",
+          "symbol": "target install verification fixture",
+          "line_range": "413-427",
+          "full_file_sha256": "87838040f891b46b10e329808c71e0f8c120ef3d3dfd29afa7283c6c371a7227",
+          "note": "The upgrade test deliberately creates target install evidence without supplying archivePath and treats it as valid target evidence."
+        }
+      ],
+      "preconditions": "A release directory and install-verification file exist, but the published tarball and .sha256 file are absent or were never verified.",
+      "trigger": "Call verify-install without --archive, then create or apply an upgrade plan using that result.",
+      "expected_behavior": "Any evidence that authorizes install, upgrade, rollback, soak, or promotion must bind to and verify the exact published archive bytes.",
+      "current_behavior": "Directory-only verification succeeds, and upgrade target verification ignores archiveCheck.verified and the archive verification marker.",
+      "impact": "Operators can install or promote bytes that were never the published release artifact, defeating source/build/archive identity and reproducible rollback.",
+      "evidence": "The source and the focused upgrade fixture establish the no-archive path without requiring external execution.",
+      "reproduction_status": {
+        "status": "CONFIRMED_BY_SOURCE_AND_FOCUSED_TEST_FIXTURE",
+        "runtime": "Node v22.16.0 supplementary",
+        "harness": "/mnt/data/bws120-r09-work/focused-r09-tests.out",
+        "result": "The upgrade fixture constructs accepted target verification with no archivePath."
+      },
+      "transaction_or_state_machine_analysis": "DIRECTORY_VERIFIED -> PROMOTABLE is reachable while ARCHIVE_VERIFIED remains false. Archive identity is optional rather than a required predecessor state.",
+      "root_cause": "Archive verification is implemented as an optional enhancement instead of the release authority for every install and upgrade transition.",
+      "minimal_fix_boundary": "Require archivePath and its adjacent checksum for promotable install verification, bind the archive digest into the install result, and require exact archive verification in upgrade, external-preflight, and final-acceptance consumers.",
+      "required_tests": [
+        "verify-install rejects missing archive for promotable mode",
+        "upgrade plan rejects archiveCheck.verified=false",
+        "archive file replaced after directory extraction",
+        "same directory from a different archive",
+        "rollback uses retained exact prior archive"
+      ],
+      "regression_risks": [
+        "Preserve a clearly named directory-audit mode only if it cannot feed promotion.",
+        "Existing historical verification files must be classified non-promotable."
+      ],
+      "primary_owner": "R09",
+      "secondary_sectors": [
+        "R07",
+        "R11",
+        "R24"
+      ],
+      "aliases_or_dependencies": [
+        "BWS118-R06-003 identifies active-process generation drift; this finding owns release archive identity before execution."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "No provider, external API, account, credential, signer, wallet, deployed service, or persistent database was contacted.",
+        "Execution, public signals, and live financial operations remain disabled and out of scope."
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS120-R09-003",
+      "title": "Unmanifested non-forbidden files can pass checksum and archive verification",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "packages/bootstrap/src/operations/release-packaging.ts::verifyManifestAgainstReleaseDirectory / verifyChecksumsFile / verifyArchiveIfPresent",
+      "exact_line_range": "817-858; 900-996; 1263-1302",
+      "full_file_sha256": "d3b51b0cf2dcd00cb70f2ebc383ed34669484cd39a4c3baeee804d5f845bcdce",
+      "relevant_release_upgrade_or_soak_object": "Release content closure and package inventory",
+      "source_evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/release-packaging.ts",
+          "symbol": "verifyArchiveIfPresent",
+          "line_range": "817-858",
+          "full_file_sha256": "d3b51b0cf2dcd00cb70f2ebc383ed34669484cd39a4c3baeee804d5f845bcdce",
+          "note": "The archive is compared to the extracted directory, but a member is checked against the manifest only when that path is present in the manifest inventory."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/release-packaging.ts",
+          "symbol": "verifyManifestAgainstReleaseDirectory",
+          "line_range": "900-949",
+          "full_file_sha256": "d3b51b0cf2dcd00cb70f2ebc383ed34669484cd39a4c3baeee804d5f845bcdce",
+          "note": "The verifier iterates expected inventories and selected policy files but does not reject every extracted path absent from the manifest inventory."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/release-packaging.ts",
+          "symbol": "verifyChecksumsFile",
+          "line_range": "964-996",
+          "full_file_sha256": "d3b51b0cf2dcd00cb70f2ebc383ed34669484cd39a4c3baeee804d5f845bcdce",
+          "note": "The checksum verifier validates listed rows but does not require checksum paths to equal the manifest path set or require every release file to be listed."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/release-packaging.ts",
+          "symbol": "buildReleaseManifestInventory",
+          "line_range": "1281-1302",
+          "full_file_sha256": "d3b51b0cf2dcd00cb70f2ebc383ed34669484cd39a4c3baeee804d5f845bcdce",
+          "note": "The canonical inventory map is built but never compared as an exact set to the extracted release paths."
+        }
+      ],
+      "preconditions": "An additional regular file is added under an allowed path, included in SHA256SUMS, and included in the archive.",
+      "trigger": "Verify the extracted release and archive.",
+      "expected_behavior": "Manifest inventory, checksum inventory, extracted regular-file inventory, and archive inventory must be exact set-equal with no undeclared member.",
+      "current_behavior": "All expected files can verify while an extra non-forbidden file remains accepted in the release and archive.",
+      "impact": "Undeclared code, configuration, data, or stale output can ship and execute despite a valid release semantic fingerprint.",
+      "evidence": "An exact path-set model using one expected file plus extra.js is accepted by each current loop.",
+      "reproduction_status": {
+        "status": "REPRODUCED_BY_EXACT_BRANCH_MODEL",
+        "runtime": "Python source model",
+        "harness": "/mnt/data/bws120-r09-work/adversarial_models.py",
+        "result": "Manifest loop, checksum loop, and archive loop all accept the undeclared extra path."
+      },
+      "transaction_or_state_machine_analysis": "MANIFEST_COMPLETE is inferred from per-entry verification; the missing set-equality transition allows MANIFEST_PLUS_UNDECLARED_CONTENT to reach VERIFIED.",
+      "root_cause": "The verifier proves inclusion of expected files but not exclusion of every undeclared file.",
+      "minimal_fix_boundary": "Construct one normalized expected path map and require exact equality across manifest, SHA256SUMS, extracted directory, and archive before any verification result is emitted.",
+      "required_tests": [
+        "extra JavaScript file included in checksums and archive",
+        "extra config file",
+        "extra executable mode file",
+        "missing checksum row for an otherwise manifest-declared file",
+        "duplicate/normalization-collision paths"
+      ],
+      "regression_risks": [
+        "Generated metadata such as release-manifest.json and SHA256SUMS must be explicitly included in the authoritative set definition.",
+        "Do not weaken existing forbidden-path and symlink checks."
+      ],
+      "primary_owner": "R09",
+      "secondary_sectors": [
+        "R11",
+        "R24"
+      ],
+      "aliases_or_dependencies": [
+        "No inherited finding owns exact release path-set closure."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "No provider, external API, account, credential, signer, wallet, deployed service, or persistent database was contacted.",
+        "Execution, public signals, and live financial operations remain disabled and out of scope."
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS120-R09-004",
+      "title": "Release publication is a non-transactional sequence that can expose mixed generations or delete the previous release",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "packages/bootstrap/src/operations/release-packaging.ts::createBwsReleasePackage / commitOutputTarget",
+      "exact_line_range": "534-588; 1305-1331",
+      "full_file_sha256": "d3b51b0cf2dcd00cb70f2ebc383ed34669484cd39a4c3baeee804d5f845bcdce",
+      "relevant_release_upgrade_or_soak_object": "Release directory, archive, checksum, result, and evidence publication transaction",
+      "source_evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/release-packaging.ts",
+          "symbol": "createBwsReleasePackage",
+          "line_range": "534-588",
+          "full_file_sha256": "d3b51b0cf2dcd00cb70f2ebc383ed34669484cd39a4c3baeee804d5f845bcdce",
+          "note": "Four independently staged targets are renamed one by one; evidence and the result are then rewritten in place twice."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/release-packaging.ts",
+          "symbol": "commitOutputTarget",
+          "line_range": "1305-1331",
+          "full_file_sha256": "d3b51b0cf2dcd00cb70f2ebc383ed34669484cd39a4c3baeee804d5f845bcdce",
+          "note": "With allowOverwrite, the existing target is recursively removed before each individual rename."
+        }
+      ],
+      "preconditions": "A prior release with the same releaseId exists or the process/filesystem fails after one publication step.",
+      "trigger": "Publish with allowOverwrite or inject failure between any two target commits or evidence rewrites.",
+      "expected_behavior": "One release generation must become visible atomically, and a failed publication must preserve the complete prior generation or leave only an explicitly incomplete staging area.",
+      "current_behavior": "Directory, archive, checksum, and result can belong to different generations. allowOverwrite deletes each previous target before its replacement is guaranteed, and later evidence/result rewrites are outside the staged commit.",
+      "impact": "Consumers can observe a mixed or partially missing release; a failed overwrite can destroy the previously valid rollback artifact.",
+      "evidence": "Static ordering proves externally visible intermediate states after each rename and destructive loss windows before each replacement.",
+      "reproduction_status": {
+        "status": "STATIC_TRANSACTION_ORDER_CONFIRMED",
+        "runtime": null,
+        "harness": null,
+        "result": "Failure after any commit leaves a partial generation; allowOverwrite removes prior targets before complete replacement."
+      },
+      "transaction_or_state_machine_analysis": "STAGED_ALL -> PUBLISHED_ALL is implemented as four independent PUBLISHED_PARTIAL transitions followed by mutable evidence rewrites, without one commit record or rollback.",
+      "root_cause": "A multi-artifact release is published as independent filesystem targets rather than one immutable generation transaction.",
+      "minimal_fix_boundary": "Publish into a new immutable generation directory, fsync and verify all members, then atomically update a single generation pointer/commit marker. Never delete the prior generation until the new generation is fully committed and retained.",
+      "required_tests": [
+        "failure after each rename",
+        "failure during each evidence registration/rewrite",
+        "allowOverwrite preserves prior complete release on failure",
+        "concurrent publishers for the same releaseId",
+        "reader observes only old or new complete generation"
+      ],
+      "regression_risks": [
+        "Evidence-index publication belongs to R07 and must participate through an explicit handoff rather than mutable post-commit rewrites.",
+        "Cross-filesystem rename assumptions must be defined."
+      ],
+      "primary_owner": "R09",
+      "secondary_sectors": [
+        "R07",
+        "R11",
+        "R24"
+      ],
+      "aliases_or_dependencies": [
+        "BWS118-R06-016 owns millisecond lifecycle evidence collisions; this is the release multi-artifact transaction root."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "No provider, external API, account, credential, signer, wallet, deployed service, or persistent database was contacted.",
+        "Execution, public signals, and live financial operations remain disabled and out of scope."
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS120-R09-005",
+      "title": "Upgrade plan fingerprints are trusted from the plan instead of recomputed from plan content",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "packages/bootstrap/src/operations/release-upgrade.ts::createBwsReleaseUpgradePlan / readUpgradePlan / assertPlanFingerprint",
+      "exact_line_range": "427-443; 1371-1385",
+      "full_file_sha256": "5c5aadcab32d9a937ea6100434f7b3644df5c31954e096af19a80c1958bfeef7",
+      "relevant_release_upgrade_or_soak_object": "Upgrade plan authority and operator apply token",
+      "source_evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/release-upgrade.ts",
+          "symbol": "createBwsReleaseUpgradePlan",
+          "line_range": "427-443",
+          "full_file_sha256": "5c5aadcab32d9a937ea6100434f7b3644df5c31954e096af19a80c1958bfeef7",
+          "note": "The plan fingerprint is computed from a subset of planning inputs during creation."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/release-upgrade.ts",
+          "symbol": "readUpgradePlan / assertPlanFingerprint",
+          "line_range": "1371-1385",
+          "full_file_sha256": "5c5aadcab32d9a937ea6100434f7b3644df5c31954e096af19a80c1958bfeef7",
+          "note": "Apply validates only the embedded fingerprint shape and compares it to the caller argument; it never recomputes the digest from the parsed plan."
+        }
+      ],
+      "preconditions": "A plan file is edited after creation while its embedded planFingerprint and the operator-supplied fingerprint remain unchanged.",
+      "trigger": "Apply the edited plan.",
+      "expected_behavior": "The apply path must recompute a canonical digest over every authoritative plan field and reject any byte/semantic change.",
+      "current_behavior": "Edited paths, evidence references, runtime directories, status, or policy fields can be accepted as long as the embedded fingerprint remains the expected 64-hex value.",
+      "impact": "A plan can redirect environment, evidence, target, or state authority after approval without changing the operator token.",
+      "evidence": "The exact descriptor model changes envFile while retaining the embedded digest; readUpgradePlan and assertPlanFingerprint still accept it.",
+      "reproduction_status": {
+        "status": "REPRODUCED_BY_EXACT_BRANCH_MODEL",
+        "runtime": "Python source model",
+        "harness": "/mnt/data/bws120-r09-work/adversarial_models.py",
+        "result": "Tampered plan content is accepted with the original embedded fingerprint."
+      },
+      "transaction_or_state_machine_analysis": "APPROVED_PLAN(A) -> FILE_MUTATED(B) -> APPLY(A_TOKEN) reaches APPLY(B) because the token is compared only to a mutable field in B.",
+      "root_cause": "The plan fingerprint is treated as self-authenticating data rather than a recomputed content commitment.",
+      "minimal_fix_boundary": "Define one canonical plan descriptor containing every apply-authoritative field, recompute it on every read, and bind the plan file digest into retained evidence and state.",
+      "required_tests": [
+        "mutate envFile with unchanged fingerprint",
+        "mutate target directory",
+        "mutate checkpoint/state path",
+        "mutate status/reasons/policy",
+        "unknown or extra fields under canonical serialization"
+      ],
+      "regression_risks": [
+        "Canonicalization must be versioned.",
+        "Secret values should be bound by a restricted digest/receipt without being copied into public evidence."
+      ],
+      "primary_owner": "R09",
+      "secondary_sectors": [
+        "R07",
+        "R10",
+        "R11"
+      ],
+      "aliases_or_dependencies": [
+        "No inherited finding owns upgrade-plan self-authentication."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "No provider, external API, account, credential, signer, wallet, deployed service, or persistent database was contacted.",
+        "Execution, public signals, and live financial operations remain disabled and out of scope."
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS120-R09-006",
+      "title": "Upgrade apply does not rebind plan-time environment, release, and install-evidence bytes",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "packages/bootstrap/src/operations/release-upgrade.ts::createBwsReleaseUpgradePlan / applyBwsReleaseUpgrade",
+      "exact_line_range": "385-475; 519-535; 610-628",
+      "full_file_sha256": "5c5aadcab32d9a937ea6100434f7b3644df5c31954e096af19a80c1958bfeef7",
+      "relevant_release_upgrade_or_soak_object": "Plan-to-apply time-of-check/time-of-use authority",
+      "source_evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/release-upgrade.ts",
+          "symbol": "createBwsReleaseUpgradePlan",
+          "line_range": "385-475",
+          "full_file_sha256": "5c5aadcab32d9a937ea6100434f7b3644df5c31954e096af19a80c1958bfeef7",
+          "note": "Planning verifies release identities and records environment and evidence hashes."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/release-upgrade.ts",
+          "symbol": "applyBwsReleaseUpgrade",
+          "line_range": "519-535",
+          "full_file_sha256": "5c5aadcab32d9a937ea6100434f7b3644df5c31954e096af19a80c1958bfeef7",
+          "note": "Apply rereads the environment file to build persistence/lifecycle configuration but does not compare its bytes to environmentFingerprintSha256."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/release-upgrade.ts",
+          "symbol": "target_staged transition",
+          "line_range": "610-628",
+          "full_file_sha256": "5c5aadcab32d9a937ea6100434f7b3644df5c31954e096af19a80c1958bfeef7",
+          "note": "Apply rereads target install evidence by path but does not enforce the plan-retained evidence digest or reverify current/target release directories against their plan-time bytes."
+        }
+      ],
+      "preconditions": "The environment file, current release directory, target release directory, or target install-verification file changes after a ready plan is created.",
+      "trigger": "Apply the unchanged plan and token.",
+      "expected_behavior": "Every plan-time authority must be rehashed/reverified at apply, and any difference must force a new plan.",
+      "current_behavior": "Apply consumes current bytes from mutable paths while retaining plan-time identities and checkpoints.",
+      "impact": "Database targets, credentials, runtime policy, migration bytes, target code, or evidence can drift between approval and execution.",
+      "evidence": "Static dataflow shows recorded fingerprints are not compared during apply; the path is reread directly.",
+      "reproduction_status": {
+        "status": "STATIC_TOCTOU_CONFIRMED",
+        "runtime": null,
+        "harness": null,
+        "result": "Plan-time digests are recorded but not enforced before side effects."
+      },
+      "transaction_or_state_machine_analysis": "PLANNED(bytes A) -> MUTATED(bytes B) -> APPLY reaches side effects under A identity while using B values.",
+      "root_cause": "The upgrade plan is treated as an advisory snapshot rather than an immutable transaction precondition.",
+      "minimal_fix_boundary": "Before acquiring upgrade ownership or stopping services, recompute the plan digest, environment receipt, release manifests/inventories, install-verification digest, backup/restore evidence, and database identity; abort on any mismatch.",
+      "required_tests": [
+        "environment mutation after plan",
+        "target file mutation after plan",
+        "current release mutation after plan",
+        "install verification replacement",
+        "backup/restore evidence replacement",
+        "mutation after pre-apply revalidation but before side effect using immutable handles or generation locks"
+      ],
+      "regression_risks": [
+        "Revalidation must occur before any lifecycle or database side effect.",
+        "Avoid exposing secret contents in public evidence while still binding exact configuration."
+      ],
+      "primary_owner": "R09",
+      "secondary_sectors": [
+        "R03",
+        "R06",
+        "R07",
+        "R10",
+        "R11"
+      ],
+      "aliases_or_dependencies": [
+        "BWS118-R06-003 owns active process/executable generation; this finding owns plan/apply byte binding."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "No provider, external API, account, credential, signer, wallet, deployed service, or persistent database was contacted.",
+        "Execution, public signals, and live financial operations remain disabled and out of scope."
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS120-R09-007",
+      "title": "Upgrade apply has no exclusive owner or fencing token",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "packages/bootstrap/src/operations/release-upgrade.ts::applyBwsReleaseUpgrade / readOrCreateUpgradeState / appendCheckpointIfMissing",
+      "exact_line_range": "519-770; 1388-1485",
+      "full_file_sha256": "5c5aadcab32d9a937ea6100434f7b3644df5c31954e096af19a80c1958bfeef7",
+      "relevant_release_upgrade_or_soak_object": "Upgrade transaction owner, state file, lifecycle, migration, and checkpoint effects",
+      "source_evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/release-upgrade.ts",
+          "symbol": "applyBwsReleaseUpgrade",
+          "line_range": "519-770",
+          "full_file_sha256": "5c5aadcab32d9a937ea6100434f7b3644df5c31954e096af19a80c1958bfeef7",
+          "note": "Apply performs stop, backup verification, migration, start, rollback, and result publication without acquiring an exclusive upgrade lease."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/release-upgrade.ts",
+          "symbol": "readOrCreateUpgradeState / appendCheckpointIfMissing",
+          "line_range": "1388-1485",
+          "full_file_sha256": "5c5aadcab32d9a937ea6100434f7b3644df5c31954e096af19a80c1958bfeef7",
+          "note": "The mutable state/checkpoint files are created and replaced without atomic interprocess ownership or a monotonic fencing epoch."
+        }
+      ],
+      "preconditions": "Two apply or recover commands for the same plan/evidence directory overlap.",
+      "trigger": "Launch concurrent upgrade operations before either publishes the next state.",
+      "expected_behavior": "Exactly one generation-bound upgrade owner must execute lifecycle, migration, checkpoint, and rollback effects; stale owners must be fenced.",
+      "current_behavior": "Both commands can read the same state, independently stop/start, apply migrations, append colliding sequence files, and overwrite state/results.",
+      "impact": "Duplicate or conflicting lifecycle and database effects, corrupted checkpoint history, overlapping rollback, and false terminal results are possible.",
+      "evidence": "A static interleaving has no linearization point before side effects. Atomic JSON replacement protects bytes, not ownership.",
+      "reproduction_status": {
+        "status": "STATIC_INTERLEAVING_CONFIRMED",
+        "runtime": null,
+        "harness": null,
+        "result": "Two callers can share one state snapshot and execute the same transition concurrently."
+      },
+      "transaction_or_state_machine_analysis": "READY -> APPLYING is not an atomic ownership transition. Multiple owners can execute the same state-machine edge, and last-writer state hides earlier effects.",
+      "root_cause": "Upgrade state persistence is used as progress memory but not as an exclusive lease/fence.",
+      "minimal_fix_boundary": "Acquire one repository/evidence-directory scoped atomic lease before any apply/recover side effect, assign a monotonic upgrade epoch, bind every checkpoint and lifecycle call to it, and reject stale writers.",
+      "required_tests": [
+        "two processes apply the same plan",
+        "apply and recover overlap",
+        "owner crash and fenced takeover",
+        "stale owner attempts checkpoint after takeover",
+        "concurrent rollback and upgrade completion"
+      ],
+      "regression_risks": [
+        "Coordinate with R03 database fencing and R06 process ownership without duplicating their lower-layer fixes.",
+        "Emergency recovery needs an explicit, audited takeover path."
+      ],
+      "primary_owner": "R09",
+      "secondary_sectors": [
+        "R03",
+        "R06",
+        "R07",
+        "R10",
+        "R11"
+      ],
+      "aliases_or_dependencies": [
+        "BWS116-R03-004 owns migration transaction mechanics.",
+        "BWS118-R06-001 owns generic lifecycle ownership; this finding owns the upgrade transaction owner."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "No provider, external API, account, credential, signer, wallet, deployed service, or persistent database was contacted.",
+        "Execution, public signals, and live financial operations remain disabled and out of scope."
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS120-R09-008",
+      "title": "Resolved upgrade state can be reused by a different plan fingerprint",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "packages/bootstrap/src/operations/release-upgrade.ts::applyBwsReleaseUpgrade / readOrCreateUpgradeState",
+      "exact_line_range": "539-542; 1388-1421",
+      "full_file_sha256": "5c5aadcab32d9a937ea6100434f7b3644df5c31954e096af19a80c1958bfeef7",
+      "relevant_release_upgrade_or_soak_object": "Upgrade state namespace and plan identity",
+      "source_evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/release-upgrade.ts",
+          "symbol": "applyBwsReleaseUpgrade",
+          "line_range": "539-542",
+          "full_file_sha256": "5c5aadcab32d9a937ea6100434f7b3644df5c31954e096af19a80c1958bfeef7",
+          "note": "Plan mismatch is rejected only while state.resolved is false."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/release-upgrade.ts",
+          "symbol": "readOrCreateUpgradeState",
+          "line_range": "1388-1421",
+          "full_file_sha256": "5c5aadcab32d9a937ea6100434f7b3644df5c31954e096af19a80c1958bfeef7",
+          "note": "A resolved state with matching current/target semantic fingerprints is returned even when planFingerprint differs."
+        }
+      ],
+      "preconditions": "A previous plan reached a resolved terminal state and a new plan for the same current/target semantic fingerprints reuses the same state path.",
+      "trigger": "Apply the new plan.",
+      "expected_behavior": "State must be immutable and namespaced by exact plan fingerprint; a different plan must start with a new empty state and checkpoint directory.",
+      "current_behavior": "The resolved prior state is accepted and its checkpoints can suppress work in the new plan.",
+      "impact": "A new upgrade can skip verification, drain, backup, migration, start, or recovery transitions based on unrelated historical checkpoints.",
+      "evidence": "The exact branch model supplies a resolved old state and a different plan fingerprint; both mismatch guards permit reuse.",
+      "reproduction_status": {
+        "status": "REPRODUCED_BY_EXACT_BRANCH_MODEL",
+        "runtime": "Python source model",
+        "harness": "/mnt/data/bws120-r09-work/adversarial_models.py",
+        "result": "Different plan accepted because previous state.resolved=true."
+      },
+      "transaction_or_state_machine_analysis": "RESOLVED(plan A) incorrectly becomes INITIAL_STATE(plan B), carrying terminal history across distinct authorization identities.",
+      "root_cause": "The state path is release-pair scoped rather than plan-identity scoped, and resolved state disables the mismatch invariant.",
+      "minimal_fix_boundary": "Require exact plan fingerprint for every state read, use per-plan state/checkpoint directories, and archive rather than reuse resolved state.",
+      "required_tests": [
+        "new plan same releases different environment",
+        "new plan same releases different evidence",
+        "new plan after prior rollback",
+        "state path collision across plans",
+        "explicit archival and fresh-state creation"
+      ],
+      "regression_risks": [
+        "Historical recovery evidence must remain discoverable without becoming active state.",
+        "Do not silently delete prior terminal evidence."
+      ],
+      "primary_owner": "R09",
+      "secondary_sectors": [
+        "R07",
+        "R10",
+        "R11"
+      ],
+      "aliases_or_dependencies": [
+        "No inherited finding owns cross-plan resolved-state reuse."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "No provider, external API, account, credential, signer, wallet, deployed service, or persistent database was contacted.",
+        "Execution, public signals, and live financial operations remain disabled and out of scope."
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS120-R09-009",
+      "title": "Upgrade recovery trusts checkpoint classifications without verifying checkpoint bytes or current target state",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "packages/bootstrap/src/operations/release-upgrade.ts::applyBwsReleaseUpgrade / readOrCreateUpgradeState / hasCheckpoint",
+      "exact_line_range": "657-770; 1404-1421; 1428-1493",
+      "full_file_sha256": "5c5aadcab32d9a937ea6100434f7b3644df5c31954e096af19a80c1958bfeef7",
+      "relevant_release_upgrade_or_soak_object": "Upgrade checkpoint replay and terminal recovery",
+      "source_evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/release-upgrade.ts",
+          "symbol": "applyBwsReleaseUpgrade",
+          "line_range": "657-770",
+          "full_file_sha256": "5c5aadcab32d9a937ea6100434f7b3644df5c31954e096af19a80c1958bfeef7",
+          "note": "If target_started already appears in state, apply skips start/readiness and appends recovery_complete before returning upgrade_applied."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/release-upgrade.ts",
+          "symbol": "readOrCreateUpgradeState",
+          "line_range": "1404-1421",
+          "full_file_sha256": "5c5aadcab32d9a937ea6100434f7b3644df5c31954e096af19a80c1958bfeef7",
+          "note": "State loading checks schema and release fingerprints but does not open or validate recorded checkpoint files, hashes, sequence, or details."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/release-upgrade.ts",
+          "symbol": "appendCheckpointIfMissing / hasCheckpoint",
+          "line_range": "1428-1493",
+          "full_file_sha256": "5c5aadcab32d9a937ea6100434f7b3644df5c31954e096af19a80c1958bfeef7",
+          "note": "Resume authority is only whether any state entry has the requested classification."
+        }
+      ],
+      "preconditions": "State lists target_started or another completed classification while checkpoint files are missing/tampered or the target process is no longer current and ready.",
+      "trigger": "Resume apply/recovery.",
+      "expected_behavior": "Resume must validate the full hash-linked checkpoint chain and re-establish current generation-bound lifecycle/database postconditions before advancing.",
+      "current_behavior": "Classification presence suppresses work and can directly produce recovery_complete/upgrade_applied without current target verification.",
+      "impact": "Tampered or stale state can create false terminality; a dead or replaced target can be reported as successfully upgraded.",
+      "evidence": "The static model with target_started present and target_process_alive_now=false reaches recovery_complete.",
+      "reproduction_status": {
+        "status": "REPRODUCED_BY_STATIC_INTERLEAVING",
+        "runtime": "Python source model",
+        "harness": "/mnt/data/bws120-r09-work/adversarial_models.py",
+        "result": "Checkpoint presence is enough to skip start and publish completion."
+      },
+      "transaction_or_state_machine_analysis": "PERSISTED_LABEL(target_started) is treated as CURRENT_FACT(target_ready). The recovery machine has no REVALIDATE_POSTCONDITION edge.",
+      "root_cause": "Checkpoint metadata is trusted as state authority without validating referenced artifacts or live postconditions.",
+      "minimal_fix_boundary": "On every resume, verify each checkpoint file hash/schema/sequence/plan/epoch, reconstruct state from the chain, then revalidate current release, database ledger, process generation, health, and readiness before any terminal transition.",
+      "required_tests": [
+        "tampered checkpoint file",
+        "missing checkpoint file",
+        "state with duplicate/out-of-order classifications",
+        "target dies after target_started checkpoint",
+        "target generation replaced before resume"
+      ],
+      "regression_risks": [
+        "Fresh status checks must use R06 generation-safe lifecycle evidence.",
+        "A failed revalidation should preserve ambiguity and require bounded recovery, not overwrite evidence."
+      ],
+      "primary_owner": "R09",
+      "secondary_sectors": [
+        "R03",
+        "R06",
+        "R07",
+        "R11"
+      ],
+      "aliases_or_dependencies": [
+        "BWS118-R06-003 and BWS118-R06-007 own process generation/readiness truth.",
+        "R07 owns evidence publication integrity."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "No provider, external API, account, credential, signer, wallet, deployed service, or persistent database was contacted.",
+        "Execution, public signals, and live financial operations remain disabled and out of scope."
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS120-R09-010",
+      "title": "Upgrade checkpoints lifecycle success from permissive or ignored lifecycle outcomes",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "packages/bootstrap/src/operations/release-upgrade.ts::buildLifecyclePlanReasons / applyBwsReleaseUpgrade",
+      "exact_line_range": "564-581; 657-674; 1132-1148",
+      "full_file_sha256": "5c5aadcab32d9a937ea6100434f7b3644df5c31954e096af19a80c1958bfeef7",
+      "relevant_release_upgrade_or_soak_object": "Drain and target-start lifecycle gates",
+      "source_evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/release-upgrade.ts",
+          "symbol": "buildLifecyclePlanReasons",
+          "line_range": "1132-1148",
+          "full_file_sha256": "5c5aadcab32d9a937ea6100434f7b3644df5c31954e096af19a80c1958bfeef7",
+          "note": "A running stack is accepted when health is healthy OR readiness is ready, rather than requiring a coherent exact-ready state."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/release-upgrade.ts",
+          "symbol": "drained_before_backup transition",
+          "line_range": "564-581",
+          "full_file_sha256": "5c5aadcab32d9a937ea6100434f7b3644df5c31954e096af19a80c1958bfeef7",
+          "note": "The stopLifecycle return value is ignored and lifecycleStopped=true is checkpointed whenever the promise resolves."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/release-upgrade.ts",
+          "symbol": "target_started transition",
+          "line_range": "657-674",
+          "full_file_sha256": "5c5aadcab32d9a937ea6100434f7b3644df5c31954e096af19a80c1958bfeef7",
+          "note": "The startLifecycle return value is ignored and targetStarted=true is checkpointed whenever the promise resolves."
+        }
+      ],
+      "preconditions": "Lifecycle methods resolve with degraded, blocked, already-running, partial, or otherwise non-authoritative outcomes.",
+      "trigger": "Plan, stop, or start during upgrade.",
+      "expected_behavior": "Upgrade transitions must require explicit exact-owner, stopped/drained, and target-ready outcomes bound to the intended generation.",
+      "current_behavior": "OR logic admits partial readiness; stop/start results are not inspected before success checkpoints are persisted.",
+      "impact": "Upgrade can migrate against an undrained stack or report a target started when the lifecycle operation returned a degraded/non-ready outcome.",
+      "evidence": "Static source trace shows the result objects are discarded and booleans are hard-coded into checkpoint details.",
+      "reproduction_status": {
+        "status": "STATIC_DATAFLOW_CONFIRMED",
+        "runtime": null,
+        "harness": null,
+        "result": "Lifecycle return values do not govern upgrade checkpoint success."
+      },
+      "transaction_or_state_machine_analysis": "RUNNING(partial) -> DRAINED and START_ATTEMPTED -> TARGET_STARTED are collapsed despite missing authoritative outcomes.",
+      "root_cause": "The orchestrator treats promise resolution as lifecycle success and uses a permissive health/readiness predicate.",
+      "minimal_fix_boundary": "Define an exact lifecycle outcome matrix, require both generation-bound health and readiness where applicable, verify stopped/drained state after stop, verify target ready after start, and persist the actual receipts.",
+      "required_tests": [
+        "stop resolves already_running/degraded/blocked",
+        "start resolves started with blocked readiness",
+        "health healthy but readiness blocked",
+        "readiness ready but health blocked",
+        "generation mismatch after start"
+      ],
+      "regression_risks": [
+        "R06 fixes may change outcome names; R09 should consume an explicit stable contract rather than duplicate process logic."
+      ],
+      "primary_owner": "R09",
+      "secondary_sectors": [
+        "R06",
+        "R07",
+        "R11"
+      ],
+      "aliases_or_dependencies": [
+        "BWS118-R06-002",
+        "BWS118-R06-007",
+        "BWS118-R06-009"
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "No provider, external API, account, credential, signer, wallet, deployed service, or persistent database was contacted.",
+        "Execution, public signals, and live financial operations remain disabled and out of scope."
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS120-R09-011",
+      "title": "Rollback starts the prior release without first fencing or stopping a partially started target",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "packages/bootstrap/src/operations/release-upgrade.ts::applyBwsReleaseUpgrade rollback branch",
+      "exact_line_range": "657-714",
+      "full_file_sha256": "5c5aadcab32d9a937ea6100434f7b3644df5c31954e096af19a80c1958bfeef7",
+      "relevant_release_upgrade_or_soak_object": "Failed target start and rollback transaction",
+      "source_evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/release-upgrade.ts",
+          "symbol": "target start failure and rollback branch",
+          "line_range": "657-714",
+          "full_file_sha256": "5c5aadcab32d9a937ea6100434f7b3644df5c31954e096af19a80c1958bfeef7",
+          "note": "After startLifecycle throws, rollback evaluation may immediately call startLifecycle for the current release. No target stop, target generation fence, or partial-child cleanup is performed first."
+        }
+      ],
+      "preconditions": "Target start creates one or more processes or side effects and then throws or fails readiness; rollback is allowed and requested.",
+      "trigger": "Execute rollbackOnFailure=true.",
+      "expected_behavior": "Rollback must first establish exclusive ownership, stop/drain/fence every partial target component, verify no target generation remains, then start and verify the prior release.",
+      "current_behavior": "The prior release is started directly while partial target processes may still exist.",
+      "impact": "Old and new releases can overlap, share ports/state/database writers, and publish conflicting evidence during recovery.",
+      "evidence": "The error path contains no target lifecycle stop between the failed start and current-release start.",
+      "reproduction_status": {
+        "status": "STATIC_INTERLEAVING_CONFIRMED",
+        "runtime": null,
+        "harness": null,
+        "result": "Partial target remains possible when prior release start begins."
+      },
+      "transaction_or_state_machine_analysis": "TARGET_STARTING -> ERROR -> OLD_STARTING lacks TARGET_FENCED/TARGET_STOPPED intermediate states.",
+      "root_cause": "Rollback assumes a thrown target start produced no owned residual process or side effect.",
+      "minimal_fix_boundary": "Retain the target runtime generation receipt before start, invoke generation-specific stop/drain on failure, verify zero residual ownership, then start the previous immutable release and validate readiness.",
+      "required_tests": [
+        "target spawns API then throws",
+        "target starts all children but readiness fails",
+        "target stop partially fails",
+        "port conflict during old start",
+        "crash between target cleanup and prior start"
+      ],
+      "regression_risks": [
+        "Cleanup must not lose emergency control of ambiguous processes.",
+        "Coordinate with R06 shutdown ordering and fencing."
+      ],
+      "primary_owner": "R09",
+      "secondary_sectors": [
+        "R06",
+        "R07",
+        "R11"
+      ],
+      "aliases_or_dependencies": [
+        "BWS118-R06-004 owns generic partial-start orphaning.",
+        "BWS118-R06-010 and BWS118-R06-011 own shutdown order/completeness."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "No provider, external API, account, credential, signer, wallet, deployed service, or persistent database was contacted.",
+        "Execution, public signals, and live financial operations remain disabled and out of scope."
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS120-R09-012",
+      "title": "The public execute command can synthesize an instant passing soak without managed runtime proof",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "packages/bootstrap/src/operations/soak-campaign.ts::executeBwsSoakCampaign / defaultObserveCycle / defaultExecuteFailure / defaultVerifyCleanup",
+      "exact_line_range": "764-788; 986-1028; 1659-1667; 1911-1960",
+      "full_file_sha256": "779c0901b003ad6510608e54136fcb3e5c7dd38f64f07bd5916d49fcafd950a1",
+      "relevant_release_upgrade_or_soak_object": "Soak duration, observations, failures, recovery, and cleanup",
+      "source_evidence": [
+        {
+          "path": "packages/bootstrap/src/cli/bws-soak-campaign.ts",
+          "symbol": "execute command",
+          "line_range": "72-80",
+          "full_file_sha256": "55a3b486f879b367fb30e3d67b465e457f1f258c209d131603ce3916e51e534a",
+          "note": "The public execute command calls executeBwsSoakCampaign without managed runtime dependencies or wall-clock timing."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/soak-campaign.ts",
+          "symbol": "executeBwsSoakCampaign",
+          "line_range": "764-788",
+          "full_file_sha256": "779c0901b003ad6510608e54136fcb3e5c7dd38f64f07bd5916d49fcafd950a1",
+          "note": "Missing dependencies select synthetic default observation, failure, and cleanup implementations."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/soak-campaign.ts",
+          "symbol": "validateBwsSoakCampaignExecution / observationBudgetSatisfied",
+          "line_range": "986-1028; 1659-1667",
+          "full_file_sha256": "779c0901b003ad6510608e54136fcb3e5c7dd38f64f07bd5916d49fcafd950a1",
+          "note": "Validation allows absent runtimeEvidence and treats intervalMs * completedCycleCount as duration proof."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/soak-campaign.ts",
+          "symbol": "defaultObserveCycle / defaultExecuteFailure / defaultVerifyCleanup",
+          "line_range": "1911-1960",
+          "full_file_sha256": "779c0901b003ad6510608e54136fcb3e5c7dd38f64f07bd5916d49fcafd950a1",
+          "note": "Defaults manufacture ready observations, recovered failures, and zero leaks without touching a target."
+        },
+        {
+          "path": "tests/bws-soak-campaign.test.ts",
+          "symbol": "default failure-matrix test",
+          "line_range": "660-710",
+          "full_file_sha256": "d0d027bfe0dd0ef866c175c59dfe71cfbc5c1f8707097ac7790298ea96aefe0e",
+          "note": "The test executes all named failures through defaults and expects validation success."
+        }
+      ],
+      "preconditions": "A valid campaign manifest and state exist; the operator invokes the execute command rather than the managed run-runtime command.",
+      "trigger": "Run enough synthetic cycles to satisfy intervalMs * cycle count >= durationMs.",
+      "expected_behavior": "Promotable soak evidence must require the managed wall-clock runner, real diagnostics-backed observations, target-specific failures, measured recovery, and measured cleanup.",
+      "current_behavior": "The execute path completes immediately, synthesizes every positive field, omits runtimeEvidence, and still validates when the arithmetic cycle budget is met.",
+      "impact": "Two-hour or longer acceptance can be fabricated in milliseconds, allowing untested release/runtime generations into BWS-600 or deployment.",
+      "evidence": "The exact branch model completes 120 one-minute cycles with no sleep and validates all defaults as successful.",
+      "reproduction_status": {
+        "status": "REPRODUCED_BY_EXACT_BRANCH_MODEL_AND_REPOSITORY_TEST",
+        "runtime": "Python source model; Node v22.16.0 supplementary fixture",
+        "harness": "/mnt/data/bws120-r09-work/adversarial_models.py",
+        "result": "Synthetic observations, recoveries, and cleanup satisfy validation without wall-clock proof."
+      },
+      "transaction_or_state_machine_analysis": "INITIALIZED -> SYNTHETIC_CYCLES -> CLEANUP_VERIFIED -> VALIDATED is a complete promotable path parallel to the stricter managed runtime state machine.",
+      "root_cause": "A test/simulation executor and a production acceptance executor share the same promotable result schema and validator.",
+      "minimal_fix_boundary": "Separate simulation from managed acceptance at the type/schema/CLI level. Require managed_runtime evidence, elapsed monotonic time, diagnostics receipts, and target-specific fault/cleanup receipts for any promotable validation.",
+      "required_tests": [
+        "execute result rejected by promotable validator",
+        "no runtimeEvidence negative",
+        "elapsed wall-clock below duration negative",
+        "default observe/failure/cleanup marked simulation-only",
+        "external preflight rejects simulation schema"
+      ],
+      "regression_risks": [
+        "Keep deterministic simulation for unit tests, but it must be explicitly non-promotable.",
+        "Existing fixtures and historical results need classification."
+      ],
+      "primary_owner": "R09",
+      "secondary_sectors": [
+        "R06",
+        "R07",
+        "R11"
+      ],
+      "aliases_or_dependencies": [
+        "BWS118-R06-007 owns false runtime health inputs; this finding owns acceptance of synthetic soak execution."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "No provider, external API, account, credential, signer, wallet, deployed service, or persistent database was contacted.",
+        "Execution, public signals, and live financial operations remain disabled and out of scope."
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS120-R09-013",
+      "title": "Managed soak collapses eighteen named failures into two generic actions",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "packages/bootstrap/src/operations/bws-soak-runtime-integration.ts::PROCESS_RESTART_FAILURE_TARGETS / ARTIFACT_MARKER_FAILURE_TARGETS / executeRestartFailure / executeArtifactMarkerFailure",
+      "exact_line_range": "17-39; 121-155; 161-241",
+      "full_file_sha256": "3426f30a61e5e1300b640ca7b242949e7b2627274a399db815ddc40de79976a9",
+      "relevant_release_upgrade_or_soak_object": "Failure-injection matrix and cleanup authority",
+      "source_evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/bws-soak-runtime-integration.ts",
+          "symbol": "failure target sets and dispatch",
+          "line_range": "17-39; 121-140",
+          "full_file_sha256": "3426f30a61e5e1300b640ca7b242949e7b2627274a399db815ddc40de79976a9",
+          "note": "Twelve process/database/timeout/lease faults all dispatch to one full-stack restart; six artifact/backup/upgrade/contract faults dispatch to one marker write/delete."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/bws-soak-runtime-integration.ts",
+          "symbol": "executeRestartFailure / executeArtifactMarkerFailure",
+          "line_range": "161-241",
+          "full_file_sha256": "3426f30a61e5e1300b640ca7b242949e7b2627274a399db815ddc40de79976a9",
+          "note": "The implementation does not inject the named component-specific fault or prove the named expected effect."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/bws-soak-runtime-integration.ts",
+          "symbol": "verifyDatabaseCleanup",
+          "line_range": "141-155",
+          "full_file_sha256": "3426f30a61e5e1300b640ca7b242949e7b2627274a399db815ddc40de79976a9",
+          "note": "Cleanup checks only the configured database identity and returns leakedDatabases=0 without enumerating campaign-created resources."
+        }
+      ],
+      "preconditions": "A managed campaign schedules any named failure target.",
+      "trigger": "The integration dispatches the failure.",
+      "expected_behavior": "Each named target must have an explicit, target-specific injection, observation, recovery criterion, and cleanup proof.",
+      "current_behavior": "All process targets perform stop/start/status of the full stack; all artifact targets write and delete a marker. The named failure is not actually produced.",
+      "impact": "The soak can claim coverage of database interruption, malformed API, lease expiry, partial startup, upgrade interruption, backup interruption, and other faults that were never exercised.",
+      "evidence": "The exact dispatch model yields one unique implementation for twelve process targets and one for six artifact targets.",
+      "reproduction_status": {
+        "status": "REPRODUCED_BY_EXACT_DISPATCH_MODEL",
+        "runtime": "Python source model",
+        "harness": "/mnt/data/bws120-r09-work/adversarial_models.py",
+        "result": "18 names reduce to 2 generic actions."
+      },
+      "transaction_or_state_machine_analysis": "SCHEDULED(target X) -> GENERIC_RESTART_OR_MARKER -> RECOVERED(X) falsely labels generic activity as target-specific proof.",
+      "root_cause": "Failure identity is metadata only; it does not select a target-specific mechanism or proof contract.",
+      "minimal_fix_boundary": "Create one implementation registry with an explicit injector, expected observation, recovery verifier, and cleanup verifier per target. Reject any target without a real implementation.",
+      "required_tests": [
+        "each target produces its named effect",
+        "wrong component action cannot satisfy target",
+        "recovery evidence is target-specific",
+        "database/resource enumeration after every fault",
+        "unsupported target fails before campaign start"
+      ],
+      "regression_risks": [
+        "Several faults depend on R03, R06, R07, and R08 primitives; retain explicit handoffs rather than inventing unsafe direct mutations.",
+        "No real provider or production database should be required for safe local failure tests."
+      ],
+      "primary_owner": "R09",
+      "secondary_sectors": [
+        "R03",
+        "R06",
+        "R07",
+        "R08",
+        "R11"
+      ],
+      "aliases_or_dependencies": [
+        "Inherited R03/R06 findings remain the owners of lower-layer recovery defects."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "No provider, external API, account, credential, signer, wallet, deployed service, or persistent database was contacted.",
+        "Execution, public signals, and live financial operations remain disabled and out of scope."
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS120-R09-014",
+      "title": "Soak validation ignores observation readiness, progress, and resource bounds",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "packages/bootstrap/src/operations/soak-campaign.ts::validateBwsSoakCampaignExecution / buildRuntimeObservation",
+      "exact_line_range": "986-1108; 2020-2049",
+      "full_file_sha256": "779c0901b003ad6510608e54136fcb3e5c7dd38f64f07bd5916d49fcafd950a1",
+      "relevant_release_upgrade_or_soak_object": "Cycle observation semantics and soak acceptance thresholds",
+      "source_evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/soak-campaign.ts",
+          "symbol": "validateBwsSoakCampaignExecution",
+          "line_range": "986-1108",
+          "full_file_sha256": "779c0901b003ad6510608e54136fcb3e5c7dd38f64f07bd5916d49fcafd950a1",
+          "note": "Validation checks structure, counts, failure checkpoint presence, and artifact hashes but never reads cycle observation health/readiness/progress/queue/latency/error values."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/soak-campaign.ts",
+          "symbol": "buildRuntimeObservation",
+          "line_range": "2020-2049",
+          "full_file_sha256": "779c0901b003ad6510608e54136fcb3e5c7dd38f64f07bd5916d49fcafd950a1",
+          "note": "The runtime records those fields, derives boundedProgress from a weak lifecycle predicate, and hard-codes latencyMs=0."
+        }
+      ],
+      "preconditions": "Every cycle is retained and the structural checkpoint/failure conditions pass, but observations show blocked health/readiness, no progress, queue growth, errors, or excessive resource use.",
+      "trigger": "Validate the soak result.",
+      "expected_behavior": "Acceptance must enforce explicit monotonic progress, readiness, error, queue, latency, dead-letter, memory, disk, and growth thresholds over the full observation window.",
+      "current_behavior": "Observation detail fields are not consulted, so structurally complete but operationally failed cycles can pass.",
+      "impact": "A stalled, blocked, or leaking release can obtain a valid soak result and promotion evidence.",
+      "evidence": "The source-dataflow model injects blocked readiness, boundedProgress=false, high queue depth, and errors; no validator branch reads them.",
+      "reproduction_status": {
+        "status": "REPRODUCED_BY_SOURCE_DATAFLOW",
+        "runtime": "Python source model",
+        "harness": "/mnt/data/bws120-r09-work/adversarial_models.py",
+        "result": "All adverse observation fields are ignored by validation."
+      },
+      "transaction_or_state_machine_analysis": "OBSERVED_BAD -> RETAINED_CHECKPOINT -> VALIDATED is reachable because observation payload semantics are opaque to the validator.",
+      "root_cause": "The soak validator validates evidence shape and count, not the operational invariants the observations are intended to prove.",
+      "minimal_fix_boundary": "Version a threshold contract in the manifest; validate every cycle and aggregate window; measure real latency/resource counters; fail on unknown/missing fields and on sustained regression.",
+      "required_tests": [
+        "blocked health cycle",
+        "blocked readiness cycle",
+        "boundedProgress=false",
+        "monotonic queue growth",
+        "nonzero errors/dead letters",
+        "latency/resource threshold breach",
+        "missing observation field"
+      ],
+      "regression_risks": [
+        "Thresholds must be explicit and workload-aware, not hidden defaults.",
+        "R07 owns evidence identity; R09 owns the acceptance semantics."
+      ],
+      "primary_owner": "R09",
+      "secondary_sectors": [
+        "R05",
+        "R06",
+        "R07",
+        "R11"
+      ],
+      "aliases_or_dependencies": [
+        "BWS118-R06-007 identifies false health/readiness production; this finding applies even when observations are truthful."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "No provider, external API, account, credential, signer, wallet, deployed service, or persistent database was contacted.",
+        "Execution, public signals, and live financial operations remain disabled and out of scope."
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS120-R09-015",
+      "title": "Soak checkpoint ordering can skip after-cycle faults or duplicate injected faults after a crash",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "packages/bootstrap/src/operations/soak-campaign.ts::executeBwsSoakCampaign / executeFailureStage",
+      "exact_line_range": "793-905; 1768-1865",
+      "full_file_sha256": "779c0901b003ad6510608e54136fcb3e5c7dd38f64f07bd5916d49fcafd950a1",
+      "relevant_release_upgrade_or_soak_object": "Failure exactly-once state and cycle checkpoint progression",
+      "source_evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/soak-campaign.ts",
+          "symbol": "executeBwsSoakCampaign",
+          "line_range": "793-905",
+          "full_file_sha256": "779c0901b003ad6510608e54136fcb3e5c7dd38f64f07bd5916d49fcafd950a1",
+          "note": "cycle_observed advances persisted completedCycleCount before after_cycle failures execute."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/soak-campaign.ts",
+          "symbol": "executeFailureStage",
+          "line_range": "1768-1865",
+          "full_file_sha256": "779c0901b003ad6510608e54136fcb3e5c7dd38f64f07bd5916d49fcafd950a1",
+          "note": "failure_injected is checkpointed before the side effect, while deduplication uses only the in-memory failures array populated after recovery."
+        }
+      ],
+      "preconditions": "The process crashes after cycle_observed but before after_cycle injection, or after failure_injected/side effect but before recovery and in-memory failure recording.",
+      "trigger": "Resume the campaign.",
+      "expected_behavior": "Every scheduled fault must be durably exactly-once or explicitly safely replayable, and completedCycleCount must not skip any required stage.",
+      "current_behavior": "After-cycle work can be skipped because resume starts at completedCycleCount+1; an injected fault can run again because the durable checkpoint is not used for deduplication.",
+      "impact": "Named failure coverage becomes incomplete or duplicate destructive effects occur, while retained state can still look progressive.",
+      "evidence": "Static crash-window models reproduce both skip and duplicate paths.",
+      "reproduction_status": {
+        "status": "REPRODUCED_BY_STATIC_INTERLEAVING",
+        "runtime": "Python source model",
+        "harness": "/mnt/data/bws120-r09-work/adversarial_models.py",
+        "result": "Crash windows cause skipped after_cycle fault and repeated injected fault."
+      },
+      "transaction_or_state_machine_analysis": "The durable cycle state and durable failure state are not one monotonic transaction. EPHEMERAL_EXECUTED_SET is lost across restart.",
+      "root_cause": "Checkpoint sequencing records intent/progress at boundaries that do not correspond to completed side effects and does not reconstruct fault state from checkpoints.",
+      "minimal_fix_boundary": "Model each injection with durable pending/injected/recovery_verified states and an idempotency token; derive resume work from the checkpoint chain; advance cycle completion only after all required stages are terminal.",
+      "required_tests": [
+        "crash at every line between fault checkpoint, side effect, recovery checkpoint, and cycle completion",
+        "replay-safe versus non-replay-safe target behavior",
+        "after_cycle crash/resume",
+        "duplicate fault token rejection",
+        "state reconstruction from checkpoints"
+      ],
+      "regression_risks": [
+        "Some real failures are inherently non-idempotent and need compensation/fencing.",
+        "Do not claim exactly-once merely from filesystem checkpoints."
+      ],
+      "primary_owner": "R09",
+      "secondary_sectors": [
+        "R03",
+        "R06",
+        "R07",
+        "R11"
+      ],
+      "aliases_or_dependencies": [
+        "BWS116-R03-007 through BWS116-R03-011 own durable worker lease/retry mechanics below this campaign state machine."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "No provider, external API, account, credential, signer, wallet, deployed service, or persistent database was contacted.",
+        "Execution, public signals, and live financial operations remain disabled and out of scope."
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS120-R09-016",
+      "title": "Resumed soak results cannot validate cumulative checkpoint history",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "packages/bootstrap/src/operations/soak-campaign.ts::executeBwsSoakCampaign / validateBwsSoakCampaignExecution",
+      "exact_line_range": "790-791; 947-965; 1056-1062",
+      "full_file_sha256": "779c0901b003ad6510608e54136fcb3e5c7dd38f64f07bd5916d49fcafd950a1",
+      "relevant_release_upgrade_or_soak_object": "Chunked or restarted soak result construction",
+      "source_evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/soak-campaign.ts",
+          "symbol": "executeBwsSoakCampaign",
+          "line_range": "790-791; 947-965",
+          "full_file_sha256": "779c0901b003ad6510608e54136fcb3e5c7dd38f64f07bd5916d49fcafd950a1",
+          "note": "Each invocation starts executedCycles and failures as empty arrays, but the result includes every retained checkpoint file in the campaign directory."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/soak-campaign.ts",
+          "symbol": "validateBwsSoakCampaignExecution",
+          "line_range": "1056-1062",
+          "full_file_sha256": "779c0901b003ad6510608e54136fcb3e5c7dd38f64f07bd5916d49fcafd950a1",
+          "note": "Validation requires result.executedCycles to equal all retained cycle_observed checkpoints exactly."
+        }
+      ],
+      "preconditions": "A campaign completes one or more cycles, stops, then resumes in a later invocation.",
+      "trigger": "Execute additional cycles and validate the new result.",
+      "expected_behavior": "A resumed result must represent cumulative durable history or validation must compare only a precisely bounded invocation segment.",
+      "current_behavior": "The result lists only cycles from the latest call while validation compares against cumulative checkpoints, so legitimate restart/chunking fails.",
+      "impact": "The advertised restart/resume path is non-convergent; operators may be forced to discard evidence or rerun campaigns, and a failure may be misdiagnosed as corruption.",
+      "evidence": "The exact model with retained cycles [1,2] and current executedCycles [2] fails the validator.",
+      "reproduction_status": {
+        "status": "REPRODUCED_BY_EXACT_BRANCH_MODEL",
+        "runtime": "Python source model",
+        "harness": "/mnt/data/bws120-r09-work/adversarial_models.py",
+        "result": "Cumulative checkpoints and per-invocation result arrays cannot satisfy equality."
+      },
+      "transaction_or_state_machine_analysis": "RESUME(previous history) -> RESULT(current segment) -> VALIDATE(cumulative history) is internally inconsistent.",
+      "root_cause": "Execution result scope is per invocation while checkpoint and validator scope is per campaign.",
+      "minimal_fix_boundary": "Define result scope explicitly. Prefer reconstructing cumulative cycles/failures from the validated checkpoint chain and emitting a cumulative result bound to the terminal state.",
+      "required_tests": [
+        "two-invocation campaign",
+        "resume after crash before result write",
+        "resume with prior recovered failures",
+        "multiple partial chunks",
+        "validator reconstructs canonical cumulative history"
+      ],
+      "regression_risks": [
+        "Historical results may remain per-invocation and need a new schema/version.",
+        "Do not silently merge inconsistent checkpoint chains."
+      ],
+      "primary_owner": "R09",
+      "secondary_sectors": [
+        "R07",
+        "R11"
+      ],
+      "aliases_or_dependencies": [
+        "No inherited finding owns soak result/checkpoint scope mismatch."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "No provider, external API, account, credential, signer, wallet, deployed service, or persistent database was contacted.",
+        "Execution, public signals, and live financial operations remain disabled and out of scope."
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS120-R09-017",
+      "title": "Cleanup acceptance is derived from caller/default counters instead of measured owned resources",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "packages/bootstrap/src/operations/final-local-acceptance.ts::createBwsFinalLocalAcceptanceCleanupResult",
+      "exact_line_range": "660-691",
+      "full_file_sha256": "1f7b5675b2d307cf8ecc7ab791eba825036ba850fe28ccacae1f8a78deb6a3c5",
+      "relevant_release_upgrade_or_soak_object": "Soak and final-acceptance cleanup proof",
+      "source_evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/final-local-acceptance.ts",
+          "symbol": "createBwsFinalLocalAcceptanceCleanupResult",
+          "line_range": "660-691",
+          "full_file_sha256": "1f7b5675b2d307cf8ecc7ab791eba825036ba850fe28ccacae1f8a78deb6a3c5",
+          "note": "verified is computed solely from caller-provided lease, PID, and file lists; no filesystem, process, lease, or database inspection occurs."
+        },
+        {
+          "path": "packages/bootstrap/src/cli/bws-final-local-acceptance.ts",
+          "symbol": "cleanup command option mapping",
+          "line_range": "75-83",
+          "full_file_sha256": "218d99afdbef03328786d155dd23766bf87e19a75eb03c5ba1e835922c251d43",
+          "note": "The CLI exposes those counters/lists as operator inputs, making the final gate a self-attestation."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/soak-campaign.ts",
+          "symbol": "defaultVerifyCleanup",
+          "line_range": "1949-1960",
+          "full_file_sha256": "779c0901b003ad6510608e54136fcb3e5c7dd38f64f07bd5916d49fcafd950a1",
+          "note": "The non-managed soak default returns leakedDatabases=0 and leakedProcesses=0 without observation."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/bws-soak-runtime-integration.ts",
+          "symbol": "verifyDatabaseCleanup",
+          "line_range": "141-155",
+          "full_file_sha256": "3426f30a61e5e1300b640ca7b242949e7b2627274a399db815ddc40de79976a9",
+          "note": "The managed integration checks only the selected database identity and then reports leakedDatabases=0 without enumerating owned databases/resources."
+        }
+      ],
+      "preconditions": "Actual child processes, leases, temporary files/directories, or disposable databases remain, while the caller passes zero/empty values or uses defaults.",
+      "trigger": "Create cleanup evidence and then finalize or validate acceptance.",
+      "expected_behavior": "Cleanup proof must be generated by authoritative bounded enumeration of every campaign-owned resource and bind each observed resource to the campaign generation.",
+      "current_behavior": "Zero/empty caller values produce verified=true even when unobserved leaks exist.",
+      "impact": "Leaked processes, leases, databases, and files can survive an accepted campaign and contaminate later tests or production operation.",
+      "evidence": "The exact branch model supplies zero/empty values while modeling real unobserved leaks; verified remains true.",
+      "reproduction_status": {
+        "status": "REPRODUCED_BY_EXACT_BRANCH_MODEL",
+        "runtime": "Python source model; direct TS harness unavailable due external loader resolution",
+        "harness": "/mnt/data/bws120-r09-work/adversarial_models.py",
+        "result": "Self-reported zero values produce verified=true without scans."
+      },
+      "transaction_or_state_machine_analysis": "UNVERIFIED_RESOURCES -> CALLER_SAYS_ZERO -> CLEANUP_VERIFIED has no observation or ownership-discovery transition.",
+      "root_cause": "Cleanup status is an assertion supplied by the same caller being evaluated, not an independently measured receipt.",
+      "minimal_fix_boundary": "Move enumeration into trusted operations: query generation-bound process ownership, durable leases, campaign directories, disposable database registry, and temp artifacts; hash the inventory and require zero residuals before verified=true.",
+      "required_tests": [
+        "hidden process with empty caller list",
+        "hidden lease",
+        "remaining file inside declared temp directory",
+        "extra campaign-owned database",
+        "resource created after scan before final commit",
+        "cleanup scan permissions failure"
+      ],
+      "regression_risks": [
+        "Enumeration must remain confined to campaign-owned resources and must not delete unrelated state.",
+        "R03/R06/R08 own lower-level ownership and cleanup mechanisms."
+      ],
+      "primary_owner": "R09",
+      "secondary_sectors": [
+        "R03",
+        "R06",
+        "R07",
+        "R08",
+        "R10",
+        "R11"
+      ],
+      "aliases_or_dependencies": [
+        "BWS118-R06-004/-005/-011/-013 own process cleanup and shutdown defects.",
+        "R08 owns database lifecycle cleanup implementation."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "No provider, external API, account, credential, signer, wallet, deployed service, or persistent database was contacted.",
+        "Execution, public signals, and live financial operations remain disabled and out of scope."
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS120-R09-018",
+      "title": "External preflight promotes schema-shaped soak state without consuming the soak result or validation verdict",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "packages/bootstrap/src/operations/external-runtime-preflight.ts::createBwsExternalRuntimeCampaignManifest / validateSoakEvidence / readSoakCheckpointFile",
+      "exact_line_range": "260-267; 529-585; 803-824",
+      "full_file_sha256": "724a419567dc2c6f737166660092d5c0d8e09be24a4b22bc9377c324949ec427",
+      "relevant_release_upgrade_or_soak_object": "BWS-600 external-runtime promotion gate",
+      "source_evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/external-runtime-preflight.ts",
+          "symbol": "createBwsExternalRuntimeCampaignManifest",
+          "line_range": "260-267",
+          "full_file_sha256": "724a419567dc2c6f737166660092d5c0d8e09be24a4b22bc9377c324949ec427",
+          "note": "The gate reads only soak manifest and state files, not soak-result.json or soak-validation.json."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/external-runtime-preflight.ts",
+          "symbol": "validateSoakEvidence",
+          "line_range": "529-585",
+          "full_file_sha256": "724a419567dc2c6f737166660092d5c0d8e09be24a4b22bc9377c324949ec427",
+          "note": "Selected manifest/state fields and the last checkpoint classification/status are checked, but no full checkpoint chain, artifact archive, failure matrix, observation semantics, or validation.ok is consumed."
+        },
+        {
+          "path": "packages/bootstrap/src/operations/external-runtime-preflight.ts",
+          "symbol": "readSoakStateFile / readSoakCheckpointFile",
+          "line_range": "803-824",
+          "full_file_sha256": "724a419567dc2c6f737166660092d5c0d8e09be24a4b22bc9377c324949ec427",
+          "note": "Readers validate only top-level schema before casting to the expected shape."
+        }
+      ],
+      "preconditions": "Schema-shaped soak manifest/state/cleanup checkpoint documents exist with plausible counts and runtimeEvidence, but the campaign result is absent, invalid, tampered, or never passed validation.",
+      "trigger": "Create the external runtime campaign manifest.",
+      "expected_behavior": "Promotion must require the exact successful soak result and validator output, bind their hashes and campaign fingerprint, and independently verify critical terminal invariants.",
+      "current_behavior": "The preflight can pass without any result or validation artifact and without verifying the checkpoint fingerprint/chain.",
+      "impact": "Fabricated or partial soak state can unblock BWS-600 even when failures, observations, cleanup, or artifact integrity did not pass.",
+      "evidence": "The source-dataflow model supplies only manifest, state, and one cleanup checkpoint; promotion remains reachable.",
+      "reproduction_status": {
+        "status": "REPRODUCED_BY_SOURCE_DATAFLOW",
+        "runtime": "Python source model",
+        "harness": "/mnt/data/bws120-r09-work/adversarial_models.py",
+        "result": "Promotion does not require result or validation files."
+      },
+      "transaction_or_state_machine_analysis": "SOAK_STATE_SHAPED -> EXTERNAL_CAMPAIGN_READY bypasses SOAK_RESULT_COMPLETE and SOAK_VALIDATION_OK.",
+      "root_cause": "The promotion gate reimplements a weak subset of soak checks instead of consuming the canonical validated terminal receipt.",
+      "minimal_fix_boundary": "Require exact soak manifest/result/validation hashes, validation.ok=true, full campaign fingerprint parity, terminal checkpoint chain verification, and all failure/observation/cleanup gates before external campaign creation.",
+      "required_tests": [
+        "missing soak result",
+        "validation.ok=false",
+        "tampered checkpoint fingerprint",
+        "missing required failure recovery",
+        "result/manifest mismatch",
+        "artifact archive digest mismatch"
+      ],
+      "regression_risks": [
+        "Avoid circular trust: external preflight should still verify essential bindings rather than trusting one boolean alone.",
+        "R07 owns evidence artifact publication and hash identity."
+      ],
+      "primary_owner": "R09",
+      "secondary_sectors": [
+        "R07",
+        "R11"
+      ],
+      "aliases_or_dependencies": [
+        "BWS120-R09-012 through -017 are upstream soak defects consumed by this promotion bypass."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "No provider, external API, account, credential, signer, wallet, deployed service, or persistent database was contacted.",
+        "Execution, public signals, and live financial operations remain disabled and out of scope."
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS120-R09-019",
+      "title": "External campaign identity omits the environment file bytes",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "packages/bootstrap/src/operations/external-runtime-preflight.ts::createBwsExternalRuntimeCampaignManifest semantic fingerprint descriptor",
+      "exact_line_range": "267-280; 332-407",
+      "full_file_sha256": "724a419567dc2c6f737166660092d5c0d8e09be24a4b22bc9377c324949ec427",
+      "relevant_release_upgrade_or_soak_object": "Environment and release promotion identity",
+      "source_evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/external-runtime-preflight.ts",
+          "symbol": "environment read and manifest descriptor",
+          "line_range": "267-280; 332-407",
+          "full_file_sha256": "724a419567dc2c6f737166660092d5c0d8e09be24a4b22bc9377c324949ec427",
+          "note": "The environment is validated and selected fields are derived, but the semantic fingerprint contains only envFile path and derived public fields, not an exact secret-safe environment receipt/digest."
+        }
+      ],
+      "preconditions": "The private environment file changes in place after preflight, including database or upstream/runtime values not fully represented in the descriptor.",
+      "trigger": "Reuse the external campaign manifest or compare identities before/after mutation.",
+      "expected_behavior": "Campaign identity must bind the exact effective configuration used by the lifecycle, persistence, and upstream clients, without exposing secrets.",
+      "current_behavior": "Changing file bytes at the same path can leave the semantic fingerprint unchanged.",
+      "impact": "The same campaign identity can execute against a different database, credentials, timeout/retry tuple, or other runtime configuration than the one reviewed.",
+      "evidence": "The exact descriptor model changes environment bytes under the same path and produces the same fingerprint.",
+      "reproduction_status": {
+        "status": "REPRODUCED_BY_EXACT_DESCRIPTOR_MODEL",
+        "runtime": "Python source model",
+        "harness": "/mnt/data/bws120-r09-work/adversarial_models.py",
+        "result": "Environment byte change does not alter campaign semantic fingerprint."
+      },
+      "transaction_or_state_machine_analysis": "PREFLIGHT(config A) -> ENV_MUTATED(config B) -> RUN(campaign identity A) is not detected.",
+      "root_cause": "The campaign descriptor records a mutable path and partial projections rather than an immutable effective-configuration receipt.",
+      "minimal_fix_boundary": "Generate a restricted, secret-safe canonical configuration receipt that covers every effective value and source/precedence decision, bind its digest into the manifest, and revalidate it at campaign start.",
+      "required_tests": [
+        "database name/host/user change",
+        "upstream URL/checkpoint change",
+        "timeout/retry change",
+        "secret-only change with protected digest",
+        "environment path symlink/replacement after preflight"
+      ],
+      "regression_risks": [
+        "Configuration digest artifacts must have restrictive permissions and must not reveal low-entropy secrets.",
+        "R10 owns repository-wide precedence and secret handling."
+      ],
+      "primary_owner": "R09",
+      "secondary_sectors": [
+        "R01",
+        "R03",
+        "R10",
+        "R11"
+      ],
+      "aliases_or_dependencies": [
+        "BWS116-R01-007 owns aggregate upstream timeout/retry semantics.",
+        "R10 remains owner of environment tuple/precedence."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "No provider, external API, account, credential, signer, wallet, deployed service, or persistent database was contacted.",
+        "Execution, public signals, and live financial operations remain disabled and out of scope."
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS120-R09-020",
+      "title": "Final recovery evidence combines unrelated schema-shaped artifacts without common byte or generation binding",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "packages/bootstrap/src/operations/final-local-acceptance.ts::createBwsFinalLocalAcceptanceRecoveryResult",
+      "exact_line_range": "534-657",
+      "full_file_sha256": "1f7b5675b2d307cf8ecc7ab791eba825036ba850fe28ccacae1f8a78deb6a3c5",
+      "relevant_release_upgrade_or_soak_object": "Upgrade, rollback, backup/restore, retention, and interrupted-recovery acceptance bundle",
+      "source_evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/final-local-acceptance.ts",
+          "symbol": "createBwsFinalLocalAcceptanceRecoveryResult",
+          "line_range": "534-657",
+          "full_file_sha256": "1f7b5675b2d307cf8ecc7ab791eba825036ba850fe28ccacae1f8a78deb6a3c5",
+          "note": "The function schema/status-checks several files, verifies fingerprint parity only for the successful plan/result pair, and fingerprints mutable file paths plus one plan fingerprint rather than every artifact byte and common generation identity."
+        },
+        {
+          "path": "tests/bws-final-local-acceptance.test.ts",
+          "symbol": "final recovery evidence focused test",
+          "line_range": "211-238",
+          "full_file_sha256": "c2ca8b6bfb9fb49cc387c781844440de074932533cd97acddaa60679281c6b2d",
+          "note": "The passing test uses independent schema-shaped fixtures and checks only selected output fields."
+        }
+      ],
+      "preconditions": "Evidence files from different plans, releases, databases, backups, or generations satisfy the individually checked statuses and schemas.",
+      "trigger": "Create the final recovery result.",
+      "expected_behavior": "Every artifact must be byte-hashed and relationally bound to one release pair, plan, database identity, backup, runtime generation, and exercise run.",
+      "current_behavior": "Unrelated evidence can be combined; later byte replacement at the same path does not change the result semantic fingerprint.",
+      "impact": "The final gate can claim successful upgrade, failed readiness, rollback allowed/blocked, restore, retention, and interruption coverage even though those records did not belong to one coherent exercise.",
+      "evidence": "The exact descriptor model mutates artifact bytes at unchanged paths and retains the same fingerprint; the focused test passes disconnected fixtures.",
+      "reproduction_status": {
+        "status": "REPRODUCED_BY_EXACT_DESCRIPTOR_MODEL_AND_FOCUSED_TEST",
+        "runtime": "Node v22.16.0 supplementary plus Python model",
+        "harness": "/mnt/data/bws120-r09-work/final-acceptance-focused.out",
+        "result": "Schema-shaped independent fixtures pass and path-based fingerprint remains stable across byte changes."
+      },
+      "transaction_or_state_machine_analysis": "EVIDENCE_A + EVIDENCE_B + ... -> RECOVERY_ACCEPTED lacks one shared exercise/generation identity and hash-linked graph.",
+      "root_cause": "The composition step validates local shape/status but not cross-artifact provenance or immutable bytes.",
+      "minimal_fix_boundary": "Bind each component hash and evidence identity into a versioned recovery graph; require exact common plan/release/database/backup/runtime/exercise identifiers and recompute all hashes at composition.",
+      "required_tests": [
+        "mix successful result from plan A with failed result from plan B",
+        "different database backup/restore",
+        "artifact replacement after read",
+        "different target release fingerprints",
+        "retention plan from unrelated backup"
+      ],
+      "regression_risks": [
+        "Existing artifacts may lack common IDs and need to remain historical/non-promotable.",
+        "Do not duplicate R08 backup/restore correctness; verify its receipts and relationships here."
+      ],
+      "primary_owner": "R09",
+      "secondary_sectors": [
+        "R07",
+        "R08",
+        "R11"
+      ],
+      "aliases_or_dependencies": [
+        "R08 owns backup/restore/retention operations.",
+        "BWS120-R09-005 through -011 own upgrade evidence production defects."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "No provider, external API, account, credential, signer, wallet, deployed service, or persistent database was contacted.",
+        "Execution, public signals, and live financial operations remain disabled and out of scope."
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS120-R09-021",
+      "title": "Final acceptance trusts a caller-supplied archive digest and mutable component paths",
+      "severity": "P1",
+      "confidence": "HIGH",
+      "classification": "CONFIRMED_FINDING",
+      "current_path_and_symbol": "packages/bootstrap/src/operations/final-local-acceptance.ts::createBwsFinalLocalAcceptanceManifest",
+      "exact_line_range": "694-830",
+      "full_file_sha256": "1f7b5675b2d307cf8ecc7ab791eba825036ba850fe28ccacae1f8a78deb6a3c5",
+      "relevant_release_upgrade_or_soak_object": "Final local acceptance manifest and artifact archive identity",
+      "source_evidence": [
+        {
+          "path": "packages/bootstrap/src/operations/final-local-acceptance.ts",
+          "symbol": "createBwsFinalLocalAcceptanceManifest",
+          "line_range": "694-830",
+          "full_file_sha256": "1f7b5675b2d307cf8ecc7ab791eba825036ba850fe28ccacae1f8a78deb6a3c5",
+          "note": "The archive SHA is accepted as a caller string with no archive path/open/hash; component files are referenced by mutable paths/selected fields; soakValidation.ok is not required."
+        },
+        {
+          "path": "tests/bws-final-local-acceptance.test.ts",
+          "symbol": "final acceptance manifest focused test",
+          "line_range": "240-287",
+          "full_file_sha256": "c2ca8b6bfb9fb49cc387c781844440de074932533cd97acddaa60679281c6b2d",
+          "note": "The passing test supplies an arbitrary 64-hex string as the archive digest and schema-shaped documents, then expects acceptance."
+        }
+      ],
+      "preconditions": "The caller supplies any valid-looking 64-hex digest, component files pass limited schema/field checks, or component bytes later change at the same paths.",
+      "trigger": "Create the final local acceptance manifest.",
+      "expected_behavior": "Final acceptance must hash the actual immutable archive, hash every component artifact, require each validator verdict including soakValidation.ok=true, and commit one immutable acceptance bundle.",
+      "current_behavior": "No archive is opened; arbitrary digest text is accepted. Component byte hashes are absent from the semantic fingerprint, and a false/missing soak-validation verdict can pass if its artifact digest field matches.",
+      "impact": "An acceptance manifest can attest to a nonexistent or different archive and can become detached from its component evidence after creation.",
+      "evidence": "The exact descriptor model and the focused test both accept an arbitrary repeated-1 digest and mutable path-based evidence.",
+      "reproduction_status": {
+        "status": "REPRODUCED_BY_EXACT_DESCRIPTOR_MODEL_AND_FOCUSED_TEST",
+        "runtime": "Node v22.16.0 supplementary plus Python model",
+        "harness": "/mnt/data/bws120-r09-work/final-acceptance-focused.out",
+        "result": "Arbitrary digest and schema-shaped fixtures produce accepted manifest."
+      },
+      "transaction_or_state_machine_analysis": "COMPONENTS_SHAPED + CALLER_DIGEST -> FINAL_ACCEPTED bypasses ARCHIVE_HASHED, COMPONENT_HASH_GRAPH_VERIFIED, and ALL_VALIDATORS_OK.",
+      "root_cause": "The final manifest is a caller-composed summary rather than an independently verified immutable acceptance transaction.",
+      "minimal_fix_boundary": "Require an actual archive path, recompute its SHA-256, enumerate and hash every component, verify every explicit ok/status field, bind a common generation/exercise graph, publish into an immutable directory, and atomically commit one final receipt.",
+      "required_tests": [
+        "wrong archive bytes with claimed digest",
+        "nonexistent archive",
+        "soakValidation.ok=false",
+        "component mutation after finalization",
+        "component from different campaign",
+        "atomic final-bundle publication failure"
+      ],
+      "regression_risks": [
+        "Final bundle production must preserve prior accepted bundles and avoid path-only mutable pointers.",
+        "R07/R24 publication mechanics require explicit coordination."
+      ],
+      "primary_owner": "R09",
+      "secondary_sectors": [
+        "R07",
+        "R11",
+        "R24"
+      ],
+      "aliases_or_dependencies": [
+        "BWS120-R09-004 owns release publication transactionality.",
+        "BWS120-R09-018 owns the earlier external soak-promotion bypass."
+      ],
+      "explicitly_unchanged_areas": [
+        "No source, test, migration, schema, configuration, documentation, manifest, or archive member was modified.",
+        "No provider, external API, account, credential, signer, wallet, deployed service, or persistent database was contacted.",
+        "Execution, public signals, and live financial operations remain disabled and out of scope."
+      ],
+      "blocks": {
+        "release": true,
+        "BWS-600": true,
+        "B1": true,
+        "deployment": true
+      }
+    },
+    {
+      "id": "BWS120-R09-HYP-001",
+      "classification": "HYPOTHESIS",
+      "title": "Archive extraction-before-validation may remain platform-dependent",
+      "status": "NOT_CONFIRMED_ON_GNU_TAR_1_35",
+      "evidence": "GNU tar rejected the bounded ../ traversal archive and symlink-pivot archive before an outside write. Other tar implementations/platforms were not available.",
+      "required_proof": "Run the exact extractor and command arguments on every supported deployment platform with traversal, absolute path, hard-link, symlink-pivot, duplicate, and special-entry archives.",
+      "primary_owner": "R09",
+      "secondary_sectors": [
+        "R11",
+        "R24"
+      ]
+    },
+    {
+      "id": "BWS120-R09-HYP-002",
+      "classification": "HYPOTHESIS",
+      "title": "Directory writability checks may be false-positive under privilege or ACL differences",
+      "status": "STATIC_SUSPICION_NOT_DYNAMICALLY_PROVEN",
+      "evidence": "ensureDirectoryWritable creates/stat-checks directories but the review ran as a privileged container user, making permission falsification unreliable.",
+      "required_proof": "Run as the actual service user against read-only, ACL-denied, NFS, and mount-policy variants.",
+      "primary_owner": "R09",
+      "secondary_sectors": [
+        "R10",
+        "R23"
+      ]
+    },
+    {
+      "id": "BWS120-R09-HYP-003",
+      "classification": "HYPOTHESIS",
+      "title": "Node engine validation uses a substring rather than a semantic range parser",
+      "status": "CURRENT_PACKAGE_NOT_TRIGGERED",
+      "evidence": "assertNodeEngineRange accepts any string containing 20. Current package.json is >=20 <21, so no current release failure was confirmed.",
+      "required_proof": "Mutation tests using misleading engine strings and a decision on exact allowed range semantics.",
+      "primary_owner": "R09",
+      "secondary_sectors": [
+        "R10",
+        "R11"
+      ]
+    },
+    {
+      "id": "BWS120-R09-SAFE-001",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "Release staging and extraction enforce repository/path confinement and reject symlinks",
+      "evidence": "Path normalization, boundary checks, lstat checks, and archive-member type validation are present. The bounded traversal and symlink-pivot tar tests were rejected.",
+      "preserve": true
+    },
+    {
+      "id": "BWS120-R09-SAFE-002",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "Release archive creation uses deterministic tar metadata and a published checksum",
+      "evidence": "createDeterministicArchive normalizes ordering/metadata and the archive SHA file is generated. Findings concern optional verification and publication atomicity, not absence of deterministic construction.",
+      "preserve": true
+    },
+    {
+      "id": "BWS120-R09-SAFE-003",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "Upgrade apply and recovery require explicit intent tokens",
+      "evidence": "apply requires explicitIntent=apply and recovery requires explicitIntent=recover. This blocks accidental invocation but does not fix plan identity or concurrency.",
+      "preserve": true
+    },
+    {
+      "id": "BWS120-R09-SAFE-004",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "Upgrade planning includes backup, restore, migration, policy, and compatibility gates",
+      "evidence": "The plan rejects several incompatible database/release/rollback states. R03/R08 defects and R09 binding gaps remain separate.",
+      "preserve": true
+    },
+    {
+      "id": "BWS120-R09-SAFE-005",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "Managed soak runner rejects missing explicit fault and database-cleanup integrations",
+      "evidence": "runBwsSoakCampaignRuntime rejects an empty failure schedule and missing executeFailure/verifyDatabaseCleanup dependencies.",
+      "preserve": true
+    },
+    {
+      "id": "BWS120-R09-SAFE-006",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "Managed soak runner performs real interval sleeps and records wall-clock evidence",
+      "evidence": "The managed runtime path sleeps per observation and updates elapsedWallClockMs/observationCount. The synthetic execute path remains independently promotable.",
+      "preserve": true
+    },
+    {
+      "id": "BWS120-R09-SAFE-007",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "Release and promotion policy keeps provider connections and execution closed",
+      "evidence": "Release, external-preflight, and final-acceptance paths require runtimeMode=paper, providerConnections=disabled, and executionEnabled=false.",
+      "preserve": true
+    },
+    {
+      "id": "BWS120-R09-SAFE-008",
+      "classification": "INTENTIONAL_SAFEGUARD",
+      "title": "Soak checkpoint validation requires a gap-free sequence and terminal cleanup checkpoint",
+      "evidence": "The validator checks sequence numbers, campaign_initialized first, campaign_completed, and cleanup_verified terminal. Findings concern semantic and restart gaps beyond this safeguard.",
+      "preserve": true
+    },
+    {
+      "id": "BWS120-R09-REJ-001",
+      "classification": "REJECTED_SUSPICION",
+      "title": "GNU tar traversal extraction writes outside the destination",
+      "status": "REJECTED_FOR_TESTED_ARCHIVE",
+      "evidence": "GNU tar 1.35 exited 2 and created no outside file for the bounded ../ member archive."
+    },
+    {
+      "id": "BWS120-R09-REJ-002",
+      "classification": "REJECTED_SUSPICION",
+      "title": "GNU tar symlink-pivot extraction writes through a prior symlink member",
+      "status": "REJECTED_FOR_TESTED_ARCHIVE",
+      "evidence": "GNU tar 1.35 exited 2 and created no outside file for the bounded symlink-pivot archive."
+    },
+    {
+      "id": "BWS120-R09-REJ-003",
+      "classification": "REJECTED_SUSPICION",
+      "title": "The deterministic archive builder is inherently nondeterministic",
+      "status": "REJECTED_BY_SOURCE_INSPECTION",
+      "evidence": "The builder normalizes sort order, ownership, timestamps, and compression inputs. The confirmed defects are content closure, optional verification, and multi-target publication."
+    },
+    {
+      "id": "BWS120-R09-REJ-004",
+      "classification": "REJECTED_SUSPICION",
+      "title": "R09 paths enable provider access or live execution",
+      "status": "REJECTED",
+      "evidence": "Reviewed release/promotion policies retain providerConnections=disabled and executionEnabled=false; no provider or financial action was invoked."
+    },
+    {
+      "id": "BWS120-R09-HANDOFF-001",
+      "classification": "CROSS_AREA_HANDOFF",
+      "title": "Migration application, psql cancellation, and database transaction correctness",
+      "target": "R03",
+      "dependencies": [
+        "BWS116-R03-003",
+        "BWS116-R03-004",
+        "BWS116-R03-005",
+        "BWS116-R03-011",
+        "BWS116-R03-013"
+      ],
+      "note": "R09 must consume corrected database receipts but does not duplicate persistence root causes."
+    },
+    {
+      "id": "BWS120-R09-HANDOFF-002",
+      "classification": "CROSS_AREA_HANDOFF",
+      "title": "Process ownership, exact generation, readiness, shutdown, and partial-start cleanup",
+      "target": "R06",
+      "dependencies": [
+        "BWS118-R06-001",
+        "BWS118-R06-002",
+        "BWS118-R06-003",
+        "BWS118-R06-004",
+        "BWS118-R06-006",
+        "BWS118-R06-007",
+        "BWS118-R06-009",
+        "BWS118-R06-010",
+        "BWS118-R06-011",
+        "BWS118-R06-012",
+        "BWS118-R06-013"
+      ],
+      "note": "Upgrade/soak must consume exact lifecycle receipts after R06 correction."
+    },
+    {
+      "id": "BWS120-R09-HANDOFF-003",
+      "classification": "CROSS_AREA_HANDOFF",
+      "title": "Evidence index, immutable artifact hashes, self-reference, and atomic publication",
+      "target": "R07",
+      "dependencies": [],
+      "note": "R09 identifies required evidence relationships; R07 owns evidence publication/index mechanics."
+    },
+    {
+      "id": "BWS120-R09-HANDOFF-004",
+      "classification": "CROSS_AREA_HANDOFF",
+      "title": "Backup, restore, retention, and disposable-resource recovery truth",
+      "target": "R08",
+      "dependencies": [],
+      "note": "R09 must require exact R08 receipts but not reimplement backup/restore correctness."
+    },
+    {
+      "id": "BWS120-R09-HANDOFF-005",
+      "classification": "CROSS_AREA_HANDOFF",
+      "title": "Environment tuple, precedence, secrets, path permissions, and CLI authority",
+      "target": "R10",
+      "dependencies": [],
+      "note": "R09 requires an immutable secret-safe effective-configuration receipt."
+    },
+    {
+      "id": "BWS120-R09-HANDOFF-006",
+      "classification": "CROSS_AREA_HANDOFF",
+      "title": "Aggregate tests, validators, fixtures, source manifest, and false-green final assurance",
+      "target": "R11",
+      "dependencies": [
+        "KNOWN_BASELINE_MANIFEST_DRIFT"
+      ],
+      "note": "R11 must prove the corrected R09 paths and close the known manifest drift."
+    },
+    {
+      "id": "BWS120-R09-HANDOFF-007",
+      "classification": "CROSS_AREA_HANDOFF",
+      "title": "Upstream retry/timeout and external API runtime authority",
+      "target": "R01",
+      "dependencies": [
+        "BWS116-R01-007"
+      ],
+      "note": "External campaign identity must consume, not redefine, corrected upstream client authority."
+    },
+    {
+      "id": "BWS120-R09-HANDOFF-008",
+      "classification": "CROSS_AREA_HANDOFF",
+      "title": "Controller invocation, artifact cleanup, and campaign finalization",
+      "target": "R12",
+      "dependencies": [],
+      "note": "R12 owns autonomous controller behavior around these release/soak operations."
+    },
+    {
+      "id": "BWS120-R09-HANDOFF-009",
+      "classification": "CROSS_AREA_HANDOFF",
+      "title": "Release and handoff publication identity",
+      "target": "R24-equivalent publication concern / R07 in this BWS program",
+      "dependencies": [],
+      "note": "BWS has no separate completed R24 sector; publication concerns remain explicit for R07/R11/R12 consolidation."
+    },
+    {
+      "id": "BWS120-R09-TG-001",
+      "classification": "TEST_GAP",
+      "title": "Negative install verification for incompatible Node, psql, and missing server proof",
+      "required_test": "Negative install verification for incompatible Node, psql, and missing server proof",
+      "primary_owner": "R09"
+    },
+    {
+      "id": "BWS120-R09-TG-002",
+      "classification": "TEST_GAP",
+      "title": "Promotable install/upgrade rejection when archive verification is absent",
+      "required_test": "Promotable install/upgrade rejection when archive verification is absent",
+      "primary_owner": "R09"
+    },
+    {
+      "id": "BWS120-R09-TG-003",
+      "classification": "TEST_GAP",
+      "title": "Exact release path-set equality with undeclared/missing members",
+      "required_test": "Exact release path-set equality with undeclared/missing members",
+      "primary_owner": "R09"
+    },
+    {
+      "id": "BWS120-R09-TG-004",
+      "classification": "TEST_GAP",
+      "title": "Fault injection after every release publication step and overwrite preservation",
+      "required_test": "Fault injection after every release publication step and overwrite preservation",
+      "primary_owner": "R09"
+    },
+    {
+      "id": "BWS120-R09-TG-005",
+      "classification": "TEST_GAP",
+      "title": "Upgrade plan content tamper and post-plan environment/release mutation",
+      "required_test": "Upgrade plan content tamper and post-plan environment/release mutation",
+      "primary_owner": "R09"
+    },
+    {
+      "id": "BWS120-R09-TG-006",
+      "classification": "TEST_GAP",
+      "title": "Two-process apply/recover ownership and fencing",
+      "required_test": "Two-process apply/recover ownership and fencing",
+      "primary_owner": "R09"
+    },
+    {
+      "id": "BWS120-R09-TG-007",
+      "classification": "TEST_GAP",
+      "title": "Resolved-state cross-plan reuse and corrupted checkpoint-chain recovery",
+      "required_test": "Resolved-state cross-plan reuse and corrupted checkpoint-chain recovery",
+      "primary_owner": "R09"
+    },
+    {
+      "id": "BWS120-R09-TG-008",
+      "classification": "TEST_GAP",
+      "title": "Lifecycle outcome matrix for drain, start, target readiness, and rollback cleanup",
+      "required_test": "Lifecycle outcome matrix for drain, start, target readiness, and rollback cleanup",
+      "primary_owner": "R09"
+    },
+    {
+      "id": "BWS120-R09-TG-009",
+      "classification": "TEST_GAP",
+      "title": "Target-specific failure injection for every soak matrix entry",
+      "required_test": "Target-specific failure injection for every soak matrix entry",
+      "primary_owner": "R09"
+    },
+    {
+      "id": "BWS120-R09-TG-010",
+      "classification": "TEST_GAP",
+      "title": "Crash at every fault/cycle checkpoint boundary and restart convergence",
+      "required_test": "Crash at every fault/cycle checkpoint boundary and restart convergence",
+      "primary_owner": "R09"
+    },
+    {
+      "id": "BWS120-R09-TG-011",
+      "classification": "TEST_GAP",
+      "title": "Chunked/resumed soak cumulative validation",
+      "required_test": "Chunked/resumed soak cumulative validation",
+      "primary_owner": "R09"
+    },
+    {
+      "id": "BWS120-R09-TG-012",
+      "classification": "TEST_GAP",
+      "title": "Observation health/progress/resource threshold negatives",
+      "required_test": "Observation health/progress/resource threshold negatives",
+      "primary_owner": "R09"
+    },
+    {
+      "id": "BWS120-R09-TG-013",
+      "classification": "TEST_GAP",
+      "title": "External preflight rejects forged or unvalidated soak state",
+      "required_test": "External preflight rejects forged or unvalidated soak state",
+      "primary_owner": "R09/R10/R11"
+    },
+    {
+      "id": "BWS120-R09-TG-014",
+      "classification": "TEST_GAP",
+      "title": "Environment mutation after external manifest creation",
+      "required_test": "Environment mutation after external manifest creation",
+      "primary_owner": "R09/R10/R11"
+    },
+    {
+      "id": "BWS120-R09-TG-015",
+      "classification": "TEST_GAP",
+      "title": "Measured resource cleanup instead of caller counters",
+      "required_test": "Measured resource cleanup instead of caller counters",
+      "primary_owner": "R09"
+    },
+    {
+      "id": "BWS120-R09-TG-016",
+      "classification": "TEST_GAP",
+      "title": "Cross-artifact final recovery provenance and final archive/component tamper",
+      "required_test": "Cross-artifact final recovery provenance and final archive/component tamper",
+      "primary_owner": "R09"
+    },
+    {
+      "id": "BWS120-R09-ENV-001",
+      "classification": "ENVIRONMENT_BLOCKER",
+      "title": "Canonical Node 20.20.2 unavailable",
+      "effect": "All Node 22 test observations are supplementary and cannot establish canonical acceptance."
+    },
+    {
+      "id": "BWS120-R09-ENV-002",
+      "classification": "ENVIRONMENT_BLOCKER",
+      "title": "Local PostgreSQL/psql unavailable",
+      "effect": "No disposable upgrade/migration/restore transaction was executed."
+    },
+    {
+      "id": "BWS120-R09-ENV-003",
+      "classification": "ENVIRONMENT_BLOCKER",
+      "title": "Repository dependencies/build and generated upstream lock unavailable",
+      "effect": "The broad focused test command had 48 environment/fixture failures, one skip, and no confirmed product assertion failure."
+    },
+    {
+      "id": "BWS120-R09-ENV-004",
+      "classification": "ENVIRONMENT_BLOCKER",
+      "title": "Systemd and multi-hour managed soak unavailable/prohibited",
+      "effect": "No real service restart, systemd, two-hour soak, or upgrade was run under the read-only safety contract."
+    }
+  ]
+}

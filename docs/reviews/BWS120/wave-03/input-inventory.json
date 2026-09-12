@@ -1,0 +1,205 @@
+{
+  "inputs": [
+    {
+      "accepted_authority_class": "CURRENT_REPOSITORY_AUTHORITY",
+      "derivative_or_primary": "PRIMARY",
+      "filename": "betting-win-surebet120.zip",
+      "format": "zip",
+      "role": "current repository archive",
+      "sha256": "d4565c05ecfe63f5d5511f224a20ff20fb82bfc75b23203c94d7d3e98a8c21bb",
+      "stated_baseline": "BWS120",
+      "supersession_status": "CURRENT"
+    },
+    {
+      "accepted_authority_class": "CURRENT_BASELINE_REVIEW_EVIDENCE",
+      "derivative_or_primary": "PRIMARY",
+      "filename": "BWS120-R07-report(1).md",
+      "format": "md",
+      "role": "R07 report",
+      "sha256": "e7cdbf19ba7f6f1bc1efb6cb13dba89d62c7d9888b63a7b811f0363530f573c3",
+      "stated_baseline": "BWS120",
+      "supersession_status": "CURRENT"
+    },
+    {
+      "accepted_authority_class": "CURRENT_BASELINE_REVIEW_EVIDENCE",
+      "derivative_or_primary": "PRIMARY",
+      "filename": "BWS120-R07-findings(1).json",
+      "format": "json",
+      "role": "R07 findings",
+      "sha256": "c3628a767a22f6df970a87d15dd14c35fe05298692c952f45ba9c2a0baaee5e7",
+      "stated_baseline": "BWS120",
+      "supersession_status": "CURRENT"
+    },
+    {
+      "accepted_authority_class": "CURRENT_BASELINE_REVIEW_EVIDENCE",
+      "derivative_or_primary": "PRIMARY",
+      "filename": "BWS120-R07-coverage(1).tsv",
+      "format": "tsv",
+      "role": "R07 coverage",
+      "sha256": "1259d5c2fccc996896ca4cdd8a6ed657b8ff379a79e9bf0bb7a717ce503cbf3a",
+      "stated_baseline": "BWS120",
+      "supersession_status": "CURRENT"
+    },
+    {
+      "accepted_authority_class": "CURRENT_BASELINE_REVIEW_EVIDENCE",
+      "derivative_or_primary": "PRIMARY",
+      "filename": "BWS120-R07-validation(1).json",
+      "format": "json",
+      "role": "R07 validation",
+      "sha256": "16646c9cd5cc05255adda690cbaf560dff80a160908089634f567989c9ce7297",
+      "stated_baseline": "BWS120",
+      "supersession_status": "CURRENT"
+    },
+    {
+      "accepted_authority_class": "CURRENT_BASELINE_REVIEW_EVIDENCE",
+      "derivative_or_primary": "PRIMARY",
+      "filename": "BWS120-R08-report(1).md",
+      "format": "md",
+      "role": "R08 report",
+      "sha256": "c8987c1c2385c7e37195cd967f17e815d43c74847afd351814f02ff8018beaf2",
+      "stated_baseline": "BWS120",
+      "supersession_status": "CURRENT"
+    },
+    {
+      "accepted_authority_class": "CURRENT_BASELINE_REVIEW_EVIDENCE",
+      "derivative_or_primary": "PRIMARY",
+      "filename": "BWS120-R08-findings(1).json",
+      "format": "json",
+      "role": "R08 findings",
+      "sha256": "9c307db8926a548aac02c24981e99529efeb69069d954489db4d2ea0199ddece",
+      "stated_baseline": "BWS120",
+      "supersession_status": "CURRENT"
+    },
+    {
+      "accepted_authority_class": "CURRENT_BASELINE_REVIEW_EVIDENCE",
+      "derivative_or_primary": "PRIMARY",
+      "filename": "BWS120-R08-coverage(1).tsv",
+      "format": "tsv",
+      "role": "R08 coverage",
+      "sha256": "1eb6541c1d4fc83ff6984d7c5b1da622439f3b6fe176b8fb5846ed0ef3f5e5be",
+      "stated_baseline": "BWS120",
+      "supersession_status": "CURRENT"
+    },
+    {
+      "accepted_authority_class": "CURRENT_BASELINE_REVIEW_EVIDENCE",
+      "derivative_or_primary": "PRIMARY",
+      "filename": "BWS120-R08-validation(1).json",
+      "format": "json",
+      "role": "R08 validation",
+      "sha256": "bf1251ce49649a270bed11617a9e7e569e4589b80b1574026eaaced9cb3694ba",
+      "stated_baseline": "BWS120",
+      "supersession_status": "CURRENT"
+    },
+    {
+      "accepted_authority_class": "CURRENT_BASELINE_REVIEW_EVIDENCE",
+      "derivative_or_primary": "PRIMARY",
+      "filename": "BWS120-R09-report(1).md",
+      "format": "md",
+      "role": "R09 report",
+      "sha256": "dac73b497eaaa5f3c3c71e196f1568fb99611fddb90641c0f86e9e7955c0dc56",
+      "stated_baseline": "BWS120",
+      "supersession_status": "CURRENT"
+    },
+    {
+      "accepted_authority_class": "CURRENT_BASELINE_REVIEW_EVIDENCE",
+      "derivative_or_primary": "PRIMARY",
+      "filename": "BWS120-R09-findings(1).json",
+      "format": "json",
+      "role": "R09 findings",
+      "sha256": "132344ea137ad854c959c4e22ad1eb10b0d43ee416efec8cbccbd87b74fba580",
+      "stated_baseline": "BWS120",
+      "supersession_status": "CURRENT"
+    },
+    {
+      "accepted_authority_class": "CURRENT_BASELINE_REVIEW_EVIDENCE",
+      "derivative_or_primary": "PRIMARY",
+      "filename": "BWS120-R09-coverage(1).tsv",
+      "format": "tsv",
+      "role": "R09 coverage",
+      "sha256": "b735b660f7c8bcf5fb1b4dc8690bedb607b3a832770a3e6390694f048d8e7c62",
+      "stated_baseline": "BWS120",
+      "supersession_status": "CURRENT"
+    },
+    {
+      "accepted_authority_class": "CURRENT_BASELINE_REVIEW_EVIDENCE",
+      "derivative_or_primary": "PRIMARY",
+      "filename": "BWS120-R09-validation(1).json",
+      "format": "json",
+      "role": "R09 validation",
+      "sha256": "3dafbaf3c52b545e5cac4844ec00694857e35f2dc6295d99476057af29eaac3a",
+      "stated_baseline": "BWS120",
+      "supersession_status": "CURRENT"
+    },
+    {
+      "accepted_authority_class": "DUPLICATE_IDENTICAL_INPUT",
+      "derivative_or_primary": "DERIVATIVE",
+      "filename": "BWS120-R08-coverage (1).tsv",
+      "format": "tsv",
+      "role": "duplicate R08 coverage upload",
+      "sha256": "1eb6541c1d4fc83ff6984d7c5b1da622439f3b6fe176b8fb5846ed0ef3f5e5be",
+      "stated_baseline": "BWS120",
+      "supersession_status": "SUPERSEDED_BY_CANONICAL_FILENAME"
+    },
+    {
+      "accepted_authority_class": "PROCESS_EVIDENCE",
+      "derivative_or_primary": "DERIVATIVE",
+      "filename": "betting-win-surebet-cross-review-docs-overlay-r04-r06-wave02-rebased-50bbcb0b-20260912.zip",
+      "format": "zip",
+      "role": "prior landed overlay",
+      "sha256": "669f1c90dcfef99b543f6223107b60f71052b9b03339c8fe6a0222f2d991981b",
+      "stated_baseline": "BWS118",
+      "supersession_status": "HISTORICAL_LANDED_LINEAGE"
+    },
+    {
+      "accepted_authority_class": "PROCESS_EVIDENCE",
+      "derivative_or_primary": "DERIVATIVE",
+      "filename": "apply-betting-win-surebet-cross-review-docs-overlay-r04-r06-wave02-rebased-50bbcb0b-20260912.sh",
+      "format": "sh",
+      "role": "failed prior installer",
+      "sha256": "192e65772da9b136392688d7a250d862b513fbf28324c74356665648a1afbaa0",
+      "stated_baseline": "BWS118",
+      "supersession_status": "HISTORICAL_LANDED_LINEAGE"
+    },
+    {
+      "accepted_authority_class": "PROCESS_EVIDENCE",
+      "derivative_or_primary": "DERIVATIVE",
+      "filename": "apply-betting-win-surebet-cross-review-docs-overlay-r04-r06-wave02-rebased-50bbcb0b-20260912-v2.sh",
+      "format": "sh",
+      "role": "corrected prior installer",
+      "sha256": "6a6773a3e98d180114c6b088caceab67a4686588a2e0c8112f1db1381311ae52",
+      "stated_baseline": "BWS118",
+      "supersession_status": "HISTORICAL_LANDED_LINEAGE"
+    },
+    {
+      "accepted_authority_class": "PROCESS_EVIDENCE",
+      "derivative_or_primary": "DERIVATIVE",
+      "filename": "betting-win-surebet-cross-review-docs-overlay-r04-r06-wave02-repair-v2-validation-20260912.txt",
+      "format": "txt",
+      "role": "prior validation",
+      "sha256": "88b5a3b78d3ed125e16537d35d3986818dcab9e031e5a16172d1db707997c5bf",
+      "stated_baseline": "BWS118",
+      "supersession_status": "HISTORICAL_LANDED_LINEAGE"
+    },
+    {
+      "accepted_authority_class": "PROCESS_EVIDENCE",
+      "derivative_or_primary": "DERIVATIVE",
+      "filename": "betting-win-surebet-cross-review-docs-overlay-r04-r06-wave02-repair-v2-checksums-20260912.txt",
+      "format": "txt",
+      "role": "prior checksums",
+      "sha256": "a2922c43c23d7cadd055221a99ced4f6f32452e7b4936b171e46f335661e09ad",
+      "stated_baseline": "BWS118",
+      "supersession_status": "HISTORICAL_LANDED_LINEAGE"
+    },
+    {
+      "accepted_authority_class": "PROCESS_EVIDENCE_ONLY",
+      "derivative_or_primary": "PRIMARY_PROCESS_RECORD",
+      "filename": "current conversation transcript",
+      "format": "conversation",
+      "role": "prior process lineage and operator output",
+      "sha256": "NOT_STANDALONE_FILE",
+      "stated_baseline": "multiple",
+      "supersession_status": "CURRENT_CONVERSATION"
+    }
+  ],
+  "schema": "betting-win-surebet-wave03-input-inventory-v1"
+}

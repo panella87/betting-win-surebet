@@ -1,0 +1,610 @@
+{
+  "entries": [
+    {
+      "action": "REPLACE",
+      "mode": "0744",
+      "path": "docs/000_documentation_index.md",
+      "postimage_sha256": "732b6e6ef7136af4e9fb7074c9606c10c68f1f48546f35feb78f88ec2b3ce40f",
+      "preimage_sha256": "ec4b7d3c4c85023e57575ef3b924b1d11fb9cf95b120dad2d1dbf47de4463667",
+      "protected_content_preserved": true,
+      "reason": "Wave 03 independent review integration",
+      "source_reports_represented": [
+        "R07",
+        "R08",
+        "R09",
+        "R01-R06 preserved"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS120/wave-03/README.md",
+      "postimage_sha256": "a932d85923eee90d7fca1b65f2670e0fae581509e6981b9608e2eae520ca03c1",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 03 independent review integration",
+      "source_reports_represented": [
+        "R07",
+        "R08",
+        "R09",
+        "R01-R06 preserved"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS120/wave-03/area-coverage.md",
+      "postimage_sha256": "0c0e060bcb6b64078436aff3f2ca5be033c47319f3157c36c419b34a3e34c5f2",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 03 independent review integration",
+      "source_reports_represented": [
+        "R07",
+        "R08",
+        "R09",
+        "R01-R06 preserved"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS120/wave-03/authority-map.md",
+      "postimage_sha256": "b004415badaf12e3ec5c2dd40e4b738718a2afbc59538d028d8e1c8dd773e2e2",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 03 independent review integration",
+      "source_reports_represented": [
+        "R07",
+        "R08",
+        "R09",
+        "R01-R06 preserved"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS120/wave-03/baseline-compatibility.json",
+      "postimage_sha256": "b53d263bdb5df616c19d300bdc2d41b4235fe6a973c8e072777ca5ee12fb6514",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 03 independent review integration",
+      "source_reports_represented": [
+        "R07",
+        "R08",
+        "R09",
+        "R01-R06 preserved"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS120/wave-03/baseline-compatibility.md",
+      "postimage_sha256": "9609b21546103a074d8f9d7d5f7dba5727939d0ce7663112a2fd37ff3d63975f",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 03 independent review integration",
+      "source_reports_represented": [
+        "R07",
+        "R08",
+        "R09",
+        "R01-R06 preserved"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS120/wave-03/baseline-file-manifest.tsv",
+      "postimage_sha256": "457bb498d00611a3a0eca478552e5b27e3268f4167c6e1fdc35f8ea2da8e611a",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 03 independent review integration",
+      "source_reports_represented": [
+        "R07",
+        "R08",
+        "R09",
+        "R01-R06 preserved"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS120/wave-03/completeness-reconciliation.json",
+      "postimage_sha256": "237b9c7bce8daacbe69d1f664dbe5fe376a21882c2336d4fd1bd07288c82ff85",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 03 independent review integration",
+      "source_reports_represented": [
+        "R07",
+        "R08",
+        "R09",
+        "R01-R06 preserved"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS120/wave-03/cumulative-consolidated-ledger.json",
+      "postimage_sha256": "dc47a624e242f859daed6b256a27cc93f343fcd7b74a630e2e6cc75015c8a894",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 03 independent review integration",
+      "source_reports_represented": [
+        "R07",
+        "R08",
+        "R09",
+        "R01-R06 preserved"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS120/wave-03/cumulative-consolidated-ledger.md",
+      "postimage_sha256": "c7cbc42fdfb1cdd89d28dead5afbcc59c6e0a13e0758632adc72ca4d9d2dac2f",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 03 independent review integration",
+      "source_reports_represented": [
+        "R07",
+        "R08",
+        "R09",
+        "R01-R06 preserved"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS120/wave-03/decisions.json",
+      "postimage_sha256": "c2e4133ec268907ae07735ead1007bc6bc37035a12f5575e82d91ded05d1334b",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 03 independent review integration",
+      "source_reports_represented": [
+        "R07",
+        "R08",
+        "R09",
+        "R01-R06 preserved"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS120/wave-03/decisions.md",
+      "postimage_sha256": "bdf894adaedd2feef67e6fdcb0af2b68eabf072a82b2f85eb06dd4e03af71cc8",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 03 independent review integration",
+      "source_reports_represented": [
+        "R07",
+        "R08",
+        "R09",
+        "R01-R06 preserved"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS120/wave-03/dependency-and-tranches.md",
+      "postimage_sha256": "ceffe100650903c4ad3bbe2cc01cb720f2f301ff212487e576ef5916656fc60c",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 03 independent review integration",
+      "source_reports_represented": [
+        "R07",
+        "R08",
+        "R09",
+        "R01-R06 preserved"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS120/wave-03/documentation-integration-plan.json",
+      "postimage_sha256": "SELF_HASH_BOUND_BY_OVERLAY_APPLY_MANIFEST_AND_EXTERNAL_CHECKSUM",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Exact overlay integration plan",
+      "source_reports_represented": [
+        "R07",
+        "R08",
+        "R09",
+        "R01-R06 preserved"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS120/wave-03/incremental-consolidation.md",
+      "postimage_sha256": "1ed86d9a32ec52a32482be813ef65da7e90f172e6344140b0d0c222e8ea3bab1",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 03 independent review integration",
+      "source_reports_represented": [
+        "R07",
+        "R08",
+        "R09",
+        "R01-R06 preserved"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS120/wave-03/input-inventory.json",
+      "postimage_sha256": "5dce07907f1dfcb701f1f1804787fd3482e94893c923c839384f969b47724dca",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 03 independent review integration",
+      "source_reports_represented": [
+        "R07",
+        "R08",
+        "R09",
+        "R01-R06 preserved"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS120/wave-03/next-wave-handoff.md",
+      "postimage_sha256": "9456766dd3583bdfe33948954c7a9ee287e1d9f47f83cbd073de9f35c2138ea0",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 03 independent review integration",
+      "source_reports_represented": [
+        "R07",
+        "R08",
+        "R09",
+        "R01-R06 preserved"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS120/wave-03/non-defect-register.json",
+      "postimage_sha256": "11500d565c9767048e965ffb432e8670627a8740229367c2d4c5c51d7761b4f2",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 03 independent review integration",
+      "source_reports_represented": [
+        "R07",
+        "R08",
+        "R09",
+        "R01-R06 preserved"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS120/wave-03/original-to-consolidated.json",
+      "postimage_sha256": "7dbbdc3ab9a35069ef6ebcf6a9b45f695b8feb1381e50dcad09b638ca9f6852f",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 03 independent review integration",
+      "source_reports_represented": [
+        "R07",
+        "R08",
+        "R09",
+        "R01-R06 preserved"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS120/wave-03/prior-overlay-lineage.json",
+      "postimage_sha256": "d27dc418b8d26c7580264ce06384f91d66c974f2ab3dceead90b5343c4c47dc8",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 03 independent review integration",
+      "source_reports_represented": [
+        "R07",
+        "R08",
+        "R09",
+        "R01-R06 preserved"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS120/wave-03/prior-overlay-lineage.md",
+      "postimage_sha256": "7bd7c1f229b3fe7f68eff0cf72f46d278e7ca98a0adb26ac99256d660d874fe9",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 03 independent review integration",
+      "source_reports_represented": [
+        "R07",
+        "R08",
+        "R09",
+        "R01-R06 preserved"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS120/wave-03/protected-mutable-documents.json",
+      "postimage_sha256": "299929726120f09ad60eb80654505889265a35daaad675b95fdae5fd004bf4f2",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 03 independent review integration",
+      "source_reports_represented": [
+        "R07",
+        "R08",
+        "R09",
+        "R01-R06 preserved"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS120/wave-03/report-index.json",
+      "postimage_sha256": "ea285e3b2649138f6546a9cea2142f1705c7ddfe4e82a299e77698b759276edc",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 03 independent review integration",
+      "source_reports_represented": [
+        "R07",
+        "R08",
+        "R09",
+        "R01-R06 preserved"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS120/wave-03/reports/R07/BWS120-R07-coverage.tsv",
+      "postimage_sha256": "1259d5c2fccc996896ca4cdd8a6ed657b8ff379a79e9bf0bb7a717ce503cbf3a",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 03 independent review integration",
+      "source_reports_represented": [
+        "R07",
+        "R08",
+        "R09",
+        "R01-R06 preserved"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS120/wave-03/reports/R07/BWS120-R07-findings.json",
+      "postimage_sha256": "c3628a767a22f6df970a87d15dd14c35fe05298692c952f45ba9c2a0baaee5e7",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 03 independent review integration",
+      "source_reports_represented": [
+        "R07",
+        "R08",
+        "R09",
+        "R01-R06 preserved"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS120/wave-03/reports/R07/BWS120-R07-report.md",
+      "postimage_sha256": "c42dd8cf2ad1c3228fb58dc4818f698011015f643bc210a9fd2d1c8b89a9b439",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 03 independent review integration",
+      "source_reports_represented": [
+        "R07",
+        "R08",
+        "R09",
+        "R01-R06 preserved"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS120/wave-03/reports/R07/BWS120-R07-validation.json",
+      "postimage_sha256": "16646c9cd5cc05255adda690cbaf560dff80a160908089634f567989c9ce7297",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 03 independent review integration",
+      "source_reports_represented": [
+        "R07",
+        "R08",
+        "R09",
+        "R01-R06 preserved"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS120/wave-03/reports/R08/BWS120-R08-coverage.tsv",
+      "postimage_sha256": "1eb6541c1d4fc83ff6984d7c5b1da622439f3b6fe176b8fb5846ed0ef3f5e5be",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 03 independent review integration",
+      "source_reports_represented": [
+        "R07",
+        "R08",
+        "R09",
+        "R01-R06 preserved"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS120/wave-03/reports/R08/BWS120-R08-findings.json",
+      "postimage_sha256": "9c307db8926a548aac02c24981e99529efeb69069d954489db4d2ea0199ddece",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 03 independent review integration",
+      "source_reports_represented": [
+        "R07",
+        "R08",
+        "R09",
+        "R01-R06 preserved"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS120/wave-03/reports/R08/BWS120-R08-report.md",
+      "postimage_sha256": "e3ee59c7004eee3a997fa9a85a0775372b7fd4c04d035434543dfcee3c585817",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 03 independent review integration",
+      "source_reports_represented": [
+        "R07",
+        "R08",
+        "R09",
+        "R01-R06 preserved"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS120/wave-03/reports/R08/BWS120-R08-validation.json",
+      "postimage_sha256": "bf1251ce49649a270bed11617a9e7e569e4589b80b1574026eaaced9cb3694ba",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 03 independent review integration",
+      "source_reports_represented": [
+        "R07",
+        "R08",
+        "R09",
+        "R01-R06 preserved"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS120/wave-03/reports/R09/BWS120-R09-coverage.tsv",
+      "postimage_sha256": "b735b660f7c8bcf5fb1b4dc8690bedb607b3a832770a3e6390694f048d8e7c62",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 03 independent review integration",
+      "source_reports_represented": [
+        "R07",
+        "R08",
+        "R09",
+        "R01-R06 preserved"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS120/wave-03/reports/R09/BWS120-R09-findings.json",
+      "postimage_sha256": "132344ea137ad854c959c4e22ad1eb10b0d43ee416efec8cbccbd87b74fba580",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 03 independent review integration",
+      "source_reports_represented": [
+        "R07",
+        "R08",
+        "R09",
+        "R01-R06 preserved"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS120/wave-03/reports/R09/BWS120-R09-report.md",
+      "postimage_sha256": "dac73b497eaaa5f3c3c71e196f1568fb99611fddb90641c0f86e9e7955c0dc56",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 03 independent review integration",
+      "source_reports_represented": [
+        "R07",
+        "R08",
+        "R09",
+        "R01-R06 preserved"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS120/wave-03/reports/R09/BWS120-R09-validation.json",
+      "postimage_sha256": "3dafbaf3c52b545e5cac4844ec00694857e35f2dc6295d99476057af29eaac3a",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 03 independent review integration",
+      "source_reports_represented": [
+        "R07",
+        "R08",
+        "R09",
+        "R01-R06 preserved"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS120/wave-03/repository-profile.md",
+      "postimage_sha256": "7a580acdbb5fbde8d905c496d9a6f2416de5f95313d67944985b5daa3ddd55dc",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 03 independent review integration",
+      "source_reports_represented": [
+        "R07",
+        "R08",
+        "R09",
+        "R01-R06 preserved"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS120/wave-03/source-verification.json",
+      "postimage_sha256": "51de5eeaa50c039da93729a1d91b779bac78da5929fa7fc49eabf4a4b2bf230f",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 03 independent review integration",
+      "source_reports_represented": [
+        "R07",
+        "R08",
+        "R09",
+        "R01-R06 preserved"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS120/wave-03/test-evidence-matrix.json",
+      "postimage_sha256": "5cecb3239f7993eaf16864216923e5238bbeedab88ffb9b26ccb83033864b272",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 03 independent review integration",
+      "source_reports_represented": [
+        "R07",
+        "R08",
+        "R09",
+        "R01-R06 preserved"
+      ]
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/reviews/BWS120/wave-03/test-evidence-matrix.md",
+      "postimage_sha256": "f3d5c17020496440362e76888e704fb78b8d755bb6625d1107890bc43d60d0ae",
+      "preimage_sha256": "ABSENT",
+      "protected_content_preserved": true,
+      "reason": "Wave 03 independent review integration",
+      "source_reports_represented": [
+        "R07",
+        "R08",
+        "R09",
+        "R01-R06 preserved"
+      ]
+    },
+    {
+      "action": "REPLACE",
+      "mode": "0644",
+      "path": "docs/reviews/README.md",
+      "postimage_sha256": "e49fa4209c5598c31962ad0815886bbbb58a93f9e26190f57be839886173e5bb",
+      "preimage_sha256": "4a19ea4f94498e7343a6bffdc31fd6aa50368736b9c68f8a1b28bc1713f62098",
+      "protected_content_preserved": true,
+      "reason": "Wave 03 independent review integration",
+      "source_reports_represented": [
+        "R07",
+        "R08",
+        "R09",
+        "R01-R06 preserved"
+      ]
+    }
+  ],
+  "repository_preimage": {
+    "archive": "betting-win-surebet120.zip",
+    "sha256": "d4565c05ecfe63f5d5511f224a20ff20fb82bfc75b23203c94d7d3e98a8c21bb"
+  },
+  "schema": "betting-win-surebet-wave03-documentation-integration-plan-v1",
+  "self_hash_note": "The plan file cannot recursively contain its own final digest. Its exact digest is bound by the overlay manifest, installer, validation record, checksum manifest, and response."
+}

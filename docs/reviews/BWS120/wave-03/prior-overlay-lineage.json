@@ -1,0 +1,105 @@
+{
+  "attempts": [
+    {
+      "apply_script_filename": "NOT_SUPPLIED",
+      "apply_script_sha256": "NOT_SUPPLIED",
+      "attempt_id": "BWS-HISTORICAL-WAVE73-ECOSYSTEM-ALIGNMENT",
+      "baseline_archive": "betting-win-surebet114 (exact archive not supplied)",
+      "baseline_sha256": "NOT_SUPPLIED",
+      "classification": "PROCESS_REFERENCE_ONLY",
+      "current_postimage_match": "UNPROVEN_AS_AN_OVERLAY_PACKAGE",
+      "declared_path_set": "NOT_SUPPLIED",
+      "evidence": [
+        "SOURCE_MANIFEST.json overlay field",
+        "docs/000_documentation_index.md documentation_curation_wave=73"
+      ],
+      "observed_result": "Referenced by SOURCE_MANIFEST.json and Wave 73 documentation, but exact package and apply receipt are absent.",
+      "overlay_filename": "betting-win-surebet114-betting-win-ecosystem-alignment-wave73-overlay.zip",
+      "overlay_sha256": "NOT_SUPPLIED",
+      "rollback_result": "NOT_APPLICABLE_OR_NOT_SUPPLIED",
+      "superseded_by": "Current BWS117 archive as file authority"
+    },
+    {
+      "apply_script_filename": "apply-betting-win-cross-review-docs-overlay-r13-r17-r18-wave07-rebased-baeb4bfc-20260910.sh",
+      "apply_script_sha256": "32fdf8bf4d6d2dc4e2c3de14c5a60d8a65c927d91e9fd9ab916529fa21b0c75b",
+      "attempt_id": "WRONG-REPOSITORY-BW-WAVE07-20260910",
+      "baseline_archive": "betting-win239(1).zip",
+      "baseline_sha256": "baeb4bfc8f31723d224d57524b69b2cce6ade197bb7c018ae1e47dc6494fec31",
+      "classification": "FAILED_BEFORE_APPLY",
+      "current_postimage_match": "NOT_APPLICABLE_TO_BWS117",
+      "declared_path_set": "38 betting-win documentation paths under docs/reviews/BW236/wave-07 plus indexes",
+      "evidence": [
+        "operator terminal output in conversation",
+        "actual wrong-repository overlay and apply-script hashes"
+      ],
+      "observed_result": "Repository identity resolved to betting-win@0.48.0, then preimage/postimage state was MIXED_OR_DRIFTED before apply.",
+      "overlay_filename": "betting-win-cross-review-docs-overlay-r13-r17-r18-wave07-rebased-baeb4bfc-20260910.zip",
+      "overlay_sha256": "633fadc571274fe724b1ad12f237e0fa45ecae858d7783ba0f1bf5833487f5c3",
+      "rollback_result": "ROLLBACK_RESTORE_FAILED=0; no write phase began.",
+      "superseded_by": "This BWS-only Wave 01 consolidation"
+    },
+    {
+      "apply_script_filename": "apply-betting-win-surebet-cross-review-docs-overlay-r01-r03-wave01-rebased-0d234e00-20260911.sh",
+      "apply_script_sha256": "fa49a0ed8bcbf6862dcc44d823152005e2eec3a9ff1c83aa30364789ead3b1fa",
+      "attempt_id": "BWS-WAVE01-R01-R03-DOCS",
+      "baseline_archive": "betting-win-surebet117.zip",
+      "baseline_sha256": "0d234e00d015dcab0989b47372ded516bddee9705d9021a0694916dc91a9d494",
+      "classification": "LANDED_IN_CURRENT_REPOSITORY",
+      "current_postimage_match": "40_OF_40_EXACT_HASH_AND_MODE_MATCH",
+      "declared_path_set": "40 paths: 39 additions and docs/000_documentation_index.md replacement",
+      "evidence": [
+        "BWS118 exact archive inventory",
+        "Wave 01 overlay exact entry inventory",
+        "R04/R05/R06 independent baseline comparisons"
+      ],
+      "observed_result": "All 40 exact overlay postimages are present in betting-win-surebet118.zip.",
+      "overlay_filename": "betting-win-surebet-cross-review-docs-overlay-r01-r03-wave01-rebased-0d234e00-20260911.zip",
+      "overlay_sha256": "3e7cac2faa605e946716ea2452198968e40438f0f256c9db5883a2b31863f481",
+      "rollback_result": "NOT_APPLICABLE_TO_CURRENT_POSTIMAGE_PROOF",
+      "superseded_by": "Wave 02 documentation overlay after successful application"
+    },
+    {
+      "apply_script_filename": "apply-betting-win-surebet-cross-review-docs-overlay-r04-r06-wave02-rebased-50bbcb0b-20260912.sh",
+      "apply_script_sha256": "192e65772da9b136392688d7a250d862b513fbf28324c74356665648a1afbaa0",
+      "attempt_id": "BWS-WAVE02-R04-R06-DOCS-V1",
+      "baseline_archive": "betting-win-surebet118.zip",
+      "baseline_sha256": "50bbcb0b476904c8209cf7e1287b5ac4f9091fa07f6fd67523fc5430029417f7",
+      "classification": "FAILED_DURING_VALIDATION_AND_ROLLED_BACK",
+      "current_postimage_match": "NOT_ATTRIBUTED_TO_FAILED_V1; later corrected package landed",
+      "declared_path_set": "40 paths: 38 additions and two index replacements",
+      "evidence": [
+        "operator terminal output",
+        "BWS119 versus BWS118 exact member comparison",
+        "V2 repair validation record"
+      ],
+      "observed_result": "All 40 files were applied in the transaction, then the custom Markdown inventory counted 577 dependency/untracked Markdown files and failed validation.",
+      "overlay_filename": "betting-win-surebet-cross-review-docs-overlay-r04-r06-wave02-rebased-50bbcb0b-20260912.zip",
+      "overlay_sha256": "669f1c90dcfef99b543f6223107b60f71052b9b03339c8fe6a0222f2d991981b",
+      "rollback_result": "ROLLBACK_RESTORE_FAILED=0; BWS119 member bytes equal BWS118.",
+      "superseded_by": "BWS-WAVE02-R04-R06-DOCS-V2"
+    },
+    {
+      "apply_script_filename": "apply-betting-win-surebet-cross-review-docs-overlay-r04-r06-wave02-rebased-50bbcb0b-20260912-v2.sh",
+      "apply_script_sha256": "6a6773a3e98d180114c6b088caceab67a4686588a2e0c8112f1db1381311ae52",
+      "attempt_id": "BWS-WAVE02-R04-R06-DOCS-V2",
+      "baseline_archive": "betting-win-surebet118.zip",
+      "baseline_sha256": "50bbcb0b476904c8209cf7e1287b5ac4f9091fa07f6fd67523fc5430029417f7",
+      "classification": "LANDED_IN_CURRENT_REPOSITORY",
+      "current_postimage_match": "40_OF_40_EXACT_HASH_AND_MODE_MATCH",
+      "declared_path_set": "40 paths: 38 additions and two index replacements",
+      "evidence": [
+        "BWS120 exact archive inventory",
+        "Wave 02 overlay exact entry comparison",
+        "R07/R08/R09 baseline compatibility results"
+      ],
+      "observed_result": "BWS120 contains every exact overlay postimage and mode.",
+      "overlay_filename": "betting-win-surebet-cross-review-docs-overlay-r04-r06-wave02-rebased-50bbcb0b-20260912.zip",
+      "overlay_sha256": "669f1c90dcfef99b543f6223107b60f71052b9b03339c8fe6a0222f2d991981b",
+      "rollback_result": "NOT_APPLICABLE_TO_CURRENT_POSTIMAGE_PROOF",
+      "superseded_by": "Wave 03 overlay after successful application"
+    }
+  ],
+  "binding_prior_attempt": "BWS-WAVE02-R04-R06-DOCS-V2",
+  "prior_bws_review_overlay_landed_state": "LANDED_IN_CURRENT_REPOSITORY",
+  "schema": "betting-win-surebet-wave03-prior-overlay-lineage-v1"
+}

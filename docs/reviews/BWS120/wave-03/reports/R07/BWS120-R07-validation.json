@@ -1,0 +1,351 @@
+{
+  "schema": "betting-win-surebet-deep-review-validation-v1",
+  "review_id": "BWS120-R07",
+  "repository": "betting-win-surebet",
+  "generated_at_utc": "2026-09-12T04:19:29Z",
+  "archive": {
+    "path": "/mnt/data/betting-win-surebet120(1).zip",
+    "expected_sha256": null,
+    "actual_sha256": "d4565c05ecfe63f5d5511f224a20ff20fb82bfc75b23203c94d7d3e98a8c21bb",
+    "expected_regular_file_count": null,
+    "actual_regular_file_count": 695,
+    "total_uncompressed_bytes": 10927220,
+    "archive_bytes": 3184672,
+    "safety": {
+      "duplicate_paths": 0,
+      "unsafe_paths": 0,
+      "symlinks": 0,
+      "special_entries": 0,
+      "verdict": "PASS"
+    }
+  },
+  "baseline_compatibility": {
+    "prior_baseline": "betting-win-surebet118.zip",
+    "prior_baseline_sha256_expected": "50bbcb0b476904c8209cf7e1287b5ac4f9091fa07f6fd67523fc5430029417f7",
+    "added_paths": 38,
+    "changed_paths": 2,
+    "removed_paths": 0,
+    "added_path_list": [
+      "docs/reviews/BWS118/wave-02/README.md",
+      "docs/reviews/BWS118/wave-02/area-coverage.md",
+      "docs/reviews/BWS118/wave-02/authority-map.md",
+      "docs/reviews/BWS118/wave-02/baseline-compatibility.json",
+      "docs/reviews/BWS118/wave-02/baseline-compatibility.md",
+      "docs/reviews/BWS118/wave-02/baseline-file-manifest.tsv",
+      "docs/reviews/BWS118/wave-02/completeness-reconciliation.json",
+      "docs/reviews/BWS118/wave-02/cumulative-consolidated-ledger.json",
+      "docs/reviews/BWS118/wave-02/cumulative-consolidated-ledger.md",
+      "docs/reviews/BWS118/wave-02/decisions.json",
+      "docs/reviews/BWS118/wave-02/decisions.md",
+      "docs/reviews/BWS118/wave-02/dependency-and-tranches.md",
+      "docs/reviews/BWS118/wave-02/documentation-integration-plan.json",
+      "docs/reviews/BWS118/wave-02/incremental-consolidation.md",
+      "docs/reviews/BWS118/wave-02/input-inventory.json",
+      "docs/reviews/BWS118/wave-02/next-wave-handoff.md",
+      "docs/reviews/BWS118/wave-02/non-defect-register.json",
+      "docs/reviews/BWS118/wave-02/original-to-consolidated.json",
+      "docs/reviews/BWS118/wave-02/prior-overlay-lineage.json",
+      "docs/reviews/BWS118/wave-02/prior-overlay-lineage.md",
+      "docs/reviews/BWS118/wave-02/protected-mutable-documents.json",
+      "docs/reviews/BWS118/wave-02/report-index.json",
+      "docs/reviews/BWS118/wave-02/reports/R04/BWS118-R04-coverage.tsv",
+      "docs/reviews/BWS118/wave-02/reports/R04/BWS118-R04-findings.json",
+      "docs/reviews/BWS118/wave-02/reports/R04/BWS118-R04-report.md",
+      "docs/reviews/BWS118/wave-02/reports/R04/BWS118-R04-validation.json",
+      "docs/reviews/BWS118/wave-02/reports/R05/BWS118-R05-coverage.tsv",
+      "docs/reviews/BWS118/wave-02/reports/R05/BWS118-R05-findings.json",
+      "docs/reviews/BWS118/wave-02/reports/R05/BWS118-R05-report.md",
+      "docs/reviews/BWS118/wave-02/reports/R05/BWS118-R05-validation.json",
+      "docs/reviews/BWS118/wave-02/reports/R06/BWS118-R06-coverage.tsv",
+      "docs/reviews/BWS118/wave-02/reports/R06/BWS118-R06-findings.json",
+      "docs/reviews/BWS118/wave-02/reports/R06/BWS118-R06-report.md",
+      "docs/reviews/BWS118/wave-02/reports/R06/BWS118-R06-validation.json",
+      "docs/reviews/BWS118/wave-02/repository-profile.md",
+      "docs/reviews/BWS118/wave-02/source-verification.json",
+      "docs/reviews/BWS118/wave-02/test-evidence-matrix.json",
+      "docs/reviews/BWS118/wave-02/test-evidence-matrix.md"
+    ],
+    "changed_path_list": [
+      "docs/000_documentation_index.md",
+      "docs/reviews/README.md"
+    ],
+    "removed_path_list": [],
+    "non_documentation_differences": [],
+    "executable_compatibility_result": "PASS_EXACT_NON_DOCUMENTATION_BYTE_EQUIVALENCE"
+  },
+  "package_identity": {
+    "name": "betting-win-surebet",
+    "version": "0.1.0-bws-full-platform",
+    "nvmrc": "20.20.2",
+    "package_engine": ">=20 <21"
+  },
+  "runtime_and_tools": {
+    "canonical_node": "20.20.2",
+    "actual_node": "22.16.0",
+    "actual_node_authority": "SUPPLEMENTARY_ONLY",
+    "npm": "10.9.2",
+    "python": "3.13.5",
+    "git": "2.47.3",
+    "typescript_command": "available but type declarations unavailable",
+    "dependencies_installed": false
+  },
+  "commands_executed": [
+    {
+      "id": "CMD-001",
+      "command": "sha256sum + Python zipfile safety/type/count/hash inventory for betting-win-surebet120(1).zip",
+      "purpose": "Freeze archive identity and construct the 695-member coverage authority.",
+      "exit_code": 0,
+      "duration_seconds": null,
+      "timed_out": false,
+      "result": "PASS"
+    },
+    {
+      "id": "CMD-002",
+      "command": "Python zipfile byte comparison: betting-win-surebet118.zip -> betting-win-surebet120(1).zip",
+      "purpose": "Verify executable compatibility with the completed R01-R06 baseline.",
+      "exit_code": 0,
+      "duration_seconds": null,
+      "timed_out": false,
+      "result": "PASS; 38 docs added, 2 docs changed, 0 removed, 0 non-documentation differences."
+    },
+    {
+      "id": "CMD-003",
+      "command": "bash -n run-paper-autopilot.sh",
+      "purpose": "Syntax-only controller check; no controller started.",
+      "exit_code": 0,
+      "duration_seconds": 0.004,
+      "timed_out": false,
+      "result": "PASS"
+    },
+    {
+      "id": "CMD-004",
+      "command": "bash -n run-paper-evaluation.sh",
+      "purpose": "Syntax-only child controller check; no controller started.",
+      "exit_code": 0,
+      "duration_seconds": 0.004,
+      "timed_out": false,
+      "result": "PASS"
+    },
+    {
+      "id": "CMD-005",
+      "command": "bash -n check_progress.sh",
+      "purpose": "Syntax-only operator helper check.",
+      "exit_code": 0,
+      "duration_seconds": 0.003,
+      "timed_out": false,
+      "result": "PASS"
+    },
+    {
+      "id": "CMD-006",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_repo.py",
+      "purpose": "Static repository validator.",
+      "exit_code": 0,
+      "duration_seconds": 0.666,
+      "timed_out": false,
+      "result": "PASS_FALSE_GREEN_RELATIVE_TO_R07_FINDINGS"
+    },
+    {
+      "id": "CMD-007",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_remaining_operator_runtime_program.py",
+      "purpose": "Static remaining-runtime validator.",
+      "exit_code": 0,
+      "duration_seconds": 0.701,
+      "timed_out": false,
+      "result": "PASS_FALSE_GREEN_RELATIVE_TO_R07_FINDINGS"
+    },
+    {
+      "id": "CMD-008",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_autonomous_controller_contract.py",
+      "purpose": "Static controller contract validator.",
+      "exit_code": 0,
+      "duration_seconds": 0.592,
+      "timed_out": false,
+      "result": "PASS_FALSE_GREEN_RELATIVE_TO_R07_FINDINGS"
+    },
+    {
+      "id": "CMD-009",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_bws_b1_acceptance.py",
+      "purpose": "Static B1 acceptance validator.",
+      "exit_code": 0,
+      "duration_seconds": 0.577,
+      "timed_out": false,
+      "result": "PASS_FALSE_GREEN_RELATIVE_TO_R07-018"
+    },
+    {
+      "id": "CMD-010",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_artifact_hygiene.py",
+      "purpose": "Static artifact-hygiene validator.",
+      "exit_code": 0,
+      "duration_seconds": 0.604,
+      "timed_out": false,
+      "result": "PASS_FALSE_GREEN_RELATIVE_TO_R07_FINDINGS"
+    },
+    {
+      "id": "CMD-011",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_temp_inode_safety.py",
+      "purpose": "Static temp/inode validator.",
+      "exit_code": 0,
+      "duration_seconds": 0.593,
+      "timed_out": false,
+      "result": "PASS_FALSE_GREEN_RELATIVE_TO_R07_FINDINGS"
+    },
+    {
+      "id": "CMD-012",
+      "command": "tsc -p tsconfig.json --noEmit --pretty false",
+      "purpose": "Attempt supplementary type check without dependency installation.",
+      "exit_code": 2,
+      "duration_seconds": 1.046,
+      "timed_out": false,
+      "result": "UNAVAILABLE_ENVIRONMENT; missing @types/node because node_modules is absent."
+    },
+    {
+      "id": "CMD-013",
+      "command": "Python bounded static probes over redaction, path confinement, HTTP status handling, continuous-readiness logic, campaign-manifest consumption, final acceptance, B1 authority, and run selection",
+      "purpose": "Reproduce source-level predicates without services, databases, or external I/O.",
+      "exit_code": 0,
+      "duration_seconds": null,
+      "timed_out": false,
+      "result": "PASS_AS_PROBE; all asserted source predicates reproduced."
+    },
+    {
+      "id": "CMD-014",
+      "command": "Grouped read-only inspection: rg -n, nl -ba, find, sha256sum, JSON parsing over owned source/tests/docs and inherited ledger",
+      "purpose": "Trace R07 architecture, state transitions, tests, validators, and overlap authority.",
+      "exit_code": 0,
+      "duration_seconds": null,
+      "timed_out": false,
+      "result": "PASS"
+    },
+    {
+      "id": "CMD-015",
+      "command": "Python extracted-tree hash reconciliation against frozen archive inventory",
+      "purpose": "Prove no repository member changed during review.",
+      "exit_code": 0,
+      "duration_seconds": null,
+      "timed_out": false,
+      "result": "PASS_BYTE_IDENTICAL"
+    }
+  ],
+  "checks": {
+    "passed": [
+      "Archive identity/count/path/type safety",
+      "BWS118-to-BWS120 exact non-documentation compatibility",
+      "85 inherited finding IDs loaded and overlap-checked",
+      "Owned R07 production/caller/test static tracing",
+      "Shell syntax checks",
+      "Six static validators",
+      "Bounded offline source probes",
+      "695-row coverage reconciliation",
+      "Final extracted-tree mutation check"
+    ],
+    "failed": [],
+    "skipped_by_design": [
+      "Controllers/services/schedulers/workers/API startup",
+      "Provider/external API/RPC/account/credential access",
+      "Persistent database access or mutation",
+      "betting-win checkout access",
+      "Dependency installation/update",
+      "Implementation/overlay/commit/push/pull/reset/clean/branch changes",
+      "Live execution, orders, wallets, signers, public signals"
+    ],
+    "unavailable": [
+      "Canonical Node 20.20.2 execution",
+      "Focused TypeScript/Node tests because dependencies are absent",
+      "Real multi-process/file-system crash and power-loss tests",
+      "Accepted external betting-win runtime evidence",
+      "Accepted B1 multi-venue runtime resource"
+    ]
+  },
+  "static_probe_summary": {
+    "schema": "bws120-r07-static-probes-v1",
+    "checks": {
+      "sensitive_key_match": {
+        "Authorization": false,
+        "Cookie": false,
+        "Set-Cookie": false,
+        "apiKey": false,
+        "headers": false,
+        "password": true,
+        "access_token": true
+      },
+      "log_directory_absolute_escape_possible": true,
+      "fetch_loopback_ignores_response_ok": true,
+      "fallback_calls_metrics_snapshot": true,
+      "default_keep_monitoring_false": true,
+      "first_ready_break": true,
+      "last_sample_decides_final": true,
+      "manifest_not_consumed_by_paper_autopilot": true,
+      "handoff_writes_version_then_latest": true,
+      "b1_accepts_caller_enum": true,
+      "final_acceptance_only_resolves_file": true,
+      "final_acceptance_placeholder_test_present": true,
+      "lexical_run_selection_example": {
+        "inputs": [
+          "artifacts/bugfix_autopilot_20990101T000000Z",
+          "artifacts/paper_autopilot_20200101T000000Z"
+        ],
+        "selected": "artifacts/paper_autopilot_20200101T000000Z",
+        "expected_by_timestamp": "artifacts/bugfix_autopilot_20990101T000000Z"
+      }
+    },
+    "all_source_assertions_true": true
+  },
+  "coverage_reconciliation": {
+    "archive_regular_files": 695,
+    "coverage_data_rows": 695,
+    "unique_coverage_paths": 695,
+    "missing_paths": [],
+    "extra_paths": [],
+    "verdict": "PASS"
+  },
+  "finding_counts": {
+    "confirmed_findings": 19,
+    "severity_counts": {
+      "P0": 2,
+      "P1": 14,
+      "P2": 3
+    },
+    "release_blocking": 17,
+    "deployment_blocking": 19,
+    "bws_600_blocking": 17,
+    "bws_710_blocking": 1,
+    "inherited_findings_checked": 85,
+    "inherited_duplicate_root_causes_created": 0,
+    "classification_counts": {
+      "CONFIRMED_FINDING": 19,
+      "HYPOTHESIS": 2,
+      "EXTERNAL_UPSTREAM_BLOCKER": 2,
+      "ENVIRONMENT_BLOCKER": 2,
+      "INTENTIONAL_SAFEGUARD": 6,
+      "REJECTED_SUSPICION": 5,
+      "CROSS_AREA_HANDOFF": 9,
+      "TEST_GAP": 19
+    }
+  },
+  "known_limitations": [
+    "No canonical Node 20 test execution.",
+    "No dependency installation; TypeScript compile/test execution unavailable.",
+    "No provider, external service, PostgreSQL, or long-duration campaign was contacted or started.",
+    "Concurrency, crash, fsync, and long-duration resource behavior are established statically unless explicitly marked as an offline probe.",
+    "Current external provider/upstream authority cannot be proven from this archive and remains an external blocker."
+  ],
+  "repository_mutation_check": {
+    "expected_count": 695,
+    "actual_count": 695,
+    "missing": [],
+    "extra": [],
+    "changed": [],
+    "verdict": "PASS_BYTE_IDENTICAL"
+  },
+  "access_attestation": {
+    "network_or_provider_access": false,
+    "external_service_access": false,
+    "database_access": false,
+    "credential_or_secret_use": false,
+    "betting_win_checkout_access": false,
+    "controller_or_service_started": false,
+    "financial_or_live_operation": false,
+    "source_or_documentation_modified": false,
+    "implementation_or_overlay_produced": false
+  }
+}

@@ -6,10 +6,10 @@ parent_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 documentation_index_status=active
 documentation_slimming_phase=complete
 documentation_curation_wave=73
-documentation_inventory_count=138
+documentation_inventory_count=153
 canonical_active_count=16
 supporting_active_count=62
-independent_review_evidence_count=31
+independent_review_evidence_count=46
 historical_count=28
 superseded_count=1
 duplicate_count=0
@@ -211,9 +211,24 @@ docs/reviews/BWS118/wave-02/reports/R04/BWS118-R04-report.md
 docs/reviews/BWS118/wave-02/reports/R05/BWS118-R05-report.md
 docs/reviews/BWS118/wave-02/reports/R06/BWS118-R06-report.md
 docs/reviews/BWS118/wave-02/test-evidence-matrix.md
+docs/reviews/BWS120/wave-03/README.md
+docs/reviews/BWS120/wave-03/area-coverage.md
+docs/reviews/BWS120/wave-03/authority-map.md
+docs/reviews/BWS120/wave-03/baseline-compatibility.md
+docs/reviews/BWS120/wave-03/cumulative-consolidated-ledger.md
+docs/reviews/BWS120/wave-03/decisions.md
+docs/reviews/BWS120/wave-03/dependency-and-tranches.md
+docs/reviews/BWS120/wave-03/incremental-consolidation.md
+docs/reviews/BWS120/wave-03/next-wave-handoff.md
+docs/reviews/BWS120/wave-03/prior-overlay-lineage.md
+docs/reviews/BWS120/wave-03/repository-profile.md
+docs/reviews/BWS120/wave-03/reports/R07/BWS120-R07-report.md
+docs/reviews/BWS120/wave-03/reports/R08/BWS120-R08-report.md
+docs/reviews/BWS120/wave-03/reports/R09/BWS120-R09-report.md
+docs/reviews/BWS120/wave-03/test-evidence-matrix.md
 ```
 
-These 31 Markdown files document independent Wave 01 and Wave 02 source review. JSON and TSV companions under the same trees are machine-readable evidence and are not included in `documentation_inventory_count`. This material is subordinate to current task and status authority and does not mark implementation, BWS-600, BWS-710, release, deployment, or execution complete.
+These 46 Markdown files document independent Wave 01, Wave 02, and Wave 03 source review. JSON and TSV companions under the same trees are machine-readable evidence and are not included in `documentation_inventory_count`. This material is subordinate to current task and status authority and does not mark implementation, BWS-600, BWS-710, release, deployment, or execution complete.
 
 ### Historical
 
