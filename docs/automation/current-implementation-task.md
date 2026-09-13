@@ -1,3 +1,24 @@
+# Activated remediation implementation task
+
+This section is the binding source-remediation task authority. The historical BWS-600 task markers retained later remain compatibility and external-hold context. They are suspended as the selected work route while the remediation campaign is active.
+
+```text
+remediation_program=BWS_FINAL_REMEDIATION_R01_R12_V1
+remediation_program_state=ACTIVE
+remediation_user_authorization=explicit_2026_09_13_longest_safe_unattended
+remediation_active_task_source=docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/unattended-plan.json
+remediation_live_state=artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/campaign-state.json
+remediation_initial_task=docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/001-BWS-W4-T39.md
+remediation_existing_controllers_pre_s2=prohibited
+remediation_post_s2_controller=run-autonomous-implementation.sh
+remediation_future_tranches=preauthorized_sequential_after_exact_ACCEPTED_predecessor
+remediation_force_unlock=not_authorized_without_fresh_verified_lock_evidence
+```
+
+The operator launcher may process the fixed 47-tranche order for up to 28 days. It uses separate bounded direct Codex sessions through T47, then the repaired implementation controller one exact tranche at a time. It must preserve all BWS holds and stop at the first non-accepted result.
+
+---
+
 # Current automation task
 
 Repository: `betting-win-surebet`.

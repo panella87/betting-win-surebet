@@ -1,0 +1,67 @@
+{
+  "activation_snapshot": {
+    "archive": "betting-win-surebet123.zip",
+    "git_branch": "TO_CAPTURE_AT_FIRST_LAUNCH",
+    "git_dirty_state": "TO_CAPTURE_AT_FIRST_LAUNCH",
+    "git_head": "TO_CAPTURE_AT_FIRST_LAUNCH",
+    "git_upstream": "TO_CAPTURE_AT_FIRST_LAUNCH",
+    "regular_files": 932,
+    "relationship": "BWS122 plus the validated 161-file documentation-only remediation package",
+    "sha256": "e8d632fbb3bc7b45b4f2366d3fac33187fdc21fc0c2a7e6e36fb4b2890f9c4a9"
+  },
+  "activation_state": "ACTIVE",
+  "authorization": {
+    "authority": "explicit_user_instruction_in_current_chat",
+    "concurrent_source_mutation": "prohibited",
+    "date": "2026-09-13",
+    "future_tranche_admission": "preauthorized_sequential_only_after_predecessor_ACCEPTED_and_dependencies_ACCEPTED",
+    "scope": "longest_safe_unattended_implementation_in_fixed_campaign_order"
+  },
+  "current_admission": {
+    "campaign_order": 1,
+    "owner": "R10",
+    "stage": "S1",
+    "state": "ADMITTED",
+    "tranche_id": "BWS-W4-T39"
+  },
+  "execution_contract": {
+    "controller_tranche_attempt": "72h",
+    "direct_tranche_timeout": "12h",
+    "force_unlock": "not_authorized_without_fresh_verified_lock_evidence",
+    "global_operator_window": "28d",
+    "orders_14_through_47": "repaired run-autonomous-implementation.sh, one exact tranche per invocation",
+    "orders_1_through_13": "direct bounded Codex sessions; existing autonomous controllers prohibited",
+    "resume_from_immutable_artifact_state": true,
+    "stop_on_first_nonaccepted_result": true
+  },
+  "frozen_source_baseline": {
+    "archive": "betting-win-surebet122.zip",
+    "regular_files": 771,
+    "sha256": "e303719e5ce64df47df7b0594433a8978e3b01c5a3d0d0bd9129b9b6340b20cd",
+    "source_manifest_authoritative": false,
+    "source_manifest_owner_tranche": "BWS-W4-T40"
+  },
+  "live_state_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/campaign-state.json",
+  "plan_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/unattended-plan.json",
+  "program_id": "BWS_FINAL_REMEDIATION_R01_R12_V1",
+  "prohibitions": [
+    "betting-win checkout access or mutation",
+    "provider connections or credentials",
+    "live betting or execution",
+    "release or deployment promotion",
+    "concurrent source-mutating tranches",
+    "controller use before all S2 tranches are ACCEPTED",
+    "fabricated or placeholder evidence",
+    "automatic Git commit, push, reset, clean, stash, or branch rewrite"
+  ],
+  "repository": "betting-win-surebet",
+  "retained_holds": {
+    "BWS-600": "BLOCKED",
+    "BWS-710": "BLOCKED",
+    "BWS-900": "PARKED_NOT_AUTHORIZED",
+    "deployment": "BLOCKED",
+    "live_execution": "PROHIBITED",
+    "release": "BLOCKED"
+  },
+  "schema": "bws-remediation-active-campaign-admission-v1"
+}

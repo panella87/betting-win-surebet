@@ -1,0 +1,515 @@
+{
+  "baseline_archive": "betting-win-surebet123.zip",
+  "baseline_sha256": "e8d632fbb3bc7b45b4f2366d3fac33187fdc21fc0c2a7e6e36fb4b2890f9c4a9",
+  "cleanup_paths": [],
+  "entries": [
+    {
+      "action": "REPLACE",
+      "mode": "0744",
+      "path": "docs/automation/current-implementation-task.md",
+      "postimage_sha256": "e700d90ecfedd3c85cde616bc4f162c0ad962afc6331bbf246b3b23a6fd92dc6",
+      "preimage_mode": "0744",
+      "preimage_sha256": "f67db876487f2ac92ad8bb56fa3f8b851e980f6fd37cbc85476f6370a45a8b4d"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/README.md",
+      "postimage_sha256": "7f5ccfb2f847edc1c0daa790cd3ef35a2e55c45d6dbeae9aaecfca5e9f2c3d5a",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/active-campaign-admission.json",
+      "postimage_sha256": "9b2e42d83018839cb03c7f585a0cdf75619bb6fd58539aca1c383b1c4f3811e3",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/active-campaign-admission.md",
+      "postimage_sha256": "c3e487e579bf10d871f0d03d0242a27ba3cd44b21f4ef16caad8b92c49d3b4bb",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/bounded-tranche-task-contract.md",
+      "postimage_sha256": "bd909ec8debcc6da7cb1abf1c6056926fcf2858607f2989950361a2f107693cb",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/campaign-state.seed.json",
+      "postimage_sha256": "b6759afe73db364486b09c6b51603ca6ada29188afe1646dffd2a254dff6c92b",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/immutable-authority.sha256",
+      "postimage_sha256": "d3f49859ef9856ed3409d8e9551b2a791a215b4ef3cb9127dd256414c7f03cd9",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/overlay-content-inventory.json",
+      "postimage_sha256": "9b1a91a50902ac4b497e43afd4d3ccaf82f9f48044945a9337247e0723b50b48",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/risks-and-stop-conditions.md",
+      "postimage_sha256": "8d71ace8d00d6acec32bc7c8768763ee7da3a60e5fce1d4c5064133558d2466f",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/run-unattended-remediation-campaign.sh",
+      "postimage_sha256": "6e3410e2c88983c94988f2370d88cbe73275b30136304a3ea0a770caf8c0bb93",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/server-runbook.md",
+      "postimage_sha256": "5db6b9796900ed95c12fd42c1efe0345b5b469a23649472a8b7438d73741df47",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/001-BWS-W4-T39.md",
+      "postimage_sha256": "1d5cb4a250c2068fb96b7f91f31bc4409e2d32ead8b0cc9a3fbfa79c2f52907d",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/002-BWS-W4-T37.md",
+      "postimage_sha256": "2c36494f4946e01eae0c5e17b8d6667989866671a271534ba421078a572fcf20",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/003-BWS-W4-T38.md",
+      "postimage_sha256": "8661237eaa42db925d94d5c8bdafe96dbedd0bde01f2c490bc0a7adcf53bb013",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/004-BWS-W3-T26.md",
+      "postimage_sha256": "9657e9b54bffa2d7c2bc91b6142f6092f198910dc49928c656632bd134b82716",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/005-BWS-W1-T01.md",
+      "postimage_sha256": "0f4a96fe97195a0595ab9745c22ceeb3fbde1234f4aece3190101f8c27806059",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/006-BWS-W1-T09.md",
+      "postimage_sha256": "dbeff277098415cd56bc2dfd3bb81bbb8f1aa3168b69f7103d83e210a83d35d7",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/007-BWS-W3-T30.md",
+      "postimage_sha256": "9eb2d264141a4a89e5720ebaca4f8fc8e981bf76a274b6ae5623744b0ef8a31f",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/008-BWS-W3-T31.md",
+      "postimage_sha256": "a29ed2533453d66844bbb851e177493d4759594402ef4f87dd0e1cc52b5ede8d",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/009-BWS-W4-T40.md",
+      "postimage_sha256": "c688ccf3b826c9b8262d07842695ce8d1668c850876b67bc512f2365af554123",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/010-BWS-W4-T44.md",
+      "postimage_sha256": "2b95183508e52b35455af4ccb930e0d03741603b88e01ea3efa75e920b346221",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/011-BWS-W4-T45.md",
+      "postimage_sha256": "0b36c61e8ba506c1d3b9624a39fae62601449909e5e296504ea5eb6360e63860",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/012-BWS-W4-T46.md",
+      "postimage_sha256": "89561a34ca570c5fb86961ab81a76386f2bdc13dadf4b4c249f925c17aaf2700",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/013-BWS-W4-T47.md",
+      "postimage_sha256": "cd4f0df5021b42a666c6ac27366d42569d03d3c44166ecdb6885610d10943b00",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/014-BWS-W1-T02.md",
+      "postimage_sha256": "da032ba7673102a340bd204a1cf92346e49bdc809ba0a460c81b071457b74094",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/015-BWS-W1-T03.md",
+      "postimage_sha256": "1a1284f933f1ac92e8999282e7e3ce93ee5c6575120122732aeb491ad0201878",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/016-BWS-W1-T04.md",
+      "postimage_sha256": "77a430dddd773c97487c0ea96a8ba03e73795e18586d5b5b6662c589574b65e6",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/017-BWS-W1-T05.md",
+      "postimage_sha256": "1bbc4f9d132357ae69da7bbcbc51375a7075604431b414d6a7fc0ad19e489231",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/018-BWS-W1-T06.md",
+      "postimage_sha256": "7f94dda28adb4271353f4b09c78333123e5724459ba123190542f619c476c8e5",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/019-BWS-W1-T10.md",
+      "postimage_sha256": "feda6a2a22e4a4d39ce5aceaab809caacf618297974fd456f4b674173c4244e5",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/020-BWS-W1-T11.md",
+      "postimage_sha256": "a2c8449a36d7770a7221b389f2204178de8cbd1d2ef9dd7c8a623f282821b6b9",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/021-BWS-W2-T21.md",
+      "postimage_sha256": "452ed6d48d4873d17171a32fe1db03d1412011e32849a84bcf72c94f525bac06",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/022-BWS-W2-T22.md",
+      "postimage_sha256": "bce8cf5f2d9e1ea5177518c2fd4df96e4c66185a6563ba26b8004d2c9314f835",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/023-BWS-W2-T23.md",
+      "postimage_sha256": "ab6d04bf8f4181e401239d0fd210927ff2ea9610555dcc9e4dfdff7c4072a549",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/024-BWS-W2-T24.md",
+      "postimage_sha256": "86d9c4c330c94e70343b2fab6422b4fa66b882b528a8fa3dc065b7cbd15249b0",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/025-BWS-W2-T25.md",
+      "postimage_sha256": "b82a3bf1c0261349121d7051c1ffa99ccd4a2d0352b6ecf1d6c35bc2dca15a93",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/026-BWS-W3-T27.md",
+      "postimage_sha256": "32dc75e3883f27a4a004c5dfc132aca1e79eb33cad77e813558266c558a65edf",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/027-BWS-W3-T33.md",
+      "postimage_sha256": "1c7b800e0e1f4479d92652297a84817b3563ca4bce1cb28d1b377874bbb774d4",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/028-BWS-W1-T13.md",
+      "postimage_sha256": "f2396c8867b54d7da604a58f60da14e142656f4c26ce90f2f5e36bb1d14bbff6",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/029-BWS-W2-T14.md",
+      "postimage_sha256": "de2acf101d8676082a9f792dba457f5e2ab94f5b700491e12474982445cd8019",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/030-BWS-W1-T07.md",
+      "postimage_sha256": "044be3bd47a110f50265fb4768f36524bf517ebf6155f9d08a604da7a37ccc65",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/031-BWS-W1-T08.md",
+      "postimage_sha256": "63b8b8ae393da0722ad856d287adef36ce13d992f43784610000475aa1b5049c",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/032-BWS-W2-T15.md",
+      "postimage_sha256": "d672f30cef884046fd5d7ed58547c014e013c9572d004278b6b0e976d3c5b9f6",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/033-BWS-W2-T16.md",
+      "postimage_sha256": "6f002704e354e76cb6ab44859477421cdf43f0ebd50b99e8f6f687b7751013ac",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/034-BWS-W1-T12.md",
+      "postimage_sha256": "234cbfb1f9a48e7cc691c012e1c9cb8f90ded1e03acf052ee4d57644805ae92f",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/035-BWS-W2-T17.md",
+      "postimage_sha256": "8aa495d6957bf5f6f04ce8db442c9a8179cb6b4405ca35472866f6fcc8fd25e5",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/036-BWS-W2-T18.md",
+      "postimage_sha256": "1918828dde00944561dc174fc227e4259a1b0188aab170d952a32bb3c5cd4d17",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/037-BWS-W2-T19.md",
+      "postimage_sha256": "10b4a3fa1b111a3240895a6fa7d4cdd0038089a2dd26aa34bb4b02642662cde4",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/038-BWS-W2-T20.md",
+      "postimage_sha256": "962d9e6d58f9b5a5b1e7a6073efb8c02438ef746748fe9aa3ad2fb2ac51b70d7",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/039-BWS-W3-T28.md",
+      "postimage_sha256": "19cf0e4b3207b02cf02c8dc264d3703ea5e2fcb74d766e0d4c96fa62f657998c",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/040-BWS-W3-T29.md",
+      "postimage_sha256": "0035d8fcf7fc7019a1c9c396b89d711fb83ebe5cc3cfeacac486d6fb1f5c35f9",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/041-BWS-W3-T32.md",
+      "postimage_sha256": "4ced3629a0a493dc6fc3d441c4d6a02f2d0543b472e64e243ac699e61c926f2c",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/042-BWS-W3-T34.md",
+      "postimage_sha256": "57a307d17f6ec50ee6afb1258737fd084e2aae988a44111a44e9fca7954385de",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/043-BWS-W3-T35.md",
+      "postimage_sha256": "ada400b82ed4604724dd2ed3dfde3ca5105b752a482f13c5bf4e0f01fa37f8a6",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/044-BWS-W3-T36.md",
+      "postimage_sha256": "ec2f1cf3bacf3e57b657e69947a6c1e19e771de9d667110e1427256e6756f0c6",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/045-BWS-W4-T41.md",
+      "postimage_sha256": "9237769b61e39f2aed42956055a23e2d6cd8f051534e421a08d343f3ef4d5cec",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/046-BWS-W4-T42.md",
+      "postimage_sha256": "acd4765693ab5be62790d59e68fef568a09dbdc29cc933a27c354bfbd3c10eed",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/047-BWS-W4-T43.md",
+      "postimage_sha256": "e12d96ce2fb362598a7cdaa89225f1d75095ef368dd6e7964c0b1cc7f5398ddc",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/README.md",
+      "postimage_sha256": "ae59673b96c6c3ee0498792a87f8e61524b16b6c09fb4d35282ef0a9b865d05e",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/unattended-plan.json",
+      "postimage_sha256": "c76f07169bf20c77531c453a00dedd59a0f52d49f33363246b427a30fbf3c3dc",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/user-authorization.md",
+      "postimage_sha256": "51f6e5ae43bbcf828d172f6495c731c534552e4c9577027aee55f26c5d089c0a",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "ADD",
+      "mode": "0644",
+      "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/validate_activation_package.py",
+      "postimage_sha256": "dac319dba2fa3062ccf59fc27ffc001becb588f256426e83bf2969925f82edc5",
+      "preimage_mode": null,
+      "preimage_sha256": "ABSENT"
+    },
+    {
+      "action": "REPLACE",
+      "mode": "0744",
+      "path": "docs/repo_status_current.md",
+      "postimage_sha256": "6724ef82abe81bc4373dcc6fed42394fbf48d37bd1581c998ff85c92358ccd29",
+      "preimage_mode": "0744",
+      "preimage_sha256": "af4f9d0fa5c84385d3d4fae2cf401410f4aa563c9f2649df5d16577ea3ca34b8"
+    }
+  ],
+  "program_id": "BWS_FINAL_REMEDIATION_R01_R12_V1",
+  "repository": "betting-win-surebet",
+  "schema": "bws-remediation-activation-overlay-manifest-v1",
+  "self_excluded": true
+}

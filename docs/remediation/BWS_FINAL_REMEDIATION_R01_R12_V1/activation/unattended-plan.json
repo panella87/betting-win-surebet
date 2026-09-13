@@ -1,0 +1,1431 @@
+{
+  "activation_state": "ACTIVE",
+  "controller_gate_order": 13,
+  "controller_tranche_attempt": "72h",
+  "direct_tranche_timeout": "12h",
+  "existing_controller_allowed_before_s2": false,
+  "fallback_model": "none",
+  "global_operator_window": "28d",
+  "model": "cli-default",
+  "node_runtime": "v20.20.2",
+  "one_source_mutating_tranche_at_a_time": true,
+  "program_id": "BWS_FINAL_REMEDIATION_R01_R12_V1",
+  "repository": "betting-win-surebet",
+  "runtime_artifact_root": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1",
+  "schema": "bws-remediation-unattended-plan-v1",
+  "tranches": [
+    {
+      "acceptance_authority": "One nested secret policy, non-destructive Git config handling, and pinned SSH destination identity.",
+      "allowed_protected_files": [
+        "zip_codebase.sh",
+        "pull_artifacts_and_zip_codebase.sh",
+        "update_git.sh"
+      ],
+      "campaign_order": 1,
+      "dependencies": [],
+      "execution_mode": "DIRECT_BOUNDED_CODEX",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS121-R10-010",
+        "BWS121-R10-011",
+        "BWS121-R10-012",
+        "BWS121-R10-013"
+      ],
+      "owner": "R10",
+      "production_entrypoint_test_count": 17,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/001-BWS-W4-T39.json",
+      "stage": "S1",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/001-BWS-W4-T39.md",
+      "test_environments": {
+        "AS_SPECIFIED_BY_REVIEW": 17
+      },
+      "test_requirement_count": 17,
+      "tranche_id": "BWS-W4-T39",
+      "tranche_number": 39
+    },
+    {
+      "acceptance_authority": "Bounded effective configuration, explicit source precedence, blank-value preservation, and scrubbed libpq authority.",
+      "allowed_protected_files": [],
+      "campaign_order": 2,
+      "dependencies": [
+        "T39"
+      ],
+      "execution_mode": "DIRECT_BOUNDED_CODEX",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS121-R10-001",
+        "BWS121-R10-002",
+        "BWS121-R10-003",
+        "BWS121-R10-008"
+      ],
+      "owner": "R10",
+      "production_entrypoint_test_count": 16,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/002-BWS-W4-T37.json",
+      "stage": "S1",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/002-BWS-W4-T37.md",
+      "test_environments": {
+        "AS_SPECIFIED_BY_REVIEW": 16
+      },
+      "test_requirement_count": 16,
+      "tranche_id": "BWS-W4-T37",
+      "tranche_number": 37
+    },
+    {
+      "acceptance_authority": "Repository-bound CLI/status/log destinations, exact flag parsing, and secret-free PostgreSQL invocation.",
+      "allowed_protected_files": [
+        "open_log.sh"
+      ],
+      "campaign_order": 3,
+      "dependencies": [
+        "T37",
+        "T39"
+      ],
+      "execution_mode": "DIRECT_BOUNDED_CODEX",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS121-R10-004",
+        "BWS121-R10-005",
+        "BWS121-R10-006",
+        "BWS121-R10-007",
+        "BWS121-R10-009"
+      ],
+      "owner": "R10",
+      "production_entrypoint_test_count": 22,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/003-BWS-W4-T38.json",
+      "stage": "S1",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/003-BWS-W4-T38.md",
+      "test_environments": {
+        "AS_SPECIFIED_BY_REVIEW": 22
+      },
+      "test_requirement_count": 22,
+      "tranche_id": "BWS-W4-T38",
+      "tranche_number": 38
+    },
+    {
+      "acceptance_authority": "no out-of-repo write/rotation; all credential-bearing keys and value shapes redacted before persistence",
+      "allowed_protected_files": [],
+      "campaign_order": 4,
+      "dependencies": [
+        "T38"
+      ],
+      "execution_mode": "DIRECT_BOUNDED_CODEX",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS120-R07-001",
+        "BWS120-R07-002"
+      ],
+      "owner": "R07",
+      "production_entrypoint_test_count": 11,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/004-BWS-W3-T26.json",
+      "stage": "S1",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/004-BWS-W3-T26.md",
+      "test_environments": {
+        "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE_OR_CONTROLLED_INTEGRATION": 11
+      },
+      "test_requirement_count": 11,
+      "tranche_id": "BWS-W3-T26",
+      "tranche_number": 26
+    },
+    {
+      "acceptance_authority": "[\"Only realpath-confined repository migrations accepted\", \"Database role cannot mutate outside surebet.*\", \"All unrecognized executable SQL families fail closed\"]",
+      "allowed_protected_files": [],
+      "campaign_order": 5,
+      "dependencies": [],
+      "execution_mode": "DIRECT_BOUNDED_CODEX",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS116-R03-001"
+      ],
+      "owner": "R03",
+      "production_entrypoint_test_count": 0,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/005-BWS-W1-T01.json",
+      "stage": "S1",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/005-BWS-W1-T01.md",
+      "test_environments": {
+        "DISPOSABLE_POSTGRESQL_AND_NODE20": 5
+      },
+      "test_requirement_count": 5,
+      "tranche_id": "BWS-W1-T01",
+      "tranche_number": 1
+    },
+    {
+      "acceptance_authority": "[\"Status is read-only\", \"Unknown applied rows fail closed or satisfy explicit compatibility\", \"One migrator owns transitions\"]",
+      "allowed_protected_files": [],
+      "campaign_order": 6,
+      "dependencies": [
+        "T01"
+      ],
+      "execution_mode": "DIRECT_BOUNDED_CODEX",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS116-R03-002",
+        "BWS116-R03-003",
+        "BWS116-R03-004"
+      ],
+      "owner": "R03",
+      "production_entrypoint_test_count": 0,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/006-BWS-W1-T09.json",
+      "stage": "S1",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/006-BWS-W1-T09.md",
+      "test_environments": {
+        "DISPOSABLE_POSTGRESQL_AND_NODE20": 10
+      },
+      "test_requirement_count": 10,
+      "tranche_id": "BWS-W1-T09",
+      "tranche_number": 9
+    },
+    {
+      "acceptance_authority": "no unrelated recursive deletion; dump and manifest from one snapshot; previous verified backup retained until atomic commit",
+      "allowed_protected_files": [],
+      "campaign_order": 7,
+      "dependencies": [
+        "T38"
+      ],
+      "execution_mode": "DIRECT_BOUNDED_CODEX",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS120-R08-001",
+        "BWS120-R08-003",
+        "BWS120-R08-004"
+      ],
+      "owner": "R08",
+      "production_entrypoint_test_count": 10,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/007-BWS-W3-T30.json",
+      "stage": "S1",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/007-BWS-W3-T30.md",
+      "test_environments": {
+        "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE_OR_CONTROLLED_INTEGRATION": 10
+      },
+      "test_requirement_count": 10,
+      "tranche_id": "BWS-W3-T30",
+      "tranche_number": 30
+    },
+    {
+      "acceptance_authority": "apply revalidates plan target and ledger; server version evaluated; receipt binds exact dump and restored semantics; restart proof authoritative; orphan cleanup recoverable",
+      "allowed_protected_files": [],
+      "campaign_order": 8,
+      "dependencies": [
+        "T01",
+        "T09",
+        "T30",
+        "T37",
+        "T38"
+      ],
+      "execution_mode": "DIRECT_BOUNDED_CODEX",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS120-R08-002",
+        "BWS120-R08-005",
+        "BWS120-R08-006",
+        "BWS120-R08-007",
+        "BWS120-R08-008",
+        "BWS120-R08-009"
+      ],
+      "owner": "R08",
+      "production_entrypoint_test_count": 22,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/008-BWS-W3-T31.json",
+      "stage": "S1",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/008-BWS-W3-T31.md",
+      "test_environments": {
+        "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE_OR_CONTROLLED_INTEGRATION": 22
+      },
+      "test_requirement_count": 22,
+      "tranche_id": "BWS-W3-T31",
+      "tranche_number": 31
+    },
+    {
+      "acceptance_authority": "Exact current source manifest and exact Node 20.20.2 enforcement.",
+      "allowed_protected_files": [],
+      "campaign_order": 9,
+      "dependencies": [
+        "T39"
+      ],
+      "execution_mode": "DIRECT_BOUNDED_CODEX",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS121-R11-001",
+        "BWS121-R11-002"
+      ],
+      "owner": "R11",
+      "production_entrypoint_test_count": 8,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/009-BWS-W4-T40.json",
+      "stage": "S2",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/009-BWS-W4-T40.md",
+      "test_environments": {
+        "AS_SPECIFIED_BY_REVIEW": 8
+      },
+      "test_requirement_count": 8,
+      "tranche_id": "BWS-W4-T40",
+      "tranche_number": 40
+    },
+    {
+      "acceptance_authority": "Non-bypassable controller ownership, monotonic heartbeat updates, self-fencing, and child-aware stale takeover.",
+      "allowed_protected_files": [
+        "run-autonomous-implementation.sh",
+        "run-paper-evaluation.sh",
+        "run-paper-autopilot.sh",
+        "run-autonomous-bugfix.sh",
+        "run-bugfix-autopilot.sh",
+        ".automation/lib/run_common.sh"
+      ],
+      "campaign_order": 10,
+      "dependencies": [
+        "T40"
+      ],
+      "execution_mode": "DIRECT_BOUNDED_CODEX",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS121-R12-001",
+        "BWS121-R12-002",
+        "BWS121-R12-003",
+        "BWS121-R12-004"
+      ],
+      "owner": "R12",
+      "production_entrypoint_test_count": 20,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/010-BWS-W4-T44.json",
+      "stage": "S2",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/010-BWS-W4-T44.md",
+      "test_environments": {
+        "AS_SPECIFIED_BY_REVIEW": 20
+      },
+      "test_requirement_count": 20,
+      "tranche_id": "BWS-W4-T44",
+      "tranche_number": 44
+    },
+    {
+      "acceptance_authority": "Enforced aggregate deadlines, whole-process-group terminality, and durable restart reconciliation.",
+      "allowed_protected_files": [
+        "run-paper-autopilot.sh",
+        "run-bugfix-autopilot.sh",
+        ".automation/lib/run_common.sh",
+        ".automation/lib/controller_hardening_v2.sh"
+      ],
+      "campaign_order": 11,
+      "dependencies": [
+        "T44"
+      ],
+      "execution_mode": "DIRECT_BOUNDED_CODEX",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS121-R12-005",
+        "BWS121-R12-006",
+        "BWS121-R12-007"
+      ],
+      "owner": "R12",
+      "production_entrypoint_test_count": 17,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/011-BWS-W4-T45.json",
+      "stage": "S2",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/011-BWS-W4-T45.md",
+      "test_environments": {
+        "AS_SPECIFIED_BY_REVIEW": 17
+      },
+      "test_requirement_count": 17,
+      "tranche_id": "BWS-W4-T45",
+      "tranche_number": 45
+    },
+    {
+      "acceptance_authority": "Exclusive run identities, quiescent finalization, and lifecycle-aware cleanup.",
+      "allowed_protected_files": [
+        "run-autonomous-implementation.sh",
+        "run-paper-evaluation.sh",
+        "run-paper-autopilot.sh",
+        "run-autonomous-bugfix.sh",
+        "run-bugfix-autopilot.sh",
+        ".automation/lib/run_common.sh",
+        ".automation/lib/controller_hardening_v2.sh"
+      ],
+      "campaign_order": 12,
+      "dependencies": [
+        "T44",
+        "T45"
+      ],
+      "execution_mode": "DIRECT_BOUNDED_CODEX",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS121-R12-008",
+        "BWS121-R12-009",
+        "BWS121-R12-010"
+      ],
+      "owner": "R12",
+      "production_entrypoint_test_count": 15,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/012-BWS-W4-T46.json",
+      "stage": "S2",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/012-BWS-W4-T46.md",
+      "test_environments": {
+        "AS_SPECIFIED_BY_REVIEW": 15
+      },
+      "test_requirement_count": 15,
+      "tranche_id": "BWS-W4-T46",
+      "tranche_number": 46
+    },
+    {
+      "acceptance_authority": "Immutable serialized archive generations, explicit publication failure currentness, and linked redacted delivery receipts.",
+      "allowed_protected_files": [
+        "run-autonomous-implementation.sh",
+        "run-paper-autopilot.sh",
+        "run-autonomous-bugfix.sh",
+        "run-bugfix-autopilot.sh",
+        ".automation/lib/run_common.sh",
+        ".automation/lib/telegram_notify.sh"
+      ],
+      "campaign_order": 13,
+      "dependencies": [
+        "T44",
+        "T45",
+        "T46"
+      ],
+      "execution_mode": "DIRECT_BOUNDED_CODEX",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS121-R12-011",
+        "BWS121-R12-012",
+        "BWS121-R12-013"
+      ],
+      "owner": "R12",
+      "production_entrypoint_test_count": 13,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/013-BWS-W4-T47.json",
+      "stage": "S2",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/013-BWS-W4-T47.md",
+      "test_environments": {
+        "AS_SPECIFIED_BY_REVIEW": 13
+      },
+      "test_requirement_count": 13,
+      "tranche_id": "BWS-W4-T47",
+      "tranche_number": 47
+    },
+    {
+      "acceptance_authority": "[\"One literal commit/tree snapshot owns every derived field\", \"Replacement objects and concurrent ref movement cannot alter lock content\"]",
+      "allowed_protected_files": [],
+      "campaign_order": 14,
+      "dependencies": [
+        "T40"
+      ],
+      "execution_mode": "REPAIRED_IMPLEMENTATION_CONTROLLER",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS116-R01-001",
+        "BWS116-R01-002"
+      ],
+      "owner": "R01",
+      "production_entrypoint_test_count": 4,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/014-BWS-W1-T02.json",
+      "stage": "S3",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/014-BWS-W1-T02.md",
+      "test_environments": {
+        "AS_DECLARED_BY_OWNING_REVIEW": 1,
+        "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE": 4
+      },
+      "test_requirement_count": 5,
+      "tranche_id": "BWS-W1-T02",
+      "tranche_number": 2
+    },
+    {
+      "acceptance_authority": "[\"Exact contract and page bytes form an ordered immutable cycle receipt\", \"Downstream consumes the exact converged record set\", \"All source/receive/verify/import/consume clocks remain distinct and bounded\"]",
+      "allowed_protected_files": [],
+      "campaign_order": 15,
+      "dependencies": [
+        "T02"
+      ],
+      "execution_mode": "REPAIRED_IMPLEMENTATION_CONTROLLER",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS116-R01-003",
+        "BWS116-R01-004",
+        "BWS116-R01-005",
+        "BWS116-R01-010"
+      ],
+      "owner": "R01",
+      "production_entrypoint_test_count": 2,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/015-BWS-W1-T03.json",
+      "stage": "S3",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/015-BWS-W1-T03.md",
+      "test_environments": {
+        "AS_DECLARED_BY_OWNING_REVIEW": 1,
+        "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE": 13
+      },
+      "test_requirement_count": 14,
+      "tranche_id": "BWS-W1-T03",
+      "tranche_number": 3
+    },
+    {
+      "acceptance_authority": "[\"Equivalent local/private destinations, DNS rebinding and redirects fail closed\", \"Allowed origin and redirect policy remain explicit\"]",
+      "allowed_protected_files": [],
+      "campaign_order": 16,
+      "dependencies": [
+        "T37",
+        "T38"
+      ],
+      "execution_mode": "REPAIRED_IMPLEMENTATION_CONTROLLER",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS116-R01-009"
+      ],
+      "owner": "R01",
+      "production_entrypoint_test_count": 2,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/016-BWS-W1-T04.json",
+      "stage": "S3",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/016-BWS-W1-T04.md",
+      "test_environments": {
+        "AS_DECLARED_BY_OWNING_REVIEW": 1,
+        "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE": 6
+      },
+      "test_requirement_count": 7,
+      "tranche_id": "BWS-W1-T04",
+      "tranche_number": 4
+    },
+    {
+      "acceptance_authority": "[\"Visited-cursor and non-progress proof\", \"Cycle-wide page/record/byte/deadline budget\", \"Streaming response bound and late-result fence\"]",
+      "allowed_protected_files": [],
+      "campaign_order": 17,
+      "dependencies": [
+        "T03"
+      ],
+      "execution_mode": "REPAIRED_IMPLEMENTATION_CONTROLLER",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS116-R01-006",
+        "BWS116-R01-007",
+        "BWS116-R01-008"
+      ],
+      "owner": "R01",
+      "production_entrypoint_test_count": 1,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/017-BWS-W1-T05.json",
+      "stage": "S3",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/017-BWS-W1-T05.md",
+      "test_environments": {
+        "AS_DECLARED_BY_OWNING_REVIEW": 1,
+        "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE": 12
+      },
+      "test_requirement_count": 13,
+      "tranche_id": "BWS-W1-T05",
+      "tranche_number": 5
+    },
+    {
+      "acceptance_authority": "[\"Outcome sets are mutually exclusive and exhaustive\", \"Identity encoding is injective and locale-independent\", \"Provider/generation and source-manifest identity remain bound\"]",
+      "allowed_protected_files": [],
+      "campaign_order": 18,
+      "dependencies": [
+        "T03"
+      ],
+      "execution_mode": "REPAIRED_IMPLEMENTATION_CONTROLLER",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS116-R02-001",
+        "BWS116-R02-002",
+        "BWS116-R02-007",
+        "BWS116-R02-008",
+        "BWS116-R02-009",
+        "BWS116-R02-013"
+      ],
+      "owner": "R02",
+      "production_entrypoint_test_count": 0,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/018-BWS-W1-T06.json",
+      "stage": "S3",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/018-BWS-W1-T06.md",
+      "test_environments": {
+        "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE": 22
+      },
+      "test_requirement_count": 22,
+      "tranche_id": "BWS-W1-T06",
+      "tranche_number": 6
+    },
+    {
+      "acceptance_authority": "[\"Atomic create-or-compare\", \"All transitions carry expected state and lease fence\", \"Database time and monotonic epochs own leases\", \"Retry and timestamp invariants enforced\"]",
+      "allowed_protected_files": [],
+      "campaign_order": 19,
+      "dependencies": [
+        "T01",
+        "T03",
+        "T06",
+        "T09"
+      ],
+      "execution_mode": "REPAIRED_IMPLEMENTATION_CONTROLLER",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS116-R03-006",
+        "BWS116-R03-007",
+        "BWS116-R03-008",
+        "BWS116-R03-009",
+        "BWS116-R03-010",
+        "BWS116-R03-017"
+      ],
+      "owner": "R03",
+      "production_entrypoint_test_count": 1,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/019-BWS-W1-T10.json",
+      "stage": "S3",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/019-BWS-W1-T10.md",
+      "test_environments": {
+        "DISPOSABLE_POSTGRESQL_AND_NODE20": 27
+      },
+      "test_requirement_count": 27,
+      "tranche_id": "BWS-W1-T10",
+      "tranche_number": 10
+    },
+    {
+      "acceptance_authority": "[\"psql operations have bounded timeout/output and classified cancellation\", \"Service shutdown prevents late durable writes\"]",
+      "allowed_protected_files": [],
+      "campaign_order": 20,
+      "dependencies": [
+        "T10",
+        "T37"
+      ],
+      "execution_mode": "REPAIRED_IMPLEMENTATION_CONTROLLER",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS116-R03-005",
+        "BWS116-R03-011"
+      ],
+      "owner": "R03",
+      "production_entrypoint_test_count": 2,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/020-BWS-W1-T11.json",
+      "stage": "S3",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/020-BWS-W1-T11.md",
+      "test_environments": {
+        "DISPOSABLE_POSTGRESQL_AND_NODE20": 8
+      },
+      "test_requirement_count": 8,
+      "tranche_id": "BWS-W1-T11",
+      "tranche_number": 11
+    },
+    {
+      "acceptance_authority": "- One atomic owner before side effects",
+      "allowed_protected_files": [],
+      "campaign_order": 21,
+      "dependencies": [
+        "T09",
+        "T10",
+        "T40"
+      ],
+      "execution_mode": "REPAIRED_IMPLEMENTATION_CONTROLLER",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS118-R06-001",
+        "BWS118-R06-003",
+        "BWS118-R06-004",
+        "BWS118-R06-005"
+      ],
+      "owner": "R06",
+      "production_entrypoint_test_count": 20,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/021-BWS-W2-T21.json",
+      "stage": "S3",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/021-BWS-W2-T21.md",
+      "test_environments": {
+        "NODE20_AND_DISPOSABLE_LOCAL_DEPENDENCIES_AS_REQUIRED": 20
+      },
+      "test_requirement_count": 20,
+      "tranche_id": "BWS-W2-T21",
+      "tranche_number": 21
+    },
+    {
+      "acceptance_authority": "- created/initializing/started-not-ready/ready/degraded/failed distinct",
+      "allowed_protected_files": [],
+      "campaign_order": 22,
+      "dependencies": [
+        "T21"
+      ],
+      "execution_mode": "REPAIRED_IMPLEMENTATION_CONTROLLER",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS118-R06-002",
+        "BWS118-R06-007",
+        "BWS118-R06-008",
+        "BWS118-R06-009"
+      ],
+      "owner": "R06",
+      "production_entrypoint_test_count": 22,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/022-BWS-W2-T22.json",
+      "stage": "S3",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/022-BWS-W2-T22.md",
+      "test_environments": {
+        "NODE20_AND_DISPOSABLE_LOCAL_DEPENDENCIES_AS_REQUIRED": 22
+      },
+      "test_requirement_count": 22,
+      "tranche_id": "BWS-W2-T22",
+      "tranche_number": 22
+    },
+    {
+      "acceptance_authority": "- One aggregate deadline",
+      "allowed_protected_files": [],
+      "campaign_order": 23,
+      "dependencies": [
+        "T05",
+        "T11",
+        "T21"
+      ],
+      "execution_mode": "REPAIRED_IMPLEMENTATION_CONTROLLER",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS118-R06-006",
+        "BWS118-R06-010",
+        "BWS118-R06-011",
+        "BWS118-R06-012",
+        "BWS118-R06-013",
+        "BWS118-R06-014"
+      ],
+      "owner": "R06",
+      "production_entrypoint_test_count": 31,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/023-BWS-W2-T23.json",
+      "stage": "S3",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/023-BWS-W2-T23.md",
+      "test_environments": {
+        "NODE20_AND_DISPOSABLE_LOCAL_DEPENDENCIES_AS_REQUIRED": 31
+      },
+      "test_requirement_count": 31,
+      "tranche_id": "BWS-W2-T23",
+      "tranche_number": 23
+    },
+    {
+      "acceptance_authority": "- Unexpected exception writes terminal failed/unknown state and evidence",
+      "allowed_protected_files": [],
+      "campaign_order": 24,
+      "dependencies": [
+        "T21",
+        "T23"
+      ],
+      "execution_mode": "REPAIRED_IMPLEMENTATION_CONTROLLER",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS118-R06-015",
+        "BWS118-R06-016"
+      ],
+      "owner": "R06",
+      "production_entrypoint_test_count": 10,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/024-BWS-W2-T24.json",
+      "stage": "S3",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/024-BWS-W2-T24.md",
+      "test_environments": {
+        "NODE20_AND_DISPOSABLE_LOCAL_DEPENDENCIES_AS_REQUIRED": 10
+      },
+      "test_requirement_count": 10,
+      "tranche_id": "BWS-W2-T24",
+      "tranche_number": 24
+    },
+    {
+      "acceptance_authority": "- Health reads precomputed immutable digest",
+      "allowed_protected_files": [],
+      "campaign_order": 25,
+      "dependencies": [
+        "T21",
+        "T26"
+      ],
+      "execution_mode": "REPAIRED_IMPLEMENTATION_CONTROLLER",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS118-R06-017"
+      ],
+      "owner": "R06",
+      "production_entrypoint_test_count": 5,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/025-BWS-W2-T25.json",
+      "stage": "S3",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/025-BWS-W2-T25.md",
+      "test_environments": {
+        "NODE20_AND_DISPOSABLE_LOCAL_DEPENDENCIES_AS_REQUIRED": 5
+      },
+      "test_requirement_count": 5,
+      "tranche_id": "BWS-W2-T25",
+      "tranche_number": 25
+    },
+    {
+      "acceptance_authority": "serialized create-or-compare index; immutable bytes or revalidation; monotonic currentness; reference-aware retention; version/latest transactional recovery",
+      "allowed_protected_files": [],
+      "campaign_order": 26,
+      "dependencies": [
+        "T24",
+        "T26",
+        "T40"
+      ],
+      "execution_mode": "REPAIRED_IMPLEMENTATION_CONTROLLER",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS120-R07-003",
+        "BWS120-R07-004",
+        "BWS120-R07-005",
+        "BWS120-R07-008",
+        "BWS120-R07-012",
+        "BWS120-R07-014"
+      ],
+      "owner": "R07",
+      "production_entrypoint_test_count": 33,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/026-BWS-W3-T27.json",
+      "stage": "S3",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/026-BWS-W3-T27.md",
+      "test_environments": {
+        "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE_OR_CONTROLLED_INTEGRATION": 33
+      },
+      "test_requirement_count": 33,
+      "tranche_id": "BWS-W3-T27",
+      "tranche_number": 27
+    },
+    {
+      "acceptance_authority": "incompatible/unknown runtime fails; published archive mandatory; no undeclared members; all release targets commit atomically with predecessor preservation",
+      "allowed_protected_files": [],
+      "campaign_order": 27,
+      "dependencies": [
+        "T27",
+        "T40"
+      ],
+      "execution_mode": "REPAIRED_IMPLEMENTATION_CONTROLLER",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS120-R09-001",
+        "BWS120-R09-002",
+        "BWS120-R09-003",
+        "BWS120-R09-004"
+      ],
+      "owner": "R09",
+      "production_entrypoint_test_count": 20,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/027-BWS-W3-T33.json",
+      "stage": "S3",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/027-BWS-W3-T33.md",
+      "test_environments": {
+        "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE_OR_CONTROLLED_INTEGRATION": 20
+      },
+      "test_requirement_count": 20,
+      "tranche_id": "BWS-W3-T33",
+      "tranche_number": 33
+    },
+    {
+      "acceptance_authority": "[\"All reads are explicitly bounded and stably ordered\", \"Retention preserves or explicitly blocks every accepted reference\"]",
+      "allowed_protected_files": [],
+      "campaign_order": 28,
+      "dependencies": [
+        "T03",
+        "T10",
+        "T31"
+      ],
+      "execution_mode": "REPAIRED_IMPLEMENTATION_CONTROLLER",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS116-R03-012",
+        "BWS116-R03-013"
+      ],
+      "owner": "R03",
+      "production_entrypoint_test_count": 0,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/028-BWS-W1-T13.json",
+      "stage": "S4",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/028-BWS-W1-T13.md",
+      "test_environments": {
+        "DISPOSABLE_POSTGRESQL_AND_NODE20": 8
+      },
+      "test_requirement_count": 8,
+      "tranche_id": "BWS-W1-T13",
+      "tranche_number": 13
+    },
+    {
+      "acceptance_authority": "- Exact duplicate events are no-ops",
+      "allowed_protected_files": [],
+      "campaign_order": 29,
+      "dependencies": [
+        "T03",
+        "T10"
+      ],
+      "execution_mode": "REPAIRED_IMPLEMENTATION_CONTROLLER",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS118-R04-001",
+        "BWS118-R04-003",
+        "BWS118-R04-004"
+      ],
+      "owner": "R04",
+      "production_entrypoint_test_count": 12,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/029-BWS-W2-T14.json",
+      "stage": "S4",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/029-BWS-W2-T14.md",
+      "test_environments": {
+        "NODE20_AND_DISPOSABLE_LOCAL_DEPENDENCIES_AS_REQUIRED": 12
+      },
+      "test_requirement_count": 12,
+      "tranche_id": "BWS-W2-T14",
+      "tranche_number": 14
+    },
+    {
+      "acceptance_authority": "[\"One candidate-global snapshot window\", \"Selected odds value-bound to exact evidence\", \"Capacity and venue limits gate solver/net classification\", \"Fee basis and stake increments are explicit\"]",
+      "allowed_protected_files": [],
+      "campaign_order": 30,
+      "dependencies": [
+        "T03",
+        "T06"
+      ],
+      "execution_mode": "REPAIRED_IMPLEMENTATION_CONTROLLER",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS116-R02-003",
+        "BWS116-R02-004",
+        "BWS116-R02-005",
+        "BWS116-R02-010",
+        "BWS116-R02-011",
+        "BWS116-R02-014"
+      ],
+      "owner": "R02",
+      "production_entrypoint_test_count": 0,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/030-BWS-W1-T07.json",
+      "stage": "S4",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/030-BWS-W1-T07.md",
+      "test_environments": {
+        "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE": 24
+      },
+      "test_requirement_count": 24,
+      "tranche_id": "BWS-W1-T07",
+      "tranche_number": 7
+    },
+    {
+      "acceptance_authority": "[\"Solver finds every feasible bounded vector or returns a proven reason\", \"Scenario matrices are complete and rectangular\"]",
+      "allowed_protected_files": [],
+      "campaign_order": 31,
+      "dependencies": [
+        "T06",
+        "T07"
+      ],
+      "execution_mode": "REPAIRED_IMPLEMENTATION_CONTROLLER",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS116-R02-006",
+        "BWS116-R02-012"
+      ],
+      "owner": "R02",
+      "production_entrypoint_test_count": 0,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/031-BWS-W1-T08.json",
+      "stage": "S4",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/031-BWS-W1-T08.md",
+      "test_environments": {
+        "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE": 9
+      },
+      "test_requirement_count": 9,
+      "tranche_id": "BWS-W1-T08",
+      "tranche_number": 8
+    },
+    {
+      "acceptance_authority": "- Actual price/odds/fees/slippage/receipt preserved",
+      "allowed_protected_files": [],
+      "campaign_order": 32,
+      "dependencies": [
+        "T07",
+        "T14"
+      ],
+      "execution_mode": "REPAIRED_IMPLEMENTATION_CONTROLLER",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS118-R04-002",
+        "BWS118-R04-005"
+      ],
+      "owner": "R04",
+      "production_entrypoint_test_count": 8,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/032-BWS-W2-T15.json",
+      "stage": "S4",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/032-BWS-W2-T15.md",
+      "test_environments": {
+        "NODE20_AND_DISPOSABLE_LOCAL_DEPENDENCIES_AS_REQUIRED": 8
+      },
+      "test_requirement_count": 8,
+      "tranche_id": "BWS-W2-T15",
+      "tranche_number": 15
+    },
+    {
+      "acceptance_authority": "- Void/refund/push/reopen represented explicitly",
+      "allowed_protected_files": [],
+      "campaign_order": 33,
+      "dependencies": [
+        "T03",
+        "T10",
+        "T14",
+        "T15"
+      ],
+      "execution_mode": "REPAIRED_IMPLEMENTATION_CONTROLLER",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS118-R04-006",
+        "BWS118-R04-007",
+        "BWS118-R04-008"
+      ],
+      "owner": "R04",
+      "production_entrypoint_test_count": 13,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/033-BWS-W2-T16.json",
+      "stage": "S4",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/033-BWS-W2-T16.md",
+      "test_environments": {
+        "NODE20_AND_DISPOSABLE_LOCAL_DEPENDENCIES_AS_REQUIRED": 13
+      },
+      "test_requirement_count": 13,
+      "tranche_id": "BWS-W2-T16",
+      "tranche_number": 16
+    },
+    {
+      "acceptance_authority": "[\"Previous state is reconstructed durably\", \"B1 parent/children repair after crash\", \"Observation and worker terminality share an aggregate completion protocol\"]",
+      "allowed_protected_files": [],
+      "campaign_order": 34,
+      "dependencies": [
+        "T03",
+        "T07",
+        "T08",
+        "T10",
+        "T14",
+        "T16"
+      ],
+      "execution_mode": "REPAIRED_IMPLEMENTATION_CONTROLLER",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS116-R03-014",
+        "BWS116-R03-015",
+        "BWS116-R03-016"
+      ],
+      "owner": "R03",
+      "production_entrypoint_test_count": 1,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/034-BWS-W1-T12.json",
+      "stage": "S4",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/034-BWS-W1-T12.md",
+      "test_environments": {
+        "DISPOSABLE_POSTGRESQL_AND_NODE20": 13
+      },
+      "test_requirement_count": 13,
+      "tranche_id": "BWS-W1-T12",
+      "tranche_number": 12
+    },
+    {
+      "acceptance_authority": "- Reports preserve leg/residual/terminal state",
+      "allowed_protected_files": [],
+      "campaign_order": 35,
+      "dependencies": [
+        "T12",
+        "T14",
+        "T15",
+        "T16"
+      ],
+      "execution_mode": "REPAIRED_IMPLEMENTATION_CONTROLLER",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS118-R04-009",
+        "BWS118-R04-010",
+        "BWS118-R04-011",
+        "BWS118-R04-012",
+        "BWS118-R04-013",
+        "BWS118-R04-014"
+      ],
+      "owner": "R04",
+      "production_entrypoint_test_count": 22,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/035-BWS-W2-T17.json",
+      "stage": "S4",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/035-BWS-W2-T17.md",
+      "test_environments": {
+        "NODE20_AND_DISPOSABLE_LOCAL_DEPENDENCIES_AS_REQUIRED": 22
+      },
+      "test_requirement_count": 22,
+      "tranche_id": "BWS-W2-T17",
+      "tranche_number": 17
+    },
+    {
+      "acceptance_authority": "- Validation/policy/not-found/conflict/unavailable/timeout/internal errors distinct",
+      "allowed_protected_files": [],
+      "campaign_order": 36,
+      "dependencies": [
+        "T03",
+        "T26"
+      ],
+      "execution_mode": "REPAIRED_IMPLEMENTATION_CONTROLLER",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS118-R05-001",
+        "BWS118-R05-006",
+        "BWS118-R05-009"
+      ],
+      "owner": "R05",
+      "production_entrypoint_test_count": 11,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/036-BWS-W2-T18.json",
+      "stage": "S5",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/036-BWS-W2-T18.md",
+      "test_environments": {
+        "NODE20_AND_DISPOSABLE_LOCAL_DEPENDENCIES_AS_REQUIRED": 11
+      },
+      "test_requirement_count": 11,
+      "tranche_id": "BWS-W2-T18",
+      "tranche_number": 18
+    },
+    {
+      "acceptance_authority": "- Authenticated/versioned cursors own one snapshot",
+      "allowed_protected_files": [],
+      "campaign_order": 37,
+      "dependencies": [
+        "T13",
+        "T18"
+      ],
+      "execution_mode": "REPAIRED_IMPLEMENTATION_CONTROLLER",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS118-R05-002",
+        "BWS118-R05-003",
+        "BWS118-R05-004",
+        "BWS118-R05-005",
+        "BWS118-R05-007",
+        "BWS118-R05-008"
+      ],
+      "owner": "R05",
+      "production_entrypoint_test_count": 26,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/037-BWS-W2-T19.json",
+      "stage": "S5",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/037-BWS-W2-T19.md",
+      "test_environments": {
+        "NODE20_AND_DISPOSABLE_LOCAL_DEPENDENCIES_AS_REQUIRED": 26
+      },
+      "test_requirement_count": 26,
+      "tranche_id": "BWS-W2-T19",
+      "tranche_number": 19
+    },
+    {
+      "acceptance_authority": "- Wire validator is exact with producer contract",
+      "allowed_protected_files": [],
+      "campaign_order": 38,
+      "dependencies": [
+        "T17",
+        "T18",
+        "T19"
+      ],
+      "execution_mode": "REPAIRED_IMPLEMENTATION_CONTROLLER",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS118-R05-010",
+        "BWS118-R05-011",
+        "BWS118-R05-012",
+        "BWS118-R05-013"
+      ],
+      "owner": "R05",
+      "production_entrypoint_test_count": 19,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/038-BWS-W2-T20.json",
+      "stage": "S5",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/038-BWS-W2-T20.md",
+      "test_environments": {
+        "NODE20_AND_DISPOSABLE_LOCAL_DEPENDENCIES_AS_REQUIRED": 19
+      },
+      "test_requirement_count": 19,
+      "tranche_id": "BWS-W2-T20",
+      "tranche_number": 20
+    },
+    {
+      "acceptance_authority": "non-2xx/schema-invalid fail closed; no synthetic-ready substitution; continuous monotonic observation window; exact generation binding",
+      "allowed_protected_files": [
+        "run-paper-evaluation.sh",
+        "run-paper-autopilot.sh"
+      ],
+      "campaign_order": 39,
+      "dependencies": [
+        "T18",
+        "T22",
+        "T23",
+        "T26",
+        "T27"
+      ],
+      "execution_mode": "REPAIRED_IMPLEMENTATION_CONTROLLER",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS120-R07-006",
+        "BWS120-R07-007",
+        "BWS120-R07-009",
+        "BWS120-R07-010",
+        "BWS120-R07-011"
+      ],
+      "owner": "R07",
+      "production_entrypoint_test_count": 31,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/039-BWS-W3-T28.json",
+      "stage": "S5",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/039-BWS-W3-T28.md",
+      "test_environments": {
+        "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE_OR_CONTROLLED_INTEGRATION": 31
+      },
+      "test_requirement_count": 31,
+      "tranche_id": "BWS-W3-T28",
+      "tranche_number": 28
+    },
+    {
+      "acceptance_authority": "source/lifecycle same generation; controller consumes exact manifest; parent verifies child evidence digest; acceptance verifies artifact graph; B1 authority not caller asserted; newest-run selection by parsed time and identity",
+      "allowed_protected_files": [
+        "check_progress.sh",
+        "watch_progress.sh",
+        "open_log.sh",
+        "run-paper-evaluation.sh",
+        "run-paper-autopilot.sh",
+        ".automation/lib/controller_hardening_v2.sh"
+      ],
+      "campaign_order": 40,
+      "dependencies": [
+        "T27",
+        "T28",
+        "T47"
+      ],
+      "execution_mode": "REPAIRED_IMPLEMENTATION_CONTROLLER",
+      "external_acceptance_pending": true,
+      "finding_ids": [
+        "BWS120-R07-013",
+        "BWS120-R07-015",
+        "BWS120-R07-016",
+        "BWS120-R07-017",
+        "BWS120-R07-018",
+        "BWS120-R07-019"
+      ],
+      "owner": "R07",
+      "production_entrypoint_test_count": 37,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/040-BWS-W3-T29.json",
+      "stage": "S5",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/040-BWS-W3-T29.md",
+      "test_environments": {
+        "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE_OR_CONTROLLED_INTEGRATION": 37
+      },
+      "test_requirement_count": 37,
+      "tranche_id": "BWS-W3-T29",
+      "tranche_number": 29
+    },
+    {
+      "acceptance_authority": "plan bound to target; plan/apply one transaction or fenced protocol; partial prune impossible; blocked/terminal provenance retained",
+      "allowed_protected_files": [],
+      "campaign_order": 41,
+      "dependencies": [
+        "T10",
+        "T13",
+        "T31"
+      ],
+      "execution_mode": "REPAIRED_IMPLEMENTATION_CONTROLLER",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS120-R08-010",
+        "BWS120-R08-011",
+        "BWS120-R08-012"
+      ],
+      "owner": "R08",
+      "production_entrypoint_test_count": 11,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/041-BWS-W3-T32.json",
+      "stage": "S6",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/041-BWS-W3-T32.md",
+      "test_environments": {
+        "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE_OR_CONTROLLED_INTEGRATION": 11
+      },
+      "test_requirement_count": 11,
+      "tranche_id": "BWS-W3-T32",
+      "tranche_number": 32
+    },
+    {
+      "acceptance_authority": "plan recomputed; all inputs rebound; one owner; state scoped to plan; checkpoint bytes/current target verified; lifecycle failures not success; partial target fenced before prior restart",
+      "allowed_protected_files": [],
+      "campaign_order": 42,
+      "dependencies": [
+        "T21",
+        "T23",
+        "T31",
+        "T33"
+      ],
+      "execution_mode": "REPAIRED_IMPLEMENTATION_CONTROLLER",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS120-R09-005",
+        "BWS120-R09-006",
+        "BWS120-R09-007",
+        "BWS120-R09-008",
+        "BWS120-R09-009",
+        "BWS120-R09-010",
+        "BWS120-R09-011"
+      ],
+      "owner": "R09",
+      "production_entrypoint_test_count": 36,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/042-BWS-W3-T34.json",
+      "stage": "S6",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/042-BWS-W3-T34.md",
+      "test_environments": {
+        "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE_OR_CONTROLLED_INTEGRATION": 36
+      },
+      "test_requirement_count": 36,
+      "tranche_id": "BWS-W3-T34",
+      "tranche_number": 34
+    },
+    {
+      "acceptance_authority": "no synthetic instant pass; each fault distinct; readiness/progress/resource thresholds enforced; checkpoint order restart-safe; resumed result cumulative; cleanup measured",
+      "allowed_protected_files": [],
+      "campaign_order": 43,
+      "dependencies": [
+        "T22",
+        "T23",
+        "T25",
+        "T27",
+        "T32",
+        "T34",
+        "T47"
+      ],
+      "execution_mode": "REPAIRED_IMPLEMENTATION_CONTROLLER",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS120-R09-012",
+        "BWS120-R09-013",
+        "BWS120-R09-014",
+        "BWS120-R09-015",
+        "BWS120-R09-016",
+        "BWS120-R09-017"
+      ],
+      "owner": "R09",
+      "production_entrypoint_test_count": 33,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/043-BWS-W3-T35.json",
+      "stage": "S6",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/043-BWS-W3-T35.md",
+      "test_environments": {
+        "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE_OR_CONTROLLED_INTEGRATION": 33
+      },
+      "test_requirement_count": 33,
+      "tranche_id": "BWS-W3-T35",
+      "tranche_number": 35
+    },
+    {
+      "acceptance_authority": "preflight consumes canonical result and validation; environment bytes in identity; all recovery artifacts share generation/content graph; archive digest independently recomputed and component paths immutable",
+      "allowed_protected_files": [],
+      "campaign_order": 44,
+      "dependencies": [
+        "T27",
+        "T28",
+        "T29",
+        "T30",
+        "T31",
+        "T32",
+        "T33",
+        "T34",
+        "T35",
+        "T37"
+      ],
+      "execution_mode": "REPAIRED_IMPLEMENTATION_CONTROLLER",
+      "external_acceptance_pending": true,
+      "finding_ids": [
+        "BWS120-R09-018",
+        "BWS120-R09-019",
+        "BWS120-R09-020",
+        "BWS120-R09-021"
+      ],
+      "owner": "R09",
+      "production_entrypoint_test_count": 22,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/044-BWS-W3-T36.json",
+      "stage": "S6",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/044-BWS-W3-T36.md",
+      "test_environments": {
+        "NODE20_OR_LANGUAGE_NEUTRAL_OFFLINE_OR_CONTROLLED_INTEGRATION": 22
+      },
+      "test_requirement_count": 22,
+      "tranche_id": "BWS-W3-T36",
+      "tranche_number": 36
+    },
+    {
+      "acceptance_authority": "Production-entrypoint semantic validators replace token/status self-attestation.",
+      "allowed_protected_files": [],
+      "campaign_order": 45,
+      "dependencies": [
+        "T36",
+        "T40"
+      ],
+      "execution_mode": "REPAIRED_IMPLEMENTATION_CONTROLLER",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS121-R11-003",
+        "BWS121-R11-004",
+        "BWS121-R11-005",
+        "BWS121-R11-006"
+      ],
+      "owner": "R11",
+      "production_entrypoint_test_count": 18,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/045-BWS-W4-T41.json",
+      "stage": "S7",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/045-BWS-W4-T41.md",
+      "test_environments": {
+        "AS_SPECIFIED_BY_REVIEW": 18
+      },
+      "test_requirement_count": 18,
+      "tranche_id": "BWS-W4-T41",
+      "tranche_number": 41
+    },
+    {
+      "acceptance_authority": "Repository-wide structural boundary analysis and complete fixture authority.",
+      "allowed_protected_files": [],
+      "campaign_order": 46,
+      "dependencies": [
+        "T39",
+        "T41"
+      ],
+      "execution_mode": "REPAIRED_IMPLEMENTATION_CONTROLLER",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS121-R11-007",
+        "BWS121-R11-008",
+        "BWS121-R11-009"
+      ],
+      "owner": "R11",
+      "production_entrypoint_test_count": 15,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/046-BWS-W4-T42.json",
+      "stage": "S7",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/046-BWS-W4-T42.md",
+      "test_environments": {
+        "AS_SPECIFIED_BY_REVIEW": 15
+      },
+      "test_requirement_count": 15,
+      "tranche_id": "BWS-W4-T42",
+      "tranche_number": 42
+    },
+    {
+      "acceptance_authority": "Machine-enforced closure from every stable finding to source postimages, executed tests, and environment receipts.",
+      "allowed_protected_files": [],
+      "campaign_order": 47,
+      "dependencies": [
+        "T40",
+        "T41",
+        "T42",
+        "T01",
+        "T02",
+        "T03",
+        "T04",
+        "T05",
+        "T06",
+        "T07",
+        "T08",
+        "T09",
+        "T10",
+        "T11",
+        "T12",
+        "T13",
+        "T14",
+        "T15",
+        "T16",
+        "T17",
+        "T18",
+        "T19",
+        "T20",
+        "T21",
+        "T22",
+        "T23",
+        "T24",
+        "T25",
+        "T26",
+        "T27",
+        "T28",
+        "T29",
+        "T30",
+        "T31",
+        "T32",
+        "T33",
+        "T34",
+        "T35",
+        "T36",
+        "T37",
+        "T38",
+        "T39",
+        "T44",
+        "T45",
+        "T46",
+        "T47"
+      ],
+      "execution_mode": "REPAIRED_IMPLEMENTATION_CONTROLLER",
+      "external_acceptance_pending": false,
+      "finding_ids": [
+        "BWS121-R11-010"
+      ],
+      "owner": "R11",
+      "production_entrypoint_test_count": 6,
+      "result_path": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/receipts/results/047-BWS-W4-T43.json",
+      "stage": "S7",
+      "task_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/047-BWS-W4-T43.md",
+      "test_environments": {
+        "AS_SPECIFIED_BY_REVIEW": 6
+      },
+      "test_requirement_count": 6,
+      "tranche_id": "BWS-W4-T43",
+      "tranche_number": 43
+    }
+  ]
+}

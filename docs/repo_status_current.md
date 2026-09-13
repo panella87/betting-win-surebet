@@ -1,3 +1,29 @@
+# Activated R01-R12 remediation authority
+
+This section is newer and binding for source-remediation routing. The retained BWS-600 fields later in this document remain external hold and compatibility markers; they do not authorize `run-paper-autopilot.sh` while this remediation campaign is active.
+
+```text
+remediation_program=BWS_FINAL_REMEDIATION_R01_R12_V1
+remediation_program_state=ACTIVE
+remediation_authorization=explicit_2026_09_13_longest_safe_unattended
+remediation_live_state=artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/campaign-state.json
+remediation_initial_tranche=BWS-W4-T39
+remediation_initial_order=1
+remediation_initial_stage=S1
+remediation_pre_s2_execution=direct_bounded_codex_only
+remediation_existing_controller_before_s2=prohibited
+remediation_post_s2_controller=run-autonomous-implementation.sh
+remediation_operator_window=28d
+remediation_active_admission=docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/active-campaign-admission.json
+remediation_unattended_plan=docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/unattended-plan.json
+remediation_launcher=docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/run-unattended-remediation-campaign.sh
+remediation_holds=unchanged
+```
+
+Routing rule: read the live campaign state first. Admit only its exact current tranche. Continue automatically only after the deterministic result verifier accepts the predecessor. Stop on any blocker or ambiguity.
+
+---
+
 # Current Repository Status
 
 ## Active post-B1 binding state
