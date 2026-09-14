@@ -2,7 +2,7 @@
 
 ## Start here
 
-The repository is in the active remediation campaign `BWS_FINAL_REMEDIATION_R01_R12_V1`. The first admitted tranche is `BWS-W4-T39`; no acceptance result is present in the BWS125 source ZIP.
+The repository is in the active remediation campaign `BWS_FINAL_REMEDIATION_R01_R12_V1`. The first admitted tranche is `BWS-W4-T39`; current campaign authority records no accepted T39 result. Verify the exact current archive or checkout through an external audit or admission receipt rather than treating a rolling numbered ZIP named in repository documentation as current authority.
 
 ```text
 repo_role=surebet_strategy_application

@@ -12,20 +12,19 @@ independent_inventory_digest_sha256=b81ff807e4c230bff96fe1fa58f73a2d4bac803ebd7f
 
 BWS122 remains the frozen finding, dependency, and application-source baseline. The archive SHA-256 and exact member inventory are initial authority; they do not prove the mutable checkout at launch.
 
-## Current documentation-aligned repository snapshot
+## Mutable current-source identity
 
 ```text
-archive=betting-win-surebet125.zip
-sha256=72a8262a5f94d144bb930cc9fb2778eed672d2a97a252f49b07f7b979b47224f
-regular_files=995
-accepted_remediation_source_result=none
+current_archive_or_checkout=TO_CAPTURE_IN_EXTERNAL_AUDIT_OR_ADMISSION_RECEIPT
+repository_documentation_self_attests_current_archive=no
+accepted_remediation_source_result=none_recorded_by_current_campaign_authority
 ```
 
-BWS125 contains the remediation documentation package, activation authority, and documentation-alignment postimage. It contains no accepted tranche implementation receipt.
+A rolling numbered source ZIP is an input receipt, not persistent repository authority. Before any source edit, capture the exact archive or checkout identity, extracted-tree digest, Git HEAD, branch, upstream, dirty-state digest, path hashes, modes, and source-manifest observation. Missing or conflicting identity blocks admission.
 
 ## Git fields unavailable from ZIP archives
 
-`git_head`, `git_branch`, `git_upstream`, and `git_dirty_state` remain `TO_CAPTURE_AT_FIRST_LAUNCH`. Neither BWS122 nor BWS125 can prove those mutable checkout properties.
+`git_head`, `git_branch`, `git_upstream`, and `git_dirty_state` remain `TO_CAPTURE_AT_FIRST_LAUNCH`. Neither the frozen BWS122 baseline nor repository documentation can prove mutable checkout properties.
 
 ## Source-manifest restriction
 
@@ -41,15 +40,17 @@ formal_finding=BWS121-R11-001
 owner=BWS-W4-T40
 ```
 
-Current BWS125 drift:
+Latest documented drift observation:
 
 ```text
+audit_input=betting-win-surebet127.zip
+audit_input_sha256=cc976c7efd5a97a262d1772001dda513775a2b282c0d8ec1055ebe97dd8dfdd4
 expected_non_self_entries=994
 manifest_entries=617
 missing_entries=377
 extra_entries=0
 mismatched_entries=47
-preimage_mismatched_entries=38
+observation_authority=historical_only_recompute_at_admission
 ```
 
 `SOURCE_MANIFEST.json` must not be edited, regenerated, or weakened before admitted T40. Until T40 is accepted, current-source proof binds the frozen baseline, the exact current archive/check-out preimage, and independently captured hashes rather than the stale manifest.

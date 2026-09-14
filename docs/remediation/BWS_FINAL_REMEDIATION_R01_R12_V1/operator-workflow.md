@@ -2,7 +2,7 @@
 
 ## 1. Verify current authority
 
-Verify `activation/immutable-authority.sha256`, run `activation/validate_activation_package.py --static`, and confirm the exact BWS125 documentation snapshot `72a8262a5f94d144bb930cc9fb2778eed672d2a97a252f49b07f7b979b47224f`. The original S0 proposal is historical; it is not current routing.
+Verify `activation/immutable-authority.sha256`, run `activation/validate_activation_package.py --static`, and verify an external audit or admission receipt for the exact current archive or checkout, extracted-tree digest, Git identity, path hashes, and modes. Repository documentation must not substitute a rolling numbered ZIP for that receipt. The original S0 proposal is historical; it is not current routing.
 
 ## 2. Confirm the one active tranche
 

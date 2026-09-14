@@ -15,7 +15,7 @@ ISSUE_IDS: BWS118-R04-002, BWS118-R04-005
 SEVERITY_COUNTS: {"P1": 2}
 DEPENDENCIES: T07, T14
 EXTERNAL_ACCEPTANCE_PENDING: no
-CURRENT_SOURCE_AUTHORITY: frozen application-source baseline betting-win-surebet122.zip sha256=e303719e5ce64df47df7b0594433a8978e3b01c5a3d0d0bd9129b9b6340b20cd; documentation-audit preimage betting-win-surebet125.zip sha256=72a8262a5f94d144bb930cc9fb2778eed672d2a97a252f49b07f7b979b47224f with 995 regular files and no accepted remediation source result; this overlay changes documentation only; exact checkout/Git/source state must be reverified before editing
+CURRENT_SOURCE_AUTHORITY: frozen review/finding baseline betting-win-surebet122.zip sha256=e303719e5ce64df47df7b0594433a8978e3b01c5a3d0d0bd9129b9b6340b20cd; active campaign authority is pinned by activation/immutable-authority.sha256; exact current numbered archive or checkout, extracted-tree digest, Git identity, source paths, hashes, and modes must be captured in an external audit or admission receipt and reverified before editing; repository documentation does not self-attest a rolling numbered ZIP
 CURRENT_SOURCE_PATH_CANDIDATES: packages/bootstrap/src/economics/b1-net-spread.ts, packages/bootstrap/src/scenarios/b1-scenario-cashflow.ts, packages/bootstrap/src/simulation/b1-leg-completion.ts, packages/bootstrap/src/simulation/b1-residual-exposure.ts, packages/bootstrap/src/simulation/b1-settlement-replay.ts, packages/bootstrap/src/simulation/non-atomic-completion.ts
 SYMBOLS_TO_REVERIFY: 9 detailed records below
 ALLOWED_EDIT_BOUNDARY: listed current paths are candidates only; exact set TO_CONFIRM_DURING_ADMISSION after current-source reverification

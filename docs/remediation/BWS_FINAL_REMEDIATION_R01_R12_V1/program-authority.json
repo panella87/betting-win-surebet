@@ -254,14 +254,17 @@
       "mismatched_entries": 8,
       "missing_entries": 153,
       "owner_tranche": "BWS-W4-T40",
-      "counts_scope": "frozen BWS122 finding baseline plus current BWS125 drift below",
-      "current_expected_non_self_entries": 994,
-      "current_manifest_entries": 617,
-      "current_missing_entries": 377,
-      "current_extra_entries": 0,
-      "current_mismatched_entries": 47,
-      "current_snapshot": "betting-win-surebet125.zip",
-      "audit_preimage_mismatched_entries": 38
+      "counts_scope": "frozen BWS122 finding state; rolling-tree drift is an external audit or admission observation and must be recomputed",
+      "latest_documented_drift_observation": {
+        "audit_input_archive": "betting-win-surebet127.zip",
+        "audit_input_sha256": "cc976c7efd5a97a262d1772001dda513775a2b282c0d8ec1055ebe97dd8dfdd4",
+        "expected_non_self_entries": 994,
+        "manifest_entries": 617,
+        "missing_entries": 377,
+        "extra_entries": 0,
+        "mismatched_entries": 47,
+        "authority": "HISTORICAL_AUDIT_OBSERVATION_RECOMPUTE_AT_ADMISSION"
+      }
     },
     "target_repo": "$HOME/app_testing/betting-win-surebet",
     "update_helper": "./update_git.sh --pull"
@@ -317,10 +320,19 @@
     "SOURCE_COMPLETE_EXTERNAL_PENDING"
   ],
   "tranches": 47,
-  "current_repository_snapshot": {
-    "archive": "betting-win-surebet125.zip",
-    "sha256": "72a8262a5f94d144bb930cc9fb2778eed672d2a97a252f49b07f7b979b47224f",
-    "regular_files": 995,
-    "relationship": "BWS122 frozen application-source baseline plus validated remediation documentation, activation authority, and documentation alignment; no accepted remediation source result"
+  "current_source_identity_policy": {
+    "authority": "EXTERNAL_AUDIT_OR_ADMISSION_RECEIPT_REQUIRED",
+    "repository_documentation_self_attests_current_archive": false,
+    "required_fields": [
+      "archive_or_checkout_identity",
+      "extracted_tree_digest",
+      "git_head",
+      "git_branch",
+      "git_upstream",
+      "git_dirty_state_digest",
+      "path_hashes_and_modes",
+      "source_manifest_observation"
+    ],
+    "accepted_remediation_source_result": "NONE_RECORDED_BY_CURRENT_CAMPAIGN_AUTHORITY"
   }
 }

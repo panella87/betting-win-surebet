@@ -29,19 +29,30 @@
     "owner_tranche": "BWS-W4-T40"
   },
   "source_manifest_task_rule": "do not edit or regenerate until admitted T40",
-  "current_repository_snapshot": {
-    "archive": "betting-win-surebet125.zip",
-    "sha256": "72a8262a5f94d144bb930cc9fb2778eed672d2a97a252f49b07f7b979b47224f",
-    "regular_files": 995,
-    "application_source_result": "NONE_ACCEPTED"
+  "protected_authority_note": "BWS122 preimages remain historical baseline evidence; validated activation later replaced only its declared authority documents and immutable hashes still verify.",
+  "current_source_identity_policy": {
+    "authority": "EXTERNAL_AUDIT_OR_ADMISSION_RECEIPT_REQUIRED",
+    "repository_documentation_self_attests_current_archive": false,
+    "required_fields": [
+      "archive_or_checkout_identity",
+      "extracted_tree_digest",
+      "git_head",
+      "git_branch",
+      "git_upstream",
+      "git_dirty_state_digest",
+      "path_hashes_and_modes",
+      "source_manifest_observation"
+    ],
+    "accepted_remediation_source_result": "NONE_RECORDED_BY_CURRENT_CAMPAIGN_AUTHORITY"
   },
-  "current_source_manifest_drift": {
+  "latest_documented_source_manifest_drift_observation": {
+    "audit_input_archive": "betting-win-surebet127.zip",
+    "audit_input_sha256": "cc976c7efd5a97a262d1772001dda513775a2b282c0d8ec1055ebe97dd8dfdd4",
     "expected_non_self_entries": 994,
     "manifest_entries": 617,
     "missing_entries": 377,
     "extra_entries": 0,
     "mismatched_entries": 47,
-    "audit_preimage_mismatched_entries": 38
-  },
-  "protected_authority_note": "BWS122 preimages remain historical baseline evidence; validated activation later replaced only its declared authority documents and immutable hashes still verify."
+    "authority": "HISTORICAL_AUDIT_OBSERVATION_RECOMPUTE_AT_ADMISSION"
+  }
 }

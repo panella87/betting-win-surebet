@@ -4,11 +4,12 @@
 
 - `BWS_FINAL_REMEDIATION_R01_R12_V1` is active; T39 alone is admitted.
 - BWS122 remains the frozen finding/dependency/application-source baseline.
-- BWS125 (`72a8262a5f94d144bb930cc9fb2778eed672d2a97a252f49b07f7b979b47224f`) is the current documentation-aligned repository archive and contains no accepted remediation source result.
+- BWS125 (`72a8262a5f94d144bb930cc9fb2778eed672d2a97a252f49b07f7b979b47224f`) is the historical preimage for the 77-file documentation-authority reconciliation. The BWS127 documentation audit verified that postimage. Neither archive is persistent current-source authority.
 - The active admission, fixed-order plan, immutable task files, and launcher under `activation/` supersede the retained S0 proposal records.
 - Exactly one source-mutating tranche may be active. Existing autonomous controllers remain prohibited until the complete S2 gate is accepted.
 - Current source paths in packets are candidates requiring first-launch reverification, not unconditional edit permission.
-- `SOURCE_MANIFEST.json` remains stale and owned by T40; current BWS125 drift is 994 expected non-self files, 617 manifest entries, 377 missing, 47 mismatched, and 0 extra in the documentation postimage; BWS125 itself had 38 mismatches.
+- Exact current source identity must come from an external audit or admission receipt. Repository documentation does not self-attest a rolling numbered source ZIP.
+- `SOURCE_MANIFEST.json` remains stale and owned by T40. The BWS127 audit observed 994 expected non-self files, 617 manifest entries, 377 missing, 47 mismatched, and 0 extra. Recompute those counts at admission.
 - All existing BWS/release/deployment/live-execution holds remain unchanged.
 
 ## Unresolved first-launch fields

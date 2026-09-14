@@ -14,9 +14,8 @@ obsolete=0
 current_program=BWS_FINAL_REMEDIATION_R01_R12_V1
 current_program_state=ACTIVE
 current_admitted_tranche=BWS-W4-T39
-current_repository_snapshot=betting-win-surebet125.zip
-current_repository_sha256=72a8262a5f94d144bb930cc9fb2778eed672d2a97a252f49b07f7b979b47224f
-current_repository_regular_files=995
+current_source_identity_policy=external_audit_or_admission_receipt_required
+repository_documentation_self_attests_current_archive=no
 ```
 
 ## Current authority
@@ -50,7 +49,7 @@ No other document owns the current controller or task selection. Supporting runb
 
 ## Current documentation-audit residuals
 
-- `SOURCE_MANIFEST.json` is intentionally stale until T40. For BWS125, the current validator input set is 994 non-self files versus 617 manifest entries, with 377 missing paths, 47 mismatches, and no manifest-only paths in this documentation postimage; the BWS125 audit preimage had 38 mismatches.
+- `SOURCE_MANIFEST.json` is intentionally stale until T40. The latest documented audit observation found 994 non-self files versus 617 manifest entries, with 377 missing paths, 47 mismatches, and no manifest-only paths. Recompute those counts at admission; they are not current-source authority.
 - `schemas/bws-release-manifest.v1.schema.json` is not valid JSON in the current source tree. This audit records the defect but does not alter executable schemas or assign an unreviewed implementation owner. The file is not acceptance evidence until an admitted implementation cycle repairs and proves it.
 
 ## Current remediation package

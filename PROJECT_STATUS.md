@@ -7,9 +7,8 @@ program=BWS_FINAL_REMEDIATION_R01_R12_V1
 status=ACTIVE_REMEDIATION
 activation_snapshot=betting-win-surebet123.zip
 activation_snapshot_sha256=e8d632fbb3bc7b45b4f2366d3fac33187fdc21fc0c2a7e6e36fb4b2890f9c4a9
-current_repository_snapshot=betting-win-surebet125.zip
-current_repository_sha256=72a8262a5f94d144bb930cc9fb2778eed672d2a97a252f49b07f7b979b47224f
-current_repository_regular_files=995
+current_source_identity=CAPTURE_IN_EXTERNAL_AUDIT_OR_ADMISSION_RECEIPT
+repository_documentation_self_attests_current_archive=no
 current_admitted_tranche=BWS-W4-T39
 current_campaign_order=1
 current_stage=S1
@@ -19,7 +18,7 @@ existing_controller_allowed_before_s2=no
 post_s2_controller=run-autonomous-implementation.sh
 ```
 
-The 47-tranche remediation campaign covers 173 confirmed findings. T39 is first and dependency-free. It owns the nested-secret, archive-policy, Git-config, SSH-identity, and first-use trust correction boundary in the repository packaging and Git helper scripts. No remediation source implementation or acceptance receipt is present in the BWS125 ZIP.
+The 47-tranche remediation campaign covers 173 confirmed findings. T39 is first and dependency-free. It owns the nested-secret, archive-policy, Git-config, SSH-identity, and first-use trust correction boundary in the repository packaging and Git helper scripts. Current campaign authority records T39 as admitted, not implemented or accepted. Exact archive, extracted-tree, Git, path-mode, and source-state identity must be captured in an external audit or admission receipt before editing; repository documentation does not self-attest a rolling numbered ZIP.
 
 The exact active routing authority is the activation package under `docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/`. `docs/repo_status_current.md` and `docs/automation/current-implementation-task.md` are immutable inputs to that package; their first sections are current. Their later BWS-600 sections are validator-retained historical compatibility text.
 
@@ -61,7 +60,7 @@ account_policy=separate_from_betting-win-betting
 
 ## Source-manifest state
 
-`SOURCE_MANIFEST.json` remains stale and is not current authority. Against BWS125, the validator input set contains 994 non-self files while the manifest contains 617 entries: 377 paths are missing, 47 shared paths mismatch, and 0 manifest-only paths remain in this documentation postimage; the BWS125 audit preimage had 38 mismatches. T40 owns replacement with exact current-tree and exact Node `20.20.2` enforcement. This documentation audit does not regenerate or weaken it.
+`SOURCE_MANIFEST.json` remains stale and is not current authority. The latest documented audit observation found 994 non-self files versus 617 manifest entries, with 377 missing paths, 47 mismatches, and 0 manifest-only paths. Those counts are historical audit evidence, not current-source authority, and must be recomputed at admission. T40 owns replacement with exact current-tree and exact Node `20.20.2` enforcement. This documentation audit does not regenerate or weaken it.
 
 ## Known source-contract residual
 

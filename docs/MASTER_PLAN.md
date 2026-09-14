@@ -16,7 +16,7 @@ canonical_node=v20.20.2
 implementation_parallelism=one_source_mutating_tranche_at_a_time
 ```
 
-The binding implementation sequence is the active admission and unattended plan under `docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/`. The original BWS122 remediation architecture remains the finding, dependency, ownership, proof, and hold baseline. BWS123 activated that plan. BWS125 contains the active authority, the completed documentation-alignment postimage, and no accepted remediation source result.
+The binding implementation sequence is the active admission and unattended plan under `docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/`. The original BWS122 remediation architecture remains the finding, dependency, ownership, proof, and hold baseline. BWS123 activated that plan. Current campaign authority records no accepted remediation source result. Exact current archive, extracted-tree, Git, path-mode, and source-state identity must be supplied by an external audit or admission receipt; persistent repository documentation does not designate a rolling numbered ZIP as current.
 
 ## Goal
 

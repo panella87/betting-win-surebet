@@ -2,7 +2,7 @@
 
 Current validation must prove:
 
-- BWS125 is the exact documentation-aligned repository snapshot and contains no accepted remediation source result;
+- an external audit or admission receipt binds the exact current archive or checkout, extracted-tree digest, Git identity, path hashes, and modes; repository documentation does not self-attest a rolling numbered ZIP;
 - the BWS122 finding/dependency baseline, 47 tranches, 173 findings, eight stages, owners, severities, test counts, environments, acyclic DAG, T43-last rule, and P0 corridor remain unchanged;
 - `activation/immutable-authority.sha256` and the activation static validator pass;
 - T39 is `ADMITTED`, every other tranche is `NOT_ADMITTED`, and no packet claims source completion or acceptance;
