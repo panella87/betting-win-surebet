@@ -1,6 +1,6 @@
 # 028 - Full implementation program
 
-> **Completed historical authority.** This document preserves the implementation sequence and acceptance rules that closed BWS-100 through BWS-599. It is not current controller routing. Current authority is `docs/automation/current-implementation-task.md`, with no active implementation queue and `run-paper-autopilot.sh` selected for BWS-600.
+> **Completed historical authority.** This document preserves the implementation sequence and acceptance rules that closed BWS-100 through BWS-599. It is non-routing. Current authority is the activated R01-R12 remediation package, with T39 admitted and all existing root controllers prohibited until S2 is accepted.
 
 ```text
 program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1

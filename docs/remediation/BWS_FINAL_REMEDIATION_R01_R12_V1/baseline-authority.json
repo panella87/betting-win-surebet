@@ -5,10 +5,10 @@
   "archive": "betting-win-surebet122.zip",
   "archive_member_inventory_path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/baseline/archive-member-inventory.json",
   "archive_sha256": "e303719e5ce64df47df7b0594433a8978e3b01c5a3d0d0bd9129b9b6340b20cd",
-  "git_branch": "TO_CAPTURE_AT_ACTIVATION",
-  "git_dirty_state": "TO_CAPTURE_AT_ACTIVATION",
-  "git_head": "TO_CAPTURE_AT_ACTIVATION",
-  "git_upstream": "TO_CAPTURE_AT_ACTIVATION",
+  "git_branch": "TO_CAPTURE_AT_FIRST_LAUNCH",
+  "git_dirty_state": "TO_CAPTURE_AT_FIRST_LAUNCH",
+  "git_head": "TO_CAPTURE_AT_FIRST_LAUNCH",
+  "git_upstream": "TO_CAPTURE_AT_FIRST_LAUNCH",
   "independent_inventory_digest_sha256": "b81ff807e4c230bff96fe1fa58f73a2d4bac803ebd7fa58b843cdcb83499f7f0",
   "overlay_additions_are_expected_additional_manifest_drift": true,
   "program_id": "BWS_FINAL_REMEDIATION_R01_R12_V1",
@@ -28,5 +28,20 @@
     "missing_entries": 153,
     "owner_tranche": "BWS-W4-T40"
   },
-  "source_manifest_task_rule": "do not edit or regenerate until admitted T40"
+  "source_manifest_task_rule": "do not edit or regenerate until admitted T40",
+  "current_repository_snapshot": {
+    "archive": "betting-win-surebet125.zip",
+    "sha256": "72a8262a5f94d144bb930cc9fb2778eed672d2a97a252f49b07f7b979b47224f",
+    "regular_files": 995,
+    "application_source_result": "NONE_ACCEPTED"
+  },
+  "current_source_manifest_drift": {
+    "expected_non_self_entries": 994,
+    "manifest_entries": 617,
+    "missing_entries": 377,
+    "extra_entries": 0,
+    "mismatched_entries": 47,
+    "audit_preimage_mismatched_entries": 38
+  },
+  "protected_authority_note": "BWS122 preimages remain historical baseline evidence; validated activation later replaced only its declared authority documents and immutable hashes still verify."
 }

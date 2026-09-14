@@ -1,17 +1,17 @@
-
 # Documentation-package validation contract
 
-The generator and transactional tooling must prove:
+Current validation must prove:
 
-- exact five input hashes, safe 771-file BWS122 archive, repository identity, and Wave 04 authority;
-- 47 unique tranches, 173 unique findings, eight stages, exact owners/severities/tests/environments, acyclic dependencies, T43 last, and all ten P0 findings in S1;
-- exactly 47 canonical tranche packets and eight stage documents;
-- all mandatory packet fields, 14 receipt contracts/schemas/examples, 14 proof-lane runbooks, six hold decision documents, and all required maps;
-- JSON/JSON Schema parsing, example validation, local-link resolution, final newlines, no trailing whitespace, no secret-like example value, and no implementation patch/prompt;
-- `PROPOSED_NOT_ACTIVE` for S0/T39, exact retained holds, and unchanged protected authority;
-- overlay regular-file-only/path/mode/hash policy and no forbidden path;
-- clean apply, exact idempotent apply, mixed-state rejection before write, forced validation failure rollback, empty-directory cleanup, dirty-Markdown preservation, 439 irrelevant dependency Markdown files ignored by canonical inventory, and no-`.git` fallback;
-- all BWS122 non-Markdown paths and protected Markdown authority remain byte- and mode-identical;
-- `SOURCE_MANIFEST.json` remains unchanged and is honestly classified stale.
+- BWS125 is the exact documentation-aligned repository snapshot and contains no accepted remediation source result;
+- the BWS122 finding/dependency baseline, 47 tranches, 173 findings, eight stages, owners, severities, test counts, environments, acyclic DAG, T43-last rule, and P0 corridor remain unchanged;
+- `activation/immutable-authority.sha256` and the activation static validator pass;
+- T39 is `ADMITTED`, every other tranche is `NOT_ADMITTED`, and no packet claims source completion or acceptance;
+- all remediation JSON and JSON Schema documents parse and all receipt examples validate;
+- every local Markdown link resolves and every inventory record matches its current path, mode, classification, and content hash;
+- executable command documentation matches the actual scripts, including the current explicit-interval limitation in `run-paper-evaluation.sh`;
+- BWS-600, BWS-710, BWS-900, release, deployment, and live execution remain blocked, parked, or prohibited;
+- `SOURCE_MANIFEST.json` remains stale and unchanged until T40, with current drift recorded rather than hidden;
+- the invalid repository file `schemas/bws-release-manifest.v1.schema.json` is reported as a source/schema residual and is not represented as valid evidence;
+- no application, test, fixture, migration, schema, validator, controller, runtime configuration, database, service, deployment, Git, or `betting-win` action occurs during documentation alignment.
 
-The tooling must never use recursive filesystem Markdown discovery as authority. It uses Git-tracked Markdown plus exact overlay additions, or the archived BWS122 inventory when `.git` is absent.
+The original `PROPOSED_NOT_ACTIVE` S0 records and examples remain historical/test material. They are not the current T39 state.

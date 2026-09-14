@@ -1,14 +1,14 @@
 # 036 - Root wrappers and paper automation integration
 
-> **Completed historical protected-file authorization.** BWS-587 through BWS-589 are validated. This document preserves the exact allowlist and acceptance contract used during that closed phase; it does not authorize current protected automation changes. Current authority is `docs/automation/current-implementation-task.md`, where `automation_maintenance_allowed=no`, `allowed_protected_files=none`, and `run-paper-autopilot.sh` is selected for BWS-600.
+> **Completed historical protected-file authorization.** BWS-587 through BWS-589 are validated. This document preserves the exact allowlist and acceptance contract used during that closed phase; it does not authorize current protected automation changes. Current authority is the active remediation task and its exact per-tranche protected-file allowlist; T39 is admitted and root controllers remain prohibited until S2 is accepted.
 
 ```text
 historical_tasks=BWS-587..BWS-589
 historical_status=VALIDATED_COMPLETE
-current_automation_maintenance_allowed=no
-current_allowed_protected_files=none
-current_selected_controller=run-paper-autopilot.sh
-current_runtime_upstream_mode=api_only
+historical_post_campaign_automation_maintenance_allowed=no
+historical_post_campaign_allowed_protected_files=none
+historical_post_campaign_selected_controller=run-paper-autopilot.sh
+historical_post_campaign_runtime_upstream_mode=api_only
 ```
 
 ## Historical scope
@@ -103,4 +103,4 @@ Required properties were:
 
 ## Closure state
 
-`BWS-587`, `BWS-588`, and `BWS-589` are validated. The reviewed `BWS-589` return-handoff implementation required `run-autonomous-implementation.sh` in the historical exact allowlist. The current task has `automation_maintenance_allowed=no` and `allowed_protected_files=none`.
+`BWS-587`, `BWS-588`, and `BWS-589` are validated. The reviewed `BWS-589` return-handoff implementation required `run-autonomous-implementation.sh` in the historical exact allowlist. That closed phase ended with `automation_maintenance_allowed=no` and `allowed_protected_files=none`. Current protected-file authority comes only from the exact active remediation task allowlist.

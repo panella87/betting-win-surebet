@@ -1,5 +1,7 @@
 # Tranche implementation packets
 
+Current state: `BWS-W4-T39` is `ADMITTED`; the other 46 packets are `NOT_ADMITTED`. Packet text defines scope and proof but never authorizes edits without the matching immutable activation task and live state.
+
 Exactly 47 packets are canonical. Campaign order controls execution; file-name order is not authority.
 
 - Order 01: [BWS-W4-T39](BWS-W4-T39.md), stage S1, owner R10, findings 4

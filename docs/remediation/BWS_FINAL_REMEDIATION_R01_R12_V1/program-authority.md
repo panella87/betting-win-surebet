@@ -19,7 +19,7 @@ P3=0
 tranches=47
 ```
 
-The BWS122 architecture and campaign map remain the finding and dependency baseline. The BWS123 activation snapshot admitted T39 and established the fixed-order unattended execution contract. BWS124 contains that authority and no accepted remediation source result.
+The BWS122 architecture and campaign map remain the finding and dependency baseline. The BWS123 activation snapshot admitted T39 and established the fixed-order unattended execution contract. BWS125 contains that authority, the completed documentation-alignment postimage, and no accepted remediation source result.
 
 ## Current authority order
 

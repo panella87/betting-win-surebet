@@ -1,7 +1,7 @@
 
 # BWS-W4-T41 implementation packet
 
-> Documentation status: `PROPOSED_NOT_ACTIVE` for T39 and `NOT_ADMITTED` for all tranches. This packet does not authorize source mutation.
+> Current campaign state: `NOT_ADMITTED`. This packet defines future scope only; source mutation is prohibited until the active launcher admits this exact tranche after all dependencies are accepted.
 
 ## Canonical packet fields
 
@@ -15,7 +15,7 @@ ISSUE_IDS: BWS121-R11-003, BWS121-R11-004, BWS121-R11-005, BWS121-R11-006
 SEVERITY_COUNTS: {"P1": 4}
 DEPENDENCIES: T36, T40
 EXTERNAL_ACCEPTANCE_PENDING: no
-CURRENT_SOURCE_AUTHORITY: betting-win-surebet122.zip sha256=e303719e5ce64df47df7b0594433a8978e3b01c5a3d0d0bd9129b9b6340b20cd; exact 771-member archive inventory; independently computed inventory digest=b81ff807e4c230bff96fe1fa58f73a2d4bac803ebd7fa58b843cdcb83499f7f0
+CURRENT_SOURCE_AUTHORITY: frozen application-source baseline betting-win-surebet122.zip sha256=e303719e5ce64df47df7b0594433a8978e3b01c5a3d0d0bd9129b9b6340b20cd; documentation-audit preimage betting-win-surebet125.zip sha256=72a8262a5f94d144bb930cc9fb2778eed672d2a97a252f49b07f7b979b47224f with 995 regular files and no accepted remediation source result; this overlay changes documentation only; exact checkout/Git/source state must be reverified before editing
 CURRENT_SOURCE_PATH_CANDIDATES: backlog/bws_full_implementation.csv, package.json, packages/bootstrap/src/cli/bws-upstream-api-convergence.ts, packages/bootstrap/src/operations/b1-runtime-evidence.ts, packages/upstream/src/upstream/betting-win-upstream-lock.ts, scripts/validate_api_only_upstream.py, scripts/validate_betting_win_upstream_contract.py, scripts/validate_bws_b1_acceptance.py, scripts/validate_full_implementation_program.py, scripts/validate_remaining_operator_runtime_program.py, src/upstream/betting-win-upstream-lock.ts, tests/api-only-upstream-contract.test.ts, tests/b1-runtime-evidence.test.ts, tests/betting-win-upstream-contract.test.ts
 SYMBOLS_TO_REVERIFY: 15 detailed records below
 ALLOWED_EDIT_BOUNDARY: listed current paths are candidates only; exact set TO_CONFIRM_DURING_ADMISSION after current-source reverification

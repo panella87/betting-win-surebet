@@ -163,7 +163,7 @@
       "mode": "0744",
       "path": "PROJECT_STATUS.md",
       "purpose": "Current repository navigation, status, operator, or policy authority.",
-      "sha256": "e9c7881c183636ebb2e1139d9e250c57bb58e365f84defed7c432c8ae401f38d",
+      "sha256": "f936a8a8b0e98c05025f92a1786e56e37dfb2faee807ed9a1d2a29a16ffb482e",
       "topic": "repository_authority",
       "topic_owner": "repository_current_authority"
     },
@@ -190,7 +190,7 @@
       "mode": "0744",
       "path": "STARTER_PACK.md",
       "purpose": "Current repository navigation, status, operator, or policy authority.",
-      "sha256": "c8dbd356c8128e8e28cebe3c43ee4da365b416db79dc77b2490e63bd8b741c49",
+      "sha256": "ac99d00f9e22c7154452ac2f4cdcbe1b87ae0e5ac19c054eb5b18e5d80f15c2f",
       "topic": "repository_authority",
       "topic_owner": "repository_current_authority"
     },
@@ -307,7 +307,7 @@
       "mode": "0744",
       "path": "docs/000_documentation_index.md",
       "purpose": "Current repository navigation, status, operator, or policy authority.",
-      "sha256": "eb7225a965b545cad6d5093383f814425c144a2a9412308b1c96efdf8f1fb8a0",
+      "sha256": "516c3087f7c05bbb9e696267303dfd1e54d2a33d45f0dc6a7daa568186101b0f",
       "topic": "repository_authority",
       "topic_owner": "repository_current_authority"
     },
@@ -505,7 +505,7 @@
       "mode": "0744",
       "path": "docs/028_full_implementation_program.md",
       "purpose": "Retained audit, review, migration, backlog, or decision history; not current routing authority.",
-      "sha256": "f98149c9e3a3e728b1a47a7c0a7c649095d5af55abbe68b2dae0d513f84b72db",
+      "sha256": "be22cde7d9472492d461dbfdc25c08be30d2db66d2be5bdef7acb9fb1fdfb63d",
       "topic": "product_contract",
       "topic_owner": "product_contract_set"
     },
@@ -514,7 +514,7 @@
       "mode": "0744",
       "path": "docs/029_full_implementation_task_ledger.md",
       "purpose": "Retained audit, review, migration, backlog, or decision history; not current routing authority.",
-      "sha256": "fa76de16b583d049f69564df66ed537ff6718bdf0848dd476e1889cc2a0430e1",
+      "sha256": "943e912f5c4603b190eb337412c93bbe70b2b527106d3fec50398ceccd5a217f",
       "topic": "product_contract",
       "topic_owner": "product_contract_set"
     },
@@ -550,7 +550,7 @@
       "mode": "0744",
       "path": "docs/033_continuous_private_paper_runtime_program.md",
       "purpose": "Retained audit, review, migration, backlog, or decision history; not current routing authority.",
-      "sha256": "b11e1ffc1410ae573f96f89f8c81aa89c08c76fe9087e7c022eed1d0bc24e340",
+      "sha256": "3db7970799c683b23dbee3741c53a3b671692dcd2bd69403ff7d330f5c676122",
       "topic": "product_contract",
       "topic_owner": "product_contract_set"
     },
@@ -559,7 +559,7 @@
       "mode": "0744",
       "path": "docs/034_remaining_operator_runtime_implementation_program.md",
       "purpose": "Retained audit, review, migration, backlog, or decision history; not current routing authority.",
-      "sha256": "bbcd3753f3fd4c79f06db3388fe72fd0b385f4f591099d839fbc0036e23774de",
+      "sha256": "637774faac337c8a93e91e5bb8d4361be631aa18c121b8c861fba9c9496f4f6c",
       "topic": "product_contract",
       "topic_owner": "product_contract_set"
     },
@@ -577,7 +577,7 @@
       "mode": "0744",
       "path": "docs/036_root_wrappers_and_paper_automation_integration.md",
       "purpose": "Supporting product architecture, domain, runtime, validation, or hold contract.",
-      "sha256": "02ca701af75f51ec7726e3daf4d9a6378b2adac893e1f75e2e21ef09cc993859",
+      "sha256": "2969de044645404f32f1a182e444ce02d6d940f34df742f9cc0bb367a2b8e902",
       "topic": "product_contract",
       "topic_owner": "product_contract_set"
     },
@@ -631,7 +631,7 @@
       "mode": "0744",
       "path": "docs/042_release_packaging_implementation_blueprint.md",
       "purpose": "Retained audit, review, migration, backlog, or decision history; not current routing authority.",
-      "sha256": "1118376616fba138c8b70b6274a9799f812c7ccd3a9b177f08f7fe013406ea99",
+      "sha256": "d4f93a367517be7f39acfe5c67b4f870dc0df8bd99986ba235ffcacfecaf7713",
       "topic": "product_contract",
       "topic_owner": "product_contract_set"
     },
@@ -640,7 +640,7 @@
       "mode": "0744",
       "path": "docs/043_upgrade_rollback_recovery_implementation_blueprint.md",
       "purpose": "Retained audit, review, migration, backlog, or decision history; not current routing authority.",
-      "sha256": "46513efa6bd4be9b897a26dae42431a8c0b5438f3f9c44f2a42af70a4dc811a3",
+      "sha256": "43fa9a133cc1bb8609bdc40783d5b937f34a878a412ebf9a0721a3c9953a0132",
       "topic": "product_contract",
       "topic_owner": "product_contract_set"
     },
@@ -649,7 +649,7 @@
       "mode": "0744",
       "path": "docs/044_soak_failure_injection_implementation_blueprint.md",
       "purpose": "Retained audit, review, migration, backlog, or decision history; not current routing authority.",
-      "sha256": "b0c656df49271f258808d8817159c0faa63df636a801a9cc8183d3d3f662384d",
+      "sha256": "f95073d730219783def479caf95a26b78199d3091946102210584dece9219f8c",
       "topic": "product_contract",
       "topic_owner": "product_contract_set"
     },
@@ -658,7 +658,7 @@
       "mode": "0744",
       "path": "docs/045_external_runtime_preflight_implementation_blueprint.md",
       "purpose": "Retained audit, review, migration, backlog, or decision history; not current routing authority.",
-      "sha256": "d410e6d47d5bd3d8c2cc90472943560356c3af8ea80f29560bf67e6a9f2df5f0",
+      "sha256": "5eefcea52f82fc806cd5c113cf0ab79b12da131f75e2f4f03c635ff699b62d07",
       "topic": "product_contract",
       "topic_owner": "product_contract_set"
     },
@@ -667,7 +667,7 @@
       "mode": "0744",
       "path": "docs/046_final_local_acceptance_implementation_blueprint.md",
       "purpose": "Retained audit, review, migration, backlog, or decision history; not current routing authority.",
-      "sha256": "9d77476860f28ff96f8f90f31d9686f4978433606e19b1c3fe3f7292750f74fb",
+      "sha256": "51f91d018937a7fdbb663cd2fe6002255a9bfe04f06c5bca405a6915899d977c",
       "topic": "product_contract",
       "topic_owner": "product_contract_set"
     },
@@ -730,7 +730,7 @@
       "mode": "0744",
       "path": "docs/MASTER_PLAN.md",
       "purpose": "Current repository navigation, status, operator, or policy authority.",
-      "sha256": "1cdeb4d2d4b5ea5db8ead08b7b20ad757a449557052fc1fedc25943b2c89ace9",
+      "sha256": "9f35a8261921b8ef2eaf8e6f133b199539531dd114e40658f3ba49f2bef8c5c1",
       "topic": "repository_authority",
       "topic_owner": "repository_current_authority"
     },
@@ -1523,7 +1523,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/authority-decisions-and-gaps.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "423e8fbc220cc1ff37fb1d65c31db30ab39cc5a69ba2401a1d6c8b46a1f27187",
+      "sha256": "1ba31c40d599abb8e0c7becac167fd82c50b37f0ccfb8be2d094a2ba6b1e9892",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -1532,7 +1532,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/baseline-authority.json",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "827600361388ba31434e145a6bbdcb66d5a300e880005a4c246ef9422279c816",
+      "sha256": "77dbd1edec02213294bd10865442abc63a14d4ad4b2aa390ace2fc4779bb44fe",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -1541,7 +1541,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/baseline-authority.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "5d589118f12519102d978310124ff308b282bae00b0495d12e0c488a5163a515",
+      "sha256": "855990e364d45fa95913fd323284883fd4d148e43a805f6eeb7599deacfcb0c1",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -1568,7 +1568,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/campaign-order.json",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "314991d058aabd83268e186b97e04391b60653106bf87492a6699f8ccf0c7630",
+      "sha256": "7df41b99cad09834abd965471205244ad68f4855db4b246606c53601caaba58a",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -1577,7 +1577,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/campaign-order.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "b575f92e612209d1798c9fe2c3b42c1f11f8077d1ffb4a99b4def5d24a338175",
+      "sha256": "0f390d16cf6dda60a83a3454f98e8d5f082fc4b74f72bb526b5b03635cec270f",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -1775,7 +1775,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/hold-register.json",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "fd6b4d21c9fcae1e7916e9c4458665eebe13b07c07b74197438765a3cc00918f",
+      "sha256": "0e302e960df9227be38ccec72fb20b2f6d2fa8b08c34390c2c2715228af4cdd7",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -1937,7 +1937,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/metadata/program-index.json",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "4c4cde615ee4d3f2b657996316708e556beb05d031636aae5566c1ef42d05411",
+      "sha256": "35f83a2f9af12448e8516f5e49389291075612cff850a3d187842500295de0c3",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -1964,7 +1964,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/metadata/validation-contract.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "9819619b6e66fe105f92003d4269057725ea0173b53514caf7933e887ea08826",
+      "sha256": "5282f26a7ab50094d3acdc40f2f1ef0050911582d12540853ff5b0194d4c2017",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -1973,7 +1973,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/operator-workflow.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "e967f6ba7110e8a165a761c82b056d15375ffb02f36276f601784180d57866bd",
+      "sha256": "5b81f56ad2fd693949040db2416dfcde414178727e59e746ff4019093947eac7",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -1991,7 +1991,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/program-authority.json",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "e2888a20854a613d21347038ef13b34e721065feb71f836fa11025a894a69836",
+      "sha256": "0c7f869c0d05a414d20bbf9a1a4d57c08473ba8c7a498d5f980b85a425767842",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2000,7 +2000,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/program-authority.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "fa2ce029e30252e2aad3a796adb5e546a70d927335508a922996a3e3b3db3c98",
+      "sha256": "b9f41197b8ddf58b53f49fa18fb4b91eb623ccc2684360ab4bafde8aed3ae620",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2450,7 +2450,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/stages/README.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "cc7dff22508652d17207d917e6877596f27725a3c7790a766881d4b07494febc",
+      "sha256": "4f4ace536b6c87e71ad640157341fae350018b3c549255f4f660ca24a8e53327",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2459,7 +2459,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/stages/S0.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "fe90de65eeb607702298635e5e289ee08daa78c61de7c770199ddf25b02195f7",
+      "sha256": "487382bd59f421ac5b760496a58e5fcf29123e1d6ef774ea063457c0a9f7e277",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2468,7 +2468,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/stages/S1.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "bd730f993a80a268685cfd56b7a506f3698425a4c467f605322e68f7f2425ce6",
+      "sha256": "9e269cb9ae3bde49c249164f9832773503b6666ca7d499064565039eabcd5f22",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2531,7 +2531,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W1-T01.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "d15003c53f3280121452eb3447ab4ed283c0641e5815049a27d145c90a8d3e30",
+      "sha256": "b8004100c2e9137d0dfde309cd47b02159a1c551a6545f96a16e95f6a49739f1",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2540,7 +2540,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W1-T02.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "03796c1f6a218755a287878512ca9b7d60234b3fdf68286fa5064055e2ee1c86",
+      "sha256": "2710eebcb59885472ae226d372d605ca22c0e6f0688a8731b3116fa06d7ab15b",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2549,7 +2549,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W1-T03.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "eb5360917a0c94cf84eda99f3717aebdebd26a11d4679a77b8312fd7e8c14070",
+      "sha256": "1e8d371e17aecdc7296a97f1a9ad685a34bffc13c0f5025f2db34adadc512bfc",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2558,7 +2558,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W1-T04.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "377cdd0edad59b04ecb97c5d48c6a0ace2e8e4d43c039bf4df224ce0f6f83ce0",
+      "sha256": "4ec1934cbcc0c00fb92434748ac9caed35def463778d5b1a6249f84254d08e3b",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2567,7 +2567,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W1-T05.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "ce67b02779646436db2ec7a801d17510f595f54a47eb7d98400ecd97e3d3cc77",
+      "sha256": "2ce868227254bb4582edff238f5285785130f34a1c1b1912a389f21a151fa137",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2576,7 +2576,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W1-T06.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "28876ce97d66c6362be985e611fce1ba1964d3e86daead55196e2dbb930345a4",
+      "sha256": "9f61205aa1c4cc06a24d930abeb9753c7c782969e26dfe8da98536de112f7171",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2585,7 +2585,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W1-T07.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "109aaba80e4659127f35be21d5803a2c7d1ea57e4e2eb10976259960ba36200c",
+      "sha256": "689a373095b9751acaf32f0dc696f3d587ed5ff0ce8eb6bc22df61e6285259c1",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2594,7 +2594,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W1-T08.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "7a1bc2bf97a7c8284daab583f892a6d9f59ffc8591ffbaa4478300f26e9e64e5",
+      "sha256": "48ad3d96d7bd3ce2c2932a8b61051b1852a7c80faccfb1b98ad345cbbe2981dd",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2603,7 +2603,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W1-T09.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "206226bdf22d60a3e55f23bedf4e4d21de5dda990fe17f1afaf5bd63db51ee7e",
+      "sha256": "3e01cb08d7f17b2e59b84e491ae41e3ec9f66da286a66a03261e9e25479ce39d",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2612,7 +2612,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W1-T10.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "32bd9fb91d8195faf299585934781892fa2c719c3a273975af4d19c5a7d14096",
+      "sha256": "b61c98b613e740d8d09d0b3d3f6ea396f8889d808850427e1ae783b75105547d",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2621,7 +2621,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W1-T11.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "72f1965211bd79faa79dc2b2fcbafe2afcf942b126d507648c93499aad9ed161",
+      "sha256": "c1a8d8fe78ca066e873a8d269220d72d6c6f588ce964ef54db98be1c33e54c11",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2630,7 +2630,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W1-T12.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "0e9d65341b0e1b109a89454f42ca84232840aee608d5bf18aaaf6964c1ca417b",
+      "sha256": "16ce3a36d510d4b24a35d6d2bb485529b200a4d7215090cd619b08b338443aca",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2639,7 +2639,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W1-T13.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "1bccdc111553b6d2778c1c23745c1dcf3fbf4a0a34d51decc5cd67e8921d4dd9",
+      "sha256": "c0c15a5313d6147b30f5c8d2a8f14b5ada42f1183322603697724c5cea7cb893",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2648,7 +2648,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W2-T14.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "bb7e1dee3915b1fc9535caea6d5320d5540edd784b296b80d6b01e7ade5e7023",
+      "sha256": "a6b96c1af7a8074b91be94039b457c49cfbc7cb29a17eea1e3f6fcbadb52728e",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2657,7 +2657,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W2-T15.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "6fdf746a520c7be1799ca1bb5c5affa2db1af2831722093d679c5268d41cb5bb",
+      "sha256": "eebe22fb6e7abbb4f3d84fc7bf3cce6e473c5591119310a12bd6a36a2b981b9d",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2666,7 +2666,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W2-T16.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "1e5ca2888152622e4ab51c18ab0267838ddf33af2460b98eeb96514a6b7874d6",
+      "sha256": "6ed0dbac6dc6fe280498eadd3806bfc241fafb8c1a7ae4db0c63418354f3e125",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2675,7 +2675,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W2-T17.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "bf87616d62fb406222f378bf4c652feaef24311c3f161eed1b40d0c528d98aa1",
+      "sha256": "7749a505edd64ab3fe94485f5408c4ad112f8718b61907b32d1f0551173dc2d8",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2684,7 +2684,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W2-T18.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "57b74a15904ac73e713d28fb8dfbc0a48254971edf31e62251a7774d832ec644",
+      "sha256": "ee8fe7666e5b1ee7d7a32c987b3b222af6ccab86a663a8352986be98a8535cef",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2693,7 +2693,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W2-T19.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "1290a0e089614aca3d9cf3ef04dfb30323ac3bd86aff70165627b065789e0531",
+      "sha256": "4ecec4582640b7d97129d506f29b24f50051d8c3e60bcee294b5823a4313fabe",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2702,7 +2702,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W2-T20.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "20871b4d20d3a69cd846a251debd8331f1aaa70ab4000240716bafa2b423b143",
+      "sha256": "61208bda8c3cb5f4071fac237a6480027290450d5ee98b076d2214442816e6ba",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2711,7 +2711,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W2-T21.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "706f4996a2e6c3a925efe5774e97131be59962f879fd708906970ec60fe00b9f",
+      "sha256": "e3dc5c1c422795d67dc83885b194b7af8b1e1b7940d24770beed8d77afdc80ca",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2720,7 +2720,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W2-T22.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "be6be1962077b421dba030f44393b8b352f3989879ef9c6f96e7f063430bb5b8",
+      "sha256": "8601f9a107973f1be456bce8bffa8876dfd1a2578cca91f6c3027a85bf9b7367",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2729,7 +2729,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W2-T23.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "683662bf31e2e980ad7493996fd487370171e4c06b42569f71aec8de81ef5062",
+      "sha256": "e66484bcfc1c7844757fe59db10bc601a7fdaaec844171d9095a1cb8e2d34c2d",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2738,7 +2738,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W2-T24.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "e38a72958e81110a73eaaf81f7934b363a080b8f6ea4e6ec03ff696ca675f122",
+      "sha256": "02abedb774d62bfbd8603d766417ce000a4c29a14d0a691500174817db3b9834",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2747,7 +2747,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W2-T25.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "473a11292e343e529de212aaef549dd28b58a18e0cbc8ed8dbbaa0e4ce43a2c9",
+      "sha256": "ffe90521d78977ff55992588e45aab27e17686e9dbb9b99a1c77523618f1181b",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2756,7 +2756,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W3-T26.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "ac0d0575aed360ebb06176ee1c6da8e0ea5516f1d5b884546c5ab462cce0c993",
+      "sha256": "20fb33e7d37d64290531a88863540803f956b09132ff31d47416f16268097e79",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2765,7 +2765,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W3-T27.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "e6db33b5a95f5ffbdc66c9710a9676982e65b7480b90419126c20fb35419c34b",
+      "sha256": "f7e3a159098b5360226b9405b62ccb54bdfcaafa709875211042db60155969b7",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2774,7 +2774,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W3-T28.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "d451c5e51cca8ee6874aac8c7a65c7e5280da96c6a5cd0e59adb97167126c172",
+      "sha256": "3cf8b4a0e38f96b3a9af328f88e5b4aa55e5356571a351edc1559031bce74375",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2783,7 +2783,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W3-T29.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "5b8693d06d55e21955afebf47ced0a7fe9bd548a81acf509b54ec1ba27df8053",
+      "sha256": "bc25e6def60aa783d1623bc94405e56da508407ee40f180b0ed496ead8513087",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2792,7 +2792,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W3-T30.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "e88a34bd0ff6b76a5680b1afd26715af773db0ec590de7f72717463d14ddce82",
+      "sha256": "3491c3f82c4f44dbcbfd1db6984a944d56d46a628460dc1f62d22309046fc435",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2801,7 +2801,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W3-T31.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "7414c2b83881adc30e8cbf2331946dee203665ffc3efb41ae3cd6ecd91ed02b7",
+      "sha256": "6a79740204604a8ec7de94ddfa76dae6448b4d6490da098d1d0fb58a4a980aca",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2810,7 +2810,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W3-T32.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "7fc2081c221b9b5c376416b6f0e15678a3f8c7f4e4fd3f27d4a8d96617d7388d",
+      "sha256": "7029290cac91e958c6fbe46da6077840ce036b5668582caef31682e0b98798c5",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2819,7 +2819,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W3-T33.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "7c9db65758904fecec4e423ddfde7c885421b1275da68117b11346385bba2d70",
+      "sha256": "3c39c0023ca6514320fe4e5c2c880dbbc2729997f70bfa7b5a0682a253b5e2a3",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2828,7 +2828,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W3-T34.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "6f3e5d5860f4ff1417ed1cf6a4f97fb73f0f12417d225c0094c454b8d462dbf4",
+      "sha256": "0bb4f5c99696a12f16516c3020954898fd122842883195716b97a5e127d394e1",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2837,7 +2837,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W3-T35.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "dc57173355a9ca21a097f509518e51fb63f5289a7d30a2cd6cf0cfb91aed08fb",
+      "sha256": "0c294cacf57cb6ae3b066db09551dc5a8a5d221130bf6508218a4cca4e36be40",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2846,7 +2846,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W3-T36.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "927c5f86bec6c5e818f38a36c5447823c45300fd54d2baf8b5e1b037b6a136ec",
+      "sha256": "c438f8a7209e70a63f04c5ab8353421043e812ffef294d3c242b3172772e3dfc",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2855,7 +2855,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W4-T37.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "534297caf33764b130d9f987c5741c8922676df166904714ea4e129fcb13aff2",
+      "sha256": "d87b3997399bfc3623bf0035aef5931857e6dc71859150f8a943216b9ee9b5f5",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2864,7 +2864,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W4-T38.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "48efbc8058b105ee9797ecfccd532c7d19e5ab4b1e8d011de3191a5220a73314",
+      "sha256": "da10e86d2a15b98bbb41d9d4dc579561b340e125b9cfd03e9a64c6e5e480f18e",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2873,7 +2873,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W4-T39.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "9f3b69d386e7775233e403d92d407b4c4f00e9354f9dcc2f29c44571781687e6",
+      "sha256": "1a66424897b055ab807ef1b949a760f5e189bfc46a20b10278dd3176766725e2",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2882,7 +2882,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W4-T40.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "f4101539abb40cba79632460df3e4945b4a1f8698a5cadf7ab419332422b5d0b",
+      "sha256": "229386b1e2009d3f73b21c265a18d73d7d65540905bbae36a9d147329432e1aa",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2891,7 +2891,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W4-T41.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "053ee3228a5810a8b4d5b32a5c32399fe102c7254adef3a4a8b771ddd6ef3a12",
+      "sha256": "473f1fadfac2270a7015df3b8f60958c2f89ec39c3d4406363632970c099cdf6",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2900,7 +2900,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W4-T42.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "176ebca3ab781d3032a0ce7f53ab5efd811ecac755aab49fe4868b4c4bea3cc0",
+      "sha256": "6aae7ffbfd5b69a5f3ef4b6ae11a60961c8e66e961013a4da18b7e42acbf1471",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2909,7 +2909,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W4-T43.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "955f52aaada597e5a7f8cc96d6c70a292756808dd39430e09eefee0eb6d28129",
+      "sha256": "9c4ea199e79b6cce4073faec130c26a8a2686b2ab9228e4909073f89756f3341",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2918,7 +2918,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W4-T44.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "afbfaef4fd2926e715fbf5e710fb65d70c41c563ca211edda91155d77a435b3d",
+      "sha256": "9e7d15398c748c47c56259d40b24cf4c850d7059fd3e8c687b1299a90badf67b",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2927,7 +2927,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W4-T45.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "3e011fafec092ea42ade40e8f13be3bc33d1818af5af005f0f52e00b58a3c2af",
+      "sha256": "b0404328f075f959769238a4ac2573e58c729c5d9af41a7f485e8691b99d774b",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2936,7 +2936,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W4-T46.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "ada9c3c5afdd6f744fd41e0d83eb2fb106f1b8deb47b3afae59bb3409610dc37",
+      "sha256": "64696dc9b6cd5d3790155f072214139c5c2b39a46367b11d00d8a8a12122a5f9",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2945,7 +2945,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W4-T47.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "160504fc9ae72f8cad17904d959badc65501657f6de93a3b42e984553afc983c",
+      "sha256": "b74cbf92817d3d724c6e0c530db2c7fe457cb42d3404257c26b544ca21995702",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -2954,7 +2954,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/README.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "33ac362066a7a0346aa2e721786c48a9ff2bb81903343d3b14dec6ebcb63e3e1",
+      "sha256": "d767e6f74630ee212e4ac91b865699675bfcde107504d0acd715bda490f93477",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
@@ -4744,7 +4744,7 @@
       "classification": "supporting_active",
       "mode": "0644",
       "path": "schemas/bws-release-manifest.v1.schema.json",
-      "purpose": "Schema reference reference.",
+      "purpose": "Repository release-manifest schema reference; current bytes are not valid JSON and are not acceptance evidence.",
       "sha256": "52b22842dbdedb04c4ff5766fc3e8c07fceda866472cbb76a0e6369684c517cb",
       "topic": "schema_reference",
       "topic_owner": "schema_reference"
@@ -4859,6 +4859,21 @@
       "templates"
     ]
   },
-  "source_archive": "betting-win-surebet124.zip",
-  "source_archive_sha256": "28232d333b5012ed68681a7aaf86224c2c0c02e339a1d9eddaa9eb56b7e3db4e"
+  "source_archive": "betting-win-surebet125.zip",
+  "source_archive_sha256": "72a8262a5f94d144bb930cc9fb2778eed672d2a97a252f49b07f7b979b47224f",
+  "documentation_alignment_postimage": {
+    "audit_date": "2026-09-14",
+    "changed_document_paths_including_this_inventory": 77,
+    "application_source_modified": false,
+    "test_source_modified": false,
+    "automation_or_controller_source_modified": false,
+    "source_manifest_modified": false,
+    "current_source_manifest_expected_non_self_entries": 994,
+    "current_source_manifest_entries": 617,
+    "current_source_manifest_missing_entries": 377,
+    "current_source_manifest_extra_entries": 0,
+    "current_source_manifest_mismatched_entries": 47,
+    "audit_preimage_mismatched_entries": 38,
+    "known_unmodified_source_contract_residual": "schemas/bws-release-manifest.v1.schema.json is not strict JSON"
+  }
 }

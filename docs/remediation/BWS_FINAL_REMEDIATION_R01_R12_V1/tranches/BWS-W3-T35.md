@@ -1,7 +1,7 @@
 
 # BWS-W3-T35 implementation packet
 
-> Documentation status: `PROPOSED_NOT_ACTIVE` for T39 and `NOT_ADMITTED` for all tranches. This packet does not authorize source mutation.
+> Current campaign state: `NOT_ADMITTED`. This packet defines future scope only; source mutation is prohibited until the active launcher admits this exact tranche after all dependencies are accepted.
 
 ## Canonical packet fields
 
@@ -15,7 +15,7 @@ ISSUE_IDS: BWS120-R09-012, BWS120-R09-013, BWS120-R09-014, BWS120-R09-015, BWS12
 SEVERITY_COUNTS: {"P1": 6}
 DEPENDENCIES: T22, T23, T25, T27, T32, T34, T47
 EXTERNAL_ACCEPTANCE_PENDING: no
-CURRENT_SOURCE_AUTHORITY: betting-win-surebet122.zip sha256=e303719e5ce64df47df7b0594433a8978e3b01c5a3d0d0bd9129b9b6340b20cd; exact 771-member archive inventory; independently computed inventory digest=b81ff807e4c230bff96fe1fa58f73a2d4bac803ebd7fa58b843cdcb83499f7f0
+CURRENT_SOURCE_AUTHORITY: frozen application-source baseline betting-win-surebet122.zip sha256=e303719e5ce64df47df7b0594433a8978e3b01c5a3d0d0bd9129b9b6340b20cd; documentation-audit preimage betting-win-surebet125.zip sha256=72a8262a5f94d144bb930cc9fb2778eed672d2a97a252f49b07f7b979b47224f with 995 regular files and no accepted remediation source result; this overlay changes documentation only; exact checkout/Git/source state must be reverified before editing
 CURRENT_SOURCE_PATH_CANDIDATES: packages/bootstrap/src/cli/bws-final-local-acceptance.ts, packages/bootstrap/src/cli/bws-soak-campaign.ts, packages/bootstrap/src/operations/bws-soak-runtime-integration.ts, packages/bootstrap/src/operations/final-local-acceptance.ts, packages/bootstrap/src/operations/soak-campaign.ts, tests/bws-soak-campaign.test.ts
 SYMBOLS_TO_REVERIFY: 23 detailed records below
 ALLOWED_EDIT_BOUNDARY: listed current paths are candidates only; exact set TO_CONFIRM_DURING_ADMISSION after current-source reverification

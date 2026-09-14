@@ -1,5 +1,5 @@
 {
-  "activation_state": "PROPOSED_NOT_ACTIVE",
+  "activation_state": "ACTIVE",
   "baseline_sha256": "e303719e5ce64df47df7b0594433a8978e3b01c5a3d0d0bd9129b9b6340b20cd",
   "canonical_locations": {
     "dag": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/maps/dependency-dag.json",
@@ -8,9 +8,13 @@
     "path_map": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/maps/path-to-tranche.json",
     "program_root": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1",
     "runbooks": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/runbooks",
-    "s0": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/s0/proposed-campaign-admission.json",
     "schemas": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/schemas",
-    "t39": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W4-T39.md"
+    "t39": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/BWS-W4-T39.md",
+    "active_admission": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/active-campaign-admission.json",
+    "active_plan": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/unattended-plan.json",
+    "active_launcher": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/run-unattended-remediation-campaign.sh",
+    "active_t39_task": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/001-BWS-W4-T39.md",
+    "s0_proposal_history": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/s0/proposed-campaign-admission.json"
   },
   "counts": {
     "findings": 173,
@@ -19,9 +23,13 @@
     "schemas": 14,
     "shared_paths": 66,
     "stages": 8,
-    "tranches": 47
+    "tranches": 47,
+    "original_documentation_package_files": 161,
+    "activation_package_files": 62,
+    "program_tree_files": 223,
+    "documentation_inventory_records": 531
   },
-  "file_hash_binding": "Exact SHA-256 and mode for every path, including this index and overlay-plan, are pinned by the standalone delivered index, apply script, overlay ZIP, and checksum manifest.",
+  "file_hash_binding": "Active authority is pinned by activation/immutable-authority.sha256; docs/documentation-inventory.json binds the current documentation inventory. Original delivery hashes remain historical generation evidence.",
   "implementation_prompt_included": false,
   "planned_repository_paths": [
     "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/README.md",
@@ -187,9 +195,23 @@
     "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/tranches/README.md"
   ],
   "program_id": "BWS_FINAL_REMEDIATION_R01_R12_V1",
-  "protected_authority_modified": false,
+  "protected_authority_modified": true,
   "repository": "betting-win-surebet",
   "schema": "bws-remediation-implementation-documentation-index-v1",
-  "source_manifest_additional_expected_drift_entries": 161,
-  "source_manifest_owner": "BWS-W4-T40"
+  "source_manifest_additional_expected_drift_entries": 224,
+  "source_manifest_owner": "BWS-W4-T40",
+  "current_repository_snapshot": {
+    "archive": "betting-win-surebet125.zip",
+    "sha256": "72a8262a5f94d144bb930cc9fb2778eed672d2a97a252f49b07f7b979b47224f",
+    "regular_files": 995
+  },
+  "protected_authority_modification_scope": "validated activation overlay only; current task/status bytes are pinned by activation/immutable-authority.sha256",
+  "current_source_manifest_drift": {
+    "expected_non_self_entries": 994,
+    "manifest_entries": 617,
+    "missing_entries": 377,
+    "extra_entries": 0,
+    "mismatched_entries": 47,
+    "audit_preimage_mismatched_entries": 38
+  }
 }

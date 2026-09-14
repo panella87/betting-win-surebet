@@ -1,27 +1,32 @@
+# Authority decisions and unresolved fields
 
-# Documentation decisions and unresolved activation-time fields
+## Current decisions
 
-## Explicit documentation decisions
+- `BWS_FINAL_REMEDIATION_R01_R12_V1` is active; T39 alone is admitted.
+- BWS122 remains the frozen finding/dependency/application-source baseline.
+- BWS125 (`72a8262a5f94d144bb930cc9fb2778eed672d2a97a252f49b07f7b979b47224f`) is the current documentation-aligned repository archive and contains no accepted remediation source result.
+- The active admission, fixed-order plan, immutable task files, and launcher under `activation/` supersede the retained S0 proposal records.
+- Exactly one source-mutating tranche may be active. Existing autonomous controllers remain prohibited until the complete S2 gate is accepted.
+- Current source paths in packets are candidates requiring first-launch reverification, not unconditional edit permission.
+- `SOURCE_MANIFEST.json` remains stale and owned by T40; current BWS125 drift is 994 expected non-self files, 617 manifest entries, 377 missing, 47 mismatched, and 0 extra in the documentation postimage; BWS125 itself had 38 mismatches.
+- All existing BWS/release/deployment/live-execution holds remain unchanged.
 
-- The new package is added only under `docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1`. Protected mutable authority documents are not replaced or edited.
-- Campaign-map JSON controls tranche identity, membership, order, stage, owner, paths, tests, environments, and acceptance authority.
-- Detailed cumulative findings and test-evidence records supply exact behaviors, invariants, symbols, correction boundaries, risks, and proof requirements.
-- Current source-path entries remain candidates until a tranche admission re-verifies them.
-- The BWS122 archive SHA-256 and exact member inventory are baseline authority; `SOURCE_MANIFEST.json` remains stale and unchanged.
-- All package files are new documentation additions with mode `0644`; there are no replacements.
+## Unresolved first-launch fields
 
-## `TO_CONFIRM_DURING_ADMISSION`
+The following still require runtime capture and fail closed when absent:
 
-The following cannot be authoritative from an archive/planning package and must be captured later:
+- Git HEAD, branch, upstream, dirty-state digest, and exact checkout identity;
+- confirmation that every T39 symbol/path and reviewed behavior remains current;
+- exact admitted edit and test-helper set after reverification;
+- concrete bounded commands for all 17 T39 requirements;
+- disposable environment identities and cleanup ownership;
+- canonical nested-secret allowlist and pinned SSH host-key material location;
+- implementation postimages, executed test results, reviewers, timestamps, and receipt digest chain.
 
-- current Git HEAD, branch, upstream, and dirty state;
-- whether each reviewed symbol/line range moved or was independently corrected after BWS122;
-- exact final edit set when a moved symbol or newly required test path is discovered;
-- concrete focused and production-entrypoint command binding for requirements whose tests do not yet exist;
-- disposable/managed proof-environment identities, runtime resources, and cleanup owners;
-- T39 canonical nested-secret allowlist decisions and pinned SSH host-key material location;
-- implementation postimages, executed test outputs, environment evidence, reviewers, and receipt digest chain;
-- accepted external upstream handoff and parity/resource evidence for BWS-600/BWS-710;
-- any later explicit activation, queue, controller, release, deployment, or execution decision.
+## Source-contract residual requiring implementation reconciliation
 
-These fields are explicit gaps, not silent defaults. They block the relevant transition until captured.
+`schemas/bws-release-manifest.v1.schema.json` currently fails strict JSON parsing at end-of-file because its outer object is not closed. This documentation audit does not alter executable schemas or invent a finding owner. The file must not be represented as valid schema evidence; a later admitted implementation cycle must reconcile ownership and proof before correcting it.
+
+## Historical records
+
+The original 161-file documentation package, S0 proposal, BWS-600 paper route, and completed BWS-100 through BWS-599 blueprints remain audit history. They do not select current work.

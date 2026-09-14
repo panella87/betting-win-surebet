@@ -1,5 +1,7 @@
 # Stage documents
 
+Current state: S0 admission is complete, S1 is active, and `BWS-W4-T39` alone is admitted.
+
 Exactly eight stage documents are canonical:
 
 - [S0: Admission and immutable campaign freeze](S0.md)

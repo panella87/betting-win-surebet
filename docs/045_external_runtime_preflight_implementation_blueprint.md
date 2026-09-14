@@ -1,6 +1,6 @@
 # 045 - External runtime preflight and campaign-manifest implementation blueprint
 
-> **Completed historical implementation blueprint.** `BWS-593` is validated. This file remains acceptance and recovery history, not current controller routing. Current authority is `docs/automation/current-implementation-task.md`; the selected route is `run-paper-autopilot.sh` for the externally gated API-only BWS-600 campaign.
+> **Completed historical implementation blueprint.** `BWS-593` is retained as acceptance and recovery history and is non-routing. Current authority is the activated R01-R12 remediation package, with T39 admitted and root controllers prohibited until S2 is accepted.
 
 ```text
 parent_task=BWS-593

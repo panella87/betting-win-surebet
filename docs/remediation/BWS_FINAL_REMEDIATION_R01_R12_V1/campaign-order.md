@@ -1,6 +1,8 @@
 
 # Campaign order
 
+Current admission: order 1, S1, `BWS-W4-T39`, state `ADMITTED`. All later orders remain `NOT_ADMITTED`.
+
 The order is binding and serial. Campaign order is not tranche-number order. No next source-mutating tranche starts until the prior tranche reaches an allowed terminal state and the next admission binds the predecessor postimage.
 
 | Order | Stage | Tranche | Owner | Severity | Findings | Dependencies |

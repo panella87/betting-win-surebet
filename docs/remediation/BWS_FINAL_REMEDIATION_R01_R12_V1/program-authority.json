@@ -15,7 +15,7 @@
     "unattended_plan": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/unattended-plan.json"
   },
   "authority_order": [
-    "exact current files in BWS122",
+    "exact current repository files, with BWS122 retained as the frozen application-source and review baseline",
     "current canonical status/task/hold/architecture/runbook/review documents",
     "campaign-map JSON machine identities and exact membership",
     "architecture Markdown explanatory sequencing",
@@ -241,7 +241,7 @@
       }
     ],
     "repository": "betting-win-surebet",
-    "selected_controller": "run-paper-autopilot.sh",
+    "selected_controller": "NONE_BEFORE_S2_DIRECT_BOUNDED_CODEX_THROUGH_ACTIVE_LAUNCHER",
     "selected_route": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/run-unattended-remediation-campaign.sh",
     "source_manifest": {
       "authoritative": false,
@@ -253,7 +253,15 @@
       "manifest_entries": 617,
       "mismatched_entries": 8,
       "missing_entries": 153,
-      "owner_tranche": "BWS-W4-T40"
+      "owner_tranche": "BWS-W4-T40",
+      "counts_scope": "frozen BWS122 finding baseline plus current BWS125 drift below",
+      "current_expected_non_self_entries": 994,
+      "current_manifest_entries": 617,
+      "current_missing_entries": 377,
+      "current_extra_entries": 0,
+      "current_mismatched_entries": 47,
+      "current_snapshot": "betting-win-surebet125.zip",
+      "audit_preimage_mismatched_entries": 38
     },
     "target_repo": "$HOME/app_testing/betting-win-surebet",
     "update_helper": "./update_git.sh --pull"
@@ -278,11 +286,12 @@
   "live_execution": "PROHIBITED",
   "program_id": "BWS_FINAL_REMEDIATION_R01_R12_V1",
   "prohibitions": [
-    "no implementation activation by documentation",
-    "no use of existing autonomous controllers before S2 acceptance",
-    "no SOURCE_MANIFEST.json edit in this task",
-    "no application/test/fixture/migration/schema/build/validator/controller/runtime edit",
-    "no release, deployment, database, service, controller, or betting-win action"
+    "no unadmitted source mutation",
+    "no use of existing autonomous controllers before complete S2 acceptance",
+    "no SOURCE_MANIFEST.json edit before admitted T40",
+    "no provider access, live execution, release, deployment, or production promotion",
+    "no betting-win checkout access or mutation",
+    "no fabricated, placeholder, static-marker-only, or listed-but-unrun evidence"
   ],
   "repository": "betting-win-surebet",
   "review_program": "COMPLETE_R01_R12",
@@ -307,5 +316,11 @@
     "BLOCKED",
     "SOURCE_COMPLETE_EXTERNAL_PENDING"
   ],
-  "tranches": 47
+  "tranches": 47,
+  "current_repository_snapshot": {
+    "archive": "betting-win-surebet125.zip",
+    "sha256": "72a8262a5f94d144bb930cc9fb2778eed672d2a97a252f49b07f7b979b47224f",
+    "regular_files": 995,
+    "relationship": "BWS122 frozen application-source baseline plus validated remediation documentation, activation authority, and documentation alignment; no accepted remediation source result"
+  }
 }

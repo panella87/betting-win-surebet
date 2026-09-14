@@ -1,50 +1,52 @@
-
 # Operator workflow
 
-## 1. Verify the documentation package
+## 1. Verify current authority
 
-Verify the delivered overlay and apply script SHA-256 values, inspect the exact entry manifest, and invoke the transactional script against the local WSL repository. A clean run must report `PREIMAGE_READY` before writes and the deterministic success marker after validation. An exact second run must report `ALREADY_APPLIED_EXACTLY`.
+Verify `activation/immutable-authority.sha256`, run `activation/validate_activation_package.py --static`, and confirm the exact BWS125 documentation snapshot `72a8262a5f94d144bb930cc9fb2778eed672d2a97a252f49b07f7b979b47224f`. The original S0 proposal is historical; it is not current routing.
 
-## 2. Inspect the proposed S0 admission
+## 2. Confirm the one active tranche
 
-Read `s0/proposed-campaign-admission.md` and `.json`. Confirm `activation_state=PROPOSED_NOT_ACTIVE`, baseline `e303719e5ce64df47df7b0594433a8978e3b01c5a3d0d0bd9129b9b6340b20cd`, candidate `BWS-W4-T39`, current task `BWS-600`, active implementation queue `none`, selected controller `run-paper-autopilot.sh`, and unchanged holds. Documentation presence is not activation.
+Read `activation/active-campaign-admission.json`, `activation/unattended-plan.json`, and `activation/tasks/001-BWS-W4-T39.md`. Required state:
 
-## 3. Later activate exactly one tranche
+```text
+activation_state=ACTIVE
+current_tranche=BWS-W4-T39
+campaign_order=1
+stage=S1
+tranche_state=ADMITTED
+accepted_tranches=none
+```
 
-A later explicit user instruction must name `BWS_FINAL_REMEDIATION_R01_R12_V1` and exactly one tranche. Capture activation-time Git/source fields, reverify protected authority, dependencies, candidate paths, symbols, tests, environments, and rollback. Produce a schema-valid `campaign-admission`/`tranche-admission` pair with one `ADMITTED` source-mutating tranche. S1/S2 remain bounded operator-driven cycles; do not start a current autonomous controller.
+All other tranches remain `NOT_ADMITTED`. Existing autonomous controllers remain prohibited through the complete S2 gate.
 
-## 4. Capture preimages
+## 3. Capture first-launch mutable authority
 
-Use the preimage runbook and schema. Record exact path existence, bytes, modes, sizes, Git state, source generation, predecessor postimages, protected authority, stale source-manifest classification, and rollback material outside the repository. Unavailable or ambiguous preimages block writes.
+Before any source edit, capture Git HEAD, branch, upstream, dirty-state digest, exact current file hashes/modes, Node identity, active holds, and rollback material. ZIP archives cannot prove Git state. Missing or ambiguous values block the cycle.
 
-## 5. Start a bounded implementation session
+## 4. Reverify T39 against current source
 
-Work only within the exact admitted path set and minimal coherent finding boundary. Preserve read-only shared paths, unrelated dirty content, current holds, and `betting-win` prohibition. Bind each mapped test requirement to a bounded repository-local command before editing. Do not deploy, migrate persistent state, start services/controllers, or use credentials/provider endpoints unless a separately admitted disposable proof explicitly requires it.
+Re-open every T39 finding and the four candidate paths. Confirm current symbols, nested-secret policy, archive member policy, repository-local Git-config preservation, pinned SSH identity, and first-use trust requirements. A moved, resolved, contradicted, or newly shared path stops implementation for explicit reconciliation.
 
-## 6. Record test and environment receipts
+## 5. Run one bounded implementation transaction
 
-Run all mapped focused, production-entrypoint, negative/adversarial, concurrency/crash, and environment requirements against the exact postimage under Node `v20.20.2` where applicable. Record commands, cwd, timeouts, exit status, output digests, runtime, environment generation, cleanup, and lineage. A test listed but not run is not evidence.
+Use only the active launcher and immutable T39 task. Orders 1 through 13 use direct bounded Codex sessions; do not start a root controller. Change only the admitted path/test boundary, preserve unrelated dirty work, and keep all holds unchanged.
 
-## 7. Accept, block, or record external pending
+## 6. Record proof and result receipts
 
-- `ACCEPTED`: all internal implementation, tests, and required environment proof pass under exact authority.
-- `BLOCKED`: any internal source, test, environment, rollback, authority, or evidence requirement fails or is unavailable.
-- `SOURCE_COMPLETE_EXTERNAL_PENDING`: only for campaign-map-marked T29/T36 after every internal requirement is closed and only external accepted evidence remains unavailable.
+Bind preimage, current-source reverification, postimage, focused tests, production-entrypoint tests, negative/adversarial proof, environment identity, exact Node `v20.20.2`, rollback material, and retained holds. A listed but unexecuted test is not evidence.
 
-Issue the schema-valid tranche-result. Do not promote holds from any of these states without a separate hold decision.
+## 7. Accept or stop
 
-## 8. Update the program ledger
+- `ACCEPTED`: every internal requirement and mapped proof passes.
+- `BLOCKED`: any source, scope, test, environment, rollback, authority, or receipt requirement fails or is unavailable.
+- `SOURCE_COMPLETE_EXTERNAL_PENDING`: only where the campaign map permits it and all internal proof is complete.
 
-Append immutable receipts to the campaign generation, update finding closure references without changing stable IDs/owners, and preserve prior generations. Do not replace current mutable task/queue/controller authority unless a separate explicit instruction authorizes that change.
+The launcher may admit the next exact campaign-order tranche only after the predecessor receipt and dependencies validate. Unknown or mixed state stops the campaign.
 
-## 9. Prepare the next tranche
+## 8. Post-S2 controller transition
 
-Select the next campaign-order tranche only after the predecessor reaches an allowed terminal state. Recheck every dependency, bind the predecessor postimage/shared-path handoff, capture a new preimage, and admit exactly one tranche. Campaign order, not tranche number, controls progression.
+Only after T40 and T44-T47 are accepted may the active launcher invoke the repaired `run-autonomous-implementation.sh`, one exact admitted tranche per invocation. No manual controller bypass, lock deletion, or force unlock is allowed.
 
-## 10. Stop safely without ambiguous state
+## 9. Hold and external-boundary preservation
 
-Stop additional transaction-owned writes, retain evidence, classify the current state, and either complete exact rollback or record `ROLLBACK_RESTORE_FAILED` and remain `BLOCKED`. Remove only transaction-owned additions and empty directories. Preserve unrelated dirty work. Never infer success, advance the queue, release a hold, or start another tranche from mixed state.
-
-## Controller prohibition
-
-Do not invoke `run-autonomous-implementation.sh`, `run-autonomous-bugfix.sh`, `run-paper-evaluation.sh`, `run-paper-autopilot.sh`, or `run-bugfix-autopilot.sh` during S1 or S2. The repaired controller becomes eligible only after T44-T47 and all S2 gates are accepted.
+Do not release BWS-600, BWS-710, BWS-900, release, deployment, or live execution. Do not access or mutate a `betting-win` checkout. Documentation, source completion, static validators, fixtures, mocks, local exports, declarations, or caller assertions cannot substitute for accepted external evidence.

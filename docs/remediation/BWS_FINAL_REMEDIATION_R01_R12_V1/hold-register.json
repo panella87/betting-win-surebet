@@ -1,5 +1,5 @@
 {
-  "activation_state": "PROPOSED_NOT_ACTIVE",
+  "activation_state": "ACTIVE",
   "holds": [
     {
       "decision_document": "holds/BWS-600.md",
@@ -45,5 +45,11 @@
     }
   ],
   "program_id": "BWS_FINAL_REMEDIATION_R01_R12_V1",
-  "schema": "bws-remediation-hold-register-v1"
+  "schema": "bws-remediation-hold-register-v1",
+  "current_admission": {
+    "campaign_order": 1,
+    "stage": "S1",
+    "state": "ADMITTED",
+    "tranche_id": "BWS-W4-T39"
+  }
 }

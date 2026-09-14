@@ -1,5 +1,5 @@
 {
-  "activation_state": "PROPOSED_NOT_ACTIVE",
+  "activation_state": "ACTIVE",
   "one_source_mutating_tranche_at_a_time": true,
   "program_id": "BWS_FINAL_REMEDIATION_R01_R12_V1",
   "schema": "bws-remediation-campaign-order-v1",
@@ -1391,5 +1391,11 @@
       "tranche_id": "BWS-W4-T43",
       "tranche_number": 43
     }
-  ]
+  ],
+  "current_admission": {
+    "campaign_order": 1,
+    "stage": "S1",
+    "state": "ADMITTED",
+    "tranche_id": "BWS-W4-T39"
+  }
 }

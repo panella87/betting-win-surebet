@@ -1,7 +1,7 @@
 
 # BWS-W1-T12 implementation packet
 
-> Documentation status: `PROPOSED_NOT_ACTIVE` for T39 and `NOT_ADMITTED` for all tranches. This packet does not authorize source mutation.
+> Current campaign state: `NOT_ADMITTED`. This packet defines future scope only; source mutation is prohibited until the active launcher admits this exact tranche after all dependencies are accepted.
 
 ## Canonical packet fields
 
@@ -15,7 +15,7 @@ ISSUE_IDS: BWS116-R03-014, BWS116-R03-015, BWS116-R03-016
 SEVERITY_COUNTS: {"P1": 3}
 DEPENDENCIES: T03, T07, T08, T10, T14, T16
 EXTERNAL_ACCEPTANCE_PENDING: no
-CURRENT_SOURCE_AUTHORITY: betting-win-surebet122.zip sha256=e303719e5ce64df47df7b0594433a8978e3b01c5a3d0d0bd9129b9b6340b20cd; exact 771-member archive inventory; independently computed inventory digest=b81ff807e4c230bff96fe1fa58f73a2d4bac803ebd7fa58b843cdcb83499f7f0
+CURRENT_SOURCE_AUTHORITY: frozen application-source baseline betting-win-surebet122.zip sha256=e303719e5ce64df47df7b0594433a8978e3b01c5a3d0d0bd9129b9b6340b20cd; documentation-audit preimage betting-win-surebet125.zip sha256=72a8262a5f94d144bb930cc9fb2778eed672d2a97a252f49b07f7b979b47224f with 995 regular files and no accepted remediation source result; this overlay changes documentation only; exact checkout/Git/source state must be reverified before editing
 CURRENT_SOURCE_PATH_CANDIDATES: database/migrations/surebet/003_create_strategy_ledger_entries.sql, database/migrations/surebet/009_create_b1_backtest_runs.sql, database/migrations/surebet/010_create_b1_candidate_snapshots.sql, database/migrations/surebet/011_create_b1_simulation_results.sql, database/migrations/surebet/012_create_b1_private_observation_cycles.sql, packages/bootstrap/src/runtime/private-paper-runtime.ts, packages/bootstrap/src/strategy/strategy-ledger.ts, packages/bootstrap/src/workers/b1-private-observation-jobs.ts, packages/bootstrap/src/workers/bounded-job-worker.ts, packages/bootstrap/src/workers/private-paper-runtime-jobs.ts, packages/persistence/src/repositories/b1-backtest-run-repository.ts, packages/persistence/src/repositories/b1-private-observation-repository.ts
 SYMBOLS_TO_REVERIFY: 13 detailed records below
 ALLOWED_EDIT_BOUNDARY: listed current paths are candidates only; exact set TO_CONFIRM_DURING_ADMISSION after current-source reverification

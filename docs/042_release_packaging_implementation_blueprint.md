@@ -1,6 +1,6 @@
 # 042 - Release packaging implementation blueprint
 
-> **Completed historical implementation blueprint.** `BWS-590` is validated. This file remains acceptance and recovery history, not current controller routing. Current authority is `docs/automation/current-implementation-task.md`; the selected route is `run-paper-autopilot.sh` for the externally gated BWS-600 campaign.
+> **Completed historical implementation blueprint.** `BWS-590` is retained as acceptance and recovery history and is non-routing. Current authority is the activated R01-R12 remediation package, with T39 admitted and root controllers prohibited until S2 is accepted.
 
 ```text
 parent_task=BWS-590
@@ -30,6 +30,8 @@ config/bws.private.env.template
 ```
 
 Exact names may follow existing repository patterns, but the implementation must not create a parallel framework or bypass `packages/bootstrap`.
+
+> Current-source note: `schemas/bws-release-manifest.v1.schema.json` does not parse as JSON in BWS125 because its outer object is unterminated. This historical blueprint does not prove that the current schema is valid; the defect requires explicit implementation ownership and behavioral proof.
 
 ## Release identity
 

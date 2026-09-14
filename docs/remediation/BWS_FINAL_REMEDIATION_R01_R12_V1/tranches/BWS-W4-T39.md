@@ -1,7 +1,7 @@
 
 # BWS-W4-T39 implementation packet
 
-> Documentation status: `PROPOSED_NOT_ACTIVE` for T39 and `NOT_ADMITTED` for all tranches. This packet does not authorize source mutation.
+> Current campaign state: `ADMITTED` through `activation/active-campaign-admission.json`. This packet defines scope and proof; the immutable activation task and live campaign state control edits.
 
 ## Canonical packet fields
 
@@ -15,10 +15,10 @@ ISSUE_IDS: BWS121-R10-010, BWS121-R10-011, BWS121-R10-012, BWS121-R10-013
 SEVERITY_COUNTS: {"P0": 3, "P2": 1}
 DEPENDENCIES: none
 EXTERNAL_ACCEPTANCE_PENDING: no
-CURRENT_SOURCE_AUTHORITY: betting-win-surebet122.zip sha256=e303719e5ce64df47df7b0594433a8978e3b01c5a3d0d0bd9129b9b6340b20cd; exact 771-member archive inventory; independently computed inventory digest=b81ff807e4c230bff96fe1fa58f73a2d4bac803ebd7fa58b843cdcb83499f7f0
+CURRENT_SOURCE_AUTHORITY: frozen application-source baseline betting-win-surebet122.zip sha256=e303719e5ce64df47df7b0594433a8978e3b01c5a3d0d0bd9129b9b6340b20cd; documentation-audit preimage betting-win-surebet125.zip sha256=72a8262a5f94d144bb930cc9fb2778eed672d2a97a252f49b07f7b979b47224f with 995 regular files and no accepted remediation source result; this overlay changes documentation only; exact checkout/Git/source state must be reverified before editing
 CURRENT_SOURCE_PATH_CANDIDATES: pull_artifacts_and_zip_codebase.sh, scripts/create-source-handoff-archive.sh, update_git.sh, zip_codebase.sh
 SYMBOLS_TO_REVERIFY: 5 detailed records below
-ALLOWED_EDIT_BOUNDARY: listed current paths are candidates only; exact set TO_CONFIRM_DURING_ADMISSION after current-source reverification
+ALLOWED_EDIT_BOUNDARY: the immutable activation task admits the four current source-path candidates plus directly necessary proof files under its exact protected-file allowlist; current-source reverification is mandatory and any additional path blocks for reconciliation
 READ_ONLY_SHARED_PATHS: none identified by campaign-map shared-path registry
 PROHIBITED_PATHS: all paths outside exact admission; betting-win; runtime/config/secret/database/service/deployment paths not explicitly admitted
 UNCHANGED_AUTHORITIES: campaign membership/dependencies/owner/holds/betting-win prohibition and detailed unchanged areas below
@@ -54,10 +54,10 @@ NEXT_TRANCHE_RULE: admit BWS-W4-T37 only after this terminal receipt and depende
 
 ## Current source-path candidates
 
-- `pull_artifacts_and_zip_codebase.sh` | present=yes | sha256=9e7199e2e7efa85963f26374510e7cde6a74eb4cd3f00aca7893de2efe0f6cc7 | mode=0755 | authorization=TO_CONFIRM_DURING_ADMISSION
-- `scripts/create-source-handoff-archive.sh` | present=yes | sha256=3636462392c76a66fae28b84eafd04a7a7db689e63d815bc82855b58f86e2f49 | mode=0755 | authorization=TO_CONFIRM_DURING_ADMISSION
-- `update_git.sh` | present=yes | sha256=afdd43955e7513016f5e53770faf9523df7ae9827608931ed81d168519dce3fe | mode=0755 | authorization=TO_CONFIRM_DURING_ADMISSION
-- `zip_codebase.sh` | present=yes | sha256=7c9090876b6c558709f6e03a979144f07f501306109ffcc7e6cf95fafc5100a9 | mode=0755 | authorization=TO_CONFIRM_DURING_ADMISSION
+- `pull_artifacts_and_zip_codebase.sh` | present=yes | sha256=9e7199e2e7efa85963f26374510e7cde6a74eb4cd3f00aca7893de2efe0f6cc7 | mode=0755 | authorization=ADMITTED_CANDIDATE_REQUIRES_CURRENT_SOURCE_REVERIFICATION
+- `scripts/create-source-handoff-archive.sh` | present=yes | sha256=3636462392c76a66fae28b84eafd04a7a7db689e63d815bc82855b58f86e2f49 | mode=0755 | authorization=ADMITTED_CANDIDATE_REQUIRES_CURRENT_SOURCE_REVERIFICATION
+- `update_git.sh` | present=yes | sha256=afdd43955e7513016f5e53770faf9523df7ae9827608931ed81d168519dce3fe | mode=0755 | authorization=ADMITTED_CANDIDATE_REQUIRES_CURRENT_SOURCE_REVERIFICATION
+- `zip_codebase.sh` | present=yes | sha256=7c9090876b6c558709f6e03a979144f07f501306109ffcc7e6cf95fafc5100a9 | mode=0755 | authorization=ADMITTED_CANDIDATE_REQUIRES_CURRENT_SOURCE_REVERIFICATION
 
 These are current-source candidates from the campaign map. They are not unconditional edit authorization. A moved symbol or needed additional path stops admission for explicit reconciliation.
 
