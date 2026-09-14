@@ -1,5 +1,8 @@
 # Bugfix autopilot: betting-win-surebet
 
+> **Routing note:** The broad bugfix campaign is historical and complete. Bugfix autopilot is not the active remediation route.
+
+
 ## Current repository state
 
 The broad bugfix campaign is complete and accepted. The terminal parent `artifacts/bugfix_autopilot_20260812T133805Z` finished with `BUGFIX_AUTOPILOT_COMPLETE`, `all_campaign_areas_closed`, 22 rounds, and all 8 campaign areas closed. Its final cross-area audit passed the full baseline and PostgreSQL-backed loopback acceptance. No active bugfix or implementation queue remains; the next selected phase is the externally gated `BWS-600` paper/runtime-evidence campaign.

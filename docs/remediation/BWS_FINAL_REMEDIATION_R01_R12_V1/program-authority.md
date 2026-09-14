@@ -1,48 +1,47 @@
-
 # Program authority
 
-## Identity
+## Current identity
 
 ```text
 program_id=BWS_FINAL_REMEDIATION_R01_R12_V1
 repository=betting-win-surebet
 review_program=COMPLETE_R01_R12
-baseline_archive=betting-win-surebet122.zip
-baseline_sha256=e303719e5ce64df47df7b0594433a8978e3b01c5a3d0d0bd9129b9b6340b20cd
-regular_files=771
+activation_state=ACTIVE
+current_admitted_tranche=BWS-W4-T39
+current_campaign_order=1
+current_stage=S1
+canonical_node=20.20.2_exact
 confirmed_findings=173
 P0=10
 P1=144
 P2=19
 P3=0
 tranches=47
-canonical_node=20.20.2_exact
-activation_state=PROPOSED_NOT_ACTIVE
 ```
+
+The BWS122 architecture and campaign map remain the finding and dependency baseline. The BWS123 activation snapshot admitted T39 and established the fixed-order unattended execution contract. BWS124 contains that authority and no accepted remediation source result.
+
+## Current authority order
+
+1. Current repository source and tests.
+2. Fresh retained implementation and environment evidence.
+3. `activation/active-campaign-admission.json`.
+4. `activation/unattended-plan.json`, immutable task files, and receipt state.
+5. The first active-remediation sections of `docs/repo_status_current.md` and `docs/automation/current-implementation-task.md`.
+6. Campaign-map identities, architecture, detailed finding records, and review evidence.
+7. Proposed S0 records, examples, historical status prose, and validator compatibility blocks.
 
 ## Binding rules
 
 - Exactly one active source-mutating tranche at a time.
-- No existing autonomous controller is permitted before S2 is accepted.
-- Every tranche re-verifies exact current source before edit and emits a postimage/test/environment receipt.
-- Node 20.20.2 is mandatory; Node 22 evidence is never acceptance.
-- No silent defaults, placeholders, fallback authority, or inferred external evidence.
-- R11 T43 is last and may accept an explicit non-promotable external hold, never a fabricated pass.
-- No betting-win source, checkout, service, database, documentation, or runtime mutation.
-
-## Authority order
-
-1. exact current files in BWS122
-2. current canonical status/task/hold/architecture/runbook/review documents
-3. campaign-map JSON machine identities and exact membership
-4. architecture Markdown explanatory sequencing
-5. architecture validation and checksum records
-6. cumulative R01-R12 ledger and detailed reports
-7. historical status prose and completion claims
+- No existing autonomous controller before the entire S2 gate is accepted.
+- Every tranche re-verifies current source and emits exact postimage, test, environment, and result receipts.
+- Node `v20.20.2` is mandatory; Node 22 is supplementary only.
+- Missing, blank, null, unknown, stale, or conflicting authority fails closed.
+- T43 is last.
+- No provider access, live execution, release, deployment, or `betting-win` checkout access or mutation.
 
 ## State machine
-
-The only valid tranche states are:
 
 ```text
 NOT_ADMITTED
@@ -55,11 +54,25 @@ BLOCKED
 SOURCE_COMPLETE_EXTERNAL_PENDING
 ```
 
-Unknown states fail closed. `SOURCE_COMPLETE_EXTERNAL_PENDING` is terminal for a bounded source cycle but cannot promote BWS-600, BWS-710, release, deployment, or live execution.
+`SOURCE_COMPLETE_EXTERNAL_PENDING` is terminal for source work but non-promotable.
 
-## Current mutable authority
+## Current holds
 
 ```text
+BWS-600=BLOCKED
+BWS-710=BLOCKED
+BWS-900=PARKED_NOT_AUTHORIZED
+release=BLOCKED
+deployment=BLOCKED
+live_execution=PROHIBITED
+```
+
+## Historical proposal snapshot
+
+The original package recorded:
+
+```text
+activation_state=PROPOSED_NOT_ACTIVE
 current_task=BWS-600
 current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
 active_implementation_queue=none
@@ -67,13 +80,4 @@ selected_controller=run-paper-autopilot.sh
 automation_maintenance_allowed=no
 ```
 
-This package does not replace those declarations. It adds a proposed documentation program under `docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1` only.
-
-## Immutable constraints
-
-- Exactly one source-mutating tranche may be admitted at a time.
-- Every finding is owned by exactly one tranche and one primary review owner.
-- Shared files are serialized by campaign order and exact predecessor postimage.
-- Every tranche re-verifies current source before editing.
-- Static markers, declared tests, documentation, or Node 22 evidence do not constitute acceptance.
-- No source, checkout, documentation, service, database, or runtime belonging to `betting-win` may be accessed or mutated by this program.
+Those lines remain historical context only. The active admission supersedes them without releasing any hold.

@@ -1,92 +1,54 @@
 # Autonomous implementation rules: betting-win-surebet
 
-## Completed BWS-700 authority and future implementation use
+## Current use
 
-The implementation controller is not currently selected. Dependency-ready B1 work is complete through BWS-820, the broad bugfix campaign is accepted, BWS-600 remains externally gated, and BWS-900 remains parked. Use this controller only for a future reviewed source handoff or after BWS-710 is unblocked by an accepted `betting-win.b1_multi_venue_markets.v1` contract.
+`run-autonomous-implementation.sh` is prohibited as a remediation driver before the complete S2 gate is accepted. After S2, the active remediation launcher may invoke it for exactly one admitted tranche at a time using the immutable task file and exact protected-file policy.
 
+```text
+active_program=BWS_FINAL_REMEDIATION_R01_R12_V1
+pre_s2_controller_use=prohibited
+post_s2_controller=run-autonomous-implementation.sh
+one_admitted_tranche_per_invocation=yes
+```
+
+The controller default remains 72 hours. The active launcher may repeat a 72-hour attempt only while the same tranche remains admitted, the controller returns the documented continuation code, and the global 28-day window remains.
+
+Canonical options used by the active launcher are:
+
+```text
+--model cli-default
+--fallback-model none
+--cycle-timeout 2h
+--validation-timeout 20m
+--max-cycles 200
+--prompt-file <exact immutable tranche task>
+```
+
+There is no `--task` option. Outside the active launcher, normal implementation authority comes from repository current-task documents or a validated handoff. `--handover-paper-mode` and `--handover-bugfix-audit` are for exact direct handoffs only.
+
+## Completion and failure
+
+Each cycle must preserve exact source ownership and emit an unambiguous terminal result. `check-only must fail` when prerequisites are unavailable. `AUTONOMOUS_GOAL_COMPLETE=yes` is accepted only after source, focused validation, repository validation, and required receipts pass. Unknown states, source drift, invalid task authority, or validation failure block the run.
+
+## Protected automation policy
+
+Protected paths are immutable during ordinary cycles. Exact task-file authorization is required for any exception. `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` without a matching exact task allowlist is rejected.
+
+## Retained ledger references
+
+`backlog/bws_full_implementation.csv` and `backlog/bws_remaining_safe_local_map.csv` preserve completed platform traceability. BWS-100` through `BWS-589` are validated carry-forward foundations, with BWS-590 and BWS-599 retained as completed gates.
+
+## Historical full-platform continuity
+
+The completed platform program `BWS_FULL_PLATFORM_IMPLEMENTATION_V1` retains validated behavior through `BWS-590` and `BWS-599`. Its CSV ledgers are historical traceability, not the current queue.
 
 ```text
 program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
-parent_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 current_task=BWS-600
 selected_controller=run-paper-autopilot.sh
 active_implementation_queue=none
-completed_b1_queue=backlog/bws_b1_cross_venue_implementation.csv
-completed_b1_map=backlog/bws_b1_cross_venue_map.csv
-bws700_completion_status=DEPENDENCY_READY_LOCAL_IMPLEMENTATION_COMPLETE
-b1_dependency_ready_local_rows=VALIDATED_THROUGH_BWS-820
-bws710_status=BLOCKED_ACCEPTED_BETTING_WIN_B1_MULTI_VENUE_API_REQUIRED
-safe_local_terminal_gate=BWS-599
 bws600_current_task=BWS-600
 bws600_selected_controller=run-paper-autopilot.sh
 ```
 
-`run-autonomous-implementation.sh` defaults to a 72-hour ceiling and is driven by repository docs, `docs/automation/current-implementation-task.md`, validated handoffs, and—only when the current task explicitly opens one—the queue named by that task. No implementation queue is active now. The completed B1 queue `backlog/bws_b1_cross_venue_implementation.csv` and the historical `backlog/bws_full_implementation.csv` and `backlog/bws_remaining_safe_local_map.csv` remain carry-forward traceability. There is no `--task` flag. A separate `--prompt-file` is not part of normal operator routing.
-
-`BWS-100` through `BWS-589` are validated carry-forward foundations inside the wider complete safe-local program through `BWS-599`.
-
-The safe-local implementation queue is complete through `BWS-599`, and the BWS-700 dependency-ready local queue is validated through `BWS-820`. Use this controller only for future reviewed source-fix handoffs or unblocked BWS-710 intake; do not reopen the completed safe-local or BWS-700 dependency-ready queues.
-
-```text
-BWS-100..BWS-580  platform foundation through integrated bounded runtime (validated)
-BWS-581..BWS-589  long-running services, lifecycle, evidence and paper automation (validated)
-BWS-590..BWS-593  release, recovery, soak and external preflight (validated)
-BWS-599           final clean-room acceptance (validated)
-BWS-600           external runtime evidence, selected parent run-paper-autopilot.sh
-BWS-900           separately authorized execution
-```
-
-Forbidden work includes direct provider clients/URLs/credentials, betting-win `core.*` writes, modifying the betting-win checkout, execution paths, public signals and profitability claims.
-
-For any future implementation queue, use `CONTINUE_REQUIRED=yes` while dependency-ready work remains and `AUTONOMOUS_GOAL_COMPLETE=yes` only when the authorized queue is validated or truthfully blocked. The current BWS-700 dependency-ready local queue is already validated through BWS-820.
-
-Canonical standalone campaign settings include:
-
-```text
---duration 72h
---max-cycles 200
---cycle-timeout 6h
---validation-timeout 45m
---model cli-default
---fallback-model none
-```
-
-## Cross-repository implementation rule
-
-No implementation queue is active now. The current integration audit found a real external wire-contract mismatch, but this documentation overlay does not authorize source changes. Any implementation must come from a reviewed cross-repository handoff identifying the owning repository:
-
-```text
-betting_win_owned_option=publish accepted versioned downstream data API facade
-bws_owned_option=adopt an explicitly accepted betting-win API contract
-forbidden=runtime parent invents route or envelope adapter
-future_sdk_owner=betting-win package, BWS-900 consumer integration only
-```
-
-## Protected automation policy
-
-Task-file automation maintenance is disabled for the current state.
-
-```text
-automation_maintenance_allowed=no
-allowed_protected_files=none
-```
-
-Do not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`. Missing or disabled authorization must fail closed, and no autonomous cycle may broaden it.
-
-The check-only must fail contract remains binding. Standalone implementation sends its final Telegram result. A parent suppresses the child notification and sends the final campaign notification.
-
-## Controller-managed source-manifest refresh
-
-A bounded implementation handoff may name only the product and test files needed for a source fix. `CHANGELOG.md` remains an operator/reviewer concern unless the task names it, but `SOURCE_MANIFEST.json` is repository validation metadata and must never remain stale after a source-changing cycle.
-
-The implementation controller therefore:
-
-```text
-1. captures the cycle source fingerprint before Codex;
-2. enforces the exact protected-file policy after Codex;
-3. when the source fingerprint changed, runs scripts/regenerate_source_manifest.py;
-4. immediately runs scripts/validate_source_manifest.py;
-5. captures the cycle diff and starts controller-managed validation only after reconciliation passes.
-```
-
-A failed manifest refresh blocks the cycle. The controller does not use this mechanism to authorize unrelated files, hide validation failures, or weaken the bugfix parent's mandatory same-area re-audit.
+That block is validator-retained pre-remediation history. It must not override the active program above.

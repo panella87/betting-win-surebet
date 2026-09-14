@@ -1,5 +1,8 @@
 # 035 - Continuous service supervisor contract
 
+> **Routing note:** This service contract remains supporting authority, but it does not select current work. The active route is the R01-R12 remediation campaign.
+
+
 > **Validated carry-forward runtime contract.** `BWS-581` through `BWS-584` are complete. This contract remains binding for lifecycle and process ownership, but current runtime transport is API-only. Historical export compatibility does not authorize an export runtime selector.
 
 ```text

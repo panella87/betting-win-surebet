@@ -1,5 +1,8 @@
 # BWS service run contract
 
+> **Routing note:** This is the retained service ownership contract. Services and paper evidence are not the current remediation task and must not be started by documentation work.
+
+
 ## Current state
 
 The repository has validated executable components, complete product-owned lifecycle control, protected root-wrapper integration, standalone paper runtime evidence and runtime-evidence paper autopilot through `BWS-599`. The safe-local release, recovery, soak, external preflight and final clean-room acceptance gates are closed.

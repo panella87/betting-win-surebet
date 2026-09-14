@@ -1,144 +1,101 @@
 # Repo automation contract: betting-win-surebet
 
-## Active post-BWS-700 controller route
+## Current remediation route
 
-`run-paper-autopilot.sh` is selected for `BWS-600` runtime evidence after BWS-700 dependency-ready local completion. `run-autonomous-implementation.sh` is not the selected route now; it is available only for future reviewed source handoffs or unblocked BWS-710 intake. Normal implementation remains docs/current-task driven; do not use `--task` and do not use `--prompt-file` for normal routing. If the operator-approved betting-win downstream API handoff is unavailable, incompatible, unauthorized, or lacks accepted real-provider parity, the paper route must stop with a truthful upstream API blocker instead of starting another source implementation queue.
+```text
+active_program=BWS_FINAL_REMEDIATION_R01_R12_V1
+activation_state=ACTIVE
+current_admitted_tranche=BWS-W4-T39
+pre_s2_execution=direct_bounded_codex_only
+existing_controllers_before_s2=prohibited
+post_s2_controller=run-autonomous-implementation.sh
+active_launcher=docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/run-unattended-remediation-campaign.sh
+canonical_node=v20.20.2
+```
 
+The active launcher owns campaign order, dependency checks, task selection, receipt validation, and the S2 controller gate. Operators must not bypass it by starting a root controller directly for remediation. Orders 1 through 13 are direct bounded sessions. Orders 14 through 47 may use the repaired implementation controller only after all S2 tranches are accepted.
+
+`docs/repo_status_current.md` and `docs/automation/current-implementation-task.md` are immutable activation inputs. Their first sections are current. Later BWS-600 sections are validator-retained historical text and must not be used to select a controller.
+
+## Standardized command surface
+
+```text
+zip_codebase.sh                         numbered repo-root source ZIP, no manifest
+pull_artifacts_and_zip_codebase.sh      pulls server root artifacts.zip, then calls local zip_codebase.sh, no automation.config.sh
+update_git.sh --acp                     add/commit/push shorthand with GITHUB_TOKEN env/.env support
+run-autonomous-implementation.sh        72h default implementation controller
+run-paper-evaluation.sh                 72h default standalone paper evaluator, root artifacts.zip
+run-autonomous-bugfix.sh                72h default standalone read-only audit/handoff, no proactive/reactive mode flags
+run-paper-autopilot.sh                  seven-day paper/evidence parent with 72h children
+run-bugfix-autopilot.sh                 seven-day audit/repair parent with 72h children
+automation.config.sh                    executable repository profile and command configuration
+```
+
+`run-paper-evaluation.sh` replaces `run-paper-evaluation-12h.sh`. The canonical adaptive flag is `--adaptive`. The protected script currently accepts explicit `--interval` values without enforcing the documented policy, so active operator commands must keep explicit intervals inside 5 to 60 minutes. `--adaptive-interval` is compatibility-only and is not the documented command. `stop-autonomous-run.sh` must not exist.
+
+`run-autonomous-implementation.sh` has no `--task` option. Normal controller selection comes from repository authority. The active remediation launcher uses the verified `--prompt-file` option for one exact tranche after S2.
+
+## Helper behavior
+
+- `zip_codebase.sh` includes tracked and untracked non-ignored source, excludes archives, secrets, logs, databases, runtime evidence, generated output, and transient paths, and creates no manifest.
+- `pull_artifacts_and_zip_codebase.sh` reads explicit SSH settings from environment then `.env`, downloads root `artifacts.zip`, stores a numbered local artifact ZIP, and invokes local `zip_codebase.sh`.
+- `update_git.sh --pull` uses fast-forward-only pull with autostash. `--acp` stages required executable modes before commit and push.
+- Root controllers return to the current shell and do not require `exec` or a stop helper.
+
+## Exact protected-file policy
+
+Protected paths are listed in `docs/automation/PROTECTED_AUTOMATION_FILES.md`. `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` is not blanket permission. It is valid only when the active task source sets `automation_maintenance_allowed=yes` and names one exact comma-separated allowlist. Missing, duplicate, malformed, or out-of-list authorization fails closed. The blanket manual override is disabled.
+
+T39 currently authorizes only:
+
+```text
+zip_codebase.sh
+pull_artifacts_and_zip_codebase.sh
+update_git.sh
+```
+
+`scripts/create-source-handoff-archive.sh` is not a protected automation path but remains inside the T39 source boundary.
+
+## Runtime and process boundary
+
+Product, paper, audit, and remediation tasks must not control `betting-win`, providers, live execution, release, or deployment. Test-owned loopback children must be bounded and exactly owned. Controllers use repo-scoped locks, atomic child-result side channels, terminal receipts, and retained artifacts. `TELEGRAM_NOTIFY=0` disables notifications; autopilot children do not send parent-level final notifications.
+
+## Evidence packaging
+
+Root `artifacts.zip` contains the complete retained-evidence portion of `artifacts/` after transient cleanup and safety validation. Current source is returned separately through `zip_codebase.sh`. See `docs/automation/artifact-retention-and-cleanup.md`.
+
+For a fresh continuation, provide both numbered outputs from `pull_artifacts_and_zip_codebase.sh`: the artifact ZIP and current source ZIP. Do not provide `.env`, credentials, databases, `node_modules`, or unretained logs.
+
+## Temporary-file and inode safety
+
+The shared guard uses repository-owned `.automation/tmp`, free-byte and free-inode checks, bounded per-run budgets, ownership metadata, and watchdog cleanup. See `docs/automation/repository-temp-inode-safety.md`. A writable `/tmp` is not an accepted fallback for an invalid managed root.
+
+## Documentation navigation
+
+Canonical repository navigation and classification are in `docs/000_documentation_index.md` and `docs/documentation-inventory.json`.
+
+## Validator-retained pre-remediation route record
+
+### Active post-BWS-700 controller route
+
+This subsection is retained verbatim enough for existing repository validators. It is a historical route snapshot, not current routing authority.
 
 ```text
 program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
-parent_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 current_task=BWS-600
 current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
 selected_controller=run-paper-autopilot.sh
 active_implementation_queue=none
-broad_bugfix_campaign_status=COMPLETED_AND_ACCEPTED
-broad_bugfix_areas_closed=8_of_8
-completed_b1_queue=backlog/bws_b1_cross_venue_implementation.csv
-completed_b1_map=backlog/bws_b1_cross_venue_map.csv
-bws700_completion_status=DEPENDENCY_READY_LOCAL_IMPLEMENTATION_COMPLETE
-b1_dependency_ready_local_rows=VALIDATED_THROUGH_BWS-820
-bws710_status=BLOCKED_ACCEPTED_BETTING_WIN_B1_MULTI_VENUE_API_REQUIRED
 safe_local_terminal_gate=BWS-599
 bws600_current_task=BWS-600
 bws600_current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
 bws600_selected_controller=run-paper-autopilot.sh
 bws600_upstream_api_preflight_source_fix=present
+automation_maintenance_allowed=no
 ```
-
-`BWS-100` through `BWS-599` are validated carry-forward foundations. The runtime has full product lifecycle ownership, database lifecycle, observability, root wrappers, service-owned paper evaluation, runtime-evidence paper autopilot, release/recovery/soak/preflight proof and final local acceptance.
-
-The safe-local queue through `BWS-599` is complete. The broad bugfix audit/repair campaign is also complete and accepted across all eight campaign areas; it is not the selected route without new bounded evidence. `BWS-592` soak/failure injection, `BWS-593` external preflight, and `BWS-599` final acceptance are validated carry-forward surfaces. The BWS-700 dependency-ready local implementation gate is complete through `BWS-820`; `BWS-600` remains an external runtime-evidence gate and is now the selected route.
-
-`BETTING_WIN_REPO_PATH` remains a read-only pointer to the existing betting-win checkout. BWS reads committed `HEAD` through Git objects and must not clone, clean, reset or modify that checkout.
-
-Documentation lookup starts at `docs/000_documentation_index.md`. Stale completion snapshots are intentionally removed from active validation; retained blueprints and archive files stay discoverable through that index.
-
-
-## Cross-repository gate
-
-The canonical integration contract is `docs/002_dependency_contract_with_betting_win.md`. The inspected betting-win source does not yet authorize the BWS runtime wire contract:
-
-```text
-upstream_operator_api=/dashboard/*
-upstream_downstream_runtime_api_handoff_allowed=no
-bws_required_probe=/contract
-bws_required_queries=/query/*
-bws600_launch=blocked_until_accepted_handoff
-```
-
-Paper autopilot is selected for BWS-600 after BWS-700 dependency-ready local completion, but selection is not permission to launch. A future cross-repo source fix must be explicitly reviewed; it must not be invented by the runtime parent.
-
-## Standardized command surface
-
-```text
-zip_codebase.sh                         numbered repo-root zips, tracked plus untracked non-ignored files, no manifest
-pull_artifacts_and_zip_codebase.sh      pulls server root artifacts.zip, then calls local zip_codebase.sh, no automation.config.sh
-update_git.sh --acp                     add/commit/push shorthand with GITHUB_TOKEN env/.env support
-run-autonomous-implementation.sh        72h default, driven by repo docs/current task or handoff, no --task flag
-run-paper-evaluation.sh                 72h default, replaces run-paper-evaluation-12h.sh, writes root artifacts.zip
-run-autonomous-bugfix.sh                72h default standalone read-only audit/handoff, no proactive/reactive mode flags
-run-paper-autopilot.sh                  seven-day parent selected for BWS-600 runtime evidence
-run-bugfix-autopilot.sh                 seven-day parent for broad audit -> repair -> same-area re-audit
-automation.config.sh                    repo executable config and protected-file list
-docs/automation/ and .automation/        repo-specific automation behavior and shared controller helpers
-```
-
-`run-paper-evaluation.sh --adaptive` is the canonical adaptive flag. Active operator commands must keep explicit observation intervals inside the documented 5..60 minute policy; the current protected controller accepts direct `--interval` values as provided, so docs must not imply automatic explicit-interval clamping until a reviewed controller-maintenance overlay implements it. `--adaptive-interval` may exist only as a compatibility alias, not as the documented operator command. `stop-autonomous-run.sh` must not exist.
-
-## Controller selection
 
 ```text
 run-autonomous-implementation.sh  available only for future reviewed source handoffs or unblocked BWS-710 intake
-run-autonomous-bugfix.sh          standalone audit only
-run-bugfix-autopilot.sh           broad audit and automatic repair after implementation
-run-paper-evaluation.sh           fixture evaluator plus validated runtime-evidence mode
-run-paper-autopilot.sh            selected future BWS-600 parent; launch requires accepted cross-repo API contract and real-provider parity
 ```
 
-Paper autopilot is selected for BWS-600 after BWS-700 dependency-ready local completion. Implementation is available only for a future reviewed source handoff or unblocked BWS-710 intake.
-
-## Exact protected-file policy
-
-The historical `BWS-587` through `BWS-589` phase used an exact reviewed allowlist that included `run-autonomous-implementation.sh` for runtime-evidence return handoffs.
-
-The current task source contains:
-
-```text
-automation_maintenance_allowed=no
-allowed_protected_files=none
-```
-
-Do not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`. Any protected automation change blocks the cycle unless an external overlay first updates the binding task source. The blanket manual override is disabled.
-
-## Process-test boundary
-
-Autonomous cycles may not mutate pre-existing services or user sessions. Bounded repo-owned loopback child processes are permitted only for task-required lifecycle, crash, restart, shutdown, recovery or soak tests. They must use unique identities and ports, remain attached to the test and be cleaned up by the command that created them.
-
-## Notifications and child results
-
-Parent autopilots launch children with `TELEGRAM_NOTIFY=0` and emit one final parent notification. Standalone controllers retain their own final notification. Parent/child terminal state uses the atomic child-result side channel, never streamed human output. Bugfix autopilot validates the runtime-evidence identity keys emitted by the implementation return handoff; for ordinary bugfix campaigns they must remain `none`, so source re-audit cannot silently turn into a paper/runtime-evidence campaign. The standalone bugfix audit child must emit a confirmed-bug implementation handoff before post-Codex validation blocks on the same known red validation that justified the handoff.
-
-
-## Source-manifest reconciliation during implementation
-
-After a source-changing implementation cycle passes protected-file enforcement, `run-autonomous-implementation.sh` regenerates and validates `SOURCE_MANIFEST.json` before the full validation chain. This is deterministic repository metadata maintenance, not permission to expand the bounded product scope. Missing or invalid manifest tooling remains fail-closed.
-
-## Clean validation bootstrap
-
-`npm test` now builds the root TypeScript graph, generates and verifies the exact committed-HEAD betting-win lock, creates the ignored repo-local `artifacts/` directory, and only then starts the serialized compiled test suite. Validation must not depend on stale generated state from a previous controller run.
-
-The managed cockpit build replaces browser assets but atomically preserves `dist/apps/web/src`, which contains Node-importable modules required by the API and lifecycle CLIs. `validate:web` uses that managed builder with the explicit loopback validation port `4312`; it does not invoke destructive Vite output directly. This keeps `start.sh`, release packaging, and clean-checkout tests deterministic after the browser build.
-
-## Evidence packaging
-
-All root controllers archive the complete retained-evidence portion of `artifacts/` with fast standard ZIP compression and refresh the current final summary after lock classification. Before full or incremental packaging, explicit top-level test/release scratch families and only non-archivable symlink nodes below exact autonomous child `cycles/cycle_<n>/repro/` trees are removed by `cleanup_automation_artifact_residue.sh`; regular repro evidence, canonical controller runs, handoffs, private-paper reports, runtime evidence, watchdog events, and operator evidence are preserved. Repo-local temporary files are used instead of relying on writable `/tmp`.
-
-For status, inspect machine-readable retained evidence. Do not infer success from elapsed time or exit code alone.
-
-For a fresh ChatGPT continuation, provide both numbered outputs produced locally by `pull_artifacts_and_zip_codebase.sh`: `artifactsN.zip` for retained server evidence and `betting-win-surebetN.zip` for the current repository source. The codebase ZIP controls current files; the artifact ZIP describes the attempt. Command output may supplement those files but must not replace them. Never provide `.env`, credentials, databases, `node_modules`, or unretained server logs.
-
-## Temporary-file and inode safety
-
-`docs/automation/repository-temp-inode-safety.md` is binding for every autonomous, bugfix, paper, and parent-autopilot controller. `run_common.sh` creates one `.automation/tmp/sessions/...` root per controller, propagates `TMPDIR`/`TMP`/`TEMP`, performs byte and inode preflight, and runs a bounded capacity watchdog. Parent and child controllers receive distinct roots.
-
-The operator maintenance command is `cleanup_automation_temp_inode_residue.sh`. It is dry-run by default and never performs a generic `/tmp` purge. `--skip-legacy-temp` may be used only to omit the optional bounded scan for historical `bws-paper-runtime-evidence-*` directories; repository-owned marker cleanup and all temp/inode guards still run.
-## API-only upstream transport
-
-The BWS runtime is permitted to consume betting-win only through an accepted, authorized, contract-compatible read-only downstream API. `BWS_UPSTREAM_MODE` and the file-export runtime selector are removed. Missing availability, compatibility, authorization, or accepted real-provider parity is a runtime-evidence blocker; there is no automatic file fallback.
-
-The supported root runtime path enforces `SUREBET_RUNTIME_MODE=paper`, `SUREBET_PROVIDER_CONNECTIONS=disabled`, and `SUREBET_EXECUTION_ENABLED=false`. Explicit process values win for approved non-policy connection settings; the selective `.env` reader accepts the canonical `POSTGRES_ADDRESS`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_DB` tuple and derives internal `SUREBET_PG_*` values. Repo-owned defaults cover BWS runtime intervals, worker identity, API transport, cockpit mode, upstream lock path, and the standard private-paper schedule path. Retired export selectors, pinned bundles, and URL-style database variables are rejected or scrubbed before runtime child startup. The root paper-runtime-evidence wrapper rebuilds the compiled runtime and managed cockpit assets immediately before evidence collection, so BWS-600 does not depend on stale `dist/apps/web/index.html` output from earlier validation stages. Runtime-evidence startup requires the managed API health endpoint to be observable, then records readiness as evidence over the requested window; if health is not observable, the lifecycle error includes bounded repo-local child stdout/stderr log paths, redacted log tails, and last probe details. The runtime-evidence command timeout is the requested duration plus 300 seconds.
-
-- `docs/automation/api-only-upstream.md`: binding API-only betting-win transport contract.
-
-### Watchdog measurement-race hardening
-
-<!-- WATCHDOG_RACE_TOLERANCE_V2 -->
-
-The centralized temp/inode guard no longer treats a single `du` traversal race as a controller failure. Sustained unusable measurements and genuine capacity breaches remain fail-closed and exact-owner scoped.
-Bugfix handoff completion rule: when `run-autonomous-implementation.sh --handover-bugfix-audit` changes source and its controller-managed validation passes, a child-authored `BLOCKED=yes` caused by environment-only validation constraints is returned to the bugfix parent as `AUTONOMOUS_GOAL_COMPLETE=yes` with re-audit required. The parent still re-audits the same area before advancing.
-A clean bugfix re-audit may report `NEXT_AUDIT_AREA=none` or the exact next non-closed campaign area. The parent verifies any non-`none` value against `campaign_coverage.tsv`, closes the current area itself, and then advances through its own ledger.
-
-## Artifact retention and cleanup
-
-See `docs/automation/artifact-retention-and-cleanup.md`. The cleanup command defaults to plan mode. Destructive cleanup requires `--apply`, uses an explicit top-level allowlist plus one exact nested autonomous-child repro-symlink rule, never follows symlinks, and can atomically rebuild root `artifacts.zip`. Packaging invokes the same cleanup policy automatically to prevent transient negative-test fixtures from blocking terminal artifact publication.
+Paper autopilot is selected for BWS-600 after BWS-700 dependency-ready local completion. `run-paper-autopilot.sh` is selected for `BWS-600` runtime evidence in this retained snapshot. `run-autonomous-implementation.sh` is not the selected route now in that snapshot. Its purpose was to preserve the truthful upstream API blocker rather than fabricate runtime readiness.

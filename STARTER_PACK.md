@@ -1,67 +1,78 @@
-# betting-win-surebet starter pack
+# STARTER_PACK
+
+## Start here
+
+The repository is in the active remediation campaign `BWS_FINAL_REMEDIATION_R01_R12_V1`. The first admitted tranche is `BWS-W4-T39`; no acceptance result is present in the BWS124 source ZIP.
 
 ```text
-repo=betting-win-surebet
 repo_role=surebet_strategy_application
+active_program=BWS_FINAL_REMEDIATION_R01_R12_V1
+activation_state=ACTIVE
+current_admitted_tranche=BWS-W4-T39
+current_stage=S1
+current_live_execution_gate=closed
+canonical_node=v20.20.2
+```
+
+Read in this order:
+
+1. `AGENTS.md`
+2. `docs/000_documentation_index.md`
+3. `docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/README.md`
+4. `docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/active-campaign-admission.md`
+5. `docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/unattended-plan.json`
+6. `docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/001-BWS-W4-T39.md`
+7. `docs/automation/README.md`
+8. `docs/002_dependency_contract_with_betting_win.md`
+
+## What is authorized
+
+- One source-mutating tranche at a time.
+- T39 first, then exact campaign order after accepted dependencies.
+- Direct bounded Codex sessions for campaign orders 1 through 13.
+- Repaired `run-autonomous-implementation.sh` only after all S2 tranches are accepted.
+- Exact task-owned source and test changes, exact protected-file allowlists, and required disposable proof environments.
+
+## What is not authorized
+
+- Existing autonomous controllers as remediation drivers before S2.
+- Provider access, `betting-win` checkout access or mutation, live betting, signing, payments, deployment, release, or production promotion.
+- Fixture or local API substitution for BWS-600 or BWS-710 external evidence.
+- Concurrent source-mutating tranches.
+- Unknown receipt states or silent defaults.
+
+## Operator paths
+
+```text
+local_repo=/mnt/c/Users/feder/Desktop/Development/GitHub/betting-win-surebet
+target_repo=$HOME/app_testing/betting-win-surebet
+active_launcher=docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/run-unattended-remediation-campaign.sh
+```
+
+Use the exact server command in `docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/server-runbook.md`. Run it from a persistent operator session. Do not manually delete locks or bypass the activation validator.
+
+## Returning evidence
+
+After a controller or campaign stops, run `pull_artifacts_and_zip_codebase.sh` from the local repository root. Return both newly numbered files:
+
+- `artifactsN.zip` for retained server evidence;
+- `betting-win-surebetN.zip` for current source.
+
+The source ZIP controls current files. The artifact ZIP describes the attempt. Never include `.env`, credentials, databases, `node_modules`, or unretained server logs.
+
+## Historical validation lineage
+
+`BWS_FULL_PLATFORM_IMPLEMENTATION_V1` retains validated gates `BWS-592`, `BWS-593`, and `BWS-599`.
+
+## Historical B1 foundation
+
+BWS-700 dependency-ready local implementation is validated through BWS-820. The completed queue is `backlog/bws_b1_cross_venue_implementation.csv`, with authority in `docs/047_b1_cross_venue_offline_falsification_program.md`. BWS-710 remains externally blocked, and these records are carry-forward regression authority rather than current routing.
+
+```text
 program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
-parent_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 current_task=BWS-600
 selected_controller=run-paper-autopilot.sh
 active_implementation_queue=none
-broad_bugfix_campaign_status=COMPLETED_AND_ACCEPTED
-broad_bugfix_areas_closed=8_of_8
-completed_b1_queue=backlog/bws_b1_cross_venue_implementation.csv
-completed_b1_map=backlog/bws_b1_cross_venue_map.csv
-bws700_completion_status=DEPENDENCY_READY_LOCAL_IMPLEMENTATION_COMPLETE
-b1_dependency_ready_local_rows=VALIDATED_THROUGH_BWS-820
-bws710_status=BLOCKED_ACCEPTED_BETTING_WIN_B1_MULTI_VENUE_API_REQUIRED
-bws600_current_task=BWS-600
-current_live_execution_gate=closed
-BWS-900=parked
 ```
 
-Read:
-
-1. `AGENTS.md`
-2. `docs/002_dependency_contract_with_betting_win.md`
-3. `docs/automation/current-implementation-task.md`
-4. `docs/repo_status_current.md`
-5. `docs/000_documentation_index.md`
-6. `docs/047_b1_cross_venue_offline_falsification_program.md`
-7. `docs/048_b1_upstream_contract.md`
-8. `docs/049_b1_market_equivalence.md`
-9. `docs/050_b1_falsification_acceptance.md`
-10. `docs/051_b1_implementation_map.md`
-11. `backlog/bws_b1_cross_venue_implementation.csv`
-12. `backlog/bws_b1_cross_venue_map.csv`
-13. `docs/041_external_runtime_preflight_and_bws600_campaign.md`
-14. `backlog/bws_full_implementation.csv`
-15. `backlog/bws_remaining_safe_local_map.csv`
-
-`BWS-599` is validated. The protected integration phase is complete, so the current campaign does not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1`.
-
-Validated carry-forward tranche:
-
-```text
-BWS-592  soak and failure injection (validated)
-BWS-593  external-runtime preflight and campaign manifest (validated)
-BWS-599  final local acceptance (validated)
-```
-
-The full-platform safe-local queue remains complete through `BWS-599`; `BWS-600` remains externally blocked on an accepted cross-repository API contract, authorized real-provider parity, and retained runtime evidence. BWS-700 dependency-ready local implementation is validated through BWS-820, and the broad bugfix campaign is complete across 8/8 areas. The selected route is now `run-paper-autopilot.sh` for BWS-600 runtime evidence.
-
-## Cross-repository reviews
-
-For a task that changes the betting-win integration contract, provide both current repository ZIPs plus the relevant upstream architecture/status evidence. The surebet ZIP remains authority for BWS files; the betting-win ZIP is authority for upstream source capabilities. An uploaded archive never replaces the committed-HEAD runtime lock.
-
-Current ecosystem reconciliation baseline:
-
-```text
-betting_win_source_archive=betting-win218(3).zip
-betting_win_source_archive_sha256=7b2c3a48bbc4cba95bcace384bb20892916a5958e6477d49651c983b16d11dc2
-canonical_integration_contract=docs/002_dependency_contract_with_betting_win.md
-```
-
-## Evidence to return for continuation
-
-After a server controller stops, run `pull_artifacts_and_zip_codebase.sh` from the local repository root. Provide both newly numbered outputs to the next review: `artifactsN.zip` for retained server evidence and `betting-win-surebetN.zip` for the current repository source. Command output is supplemental, not a substitute for either ZIP. Never include `.env`, credentials, databases, `node_modules`, or unretained server logs.
+That final block is retained for validator compatibility and records the pre-remediation route only.

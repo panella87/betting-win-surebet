@@ -62,14 +62,24 @@ docs/automation/PROTECTED_AUTOMATION_FILES.md
 
 ## Current task state
 
-The integration phase is complete. `docs/automation/current-implementation-task.md` now contains:
+The active remediation admission is task-scoped. T39 authorizes protected changes only to:
+
+```text
+zip_codebase.sh
+pull_artifacts_and_zip_codebase.sh
+update_git.sh
+```
+
+The activation validator must confirm `automation_maintenance_allowed=yes` and the exact allowlist for that admitted task before the direct bounded implementation session edits any protected file. All other protected paths remain read-only. Later controller repair tranches own their own exact allowlists.
+
+The pre-remediation validator snapshot remains:
 
 ```text
 automation_maintenance_allowed=no
 allowed_protected_files=none
 ```
 
-Do not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` for the current `BWS-600` runtime-evidence state, completed `BWS-700` dependency-ready local implementation state, or any ordinary implementation, paper, or bugfix run. Do not broaden authorization from inside an autonomous cycle.
+The sentence below is retained for existing validators and describes the superseded BWS route only: Do not set `AUTOMATION_ALLOW_PROTECTED_CHANGES=1` for the current `BWS-600` runtime-evidence state, completed `BWS-700` dependency-ready local implementation state, or any ordinary implementation, paper, or bugfix run. Do not broaden authorization from inside an autonomous cycle.
 
 Executable command lists remain in `automation.config.sh`, `tools/required_executable_paths.js` and `scripts/validate_executable_bits.py`.
 

@@ -1,5 +1,8 @@
 # 040 - Soak, failure injection and operator acceptance
 
+> **Routing note:** This is a supporting proof contract. Soak and BWS-600 execution are not currently selected and remain gated by the remediation sequence.
+
+
 > **Validated carry-forward acceptance contract.** `BWS-592` and `BWS-599` are complete. The current external phase is `BWS-600`, and all managed runtime evidence is API-only.
 
 ```text

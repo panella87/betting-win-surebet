@@ -1,45 +1,42 @@
 # PROJECT_STATUS
 
-## Completed B1 implementation and active BWS-600 status
-
-The operator explicitly opened `BWS-700` as a research/offline implementation authority for B1 cross-venue arbitrage falsification, and the dependency-ready local queue is now validated through `BWS-820`. This does not mark `BWS-600` runtime evidence complete and does not authorize execution. The next selected controller is `run-paper-autopilot.sh` for the carry-forward BWS-600 runtime-evidence gate.
-
-The upstream source declares `betting-win.b1_multi_venue_markets.v1`, but real B1 API intake remains blocked until that schema is exposed and authorized as an accepted runtime resource and downstream handoff. Fixtures or local BWS runtime evidence cannot solve the blocker.
-
-The broad bugfix campaign is complete and accepted. The terminal parent `artifacts/bugfix_autopilot_20260812T133805Z` finished with `BUGFIX_AUTOPILOT_COMPLETE`, `all_campaign_areas_closed`, 22 rounds, and all 8 campaign areas closed. Its final cross-area audit passed the full baseline and PostgreSQL-backed loopback acceptance. No active bugfix or implementation queue remains; the next selected phase is the externally gated `BWS-600` paper/runtime-evidence campaign.
-
+## Current program
 
 ```text
-program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
-parent_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-status=B1_DEPENDENCY_READY_LOCAL_IMPLEMENTATION_COMPLETE
-repo_role=surebet_strategy_application
-current_task=BWS-600
-current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
-active_implementation_queue=none
-broad_bugfix_campaign_status=COMPLETED_AND_ACCEPTED
-broad_bugfix_parent_run=bugfix_autopilot_20260812T133805Z
-broad_bugfix_areas_closed=8_of_8
-completed_b1_queue=backlog/bws_b1_cross_venue_implementation.csv
-completed_b1_map=backlog/bws_b1_cross_venue_map.csv
-bws700_completion_status=DEPENDENCY_READY_LOCAL_IMPLEMENTATION_COMPLETE
-b1_dependency_ready_local_rows=VALIDATED_THROUGH_BWS-820
-bws710_status=BLOCKED_ACCEPTED_BETTING_WIN_B1_MULTI_VENUE_API_REQUIRED
-safe_local_completion_gate=BWS-599
-external_runtime_gate=BWS-600
-bws600_status=RUNTIME_EVIDENCE_READY
-bws600_status_scope=SOURCE_AND_PREFLIGHT_CAPABILITY_ONLY
-bws600_campaign_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
-bws600_current_task=BWS-600
-bws600_current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
-selected_controller=run-paper-autopilot.sh
-bws600_selected_controller=run-paper-autopilot.sh
-execution_gate=closed
+program=BWS_FINAL_REMEDIATION_R01_R12_V1
+status=ACTIVE_REMEDIATION
+activation_snapshot=betting-win-surebet123.zip
+activation_snapshot_sha256=e8d632fbb3bc7b45b4f2366d3fac33187fdc21fc0c2a7e6e36fb4b2890f9c4a9
+current_repository_snapshot=betting-win-surebet124.zip
+current_repository_sha256=28232d333b5012ed68681a7aaf86224c2c0c02e339a1d9eddaa9eb56b7e3db4e
+current_admitted_tranche=BWS-W4-T39
+current_campaign_order=1
+current_stage=S1
+current_tranche_state=ADMITTED_NOT_YET_PROVEN
+canonical_node=v20.20.2
+existing_controller_allowed_before_s2=no
+post_s2_controller=run-autonomous-implementation.sh
 ```
 
-`bws600_status=RUNTIME_EVIDENCE_READY` is a retained capability marker required by repository validation. It means the source and preflight path can collect runtime evidence once external inputs exist; it does not mean the BWS-600 campaign has started, completed, or passed. The authoritative campaign state is `bws600_campaign_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE`.
+The 47-tranche remediation campaign covers 173 confirmed findings. T39 is first and dependency-free. It owns the nested-secret, archive-policy, Git-config, SSH-identity, and first-use trust correction boundary in the repository packaging and Git helper scripts. No source implementation or acceptance receipt is present in the BWS124 ZIP.
 
-## Three-repo ownership carry-forward markers
+The exact active routing authority is the activation package under `docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/`. `docs/repo_status_current.md` and `docs/automation/current-implementation-task.md` are immutable inputs to that package; their first sections are current. Their later BWS-600 sections are validator-retained historical compatibility text.
+
+## Holds and safety
+
+```text
+BWS-600=BLOCKED
+BWS-710=BLOCKED
+BWS-900=PARKED_NOT_AUTHORIZED
+release=BLOCKED
+deployment=BLOCKED
+live_execution=PROHIBITED
+betting_win_access_or_mutation=PROHIBITED
+```
+
+The current campaign does not authorize provider access, external repository access, live execution, release, deployment, or production promotion.
+
+## Repository role
 
 ```text
 repo_role=surebet_strategy_application
@@ -52,84 +49,48 @@ future_live_decision_owner=betting-win-surebet_after_explicit_gate
 account_policy=separate_from_betting-win-betting
 ```
 
-These markers preserve the accepted three-repo boundary after the BWS-700 B1 research/offline dependency-ready queue has been validated.
+## Current documentation ownership
 
-## Validated
+- `docs/000_documentation_index.md`: canonical navigation and classification policy.
+- `docs/documentation-inventory.json`: exhaustive document inventory and classification.
+- `docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/`: active campaign authority.
+- `docs/automation/README.md`: executable automation command contract.
+- `docs/002_dependency_contract_with_betting_win.md`: cross-repository boundary.
+- `docs/MASTER_PLAN.md`: stage roadmap and completion model.
 
-- Exact committed-HEAD upstream lock and compatibility proof.
-- Workspace packages, `surebet.*` persistence, immutable intake and typed read-only client.
-- Identity, opportunity, solver, completion/exposure, settlement, backtest and private-paper engines.
-- Read-only API, bounded workers, operator cockpit, API-only convergence and loopback acceptance.
-- Long-running convergence, scheduler and worker services with complete product-owned lifecycle ownership.
-- Database backup/restore/retention, structured observability, diagnostics and evidence indexing.
-- Root lifecycle/progress/log wrappers, service-owned paper evaluation and runtime-evidence paper autopilot.
-- Hardened controller infrastructure with atomic child results, truthful lock finalization and parent-only Telegram routing.
-- Broad bugfix audit/repair campaign completed and accepted across all eight areas, with final full validation and loopback acceptance green.
+## Source-manifest state
 
-## Cross-repository integration status
+`SOURCE_MANIFEST.json` remains stale and is not current authority. T40 owns replacement with exact current-tree and exact Node `20.20.2` enforcement. This documentation audit does not regenerate or weaken it.
 
-```text
-betting_win_source_audit_sha256=7b2c3a48bbc4cba95bcace384bb20892916a5958e6477d49651c983b16d11dc2
-betting_win_package_version=0.48.0
-betting_win_downstream_runtime_api_handoff_allowed=no
-betting_win_operator_server_route_family=/dashboard/*
-bws_required_contract_probe=/contract
-bws_required_query_route_family=/query/*
-bws600_cross_repo_wire_status=BLOCKED_NOT_ACCEPTED
-bws710_schema_definition_status=DECLARED_STUB_AND_SAMPLE_VALIDATED
-bws710_runtime_resource_status=BLOCKED_NOT_ACCEPTED
-betting_win_execution_sdk_status=PARTIAL_FAIL_CLOSED
-bws_execution_sdk_dependency=absent
-bws900_execution_status=PARKED_NOT_AUTHORIZED
-```
+## Historical validation lineage
 
-The previous source-manifest diagnostic is resolved: 617 manifest entries exactly matched 617 locally expected entries with no missing, extra, duplicate, reordered, or content-mismatched path. The prior transient-file hypothesis is rejected for the current checkout.
+`BWS_FULL_PLATFORM_IMPLEMENTATION_V1` retains validated gates `BWS-592`, `BWS-593`, and `BWS-599`.
 
-## Validated safe local work
+## Historical platform status retained for validator compatibility
+
+The following exact block is the completed B1 and BWS-600 route immediately before remediation activation. It is not current routing.
 
 ```text
-BWS-590=VALIDATED_RELEASE_DEPLOYMENT
-BWS-591=VALIDATED_UPGRADE_ROLLBACK_RECOVERY
-BWS-592=VALIDATED_SOAK_FAILURE_INJECTION
-BWS-593=VALIDATED_EXTERNAL_RUNTIME_PREFLIGHT
-BWS-599=VALIDATED_FINAL_LOCAL_ACCEPTANCE
-```
-
-The short documentation map is `docs/000_documentation_index.md`. Detailed dependency history remains in `backlog/bws_remaining_safe_local_map.csv` and the retained implementation blueprints are `docs/042` through `docs/046`.
-
-## Blocked or parked
-
-- `BWS-600` requires an accepted operator-approved betting-win downstream API contract, retained provider-to-PostgreSQL-to-API parity, and continuous private runtime evidence. The source-side fail-fast preflight prevents BWS from treating its local API or the upstream dashboard API as accepted evidence.
-- `BWS-710` requires the declared B1 schema to become an accepted runtime resource/API handoff.
-- `BWS-900` requires separate SDK/package/account/execution authorization and remains parked.
-
-## Controller selection
-
-The active controller and helper surface are the standardized repo scripts documented in `docs/automation/README.md`. Obsolete helpers such as `run-paper-evaluation-12h.sh` and `stop-autonomous-run.sh` must remain absent.
-
-```text
+program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
+parent_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
+status=B1_DEPENDENCY_READY_LOCAL_IMPLEMENTATION_COMPLETE
+current_task=BWS-600
+current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
+active_implementation_queue=none
+bws600_current_task=BWS-600
+safe_local_completion_gate=BWS-599
 selected_controller=run-paper-autopilot.sh
 selected_task=BWS-600
-implementation_queue=none
 paper_autopilot_selected=selected_after_bws700_dependency_ready_queue_complete
-bws600_paper_autopilot_route=available_after_operator_approved_upstream_api_and_no_binding_implementation_queue
-bugfix_autopilot_status=COMPLETED_AND_ACCEPTED
-bugfix_autopilot_selected=no_no_new_bounded_audit_scope
-force_unlock_required=no_evidence
-automation_maintenance_allowed=no
+bws600_status=RUNTIME_EVIDENCE_READY
+bws600_campaign_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
+execution_gate=closed
 ```
 
-## Automation filesystem safety
+`bws600_status=RUNTIME_EVIDENCE_READY` records source capability only. It never proved campaign completion.
 
-```text
-repository_temp_sessions=.automation/tmp/sessions
-free_byte_preflight=required
-free_inode_preflight=required
-per_run_inode_budget=required
-watchdog=enabled
-cleanup_command=cleanup_automation_temp_inode_residue.sh
-next_controller=run-paper-autopilot.sh
-```
-## API-only upstream transport
+## Historical validated foundation
 
-The BWS runtime is permitted to consume betting-win only through an accepted, authorized, contract-compatible read-only downstream API. `BWS_UPSTREAM_MODE` and the file-export runtime selector are removed. Missing availability, compatibility, authorization, or accepted real-provider parity is a runtime-evidence blocker; there is no automatic file fallback. The root runtime wrapper enforces paper mode, provider-disabled operation, and execution-disabled operation, uses explicit process values before selective `.env` fill, derives internal PostgreSQL settings from the canonical `POSTGRES_*` tuple, uses repo-owned defaults for internal runtime settings, and scrubs retired export and pinned-bundle runtime inputs. It does not invent private-paper manifest content.
+BWS-100 through BWS-599 and dependency-ready local B1 work through BWS-820 remain accepted carry-forward behavior and regression authority. The broad bugfix campaign was completed and accepted across eight areas. Those facts are historical foundations, not the currently selected work route.
+
+The compact documentation map is `docs/000_documentation_index.md`.

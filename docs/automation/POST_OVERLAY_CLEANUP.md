@@ -1,16 +1,14 @@
-# Post-overlay cleanup
+# Post-overlay cleanup compatibility record
 
-Current state: no canonical automation script cleanup is pending.
-
-If a stale root overlay metadata file exists from a previous drag-and-drop overlay, remove it with:
-
-```bash
-rm -f OVERLAY_MANIFEST.json
+```text
+document_classification=superseded
+retained_for=repository_validator_and_historical_cleanup_contract
+current_cleanup_action=none
 ```
 
-That file is generated overlay metadata, not active repo authority. Active status lives in `PROJECT_STATUS.md`, `docs/repo_status_current.md`, `docs/MASTER_PLAN.md`, and `docs/automation/`. The source-manifest validator intentionally ignores `OVERLAY_MANIFEST.json` so a drag-and-drop overlay metadata file cannot stale validation, but removing it keeps the working tree cleaner.
+This file is no longer an active overlay procedure. `scripts/validate_repo.py` still requires the path, so deleting it would change validation behavior. Current documentation overlays must declare their own exact cleanup or state `none`.
 
-Obsolete runtime helpers must remain absent:
+The following obsolete helpers must remain absent:
 
 ```text
 run-paper-evaluation-12h.sh
@@ -18,14 +16,4 @@ stop-autonomous-run.sh
 scripts/stop-autonomous-run.sh
 ```
 
-If one of those files reappears in a future zip, remove only that obsolete file and then run `npm run validate`. Do not remove the canonical root controllers:
-
-```text
-run-autonomous-implementation.sh
-run-paper-evaluation.sh
-run-autonomous-bugfix.sh
-run-bugfix-autopilot.sh
-run-paper-autopilot.sh
-```
-
-Required executable paths include the root helper scripts, compatibility wrappers, `.automation/lib/run_common.sh`, `.automation/lib/controller_hardening_v2.sh`, and `.automation/lib/telegram_notify.sh`.
+Current canonical helpers are documented in `docs/automation/README.md`. Temporary controller and artifact cleanup is owned by `cleanup_automation_temp_inode_residue.sh`, `cleanup_automation_artifact_residue.sh`, and the exact task-specific overlay procedure. Do not remove unrelated files, generated evidence, locks, or operator worktrees through this compatibility record.

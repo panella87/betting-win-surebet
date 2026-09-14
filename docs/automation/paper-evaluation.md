@@ -1,5 +1,8 @@
 # Paper evaluation controller: betting-win-surebet
 
+> **Routing note:** This standalone evaluator remains available for explicit supervised use, but it is not the active remediation driver.
+
+
 `run-paper-evaluation.sh` is the retained standalone fixture, explicit pinned-bundle, or bounded runtime-evidence evaluator. It replaces the obsolete `run-paper-evaluation-12h.sh`; no 12-hour helper should exist.
 
 ```text

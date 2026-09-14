@@ -1,5 +1,8 @@
 # 013 - Autonomous controller status contract
 
+> **Routing note:** This compatibility pointer is non-routing. Current authority is the active remediation activation package. The exact BWS-600 marker block below is retained for validator compatibility only.
+
+
 > **Superseded compatibility entry point.** The canonical implementation-cycle status, request-flags, validation, and runtime-loader contract is `docs/autonomous_loop_contract.md`. Current routing authority is `docs/automation/current-implementation-task.md`.
 
 ```text

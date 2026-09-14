@@ -1,341 +1,95 @@
-# 000 - Documentation index
+# Documentation index
 
 ```text
-program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
-parent_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
 documentation_index_status=active
 documentation_slimming_phase=complete
-documentation_curation_wave=73
-documentation_inventory_count=168
-canonical_active_count=16
-supporting_active_count=62
-independent_review_evidence_count=61
-historical_count=28
-superseded_count=1
-duplicate_count=0
-obsolete_count=0
-current_task=BWS-600
-active_implementation_queue=none
-broad_bugfix_campaign_status=COMPLETED_AND_ACCEPTED
-broad_bugfix_areas_closed=8_of_8
-completed_b1_queue=backlog/bws_b1_cross_venue_implementation.csv
-completed_b1_map=backlog/bws_b1_cross_venue_map.csv
-bws700_completion_status=DEPENDENCY_READY_LOCAL_IMPLEMENTATION_COMPLETE
-b1_dependency_ready_local_rows=VALIDATED_THROUGH_BWS-820
-bws710_status=BLOCKED_ACCEPTED_BETTING_WIN_B1_MULTI_VENUE_API_REQUIRED
-current_external_gate=BWS-600
-safe_local_terminal_gate=BWS-599
-execution_gate=BWS-900
+documentation_inventory=docs/documentation-inventory.json
+documentation_inventory_count=531
+canonical_active=29
+supporting_active=273
+historical=223
+superseded=6
+duplicate=0
+obsolete=0
+current_program=BWS_FINAL_REMEDIATION_R01_R12_V1
+current_program_state=ACTIVE
+current_admitted_tranche=BWS-W4-T39
 ```
 
-This file is the complete documentation inventory and ownership map. It classifies every Markdown document retained in the repository, including repo-local Graphify tooling documentation. Current commands and status must not be inferred from historical blueprints, research checkpoints, or compatibility entry points.
+## Current authority
 
-## Wave 73 ecosystem integration authority
+The active implementation authority is `docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/`. Current work begins with T39 and follows the exact 47-tranche dependency order. S1 and S2 use direct bounded implementation sessions; existing root controllers are prohibited until the entire S2 gate is accepted.
 
-`docs/002_dependency_contract_with_betting_win.md` is the sole canonical owner of the cross-repository data-plane, B1-resource, execution-SDK, lifecycle, lock, and readiness boundary. Other active documents summarize or apply that contract and must not independently redefine upstream routes, response envelopes, package ownership, or readiness.
+The immutable files `docs/repo_status_current.md` and `docs/automation/current-implementation-task.md` begin with active-remediation sections and are included in `activation/immutable-authority.sha256`. Their later BWS-600 blocks are retained only for existing validator compatibility. Those later blocks do not select current work.
 
-```text
-betting_win_source_audit=betting-win218(3).zip
-betting_win_source_audit_sha256=7b2c3a48bbc4cba95bcace384bb20892916a5958e6477d49651c983b16d11dc2
-bws600_wire_contract=not_accepted
-bws710_runtime_resource=not_accepted
-bws900_execution=parked
-```
+## Canonical ownership
 
-## Ownership rules
+| Topic | Canonical owner |
+|---|---|
+| Repository introduction and boundaries | `README.md` |
+| Agent rules and source-of-truth order | `AGENTS.md` |
+| High-level current state | `PROJECT_STATUS.md` |
+| Operator starting point | `STARTER_PACK.md` |
+| Complete document classification | `docs/documentation-inventory.json` |
+| Detailed current status | first active section of `docs/repo_status_current.md` plus active admission |
+| Current implementation task | active plan/task plus first active section of `docs/automation/current-implementation-task.md` |
+| Program roadmap | `docs/MASTER_PLAN.md` |
+| Automation commands and options | `docs/automation/README.md` |
+| Protected automation policy | `docs/automation/PROTECTED_AUTOMATION_FILES.md` |
+| Cross-repository boundary | `docs/002_dependency_contract_with_betting_win.md` |
+| Remediation architecture and receipts | `docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/` |
+| Active unattended operator command | `docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/server-runbook.md` |
+| Completed implementation ledgers | `backlog/README.md` and retained CSVs |
+| Review evidence | `docs/reviews/` |
 
-- `docs/002_dependency_contract_with_betting_win.md` owns the canonical cross-repository ecosystem contract.
-- `docs/automation/current-implementation-task.md` owns current task and controller routing.
-- `docs/repo_status_current.md` owns the detailed current operational state.
-- `PROJECT_STATUS.md` is the concise operator-facing status mirror.
-- `docs/automation/README.md` owns the standardized automation command surface.
-- `docs/autonomous_loop_contract.md` owns implementation-cycle status and request-flag semantics.
-- `docs/041_external_runtime_preflight_and_bws600_campaign.md` owns the BWS-600 external evidence gate.
-- `docs/047` through `docs/051` own the accepted B1 program, upstream, equivalence, acceptance, and implementation map.
-- Historical and superseded files retain audit, decision, migration, recovery, or validation value but own no current route.
-- `docs/reviews/README.md` owns independent-review navigation only. Review documents cannot override current task, status, runtime, release, or controller authority.
+No other document owns the current controller or task selection. Supporting runbooks and historical programs must defer to this table.
 
-## Read first
+## Current remediation package
 
-1. `AGENTS.md` - repository authority, safety boundaries, and source-of-truth order.
-2. `docs/002_dependency_contract_with_betting_win.md` - canonical betting-win ecosystem integration contract.
-3. `docs/automation/current-implementation-task.md` - current BWS-600 route and protected-file policy.
-4. `docs/repo_status_current.md` - detailed operational state and blocker.
-5. `PROJECT_STATUS.md` - concise status mirror.
-6. `docs/automation/README.md` - canonical automation command surface.
-7. `docs/041_external_runtime_preflight_and_bws600_campaign.md` - BWS-600 preflight and campaign gate.
-8. `docs/047_b1_cross_venue_offline_falsification_program.md` through `docs/051_b1_implementation_map.md` - completed dependency-ready B1 authority.
-9. `docs/automation/api-only-upstream.md` - binding API-only runtime transport contract.
-10. `docs/reviews/README.md` - independent source-review evidence and next-wave handoff; never current runtime authority.
+- `docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/README.md`
+- `docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/program-authority.md`
+- `docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/campaign-order.md`
+- `docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/dependency-graph.md`
+- `docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/ownership-and-shared-paths.md`
+- `docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/hold-register.md`
+- `docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/completion-criteria.md`
+- `docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/README.md`
+- `docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/unattended-plan.json`
+- `docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/tasks/`
 
-## Current route
+The original `s0/proposed-*` records are classified `superseded`. They remain audit history and do not override the active admission.
 
-```text
-current_task=BWS-600
-current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
-active_implementation_queue=none
-bws600_current_task=BWS-600
-bws600_current_task_status=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
-safe_local_terminal_gate=BWS-599
-selected_controller=run-paper-autopilot.sh
-BWS-900=parked
-```
+## Active supporting contracts
 
-`BWS-100` through `BWS-599` are validated. The BWS-700 dependency-ready local queue is validated through `BWS-820`; the B1 schema name exists upstream, but `BWS-710` remains blocked until betting-win exposes and authorizes an accepted runtime resource and API handoff. BWS-600 runtime evidence is still blocked on an accepted cross-repository API wire contract, provider-to-PostgreSQL-to-API parity, and private campaign inputs. Fixtures and retained export compatibility inputs are not runtime evidence.
+The numbered product contracts `docs/001` through `docs/052` remain available according to their inventory classification. Current architecture and safety ownership is concentrated in:
 
-## Complete documentation classification
+- `docs/001_scope_and_boundaries.md`
+- `docs/002_dependency_contract_with_betting_win.md`
+- `docs/011_validation_matrix.md`
+- `docs/018_private_paper_mode_runbook.md`
+- `docs/019_three_repo_surebet_strategy_boundary.md`
+- `docs/027_bws_target_architecture.md`
+- `docs/035_continuous_service_supervisor_contract.md`
+- `docs/037_database_backup_retention_and_recovery.md`
+- `docs/038_observability_metrics_and_evidence_contract.md`
+- `docs/039_release_deployment_and_upgrade_contract.md`
+- `docs/040_soak_failure_injection_and_operator_acceptance.md`
+- `docs/041_external_runtime_preflight_and_bws600_campaign.md`
+- `docs/048_b1_upstream_contract.md`
+- `docs/049_b1_market_equivalence.md`
+- `docs/050_b1_falsification_acceptance.md`
 
-### Canonical active
+These documents define behavior and holds but do not select current work.
 
-```text
-AGENTS.md
-PROJECT_STATUS.md
-README.md
-STARTER_PACK.md
-docs/000_documentation_index.md
-docs/002_dependency_contract_with_betting_win.md
-docs/041_external_runtime_preflight_and_bws600_campaign.md
-docs/047_b1_cross_venue_offline_falsification_program.md
-docs/048_b1_upstream_contract.md
-docs/049_b1_market_equivalence.md
-docs/050_b1_falsification_acceptance.md
-docs/051_b1_implementation_map.md
-docs/MASTER_PLAN.md
-docs/automation/README.md
-docs/automation/current-implementation-task.md
-docs/repo_status_current.md
-```
+## Historical and superseded records
 
-These files own current purpose, status, task routing, automation, BWS-600, or B1 authority.
+Retained review reports, completed blueprints, completed queue maps, change history, legacy research, and proposed admission records preserve audit, decision, migration, or incident value. They are non-routing and are classified individually in `docs/documentation-inventory.json`.
 
-### Supporting active
+`docs/013_autonomous_controller_status_contract.md` is a superseded path-compatibility pointer. `docs/automation/POST_OVERLAY_CLEANUP.md` is a validator-required superseded compatibility record. Neither owns a current procedure.
 
-```text
-.automation/README.md
-.codex/skills/graphify/SKILL.md
-.codex/skills/graphify/references/add-watch.md
-.codex/skills/graphify/references/exports.md
-.codex/skills/graphify/references/extraction-spec.md
-.codex/skills/graphify/references/github-and-merge.md
-.codex/skills/graphify/references/hooks.md
-.codex/skills/graphify/references/query.md
-.codex/skills/graphify/references/transcribe.md
-.codex/skills/graphify/references/update.md
-CHANGELOG.md
-backlog/README.md
-decisions/ADR-0001-repo-boundary-and-no-provider-connections.md
-decisions/ADR-0002-first-lane-polymarket-standard-binary-complete-set.md
-decisions/ADR-0003-paper-only-no-execution.md
-decisions/ADR-0004-three-repo-surebet-strategy-execution-boundary.md
-decisions/ADR-0005-bws-built-on-betting-win-platform.md
-decisions/ADR-0006-full-stack-runtime-and-automation-boundary.md
-docs/001_scope_and_boundaries.md
-docs/003_surebet_family_decision.md
-docs/004_market_identity_and_rule_equivalence.md
-docs/005_terminal_scenario_cashflow_model.md
-docs/006_quote_depth_capacity_requirements.md
-docs/007_stake_vector_solver_contract.md
-docs/008_leg_completion_and_residual_exposure.md
-docs/009_settlement_replay_contract.md
-docs/010_paper_evaluation_and_kill_criteria.md
-docs/011_validation_matrix.md
-docs/012_runbook.md
-docs/016_pinned_betting_win_interface_readiness.md
-docs/018_private_paper_mode_runbook.md
-docs/019_three_repo_surebet_strategy_boundary.md
-docs/020_strategy_data_and_state_ownership.md
-docs/021_backtest_paper_live_mode_roadmap.md
-docs/022_separate_account_policy.md
-docs/026_betting_win_platform_baseline.md
-docs/027_bws_target_architecture.md
-docs/030_upstream_compatibility_and_pin_contract.md
-docs/031_bws_api_ui_worker_contract.md
-docs/032_database_and_data_lifecycle.md
-docs/035_continuous_service_supervisor_contract.md
-docs/037_database_backup_retention_and_recovery.md
-docs/038_observability_metrics_and_evidence_contract.md
-docs/039_release_deployment_and_upgrade_contract.md
-docs/040_soak_failure_injection_and_operator_acceptance.md
-docs/052_b1_future_strategy_stubs.md
-docs/automation/POST_OVERLAY_CLEANUP.md
-docs/automation/PROTECTED_AUTOMATION_FILES.md
-docs/automation/SSH_KEY_SETUP.md
-docs/automation/api-only-upstream.md
-docs/automation/artifact-retention-and-cleanup.md
-docs/automation/autonomous-bugfix.md
-docs/automation/autonomous-implementation.md
-docs/automation/bugfix-autopilot.md
-docs/automation/paper-autopilot.md
-docs/automation/paper-evaluation.md
-docs/automation/repo-profile.md
-docs/automation/repository-temp-inode-safety.md
-docs/automation/telegram-notifications.md
-docs/autonomous_loop_contract.md
-docs/operations/autonomous_72h_runbook.md
-docs/operations/service_run.md
-```
+## Removed stale snapshots
 
-These files provide still-binding architecture, safety, validation, setup, automation, operator, decision, or tooling support. `.automation/README.md` mirrors required controller markers but is not routing authority. `.codex/skills/graphify/` is external tooling documentation and does not own product behavior.
-
-### Independent review evidence
-
-```text
-docs/reviews/README.md
-docs/reviews/BWS117/wave-01/README.md
-docs/reviews/BWS117/wave-01/area-coverage.md
-docs/reviews/BWS117/wave-01/authority-map.md
-docs/reviews/BWS117/wave-01/baseline-compatibility.md
-docs/reviews/BWS117/wave-01/cumulative-consolidated-ledger.md
-docs/reviews/BWS117/wave-01/decisions.md
-docs/reviews/BWS117/wave-01/dependency-and-tranches.md
-docs/reviews/BWS117/wave-01/incremental-consolidation.md
-docs/reviews/BWS117/wave-01/next-wave-handoff.md
-docs/reviews/BWS117/wave-01/prior-overlay-lineage.md
-docs/reviews/BWS117/wave-01/repository-profile.md
-docs/reviews/BWS117/wave-01/reports/R01/BWS116-R01-report.md
-docs/reviews/BWS117/wave-01/reports/R02/BWS116-R02-report.md
-docs/reviews/BWS117/wave-01/reports/R03/BWS116-R03-report.md
-docs/reviews/BWS117/wave-01/test-evidence-matrix.md
-docs/reviews/BWS118/wave-02/README.md
-docs/reviews/BWS118/wave-02/area-coverage.md
-docs/reviews/BWS118/wave-02/authority-map.md
-docs/reviews/BWS118/wave-02/baseline-compatibility.md
-docs/reviews/BWS118/wave-02/cumulative-consolidated-ledger.md
-docs/reviews/BWS118/wave-02/decisions.md
-docs/reviews/BWS118/wave-02/dependency-and-tranches.md
-docs/reviews/BWS118/wave-02/incremental-consolidation.md
-docs/reviews/BWS118/wave-02/next-wave-handoff.md
-docs/reviews/BWS118/wave-02/prior-overlay-lineage.md
-docs/reviews/BWS118/wave-02/repository-profile.md
-docs/reviews/BWS118/wave-02/reports/R04/BWS118-R04-report.md
-docs/reviews/BWS118/wave-02/reports/R05/BWS118-R05-report.md
-docs/reviews/BWS118/wave-02/reports/R06/BWS118-R06-report.md
-docs/reviews/BWS118/wave-02/test-evidence-matrix.md
-docs/reviews/BWS120/wave-03/README.md
-docs/reviews/BWS120/wave-03/area-coverage.md
-docs/reviews/BWS120/wave-03/authority-map.md
-docs/reviews/BWS120/wave-03/baseline-compatibility.md
-docs/reviews/BWS120/wave-03/cumulative-consolidated-ledger.md
-docs/reviews/BWS120/wave-03/decisions.md
-docs/reviews/BWS120/wave-03/dependency-and-tranches.md
-docs/reviews/BWS120/wave-03/incremental-consolidation.md
-docs/reviews/BWS120/wave-03/next-wave-handoff.md
-docs/reviews/BWS120/wave-03/prior-overlay-lineage.md
-docs/reviews/BWS120/wave-03/repository-profile.md
-docs/reviews/BWS120/wave-03/reports/R07/BWS120-R07-report.md
-docs/reviews/BWS120/wave-03/reports/R08/BWS120-R08-report.md
-docs/reviews/BWS120/wave-03/reports/R09/BWS120-R09-report.md
-docs/reviews/BWS120/wave-03/test-evidence-matrix.md
-docs/reviews/BWS121/wave-04/README.md
-docs/reviews/BWS121/wave-04/area-coverage.md
-docs/reviews/BWS121/wave-04/authority-map.md
-docs/reviews/BWS121/wave-04/baseline-compatibility.md
-docs/reviews/BWS121/wave-04/cumulative-consolidated-ledger.md
-docs/reviews/BWS121/wave-04/decisions.md
-docs/reviews/BWS121/wave-04/dependency-and-tranches.md
-docs/reviews/BWS121/wave-04/incremental-consolidation.md
-docs/reviews/BWS121/wave-04/next-wave-handoff.md
-docs/reviews/BWS121/wave-04/prior-overlay-lineage.md
-docs/reviews/BWS121/wave-04/repository-profile.md
-docs/reviews/BWS121/wave-04/reports/R10/BWS121-R10-report.md
-docs/reviews/BWS121/wave-04/reports/R11/BWS121-R11-report.md
-docs/reviews/BWS121/wave-04/reports/R12/BWS121-R12-report.md
-docs/reviews/BWS121/wave-04/test-evidence-matrix.md
-```
-
-These 61 Markdown files document independent Wave 01, Wave 02, Wave 03, and final Wave 04 source review. JSON and TSV companions under the same trees are machine-readable evidence and are not included in `documentation_inventory_count`. This material is subordinate to current task and status authority and does not mark implementation, BWS-600, BWS-710, release, deployment, or execution complete.
-
-### Historical
-
-```text
-docs/028_full_implementation_program.md
-docs/029_full_implementation_task_ledger.md
-docs/033_continuous_private_paper_runtime_program.md
-docs/034_remaining_operator_runtime_implementation_program.md
-docs/036_root_wrappers_and_paper_automation_integration.md
-docs/042_release_packaging_implementation_blueprint.md
-docs/043_upgrade_rollback_recovery_implementation_blueprint.md
-docs/044_soak_failure_injection_implementation_blueprint.md
-docs/045_external_runtime_preflight_implementation_blueprint.md
-docs/046_final_local_acceptance_implementation_blueprint.md
-docs/legacy/surebet-research/105_polymarket_complete_set_paper_experiment_gate_after_prompt28.md
-docs/legacy/surebet-research/90_stage25_prompt26_surebet_academic_review_and_next_steps.md
-docs/legacy/surebet-research/91_surebet_math_and_execution_corrections_after_prompt26.md
-docs/legacy/surebet-research/92_surebet_operational_research_plan_after_prompt26.md
-docs/legacy/surebet-research/98_stage27_reference_bot_repository_audit_and_next_steps.md
-docs/legacy/surebet-research/99_surebet_system_design_lessons_from_reference_bots.md
-docs/legacy/surebet-research/README.md
-research/imported-from-betting-win/legacy/surebet/README.md
-research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/2026-06-18_prompt_26_result_surebet_academic_review.md
-research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/2026-06-18_stage25_prompt26_reviewed_assessment.md
-research/imported-from-betting-win/legacy/surebet/academic/openalex/surebet/README.md
-research/imported-from-betting-win/legacy/surebet/bots/2026-06-18_stage27_reference_bot_repository_audit.md
-research/imported-from-betting-win/legacy/surebet/bots/README.md
-research/imported-from-betting-win/legacy/surebet/synthesis/2026-06-18_prompt_28_result_academic_strategy_provider_reference_bot_synthesis.md
-research/imported-from-betting-win/legacy/surebet/synthesis/2026-06-18_stage28_reviewed_assessment.md
-schemas/imported-from-betting-win/legacy/surebet/README.md
-templates/imported-from-betting-win/legacy/surebet/README.md
-templates/imported-from-betting-win/legacy/surebet/surebet_market_identity_and_cashflow_review_template.md
-```
-
-These files retain decision, implementation, acceptance, recovery, research, migration, or provenance value. Historical next-step language is classified as completed context and cannot route current work.
-
-### Superseded compatibility pointer
-
-```text
-docs/013_autonomous_controller_status_contract.md
-```
-
-`docs/013_autonomous_controller_status_contract.md` is retained because the path is part of repository inventory and historical references. Its duplicate procedure was removed; it now points to `docs/autonomous_loop_contract.md`.
-
-### Duplicate or obsolete documents
-
-None remain in the reviewed tree. No cleanup command is required. Candidate removals were retained only when they have unique audit or recovery value, are referenced by validators, or provide repo-local tooling instructions. Their ownership is now explicit.
-
-## Historical bootstrap summary
-
-The old SURE bootstrap ledgers are retained here as compact provenance, not as active routing files.
-
-```text
-status=SUPERSEDED_BOOTSTRAP_LEDGER
-active_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
-legacy_stage=SURE-001
-legacy_stage=SURE-002A_LOCAL_INTERFACE_AND_ENGINE_BOOTSTRAP
-legacy_stage=SURE-002B_PRIVATE_PAPER_MODE_INTAKE
-```
-
-`SURE-001` established strict cycle artifacts, source-manifest validation, archive hygiene, shell safety, and fail-closed controller behavior. Those controls survive as regression contracts under the current automation validators.
-
-`SURE-002A_LOCAL_INTERFACE_AND_ENGINE_BOOTSTRAP` proved deterministic bundle parsing, stake-vector math, completion and residual simulation, settlement replay consumption, and private report assembly. It was a bootstrap, not the complete application. Its behavior is incorporated into `BWS-110`, `BWS-200` through `BWS-240`, `BWS-300`, and `BWS-310`.
-
-`SURE-002B_PRIVATE_PAPER_MODE_INTAKE` proved fixture-only intake, private report artifacts, and the controller smoke path. Those facts do not constitute the final BWS paper platform. The full platform is represented by `BWS-310`, `BWS-320`, `BWS-410`, `BWS-500`, `BWS-510`, `BWS-520`, `BWS-580`, validated work through `BWS-599`, and the externally gated `BWS-600` campaign.
-
-## Retained implementation history
-
-The completed historical authorities are `docs/028`, `docs/029`, `docs/033`, `docs/034`, `docs/036`, and implementation blueprints `docs/042` through `docs/046`. They preserve exact acceptance and recovery context but cannot reopen an implementation queue, export runtime selector, or protected-file authorization.
-
-The current managed runtime is API-only. Historical export parser, convergence, release, preflight, and clean-room cases are retained non-runtime compatibility evidence.
-
-## Archive and research material
-
-Historical surebet research imported from betting-win remains under:
-
-```text
-docs/legacy/surebet-research/
-research/imported-from-betting-win/legacy/surebet/
-schemas/imported-from-betting-win/legacy/surebet/
-templates/imported-from-betting-win/legacy/surebet/
-```
-
-These files are not active product authority. Stage 27 and Prompt 28 work is complete; old “next step” headings are historical sequence notes, not commands.
-
-```text
-archive_is_active_product_authority=no
-```
-
-## Removed documents
-
-The following stale snapshots and superseded bootstrap ledgers remain intentionally absent. Their useful facts are merged into current status, this index, retained validators, and historical summaries.
+The prior slimming phase remains complete. These obsolete snapshots must remain absent:
 
 ```text
 DOCUMENTATION_CHECK_REPORT.md
@@ -347,6 +101,60 @@ docs/024_three_repo_documentation_completion_status.md
 docs/025_research_archive_completion_status.md
 ```
 
-## Completion state
+Their useful content was incorporated into surviving canonical or historical documents. Historical bootstrap identity remains recorded as:
 
-Documentation slimming and full ownership classification are complete for the current tree. The repository contains no unclassified, duplicate, or obsolete Markdown file after this curation pass. Future removals must preserve unique evidence and pass the existing validation contracts; historical documents must not be deleted merely because they are non-routing.
+```text
+status=SUPERSEDED_BOOTSTRAP_LEDGER
+legacy_stage=SURE-001
+legacy_stage=SURE-002A_LOCAL_INTERFACE_AND_ENGINE_BOOTSTRAP
+legacy_stage=SURE-002B_PRIVATE_PAPER_MODE_INTAKE
+```
+
+Those stages were bootstrap, not the complete application, and do not constitute the final BWS paper platform.
+
+## Legacy implementation-stage traceability
+
+The superseded bootstrap ledgers preserve these validated stage identifiers for audit and validator continuity:
+
+```text
+BWS-110
+BWS-200
+BWS-240
+BWS-300
+BWS-310
+BWS-320
+BWS-410
+BWS-500
+BWS-510
+BWS-520
+BWS-580
+BWS-600
+```
+
+They remain historical task identities and do not reopen an implementation queue.
+
+## Historical platform compatibility markers
+
+The following exact block exists only because current executable validators still assert the pre-remediation route. It is not current routing authority.
+
+```text
+active_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1
+program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
+current_task=BWS-600
+active_implementation_queue=none
+selected_controller=run-paper-autopilot.sh
+safe_local_terminal_gate=BWS-599
+BWS-600=BLOCKED_EXTERNAL_RUNTIME_EVIDENCE
+```
+
+`docs/041_external_runtime_preflight_and_bws600_campaign.md` remains the supporting external hold contract. BWS-600, BWS-710, BWS-900, release, deployment, and live execution remain blocked or parked.
+
+## Legacy research archive
+
+The archive under `docs/legacy/surebet-research/` and imported research roots is historical only.
+
+```text
+archive_is_active_product_authority=no
+```
+
+It may preserve decision provenance but cannot route implementation or satisfy runtime evidence.

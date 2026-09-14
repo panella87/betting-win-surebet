@@ -1,5 +1,8 @@
 # 033 - Continuous private-paper runtime foundation
 
+> **Routing note:** This completed program is historical carry-forward authority. The active route is the R01-R12 remediation activation package.
+
+
 > **Completed historical implementation authority with current carry-forward boundaries.** This document preserves the BWS-520 through BWS-599 runtime build sequence. It is not current implementation routing. Current authority is `docs/automation/current-implementation-task.md`.
 
 ```text

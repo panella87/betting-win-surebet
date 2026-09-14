@@ -1,5 +1,8 @@
 # 047 - B1 cross-venue offline falsification program
 
+> **Routing note:** This completed B1 program is historical regression and dependency authority. It is not an open implementation queue.
+
+
 ```text
 program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
 parent_program=BWS_FULL_PLATFORM_IMPLEMENTATION_V1

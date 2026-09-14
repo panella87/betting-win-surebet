@@ -1,5 +1,19 @@
 {
-  "activation_state": "PROPOSED_NOT_ACTIVE",
+  "activation_state": "ACTIVE",
+  "active_authority": {
+    "active_admission": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/active-campaign-admission.json",
+    "campaign_order": 1,
+    "canonical_node": "v20.20.2",
+    "current_tranche": "BWS-W4-T39",
+    "immutable_authority": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/immutable-authority.sha256",
+    "launcher": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/run-unattended-remediation-campaign.sh",
+    "live_state": "artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/campaign-state.json",
+    "post_s2_controller": "run-autonomous-implementation.sh",
+    "pre_s2_execution": "DIRECT_BOUNDED_CODEX",
+    "stage": "S1",
+    "state": "ADMITTED",
+    "unattended_plan": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/unattended-plan.json"
+  },
   "authority_order": [
     "exact current files in BWS122",
     "current canonical status/task/hold/architecture/runbook/review documents",
@@ -32,12 +46,12 @@
   "clock_authority": "artifact generation date fixed by supplied authority artifacts",
   "created_at": "2026-09-12T00:00:00Z",
   "current_authority": {
-    "active_implementation_queue": "none",
-    "automation_maintenance_allowed": "no",
+    "active_implementation_queue": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/unattended-plan.json",
+    "automation_maintenance_allowed": "task_scoped_exact_allowlist_only",
     "current_status_document": "docs/repo_status_current.md",
-    "current_task": "BWS-600",
+    "current_task": "BWS-W4-T39",
     "current_task_document": "docs/automation/current-implementation-task.md",
-    "current_task_status": "BLOCKED_EXTERNAL_RUNTIME_EVIDENCE",
+    "current_task_status": "ADMITTED",
     "documentation_root": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1",
     "existing_review_roots": [
       "docs/reviews/BWS117/wave-01",
@@ -228,6 +242,7 @@
     ],
     "repository": "betting-win-surebet",
     "selected_controller": "run-paper-autopilot.sh",
+    "selected_route": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/run-unattended-remediation-campaign.sh",
     "source_manifest": {
       "authoritative": false,
       "baseline_mode": "0744",
@@ -249,6 +264,15 @@
     "P2": 19,
     "P3": 0,
     "confirmed": 173
+  },
+  "historical_pre_activation_authority": {
+    "activation_state": "PROPOSED_NOT_ACTIVE",
+    "current_authority": {
+      "active_implementation_queue": "none",
+      "automation_maintenance_allowed": "no",
+      "current_task": "BWS-600",
+      "current_task_status": "BLOCKED_EXTERNAL_RUNTIME_EVIDENCE"
+    }
   },
   "implementation_parallelism": "one_source_mutating_tranche_at_a_time",
   "live_execution": "PROHIBITED",

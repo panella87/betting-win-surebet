@@ -1,47 +1,59 @@
 # Autonomous Loop Contract
 
-```text
-document_role=CANONICAL_IMPLEMENTATION_CONTROLLER_STATUS_CONTRACT
-current_task=BWS-600
-active_implementation_queue=none
-selected_controller=run-paper-autopilot.sh
-```
-
-This is the canonical implementation-cycle status and request-flags contract. `docs/013_autonomous_controller_status_contract.md` is retained only as a compatibility pointer. Current controller routing comes from `docs/automation/current-implementation-task.md`, not from this carry-forward implementation contract.
-
-The autonomous loop is a repo-local implementation controller. It is allowed to edit source, docs, and tests only through a bounded Codex cycle. It is not allowed to run providers, wallets, signers, orders, or external trading operations. Bounded uniquely identified loopback child processes are permitted only inside required tests or validation and must be cleaned up by their owner.
-
-Each cycle must write `continue_status.txt` with exactly one non-empty line. The only valid lines are:
+## Active remediation loop
 
 ```text
-AUTONOMOUS_GOAL_COMPLETE=yes
+active_program=BWS_FINAL_REMEDIATION_R01_R12_V1
+activation_state=ACTIVE
+current_admitted_tranche=BWS-W4-T39
+state_source=artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/campaign-state.json
+plan_source=docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/unattended-plan.json
 ```
+
+The active launcher resolves the next exact tranche, verifies dependencies and immutable authority, runs one bounded implementation attempt, validates the exact result receipt, and advances only after acceptance.
 
 ```text
-CONTINUE_REQUIRED=yes
+admission -> current-source re-verification -> minimal implementation -> focused proof -> environment proof -> result receipt -> exact advance
 ```
+
+Allowed tranche states are:
 
 ```text
-BLOCKED=yes
+NOT_ADMITTED
+ADMITTED
+SOURCE_IMPLEMENTED
+FOCUSED_TESTS_PASSED
+ENVIRONMENT_PROOF_PASSED
+ACCEPTED
+BLOCKED
+SOURCE_COMPLETE_EXTERNAL_PENDING
 ```
 
-Use `CONTINUE_REQUIRED=yes` only when another safe, documented repo-local task remains in an explicitly active backlog or reviewed source-fix handoff. Do not route from stale SURE-001, SURE-002A, SURE-002B, BWS-100..BWS-599, or completed dependency-ready BWS-700 queue wording. Use `BLOCKED=yes` only when the first required task needs unavailable upstream contract evidence, external credentials, unsafe actions, or a human decision. A malformed, missing, combined, or unknown status must fail closed.
+Unknown states fail closed. `SOURCE_COMPLETE_EXTERNAL_PENDING` is non-promotable. A missing or invalid result stops the campaign.
 
-Each cycle must also write `request_flags.txt` with exactly two lines and in this exact order:
+## Execution modes
 
-```text
-SERVICE_REFRESH_REQUIRED=no
-RUNTIME_EVIDENCE_REQUIRED=no
-```
+- Campaign orders 1 through 13 use direct bounded Codex sessions. Existing root controllers are prohibited.
+- Campaign orders 14 through 47 use repaired `run-autonomous-implementation.sh` only after the activation validator proves S2 accepted.
+- Exactly one source-mutating tranche may be active.
+- The same admitted post-S2 tranche may receive repeated 72-hour controller attempts only while the global window remains and the controller returns the documented continuation result.
 
-Malformed, missing, reordered, extra-line, or unknown request flags must fail closed before any cycle status can be accepted.
+## Generic controller contract
 
-Each required cycle report artifact must be real. The controller may create placeholders for missing files to preserve forensic context, but any placeholder or empty required report must fail closed with `BLOCKED=yes` before `request_flags.txt` or `continue_status.txt` can be accepted. `git_diff.patch` may be empty only when a cycle genuinely made no source diff.
-
-`AUTONOMOUS_GOAL_COMPLETE=yes` is accepted only after the post-cycle `npm run validate` gate passes. A nonzero Codex exit code must fail closed even if validation still passes.
-
-Hard bans under the current gate: provider SDKs or URLs, wallet/signer/order/transaction paths, `.env` mutation, git branch mutation, long external services, live operations, weakened validators, fabricated upstream evidence, predictive/value-betting work, and shared-account coordination.
+All root controllers use repository-scoped ownership, verified locks, bounded child processes, atomic terminal results, exact artifact publication, and controller-owned cleanup. `--force-unlock` is valid only through the owning parent with fresh lock and PID evidence. Manual lock deletion or broad process killing is prohibited.
 
 ## Runtime loader invariant
 
-Root autonomous controllers inherit the active Node runtime from the parent shell. They must not source `nvm.sh` directly and must not source `scripts/load-node-runtime.sh`. Compatibility wrappers under `commands/` may still use `scripts/load-node-runtime.sh`, which also must not source `nvm.sh` directly. Startup must fail with an explicit Node version error instead of exiting through NVM shell internals.
+Controllers never source NVM internally. The parent shell must activate exact Node `v20.20.2` before the active remediation launcher or any standalone controller starts.
+
+## Historical pre-remediation route record
+
+```text
+program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
+current_task=BWS-600
+active_implementation_queue=none
+selected_controller=run-paper-autopilot.sh
+safe_local_terminal_gate=BWS-599
+```
+
+This exact block is retained for compatibility with existing validators. It is not current routing authority.

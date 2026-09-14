@@ -1,5 +1,8 @@
 # 041 - External runtime preflight and BWS-600 campaign
 
+> **Routing note:** This document defines the still-blocked BWS-600 external evidence campaign. It is not the current task while R01-R12 remediation is active.
+
+
 ## Scope
 
 `BWS-593` is safe local implementation. `BWS-600` is the external evidence campaign.

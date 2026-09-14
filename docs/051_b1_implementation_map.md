@@ -1,5 +1,8 @@
 # 051 - B1 implementation map
 
+> **Routing note:** This map is completed B1 traceability. It does not select current work.
+
+
 ```text
 program=BWS_B1_CROSS_VENUE_OFFLINE_FALSIFICATION_V1
 completed_implementation_queue=backlog/bws_b1_cross_venue_implementation.csv

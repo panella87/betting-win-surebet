@@ -1,5 +1,8 @@
 # 027 - Validated BWS architecture
 
+> **Routing note:** This architecture remains supporting authority. Its BWS-600 controller fields are a pre-remediation snapshot and do not override the active remediation admission.
+
+
 ```text
 architecture_status=VALIDATED_SAFE_LOCAL_PLATFORM
 current_task=BWS-600

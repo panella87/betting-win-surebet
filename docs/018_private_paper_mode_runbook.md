@@ -1,5 +1,8 @@
 # 018 - BWS private paper runbook
 
+> **Routing note:** This is the supporting BWS-600 private-paper hold contract, not the currently selected task. Current work is the active R01-R12 remediation campaign; BWS-600 remains blocked.
+
+
 ```text
 paper_mode_owner=betting-win-surebet
 account_policy=separate_from_betting-win-betting

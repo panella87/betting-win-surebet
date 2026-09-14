@@ -1,5 +1,8 @@
 # Paper autopilot controller
 
+> **Routing note:** Paper autopilot remains the future BWS-600 evidence parent after internal remediation and external handoff gates. It is not the current remediation driver.
+
+
 `run-paper-autopilot.sh` remains the hardened parent workflow for paper evidence and source-fix handoffs:
 
 ```text
