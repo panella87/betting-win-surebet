@@ -1,41 +1,4 @@
 {
-  "schema": "betting-win-surebet.documentation-inventory.v1",
-  "repository": "betting-win-surebet",
-  "generated_date": "2026-09-14",
-  "scope": {
-    "excluded": "dependencies, generated output, artifacts, archives, secrets, caches, logs, databases, and Git metadata",
-    "extensions": [
-      ".csv",
-      ".json",
-      ".jsonl",
-      ".markdown",
-      ".md",
-      ".sha256",
-      ".tsv",
-      ".txt",
-      ".yaml",
-      ".yml"
-    ],
-    "root_documents": [
-      "AGENTS.md",
-      "CHANGELOG.md",
-      "PROJECT_STATUS.md",
-      "README.md",
-      "SOURCE_MANIFEST.json",
-      "STARTER_PACK.md"
-    ],
-    "roots": [
-      ".automation",
-      ".codex",
-      "backlog",
-      "config",
-      "decisions",
-      "docs",
-      "research",
-      "schemas",
-      "templates"
-    ]
-  },
   "classification_policy": {
     "canonical_active": "Owns current navigation, status, task, campaign, or command authority.",
     "duplicate": "Redundant document with no unique retained ownership.",
@@ -77,52 +40,24 @@
     "reason": "No reviewed document could be safely removed without deleting audit history, breaking path compatibility, or changing existing validator behavior.",
     "removed": 0
   },
-  "source_identity_policy": {
-    "authority": "EXTERNAL_AUDIT_OR_ADMISSION_RECEIPT_REQUIRED",
-    "repository_documentation_self_attests_current_archive": false,
-    "frozen_review_baseline": {
-      "archive": "betting-win-surebet122.zip",
-      "sha256": "e303719e5ce64df47df7b0594433a8978e3b01c5a3d0d0bd9129b9b6340b20cd"
-    },
-    "activation_snapshot": {
-      "archive": "betting-win-surebet123.zip",
-      "sha256": "e8d632fbb3bc7b45b4f2366d3fac33187fdc21fc0c2a7e6e36fb4b2890f9c4a9"
-    }
-  },
   "documentation_audit_receipts": [
     {
       "archive": "betting-win-surebet125.zip",
-      "sha256": "72a8262a5f94d144bb930cc9fb2778eed672d2a97a252f49b07f7b979b47224f",
-      "role": "HISTORICAL_PREIMAGE_FOR_77_FILE_DOCUMENTATION_AUTHORITY_RECONCILIATION",
+      "current_source_authority": false,
       "regular_files": 995,
-      "current_source_authority": false
+      "role": "HISTORICAL_PREIMAGE_FOR_77_FILE_DOCUMENTATION_AUTHORITY_RECONCILIATION",
+      "sha256": "72a8262a5f94d144bb930cc9fb2778eed672d2a97a252f49b07f7b979b47224f"
     },
     {
       "archive": "betting-win-surebet127.zip",
-      "sha256": "cc976c7efd5a97a262d1772001dda513775a2b282c0d8ec1055ebe97dd8dfdd4",
-      "role": "HISTORICAL_INPUT_VERIFIED_BY_2026_09_14_DOCUMENTATION_AUDIT",
-      "regular_files": 995,
-      "prior_reconciliation_postimages_present": 77,
+      "current_source_authority": false,
       "non_documentation_changes_vs_bws125": 0,
-      "current_source_authority": false
+      "prior_reconciliation_postimages_present": 77,
+      "regular_files": 995,
+      "role": "HISTORICAL_INPUT_VERIFIED_BY_2026_09_14_DOCUMENTATION_AUDIT",
+      "sha256": "cc976c7efd5a97a262d1772001dda513775a2b282c0d8ec1055ebe97dd8dfdd4"
     }
   ],
-  "historical_documentation_alignment_receipt": {
-    "audit_date": "2026-09-14",
-    "changed_document_paths_including_this_inventory": 77,
-    "application_source_modified": false,
-    "test_source_modified": false,
-    "automation_or_controller_source_modified": false,
-    "source_manifest_modified": false,
-    "current_source_manifest_expected_non_self_entries": 994,
-    "current_source_manifest_entries": 617,
-    "current_source_manifest_missing_entries": 377,
-    "current_source_manifest_extra_entries": 0,
-    "current_source_manifest_mismatched_entries": 47,
-    "audit_preimage_mismatched_entries": 38,
-    "known_unmodified_source_contract_residual": "schemas/bws-release-manifest.v1.schema.json is not strict JSON",
-    "authority_scope": "HISTORICAL_DOCUMENTATION_ALIGNMENT_RECEIPT_NOT_CURRENT_SOURCE_AUTHORITY"
-  },
   "documents": [
     {
       "classification": "supporting_active",
@@ -1066,7 +1001,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/README.md",
       "purpose": "Active campaign admission, routing, execution, safety, or validation authority.",
-      "sha256": "252f0d1e8af6fb631b924fb9ac7118fd0767133ef0a93bf47ea8ae79fe6b79e0",
+      "sha256": "8014d9a9a80cd9d493e1b6acc6419d74fce1b69cdbbd9cf9434e5f10bef8ad11",
       "topic": "remediation_activation",
       "topic_owner": "active_remediation_admission"
     },
@@ -1093,7 +1028,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/bounded-tranche-task-contract.md",
       "purpose": "Active campaign admission, routing, execution, safety, or validation authority.",
-      "sha256": "cbb21ec81fdded33fc7c59e4f44429be20cbc7bfd9baa7ccd7d8c4885898cc72",
+      "sha256": "54fcf9b776b2632890212ae341e5be9e493ec26b116c85acf9d1a8e92dfe62f6",
       "topic": "remediation_activation",
       "topic_owner": "active_remediation_admission"
     },
@@ -1111,7 +1046,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/immutable-authority.sha256",
       "purpose": "Active campaign admission, routing, execution, safety, or validation authority.",
-      "sha256": "74315eb193470dfe5d51869d7e99409b771bd3067d8bb016b080775b522b3f3d",
+      "sha256": "dea34d92eb64290cbeb8e04d7519445cb8c220ae280f6bb9665c033eb74a17a8",
       "topic": "remediation_activation",
       "topic_owner": "active_remediation_admission"
     },
@@ -1138,7 +1073,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/risks-and-stop-conditions.md",
       "purpose": "Active campaign admission, routing, execution, safety, or validation authority.",
-      "sha256": "796ab0be95186f09d4ac1a2b7abf799c1e83602da4201f4ddb00c9bdd029aa60",
+      "sha256": "081e1cb854dfb5171b717363bd2d7b7a65e3dae1d89b6b731b60bce2c7e21b76",
       "topic": "remediation_activation",
       "topic_owner": "active_remediation_admission"
     },
@@ -1147,7 +1082,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/server-runbook.md",
       "purpose": "Active campaign admission, routing, execution, safety, or validation authority.",
-      "sha256": "19b4213b1561b75698c85cc94c42309dc02727dc414557065cfb472727e614eb",
+      "sha256": "07cc919138d8b6ba0c7b94c46595f1faf86d0284668780738b75a807fa0e7220",
       "topic": "remediation_activation",
       "topic_owner": "active_remediation_admission"
     },
@@ -4904,5 +4839,70 @@
       "topic": "template_reference",
       "topic_owner": "template_reference"
     }
-  ]
+  ],
+  "generated_date": "2026-09-15",
+  "historical_documentation_alignment_receipt": {
+    "application_source_modified": false,
+    "audit_date": "2026-09-14",
+    "audit_preimage_mismatched_entries": 38,
+    "authority_scope": "HISTORICAL_DOCUMENTATION_ALIGNMENT_RECEIPT_NOT_CURRENT_SOURCE_AUTHORITY",
+    "automation_or_controller_source_modified": false,
+    "changed_document_paths_including_this_inventory": 77,
+    "current_source_manifest_entries": 617,
+    "current_source_manifest_expected_non_self_entries": 994,
+    "current_source_manifest_extra_entries": 0,
+    "current_source_manifest_mismatched_entries": 47,
+    "current_source_manifest_missing_entries": 377,
+    "known_unmodified_source_contract_residual": "schemas/bws-release-manifest.v1.schema.json is not strict JSON",
+    "source_manifest_modified": false,
+    "test_source_modified": false
+  },
+  "repository": "betting-win-surebet",
+  "schema": "betting-win-surebet.documentation-inventory.v1",
+  "scope": {
+    "excluded": "dependencies, generated output, artifacts, archives, secrets, caches, logs, databases, and Git metadata",
+    "extensions": [
+      ".csv",
+      ".json",
+      ".jsonl",
+      ".markdown",
+      ".md",
+      ".sha256",
+      ".tsv",
+      ".txt",
+      ".yaml",
+      ".yml"
+    ],
+    "root_documents": [
+      "AGENTS.md",
+      "CHANGELOG.md",
+      "PROJECT_STATUS.md",
+      "README.md",
+      "SOURCE_MANIFEST.json",
+      "STARTER_PACK.md"
+    ],
+    "roots": [
+      ".automation",
+      ".codex",
+      "backlog",
+      "config",
+      "decisions",
+      "docs",
+      "research",
+      "schemas",
+      "templates"
+    ]
+  },
+  "source_identity_policy": {
+    "activation_snapshot": {
+      "archive": "betting-win-surebet123.zip",
+      "sha256": "e8d632fbb3bc7b45b4f2366d3fac33187fdc21fc0c2a7e6e36fb4b2890f9c4a9"
+    },
+    "authority": "EXTERNAL_AUDIT_OR_ADMISSION_RECEIPT_REQUIRED",
+    "frozen_review_baseline": {
+      "archive": "betting-win-surebet122.zip",
+      "sha256": "e303719e5ce64df47df7b0594433a8978e3b01c5a3d0d0bd9129b9b6340b20cd"
+    },
+    "repository_documentation_self_attests_current_archive": false
+  }
 }

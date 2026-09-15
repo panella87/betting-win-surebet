@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import json
+import os
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -149,24 +150,46 @@ FORBIDDEN = [
 ]
 CONFLICT_MARKER_PREFIXES = ('<<<<<<<', '>>>>>>>')
 CONFLICT_SEPARATOR = '======='
-CONFLICT_SCAN_SKIP_DIRS = {'.git', 'node_modules', 'dist', 'artifacts', '.tmp', '.cache'}
+CONFLICT_SCAN_SKIP_DIRS = {
+    '.git', '.cache', '.mypy_cache', '.npm', '.pytest_cache', '.ruff_cache',
+    '.tmp', '.turbo', '.venv', '__pycache__', 'artifacts', 'coverage', 'dist',
+    'node_modules', 'venv',
+}
 CONFLICT_SCAN_SKIP_SUFFIXES = {'.zip', '.gz', '.tar', '.tgz', '.png', '.jpg', '.jpeg', '.webp', '.ico', '.db', '.sqlite'}
+
+
+def iter_conflict_scan_files() -> list[Path]:
+    paths: list[Path] = []
+    for current_root, directory_names, file_names in os.walk(
+        ROOT,
+        topdown=True,
+        followlinks=False,
+    ):
+        current = Path(current_root)
+        directory_names[:] = sorted(
+            name
+            for name in directory_names
+            if name not in CONFLICT_SCAN_SKIP_DIRS
+            and not (current / name).is_symlink()
+        )
+        for name in sorted(file_names):
+            path = current / name
+            if path.is_symlink() or not path.is_file():
+                continue
+            paths.append(path)
+    return paths
 
 
 def validate_no_conflict_markers() -> None:
     hits: list[str] = []
-    for path in sorted(ROOT.rglob('*')):
-        if not path.is_file():
-            continue
+    for path in iter_conflict_scan_files():
         rel_path = path.relative_to(ROOT)
         rel = rel_path.as_posix()
-        if any(part in CONFLICT_SCAN_SKIP_DIRS for part in rel_path.parts):
-            continue
         if path.suffix.lower() in CONFLICT_SCAN_SKIP_SUFFIXES:
             continue
         try:
             lines = path.read_text(encoding='utf-8').splitlines()
-        except UnicodeDecodeError:
+        except (UnicodeDecodeError, OSError):
             continue
         for line_no, line in enumerate(lines, start=1):
             stripped = line.strip()

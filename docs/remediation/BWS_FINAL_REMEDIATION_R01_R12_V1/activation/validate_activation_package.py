@@ -6,6 +6,8 @@ import hashlib
 import json
 import os
 import re
+import shlex
+import shutil
 import stat
 import subprocess
 import sys
@@ -78,6 +80,49 @@ SECRET_SUFFIXES = {
     ".sqlite",
     ".sqlite3",
 }
+PROTECTED_AUTOMATION_FILES = {
+    "zip_codebase.sh",
+    "pull_artifacts_and_zip_codebase.sh",
+    "update_git.sh",
+    "check_progress.sh",
+    "watch_progress.sh",
+    "open_log.sh",
+    "start.sh",
+    "stop.sh",
+    "run-autonomous-implementation.sh",
+    "run-paper-evaluation.sh",
+    "run-paper-autopilot.sh",
+    "run-autonomous-bugfix.sh",
+    "run-bugfix-autopilot.sh",
+    "automation.config.sh",
+    ".automation/lib/run_common.sh",
+    ".automation/lib/controller_hardening_v2.sh",
+    ".automation/lib/temp_inode_guard.sh",
+    ".automation/lib/telegram_notify.sh",
+    "cleanup_automation_temp_inode_residue.sh",
+    "cleanup_automation_artifact_residue.sh",
+    "docs/automation/PROTECTED_AUTOMATION_FILES.md",
+}
+REQUIRED_IMMUTABLE_AUTHORITY_PATHS = {
+    "automation.config.sh",
+    "docs/automation/PROTECTED_AUTOMATION_FILES.md",
+    f"docs/remediation/{PROGRAM}/campaign-order.json",
+    f"docs/remediation/{PROGRAM}/maps/dependency-dag.json",
+    f"docs/remediation/{PROGRAM}/maps/finding-to-tranche.json",
+    f"docs/remediation/{PROGRAM}/maps/path-to-tranche.json",
+    f"docs/remediation/{PROGRAM}/schemas/tranche-result.schema.json",
+    "docs/reviews/BWS121/wave-04/test-evidence-matrix.json",
+    "scripts/validate_remediation_tranche_evidence.py",
+    "scripts/run_bounded_remediation_child.py",
+    "scripts/validate_repo.py",
+}
+TRUSTED_EVIDENCE_SCHEMA = "bws-remediation-trusted-evidence-v1"
+TRIVIAL_EXECUTABLES = {"true", "false", "echo", "printf", "test", ":"}
+FORBIDDEN_TEST_EXECUTABLES = {
+    "sudo", "su", "ssh", "scp", "sftp", "rsync", "kill", "killall", "pkill",
+    "reboot", "shutdown", "poweroff", "halt", "docker", "podman",
+}
+SUPPORT_PATH_PREFIXES = ("tests/", "scripts/", "schemas/", "docs/")
 
 
 def fail(message: str) -> None:
@@ -194,6 +239,220 @@ def resolve_dependency_id(dep: str, entries: list[dict[str, Any]]) -> str:
     return matches[0]
 
 
+def parse_config_protected_files(repo: Path) -> set[str]:
+    config = repo / "automation.config.sh"
+    if not config.is_file() or config.is_symlink():
+        fail("automation.config.sh is missing or unsafe")
+    text = config.read_text(encoding="utf-8")
+    match = re.search(r"(?ms)^AUTOMATION_PROTECTED_FILES=\(\s*(.*?)^\)", text)
+    if match is None:
+        fail("automation.config.sh lacks AUTOMATION_PROTECTED_FILES")
+    try:
+        values = shlex.split(match.group(1), comments=True, posix=True)
+    except ValueError as exc:
+        fail(f"cannot parse AUTOMATION_PROTECTED_FILES: {exc}")
+    if not values or len(values) != len(set(values)):
+        fail("AUTOMATION_PROTECTED_FILES is empty or contains duplicates")
+    return set(values)
+
+
+def immutable_authority_paths(repo: Path) -> set[str]:
+    checksum = activation_root(repo) / "immutable-authority.sha256"
+    if not checksum.is_file() or checksum.is_symlink():
+        fail("immutable authority checksum file is missing or unsafe")
+    paths: set[str] = set()
+    for line in checksum.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        match = re.fullmatch(r"([0-9a-f]{64})  ([^\n]+)", line)
+        if match is None:
+            fail(f"malformed immutable authority checksum line: {line!r}")
+        relative = match.group(2)
+        if relative in paths:
+            fail(f"duplicate immutable authority path: {relative}")
+        paths.add(relative)
+    return paths
+
+
+def trusted_evidence_path(repo: Path, entry: dict[str, Any]) -> Path:
+    return campaign_artifact_root(repo) / "trusted-evidence" / f"{entry['campaign_order']:03d}-{entry['tranche_id']}.json"
+
+
+def command_reference_files(repo: Path, command: list[str]) -> list[Path]:
+    candidates: set[Path] = set()
+    package_scripts: dict[str, Any] = {}
+    try:
+        package_scripts = json.loads((repo / "package.json").read_text(encoding="utf-8")).get("scripts", {})
+    except Exception:
+        package_scripts = {}
+
+    tokens = list(command)
+    executable = Path(tokens[0]).name.lower() if tokens else ""
+    if executable in {"npm", "pnpm", "yarn"}:
+        script_name: str | None = None
+        if len(tokens) >= 2 and tokens[1] == "test":
+            script_name = "test"
+        elif len(tokens) >= 3 and tokens[1] == "run":
+            script_name = tokens[2]
+        elif executable == "yarn" and len(tokens) >= 2:
+            script_name = tokens[1]
+        script_value = package_scripts.get(script_name) if isinstance(package_scripts, dict) and script_name else None
+        if isinstance(script_value, str):
+            try:
+                tokens.extend(shlex.split(script_value, posix=True))
+            except ValueError:
+                tokens.extend(script_value.split())
+
+    path_pattern = re.compile(r"^[A-Za-z0-9_.@+/-]+\.(?:sh|py|mjs|cjs|js|ts|tsx)$")
+    for token in tokens:
+        stripped = token.strip("'\";,()[]{}")
+        if not stripped or not path_pattern.fullmatch(stripped):
+            continue
+        candidate = Path(stripped)
+        target = candidate.resolve() if candidate.is_absolute() else (repo / candidate).resolve()
+        try:
+            target.relative_to(repo)
+        except ValueError:
+            continue
+        if target.is_file() and not target.is_symlink():
+            candidates.add(target)
+    return sorted(candidates)
+
+
+def requirement_command_is_bound(repo: Path, command: list[str], requirement_id: str) -> bool:
+    assertion_pattern = re.compile(
+        r"(?:\bassert\b|\bexpect\s*\(|strictEqual\s*\(|deepEqual\s*\(|"
+        r"throw\s+new\s+Error|raise\s+AssertionError|pytest\.|unittest\.|"
+        r"grep\s+-[A-Za-z]*q|\btest\s+[^=]|\[\[)"
+    )
+    for path in command_reference_files(repo, command):
+        relative = str(path.relative_to(repo))
+        if not (
+            relative.startswith("tests/")
+            or relative.startswith("scripts/validate_")
+            or relative.startswith("scripts/test_")
+            or Path(relative).name.startswith("validate-")
+            or Path(relative).name.startswith("test-")
+        ):
+            continue
+        try:
+            source = path.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        if len(source) < 160:
+            continue
+        if requirement_id in source and assertion_pattern.search(source):
+            return True
+    return False
+
+
+def has_exact_owned_change(repo: Path, entry: dict[str, Any], records: list[dict[str, Any]]) -> bool:
+    allowed_protected = set(entry.get("allowed_protected_files", []))
+    path_map = load(program_root(repo) / "maps" / "path-to-tranche.json")
+    for record in records:
+        path = record["path"]
+        if path in allowed_protected:
+            return True
+        for mapped in path_map.get("paths", []):
+            if not isinstance(mapped, dict) or mapped.get("path") != path:
+                continue
+            candidates = mapped.get("candidate_tranches", [])
+            if any(
+                isinstance(candidate, dict) and candidate.get("tranche_id") == entry["tranche_id"]
+                for candidate in candidates
+            ):
+                return True
+    return False
+
+
+def support_path_is_traceable(repo: Path, record: dict[str, Any], entry: dict[str, Any]) -> bool:
+    path = record["path"]
+    if not path.startswith(SUPPORT_PATH_PREFIXES):
+        return False
+    if record.get("action") == "DELETE":
+        return False
+    target = repo / path
+    if not target.is_file() or target.is_symlink():
+        return False
+    try:
+        text = target.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return False
+    markers = [entry["tranche_id"], *entry.get("finding_ids", []), *expected_test_requirement_ids(repo, entry["tranche_id"])]
+    return any(marker in text for marker in markers)
+
+
+def validate_trusted_evidence(repo: Path, entry: dict[str, Any], result: dict[str, Any], result_path: Path) -> None:
+    attestation_path = trusted_evidence_path(repo, entry)
+    attestation = load(attestation_path)
+    expected_exact = {
+        "schema": TRUSTED_EVIDENCE_SCHEMA,
+        "program_id": PROGRAM,
+        "tranche_id": entry["tranche_id"],
+        "campaign_order": entry["campaign_order"],
+        "result_sha256": digest(result_path),
+        "result_state": result["state"],
+        "exact_preimage_generation_id": result["exact_preimage_generation_id"],
+        "exact_postimage_generation_id": result["exact_postimage_generation_id"],
+        "validator_sha256": digest(Path(__file__).resolve()),
+        "verifier_sha256": digest(repo / "scripts" / "validate_remediation_tranche_evidence.py"),
+        "test_records_sha256": canonical_digest(result["test_commands_and_results"]),
+        "proof_environments_sha256": canonical_digest(result["proof_environments"]),
+    }
+    for key, expected in expected_exact.items():
+        if attestation.get(key) != expected:
+            fail(f"trusted evidence attestation {key} mismatch: {entry['tranche_id']}")
+    parse_datetime(attestation.get("verified_at"), f"trusted evidence {entry['tranche_id']} verified_at")
+    if attestation.get("all_commands_executed") is not True:
+        fail(f"trusted evidence does not prove command execution: {entry['tranche_id']}")
+    executions = attestation.get("executions")
+    if not isinstance(executions, list):
+        fail(f"trusted evidence execution list is malformed: {entry['tranche_id']}")
+    if attestation.get("executions_sha256") != canonical_digest(executions):
+        fail(f"trusted evidence execution digest mismatch: {entry['tranche_id']}")
+    result_tests = result.get("test_commands_and_results")
+    if not isinstance(result_tests, list) or len(executions) != len(result_tests):
+        fail(f"trusted evidence execution count mismatch: {entry['tranche_id']}")
+    by_id = {item.get("test_requirement_id"): item for item in executions if isinstance(item, dict)}
+    if len(by_id) != len(executions):
+        fail(f"trusted evidence contains duplicate execution IDs: {entry['tranche_id']}")
+    for test in result_tests:
+        execution = by_id.get(test.get("test_requirement_id"))
+        if not isinstance(execution, dict):
+            fail(f"trusted evidence missing test execution: {test.get('test_requirement_id')}")
+        for key in (
+            "command", "working_directory", "timeout_seconds", "status", "exit_code",
+            "stdout_sha256", "stderr_sha256", "node_version", "environment_generation_id",
+        ):
+            if execution.get(key) != test.get(key):
+                fail(f"trusted evidence test {key} mismatch: {test.get('test_requirement_id')}")
+        evidence_paths = execution.get("entrypoint_evidence_paths")
+        if (
+            not isinstance(evidence_paths, list)
+            or len(evidence_paths) != len(set(evidence_paths))
+            or not all(isinstance(value, str) and value for value in evidence_paths)
+        ):
+            fail(f"trusted evidence entrypoint path list is malformed: {test.get('test_requirement_id')}")
+        normalized_evidence: set[str] = set()
+        for value in evidence_paths:
+            pure = PurePosixPath(value)
+            if pure.is_absolute() or ".." in pure.parts or "\\" in value:
+                fail(f"trusted evidence contains an unsafe entrypoint path: {test.get('test_requirement_id')}:{value}")
+            target = repo / value
+            if not target.is_file() or target.is_symlink():
+                fail(f"trusted evidence names a missing entrypoint path: {test.get('test_requirement_id')}:{value}")
+            normalized_evidence.add(value)
+        if test.get("production_entrypoint") is True:
+            relevant = relevant_production_paths(repo, test.get("finding_ids") or [])
+            observed = sorted(relevant & normalized_evidence)
+            if not observed:
+                fail(
+                    f"trusted execution did not load or execute a mapped production entrypoint: "
+                    f"{test.get('test_requirement_id')} relevant={sorted(relevant)} "
+                    f"observed={sorted(normalized_evidence)}"
+                )
+
+
 def validate_static(repo: Path) -> None:
     activation, plan_path, seed_path, _ = paths(repo)
     plan = load(plan_path)
@@ -208,6 +467,22 @@ def validate_static(repo: Path) -> None:
         fail("plan illegally permits an existing controller before S2")
     if plan.get("node_runtime") != "v20.20.2":
         fail("plan does not bind exact Node v20.20.2")
+    configured_protected = parse_config_protected_files(repo)
+    if configured_protected != PROTECTED_AUTOMATION_FILES:
+        fail(
+            "protected automation authority mismatch; "
+            f"missing={sorted(PROTECTED_AUTOMATION_FILES - configured_protected)} "
+            f"extra={sorted(configured_protected - PROTECTED_AUTOMATION_FILES)}"
+        )
+    immutable_paths = immutable_authority_paths(repo)
+    required_immutable = set(REQUIRED_IMMUTABLE_AUTHORITY_PATHS)
+    required_immutable.update(
+        str(path.relative_to(repo))
+        for path in sorted((program_root(repo) / "tranches").glob("BWS-*.md"))
+    )
+    missing_immutable = sorted(required_immutable - immutable_paths)
+    if missing_immutable:
+        fail(f"immutable authority does not cover acceptance inputs: {missing_immutable}")
 
     entries = plan_entries(plan)
     orders = [e.get("campaign_order") for e in entries]
@@ -242,7 +517,13 @@ def validate_static(repo: Path) -> None:
         for key in ("automation_maintenance_allowed", "allowed_protected_files"):
             if len(re.findall(rf"^{re.escape(key)}=", text, re.M)) != 1:
                 fail(f"task {entry['task_path']} must contain exactly one {key} marker")
-        expected_allowed = ",".join(entry.get("allowed_protected_files", [])) or "none"
+        allowed_protected = entry.get("allowed_protected_files", [])
+        if not isinstance(allowed_protected, list) or not all(isinstance(value, str) for value in allowed_protected):
+            fail(f"task protected allowlist is malformed: {entry['tranche_id']}")
+        unknown_protected = sorted(set(allowed_protected) - PROTECTED_AUTOMATION_FILES)
+        if unknown_protected:
+            fail(f"task names non-protected automation paths: {entry['tranche_id']}:{unknown_protected}")
+        expected_allowed = ",".join(allowed_protected) or "none"
         if f"allowed_protected_files={expected_allowed}" not in text:
             fail(f"task protected allowlist mismatch: {entry['tranche_id']}")
         expected_mode = "DIRECT_BOUNDED_CODEX" if entry["campaign_order"] <= 13 else "REPAIRED_IMPLEMENTATION_CONTROLLER"
@@ -304,16 +585,18 @@ def git_capture(repo: Path) -> dict[str, Any]:
 
 def init_state(repo: Path) -> None:
     _, plan_path, seed_path, state_path = paths(repo)
+    plan = load(plan_path)
     if state_path.exists():
-        plan = load(plan_path)
         state = load(state_path)
-        validate_state(plan, state)
+        validate_runtime_state(repo, plan, state)
         print(f"BWS_REMEDIATION_STATE_PRESENT={state_path}")
         return
     state = load(seed_path)
     state["created_at"] = utc_now()
     state["clock_authority"] = "UTC_SYSTEM_CLOCK_AT_OPERATOR_LAUNCH"
     state["initial_git"] = git_capture(repo)
+    validate_state(plan, state)
+    validate_git_anchor(repo, state)
     atomic_write(state_path, state)
     print(f"BWS_REMEDIATION_STATE_INITIALIZED={state_path}")
 
@@ -360,12 +643,45 @@ def validate_state(plan: dict[str, Any], state: dict[str, Any]) -> None:
     if bool(state.get("controller_eligible")) != (len(accepted) >= 13):
         fail("controller eligibility does not match S2 acceptance")
 
+    initial_git = state.get("initial_git")
+    if not isinstance(initial_git, dict) or set(initial_git) != {
+        "commit", "branch", "upstream", "worktree_status_sha256"
+    }:
+        fail("campaign state initial Git authority is malformed")
+    commit = initial_git.get("commit")
+    if not isinstance(commit, str) or not GIT_OBJECT.fullmatch(commit):
+        fail("campaign state lacks an exact initial Git commit")
+    for key in ("branch", "upstream"):
+        value = initial_git.get(key)
+        if value is not None and (not isinstance(value, str) or not value):
+            fail(f"campaign state initial Git {key} is malformed")
+    status_digest = initial_git.get("worktree_status_sha256")
+    if not isinstance(status_digest, str) or not HEX64.fullmatch(status_digest):
+        fail("campaign state initial Git worktree digest is malformed")
+
+
+def validate_git_anchor(repo: Path, state: dict[str, Any]) -> None:
+    initial_git = state["initial_git"]
+    current = git_capture(repo)
+    for key in ("commit", "branch", "upstream"):
+        if current.get(key) != initial_git.get(key):
+            fail(
+                f"campaign Git {key} changed after admission: "
+                f"expected={initial_git.get(key)!r} observed={current.get(key)!r}"
+            )
+
+
+def validate_runtime_state(repo: Path, plan: dict[str, Any], state: dict[str, Any]) -> None:
+    validate_state(plan, state)
+    validate_git_anchor(repo, state)
+    validate_historical_receipt_chain(repo, plan, state)
+
 
 def next_task(repo: Path) -> None:
     _, plan_path, _, state_path = paths(repo)
     plan = load(plan_path)
     state = load(state_path)
-    validate_state(plan, state)
+    validate_runtime_state(repo, plan, state)
     if state.get("terminal_state") == "COMPLETE":
         print("COMPLETE")
         return
@@ -469,7 +785,7 @@ def prepare_tranche(repo: Path, tranche_id: str) -> None:
     _, plan_path, _, state_path = paths(repo)
     plan = load(plan_path)
     state = load(state_path)
-    validate_state(plan, state)
+    validate_runtime_state(repo, plan, state)
     entry = entry_by_id(plan, tranche_id)
     current = state.get("current")
     if not isinstance(current, dict) or current.get("tranche_id") != tranche_id or current.get("state") != "ADMITTED":
@@ -495,7 +811,21 @@ def prepare_tranche(repo: Path, tranche_id: str) -> None:
         generation = existing.get("source_generation_id")
         if not isinstance(generation, str) or not generation.startswith("sha256:"):
             fail(f"existing preimage lacks source generation identity: {tranche_id}")
-        print(f"BWS_REMEDIATION_PREIMAGE_PRESENT={tranche_id}:{generation}:{destination}")
+        identity_payload = {
+            "files": existing.get("files"),
+            "protected_secret_metadata": existing.get("protected_secret_metadata"),
+        }
+        recomputed_tree = canonical_digest(identity_payload)
+        if existing.get("tree_sha256") != recomputed_tree or generation != f"sha256:{recomputed_tree}":
+            fail(f"existing preimage internal digest mismatch: {tranche_id}")
+        resumed = snapshot_tree(repo)
+        compare_secret_metadata(existing, resumed)
+        resumed_delta = changed_path_records(existing, resumed)
+        validate_changed_path_authority(repo, plan, entry, resumed_delta)
+        print(
+            f"BWS_REMEDIATION_PREIMAGE_PRESENT={tranche_id}:{generation}:{destination}:"
+            f"resumed_changed_paths={len(resumed_delta)}"
+        )
         return
 
     snapshot = snapshot_tree(repo)
@@ -616,6 +946,18 @@ def matrix_record_map(repo: Path) -> dict[str, dict[str, Any]]:
     return result
 
 
+def relevant_production_paths(repo: Path, issue_ids: list[str]) -> set[str]:
+    finding_map = load(program_root(repo) / "maps" / "finding-to-tranche.json")
+    relevant_paths: set[str] = set()
+    for finding in finding_map.get("findings", []):
+        if not isinstance(finding, dict) or finding.get("finding_id") not in issue_ids:
+            continue
+        for source_path in finding.get("relevant_source_paths", []):
+            if isinstance(source_path, str) and not source_path.startswith(("tests/", "docs/")):
+                relevant_paths.add(source_path)
+    return relevant_paths
+
+
 def production_command_is_bound(
     repo: Path,
     command: list[str],
@@ -624,55 +966,27 @@ def production_command_is_bound(
     if not command:
         return False
     executable = Path(command[0]).name.lower()
-    if executable in {"true", "false", "echo", "printf", "test", ":"}:
+    if executable in TRIVIAL_EXECUTABLES or executable in FORBIDDEN_TEST_EXECUTABLES:
+        return False
+    if executable in {"bash", "sh", "zsh", "dash"} and any(token in {"-c", "-lc"} for token in command[1:]):
         return False
 
-    package_scripts: dict[str, Any] = {}
-    try:
-        package_scripts = json.loads((repo / "package.json").read_text(encoding="utf-8")).get("scripts", {})
-    except Exception:
-        package_scripts = {}
-    if executable in {"npm", "pnpm", "yarn"}:
-        script_name: str | None = None
-        if len(command) >= 2 and command[1] == "test":
-            script_name = "test"
-        elif len(command) >= 3 and command[1] == "run":
-            script_name = command[2]
-        elif executable == "yarn" and len(command) >= 2:
-            script_name = command[1]
-        if script_name and isinstance(package_scripts, dict) and script_name in package_scripts:
-            return True
+    relevant_paths = relevant_production_paths(repo, issue_ids)
+    if not relevant_paths:
+        return False
 
-    finding_map = load(program_root(repo) / "maps" / "finding-to-tranche.json")
-    relevant_paths: set[str] = set()
-    for finding in finding_map.get("findings", []):
-        if not isinstance(finding, dict) or finding.get("finding_id") not in issue_ids:
-            continue
-        for path in finding.get("relevant_source_paths", []):
-            if isinstance(path, str):
-                relevant_paths.add(path)
     joined = " ".join(command)
     if any(path in joined or Path(path).name in joined for path in relevant_paths):
         return True
-
-    path_pattern = re.compile(r"(?<![A-Za-z0-9_./-])([A-Za-z0-9_./-]+\.(?:sh|py|mjs|cjs|js|ts|tsx))(?![A-Za-z0-9_./-])")
-    for match in path_pattern.finditer(joined):
-        candidate = Path(match.group(1))
-        if candidate.is_absolute():
-            try:
-                resolved = candidate.resolve().relative_to(repo)
-            except Exception:
-                continue
-        else:
-            resolved = candidate
-        target = (repo / resolved).resolve()
+    for reference in command_reference_files(repo, command):
         try:
-            target.relative_to(repo)
-        except ValueError:
+            source = reference.read_text(encoding="utf-8", errors="replace")
+        except OSError:
             continue
-        if target.is_file() and not target.is_symlink():
+        if any(path in source or Path(path).name in source for path in relevant_paths):
             return True
     return False
+
 
 
 def normalize_changed_paths(value: Any, tranche_id: str) -> list[dict[str, Any]]:
@@ -714,19 +1028,14 @@ def normalize_changed_paths(value: Any, tranche_id: str) -> list[dict[str, Any]]
 
 def validate_changed_path_authority(repo: Path, plan: dict[str, Any], entry: dict[str, Any], records: list[dict[str, Any]]) -> None:
     immutable_prefix = f"docs/remediation/{PROGRAM}/activation/"
-    forbidden_prefixes = (
-        ".git/",
-        "artifacts/",
-        "node_modules/",
-        "betting-win/",
-    )
-    protected = {
-        path
-        for candidate in plan_entries(plan)
-        for path in candidate.get("allowed_protected_files", [])
-        if isinstance(path, str)
-    }
+    forbidden_prefixes = (".git/", "artifacts/", "node_modules/", "betting-win/")
+    protected = set(PROTECTED_AUTOMATION_FILES)
+    if parse_config_protected_files(repo) != protected:
+        fail("protected automation authority changed during campaign")
     allowed_protected = set(entry.get("allowed_protected_files", []))
+    if not allowed_protected.issubset(protected):
+        fail(f"tranche protected allowlist is not a subset of canonical protection: {entry['tranche_id']}")
+
     path_map_doc = load(program_root(repo) / "maps" / "path-to-tranche.json")
     mapped_paths = path_map_doc.get("paths")
     if not isinstance(mapped_paths, list):
@@ -744,6 +1053,12 @@ def validate_changed_path_authority(repo: Path, plan: dict[str, Any], entry: dic
             if isinstance(candidate, dict) and isinstance(candidate.get("tranche_id"), str)
         }
 
+    exact_owned_change = False
+    mapped_parent_dirs = {
+        str(PurePosixPath(path).parent)
+        for path, owners in path_owners.items()
+        if entry["tranche_id"] in owners
+    }
     for record in records:
         path = record["path"]
         lower = path.lower()
@@ -753,11 +1068,27 @@ def validate_changed_path_authority(repo: Path, plan: dict[str, Any], entry: dic
             fail(f"immutable activation authority changed by tranche: {path}")
         if is_secret_path(PurePosixPath(path)):
             fail(f"secret or credential path changed by tranche: {path}")
-        if path in protected and path not in allowed_protected:
-            fail(f"tranche changed protected automation path without exact allowance: {path}")
+        if path in protected:
+            if path not in allowed_protected:
+                fail(f"tranche changed protected automation path without exact allowance: {path}")
+            exact_owned_change = True
+            continue
+
         owners = path_owners.get(path)
-        if owners is not None and entry["tranche_id"] not in owners:
-            fail(f"tranche changed a path owned by another remediation boundary: {path}")
+        if owners is not None:
+            if entry["tranche_id"] not in owners:
+                fail(f"tranche changed a path owned by another remediation boundary: {path}")
+            exact_owned_change = True
+            continue
+
+        parent = str(PurePosixPath(path).parent)
+        new_in_owned_parent = record.get("action") == "ADD" and parent in mapped_parent_dirs
+        if new_in_owned_parent and support_path_is_traceable(repo, record, entry):
+            continue
+        if support_path_is_traceable(repo, record, entry):
+            continue
+        fail(f"tranche changed an unmapped and untraceable path: {path}")
+
 
 
 def validate_result_shape(repo: Path, result: dict[str, Any]) -> None:
@@ -776,6 +1107,116 @@ def validate_result_shape(repo: Path, result: dict[str, Any]) -> None:
         fail("example tranche receipt cannot be accepted as runtime evidence")
 
 
+def validate_historical_receipt_chain(repo: Path, plan: dict[str, Any], state: dict[str, Any]) -> None:
+    entries = plan_entries(plan)
+    accepted = state.get("accepted_tranches", [])
+    current = state.get("current")
+    blocked_terminal = isinstance(current, dict) and current.get("state") == "BLOCKED"
+    expected_count = len(accepted) + (1 if blocked_terminal else 0)
+    history = state.get("history")
+    if not isinstance(history, list) or len(history) != expected_count:
+        fail(
+            f"campaign history length mismatch: expected={expected_count} "
+            f"observed={len(history) if isinstance(history, list) else 'non-list'}"
+        )
+
+    parent_sha = digest(activation_root(repo) / "active-campaign-admission.json")
+    for index, event in enumerate(history):
+        if not isinstance(event, dict) or set(event) != {
+            "recorded_at", "campaign_order", "result_path", "result_sha256",
+            "result_state", "tranche_id",
+        }:
+            fail(f"campaign history event shape is malformed at index {index}")
+        entry = entries[index]
+        expected_state = "ACCEPTED" if index < len(accepted) else current.get("result_state")
+        expected_event = {
+            "campaign_order": entry["campaign_order"],
+            "result_path": entry["result_path"],
+            "result_state": expected_state,
+            "tranche_id": entry["tranche_id"],
+        }
+        for key, value in expected_event.items():
+            if event.get(key) != value:
+                fail(f"campaign history {key} mismatch at order {entry['campaign_order']}")
+        parse_datetime(event.get("recorded_at"), f"history {entry['tranche_id']} recorded_at")
+        result_sha = event.get("result_sha256")
+        if not isinstance(result_sha, str) or not HEX64.fullmatch(result_sha):
+            fail(f"campaign history result digest is malformed: {entry['tranche_id']}")
+        result_path = repo / entry["result_path"]
+        result = load(result_path)
+        if digest(result_path) != result_sha:
+            fail(f"campaign history result digest mismatch: {entry['tranche_id']}")
+        validate_result_shape(repo, result)
+        exact = {
+            "program_id": PROGRAM,
+            "record_type": "tranche-result",
+            "tranche_id": entry["tranche_id"],
+            "campaign_order": entry["campaign_order"],
+            "stage": entry["stage"],
+            "owner": entry["owner"],
+            "finding_ids": entry["finding_ids"],
+            "retained_holds": HOLDS,
+            "acceptance_authority": entry["acceptance_authority"],
+            "state": expected_state,
+            "parent_receipt_sha256": parent_sha,
+            "previous_receipt_sha256": None,
+        }
+        for key, value in exact.items():
+            if result.get(key) != value:
+                fail(f"historical result {entry['tranche_id']} field {key} mismatch")
+        parse_datetime(result.get("created_at"), f"historical result {entry['tranche_id']} created_at")
+
+        preimage = load(preimage_path(repo, entry))
+        if preimage.get("program_id") != PROGRAM or preimage.get("tranche_id") != entry["tranche_id"]:
+            fail(f"historical preimage identity mismatch: {entry['tranche_id']}")
+        pre_generation = preimage.get("source_generation_id")
+        post_generation = result.get("exact_postimage_generation_id")
+        if result.get("exact_preimage_generation_id") != pre_generation:
+            fail(f"historical result preimage generation mismatch: {entry['tranche_id']}")
+        if not isinstance(post_generation, str) or re.fullmatch(r"sha256:[0-9a-f]{64}", post_generation) is None:
+            fail(f"historical result postimage generation is malformed: {entry['tranche_id']}")
+        identity = result.get("repository_identity")
+        expected_identity = {
+            "name": "betting-win-surebet",
+            "baseline_archive": BASELINE_ARCHIVE,
+            "baseline_sha256": BASELINE_SHA256,
+            "source_generation_id": pre_generation,
+            "git_commit": preimage.get("git", {}).get("commit"),
+        }
+        if identity != expected_identity:
+            fail(f"historical result repository identity mismatch: {entry['tranche_id']}")
+
+        blockers = result.get("unresolved_blockers")
+        if not isinstance(blockers, list) or len(blockers) != len(set(blockers)):
+            fail(f"historical result blockers are malformed: {entry['tranche_id']}")
+        tests = result.get("test_commands_and_results")
+        proofs = result.get("proof_environments")
+        if not isinstance(tests, list) or not isinstance(proofs, list):
+            fail(f"historical result evidence lists are malformed: {entry['tranche_id']}")
+
+        if expected_state in {"ACCEPTED", "SOURCE_COMPLETE_EXTERNAL_PENDING"}:
+            expected_ids = set(expected_test_requirement_ids(repo, entry["tranche_id"]))
+            observed_ids = [item.get("test_requirement_id") for item in tests if isinstance(item, dict)]
+            if len(observed_ids) != len(set(observed_ids)) or set(observed_ids) != expected_ids:
+                fail(f"historical result test requirement set mismatch: {entry['tranche_id']}")
+            if any(item.get("status") != "PASSED" or item.get("exit_code") != 0 for item in tests):
+                fail(f"historical result contains non-passing test evidence: {entry['tranche_id']}")
+            expected_lanes = set(entry.get("test_environments", {}))
+            observed_lanes = [item.get("lane") for item in proofs if isinstance(item, dict)]
+            if len(observed_lanes) != len(set(observed_lanes)) or set(observed_lanes) != expected_lanes:
+                fail(f"historical result proof lane set mismatch: {entry['tranche_id']}")
+            if any(item.get("result") != "PASSED" for item in proofs):
+                fail(f"historical result contains non-passing proof evidence: {entry['tranche_id']}")
+            if result.get("node_runtime_identity") != "v20.20.2" or result.get("all_internal_requirements_closed") is not True:
+                fail(f"historical complete result lacks exact runtime or closure: {entry['tranche_id']}")
+            validate_trusted_evidence(repo, entry, result, result_path)
+        else:
+            if expected_state != "BLOCKED" or not blockers or result.get("all_internal_requirements_closed") is not False:
+                fail(f"historical blocked result is malformed: {entry['tranche_id']}")
+
+        parent_sha = result_sha
+
+
 def expected_parent_receipt_sha256(repo: Path, plan: dict[str, Any], entry: dict[str, Any]) -> str:
     if entry["campaign_order"] == 1:
         return digest(activation_root(repo) / "active-campaign-admission.json")
@@ -787,11 +1228,11 @@ def expected_parent_receipt_sha256(repo: Path, plan: dict[str, Any], entry: dict
     return digest(previous_result)
 
 
-def validate_result(repo: Path, tranche_id: str) -> tuple[dict[str, Any], dict[str, Any], Path, str]:
+def validate_result(repo: Path, tranche_id: str, require_trusted_evidence: bool = True) -> tuple[dict[str, Any], dict[str, Any], Path, str]:
     _, plan_path, _, state_path = paths(repo)
     plan = load(plan_path)
     state = load(state_path)
-    validate_state(plan, state)
+    validate_runtime_state(repo, plan, state)
     entry = entry_by_id(plan, tranche_id)
     current = state.get("current")
     if not isinstance(current, dict) or current.get("tranche_id") != tranche_id or current.get("state") != "ADMITTED":
@@ -926,6 +1367,18 @@ def validate_result(repo: Path, tranche_id: str) -> tuple[dict[str, Any], dict[s
             fail(f"test timeout is invalid: {requirement_id}")
         if item.get("node_version") not in ("v20.20.2", None):
             fail(f"test used a non-authoritative Node version: {requirement_id}")
+        executable = Path(command[0]).name.lower()
+        if executable in TRIVIAL_EXECUTABLES or executable in FORBIDDEN_TEST_EXECUTABLES:
+            fail(f"test command uses a forbidden or trivial executable: {requirement_id}:{executable}")
+        if executable in {"bash", "sh", "zsh", "dash"} and any(token in {"-c", "-lc"} for token in command[1:]):
+            fail(f"test command uses an unauditable shell command string: {requirement_id}")
+        joined_command = " ".join(command)
+        if re.search(r"(?i)(?:password|passwd|secret|token|api[-_]?key|private[-_]?key|pgpassword)=", joined_command):
+            fail(f"test command contains a secret-like argv assignment: {requirement_id}")
+        if re.search(r"(?i)://[^/@:\s]+:[^/@\s]+@", joined_command):
+            fail(f"test command contains URL userinfo credentials: {requirement_id}")
+        if not requirement_command_is_bound(repo, command, requirement_id):
+            fail(f"test command is not bound to its exact requirement ID: {requirement_id}")
         if item.get("production_entrypoint") is True and not production_command_is_bound(
             repo, command, expected_record.get("issue_ids") or []
         ):
@@ -1013,6 +1466,14 @@ def validate_result(repo: Path, tranche_id: str) -> tuple[dict[str, Any], dict[s
         if result.get("node_runtime_identity") != "v20.20.2":
             fail(f"external-pending result lacks exact Node v20.20.2: {tranche_id}")
 
+    if complete_internal:
+        if not actual_changed:
+            fail(f"complete tranche result has no source postimage delta: {tranche_id}")
+        if not has_exact_owned_change(repo, entry, actual_changed):
+            fail(f"complete tranche result changed no exact owned source path: {tranche_id}")
+        if require_trusted_evidence:
+            validate_trusted_evidence(repo, entry, result, result_path)
+
     return entry, result, result_path, postimage["source_generation_id"]
 
 
@@ -1020,7 +1481,7 @@ def receipt_context(repo: Path, tranche_id: str) -> None:
     _, plan_path, _, state_path = paths(repo)
     plan = load(plan_path)
     state = load(state_path)
-    validate_state(plan, state)
+    validate_runtime_state(repo, plan, state)
     entry = entry_by_id(plan, tranche_id)
     current = state.get("current")
     if not isinstance(current, dict) or current.get("tranche_id") != tranche_id or current.get("state") != "ADMITTED":
@@ -1083,7 +1544,7 @@ def ensure_operator_window(repo: Path, seconds: int) -> None:
     _, plan_path, _, state_path = paths(repo)
     plan = load(plan_path)
     state = load(state_path)
-    validate_state(plan, state)
+    validate_runtime_state(repo, plan, state)
     stored = state.get("operator_window")
     if stored is None:
         start_epoch = int(datetime.now(timezone.utc).timestamp())
@@ -1176,7 +1637,7 @@ def check_s2(repo: Path) -> None:
     _, plan_path, _, state_path = paths(repo)
     plan = load(plan_path)
     state = load(state_path)
-    validate_state(plan, state)
+    validate_runtime_state(repo, plan, state)
     expected = [e["tranche_id"] for e in plan_entries(plan)[:13]]
     if state.get("accepted_tranches", [])[:13] != expected or state.get("last_accepted_order", 0) < 13:
         fail("S2 is not fully accepted")
