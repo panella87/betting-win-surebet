@@ -26,9 +26,6 @@ Run this command on the server from a persistent operator session. For a first l
 
   cd "$repo"
 
-  [[ -z "$(git status --porcelain=v1 --untracked-files=all)" ]] ||
-    fail 'repository worktree or index is not clean'
-
   if [[ -e "$state" || -L "$state" ]]; then
     [[ -f "$state" && ! -L "$state" ]] ||
       fail "campaign state is not a safe regular file: $state"
@@ -51,6 +48,9 @@ PY_STATE
     [[ "$(git rev-parse --verify HEAD)" == "$admitted_commit" ]] ||
       fail 'current HEAD differs from the admitted campaign commit; do not delete or replace campaign state'
   else
+    [[ -z "$(git status --porcelain=v1 --untracked-files=all)" ]] ||
+      fail 'first campaign launch requires a clean worktree and index'
+
     branch="$(git symbolic-ref --quiet --short HEAD)" ||
       fail 'repository is not on a local branch'
     remote="$(git config --get "branch.$branch.remote")" ||
@@ -65,13 +65,13 @@ PY_STATE
 
     GIT_TERMINAL_PROMPT=0 \
     GIT_SSH_COMMAND='ssh -o BatchMode=yes -o StrictHostKeyChecking=yes' \
-      git fetch --prune "$remote"
+      timeout --foreground 120s git fetch --prune "$remote"
 
     git show-ref --verify --quiet "$upstream_ref" ||
       fail "fetched upstream ref is missing: $upstream_ref"
     git merge-base --is-ancestor HEAD "$upstream_ref" ||
       fail 'local HEAD is ahead of or diverged from the fetched upstream'
-    git merge --ff-only "$upstream_ref"
+    timeout --foreground 120s git merge --ff-only "$upstream_ref"
 
     [[ -z "$(git status --porcelain=v1 --untracked-files=all)" ]] ||
       fail 'repository is not clean after fast-forward synchronization'
@@ -79,8 +79,18 @@ PY_STATE
 
   [[ -s "$HOME/.nvm/nvm.sh" ]] ||
     fail "nvm loader missing: $HOME/.nvm/nvm.sh"
-  . "$HOME/.nvm/nvm.sh"
-  nvm use 20.20.2 >/dev/null
+
+  set +u
+  if ! . "$HOME/.nvm/nvm.sh"; then
+    set -u
+    fail 'failed to load nvm runtime'
+  fi
+  if ! nvm use 20.20.2 >/dev/null; then
+    set -u
+    fail 'Node 20.20.2 is not installed or could not be selected'
+  fi
+  set -u
+
   [[ "$(node --version)" == 'v20.20.2' ]] ||
     fail "exact Node v20.20.2 is required; observed $(node --version 2>/dev/null || printf missing)"
 
@@ -92,6 +102,8 @@ PY_STATE
 ```
 
 The command never deletes campaign state, force-unlocks, changes Git configuration, stashes local work, resets, or starts a detached process. `StrictHostKeyChecking=yes` means an absent or mismatched SSH host key is a blocker; pin and verify the destination key independently before first contact.
+
+A clean worktree and index are required only before the campaign state is first created. A resumed campaign may legitimately contain retained source deltas from its admitted or accepted tranches. Do not clean, reset, stash, or overwrite those deltas. The launcher validates the unchanged Git commit, branch, and upstream, then re-derives the exact current delta from retained preimages and receipts before continuing.
 
 After synchronization, the operator activates exact Node `v20.20.2` and invokes `run-unattended-remediation-campaign.sh` in the foreground. The launcher initializes or resumes `artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/campaign-state.json`, obtains one kernel lock, captures one preimage per tranche, and processes exactly one admitted tranche at a time.
 

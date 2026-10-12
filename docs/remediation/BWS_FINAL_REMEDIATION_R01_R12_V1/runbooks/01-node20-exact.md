@@ -21,8 +21,8 @@ Every tranche with Node build, test, CLI, validator, controller, or runtime evid
 
 ## Procedure
 
-1. Load the repository-approved Node mechanism in a subshell.
-2. Require `node --version` to equal `v20.20.2` byte-for-byte.
+1. Load the operator-installed NVM runtime in a subshell, temporarily disabling `nounset` only while sourcing NVM.
+2. Require `node --version` to equal `v20.20.2` byte-for-byte. Do not invoke the `nvm` shell function or the `command` shell builtin through `timeout`; only external diagnostics are wrapped.
 3. Capture `command -v node`, Node version, npm version, platform, architecture, and binary SHA-256.
 4. Bind the runtime evidence to every test/environment receipt.
 5. Reject Node 22 as acceptance even when results pass.
@@ -35,12 +35,19 @@ Every tranche with Node build, test, CLI, validator, controller, or runtime evid
   repo="${REPO_DIR:?REPO_DIR is required}"
   test -d "$repo" && cd "$repo"
   test -s "$HOME/.nvm/nvm.sh"
+
+  set +u
   . "$HOME/.nvm/nvm.sh"
-  timeout 120s nvm use 20.20.2 >/dev/null
+  nvm use 20.20.2 >/dev/null
+  set -u
+
   test "$(node --version)" = "v20.20.2"
-  timeout 120s command -v node
-  timeout 120s sha256sum "$(command -v node)"
-  timeout 120s npm --version
+  node_path="$(command -v node)"
+  test -n "$node_path" && test -x "$node_path"
+  printf 'node_path=%s\n' "$node_path"
+  timeout --foreground 120s sha256sum -- "$node_path"
+  timeout --foreground 120s node -p     'JSON.stringify({version:process.version,platform:process.platform,arch:process.arch})'
+  timeout --foreground 120s npm --version
 )
 ```
 

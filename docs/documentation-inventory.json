@@ -64,6 +64,14 @@
       "regular_files": 997,
       "role": "HISTORICAL_INPUT_VERIFIED_BY_2026_10_12_DOCUMENTATION_AUDIT",
       "sha256": "aab2ac14165930c8cc1d3112be582843a563177fbd3b1d78c167e038a4aea3b1"
+    },
+    {
+      "archive": "betting-win-surebet135.zip",
+      "current_source_authority": false,
+      "documentation_records": 531,
+      "regular_files": 997,
+      "role": "HISTORICAL_INPUT_VERIFIED_BY_2026_10_12_DOCUMENTATION_AUDIT",
+      "sha256": "ec7e3100b40dd7f8a48d66a1e8a3ff758ec9049576f8e3a51b17e8e9eb68856c"
     }
   ],
   "documents": [
@@ -1054,7 +1062,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/immutable-authority.sha256",
       "purpose": "Active campaign admission, routing, execution, safety, or validation authority.",
-      "sha256": "a6fc23cd4f135cc886fa17dc36175d3cf260247e83b71ce48023e3bf1fc5428b",
+      "sha256": "84a183f655df671fe27e76d7d1ed615fac6298ada9a53a257b81920dd66c9f3e",
       "topic": "remediation_activation",
       "topic_owner": "active_remediation_admission"
     },
@@ -1090,7 +1098,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/server-runbook.md",
       "purpose": "Active campaign admission, routing, execution, safety, or validation authority.",
-      "sha256": "78e478e0b67b555e513162cc8e568520419cc6036949d8ef41797e31a330d75a",
+      "sha256": "bd4b0e08479706397a76b10376ceaac7b0ba5de4c1b783a6fb2f850059d55f6a",
       "topic": "remediation_activation",
       "topic_owner": "active_remediation_admission"
     },
@@ -2170,7 +2178,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/runbooks/01-node20-exact.md",
       "purpose": "R01-R12 remediation architecture, map, schema, runbook, receipt, or proof contract.",
-      "sha256": "b1ef80b4b05bceede0fa7f4cbe49bcbd9c98a4114b8d59f2ac8b496f8355835d",
+      "sha256": "6b0b4153a05bc34c0debef542713c7f22bf677c943400befcd53fb522c31e78e",
       "topic": "remediation_program",
       "topic_owner": "R01_R12_remediation_program"
     },
