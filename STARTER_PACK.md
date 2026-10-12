@@ -53,7 +53,7 @@ Use the exact server command in `docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_
 
 ## Returning evidence
 
-After a controller or campaign stops, run `pull_artifacts_and_zip_codebase.sh` from the local repository root. Return both newly numbered files:
+After a controller or campaign stops, use `pull_artifacts_and_zip_codebase.sh` only after T39 is accepted in the current source or after the destination host key has already been independently verified and pinned in the local SSH trust store. Before either condition is true, the current helper's `StrictHostKeyChecking=accept-new` path must not establish first-use trust while sending `SSH_PASSWORD`; use a separately reviewed strict transfer instead. Then run the helper from the local repository root and return both newly numbered files:
 
 - `artifactsN.zip` for retained server evidence;
 - `betting-win-surebetN.zip` for current source.

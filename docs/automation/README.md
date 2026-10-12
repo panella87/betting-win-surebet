@@ -38,7 +38,7 @@ automation.config.sh                    executable repository profile and comman
 ## Helper behavior
 
 - `zip_codebase.sh` includes tracked and untracked non-ignored source, excludes archives, secrets, logs, databases, runtime evidence, generated output, and transient paths, and creates no manifest.
-- `pull_artifacts_and_zip_codebase.sh` reads explicit SSH settings from environment then `.env`, downloads root `artifacts.zip`, stores a numbered local artifact ZIP, and invokes local `zip_codebase.sh`.
+- `pull_artifacts_and_zip_codebase.sh` reads explicit SSH settings from environment then `.env`, downloads root `artifacts.zip`, stores a numbered local artifact ZIP, and invokes local `zip_codebase.sh`. Until T39 is accepted, its executable preimage still combines `sshpass` with `StrictHostKeyChecking=accept-new`; it may be used only when the destination key is already independently verified and pinned, never to establish first-use trust.
 - `update_git.sh --pull` uses fast-forward-only pull with autostash. `--acp` stages required executable modes before commit and push.
 - Root controllers return to the current shell and do not require `exec` or a stop helper.
 

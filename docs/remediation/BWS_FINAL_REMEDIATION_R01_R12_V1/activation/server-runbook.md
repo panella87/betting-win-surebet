@@ -2,7 +2,96 @@
 
 Target repository: `$HOME/app_testing/betting-win-surebet`.
 
-Before T39 is accepted, `update_git.sh` is itself inside the admitted correction boundary. Bootstrap synchronization therefore uses a strict, non-interactive, fast-forward-only Git pull without mutating repository Git configuration. SSH remotes require an already pinned host key and batch authentication; missing trust or credentials stop the launch.
+Before T39 is accepted, `update_git.sh` is itself inside the admitted correction boundary. Bootstrap synchronization therefore uses a strict, non-interactive, fast-forward-only Git update without mutating repository Git configuration. SSH remotes require an already pinned host key and batch authentication; missing trust or credentials stop the launch.
+
+## Exact foreground launch
+
+Run this command on the server from a persistent operator session. For a first launch it performs a clean, strict fetch and fast-forward update. For a resumed campaign it refuses to change Git authority and requires `HEAD` to remain equal to the commit recorded in campaign state.
+
+```bash
+(
+  set -Eeuo pipefail
+  umask 077
+
+  repo="$HOME/app_testing/betting-win-surebet"
+  state="$repo/artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/campaign-state.json"
+
+  fail() {
+    printf 'ERROR: %s\n' "$*" >&2
+    return 1
+  }
+
+  [[ -d "$repo/.git" && ! -L "$repo" ]] ||
+    fail "repository missing or unsafe: $repo"
+
+  cd "$repo"
+
+  [[ -z "$(git status --porcelain=v1 --untracked-files=all)" ]] ||
+    fail 'repository worktree or index is not clean'
+
+  if [[ -e "$state" || -L "$state" ]]; then
+    [[ -f "$state" && ! -L "$state" ]] ||
+      fail "campaign state is not a safe regular file: $state"
+
+    admitted_commit="$(python3 - "$state" <<'PY_STATE'
+import json
+import re
+import sys
+
+with open(sys.argv[1], encoding='utf-8') as handle:
+    value = json.load(handle).get('initial_git', {}).get('commit')
+
+if not isinstance(value, str) or re.fullmatch(r'(?:[0-9a-f]{40}|[0-9a-f]{64})', value) is None:
+    raise SystemExit(2)
+
+print(value)
+PY_STATE
+    )" || fail 'campaign state has no valid initial Git commit'
+
+    [[ "$(git rev-parse --verify HEAD)" == "$admitted_commit" ]] ||
+      fail 'current HEAD differs from the admitted campaign commit; do not delete or replace campaign state'
+  else
+    branch="$(git symbolic-ref --quiet --short HEAD)" ||
+      fail 'repository is not on a local branch'
+    remote="$(git config --get "branch.$branch.remote")" ||
+      fail "branch has no configured remote: $branch"
+    [[ -n "$remote" && "$remote" != '.' ]] ||
+      fail "branch remote is invalid for strict synchronization: $remote"
+
+    upstream_ref="$(git rev-parse --verify --symbolic-full-name '@{upstream}')" ||
+      fail "branch has no valid upstream: $branch"
+    [[ "$upstream_ref" == refs/remotes/* ]] ||
+      fail "upstream is not a remote-tracking ref: $upstream_ref"
+
+    GIT_TERMINAL_PROMPT=0 \
+    GIT_SSH_COMMAND='ssh -o BatchMode=yes -o StrictHostKeyChecking=yes' \
+      git fetch --prune "$remote"
+
+    git show-ref --verify --quiet "$upstream_ref" ||
+      fail "fetched upstream ref is missing: $upstream_ref"
+    git merge-base --is-ancestor HEAD "$upstream_ref" ||
+      fail 'local HEAD is ahead of or diverged from the fetched upstream'
+    git merge --ff-only "$upstream_ref"
+
+    [[ -z "$(git status --porcelain=v1 --untracked-files=all)" ]] ||
+      fail 'repository is not clean after fast-forward synchronization'
+  fi
+
+  [[ -s "$HOME/.nvm/nvm.sh" ]] ||
+    fail "nvm loader missing: $HOME/.nvm/nvm.sh"
+  . "$HOME/.nvm/nvm.sh"
+  nvm use 20.20.2 >/dev/null
+  [[ "$(node --version)" == 'v20.20.2' ]] ||
+    fail "exact Node v20.20.2 is required; observed $(node --version 2>/dev/null || printf missing)"
+
+  BWS_CAMPAIGN_DURATION=7d \
+  BWS_MODEL=cli-default \
+  BWS_FALLBACK_MODEL=none \
+    bash docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/run-unattended-remediation-campaign.sh
+)
+```
+
+The command never deletes campaign state, force-unlocks, changes Git configuration, stashes local work, resets, or starts a detached process. `StrictHostKeyChecking=yes` means an absent or mismatched SSH host key is a blocker; pin and verify the destination key independently before first contact.
 
 After synchronization, the operator activates exact Node `v20.20.2` and invokes `run-unattended-remediation-campaign.sh` in the foreground. The launcher initializes or resumes `artifacts/remediation_campaign/BWS_FINAL_REMEDIATION_R01_R12_V1/campaign-state.json`, obtains one kernel lock, captures one preimage per tranche, and processes exactly one admitted tranche at a time.
 

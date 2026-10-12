@@ -56,6 +56,14 @@
       "regular_files": 995,
       "role": "HISTORICAL_INPUT_VERIFIED_BY_2026_09_14_DOCUMENTATION_AUDIT",
       "sha256": "cc976c7efd5a97a262d1772001dda513775a2b282c0d8ec1055ebe97dd8dfdd4"
+    },
+    {
+      "archive": "betting-win-surebet134.zip",
+      "current_source_authority": false,
+      "documentation_records": 531,
+      "regular_files": 997,
+      "role": "HISTORICAL_INPUT_VERIFIED_BY_2026_10_12_DOCUMENTATION_AUDIT",
+      "sha256": "aab2ac14165930c8cc1d3112be582843a563177fbd3b1d78c167e038a4aea3b1"
     }
   ],
   "documents": [
@@ -208,7 +216,7 @@
       "mode": "0744",
       "path": "STARTER_PACK.md",
       "purpose": "Current repository navigation, status, operator, or policy authority.",
-      "sha256": "cc844415fb173034113830e8aba05d790ac7fa62972605fb68a8783bdc041acc",
+      "sha256": "5a48e536f0300dca9cd630da49c3781e09b03831a13ee06e9ca564870ff965f4",
       "topic": "repository_authority",
       "topic_owner": "repository_current_authority"
     },
@@ -775,7 +783,7 @@
       "mode": "0744",
       "path": "docs/automation/README.md",
       "purpose": "Executable automation command, controller, protection, artifact, or filesystem contract.",
-      "sha256": "02fe2aa3ee16d67c1cf5608502fb084ef0a14a6c9ccc7ebf67a379fad7892599",
+      "sha256": "9484b1ac4119532a5cd191484b7a0e9d0b584d09a22ae73b3c81f30a0d458e53",
       "topic": "automation",
       "topic_owner": "repository_automation_contract"
     },
@@ -784,7 +792,7 @@
       "mode": "0744",
       "path": "docs/automation/SSH_KEY_SETUP.md",
       "purpose": "Executable automation command, controller, protection, artifact, or filesystem contract.",
-      "sha256": "f66d99bd25463935d3567260c153416d1c20f41f20234a2f8dbffd19360dcebb",
+      "sha256": "40754ce52ad5d36c5485f86321a68fb620f6f301e8c0c104cddd08734b398f6e",
       "topic": "automation",
       "topic_owner": "repository_automation_contract"
     },
@@ -1046,7 +1054,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/immutable-authority.sha256",
       "purpose": "Active campaign admission, routing, execution, safety, or validation authority.",
-      "sha256": "dea34d92eb64290cbeb8e04d7519445cb8c220ae280f6bb9665c033eb74a17a8",
+      "sha256": "a6fc23cd4f135cc886fa17dc36175d3cf260247e83b71ce48023e3bf1fc5428b",
       "topic": "remediation_activation",
       "topic_owner": "active_remediation_admission"
     },
@@ -1082,7 +1090,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/server-runbook.md",
       "purpose": "Active campaign admission, routing, execution, safety, or validation authority.",
-      "sha256": "07cc919138d8b6ba0c7b94c46595f1faf86d0284668780738b75a807fa0e7220",
+      "sha256": "78e478e0b67b555e513162cc8e568520419cc6036949d8ef41797e31a330d75a",
       "topic": "remediation_activation",
       "topic_owner": "active_remediation_admission"
     },
