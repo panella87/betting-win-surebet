@@ -5,9 +5,18 @@
 
 ## Current repository state
 
-The broad bugfix campaign is complete and accepted. The terminal parent `artifacts/bugfix_autopilot_20260812T133805Z` finished with `BUGFIX_AUTOPILOT_COMPLETE`, `all_campaign_areas_closed`, 22 rounds, and all 8 campaign areas closed. Its final cross-area audit passed the full baseline and PostgreSQL-backed loopback acceptance. No active bugfix or implementation queue remains; the next selected phase is the externally gated `BWS-600` paper/runtime-evidence campaign.
+```text
+active_program=BWS_FINAL_REMEDIATION_R01_R12_V1
+current_admitted_tranche=BWS-W4-T39
+bugfix_autopilot_selected_now=no
+pre_s2_existing_controllers=prohibited
+```
 
-`run-bugfix-autopilot.sh` remains available for a future, newly evidenced broad audit. It is not the selected controller for the current BWS-600 runtime-evidence task.
+`run-bugfix-autopilot.sh` remains available only for a future, newly evidenced broad audit after the active remediation route no longer binds. It is not selected by the current remediation campaign and does not own the blocked BWS-600 evidence gate.
+
+## Historical completed campaign
+
+The prior broad bugfix campaign is complete and accepted. The terminal parent `artifacts/bugfix_autopilot_20260812T133805Z` finished with `BUGFIX_AUTOPILOT_COMPLETE`, `all_campaign_areas_closed`, 22 rounds, and all 8 campaign areas closed. Its final cross-area audit passed the full baseline and PostgreSQL-backed loopback acceptance. Immediately before remediation activation, the next planned phase was the externally gated `BWS-600` paper/runtime-evidence campaign. That sequence is historical and does not select current work.
 
 `run-bugfix-autopilot.sh` is the unattended parent for bounded source-audit hardening. It is separate from `run-paper-autopilot.sh` and enforces a mandatory same-area re-audit after every validated implementation. The enforced lifecycle is `audit -> implementation -> same-area re-audit`.
 

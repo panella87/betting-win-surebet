@@ -36,7 +36,13 @@ Protected paths are immutable during ordinary cycles. Exact task-file authorizat
 
 ## Retained ledger references
 
-`backlog/bws_full_implementation.csv` and `backlog/bws_remaining_safe_local_map.csv` preserve completed platform traceability. BWS-100` through `BWS-589` are validated carry-forward foundations, with BWS-590 and BWS-599 retained as completed gates.
+`backlog/bws_full_implementation.csv` and `backlog/bws_remaining_safe_local_map.csv` preserve completed platform traceability. `BWS-100` through `BWS-589` are validated carry-forward foundations, with `BWS-590` and `BWS-599` retained as completed gates.
+
+The malformed literal below is retained only because the current executable continuation validator still asserts it. It is compatibility text, not canonical prose:
+
+```text
+BWS-100` through `BWS-589` are validated carry-forward foundations
+```
 
 ## Historical full-platform continuity
 

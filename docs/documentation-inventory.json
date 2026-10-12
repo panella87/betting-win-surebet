@@ -72,6 +72,14 @@
       "regular_files": 997,
       "role": "HISTORICAL_INPUT_VERIFIED_BY_2026_10_12_DOCUMENTATION_AUDIT",
       "sha256": "ec7e3100b40dd7f8a48d66a1e8a3ff758ec9049576f8e3a51b17e8e9eb68856c"
+    },
+    {
+      "archive": "betting-win-surebet136.zip",
+      "current_source_authority": false,
+      "documentation_records": 531,
+      "regular_files": 997,
+      "role": "HISTORICAL_INPUT_VERIFIED_BY_2026_10_12_DOCUMENTATION_AUDIT",
+      "sha256": "56b11ad119284f61c84fd2953e238d2aaac761d836fea823d4f6a67edb178001"
     }
   ],
   "documents": [
@@ -431,7 +439,7 @@
       "mode": "0744",
       "path": "docs/010_paper_evaluation_and_kill_criteria.md",
       "purpose": "Supporting product architecture, domain, runtime, validation, or hold contract.",
-      "sha256": "79fc00c69fd122ff3cfcc62b08d1ac7a988404da4f5cba5b44b78f501f1a9e7a",
+      "sha256": "f99b45cf9d318ac82dbc2adafdc309e4cda15947fdad4cd6ff738a8c34e6957e",
       "topic": "product_contract",
       "topic_owner": "product_contract_set"
     },
@@ -836,7 +844,7 @@
       "mode": "0744",
       "path": "docs/automation/autonomous-implementation.md",
       "purpose": "Executable automation command, controller, protection, artifact, or filesystem contract.",
-      "sha256": "4a03dcd4846b2bb97ef06daf8d25097c56b5ffba11b69a4638d1236164763aa4",
+      "sha256": "a16f2b388a9f2fc6344fbd653dfc0f57ccce63bfbbbd67812d54cb4760018f89",
       "topic": "automation",
       "topic_owner": "repository_automation_contract"
     },
@@ -845,7 +853,7 @@
       "mode": "0744",
       "path": "docs/automation/bugfix-autopilot.md",
       "purpose": "Executable automation command, controller, protection, artifact, or filesystem contract.",
-      "sha256": "1fbae6d5e2d51165ac54b3d46c95289401275ffdb7fdd31c697a60e55a4b96b9",
+      "sha256": "0c3eba390ab28d00fee9daedcbbf9497068564f4e4f5613682c5ab44143382a1",
       "topic": "automation",
       "topic_owner": "repository_automation_contract"
     },
@@ -863,7 +871,7 @@
       "mode": "0744",
       "path": "docs/automation/paper-autopilot.md",
       "purpose": "Executable automation command, controller, protection, artifact, or filesystem contract.",
-      "sha256": "b682fad2a0171744acd762dbe908bee9be9d1de5bf32555e6915cb59d22c0dd2",
+      "sha256": "85ddf701b32a6bbf518ce1914e15e6faddc827172c30b33d9dce583e3857cfbd",
       "topic": "automation",
       "topic_owner": "repository_automation_contract"
     },
@@ -872,7 +880,7 @@
       "mode": "0744",
       "path": "docs/automation/paper-evaluation.md",
       "purpose": "Executable automation command, controller, protection, artifact, or filesystem contract.",
-      "sha256": "a74cecc190bbc4b4b3af373603a54c6bfd8bec60d4a6af89e25c0b0e06444553",
+      "sha256": "b8f374667efa6641cf4f658f0f967690229615c7b5bd4c6d00075d1f955b5805",
       "topic": "automation",
       "topic_owner": "repository_automation_contract"
     },
@@ -4924,17 +4932,17 @@
   "upstream_read_only_audit_receipts": [
     {
       "archive": "betting-win299.zip",
-      "sha256": "3ce855567a954c63f7dfbd61b208ef962f7cd4eac1f4a1dd2551685f205e464a",
-      "regular_files": 2762,
-      "package_version": "0.48.0",
-      "node_engine": "20.x",
       "archive_has_git_metadata": false,
+      "audit_date": "2026-10-12",
+      "b1_full_readiness_claimed": false,
+      "node_engine": "20.x",
+      "package_version": "0.48.0",
+      "regular_files": 2762,
+      "role": "READ_ONLY_EXTERNAL_COMPATIBILITY_EVIDENCE_NOT_RUNTIME_LOCK",
+      "runtime_api_handoff_allowed": false,
       "self_reported_git_head": "334950bea22a8778362f0efa78fca09b3c0582ed",
       "self_reported_git_tree": "4b609c2b889d141c653a555fc0550dfe2f884543",
-      "runtime_api_handoff_allowed": false,
-      "b1_full_readiness_claimed": false,
-      "role": "READ_ONLY_EXTERNAL_COMPATIBILITY_EVIDENCE_NOT_RUNTIME_LOCK",
-      "audit_date": "2026-10-12"
+      "sha256": "3ce855567a954c63f7dfbd61b208ef962f7cd4eac1f4a1dd2551685f205e464a"
     }
   ]
 }

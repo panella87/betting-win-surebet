@@ -1,6 +1,6 @@
 # Paper evaluation controller: betting-win-surebet
 
-> **Routing note:** This standalone evaluator remains available for explicit supervised use, but it is not the active remediation driver.
+> **Routing note:** This standalone evaluator remains available for explicit supervised use, but it is not the active remediation driver. The current campaign has T39 admitted and prohibits existing root controllers before the complete S2 gate.
 
 
 `run-paper-evaluation.sh` is the retained standalone fixture, explicit pinned-bundle, or bounded runtime-evidence evaluator. It replaces the obsolete `run-paper-evaluation-12h.sh`; no 12-hour helper should exist.
@@ -19,6 +19,6 @@ parent_integration_task=BWS-589_VALIDATED
 
 It is not the selected implementation controller and cannot prove continuous `BWS-600` readiness on its own. It may validate repo source, run bounded private fixture or explicit repo-local pinned-bundle checks, or collect bounded runtime evidence with exact stack ownership checks. The current protected script accepts explicit `--interval` values as provided; standardized operation must use `--adaptive` with explicit intervals inside `5m..60m` until a reviewed protected-controller repair adds automatic enforcement. The explicit pinned-bundle variable remains `SUREBET_PINNED_BUNDLE`.
 
-`BWS-589` integrated this child mode into paper autopilot with selected upstream mode, campaign identity, source-defect handoffs, atomic child results and parent-owned final notification. The selected `BWS-600` route is the parent `run-paper-autopilot.sh`, not a standalone paper child.
+`BWS-589` integrated this child mode into paper autopilot with selected upstream mode, campaign identity, source-defect handoffs, atomic child results and parent-owned final notification. In the retained pre-remediation route, `run-paper-autopilot.sh` was the planned `BWS-600` parent rather than this standalone child. Neither paper controller is selected during the active remediation campaign.
 
 Fixture success, dashboard-only availability, and local-only runtime evidence cannot validate `BWS-600`; runtime evidence requires the accepted route/envelope/provenance contract and real provider-to-PostgreSQL-to-API parity. Direct provider calls, direct betting-win database reads, execution, public signals and profitability claims remain prohibited.
