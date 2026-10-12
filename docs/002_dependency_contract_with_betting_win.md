@@ -2,7 +2,7 @@
 
 ```text
 document_role=CANONICAL_BETTING_WIN_ECOSYSTEM_INTEGRATION_CONTRACT
-ecosystem_alignment_wave=73
+ecosystem_alignment_wave=betting_win299_read_only_reconciliation
 repo_role=surebet_strategy_application
 upstream_platform=betting-win
 provider_truth_owner=betting-win
@@ -17,18 +17,21 @@ execution_library_runtime_owner=downstream_process
 
 ## Inspected upstream source
 
-This integration audit inspected the uploaded `betting-win` 0.48.0 source archive with SHA-256:
+This reconciliation inspected the uploaded `betting-win299.zip` source archive read-only:
 
 ```text
-betting_win_source_audit_archive=betting-win218(3).zip
-betting_win_source_audit_sha256=7b2c3a48bbc4cba95bcace384bb20892916a5958e6477d49651c983b16d11dc2
+betting_win_source_audit_archive=betting-win299.zip
+betting_win_source_audit_sha256=3ce855567a954c63f7dfbd61b208ef962f7cd4eac1f4a1dd2551685f205e464a
+betting_win_source_audit_regular_files=2762
 betting_win_source_audit_package_version=0.48.0
 betting_win_source_audit_node=20.x
 betting_win_source_audit_git_metadata=absent
+betting_win_source_self_reported_git_head=334950bea22a8778362f0efa78fca09b3c0582ed
+betting_win_source_self_reported_git_tree=4b609c2b889d141c653a555fc0550dfe2f884543
 betting_win_source_audit_role=architecture_and_compatibility_evidence_not_runtime_lock
 ```
 
-The current source contains `apps/api`, `apps/web`, `apps/workers`, the provider/data packages, and `@betting-win/execution-sdk`. Runtime identity still comes from the operator-provided betting-win checkout's committed `HEAD`, not from this archive.
+The source now contains a much larger provider, PostgreSQL, query, dashboard, execution-SDK, testing, and remediation surface. The self-reported Git identity above is repository prose from the archive; it does not bind every archive byte. Runtime identity must still come from an independently verified operator checkout and immutable handoff receipt, not from this ZIP.
 
 ## Three-repository ownership
 
@@ -58,11 +61,21 @@ Pinned exports bind source commit or source-manifest hash, provider generation, 
 
 ## Current runtime API compatibility result
 
-The inspected betting-win source implements a large GET-only operator API under `/dashboard/*`. It also contains foundation/query application contracts for identity, rules, and normalized records. However, the repository explicitly records:
+The newer source contains an eight-route foundation OpenAPI surface, including the three query paths BWS needs:
+
+```text
+/query/identity-entities
+/query/rule-profiles
+/query/normalized-records
+```
+
+That narrows the path-name gap, but it does not complete the runtime handoff. The default `api:serve-read-only` command still launches `apps/api/dist/server.js`, whose externally served route family is `/health` plus `/dashboard/*`. No `/contract` negotiation route exists. The source query responses use the foundation page shape `schemaVersion,phase,query,pageSize,returnedCount,nextCursor,items`; BWS requires the separately pinned envelope `contractVersion,contractSchema,contractAlias,surebetProfile,resource,provenance,page`.
 
 ```text
 upstream_downstream_runtime_api_handoff_allowed=no
-upstream_operator_server_route_family=/dashboard/*
+upstream_real_operational_system_status=not_ready
+upstream_default_operator_server_route_family=/health,/dashboard/*
+upstream_foundation_query_routes_present_in_source=yes
 upstream_contract_negotiation_endpoint=not_found
 bws_required_contract_probe=/contract
 bws_required_query_routes=/query/identity-entities,/query/rule-profiles,/query/normalized-records
@@ -70,7 +83,7 @@ bws_required_response_envelope=contractVersion,contractSchema,contractAlias,sure
 current_cross_repo_runtime_wire_status=NOT_ACCEPTED_NOT_COMPATIBLE
 ```
 
-The current BWS client must not be pointed at the upstream dashboard server and treated as integrated. The route family, contract negotiation, response envelope, and exact committed-HEAD provenance contract are not accepted as one deployable cross-repository interface.
+The current BWS client must not be pointed at either the dashboard server or an unapproved internal query application and treated as integrated. Similar route names do not establish deployment, version negotiation, response-envelope compatibility, immutable provenance, provider parity, or downstream authorization.
 
 The platform-side resolution must be one of these explicit reviewed outcomes:
 
@@ -99,10 +112,13 @@ Until then, `run-paper-autopilot.sh` is the selected future parent but is launch
 
 ## B1 data contract
 
-The upstream source declares and sample-validates `betting-win.b1_multi_venue_markets.v1`. That proves a schema target exists. It does not prove an accepted live/runtime resource, multi-venue completeness, provider parity, or downstream API authorization.
+The upstream source still declares and sample-validates `betting-win.b1_multi_venue_markets.v1`. Its current validator exercises descriptive moneyline rows with canonical event/market/selection IDs, equivalence keys, provider and venue identity, timestamps, decimal odds, settlement compatibility, raw-payload hash, and quality flags while rejecting downstream strategy fields.
+
+This is stronger schema evidence than the earlier snapshot, but it remains a sample contract rather than an accepted runtime resource. The upstream status explicitly retains `B1_FULL_READINESS_NOT_CLAIMED=yes`, and the POC canonical D1 row count is zero. The sample does not establish complete multi-venue grouping, accepted depth/fillability, provider-generation authority, complete settlement/finality proof, downstream runtime publication, or API handoff authorization.
 
 ```text
-bws710_schema_definition_status=DECLARED_STUB_AND_SAMPLE_VALIDATED
+bws710_schema_definition_status=DECLARED_AND_SAMPLE_VALIDATED
+bws710_upstream_full_readiness_claimed=no
 bws710_runtime_resource_status=NOT_ACCEPTED_NOT_AUTHORIZED
 bws710_current_status=BLOCKED_ACCEPTED_BETTING_WIN_B1_MULTI_VENUE_API_REQUIRED
 ```
@@ -111,9 +127,9 @@ The legacy blocker code `B1_BLOCKED_UPSTREAM_CONTRACT_ABSENT` is retained for co
 
 ## Execution plane
 
-`betting-win` owns the strategy-free provider mechanics library `@betting-win/execution-sdk`; it does not expose an execution HTTP service. The SDK runs inside the downstream executor process.
+`betting-win` owns the strategy-free provider mechanics library `@betting-win/execution-sdk`; it does not expose an execution HTTP service. The SDK runs inside a separately authorized downstream executor process.
 
-The inspected package is npm-packable and exposes canonical contracts, client/preflight, provider capabilities, risk/kill-switch contracts, execution intents/results, reconciliation classifications, testing surfaces, and SX OBv3 non-writing mechanics. Its client methods currently return fail-closed blocked results for submit, cancel, close, redeem, order, position, balance, and reconciliation operations. Real provider writes remain unauthorized.
+The newer source describes the SDK as source-complete at a typed-held boundary while a named SX read-route/auth contradiction remains under upstream reconciliation. Downstream runtime integration is incomplete and real provider writes remain unauthorized. This is not authority for BWS to consume the package, copy provider mechanics, or open BWS-900.
 
 BWS currently has no dependency on `@betting-win/execution-sdk`. Integration belongs only to separately authorized `BWS-900` work and must use a distinct SDK package/version/integrity lock. It must not reuse the data-plane lock and must not copy provider mechanics into BWS.
 

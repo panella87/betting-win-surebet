@@ -16,16 +16,21 @@ selected_controller=run-paper-autopilot.sh
 ## Inspected cross-repository wire status
 
 ```text
-betting_win_source_audit_sha256=7b2c3a48bbc4cba95bcace384bb20892916a5958e6477d49651c983b16d11dc2
-betting_win_operator_api_route_family=/dashboard/*
+betting_win_source_audit_archive=betting-win299.zip
+betting_win_source_audit_sha256=3ce855567a954c63f7dfbd61b208ef962f7cd4eac1f4a1dd2551685f205e464a
+betting_win_source_audit_regular_files=2762
+betting_win_foundation_query_paths_present_in_source=yes
+betting_win_default_operator_server_route_family=/health,/dashboard/*
+betting_win_contract_probe=/contract_absent
 betting_win_downstream_runtime_api_handoff_allowed=no
+betting_win_real_operational_system_status=not_ready
 bws_contract_probe=/contract
 bws_query_route_family=/query/*
 bws_expected_response_envelope=contractVersion,contractSchema,contractAlias,surebetProfile,resource,provenance,page
 bws600_current_wire_status=BLOCKED_NOT_ACCEPTED
 ```
 
-BWS-593 must reject a merely reachable dashboard API. It must prove the exact accepted downstream data contract and committed-HEAD provenance. The preflight cannot invent an adapter or infer that `/dashboard/*` is equivalent to the BWS `/query/*` contract.
+BWS-593 must reject a merely reachable dashboard API and must not equate source-only `/query/*` route definitions with an accepted deployed facade. It must prove the exact accepted downstream data contract, response envelope, committed-HEAD provenance, and real provider-to-PostgreSQL-to-API parity. The preflight cannot invent an adapter or infer compatibility from route-name overlap.
 
 ## BWS-593 preflight tooling
 

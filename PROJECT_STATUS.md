@@ -22,6 +22,30 @@ The 47-tranche remediation campaign covers 173 confirmed findings. T39 is first 
 
 The exact active routing authority is the activation package under `docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/`. `docs/repo_status_current.md` and `docs/automation/current-implementation-task.md` are immutable inputs to that package; their first sections are current. Their later BWS-600 sections are validator-retained historical compatibility text.
 
+## Latest read-only betting-win audit
+
+The uploaded `betting-win299.zip` source archive was inspected read-only on 2026-10-12. It is external compatibility evidence, not a runtime lock or permission to access, mutate, start, or deploy `betting-win`.
+
+```text
+betting_win_audit_archive=betting-win299.zip
+betting_win_audit_sha256=3ce855567a954c63f7dfbd61b208ef962f7cd4eac1f4a1dd2551685f205e464a
+betting_win_audit_regular_files=2762
+betting_win_package_version=0.48.0
+betting_win_node_engine=20.x
+betting_win_self_reported_git_head=334950bea22a8778362f0efa78fca09b3c0582ed
+betting_win_self_reported_git_tree=4b609c2b889d141c653a555fc0550dfe2f884543
+betting_win_archive_has_git_metadata=no
+betting_win_runtime_api_handoff_allowed=no
+betting_win_real_operational_system_status=not_ready
+betting_win_foundation_query_routes_present_in_source=yes
+betting_win_default_operator_server_route_family=/health,/dashboard/*
+betting_win_contract_negotiation_endpoint=/contract_absent
+betting_win_b1_schema_status=sample_validated_stub_only
+betting_win_b1_full_readiness_claimed=no
+```
+
+The newer upstream source materially expands provider, query, dashboard, execution-SDK, and remediation code. It still does not supply an accepted downstream runtime facade, the exact BWS response envelope, an accepted complete `betting-win.b1_multi_venue_markets.v1` resource, or real provider-to-PostgreSQL-to-API parity. BWS-600 and BWS-710 therefore remain blocked, and BWS-900 remains separately parked. No upstream source is copied into this repository.
+
 ## Holds and safety
 
 ```text

@@ -181,7 +181,7 @@
       "mode": "0744",
       "path": "PROJECT_STATUS.md",
       "purpose": "Current repository navigation, status, operator, or policy authority.",
-      "sha256": "fd15574ea96b21254fe1eca80786463e0a1103480506362fc056b6266b553fef",
+      "sha256": "1bdaf32a670b2b898ee2175ab5e344c2de2dff1e877d41d69ca0dc109db5d663",
       "topic": "repository_authority",
       "topic_owner": "repository_current_authority"
     },
@@ -343,7 +343,7 @@
       "mode": "0744",
       "path": "docs/002_dependency_contract_with_betting_win.md",
       "purpose": "Supporting product architecture, domain, runtime, validation, or hold contract.",
-      "sha256": "bdba05055d9c507d4d4ba1901d1cb5d18a15e8359b6c84a4027a6eaadb87ec3b",
+      "sha256": "e130ee9a3bb4c4f127481de6abcbf186d1a73ad403350b6e823fbe6c4d7b022c",
       "topic": "product_contract",
       "topic_owner": "product_contract_set"
     },
@@ -451,7 +451,7 @@
       "mode": "0744",
       "path": "docs/016_pinned_betting_win_interface_readiness.md",
       "purpose": "Supporting product architecture, domain, runtime, validation, or hold contract.",
-      "sha256": "d1870f6e9a14ef562925be6112b858f4432a27395ffbae9dca3f221986d1b26c",
+      "sha256": "2383369d5f6de43ac8c41d35ca656331b4d1d2a018b69aba9882292c07ce7a9a",
       "topic": "product_contract",
       "topic_owner": "product_contract_set"
     },
@@ -505,7 +505,7 @@
       "mode": "0744",
       "path": "docs/026_betting_win_platform_baseline.md",
       "purpose": "Supporting product architecture, domain, runtime, validation, or hold contract.",
-      "sha256": "f54864ce72a2bab80b57ad55f16b2c0458237cbcd88d7abe43bf2f45d5bbcae6",
+      "sha256": "18730aeb4669f1816e9cb66af0072bf832eac147dce6427d896ef0ab03d477de",
       "topic": "product_contract",
       "topic_owner": "product_contract_set"
     },
@@ -640,7 +640,7 @@
       "mode": "0744",
       "path": "docs/041_external_runtime_preflight_and_bws600_campaign.md",
       "purpose": "Supporting product architecture, domain, runtime, validation, or hold contract.",
-      "sha256": "cb2f35f37ace055037f3dc6e4a927773f63d6c25566f0c077ebc4b7792d5ab4c",
+      "sha256": "6f2d6e3fafdd9ce93f2e844aba6facd77d3d42c0a92f01d02a091c465e6a2fbe",
       "topic": "product_contract",
       "topic_owner": "product_contract_set"
     },
@@ -703,7 +703,7 @@
       "mode": "0644",
       "path": "docs/048_b1_upstream_contract.md",
       "purpose": "Supporting product architecture, domain, runtime, validation, or hold contract.",
-      "sha256": "a37339908cf947ab24dc9580345f0c742f39e1ca167544221a6f4ae138e2cecc",
+      "sha256": "feac394e596ddef250c98dcf59e006ba383dbd2c90d5119e0c2163f3fd9a03e2",
       "topic": "product_contract",
       "topic_owner": "product_contract_set"
     },
@@ -793,7 +793,7 @@
       "mode": "0644",
       "path": "docs/automation/api-only-upstream.md",
       "purpose": "Executable automation command, controller, protection, artifact, or filesystem contract.",
-      "sha256": "52031ce84c470b72aeb2f70b02de0f63035794c74481b2c3c687f5fdfa12d3ad",
+      "sha256": "2fff032da7ea5d0b692a49441d4bbfc64305122542d5136afb7014ba9bfe788e",
       "topic": "automation",
       "topic_owner": "repository_automation_contract"
     },
@@ -4840,7 +4840,7 @@
       "topic_owner": "template_reference"
     }
   ],
-  "generated_date": "2026-09-15",
+  "generated_date": "2026-10-12",
   "historical_documentation_alignment_receipt": {
     "application_source_modified": false,
     "audit_date": "2026-09-14",
@@ -4904,5 +4904,21 @@
       "sha256": "e303719e5ce64df47df7b0594433a8978e3b01c5a3d0d0bd9129b9b6340b20cd"
     },
     "repository_documentation_self_attests_current_archive": false
-  }
+  },
+  "upstream_read_only_audit_receipts": [
+    {
+      "archive": "betting-win299.zip",
+      "sha256": "3ce855567a954c63f7dfbd61b208ef962f7cd4eac1f4a1dd2551685f205e464a",
+      "regular_files": 2762,
+      "package_version": "0.48.0",
+      "node_engine": "20.x",
+      "archive_has_git_metadata": false,
+      "self_reported_git_head": "334950bea22a8778362f0efa78fca09b3c0582ed",
+      "self_reported_git_tree": "4b609c2b889d141c653a555fc0550dfe2f884543",
+      "runtime_api_handoff_allowed": false,
+      "b1_full_readiness_claimed": false,
+      "role": "READ_ONLY_EXTERNAL_COMPATIBILITY_EVIDENCE_NOT_RUNTIME_LOCK",
+      "audit_date": "2026-10-12"
+    }
+  ]
 }

@@ -41,6 +41,41 @@ execution_sdk=partial_fail_closed
 real_provider_writes=not_authorized
 ```
 
+## Latest read-only reconciliation snapshot
+
+```text
+audit_date=2026-10-12
+source_archive=betting-win299.zip
+source_archive_sha256=3ce855567a954c63f7dfbd61b208ef962f7cd4eac1f4a1dd2551685f205e464a
+regular_files=2762
+package_version=0.48.0
+node=20.x
+self_reported_git_head=334950bea22a8778362f0efa78fca09b3c0582ed
+self_reported_git_tree=4b609c2b889d141c653a555fc0550dfe2f884543
+archive_git_metadata=absent
+```
+
+Observed source capabilities and limits:
+
+```text
+foundation_query_paths_present=/query/identity-entities,/query/rule-profiles,/query/normalized-records
+default_operator_server_command=npm run api:serve-read-only
+default_operator_server_entrypoint=apps/api/dist/server.js
+default_operator_server_routes=/health,/dashboard/*
+contract_negotiation_endpoint=/contract_absent
+downstream_runtime_api_handoff_allowed=no
+real_operational_system_status=not_ready
+provider_to_postgres_to_api_real_acceptance=incomplete
+b1_schema=declared_and_sample_validated
+b1_full_readiness_claimed=no
+b1_runtime_resource=not_accepted
+execution_sdk=source_complete_typed_held
+downstream_runtime_integration_complete=no
+real_provider_writes=not_authorized
+```
+
+The route-name overlap is relevant future integration evidence, but it is not an accepted wire contract. The archive does not authorize source merging, provider access, BWS-600, BWS-710, or BWS-900.
+
 ## Machine-readable limitations
 
 ```text

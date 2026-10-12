@@ -23,9 +23,22 @@ provenance=exact_committed_head_lock
 
 ## Inspected betting-win status
 
-The current upstream operator server exposes GET-only `/dashboard/*` routes and records `DOWNSTREAM_RUNTIME_API_HANDOFF_ALLOWED=no`. Foundation/query contracts exist in source, but the inspected server does not expose an accepted `/contract` negotiation endpoint or the exact BWS response envelope.
+The latest read-only source audit is `betting-win299.zip` with SHA-256 `3ce855567a954c63f7dfbd61b208ef962f7cd4eac1f4a1dd2551685f205e464a`.
 
-Therefore an available betting-win HTTP process is not sufficient. `BWS-600` remains blocked until an explicit versioned downstream handoff is accepted and real provider-to-PostgreSQL-to-API parity is retained.
+The source foundation API defines the three BWS query path names, but the default operator runtime remains different:
+
+```text
+foundation_source_query_paths=/query/identity-entities,/query/rule-profiles,/query/normalized-records
+default_server_command=npm run api:serve-read-only
+default_server_entrypoint=apps/api/dist/server.js
+default_server_routes=/health,/dashboard/*
+contract_probe=/contract_absent
+foundation_response_shape=schemaVersion,phase,query,pageSize,returnedCount,nextCursor,items
+bws_response_shape=contractVersion,contractSchema,contractAlias,surebetProfile,resource,provenance,page
+downstream_runtime_api_handoff_allowed=no
+```
+
+Therefore route-name overlap or an available betting-win HTTP process is not sufficient. `BWS-600` remains blocked until an explicit versioned handoff is accepted and real provider-to-PostgreSQL-to-API parity is retained.
 
 ## Resolution rule
 
@@ -33,7 +46,7 @@ Resolve the mismatch through an explicit cross-repository contract change. Eithe
 
 ## B1 and execution
 
-`betting-win.b1_multi_venue_markets.v1` is declared/sample-validated but not an accepted runtime resource. `@betting-win/execution-sdk` is a separate partial fail-closed package and is not part of BWS-600. BWS-710 and BWS-900 remain blocked/parked respectively.
+`betting-win.b1_multi_venue_markets.v1` is declared and sample-validated, while upstream explicitly does not claim B1 full readiness. It is not an accepted runtime resource. `@betting-win/execution-sdk` is a separate typed-held package surface, downstream integration is incomplete, and real provider writes remain unauthorized. Neither belongs to BWS-600. BWS-710 and BWS-900 remain blocked or parked respectively.
 
 ## Required fail-fast wording
 

@@ -6,7 +6,8 @@ contract_schema=betting-win.b1_multi_venue_markets.v1
 contract_alias=betting-win-b1-multi-venue-markets.v1
 transport=read_only_api_only_for_runtime
 runtime_file_export_fallback=prohibited
-current_schema_definition_status=DECLARED_STUB_AND_SAMPLE_VALIDATED
+current_schema_definition_status=DECLARED_AND_SAMPLE_VALIDATED
+current_upstream_full_readiness_claimed=no
 current_runtime_resource_status=NOT_ACCEPTED_NOT_AUTHORIZED
 current_real_intake_status=BLOCKED_UPSTREAM_CONTRACT_ABSENT
 legacy_blocker_semantics=ACCEPTED_RUNTIME_CONTRACT_ABSENT_NOT_SCHEMA_NAME_ABSENT
@@ -14,7 +15,34 @@ legacy_blocker_semantics=ACCEPTED_RUNTIME_CONTRACT_ABSENT_NOT_SCHEMA_NAME_ABSENT
 
 ## Source reconciliation
 
-The inspected betting-win source contains the B1 schema name, validator, sample contract, and research/task references. This is useful contract design evidence. It does not prove that the running betting-win API exposes a complete multi-venue resource, that real provider observations cover the required venues/markets, or that downstream runtime handoff is authorized.
+The latest read-only audit used `betting-win299.zip` (SHA-256 `3ce855567a954c63f7dfbd61b208ef962f7cd4eac1f4a1dd2551685f205e464a`, 2762 regular files). It contains the B1 schema name, validator, sample contract, provider-neutral moneyline examples, and negative tests that reject settlement-incompatible or strategy-shaped rows.
+
+Observed sample row fields include:
+
+```text
+canonicalEventId
+canonicalMarketId
+canonicalSelectionId
+marketEquivalenceKey
+selectionEquivalenceKey
+providerId
+venueOrBookmakerId
+marketType
+period
+lineValue
+snapshotTimeUtc
+retrievedAtUtc
+quoteAgeMs
+decimalOdds
+marketStatus
+settlementRuleVersion
+settlementCompatibilityFlag
+voidRuleId
+rawPayloadHash
+qualityFlags
+```
+
+That is useful contract-design evidence, not runtime acceptance. Upstream still states `B1_FULL_READINESS_NOT_CLAIMED=yes` and exposes no accepted complete `betting-win.b1_multi_venue_markets.v1` runtime resource or authorized downstream handoff. The sample also does not prove complete multi-venue outcome grouping, provider-generation authority, accepted depth/fillability, full settlement/finality compatibility, or real provider-to-PostgreSQL-to-API parity.
 
 ## Required upstream resource
 
