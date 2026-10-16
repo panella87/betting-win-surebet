@@ -909,7 +909,7 @@ async function ensureRuntimeCockpitBuild(): Promise<void> {
         encoding: 'utf-8',
         env: {
           ...process.env,
-          BWS_API_PORT: '4312',
+          BWS_API_PORT: '8803',
         },
         stdio: 'pipe',
       },

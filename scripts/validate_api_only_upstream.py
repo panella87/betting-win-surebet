@@ -224,12 +224,12 @@ for rel in [
 
 
 api_doc=(ROOT/'docs/automation/api-only-upstream.md').read_text(encoding='utf-8')
-for marker in ['fail-fast blocker before BWS enters a long runtime-evidence observation window', '127.0.0.1:4312', 'not upstream evidence']:
+for marker in ['fail-fast blocker before BWS enters a long runtime-evidence observation window', '127.0.0.1:8803', 'not upstream evidence']:
  if marker not in api_doc:
   errors.append(f'docs/automation/api-only-upstream.md: missing {marker}')
 for rel,markers in {
- 'docs/automation/paper-autopilot.md': ['only after the upstream betting-win read-only API preflight succeeds', '127.0.0.1:4312', 'PAPER_EVALUATION_BLOCKED_BETTING_WIN_API_UNAVAILABLE'],
- 'docs/041_external_runtime_preflight_and_bws600_campaign.md': ['post_source_fix_controller=run-paper-autopilot.sh', 'bws_local_api_4312_does_not_satisfy_upstream_preflight=true', 'BWS must fail fast if the upstream betting-win read-only API is unavailable before starting the long runtime-evidence observation window'],
+ 'docs/automation/paper-autopilot.md': ['only after the upstream betting-win read-only API preflight succeeds', '127.0.0.1:8803', 'PAPER_EVALUATION_BLOCKED_BETTING_WIN_API_UNAVAILABLE'],
+ 'docs/041_external_runtime_preflight_and_bws600_campaign.md': ['post_source_fix_controller=run-paper-autopilot.sh', 'bws_local_api_8803_does_not_satisfy_upstream_preflight=true', 'BWS must fail fast if the upstream betting-win read-only API is unavailable before starting the long runtime-evidence observation window'],
 }.items():
  text=(ROOT/rel).read_text(encoding='utf-8')
  for marker in markers:

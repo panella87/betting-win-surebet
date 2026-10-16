@@ -331,11 +331,11 @@ test('external runtime preflight rejects the local BWS API and loopback aliases 
   const fixture = await createFixture();
   try {
     for (const apiBaseUrl of [
-      'http://127.0.0.1:4312',
-      'http://localhost:4312',
-      'http://[::1]:4312',
-      'http://[::ffff:127.0.0.1]:4312',
-      'http://[::ffff:7f00:1]:4312',
+      'http://127.0.0.1:8803',
+      'http://localhost:8803',
+      'http://[::1]:8803',
+      'http://[::ffff:127.0.0.1]:8803',
+      'http://[::ffff:7f00:1]:8803',
     ]) {
       writeApiEnvFile(fixture.apiEnvFile, apiBaseUrl, fixture.bettingWinRepositoryPath);
       await assert.rejects(
@@ -555,7 +555,7 @@ async function createFixture() {
     join(releaseDirectoryAbsolute, 'release-manifest.json'),
     `${JSON.stringify({
       cockpit: {
-        apiBaseUrl: 'http://127.0.0.1:4312',
+        apiBaseUrl: 'http://127.0.0.1:8803',
       },
       policy: {
         executionEnabled: false,
@@ -807,7 +807,7 @@ function writeExportEnvFile(path: string, bettingWinRepositoryPath: string): voi
       'BWS_UPSTREAM_LOCK_PATH=./config/betting-win.upstream.lock.json',
       'BWS_UPSTREAM_MODE=export',
       'BWS_UPSTREAM_EXPORT_SELECTION_PATH=/tmp/operator-selection.json',
-      'BWS_API_PORT=4312',
+      'BWS_API_PORT=8803',
       'SUREBET_RUNTIME_MODE=paper',
       'SUREBET_PROVIDER_CONNECTIONS=disabled',
       'SUREBET_EXECUTION_ENABLED=false',
@@ -835,7 +835,7 @@ function writeApiEnvFile(path: string, apiBaseUrl: string, bettingWinRepositoryP
       'BWS_UPSTREAM_API_RETRY_LIMIT=1',
       'BWS_UPSTREAM_API_RETRY_BACKOFF_MS=10',
       'BWS_UPSTREAM_API_TIMEOUT_MS=1000',
-      'BWS_API_PORT=4312',
+      'BWS_API_PORT=8803',
       'SUREBET_RUNTIME_MODE=paper',
       'SUREBET_PROVIDER_CONNECTIONS=disabled',
       'SUREBET_EXECUTION_ENABLED=false',

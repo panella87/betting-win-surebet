@@ -48,4 +48,4 @@ soak, failure injection, external preflight and final local acceptance evidence
 
 Every process requires exact identity, source/config binding, stale-state protection, graceful shutdown and immutable evidence. No process-name or port-based killing is allowed.
 
-The stack remains read-only, private and loopback-only. `BWS-600` requires accepted operator-approved runtime input from the real `betting-win` read-only API; the local BWS API on `127.0.0.1:4312` is not upstream evidence. After BWS-700 dependency-ready local completion, this service/runtime runbook is active carry-forward context for the selected `run-paper-autopilot.sh` route. `BWS-900` remains the execution gate.
+The stack remains read-only, private and loopback-only. `BWS-600` requires accepted operator-approved runtime input from the real `betting-win` read-only API; the local BWS API on `127.0.0.1:8803` is not upstream evidence. After BWS-700 dependency-ready local completion, this service/runtime runbook is active carry-forward context for the selected `run-paper-autopilot.sh` route. `BWS-900` remains the execution gate.

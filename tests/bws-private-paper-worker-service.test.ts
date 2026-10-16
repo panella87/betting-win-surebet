@@ -350,7 +350,7 @@ function createRuntimeConfig(repositoryRoot: string): BwsServiceRuntimeConfig {
   return Object.freeze({
     api: Object.freeze({
       bindHost: '127.0.0.1',
-      port: 4312,
+      port: 8803,
     }),
     persistence: {} as never,
     policy: Object.freeze({

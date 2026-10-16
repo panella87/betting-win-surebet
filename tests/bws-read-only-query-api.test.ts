@@ -1747,7 +1747,7 @@ function createRuntimeCycleJobPayload(
       contractVersion: 'v1',
       exportedAt: TEST_TIMESTAMP,
       kind: 'read_only_query',
-      localBwsApiPort: 4312,
+      localBwsApiPort: 8803,
       maxPagesPerResource: 4,
       pageSize: 2,
       retryBackoffMs: 250,

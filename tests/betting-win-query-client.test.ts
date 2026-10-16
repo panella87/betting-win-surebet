@@ -138,19 +138,19 @@ test('read-only query client rejects invalid base URLs and explicit credentialed
   ]);
 
   for (const baseUrl of [
-    'http://127.0.0.1:4312',
-    'http://127.0.0.2:4312',
-    'http://127.1.2.3:4312',
-    'http://127.2.3.4:4312',
-    'http://127.255.255.255:4312',
-    'http://localhost:4312',
-    'http://[::1]:4312',
-    'http://[::ffff:127.0.0.1]:4312',
-    'http://[::ffff:127.0.0.2]:4312',
-    'http://[::ffff:127.2.3.4]:4312',
-    'http://[::ffff:7f00:1]:4312',
-    'http://[::ffff:7f01:203]:4312',
-    'http://[::ffff:7f02:304]:4312',
+    'http://127.0.0.1:8803',
+    'http://127.0.0.2:8803',
+    'http://127.1.2.3:8803',
+    'http://127.2.3.4:8803',
+    'http://127.255.255.255:8803',
+    'http://localhost:8803',
+    'http://[::1]:8803',
+    'http://[::ffff:127.0.0.1]:8803',
+    'http://[::ffff:127.0.0.2]:8803',
+    'http://[::ffff:127.2.3.4]:8803',
+    'http://[::ffff:7f00:1]:8803',
+    'http://[::ffff:7f01:203]:8803',
+    'http://[::ffff:7f02:304]:8803',
   ]) {
     const localBwsApi = createReadOnlyQueryApiClient({
       baseUrl,
@@ -191,8 +191,8 @@ test('read-only query client rejects invalid base URLs and explicit credentialed
   }
 
   for (const baseUrl of [
-    'http://0.0.0.0:4312',
-    'http://[::]:4312',
+    'http://0.0.0.0:8803',
+    'http://[::]:8803',
     'http://0.0.0.0:4301',
     'http://[::]:4301',
     'http://0.0.0.0:4302',

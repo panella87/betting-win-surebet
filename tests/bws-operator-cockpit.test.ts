@@ -83,7 +83,7 @@ test('BWS operator cockpit browser config rejects non-http API URLs, non-loopbac
   assert.throws(
     () =>
       createBwsOperatorCockpitApiClient({
-        apiBaseUrl: 'http://127.0.0.1:4312/prefix',
+        apiBaseUrl: 'http://127.0.0.1:8803/prefix',
         dataMode: 'api',
       }),
     new RegExp(`${BWS_OPERATOR_COCKPIT_API_BASE_URL_ENV} must not include path components`),
@@ -92,10 +92,10 @@ test('BWS operator cockpit browser config rejects non-http API URLs, non-loopbac
   assert.deepEqual(
     resolveBwsOperatorCockpitBrowserConfig({
       [BWS_OPERATOR_COCKPIT_DATA_MODE_ENV]: 'api',
-      [BWS_OPERATOR_COCKPIT_API_BASE_URL_ENV]: 'http://127.0.0.1:4312',
+      [BWS_OPERATOR_COCKPIT_API_BASE_URL_ENV]: 'http://127.0.0.1:8803',
     }),
     Object.freeze({
-      apiBaseUrl: 'http://127.0.0.1:4312',
+      apiBaseUrl: 'http://127.0.0.1:8803',
       dataMode: 'api',
     }),
   );
@@ -105,7 +105,7 @@ test('BWS operator cockpit process metadata stays loopback-only in explicit api 
   const processDefinition = describeBwsOperatorCockpitProcessDefinition(
     resolveBwsOperatorCockpitBrowserConfig({
       [BWS_OPERATOR_COCKPIT_DATA_MODE_ENV]: 'api',
-      [BWS_OPERATOR_COCKPIT_API_BASE_URL_ENV]: 'http://127.0.0.1:4312',
+      [BWS_OPERATOR_COCKPIT_API_BASE_URL_ENV]: 'http://127.0.0.1:8803',
     }),
   );
   assert.equal(processDefinition.exposure, 'loopback_only');
@@ -113,7 +113,7 @@ test('BWS operator cockpit process metadata stays loopback-only in explicit api 
     Object.freeze({
       exposure: 'loopback_only',
       host: '127.0.0.1',
-      port: 4312,
+      port: 8803,
       protocol: 'http',
       purpose: 'operator_cockpit',
     }),
@@ -328,7 +328,7 @@ test('BWS operator cockpit snapshot loader aggregates the bounded API snapshot w
   const loaded = await loadBwsOperatorCockpitSnapshot(
     resolveBwsOperatorCockpitBrowserConfig({
       [BWS_OPERATOR_COCKPIT_DATA_MODE_ENV]: 'api',
-      [BWS_OPERATOR_COCKPIT_API_BASE_URL_ENV]: 'http://127.0.0.1:4312',
+      [BWS_OPERATOR_COCKPIT_API_BASE_URL_ENV]: 'http://127.0.0.1:8803',
     }),
     {
       evidenceScope: Object.freeze({ providerId: 'polymarket' }),
@@ -435,7 +435,7 @@ test('BWS operator cockpit API client builds bounded read-only requests and pars
   };
 
   const client = createBwsOperatorCockpitApiClient({
-    apiBaseUrl: 'http://127.0.0.1:4312',
+    apiBaseUrl: 'http://127.0.0.1:8803',
     dataMode: 'api',
   }, fetchImpl);
 
@@ -485,7 +485,7 @@ test('BWS operator cockpit API client rejects malformed non-string filters befor
     throw new Error('Malformed cockpit requests must fail before fetch.');
   };
   const client = createBwsOperatorCockpitApiClient({
-    apiBaseUrl: 'http://127.0.0.1:4312',
+    apiBaseUrl: 'http://127.0.0.1:8803',
     dataMode: 'api',
   }, fetchImpl);
 
@@ -571,7 +571,7 @@ test('BWS operator cockpit API client fails closed on malformed committed-HEAD p
 
   const malformedProvenanceClient = createBwsOperatorCockpitApiClient(
     {
-      apiBaseUrl: 'http://127.0.0.1:4312',
+      apiBaseUrl: 'http://127.0.0.1:8803',
       dataMode: 'api',
     },
     async () => Object.freeze({
@@ -597,7 +597,7 @@ test('BWS operator cockpit API client fails closed on malformed committed-HEAD p
 
   const malformedBlockedClient = createBwsOperatorCockpitApiClient(
     {
-      apiBaseUrl: 'http://127.0.0.1:4312',
+      apiBaseUrl: 'http://127.0.0.1:8803',
       dataMode: 'api',
     },
     async () => Object.freeze({
@@ -623,7 +623,7 @@ test('BWS operator cockpit API client fails closed on malformed committed-HEAD p
 
   const malformedPinnedExportClient = createBwsOperatorCockpitApiClient(
     {
-      apiBaseUrl: 'http://127.0.0.1:4312',
+      apiBaseUrl: 'http://127.0.0.1:8803',
       dataMode: 'api',
     },
     async () => Object.freeze({
@@ -693,7 +693,7 @@ test('BWS operator cockpit API client rejects uppercase response hashes and Git 
   const createClientFor = (payload: unknown) =>
     createBwsOperatorCockpitApiClient(
       {
-        apiBaseUrl: 'http://127.0.0.1:4312',
+        apiBaseUrl: 'http://127.0.0.1:8803',
         dataMode: 'api',
       },
       async () => Object.freeze({
@@ -735,7 +735,7 @@ test('BWS operator cockpit API client fails closed when strategy-ledger rows esc
   const createClient = () =>
     createBwsOperatorCockpitApiClient(
       {
-        apiBaseUrl: 'http://127.0.0.1:4312',
+        apiBaseUrl: 'http://127.0.0.1:8803',
         dataMode: 'api',
       },
       async () => Object.freeze({
@@ -810,7 +810,7 @@ test('BWS operator cockpit API client fails closed on inconsistent counts and es
   const createClientFor = (payload: unknown) =>
     createBwsOperatorCockpitApiClient(
       {
-        apiBaseUrl: 'http://127.0.0.1:4312',
+        apiBaseUrl: 'http://127.0.0.1:8803',
         dataMode: 'api',
       },
       async () => Object.freeze({
@@ -1001,7 +1001,7 @@ test('BWS operator cockpit validation contract includes the web workspace in roo
   );
   assert.match(
     packageJson.scripts?.['validate:web'] ?? '',
-    /BWS_API_PORT=4312 npm run build:runtime-cockpit/,
+    /BWS_API_PORT=8803 npm run build:runtime-cockpit/,
   );
   assert.match(
     packageJson.scripts?.['validate:starter'] ?? '',

@@ -229,7 +229,7 @@ def main() -> None:
         fail('package.json test script must build, prepare deterministic runtime prerequisites, and serialize test files')
     if package.get('scripts', {}).get('prepare:test-runtime') != 'npm run generate:upstream-lock && npm run verify:upstream-lock && node scripts/prepare_bws_test_environment.mjs':
         fail('package.json prepare:test-runtime must generate, verify, and inspect the committed-HEAD upstream test lock')
-    if package.get('scripts', {}).get('validate:web') != 'npm run --workspace @betting-win-surebet/web typecheck && BWS_API_PORT=4312 npm run build:runtime-cockpit':
+    if package.get('scripts', {}).get('validate:web') != 'npm run --workspace @betting-win-surebet/web typecheck && BWS_API_PORT=8803 npm run build:runtime-cockpit':
         fail('package.json validate:web must use the managed cockpit builder with an explicit loopback validation port')
     web_package = json.loads(read(ROOT / 'apps/web/package.json'))
     if web_package.get('scripts', {}).get('build') != 'node node_modules/vite/bin/vite.js build':

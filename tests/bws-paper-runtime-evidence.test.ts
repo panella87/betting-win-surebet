@@ -418,7 +418,7 @@ function configureUpstreamApiPreflightEnvironment(
     restoreEnvironmentValue('SUREBET_RUNTIME_MODE', previous.SUREBET_RUNTIME_MODE);
   });
   process.env.BETTING_WIN_REPO_PATH = join(repositoryRoot, 'betting-win');
-  process.env.BWS_API_PORT = values.apiPort ?? '4312';
+  process.env.BWS_API_PORT = values.apiPort ?? '8803';
   process.env.BWS_UPSTREAM_API_BASE_URL = values.apiBaseUrl;
   process.env.BWS_UPSTREAM_API_CONTRACT_VERSION = values.contractVersion ?? '1.0.0';
   process.env.BWS_UPSTREAM_API_TIMEOUT_MS = values.timeoutMs ?? '1000';
@@ -1237,24 +1237,24 @@ test('paper runtime evidence rejects malformed, credential-bearing, non-loopback
       expectedMessage: /must be an absolute URL/i,
     },
     {
-      apiBaseUrl: 'http://127.0.0.1:4312',
+      apiBaseUrl: 'http://127.0.0.1:8803',
       expectedFailureClass: 'bws_local_api_conflict',
       expectedMessage: /must not target the local BWS API/i,
     },
     {
-      apiBaseUrl: 'http://localhost:4312',
+      apiBaseUrl: 'http://localhost:8803',
       expectedFailureClass: 'bws_local_api_conflict',
       expectedMessage: /must not target the local BWS API/i,
     },
     {
-      apiBaseUrl: 'http://[::ffff:127.0.0.1]:4312',
+      apiBaseUrl: 'http://[::ffff:127.0.0.1]:8803',
       expectedFailureClass: 'bws_local_api_conflict',
       expectedMessage: /must not target the local BWS API/i,
     },
   ] as const;
 
   for (const testCase of cases) {
-    configureUpstreamApiPreflightEnvironment(t, repositoryRoot, { apiBaseUrl: testCase.apiBaseUrl, apiPort: '4312' });
+    configureUpstreamApiPreflightEnvironment(t, repositoryRoot, { apiBaseUrl: testCase.apiBaseUrl, apiPort: '8803' });
     let lifecycleTouched = false;
     const result = await createBwsPaperRuntimeEvidence({
       getLifecycleStatus: async () => {

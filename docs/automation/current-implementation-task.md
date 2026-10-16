@@ -71,7 +71,7 @@ Do not start another broad bugfix parent without fresh evidence defining a new b
 
 The BWS-700 cross-venue offline falsification implementation queue is complete for every dependency-ready local row. `BWS-700`, `BWS-705`, and `BWS-720` through `BWS-820` are validated; `BWS-710` remains externally blocked until `betting-win` exposes an accepted read-only `betting-win.b1_multi_venue_markets.v1` resource; `BWS-830` and `BWS-840` remain parked future strategy stubs requiring separate reviewed authority.
 
-The next selected controller is the carry-forward `BWS-600` runtime-evidence parent, `run-paper-autopilot.sh`, not another implementation pass. The paper route must prove or truthfully block runtime/database convergence against an authorized, contract-compatible `betting-win` downstream read-only API handoff with accepted real provider-to-PostgreSQL-to-API parity. It must not use the local BWS API on `127.0.0.1:4312` as upstream evidence and must not fall back to file exports, fixtures, mocks or synthesized private-paper schedules.
+The next selected controller is the carry-forward `BWS-600` runtime-evidence parent, `run-paper-autopilot.sh`, not another implementation pass. The paper route must prove or truthfully block runtime/database convergence against an authorized, contract-compatible `betting-win` downstream read-only API handoff with accepted real provider-to-PostgreSQL-to-API parity. It must not use the local BWS API on `127.0.0.1:8803` as upstream evidence and must not fall back to file exports, fixtures, mocks or synthesized private-paper schedules.
 
 ## Required reading
 
@@ -194,7 +194,7 @@ Do not clone the betting-win checkout. Do not invent an upstream B1 contract, en
 ```text
 betting_win_service_start_by_bws=prohibited
 betting_win_service_stop_by_bws=prohibited
-bws_local_api_port_4312=not_upstream_api_evidence
+bws_local_api_port_8803=not_upstream_api_evidence
 direct_betting_win_core_writes=prohibited
 direct_betting_win_database_reads=prohibited
 automatic_upstream_mode_fallback=prohibited

@@ -330,7 +330,7 @@ function createMinimalRuntimeConfig(): BwsServiceRuntimeConfig {
   return Object.freeze({
     api: Object.freeze({
       bindHost: '127.0.0.1',
-      port: 4312,
+      port: 8803,
     }),
     persistence: Object.freeze({
       database: 'surebet_test',

@@ -30,7 +30,7 @@ test('validate_repo requires the full implementation and upstream contract surfa
     'cleanup_automation_artifact_residue.sh',
     'docs/automation/artifact-retention-and-cleanup.md',
     'prepare:test-runtime',
-    'npm run --workspace @betting-win-surebet/web typecheck && BWS_API_PORT=4312 npm run build:runtime-cockpit',
+    'npm run --workspace @betting-win-surebet/web typecheck && BWS_API_PORT=8803 npm run build:runtime-cockpit',
     'node node_modules/vite/bin/vite.js build',
     'tests/full-implementation-program-contract.test.ts',
     'tests/remaining-operator-runtime-program-contract.test.ts',

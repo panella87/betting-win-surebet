@@ -557,7 +557,7 @@ test('upstream API convergence config rejects whitespace-wrapped canonical env i
       [BWS_UPSTREAM_API_BASE_URL_ENV, 'https://user:pass@example.test/read-only', /must not embed credentials/],
       [BWS_UPSTREAM_API_BASE_URL_ENV, 'http://betting-win-query.test/read-only', /must not include path components/],
       [BWS_UPSTREAM_API_BASE_URL_ENV, 'http://0.0.0.0:4301', /must not target an unspecified bind host/],
-      [BWS_UPSTREAM_API_BASE_URL_ENV, 'http://127.0.0.1:4312', /must not target the local BWS API listener/],
+      [BWS_UPSTREAM_API_BASE_URL_ENV, 'http://127.0.0.1:8803', /must not target the local BWS API listener/],
     ] as const) {
       assert.throws(
         () => resolveBwsUpstreamApiConvergenceConfig({
@@ -643,9 +643,9 @@ test('upstream API convergence config and CLI help stay explicit about api mode 
     }
 
     for (const apiBaseUrl of [
-      'http://127.0.0.1:4312',
-      'http://localhost:4312',
-      'http://[::1]:4312',
+      'http://127.0.0.1:8803',
+      'http://localhost:8803',
+      'http://[::1]:8803',
     ]) {
       assert.throws(
         () => resolveBwsUpstreamApiConvergenceConfig({
@@ -657,8 +657,8 @@ test('upstream API convergence config and CLI help stay explicit about api mode 
     }
 
     for (const apiBaseUrl of [
-      'http://0.0.0.0:4312',
-      'http://[::]:4312',
+      'http://0.0.0.0:8803',
+      'http://[::]:8803',
       'http://0.0.0.0:4302',
       'http://[::]:4302',
     ]) {

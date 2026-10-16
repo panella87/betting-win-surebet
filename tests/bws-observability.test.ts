@@ -77,11 +77,11 @@ test('evidence index deduplicates repeated registrations and diagnostics bundles
       join(repositoryRoot, 'runtime/bws-operator-lifecycle/state.json'),
       `${JSON.stringify({
         configFingerprint: 'c'.repeat(64),
-        configuration: { api: { bindHost: '127.0.0.1', port: 4312 } },
+        configuration: { api: { bindHost: '127.0.0.1', port: 8803 } },
         processes: [{ lifecycleToken: 'runtime-diag-001', pid: 999, procStartTicks: '1000', processName: 'bws-read-only-api', roles: ['api'] }],
         repositoryRoot,
         runtimeId: 'runtime-diag-001',
-        runtimeBaseUrl: 'http://127.0.0.1:4312',
+        runtimeBaseUrl: 'http://127.0.0.1:8803',
         schema: 'bws.operator_lifecycle_state.v2',
         service: 'full_stack',
         sourceFingerprints: { sourceManifestSha256: 'a'.repeat(64) },
@@ -139,7 +139,7 @@ test('evidence index deduplicates repeated registrations and diagnostics bundles
       config: createRuntimeConfig(repositoryRoot),
       environment: Object.freeze({
         BETTING_WIN_REPO_PATH: join(repositoryRoot, '..', 'betting-win'),
-        BWS_API_PORT: '4312',
+        BWS_API_PORT: '8803',
         BWS_UPSTREAM_LOCK_PATH: 'config/betting-win.upstream.lock.json',
         BWS_WORKER_ID: 'worker-a',
         BWS_WORKER_LEASE_DURATION_MS: '15000',
@@ -315,7 +315,7 @@ function createRuntimeConfig(repositoryRoot: string): BwsServiceRuntimeConfig {
   return Object.freeze({
     api: Object.freeze({
       bindHost: '127.0.0.1',
-      port: 4312,
+      port: 8803,
     }),
     persistence: Object.freeze({
       database: 'surebet_local',

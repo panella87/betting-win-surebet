@@ -50,4 +50,4 @@ Resolve the mismatch through an explicit cross-repository contract change. Eithe
 
 ## Required fail-fast wording
 
-An unavailable or incompatible betting-win API is a fail-fast blocker before BWS enters a long runtime-evidence observation window. The local BWS listener at `127.0.0.1:4312` is not upstream evidence and cannot satisfy the betting-win preflight.
+An unavailable or incompatible betting-win API is a fail-fast blocker before BWS enters a long runtime-evidence observation window. The local BWS listener at `127.0.0.1:8803` is not upstream evidence and cannot satisfy the betting-win preflight.

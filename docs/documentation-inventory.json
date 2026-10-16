@@ -664,7 +664,7 @@
       "mode": "0744",
       "path": "docs/041_external_runtime_preflight_and_bws600_campaign.md",
       "purpose": "Supporting product architecture, domain, runtime, validation, or hold contract.",
-      "sha256": "6f2d6e3fafdd9ce93f2e844aba6facd77d3d42c0a92f01d02a091c465e6a2fbe",
+      "sha256": "cc95a547574137d7f3c21cd6eb350d3c2aa3428f186c43817259a4d4e38398a0",
       "topic": "product_contract",
       "topic_owner": "product_contract_set"
     },
@@ -817,7 +817,7 @@
       "mode": "0644",
       "path": "docs/automation/api-only-upstream.md",
       "purpose": "Executable automation command, controller, protection, artifact, or filesystem contract.",
-      "sha256": "2fff032da7ea5d0b692a49441d4bbfc64305122542d5136afb7014ba9bfe788e",
+      "sha256": "eaeb3ff69ba0e32fbe986ef9801916291f4626e17ea028af21a42d567195f6d9",
       "topic": "automation",
       "topic_owner": "repository_automation_contract"
     },
@@ -862,7 +862,7 @@
       "mode": "0744",
       "path": "docs/automation/current-implementation-task.md",
       "purpose": "Executable automation command, controller, protection, artifact, or filesystem contract.",
-      "sha256": "e700d90ecfedd3c85cde616bc4f162c0ad962afc6331bbf246b3b23a6fd92dc6",
+      "sha256": "b3360cf445b13e537ae11ab288f0fc66730b759b7d114189f4134a1970d32600",
       "topic": "automation",
       "topic_owner": "repository_automation_contract"
     },
@@ -871,7 +871,7 @@
       "mode": "0744",
       "path": "docs/automation/paper-autopilot.md",
       "purpose": "Executable automation command, controller, protection, artifact, or filesystem contract.",
-      "sha256": "85ddf701b32a6bbf518ce1914e15e6faddc827172c30b33d9dce583e3857cfbd",
+      "sha256": "dfe3513a1ed7911da6e1ef713293aefd29fcc39617a97a4122483b4ae22abab9",
       "topic": "automation",
       "topic_owner": "repository_automation_contract"
     },
@@ -1007,7 +1007,7 @@
       "mode": "0744",
       "path": "docs/operations/service_run.md",
       "purpose": "Operations reference.",
-      "sha256": "418a18e731dd7c07a2e100b28b966921fc6083eca6350aa1cfa7666d92ff6d5a",
+      "sha256": "dc7f5d57881e2ce92ec11c9a8bfdf9ded0aa74d30de78f3521b0d8fde5759cb9",
       "topic": "operations",
       "topic_owner": "operations"
     },
@@ -1070,7 +1070,7 @@
       "mode": "0644",
       "path": "docs/remediation/BWS_FINAL_REMEDIATION_R01_R12_V1/activation/immutable-authority.sha256",
       "purpose": "Active campaign admission, routing, execution, safety, or validation authority.",
-      "sha256": "84a183f655df671fe27e76d7d1ed615fac6298ada9a53a257b81920dd66c9f3e",
+      "sha256": "f46fa1c0d4d6d6adf76648f66452e5f077deb48ee4f0c9590d54e23e0f8003cf",
       "topic": "remediation_activation",
       "topic_owner": "active_remediation_admission"
     },
@@ -3005,7 +3005,7 @@
       "mode": "0744",
       "path": "docs/repo_status_current.md",
       "purpose": "Current repository navigation, status, operator, or policy authority.",
-      "sha256": "6724ef82abe81bc4373dcc6fed42394fbf48d37bd1581c998ff85c92358ccd29",
+      "sha256": "bcb90ac6f44daf3d6f78f0930fcbc39834624f99586c89ed48a287009038584d",
       "topic": "repository_authority",
       "topic_owner": "repository_current_authority"
     },

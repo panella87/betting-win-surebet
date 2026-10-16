@@ -69,7 +69,7 @@ test('paper runtime handoff fails closed when lifecycle status is not healthy an
           ...sampleLifecycleStatus(),
           health: Object.freeze({
             error: 'managed process is not running',
-            url: 'http://127.0.0.1:4312/health',
+            url: 'http://127.0.0.1:8803/health',
           }),
         },
         now: () => TEST_TIMESTAMP,
@@ -237,7 +237,7 @@ function sampleLifecycleStatus(): BwsOperatorLifecycleCommandResult {
     configuration: Object.freeze({
       api: Object.freeze({
         bindHost: '127.0.0.1',
-        port: 4312,
+        port: 8803,
       }),
       persistence: Object.freeze({
         database: 'surebet_test',
@@ -305,7 +305,7 @@ function sampleLifecycleStatus(): BwsOperatorLifecycleCommandResult {
       }),
       ok: true,
       statusCode: 200,
-      url: 'http://127.0.0.1:4312/health',
+      url: 'http://127.0.0.1:8803/health',
     }),
     outcome: 'running',
     process: Object.freeze({
@@ -377,7 +377,7 @@ function sampleLifecycleStatus(): BwsOperatorLifecycleCommandResult {
       }),
       ok: true,
       statusCode: 200,
-      url: 'http://127.0.0.1:4312/readiness',
+      url: 'http://127.0.0.1:8803/readiness',
     }),
     service: 'full_stack',
     sourceFingerprints: Object.freeze({

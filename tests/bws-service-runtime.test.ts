@@ -37,7 +37,7 @@ test('BWS service runtime config resolves the closed local stack and redacts sec
   try {
     const config = resolveBwsServiceRuntimeConfig(fixture.environment, fixture.repositoryRoot);
     assert.equal(config.api.bindHost, '127.0.0.1');
-    assert.equal(config.api.port, 4312);
+    assert.equal(config.api.port, 8803);
     assert.equal(config.policy.runtimeMode, 'paper');
     assert.equal(config.policy.providerConnections, 'disabled');
     assert.equal(config.policy.executionEnabled, false);
@@ -388,7 +388,7 @@ function createRuntimeFixture(): {
     dispose: () => rmSync(root, { force: true, recursive: true }),
     environment: {
       BETTING_WIN_REPO_PATH: upstreamRoot,
-      [BWS_API_PORT_ENV]: '4312',
+      [BWS_API_PORT_ENV]: '8803',
       [BWS_UPSTREAM_LOCK_PATH_ENV]: relative(repositoryRoot, fixtureLockPath),
       [BWS_WORKER_ID_ENV]: 'worker-bws-500',
       [BWS_WORKER_LEASE_DURATION_MS_ENV]: '30000',
@@ -411,7 +411,7 @@ function sampleRuntimeConfig(): BwsServiceRuntimeConfig {
   return Object.freeze({
     api: Object.freeze({
       bindHost: '127.0.0.1',
-      port: 4312,
+      port: 8803,
     }),
     persistence: Object.freeze({
       database: 'surebet_local',
@@ -468,7 +468,7 @@ function getServerPort(server: ReturnType<typeof createServer>): number {
 
 function createReadyCockpitState() {
   return Object.freeze({
-    apiBaseUrl: 'http://127.0.0.1:4312',
+    apiBaseUrl: 'http://127.0.0.1:8803',
     assetFingerprint: 'f'.repeat(64),
     buildDirectory: 'dist/apps/web',
     dataMode: 'api' as const,

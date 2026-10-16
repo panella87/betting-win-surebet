@@ -83,8 +83,8 @@ Loopback fixtures cannot validate `BWS-600`. The gate remains blocked until an a
 
 ```text
 bws600_upstream_api_preflight_source_fix=present
-bws_local_api_4312_does_not_satisfy_upstream_preflight=true
+bws_local_api_8803_does_not_satisfy_upstream_preflight=true
 post_source_fix_controller=run-paper-autopilot.sh
 ```
 
-BWS must fail fast if the upstream betting-win read-only API is unavailable before starting the long runtime-evidence observation window. Availability alone is insufficient: the downstream handoff must also be contract-compatible, authorized, and backed by accepted real provider-to-PostgreSQL-to-API parity. The BWS local read-only API on `127.0.0.1:4312` is only a BWS listener and cannot satisfy the upstream preflight.
+BWS must fail fast if the upstream betting-win read-only API is unavailable before starting the long runtime-evidence observation window. Availability alone is insufficient: the downstream handoff must also be contract-compatible, authorized, and backed by accepted real provider-to-PostgreSQL-to-API parity. The BWS local read-only API on `127.0.0.1:8803` is only a BWS listener and cannot satisfy the upstream preflight.

@@ -35,7 +35,7 @@ test('BWS-810 cockpit API client requests B1 reporting through the read-only API
     });
   };
   const client = createBwsOperatorCockpitApiClient({
-    apiBaseUrl: 'http://127.0.0.1:4312',
+    apiBaseUrl: 'http://127.0.0.1:8803',
     dataMode: 'api',
   }, fetchImpl);
 

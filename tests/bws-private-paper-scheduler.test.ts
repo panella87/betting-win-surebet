@@ -140,7 +140,7 @@ test('private-paper scheduler persists one completed API cycle into a determinis
   const payload = persistedJob?.payload as unknown as PersistedPrivatePaperRuntimeJobPayload | undefined;
   assert.equal(payload?.source.kind, 'read_only_query');
   assert.equal(payload?.source.exportedAt, '2026-07-15T12:00:09.000Z');
-  assert.equal(payload?.source.kind === 'read_only_query' ? payload.source.localBwsApiPort : undefined, 4312);
+  assert.equal(payload?.source.kind === 'read_only_query' ? payload.source.localBwsApiPort : undefined, 8803);
   assert.equal(payload?.runtimeId, 'runtime-001');
 
   const checkpoint = schedulerCheckpoints.get('scheduler-001');
@@ -479,7 +479,7 @@ test('private-paper worker handler rejects read_only_query jobs targeting the lo
 });
 
 test('private-paper worker handler rejects missing and out-of-range persisted local BWS API guard ports', async () => {
-  for (const localBwsApiPort of [undefined, 0, 65_536, '4312']) {
+  for (const localBwsApiPort of [undefined, 0, 65_536, '8803']) {
     const payload = createExpectedApiJobPayload(
       createSchedulerConfig(),
       1,
@@ -773,7 +773,7 @@ function createUpstreamApiConfig(): BwsUpstreamApiConvergenceConfig {
     query: Object.freeze({
       baseUrl: 'http://127.0.0.1:4301',
       contractVersion: '1.0.0',
-      localBwsApiPort: 4312,
+      localBwsApiPort: 8803,
       maxPagesPerResource: 2,
       pageSize: 2,
       retryBackoffMs: 250,
@@ -872,7 +872,7 @@ function createExpectedApiJobPayload(
       contractVersion: '1.0.0',
       exportedAt,
       kind: 'read_only_query',
-      localBwsApiPort: 4312,
+      localBwsApiPort: 8803,
       maxPagesPerResource: 2,
       pageSize: 2,
       retryBackoffMs: 250,
